@@ -23,16 +23,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
@@ -88,23 +86,18 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 		Block block= methodDecl.getBody();
 		assertTrue("No block" , block != null);	
 		
-		List statements= block.statements();
 		ReturnStatement returnStatement= block.getAST().newReturnStatement();
-		returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
-		statements.add(returnStatement);
-		rewrite.markAsInserted(returnStatement);
+		returnStatement.setExpression(block.getAST().newNullLiteral());
+		rewrite.getListRewrite(block, ASTNodeConstants.STATEMENTS).insertLast(returnStatement, null);
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -117,8 +110,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testInsert2() throws Exception {
@@ -138,13 +131,13 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
 		MethodDeclaration methodDeclGoo= findMethodDeclaration(type, "goo");
 		List bodyStatements= methodDeclGoo.getBody().statements();
 
-		ASTNode copy= rewrite.createCopy((ASTNode) bodyStatements.get(0));
+		ASTNode copy= rewrite.createCopyPlaceholder((ASTNode) bodyStatements.get(0));
 		
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "hoo");
 		Block block= methodDecl.getBody();
@@ -154,13 +147,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertTrue("No statements in block", !statements.isEmpty());
 		assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
 		
-		statements.add(0, copy);
-		rewrite.markAsInserted(copy);
+		rewrite.getListRewrite(block, ASTNodeConstants.STATEMENTS).insertFirst(copy, null);
+
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -174,8 +164,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());			
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());			
+
 	}
 
 	public void testInsert3() throws Exception {
@@ -194,7 +184,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		AST ast= astRoot.getAST();
 	
@@ -206,25 +196,19 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		invocation1.setName(ast.newSimpleName("foo"));
 		ExpressionStatement statement1= ast.newExpressionStatement(invocation1);
 		
-		rewrite.markAsInserted(statement1);
-		
 		MethodInvocation invocation2= ast.newMethodInvocation();
 		invocation2.setName(ast.newSimpleName("foo"));
 		ExpressionStatement statement2= ast.newExpressionStatement(invocation2);
 		
-		rewrite.markAsInserted(statement2);		
-		
 		List statements= methodDecl.getBody().statements();
+		ASTNode second= (ASTNode) statements.get(1);
 		
-		rewrite.markAsRemoved((ASTNode) statements.get(1));
+		ListRewriter listRewrite= rewrite.getListRewrite(methodDecl.getBody(), ASTNodeConstants.STATEMENTS);
+		listRewrite.remove(second, null); 
+		listRewrite.insertBefore(statement1, second, null);
+		listRewrite.insertAfter(statement2, second, null);
 		
-		statements.add(2, statement2);
-		statements.add(1, statement1);
-		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -237,8 +221,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());			
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());			
+
 	}		
 	
 	public void testRemove1() throws Exception {
@@ -256,7 +240,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -268,10 +252,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		
 		rewrite.markAsRemoved((ASTNode) statements.get(0));
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -280,8 +261,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 			
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	public void testRemove2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
@@ -299,7 +280,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 	
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
@@ -314,10 +295,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		Expression expr= returnStatement.getExpression();
 		rewrite.markAsRemoved(expr);
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -330,8 +308,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());			
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());			
+
 	}
 	public void testRemove3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
@@ -349,7 +327,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 	
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
@@ -361,10 +339,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) statements.get(1));
 		rewrite.markAsRemoved((ASTNode) statements.get(2));
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -373,8 +348,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());			
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());			
+
 	}
 	
 	public void testReplace1() throws Exception {
@@ -392,7 +367,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -405,10 +380,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ReturnStatement returnStatement= block.getAST().newReturnStatement();
 		rewrite.markAsReplaced((ASTNode) statements.get(0), returnStatement);
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -418,8 +390,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 			
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testReplace2() throws Exception {
@@ -439,7 +411,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 	
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
@@ -452,14 +424,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		
 		ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 		Expression expr= returnStatement.getExpression();
-		Expression modified= ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions());
+		Expression modified= block.getAST().newNullLiteral();
 
 		rewrite.markAsReplaced(expr, modified);
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -472,8 +441,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	
@@ -491,7 +460,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -505,10 +474,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			BreakStatement statement= (BreakStatement) statements.get(0);
 			assertTrue("Has label", statement.getLabel() == null);
 			
-			SimpleName newLabel= ast.newSimpleName("label2");	
-			statement.setLabel(newLabel);
-			
-			rewrite.markAsInserted(newLabel);
+			SimpleName newLabel= ast.newSimpleName("label2");
+			rewrite.markAsInsert(statement, ASTNodeConstants.LABEL, newLabel, null);
 		}
 		{ // replace label
 			BreakStatement statement= (BreakStatement) statements.get(1);
@@ -529,10 +496,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsRemoved(label);
 		}	
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -543,8 +507,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        break;\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testConstructorInvocation() throws Exception {
@@ -562,7 +526,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -577,18 +541,17 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertTrue("Number of statements not 1", statements.size() == 1);
 			
 			ConstructorInvocation invocation= (ConstructorInvocation) statements.get(0);
-	
-			List arguments= invocation.arguments();
-			
+				
 			StringLiteral stringLiteral1= ast.newStringLiteral();
 			stringLiteral1.setLiteralValue("Hello");
-			arguments.add(stringLiteral1);
-			rewrite.markAsInserted(stringLiteral1);
 			
 			StringLiteral stringLiteral2= ast.newStringLiteral();
 			stringLiteral2.setLiteralValue("World");
-			arguments.add(stringLiteral2);
-			rewrite.markAsInserted(stringLiteral2);
+			
+			ListRewriter listRewrite= rewrite.getListRewrite(invocation, ASTNodeConstants.ARGUMENTS);
+			listRewrite.insertLast(stringLiteral1, null);
+			listRewrite.insertLast(stringLiteral2, null);
+			
 		}
 		{ //remove parameters
 			Block block= declarations[1].getBody();
@@ -601,10 +564,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsRemoved((ASTNode) arguments.get(0));
 			rewrite.markAsRemoved((ASTNode) arguments.get(1));
 		}		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -616,8 +576,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        this();\n");
 		buf.append("    }\n");		
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testContinueStatement() throws Exception {
@@ -634,7 +594,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -649,9 +609,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertTrue("Has label", statement.getLabel() == null);
 			
 			SimpleName newLabel= ast.newSimpleName("label2");	
-			statement.setLabel(newLabel);
-			
-			rewrite.markAsInserted(newLabel);
+
+			rewrite.markAsInsert(statement, ASTNodeConstants.LABEL, newLabel, null);
 		}
 		{ // replace label
 			ContinueStatement statement= (ContinueStatement) statements.get(1);
@@ -672,10 +631,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsRemoved(label);
 		}	
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -686,8 +642,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        continue;\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testDoStatement() throws Exception {
@@ -704,7 +660,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -732,10 +688,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(doStatement.getExpression(), literal);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -746,8 +699,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        } while (true);\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testDoStatement1() throws Exception {
@@ -777,7 +730,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -848,10 +801,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 		
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -877,8 +827,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        while (true);\n");	
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}		
 	
 
@@ -894,7 +844,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -909,7 +859,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			
 			Assignment assignment= (Assignment) stmt.getExpression();
-			Expression placeholder= (Expression) rewrite.createCopy(assignment);
+			Expression placeholder= (Expression) rewrite.createCopyPlaceholder(assignment);
 									
 			Assignment newExpression= ast.newAssignment();
 			newExpression.setLeftHandSide(ast.newSimpleName("x"));
@@ -919,10 +869,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(stmt.getExpression(), newExpression);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -931,8 +878,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        x = i= 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 
 	}
 	
@@ -957,7 +904,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -986,9 +933,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assignment2.setOperator(Assignment.Operator.ASSIGN);
 			assignment2.setRightHandSide(ast.newNumberLiteral("4"));
 			
-			rewrite.markAsInserted(assignment2);
-			
-			initializers.add(assignment2);
+			rewrite.getListRewrite(forStatement, ASTNodeConstants.INITIALIZERS).insertLast(assignment2, null);
 			
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
 			rewrite.markAsReplaced(forStatement.getExpression(), literal);
@@ -998,9 +943,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			prefixExpression.setOperand(ast.newSimpleName("j"));
 			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
 			
-			forStatement.updaters().add(prefixExpression);
-			
-			rewrite.markAsInserted(prefixExpression);
+			rewrite.getListRewrite(forStatement, ASTNodeConstants.UPDATERS).insertLast(prefixExpression, null);
 			
 			// replace body		
 			Block newBody= ast.newBlock();
@@ -1036,10 +979,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			PrefixExpression prefixExpression= ast.newPrefixExpression();
 			prefixExpression.setOperand(ast.newSimpleName("j"));
 			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
-			
-			forStatement.updaters().add(prefixExpression);
-			
-			rewrite.markAsInserted(prefixExpression);
+
+			rewrite.getListRewrite(forStatement, ASTNodeConstants.UPDATERS).insertLast(prefixExpression, null);
 		}
 		
 		{ // insert updater & initializer
@@ -1050,17 +991,13 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			assignment.setRightHandSide(ast.newNumberLiteral("3"));
 			
-			forStatement.initializers().add(assignment);
-			
-			rewrite.markAsInserted(assignment);	
+			rewrite.getListRewrite(forStatement, ASTNodeConstants.INITIALIZERS).insertLast(assignment, null);
 			
 			PrefixExpression prefixExpression= ast.newPrefixExpression();
 			prefixExpression.setOperand(ast.newSimpleName("j"));
 			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
 			
-			forStatement.updaters().add(prefixExpression);
-			
-			rewrite.markAsInserted(prefixExpression);
+			rewrite.getListRewrite(forStatement, ASTNodeConstants.UPDATERS).insertLast(prefixExpression, null);
 		}
 		
 		{ // replace initializer: turn assignement to var decl
@@ -1073,7 +1010,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			VariableDeclarationExpression varDecl= ast.newVariableDeclarationExpression(varFragment);
 			varFragment.setName(ast.newSimpleName(leftHandSide.getIdentifier()));
 			
-			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
+			Expression placeholder= (Expression) rewrite.createCopyPlaceholder(assignment.getRightHandSide());
 			varFragment.setInitializer(placeholder);
 			varDecl.setType(ast.newPrimitiveType(PrimitiveType.INT));
 
@@ -1082,10 +1019,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}	
 		
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1104,8 +1038,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");			
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testForStatement1() throws Exception {
@@ -1129,7 +1063,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1200,10 +1134,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 		
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1227,8 +1158,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            }\n");	
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}		
 	
 	
@@ -1250,7 +1181,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -1286,16 +1217,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsInserted(newBody);
-			
-			ifStatement.setElseStatement(newBody);
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, newBody, null);
 		}		
 		
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1311,8 +1237,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement1() throws Exception {
@@ -1338,7 +1264,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1353,7 +1279,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 		}
@@ -1363,7 +1289,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 		}
@@ -1373,15 +1299,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1400,8 +1323,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            hoo(11);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement2() throws Exception {
@@ -1430,7 +1353,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1446,14 +1369,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 			
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsInserted(returnStatement);
-			
-			ifStatement.setElseStatement(returnStatement);
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, returnStatement, null);
 			
 		}
 		{ // replace then block by statement, remove else statement
@@ -1462,7 +1383,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 			rewrite.markAsRemoved(ifStatement.getElseStatement());
@@ -1473,7 +1394,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 			
@@ -1481,9 +1402,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);
 			
-			rewrite.markAsInserted(newElseBlock);
-			
-			ifStatement.setElseStatement(newElseBlock);
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, newElseBlock, null);
+
 			
 		}
 		{ // replace then block by statement, remove else statement
@@ -1492,15 +1412,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 			rewrite.markAsRemoved(ifStatement.getElseStatement());
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1521,8 +1438,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            System.beep();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement3() throws Exception {
@@ -1547,7 +1464,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1562,7 +1479,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1573,7 +1490,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1584,17 +1501,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
 			rewrite.markAsReplaced(statement, newBody);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1614,8 +1528,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            hoo(11);\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement4() throws Exception {
@@ -1642,7 +1556,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1657,16 +1571,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
 			rewrite.markAsReplaced(statement, newBody);
 			
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsInserted(returnStatement);
-			
-			ifStatement.setElseStatement(returnStatement);
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, returnStatement, null);
 			
 		}
 		{ // replace then statement by block, remove else statement
@@ -1674,7 +1586,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1687,7 +1599,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1697,17 +1609,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);
 			
-			rewrite.markAsInserted(newElseBlock);
-			
-			ifStatement.setElseStatement(newElseBlock);
-			
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, newElseBlock, null);
 		}
 		{ // replace then block by statement, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1715,10 +1624,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			rewrite.markAsRemoved(ifStatement.getElseStatement());
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1741,8 +1647,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement5() throws Exception {
@@ -1769,7 +1675,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1784,7 +1690,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1798,17 +1704,15 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newBody2.statements().add(returnStatement);			
 
 			newElseBlock.setThenStatement(newBody2);
-			rewrite.markAsInserted(newElseBlock);
-						
-			ifStatement.setElseStatement(newElseBlock);
-			
+
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, newElseBlock, null);
 		}
 		{ // replace then statement by block, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(1);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1821,7 +1725,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1833,16 +1737,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 
 			newElseBlock.setThenStatement(returnStatement);
-			rewrite.markAsInserted(newElseBlock);
-						
-			ifStatement.setElseStatement(newElseBlock);
+			rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, newElseBlock, null);
 		}
 		{ // replace then block by statement, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMove(statement);
+			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
@@ -1850,10 +1752,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			rewrite.markAsRemoved(ifStatement.getElseStatement());
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1876,8 +1775,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement6() throws Exception {
@@ -1896,7 +1795,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1934,10 +1833,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry);	
 		}
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1955,8 +1851,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatement_bug48988() throws Exception {
@@ -1980,25 +1876,24 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		
-		String str= "if (1 < var && var < 17)";
-		int idx= buf.indexOf(str);
-		ASTNode node = NodeFinder.perform(astRoot, idx, str.length());
+		TypeDeclaration typeDecl= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methDecl= findMethodDeclaration(typeDecl, "doit");
+		IfStatement outerIf= (IfStatement) methDecl.getBody().statements().get(1);
+		ASTNode node= ((IfStatement) outerIf.getElseStatement()).getThenStatement();
+		
 		assertTrue(node instanceof IfStatement);
 		
 		{ // replace else statement by a block containing the old then statement
 			IfStatement ifStatement= (IfStatement) node;
-			ASTNode placeholder = rewrite.createMove(ifStatement);
+			ASTNode placeholder = rewrite.createMovePlaceholder(ifStatement);
 			Block newBlock = ast.newBlock();
 			newBlock.statements().add(placeholder);
 			rewrite.markAsReplaced(ifStatement, newBlock);
 		}
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2016,8 +1911,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	
@@ -2050,7 +1945,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -2092,10 +1987,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2121,8 +2013,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            return;\n");	
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	
@@ -2155,7 +2047,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -2171,7 +2063,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);
@@ -2189,7 +2081,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
@@ -2205,7 +2097,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);				
@@ -2220,17 +2112,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
 			Statement returnStatement= ast.newReturnStatement();
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2256,8 +2145,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            return;\n");	
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatementReplaceElse3() throws Exception {
@@ -2289,7 +2178,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -2305,7 +2194,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);
@@ -2313,7 +2202,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
@@ -2324,14 +2213,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
@@ -2342,7 +2231,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);				
@@ -2350,7 +2239,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
@@ -2362,22 +2251,19 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2403,8 +2289,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testIfStatementReplaceElse4() throws Exception {
@@ -2436,7 +2322,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 				
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -2452,7 +2338,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);
@@ -2474,7 +2360,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
@@ -2495,7 +2381,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMove(statement);
+			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
 			newBody.statements().add(newStatement);
 			
 			rewrite.markAsReplaced(statement, newBody);				
@@ -2515,7 +2401,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMove(statement);
+			ASTNode newBody= rewrite.createMovePlaceholder(statement);
 			
 			rewrite.markAsReplaced(body, newBody);
 				
@@ -2527,10 +2413,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
 		}				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2556,8 +2439,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}	
 	
 	public void testLabeledStatement() throws Exception {
@@ -2574,7 +2457,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -2602,10 +2485,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(labeledStatement.getBody(), newStatement);
 		}		
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2614,8 +2494,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        newLabel: x = 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}		
 	
 	public void testReturnStatement() throws Exception {
@@ -2633,7 +2513,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -2648,9 +2528,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertTrue("Has expression", statement.getExpression() == null);
 			
 			SimpleName newExpression= ast.newSimpleName("x");	
-			statement.setExpression(newExpression);
-			
-			rewrite.markAsInserted(newExpression);
+			rewrite.markAsInsert(statement, ASTNodeConstants.EXPRESSION, newExpression, null);
 		}
 		{ // replace expression
 			ReturnStatement statement= (ReturnStatement) statements.get(1);
@@ -2678,10 +2556,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}		
 		
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2693,8 +2568,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        return 9 + 2;\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testSwitchStatement() throws Exception {
@@ -2720,7 +2595,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -2742,17 +2617,16 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			SwitchCase caseStatement1= ast.newSwitchCase();
 			caseStatement1.setExpression(ast.newNumberLiteral("1"));
-			rewrite.markAsInserted(caseStatement1);
-			statements.add(caseStatement1);
 			
 			Statement statement1= ast.newReturnStatement();
-			rewrite.markAsInserted(statement1);
-			statements.add(statement1);
 			
 			SwitchCase caseStatement2= ast.newSwitchCase(); // default
 			caseStatement2.setExpression(null);
-			rewrite.markAsInserted(caseStatement2);
-			statements.add(caseStatement2);
+			
+			ListRewriter listRewrite= rewrite.getListRewrite(switchStatement, ASTNodeConstants.STATEMENTS);
+			listRewrite.insertLast(caseStatement1, null);
+			listRewrite.insertLast(statement1, null);
+			listRewrite.insertLast(caseStatement2, null);
 		}
 		
 		{ // insert, remove, replace statements, change case statements
@@ -2772,39 +2646,34 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Expression newCaseExpression= ast.newNumberLiteral("10");
 			rewrite.markAsReplaced(caseStatement.getExpression(), newCaseExpression);
 			
+			ListRewriter listRewrite= rewrite.getListRewrite(switchStatement, ASTNodeConstants.STATEMENTS);
+			
 			{
 				// insert case statement
 				SwitchCase caseStatement2= ast.newSwitchCase();
 				caseStatement2.setExpression(ast.newNumberLiteral("11"));
-				rewrite.markAsInserted(caseStatement2);
-				statements.add(0, caseStatement2);
+				listRewrite.insertFirst(caseStatement2, null);
 	
 				// insert statement
 				Statement statement1= ast.newReturnStatement();
-				rewrite.markAsInserted(statement1);
-				statements.add(1, statement1);
+				listRewrite.insertAfter(statement1, caseStatement2, null);
 			}
 			
 			{
 				// insert case statement
 				SwitchCase caseStatement2= ast.newSwitchCase();
 				caseStatement2.setExpression(ast.newNumberLiteral("12"));
-				rewrite.markAsInserted(caseStatement2);
-				statements.add(caseStatement2);
+				listRewrite.insertLast(caseStatement2, null);
 	
 				// insert statement
 				Statement statement1= ast.newReturnStatement();
-				rewrite.markAsInserted(statement1);
-				statements.add(statement1);
+				listRewrite.insertAfter(statement1, caseStatement2, null);
 			}			
 			
 
 		}		
 	
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2828,8 +2697,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testSynchronizedStatement() throws Exception {
@@ -2846,7 +2715,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -2874,10 +2743,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(statement.getBody(), newBody);
 		}		
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2888,8 +2754,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testThrowStatement() throws Exception {
@@ -2907,7 +2773,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -2942,10 +2808,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) creation.arguments().get(0), newArgument);
 		}				
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2957,8 +2820,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        throw new Exception(x);\n");
 		buf.append("    }\n");		
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}		
 		
 	public void testTryStatement() throws Exception {
@@ -2985,7 +2848,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -3003,10 +2866,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			decl.setType(ast.newSimpleType(ast.newSimpleName("IOException")));
 			decl.setName(ast.newSimpleName("e"));
 			catchClause.setException(decl);
-			
-			rewrite.markAsInserted(catchClause);
-			
-			tryStatement.catchClauses().add(catchClause);
+						
+			rewrite.getListRewrite(tryStatement, ASTNodeConstants.CATCH_CLAUSES).insertLast(catchClause, null);
 			
 			Block body= ast.newBlock();
 			body.statements().add(ast.newReturnStatement());
@@ -3037,9 +2898,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			Block body= ast.newBlock();
 			body.statements().add(ast.newReturnStatement());
-			rewrite.markAsInserted(body);
-			
-			tryStatement.setFinally(body);
+
+			rewrite.markAsInsert(tryStatement, ASTNodeConstants.FINALLY, body, null);
 		}
 		{ // insert catch before and after existing
 			TryStatement tryStatement= (TryStatement) blockStatements.get(3);
@@ -3050,9 +2910,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			decl1.setName(ast.newSimpleName("e"));
 			catchClause1.setException(decl1);
 			
-			rewrite.markAsInserted(catchClause1);
-			
-			tryStatement.catchClauses().add(0, catchClause1);
+			rewrite.getListRewrite(tryStatement, ASTNodeConstants.CATCH_CLAUSES).insertFirst(catchClause1, null);
+
 			
 			CatchClause catchClause2= ast.newCatchClause();
 			SingleVariableDeclaration decl2= ast.newSingleVariableDeclaration();
@@ -3060,16 +2919,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			decl2.setName(ast.newSimpleName("e"));
 			catchClause2.setException(decl2);
 			
-			rewrite.markAsInserted(catchClause2);
-			
-			tryStatement.catchClauses().add(catchClause2);			
+			rewrite.getListRewrite(tryStatement, ASTNodeConstants.CATCH_CLAUSES).insertLast(catchClause2, null);
 		}				
 			
 	
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3094,8 +2948,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testTypeDeclarationStatement() throws Exception {
@@ -3111,7 +2965,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -3132,10 +2986,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(stmt.getTypeDeclaration(), newDeclaration);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3145,8 +2996,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testVariableDeclarationStatement() throws Exception {
@@ -3163,7 +3014,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -3185,16 +3036,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
 			rewrite.markAsReplaced(decl.getType(), newType);
-			
-			List fragments= decl.fragments();
-			
+					
 			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
 			frag.setName(ast.newSimpleName("k1"));
 			frag.setInitializer(null);
-			
-			rewrite.markAsInserted(frag);
-			
-			fragments.add(frag);
+						
+			rewrite.getListRewrite(decl, ASTNodeConstants.FRAGMENTS).insertLast(frag, null);
 		}
 		{	// add modifiers, remove first two fragments, replace last
 			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(1);
@@ -3223,10 +3070,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3238,8 +3082,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");		
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testWhileStatement() throws Exception {
@@ -3256,7 +3100,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -3284,10 +3128,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3298,8 +3139,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testWhileStatement1() throws Exception {
@@ -3323,7 +3164,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -3394,10 +3235,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 		
 		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3421,8 +3259,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("            }\n");	
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}		
 	
 	
@@ -3440,7 +3278,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		
 	
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -3453,7 +3291,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{ // replace while statement with comment, insert new statement
 			WhileStatement whileStatement= (WhileStatement) statements.get(0);
 			String comment= "//hello";
-			ASTNode placeHolder= rewrite.createPlaceholder(comment, NewASTRewrite.STATEMENT);
+			ASTNode placeHolder= rewrite.createStringPlaceholder(comment, NewASTRewrite.STATEMENT);
 			
 			rewrite.markAsReplaced(whileStatement, placeHolder);
 			
@@ -3462,16 +3300,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf1.append("    System.beep();\n");
 			buf1.append("}");
 			
-			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), NewASTRewrite.STATEMENT);
-			rewrite.markAsInserted(placeHolder2);
-			
-			statements.add(placeHolder2);
+			ASTNode placeHolder2= rewrite.createStringPlaceholder(buf1.toString(), NewASTRewrite.STATEMENT);
+			rewrite.getListRewrite(block, ASTNodeConstants.STATEMENTS).insertLast(placeHolder2, null);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3483,9 +3316,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
+	
 	
 }
 
