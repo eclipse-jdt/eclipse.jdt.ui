@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.PlatformUI;
@@ -139,22 +138,16 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
-		ILabelProvider provider= getLabelProvider();
-		if (provider instanceof IColorProvider) {
-			return ((IColorProvider) provider).getForeground(element);
-		}
-		return null;
+		// label provider is a JavaUILabelProvider
+		return ((IColorProvider) getLabelProvider()).getForeground(element);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
 	public Color getBackground(Object element) {
-		ILabelProvider provider= getLabelProvider();
-		if (provider instanceof IColorProvider) {
-			return ((IColorProvider) provider).getBackground(element);
-		}
-		return null;
+		// label provider is a JavaUILabelProvider
+		return ((IColorProvider) getLabelProvider()).getBackground(element);
 	}
 
 }

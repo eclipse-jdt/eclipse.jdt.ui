@@ -26,6 +26,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 public class JavaSourceViewer extends SourceViewer {
 
+
 	/**
 	 * Text operation code for requesting the outline for the current input.
 	 */
@@ -36,9 +37,14 @@ public class JavaSourceViewer extends SourceViewer {
 	 */
 	public static final int OPEN_STRUCTURE= 52;
 
+	/**
+	 * Text operation code for requesting the hierarchy for the current input.
+	 */
+	public static final int SHOW_HIERARCHY= 53;
 
 	private IInformationPresenter fOutlinePresenter;
 	private IInformationPresenter fStructurePresenter;
+	private IInformationPresenter fHierarchyPresenter;
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
@@ -58,6 +64,9 @@ public class JavaSourceViewer extends SourceViewer {
 			case OPEN_STRUCTURE:
 				fStructurePresenter.showInformation();
 				return;
+			case SHOW_HIERARCHY:
+				fHierarchyPresenter.showInformation();
+				return;	
 		}
 		
 		super.doOperation(operation);
@@ -71,6 +80,9 @@ public class JavaSourceViewer extends SourceViewer {
 			return fOutlinePresenter != null;
 		if (operation == OPEN_STRUCTURE)
 			return fStructurePresenter != null;
+		if (operation == SHOW_HIERARCHY)
+			return fHierarchyPresenter != null;			
+			
 		return super.canDoOperation(operation);
 	}
 
@@ -87,6 +99,10 @@ public class JavaSourceViewer extends SourceViewer {
 			fStructurePresenter= ((JavaSourceViewerConfiguration)configuration).getOutlinePresenter(this, true);
 			fStructurePresenter.install(this);
 		}
+		if (configuration instanceof JavaSourceViewerConfiguration) {
+			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
+			fHierarchyPresenter.install(this);
+		}
 	}
 
 	/*
@@ -101,6 +117,10 @@ public class JavaSourceViewer extends SourceViewer {
 			fStructurePresenter.uninstall();
 			fStructurePresenter= null;
 		}
+		if (fHierarchyPresenter != null) {
+			fHierarchyPresenter.uninstall();
+			fHierarchyPresenter= null;
+		}		
 		super.handleDispose();
 	}
 }

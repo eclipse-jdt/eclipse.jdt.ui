@@ -65,7 +65,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	/**
 	 * Content provider for the 'traditional' type hierarchy.
 	 */	
-	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
+	public static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
 		
 			
 		public TraditionalHierarchyContentProvider(TypeHierarchyLifeCycle provider) {

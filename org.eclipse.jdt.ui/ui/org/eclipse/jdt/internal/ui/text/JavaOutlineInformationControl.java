@@ -42,11 +42,10 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -55,7 +54,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -69,11 +67,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * @author dmegert
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
  */
 public class JavaOutlineInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2 {
 
@@ -92,65 +85,36 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	private static class NamePatternFilter extends ViewerFilter {
 		private String fPattern;
 		private StringMatcher fMatcher;
-		private ILabelProvider fLabelProvider;
-		private Viewer fViewer;
-
-		private StringMatcher getMatcher() {
+		
+		public StringMatcher getMatcher() {
 			return fMatcher;
 		}
-
-
+	
 		/* (non-Javadoc)
 		 * Method declared on ViewerFilter.
 		 */
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (fMatcher == null)
+			if (fMatcher == null || !(viewer instanceof TreeViewer))
 				return true;
-
-			ILabelProvider labelProvider= getLabelProvider(viewer);
-
-			String matchName= null;
-			if (labelProvider != null)
-				matchName= ((ILabelProvider)labelProvider).getText(element);
-			else if (element instanceof IJavaElement)
-				matchName= ((IJavaElement) element).getElementName();
-
+			TreeViewer treeViewer= (TreeViewer) viewer;
+	
+			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
 			if (matchName != null && fMatcher.match(matchName))
 				return true;
-
-			return hasUnfilteredChild(viewer, element);
+	
+			return hasUnfilteredChild(treeViewer, element);
 		}
-
-		private ILabelProvider getLabelProvider(Viewer viewer) {
-			if (fViewer == viewer)
-				return fLabelProvider;
-
-			fLabelProvider= null;
-			IBaseLabelProvider baseLabelProvider= null;
-			if (viewer instanceof StructuredViewer)
-				baseLabelProvider= ((StructuredViewer)viewer).getLabelProvider();
-
-			if (baseLabelProvider instanceof ILabelProvider)
-				fLabelProvider= (ILabelProvider)baseLabelProvider;
-
-			return fLabelProvider;
-		}
-
-		private boolean hasUnfilteredChild(Viewer viewer, Object element) {
-			IJavaElement[] children;
+	
+		private boolean hasUnfilteredChild(TreeViewer viewer, Object element) {
 			if (element instanceof IParent) {
-				try {
-					children= ((IParent)element).getChildren();
-				} catch (JavaModelException ex) {
-					return false;
-				}
+				Object[] children=  ((ITreeContentProvider) viewer.getContentProvider()).getChildren(element);
 				for (int i= 0; i < children.length; i++)
 					if (select(viewer, element, children[i]))
 						return true;
 			}
 			return false;
 		}
-
+	
 		/**
 		 * Sets the patterns to filter out for the receiver.
 		 * <p>
@@ -294,40 +258,12 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 		fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		createFilterText(fComposite);
-		createTreeViewer(fComposite, treeStyle);
-
-		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
-		fShell.setLayout(new BorderFillLayout(border));
+		fTreeViewer= createTreeViewer(fComposite, treeStyle);
 		
-		setInfoSystemColor();
-		installFilter();
-	}
+		Tree tree= fTreeViewer.getTree();
+		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-	private void createTreeViewer(Composite parent, int style) {
-		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
-		GridData data= new GridData(GridData.FILL_BOTH);
-		tree.setLayoutData(data);
-
-		fTreeViewer= new TreeViewer(tree);
-
-		// Hide import declartions but show the container
-		fTreeViewer.addFilter(new ViewerFilter() {
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return !(element instanceof IImportDeclaration);
-			}
-		});
-
-		fTreeViewer.setContentProvider(new StandardJavaElementContentProvider(true, true));
-		fTreeViewer.setSorter(new JavaElementSorter());
-		fTreeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
-		
-		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
-			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
-			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
-		);
-		fTreeViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
-
-		fTreeViewer.getTree().addKeyListener(new KeyListener() {
+		tree.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
 					dispose();
@@ -337,7 +273,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 			}
 		});
 
-		fTreeViewer.getTree().addSelectionListener(new SelectionListener() {
+		tree.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				// do nothing
 			}
@@ -345,9 +281,43 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 				gotoSelectedElement();
 			}
 		});
+
+		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
+		fShell.setLayout(new BorderFillLayout(border));
+		
+		setInfoSystemColor();
+		installFilter();
+	}
+	
+	protected TreeViewer createTreeViewer(Composite parent, int style) {
+		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
+	
+		TreeViewer treeViewer= new TreeViewer(tree);
+
+		// Hide import declartions but show the container
+		treeViewer.addFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return !(element instanceof IImportDeclaration);
+			}
+		});
+
+		treeViewer.setContentProvider(new StandardJavaElementContentProvider(true, true));
+		treeViewer.setSorter(new JavaElementSorter());
+		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		
+		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
+		);
+		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
+		return treeViewer;
 	}
 
-	private Text createFilterText(Composite parent) {
+	protected TreeViewer getTreeViewer() {
+		return fTreeViewer;
+	}
+
+	protected Text createFilterText(Composite parent) {
 		fFilterText= new Text(parent, SWT.FLAT);
 
 		GridData data= new GridData();
@@ -473,9 +443,8 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @see IInformationControlExtension2#setInput(Object)
 	 */
 	public void setInput(Object information) {
-		fFilterText.setText(""); //$NON-NLS-1$
 		if (information == null || information instanceof String) {
-			setInput(null);
+			inputChanged(null, null);
 			return;
 		}
 		IJavaElement je= (IJavaElement)information;
@@ -485,8 +454,16 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 			sel= cu;
 		else
 			sel= je.getAncestor(IJavaElement.CLASS_FILE);
-		fTreeViewer.setInput(sel);
-		fTreeViewer.setSelection(new StructuredSelection(information));
+			
+		inputChanged(sel, information);
+	}
+	
+	protected void inputChanged(Object newInput, Object newSelection) {
+		fFilterText.setText(""); //$NON-NLS-1$
+		fTreeViewer.setInput(newInput);
+		if (newSelection != null) {
+			fTreeViewer.setSelection(new StructuredSelection(newSelection));
+		}
 	}
 
 	/*

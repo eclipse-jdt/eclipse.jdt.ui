@@ -2215,7 +2215,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.show.outline"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-      
+
+	<command
+		category="org.eclipse.ui.category.navigate"
+		id="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
+		name= "%ActionDefinition.open.hierarchy.name"
+		description="%ActionDefinition.open.hierarchy.description">
+	</command>
+	<keyBinding
+		string="Ctrl+T"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+
 	<command
 		category="org.eclipse.ui.category.navigate"
 		id="org.eclipse.jdt.ui.navigate.java.open.structure"

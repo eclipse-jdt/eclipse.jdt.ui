@@ -54,7 +54,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * Content provider for the supertype hierarchy
 	 */
-	private static class SuperTypeHierarchyContentProvider extends TypeHierarchyContentProvider {
+	public static class SuperTypeHierarchyContentProvider extends TypeHierarchyContentProvider {
 		public SuperTypeHierarchyContentProvider(TypeHierarchyLifeCycle lifeCycle) {
 			super(lifeCycle);
 		}

@@ -14,8 +14,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.viewers.IColorProvider;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -31,7 +29,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 /**
  * Label provider for the hierarchy method viewers. 
  */
-public class MethodsLabelProvider extends AppearanceAwareLabelProvider implements IColorProvider {
+public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 
 	private Color fResolvedBackground;
 	
@@ -121,12 +119,5 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider implement
 		}
 		return null;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-	 */
-	public Color getBackground(Object element) {
-		return null;
-	}	
 	
 }

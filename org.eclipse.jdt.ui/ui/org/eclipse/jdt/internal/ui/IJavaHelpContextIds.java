@@ -159,7 +159,9 @@ public interface IJavaHelpContextIds {
 	public static final String SHOW_JAVADOC_ACTION= 						PREFIX + "show_javadoc_action"; 	 //$NON-NLS-1$	
 	public static final String SHOW_OUTLINE_ACTION= 						PREFIX + "show_outline_action"; 	 //$NON-NLS-1$	
 	public static final String OPEN_STRUCTURE_ACTION= 						PREFIX + "open_structure_action"; 	 //$NON-NLS-1$	
+	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$	
 	public static final String TOGGLE_SMART_TYPING_ACTION= 					PREFIX + "toggle_smart_typing_action"; //$NON-NLS-1$
+
 
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$

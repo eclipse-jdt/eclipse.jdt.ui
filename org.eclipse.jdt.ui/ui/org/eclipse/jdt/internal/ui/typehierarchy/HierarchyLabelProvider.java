@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -60,6 +63,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}		
 	}
 
+	private Color fResolvedBackground;
 	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
 
@@ -198,7 +202,24 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (Flags.isStatic(flags)) {
 			adornmentFlags |= JavaElementImageDescriptor.STATIC;
 		}
+		
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+	 */
+	public Color getForeground(Object element) {
+		if (element instanceof IMethod) {
+			if (fResolvedBackground == null) {
+				Display display= Display.getCurrent();
+				fResolvedBackground= display.getSystemColor(SWT.COLOR_DARK_BLUE);
+			}
+			return fResolvedBackground;
+		}
+		return null;
+	}	
+	
+	
 
 }

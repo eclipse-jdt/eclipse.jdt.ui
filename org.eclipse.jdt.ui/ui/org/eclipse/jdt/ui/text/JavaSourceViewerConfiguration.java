@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
 
 /**
@@ -488,6 +489,16 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		};
 	}
 	
+	private IInformationControlCreator getHierarchyPresenterControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
+				return new HierarchyInformationControl(parent, shellStyle, treeStyle);
+			}
+		};
+	}	
+	
 	/*
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
 	 * @since 2.0
@@ -523,4 +534,19 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setSizeConstraints(40, 20, true, false);
 		return presenter;
 	}
+	
+	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
+		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator(sourceViewer));
+		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
+		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
+		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		presenter.setSizeConstraints(40, 20, true, false);
+		return presenter;
+	}	
+	
 }

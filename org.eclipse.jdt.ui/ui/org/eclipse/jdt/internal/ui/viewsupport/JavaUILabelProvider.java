@@ -14,13 +14,15 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProvider;
 
-public class JavaUILabelProvider extends LabelProvider {
+public class JavaUILabelProvider extends LabelProvider implements IColorProvider {
 	
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
@@ -204,6 +206,20 @@ public class JavaUILabelProvider extends LabelProvider {
 		if (extra != null) {
 			return new ILabelDecorator[] { extra };
 		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+	 */
+	public Color getForeground(Object element) {
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+	 */
+	public Color getBackground(Object element) {
 		return null;
 	}	
 

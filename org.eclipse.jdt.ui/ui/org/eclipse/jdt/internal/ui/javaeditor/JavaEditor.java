@@ -1636,6 +1636,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.OPEN_STRUCTURE_ACTION);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenHierarchy.", this, JavaSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
+		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
 		
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
