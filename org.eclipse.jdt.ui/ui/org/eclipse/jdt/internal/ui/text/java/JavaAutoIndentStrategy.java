@@ -124,7 +124,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private boolean fCloseBrace;
 	private boolean fIsSmartMode;
 
-	private boolean fHasTypedBrace;
 	private String fPartitioning;
 	
 	/**
@@ -307,7 +306,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					
 					buf.append(createIndent(1, useSpaces()));
 					
-					if (fHasTypedBrace && closeBrace() && !isClosed(d, c.offset, c.length)) {
+					if (closeBrace() && !isClosed(d, c.offset, c.length)) {
 						c.caretOffset= c.offset + buf.length();
 						c.shiftsCaret= false;
 						
@@ -1189,12 +1188,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			smartIndentAfterBlockDelimiter(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c);
-		
-		fHasTypedBrace= false;
-		if (c.text.length() > 0) {
-			if (c.text.charAt(c.text.length() - 1) == '{')
-				fHasTypedBrace= true;
-		}
 		
 	}
 	
