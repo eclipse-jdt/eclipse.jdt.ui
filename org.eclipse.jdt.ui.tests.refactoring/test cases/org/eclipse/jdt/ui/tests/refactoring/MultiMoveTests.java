@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MultiMoveTests extends RefactoringTest {
 
@@ -39,11 +40,7 @@ public class MultiMoveTests extends RefactoringTest {
 	}
 	
 	//--------
-	public void test0() throws Exception{
-		printTestDisabledMessage("incorrect import");
-		if (true)
-			return;
-		
+	public void test0() throws Exception{		
 		final String p1Name= "p1";
 		final String inDir= "/in/";
 		final String outDir= "/out/";
@@ -59,8 +56,9 @@ public class MultiMoveTests extends RefactoringTest {
 		List elems= new ArrayList();
 		elems.add(p1A);
 		elems.add(p1B);
-		MoveRefactoring ref= new MoveRefactoring(elems, fgChangeCreator);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setDestination(packP2);
+		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
@@ -82,11 +80,7 @@ public class MultiMoveTests extends RefactoringTest {
 		packP2.delete(true, null);
 	}
 	
-	public void test1() throws Exception{
-		printTestDisabledMessage("incorrect import");
-		if (true)
-			return;
-		
+	public void test1() throws Exception{		
 		final String p1Name= "p1";
 		final String p3Name= "p3";
 		final String inDir= "/in/";
@@ -104,8 +98,9 @@ public class MultiMoveTests extends RefactoringTest {
 		List elems= new ArrayList();
 		elems.add(p1A);
 		elems.add(p3B);
-		MoveRefactoring ref= new MoveRefactoring(elems, fgChangeCreator);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setDestination(packP2);
+		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
@@ -130,9 +125,6 @@ public class MultiMoveTests extends RefactoringTest {
 	}
 	
 	public void test2() throws Exception{
-		printTestDisabledMessage("incorrect import");
-		if (true)
-			return;
 		final String p1Name= "p1";
 		final String inDir= "/in/";
 		final String outDir= "/out/";
@@ -147,8 +139,9 @@ public class MultiMoveTests extends RefactoringTest {
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
-		MoveRefactoring ref= new MoveRefactoring(elems, fgChangeCreator);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setDestination(packP2);
+		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
