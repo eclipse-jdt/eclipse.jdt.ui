@@ -121,20 +121,25 @@ public class JavaSearchActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 
+		IMenuManager target= menu;
+		IMenuManager searchSubMenu= null;
 		if (fEditor != null) {
 			String groupName= SearchMessages.getString("group.search"); //$NON-NLS-1$
-			String groupId= ITextEditorActionConstants.GROUP_FIND;
-			IMenuManager searchSubMenu= new MenuManager(groupName, groupId);
-			searchSubMenu.add(new GroupMarker(groupId));
-			menu.appendToGroup(groupId, searchSubMenu);
-			menu= searchSubMenu;
+			searchSubMenu= new MenuManager(groupName, ITextEditorActionConstants.GROUP_FIND);
+			searchSubMenu.add(new GroupMarker(ITextEditorActionConstants.GROUP_FIND));
+			target= searchSubMenu;
 		}
 
-		fReferencesGroup.fillContextMenu(menu);
-		fDeclarationsGroup.fillContextMenu(menu);
-		fImplementorsGroup.fillContextMenu(menu);
-		fReadAccessGroup.fillContextMenu(menu);
-		fWriteAccessGroup.fillContextMenu(menu);
+		fReferencesGroup.fillContextMenu(target);
+		fDeclarationsGroup.fillContextMenu(target);
+		fImplementorsGroup.fillContextMenu(target);
+		fReadAccessGroup.fillContextMenu(target);
+		fWriteAccessGroup.fillContextMenu(target);
+		
+		// no other way to find out if we have added items.
+		if (searchSubMenu != null && searchSubMenu.getItems().length > 1) {		
+			menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, searchSubMenu);
+		}
 	}	
 
 	/* 
