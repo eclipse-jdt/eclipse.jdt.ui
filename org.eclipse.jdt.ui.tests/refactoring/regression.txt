@@ -1,0 +1,4 @@
+1. move junit.framework.TestCase to junit.samples causes NPE
+	fixed in > 108
+	(should never call List::addAll with null)
+	
