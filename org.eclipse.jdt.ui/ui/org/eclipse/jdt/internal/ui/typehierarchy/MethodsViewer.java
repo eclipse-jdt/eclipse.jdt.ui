@@ -18,6 +18,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -78,10 +79,13 @@ public class MethodsViewer extends ProblemTableViewer {
 		super(new Table(parent, SWT.MULTI));
 		
 		fLabelProvider= new JavaUILabelProvider(new ErrorTickImageProvider());
+
 		
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 
-		setLabelProvider(fLabelProvider);
+		setLabelProvider(new DecoratingLabelProvider(
+			fLabelProvider, part.getSite().getDecoratorManager())
+		);
 		setContentProvider(contentProvider);
 				
 		fOpen= new OpenJavaElementAction(this);
