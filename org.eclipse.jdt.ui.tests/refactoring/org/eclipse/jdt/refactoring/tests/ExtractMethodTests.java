@@ -553,6 +553,15 @@ public class ExtractMethodTests extends RefactoringTest {
 		invalidSelectionTest();
 	}
 	
+	public void test160() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test161() throws Exception {
+		System.out.println("\n161 disabled since it fails. See 1GEALET");
+		// invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -891,6 +900,10 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test511() throws Exception {
+		localsTest();
+	}
+		
+	public void test512() throws Exception {
 		localsTest();
 	}
 	
