@@ -2721,7 +2721,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						continue;
 					}
 					annotationMap.put(
-							new Annotation("org.eclipse.search.results", false, message),
+							new Annotation("org.eclipse.jdt.ui.occurrences", false, message), //$NON-NLS-1$
 							position);
 				}
 				
