@@ -211,14 +211,16 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		 */
 		public int compare(Viewer viewer, Object first, Object second) {
 			if (first instanceof ITypeBinding && second instanceof ITypeBinding) {
-				if (((IBinding) first).isEqualTo((IBinding) second))
+				final ITypeBinding left= (ITypeBinding) first;
+				final ITypeBinding right= (ITypeBinding) second;
+				if (right.getQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+					return -1;
+				if (left.isEqualTo(right))
 					return 0;
-				for (int i= 0; i < fAllTypes.length; i++) {
-					if (fAllTypes[i].isEqualTo((IBinding) first))
-						return -1;
-					if (fAllTypes[i].isEqualTo((IBinding) second))
-						return 1;
-				}
+				if (Bindings.isSuperType(left, right))
+					return +1;
+				else if (Bindings.isSuperType(right, left))
+					return -1;
 				return 0;
 			} else
 				return super.compare(viewer, first, second);
@@ -352,6 +354,6 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 	protected void createAnnotationControls(Composite composite) {
 		Composite annotationComposite= createAnnotationSelection(composite);
-		annotationComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
+		annotationComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 }
