@@ -197,11 +197,11 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
+		IDialogSettings settings= getDialogSettings();
 		if (fXmlJavadocFile == null) {
-			IDialogSettings settings= getDialogSettings();
 			fStore= new JavadocOptionsManager(settings.getSection("javadoc"), fRoot, structuredSelection);
 		} else {
-			fStore= new JavadocOptionsManager(fXmlJavadocFile, fRoot, structuredSelection);
+			fStore= new JavadocOptionsManager(fXmlJavadocFile, settings, fRoot, structuredSelection);
 		}
 	}
 	

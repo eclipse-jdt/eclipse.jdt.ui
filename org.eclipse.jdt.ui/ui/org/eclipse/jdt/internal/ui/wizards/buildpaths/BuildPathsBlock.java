@@ -595,10 +595,10 @@ public class BuildPathsBlock {
 			if (javadocLocation != null) {
 				IPath path= entry.getPath();
 				if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					path= JavaCore.getClasspathVariable(path.segment(0));
+					path= JavaCore.getResolvedVariablePath(path);
 				}
 				if (path != null) {
-					JavaDocLocations.setJavadocLocation(entry.getPath(), javadocLocation);
+					JavaDocLocations.setLibraryJavadocLocation(path, javadocLocation);
 				}
 			}
 		}	

@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -30,6 +31,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 
 public class JavadocOptionsManager {
@@ -52,6 +55,8 @@ public class JavadocOptionsManager {
 	private IWorkspaceRoot fRoot;
 	private IJavaProject fProject;
 	private IFile fXmlfile;
+	
+	private StatusInfo fWizardStatus;
 
 	private List fPackages;
 	private String fAccess;
@@ -106,43 +111,47 @@ public class JavadocOptionsManager {
 
 	public final String NAME= "name";
 	public final String PATH= "path";
-
-	public JavadocOptionsManager(IDialogSettings settings, IWorkspaceRoot root, ISelection currSelection) {
-
-		this.fRoot= root;
-		fJDocCommand= JavadocPreferencePage.getJavaDocCommand();
-
-		if (settings == null)
-			loadDefaults(currSelection);
-		else
-			loadStore(settings, currSelection);
-
+	
+	public JavadocOptionsManager(IDialogSettings settings, IWorkspaceRoot root, ISelection selection) {
+		this(null, settings, root, selection);	
 	}
 
-	public JavadocOptionsManager(IFile xmlJavadocFile, IWorkspaceRoot root, ISelection currSelection) {
+
+	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings settings, IWorkspaceRoot root, ISelection currSelection) {
 		Element element;
 		this.fRoot= root;
 		fJDocCommand= JavadocPreferencePage.getJavaDocCommand();
 		this.fXmlfile= xmlJavadocFile;
-
-		try {
-			JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
-			element= reader.readXML();
-
-			if (element == null)
-				loadDefaults(currSelection);
-			else
-				loadStore(element);
-
-			//This is not that bad		
-		} catch (Exception e) {
-			JavaPlugin.log(e);
-			loadDefaults(currSelection);
-		}
+		this.fWizardStatus= new StatusInfo();
+		
+		if(xmlJavadocFile!= null) {
+			try {
+				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
+				element= reader.readXML();
+	
+				if (element == null)
+					loadStore(settings, currSelection);
+				else
+					loadStore(element);
+			} catch(CoreException e) {
+				JavaPlugin.log(e);
+				fWizardStatus.setWarning("Unable to run wizard from Ant file, defaults used...");
+				loadStore(settings, currSelection);
+			} catch(IOException e) {
+				JavaPlugin.log(e);
+				fWizardStatus.setWarning("Error reading Ant file, defaults used...");
+				loadStore(settings, currSelection);
+			} catch(SAXException e) {
+				JavaPlugin.log(e);
+				fWizardStatus.setWarning("Error reading Ant file, defaults used...");
+				loadStore(settings, currSelection);
+			}		
+		}else loadStore(settings, currSelection);		
 	}
 
 	private void loadStore(IDialogSettings settings, ISelection sel) {
 
+	if(settings!= null){
 		fPackages= new ArrayList();
 		//getValidSelection will also find the project
 		IStructuredSelection selection= getValidSelection(sel);
@@ -160,8 +169,9 @@ public class JavadocOptionsManager {
 			fDocletname= fDocletname= "";
 		}
 
+		//load a destination even if a custom doclet is being used
 		IPath path= null;
-		if (fFromStandard && (fProject != null)) {
+		if (fProject != null) {
 			path= fProject.getProject().getFullPath();
 
 			URL url= JavaDocLocations.getJavadocLocation(path);
@@ -204,15 +214,15 @@ public class JavadocOptionsManager {
 		fNotree= loadbutton(settings.get(NOTREE));
 		fSplitindex= loadbutton(settings.get(SPLITINDEX));
 
+		}else loadDefaults(sel);
 	}
-
 	private void loadDefaults(ISelection sel) {
 		fPackages= new ArrayList();
 		IStructuredSelection selection= getValidSelection(sel);
 		fPackages= selection.toList();
 		fAccess= PRIVATE;
 
-		fFromStandard= true;
+		
 		if (fProject == null) {
 			fAntpath= "";
 		} else {
@@ -221,6 +231,7 @@ public class JavadocOptionsManager {
 		}
 
 		//default destination
+		fFromStandard= true;
 		if (fProject != null) {
 			IPath path= fProject.getProject().getFullPath();
 			URL url= JavaDocLocations.getJavadocLocation(path);
@@ -234,7 +245,9 @@ public class JavadocOptionsManager {
 
 		} else
 			fDestination= "";
-
+		
+		fDocletname="";
+		fDocletpath="";
 		fStylesheet= "";
 		fAdditionalParams= "";
 		fOverview= "";
@@ -283,6 +296,7 @@ public class JavadocOptionsManager {
 					fDocletname= ((Element) child).getAttribute(NAME);
 					if (!(fDocletpath.equals("") && !fDocletname.equals("")))
 						fFromStandard= false;
+					else fDocletname= fDocletpath ="";
 					break;
 				}
 			}
@@ -341,6 +355,10 @@ public class JavadocOptionsManager {
 	}
 
 	//it is possible that the package list is empty
+	public StatusInfo getWizardStatus() {
+		return fWizardStatus;
+	}	
+
 	public List getPackagenames() {
 		return fPackages;
 	}
