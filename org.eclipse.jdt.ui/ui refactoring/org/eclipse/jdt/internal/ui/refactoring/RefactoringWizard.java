@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -245,7 +246,15 @@ public class RefactoringWizard extends Wizard {
 			setChange(change);
 			return caller;
 		}
-			
+		
+		if (change instanceof ICompositeChange){
+			ICompositeChange cp= (ICompositeChange)change;
+			if (cp.getChildren() == null || cp.getChildren().length == 0){
+				setChange(change);
+				return caller;
+			}
+		}
+		
 		// Set change if we don't have fatal errors.
 		if (!status.hasFatalError())
 			setChange(change);
