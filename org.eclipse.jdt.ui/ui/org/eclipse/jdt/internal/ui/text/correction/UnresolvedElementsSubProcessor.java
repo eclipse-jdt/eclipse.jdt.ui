@@ -634,9 +634,9 @@ public class UnresolvedElementsSubProcessor {
 		}		
 	}
 	
-	private static String getMethodSignature(IMethodBinding binding, boolean qualify) {
+	private static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
 		StringBuffer buf= new StringBuffer();
-		if (qualify) {
+		if (inOtherCU && !binding.isConstructor()) {
 			buf.append(binding.getDeclaringClass().getName()).append('.');
 		}
 		buf.append(binding.getName());

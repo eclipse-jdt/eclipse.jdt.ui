@@ -14,6 +14,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 /**
@@ -87,6 +90,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateConstructor:
 			case IProblem.UnusedPrivateField:
 			case IProblem.UnusedPrivateType:
+			case IProblem.LocalVariableIsNeverUsed:
+			case IProblem.ArgumentIsNeverUsed:
 			case IProblem.MethodRequiresBody:
 			case IProblem.NeedToEmulateFieldReadAccess:
 			case IProblem.NeedToEmulateFieldWriteAccess:
@@ -98,6 +103,21 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		}
 	}
 	
+	public static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {
+		try {
+			IBuffer buf= cu.getBuffer();
+			while (offset >= start) {
+				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) { //$NON-NLS-1$
+					return offset;
+				}
+				offset--;
+			}
+		} catch(JavaModelException e) {
+		}
+		return start;
+	}	
+	
+	
 	public void process(ICorrectionContext context, List proposals) throws CoreException {
 		int id= context.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
@@ -107,8 +127,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		switch (id) {
 			case IProblem.UnterminatedString:
 				String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
-				int pos= InsertCorrectionProposal.moveBack(context.getOffset() + context.getLength(), context.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
-				proposals.add(new InsertCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, "\"", 0)); //$NON-NLS-1$ 
+				int pos= moveBack(context.getOffset() + context.getLength(), context.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
+				proposals.add(new ReplaceCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, 0, "\"", 0)); //$NON-NLS-1$ 
 				break;
 			case IProblem.UnusedImport:
 			case IProblem.DuplicateImport:
@@ -228,7 +248,9 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateMethod:
 			case IProblem.UnusedPrivateConstructor:
 			case IProblem.UnusedPrivateField:
-			case IProblem.UnusedPrivateType:				
+			case IProblem.UnusedPrivateType:
+			case IProblem.LocalVariableIsNeverUsed:
+			case IProblem.ArgumentIsNeverUsed:			
 				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, proposals);
 				break;
 			case IProblem.NeedToEmulateFieldReadAccess:

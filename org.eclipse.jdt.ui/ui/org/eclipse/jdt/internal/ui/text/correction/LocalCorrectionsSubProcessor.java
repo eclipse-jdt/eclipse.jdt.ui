@@ -19,8 +19,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.ISharedImages;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
@@ -83,6 +81,10 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(castProposal);
 		}
 		
+		if ("void".equals(args[1])) { //$NON-NLS-1$
+			return;
+		}
+		
 		// change method return statement to actual type
 		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
 			ITypeBinding binding= nodeToCast.resolveTypeBinding();
@@ -115,24 +117,25 @@ public class LocalCorrectionsSubProcessor {
 		if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
 			ASTNode parent= fragment.getParent();
-			Type type= null;
+
+			Type typeNode= null;			
 			if (parent instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement stmt= (VariableDeclarationStatement) parent;
 				if (stmt.fragments().size() == 1) {
-					type= stmt.getType();
+					typeNode= stmt.getType();
 				}
 			} else if (parent instanceof FieldDeclaration) {
 				FieldDeclaration decl= (FieldDeclaration) parent;
 				if (decl.fragments().size() == 1) {
-					type= decl.getType();
+					typeNode= decl.getType();
 				}
-			}			
-			if (type != null) {
+			}
+			if (typeNode != null) {
 				ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 				String typeName= edit.addImport(args[0]);
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", typeName); //$NON-NLS-1$
-				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), typeName, 1);
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 1);
 				varProposal.getRootTextEdit().add(edit);	
 				proposals.add(varProposal);
 			}
@@ -306,7 +309,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			for (int i= 0; i < exceptions.size(); i++) {
 				Name elem= (Name) exceptions.get(i);
-				if (canRemove(elem.resolveTypeBinding(), uncaughtExceptions)) {
+				if (canRemoveException(elem.resolveTypeBinding(), uncaughtExceptions)) {
 					rewrite.markAsRemoved(elem);
 				}
 			}
@@ -315,7 +318,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	private static boolean canRemove(ITypeBinding curr, ITypeBinding[] addedExceptions) {
+	private static boolean canRemoveException(ITypeBinding curr, ITypeBinding[] addedExceptions) {
 		while (curr != null) {
 			for (int i= 0; i < addedExceptions.length; i++) {
 				if (curr == addedExceptions[i]) {
@@ -558,49 +561,18 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addUnusedMemberProposal(ICorrectionContext context, List proposals) throws CoreException {
 		ASTNode selectedNode= context.getCoveringNode();
-		if (selectedNode == null) {
-			return;
-		}
-		BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (declaration != null) {
-			
-			String label;
-			ASTNode nodeToRemove= declaration;
-			if (declaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
-				label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedfield.description"); //$NON-NLS-1$
-
-				
-				List fragments= ((FieldDeclaration) declaration).fragments();
-				if (fragments.size() > 1) {
-					for (int i= 0; i < fragments.size(); i++) {
-						VariableDeclarationFragment node= (VariableDeclarationFragment) fragments.get(i);
-						if (ASTNodes.isParent(selectedNode, node)) {
-							nodeToRemove= node;
-							break;
-						}
-					}
-				}
-			} else if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-				if (((MethodDeclaration) declaration).isConstructor()) {
-					label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedconstructor.description"); //$NON-NLS-1$
-				} else {
-					label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedmethod.description"); //$NON-NLS-1$
-				}
-			} else if (declaration.getNodeType() == ASTNode.TYPE_DECLARATION) {
-				label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedtype.description"); //$NON-NLS-1$
-			} else {
-				return;
-			}
-			
-			ASTRewrite rewrite= new ASTRewrite(nodeToRemove.getParent());		
-			rewrite.markAsRemoved(nodeToRemove);
-
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-			proposal.ensureNoModifications();
-			proposals.add(proposal);			
-		}
 		
-	}
-	
+		SimpleName name= null;
+		if (selectedNode instanceof MethodDeclaration) {
+			name= ((MethodDeclaration) selectedNode).getName();
+		} else if (selectedNode instanceof SimpleName) {
+			name= (SimpleName) selectedNode;
+		}
+		if (name != null) {
+			IBinding binding= name.resolveBinding();
+			if (binding != null) {
+				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), context.getASTRoot(), binding, 1));
+			}
+		}
+	}	
 }
