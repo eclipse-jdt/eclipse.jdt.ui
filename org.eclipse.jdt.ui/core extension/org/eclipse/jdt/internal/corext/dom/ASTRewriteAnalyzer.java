@@ -2016,7 +2016,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		List catchBlocks= node.catchClauses();
 		if (hasChanges(catchBlocks)) {
-			pos= getDefaultRewriter().rewriteList(catchBlocks, pos, " ", " "); //$NON-NLS-1$ //$NON-NLS-2$
+			int indent= getIndent(node.getStartPosition());
+			String prefix= ASTRewriteFormatter.CATCH_BLOCK.getPrefix(indent, fTextBuffer.getLineDelimiter(), node);
+			pos= getDefaultRewriter().rewriteList(catchBlocks, pos, prefix, prefix); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			pos= visitList(catchBlocks, pos);
 		}

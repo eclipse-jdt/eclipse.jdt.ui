@@ -121,7 +121,15 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		
 		int nExistingNodes= markers.size();
 
-		int[] positions= new int[nExistingNodes*2];
+		int nPositions= nExistingNodes;
+		for (int i= 0; i < nExistingNodes; i++) {
+			NodeMarker curr= (NodeMarker) markers.get(i);
+			if (curr.length > 0) {
+				nPositions++;
+			}
+		}
+
+		int[] positions= new int[nPositions];
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			NodeMarker curr= (NodeMarker) markers.get(i);
 			
@@ -181,9 +189,9 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		private int fStart;
 		private int fEnd;
 		
-		public FormattingPrefix(String string, char start, char end, int kind) {
-			fStart= string.indexOf(start);
-			fEnd= string.lastIndexOf(end);
+		public FormattingPrefix(String string, String sub, int kind) {
+			fStart= string.indexOf(sub);
+			fEnd= fStart + sub.length() - 1;
 			fString= string;
 			fKind= kind;
 		}
@@ -219,10 +227,13 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix SPACE= new ConstPrefix(" "); //$NON-NLS-1$
 	public final static Prefix ASSERT_COMMENT= new ConstPrefix(" : "); //$NON-NLS-1$
 	
-	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", 'a', '{' , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
-	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ')', '{' , CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$
-	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", '}' , '{', CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
+	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+
 
 	public final static Prefix ELSE_BLOCK= new BlockFormattingPrefix("if (true) {} else", '}' , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
+
 	
 }

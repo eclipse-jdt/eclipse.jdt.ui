@@ -162,6 +162,11 @@ public class CodeFormatterUtil {
 	 * a dummy node with no content.
 	 */
 	public static String format(ASTNode node, String str, int indentationLevel, int[] positions, String lineSeparator, Map options) {		
+		if (OLD_FORMATTER) {
+			// shortcut: old formatter can format all nodes
+			return old_format(str, indentationLevel, positions, lineSeparator, options);
+		}
+
 		int code;
 		String prefix= ""; //$NON-NLS-1$
 		String suffix= ""; //$NON-NLS-1$
@@ -187,11 +192,6 @@ public class CodeFormatterUtil {
 			suffix= "\nclass A {}"; //$NON-NLS-1$
 			code= CodeFormatterUtil.K_COMPILATION_UNIT;
 		} else if (node instanceof Javadoc) {
-			if (OLD_FORMATTER) {
-				// fix for bug with positions in old formatter
-				return old_format(str, indentationLevel, positions, lineSeparator, options);
-			}
-			
 			suffix= "void foo();"; //$NON-NLS-1$
 			code= CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS;
 		} else if (node instanceof CatchClause) {
