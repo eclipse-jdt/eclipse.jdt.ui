@@ -234,26 +234,26 @@ public class ReorderParametersInputPage extends UserInputWizardPage {
 	private TableLayout createTableLayout(Table table) {
 		TableLayout layout= new TableLayout();
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[3];
-		columnLayoutData[TYPE_PROP]= new ColumnWeightData(34);
-		columnLayoutData[OLDNAME_PROP]= new ColumnWeightData(33);
-		columnLayoutData[NEWNAME_PROP]= new ColumnWeightData(33);
+		columnLayoutData[TYPE_PROP]= new ColumnWeightData(34, true);
+		columnLayoutData[OLDNAME_PROP]= new ColumnWeightData(33, true);
+		columnLayoutData[NEWNAME_PROP]= new ColumnWeightData(33, true);
 		
-		layout.addColumnData(columnLayoutData[0]);
-		layout.addColumnData(columnLayoutData[1]);
-		layout.addColumnData(columnLayoutData[2]);
+		layout.addColumnData(columnLayoutData[TYPE_PROP]);
+		layout.addColumnData(columnLayoutData[OLDNAME_PROP]);
+		layout.addColumnData(columnLayoutData[NEWNAME_PROP]);
 		
 		TableColumn tc;
 		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
 		tc.setResizable(columnLayoutData[TYPE_PROP].resizable);
-		tc.setText("Parameter Type");
+		tc.setText("Type");
 		
 		tc= new TableColumn(table, SWT.NONE, OLDNAME_PROP);
 		tc.setResizable(columnLayoutData[OLDNAME_PROP].resizable);
-		tc.setText("Old Parameter Name"); 
+		tc.setText("Old Name"); 
 		
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(columnLayoutData[NEWNAME_PROP].resizable);
-		tc.setText("New Parameter Name"); 
+		tc.setText("New Name"); 
 		
 		return layout;
 	}
