@@ -459,29 +459,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private CellEditor[] createCellEditors() {
 		final CellEditor editors[]= new CellEditor[SIZE];
 		editors[TASK_PROP]= new MultiStateCellEditor(fTable, NLSSubstitution.STATE_COUNT, NLSSubstitution.DEFAULT);
-		
-		class AutoApplyTextCellEditor extends TextCellEditor {
-			public AutoApplyTextCellEditor(Composite parent) {
-				super(parent);
-			}
-			public void fireApplyEditorValue() {
-				super.fireApplyEditorValue();
-			}
-		}
-		
-		editors[KEY_PROP]= new AutoApplyTextCellEditor(fTable);
-		editors[KEY_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor)editors[KEY_PROP]).fireApplyEditorValue();
-			}
-		});
-		
-		editors[VAL_PROP]= new AutoApplyTextCellEditor(fTable);
-		editors[VAL_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor)editors[VAL_PROP]).fireApplyEditorValue();
-			}
-		});
+		editors[KEY_PROP]= new TextCellEditor(fTable);
+		editors[VAL_PROP]= new TextCellEditor(fTable);
 		return editors;
 	}
 

@@ -580,34 +580,9 @@ public class ChangeParametersControl extends Composite {
 	private void addCellEditors() {
 		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
 
-		class AutoApplyTextCellEditor extends TextCellEditor {
-			public AutoApplyTextCellEditor(Composite parent) {
-				super(parent);
-			}
-			public void fireApplyEditorValue() {
-				super.fireApplyEditorValue();
-			}
-		}
-
-		editors[TYPE_PROP]= new AutoApplyTextCellEditor(getTable());
-		editors[TYPE_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor) editors[TYPE_PROP]).fireApplyEditorValue();
-			}
-		});
-
-		editors[NEWNAME_PROP]= new AutoApplyTextCellEditor(getTable());
-		editors[NEWNAME_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor) editors[NEWNAME_PROP]).fireApplyEditorValue();
-			}
-		});
-		editors[DEFAULT_PROP]= new AutoApplyTextCellEditor(getTable());
-		editors[DEFAULT_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor) editors[DEFAULT_PROP]).fireApplyEditorValue();
-			}
-		});
+		editors[TYPE_PROP]= new TextCellEditor(getTable());
+		editors[NEWNAME_PROP]= new TextCellEditor(getTable());
+		editors[DEFAULT_PROP]= new TextCellEditor(getTable());
 
 		fTableViewer.setCellEditors(editors);
 		fTableViewer.setColumnProperties(PROPERTIES);
