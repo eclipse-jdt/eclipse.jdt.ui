@@ -68,16 +68,16 @@
 <template name="main" description="%Templates.main" context="java" enabled="true">public static void main(String[] args) {
 	${cursor}
 }</template>
-<template name="public_method" description="%Templates.public_method" context="java" enabled="true">public ${return_type} ${name}(${arguments}) {
+<template name="public_method" description="%Templates.public_method" context="java" enabled="true">public ${return_type} ${name}(${}) {
 	${cursor}
 }</template>
-<template name="protected_method" description="%Templates.protected_method" context="java" enabled="true">protected ${return_type} ${name}(${arguments}) {
+<template name="protected_method" description="%Templates.protected_method" context="java" enabled="true">protected ${return_type} ${name}(${}) {
 	${cursor}
 }</template>
-<template name="private_method" description="%Templates.private_method" context="java" enabled="true">private ${return_type} ${name}(${arguments}) {
+<template name="private_method" description="%Templates.private_method" context="java" enabled="true">private ${return_type} ${name}(${}) {
 	${cursor}
 }</template>
-<template name="private_static_method" description="%Templates.private_static_method" context="java" enabled="true">private static ${return_type} ${name}(${arguments}) {
+<template name="private_static_method" description="%Templates.private_static_method" context="java" enabled="true">private static ${return_type} ${name}(${}) {
 	${cursor}
 }</template>
 <template name="instanceof" description="%Templates.instanceof" context="java" enabled="true">if (${name} instanceof ${type}) {

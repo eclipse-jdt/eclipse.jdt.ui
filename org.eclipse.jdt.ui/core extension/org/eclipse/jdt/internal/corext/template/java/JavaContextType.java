@@ -42,7 +42,12 @@ public class JavaContextType extends CompilationUnitContextType {
 	     	super("array_type", JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 	    protected String resolve(TemplateContext context) {
-	        return ((JavaContext) context).guessArrayType();
+	        
+	    	String arrayType= ((JavaContext) context).guessArrayType();
+	    	if (arrayType != null)
+	    		return arrayType;
+	    	else
+	    		return super.resolve(context);
 	    }
 	}
 
@@ -69,7 +74,11 @@ public class JavaContextType extends CompilationUnitContextType {
 		    super("collection", JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	    protected String resolve(TemplateContext context) {
-	        return ((JavaContext) context).guessCollection();
+	    	String collection= ((JavaContext) context).guessCollection();
+	    	if (collection != null)
+	    		return collection;
+	    	else
+	    		return super.resolve(context);
 	    }
 	}
 

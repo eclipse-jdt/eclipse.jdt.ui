@@ -44,13 +44,6 @@ public abstract class CompilationUnitContextType extends ContextType {
 				return null;
 			}
 		}
-	 	
-		/*
-		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
-		 */
-		protected boolean isUnambiguous(TemplateContext context) {
-			return resolve(context) != null;
-		}
 	}
 
 	protected static class File extends TemplateVariableResolver {
@@ -199,7 +192,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		super(name);	
 	}
 
-	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int i, ICompilationUnit compilationUnit);
+	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int length, ICompilationUnit compilationUnit);
 
 
 	/* (non-Javadoc)

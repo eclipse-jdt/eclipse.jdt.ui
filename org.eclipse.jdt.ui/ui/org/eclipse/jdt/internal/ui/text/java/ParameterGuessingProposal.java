@@ -118,7 +118,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				positionOffsets= new int[parameterCount];
 				positionLengths= new int[parameterCount];
 
-				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths);
+				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths, document);
 				
 			} else {
 				parameterCount= 0;
@@ -170,7 +170,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		}
 	}
 	
-	private ICompletionProposal[][] guessParameters(int offset) throws JavaModelException {
+	private ICompletionProposal[][] guessParameters(int offset, IDocument document) throws JavaModelException {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
 		// likely to be closer to the point of codecompletion. As an example consider a "delegation" completion:
@@ -206,7 +206,8 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					new String(fParamaterTypePackageNames[i]),
 					new String(fParameterTypeNames[i]),
 					paramName,
-					offset);
+					offset,
+					document);
 
 				int paramLength= paramName.length();
 				fChoices[i]= (parameter == null) ? new ICompletionProposal[] {new CompletionProposal(paramName, offset, paramLength, paramLength)} : parameter;
@@ -221,13 +222,13 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths
 	 * of the parameters.
 	 */
-	private String computeGuessingCompletion(int startOffset, int[] offsets, int[] lengths) throws JavaModelException {
+	private String computeGuessingCompletion(int startOffset, int[] offsets, int[] lengths, IDocument document) throws JavaModelException {
 	
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(fName);
 		buffer.append('(');
 
-		fChoices= guessParameters(startOffset+buffer.length());
+		fChoices= guessParameters(startOffset+buffer.length(), document);
 		for (int i= 0; i < fChoices.length; i++) {
 			if (i != 0)
 				buffer.append(", "); //$NON-NLS-1$

@@ -134,7 +134,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			IDocument document= viewer.getDocument();
 			String templateString= templateBuffer.getString();	
 			document.replace(start, end - start, templateString);	
-
+			
 			// translate positions
 			LinkedEnvironment env= new LinkedEnvironment();
 			TemplateVariable[] variables= templateBuffer.getVariables();
@@ -317,14 +317,23 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * {@inheritDoc}
 	 */
 	public String getReplacementString() {
-		return new String(); // return empty string for replacement text
+		fContext.setReadOnly(false);
+		try {
+			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
+			if (templateBuffer == null)
+				return new String(); // return empty string for replacement text
+			else
+				return templateBuffer.getString();
+		} catch (BadLocationException e) {
+			return new String();
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void updateReplacementLength(int length) {
-		Assert.isTrue(length > 0);
+		Assert.isTrue(length >= 0);
 		fRegion= new Region(fRegion.getOffset(), length);
 	}
 }

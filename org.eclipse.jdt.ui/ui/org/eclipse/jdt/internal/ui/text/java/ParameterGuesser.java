@@ -21,7 +21,12 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
@@ -35,9 +40,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -258,6 +267,9 @@ public class ParameterGuesser {
 	/** Local and member variables of the compilation unit */
 	private List fVariables;
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
+	private Template fTemplateMatch;
+	private String fTemplateType;
+	private String fTemplateCollection;
 
 	/**
 	 * Creates a parameter guesser for compilation unit and offset.
@@ -342,19 +354,21 @@ public class ParameterGuesser {
 	 * @param paramName - the name of the paramater (used to find similarly named matches)
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 */
-	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, int offset) throws JavaModelException {
+	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, int offset, IDocument document) throws JavaModelException {
 		
 		if (fVariables == null) {
 			VariableCollector variableCollector= new VariableCollector();
 			fVariables= variableCollector.collect(fCodeAssistOffset, fCompilationUnit);
 		}
 		
+		fTemplateMatch= null;
+		
 		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
 		orderMatches(typeMatches, paramName);
 		if (typeMatches == null)
 			return new ICompletionProposal[0];
 			
-		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
+		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size() + (fTemplateMatch != null ? 1 : 0)];
 		int i= 0; int replacementLength= 0;
 		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
 			Variable v= (Variable)it.next();
@@ -363,16 +377,47 @@ public class ParameterGuesser {
 				replacementLength= v.name.length();
 			}
 			
-			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, replacementLength, getImage(v.descriptor), v.name, ret.length - i);
+			if (fTemplateMatch != null && !isArrayType(v.typeName)) {
+				ret[i++]= createTemplateProposal(offset, document, replacementLength);
+				fTemplateMatch= null;
+			}
+			
+			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, replacementLength, getImage(v.descriptor), v.name, ret.length + 1 - i);
 			char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
 			triggers[triggers.length - 1]= ';';
 			proposal.setTriggerCharacters(triggers);
 			ret[i++]= proposal;
 		}
+
+		if (fTemplateMatch != null) {
+			ret[i++]= createTemplateProposal(offset, document, replacementLength);
+		}
+		
 		return ret;
 	}
 	
+	/**
+	 * @param offset
+	 * @param document
+	 * @param replacementLength
+	 * @return
+	 */
+	private TemplateProposal createTemplateProposal(int offset, IDocument document, int replacementLength) {
+		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, offset, replacementLength, fCompilationUnit);
+		context.setForceEvaluation(true);
+		context.setVariable("type", fTemplateType); //$NON-NLS-1$
+		context.setVariable("collection", fTemplateCollection); //$NON-NLS-1$
+		
+		int start= context.getStart();
+		int end= context.getEnd();
+		IRegion region= new Region(start, end - start);
+		
+		TemplateProposal proposal= new TemplateProposal(fTemplateMatch, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+		return proposal;
+	}
+
 	/**
 	 * Determine the best match of all possible type matches.  The input into this method is all 
 	 * possible completions that match the type of the argument. The purpose of this method is to
@@ -508,10 +553,18 @@ public class ParameterGuesser {
 		
 		List matches= new ArrayList();
 		
+		boolean isArrayType= isArrayType(typeName);
+		
 		for (ListIterator iterator= variables.listIterator(variables.size()); iterator.hasPrevious(); ) {
 			Variable variable= (Variable) iterator.previous();
 			if (isTypeMatch(variable, typePackage, typeName))
 				matches.add(variable);
+			if (isArrayType && isAssignable(variable, "java.util", "Collection")) { //$NON-NLS-1$//$NON-NLS-2$
+				fTemplateMatch= Templates.getInstance().getFirstTemplate("toarray"); //$NON-NLS-1$
+				isArrayType= false;
+				fTemplateType= typeName.substring(0, typeName.length() - 2);
+				fTemplateCollection= variable.name;
+			}
 		}
 
 		// add null proposal
@@ -519,6 +572,11 @@ public class ParameterGuesser {
 			matches.add(new Variable(typePackage, typeName, "null", Variable.FIELD, 2, new char[0], null)); //$NON-NLS-1$		
 				
 		return matches.isEmpty() ? null : matches;
+	}
+
+	private boolean isArrayType(String typeName) throws JavaModelException {
+		// check for an exact match (fast)
+		return typeName.endsWith("[]"); //$NON-NLS-1$
 	}
 
 	/**
