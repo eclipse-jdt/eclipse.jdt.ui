@@ -28,7 +28,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @param type the input element of this type hierarchy view, or <code>null</code>
 	 *  to clear any input element
-	 * @deprecated use getInputElement instead
+	 * @deprecated use setInputElement instead
 	 */
 	public void setInput(IType type);
 	

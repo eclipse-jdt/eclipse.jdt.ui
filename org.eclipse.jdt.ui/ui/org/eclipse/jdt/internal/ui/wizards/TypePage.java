@@ -1344,14 +1344,24 @@ public abstract class TypePage extends ContainerPage {
 		if (doConstructors) {
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				StubUtility.evalConstructors(type, superclass, settings, newMethods, imports);
+				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports);
+				if (constructors != null) {
+					for (int i= 0; i < constructors.length; i++) {
+						newMethods.add(constructors[i]);					
+					}
+				}
+			
 			}
 		}
 		if (doUnimplementedMethods) {
-			StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, newMethods, imports);
+			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, null, imports);
+			if (unimplemented != null) {
+				for (int i= 0; i < unimplemented.length; i++) {
+					newMethods.add(unimplemented[i]);					
+				}
+			}
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
-		
 	}
 	
 	// ---- creation ----------------

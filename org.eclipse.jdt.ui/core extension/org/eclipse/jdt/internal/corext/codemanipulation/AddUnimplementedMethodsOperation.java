@@ -28,12 +28,15 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 	private boolean fDoSave;
 	private CodeGenerationSettings fSettings;
 	
-	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, boolean save) {
+	private IImplementMethodQuery fSelectionQuery;
+	
+	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IImplementMethodQuery selectionQuery, boolean save) {
 		super();
 		fType= type;
 		fDoSave= save;
 		fCreatedMethods= null;
 		fSettings= settings;
+		fSelectionQuery= selectionQuery;
 	}
 
 	/**
@@ -51,30 +54,33 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
 			
-			ArrayList toImplement= new ArrayList();
-				
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			
-			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, fSettings, toImplement, imports);
+			String[] toImplement= StubUtility.evalUnimplementedMethods(fType, hierarchy, false, fSettings, fSelectionQuery, imports);
+			if (toImplement == null) {
+				throw new OperationCanceledException();
+			}
 			
-			int nToImplement= toImplement.size();
+			int nToImplement= toImplement.length;
 			ArrayList createdMethods= new ArrayList(nToImplement);
 			
-			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
-			int indent= StubUtility.getIndentUsed(fType) + 1;
-			
-			IMethod lastMethod= null;
-			for (int i= 0; i < nToImplement; i++) {
-				String content= (String) toImplement.get(i);
+			if (nToImplement > 0) {
+				String lineDelim= StubUtility.getLineDelimiterUsed(fType);
+				int indent= StubUtility.getIndentUsed(fType) + 1;
 				
-				String formattedContent= StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-				lastMethod= fType.createMethod(formattedContent, null, true, null);
-				createdMethods.add(lastMethod);
+				IMethod lastMethod= null;
+				for (int i= 0; i < nToImplement; i++) {
+					String formattedContent= StubUtility.codeFormat(toImplement[i], indent, lineDelim) + lineDelim;
+					lastMethod= fType.createMethod(formattedContent, null, true, null);
+					createdMethods.add(lastMethod);
+				}
+				monitor.worked(1);	
+	
+				imports.create(fDoSave, null);
+				monitor.worked(1);
+			} else {
+				monitor.worked(2);
 			}
-			monitor.worked(1);	
-
-			imports.create(fDoSave, null);
-			monitor.worked(1);
 
 			fCreatedMethods= new IMethod[createdMethods.size()];
 			createdMethods.toArray(fCreatedMethods);

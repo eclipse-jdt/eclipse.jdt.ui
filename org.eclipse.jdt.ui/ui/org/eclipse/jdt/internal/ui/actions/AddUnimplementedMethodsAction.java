@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 
 /**
@@ -68,11 +69,12 @@ public class AddUnimplementedMethodsAction extends Action {
 				return;
 			}
 			
+			ImplementMethodQuery selectionQuery= new ImplementMethodQuery(shell, false);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, false);
+			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
 			try {
-				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-				dialog.run(false, true, new WorkbenchRunnableAdapter(op));
+				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+				context.run(false, true, new WorkbenchRunnableAdapter(op));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$

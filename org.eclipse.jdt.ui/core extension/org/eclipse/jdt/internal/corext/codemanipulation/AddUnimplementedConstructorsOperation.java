@@ -55,24 +55,33 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 				fCreatedMethods= new IMethod[0];
 				return;
 			}
-			
-			ArrayList toImplement= new ArrayList();
-				
+							
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
-			StubUtility.evalConstructors(fType, superType, fSettings, toImplement, imports);
+			String[] toImplement= StubUtility.evalConstructors(fType, superType, fSettings, imports);
+			if (toImplement == null) {
+				throw new OperationCanceledException();
+			}
 			
-			int nToImplement= toImplement.size();
+			int nToImplement= toImplement.length;
 			ArrayList createdMethods= new ArrayList(nToImplement);
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
 			
-			IMethod lastMethod= null;
+			IMethod sibling= null;
+			IMethod[] existing= fType.getMethods();
+			for (int i= 0; i < existing.length; i++) {
+				if (existing[i].isConstructor()) {
+					sibling= existing[i];
+				}
+			}
+			if (sibling == null && existing.length > 0) {
+				sibling= existing[0];
+			}
+		
 			for (int i= 0; i < nToImplement; i++) {
-				String content= (String) toImplement.get(i);
-				
-				String formattedContent= StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-				lastMethod= fType.createMethod(formattedContent, null, true, null);
+				String formattedContent= StubUtility.codeFormat(toImplement[i], indent, lineDelim) + lineDelim;
+				IMethod lastMethod= fType.createMethod(formattedContent, sibling, true, null);
 				createdMethods.add(lastMethod);
 			}
 			monitor.worked(1);	

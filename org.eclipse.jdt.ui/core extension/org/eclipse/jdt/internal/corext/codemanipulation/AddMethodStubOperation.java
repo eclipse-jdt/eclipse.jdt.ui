@@ -120,7 +120,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						}
 					}			 	
 					
-					IMethod overwrittenMethod= JavaModelUtil.findMethodImplementationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+					IMethod overwrittenMethod= JavaModelUtil.findMethodImplementationInHierarchy(typeHierarchy, fType, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 					if (overwrittenMethod == null) {
 						// create method without super call, no overwrite
 						genStubSetting.callSuper= false;
@@ -134,11 +134,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 								continue;
 							}
 						}
-						boolean callSuper= 
-						genStubSetting.callSuper= overwrittenMethod.getDeclaringType().isClass() && !Flags.isAbstract(overwrittenMethod.getFlags());
+						genStubSetting.callSuper= !Flags.isAbstract(overwrittenMethod.getFlags());
 						genStubSetting.methodOverwrites= true;
 					
-						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, fType, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 						content= StubUtility.genStub(fType.getElementName(), declaration, genStubSetting, imports);	
 					}
 					IJavaElement sibling= null;

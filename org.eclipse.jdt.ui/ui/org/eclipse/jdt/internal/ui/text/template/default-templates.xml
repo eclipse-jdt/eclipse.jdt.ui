@@ -136,7 +136,7 @@ public ${return_type} ${name}(${arguments}) {
  
  <template context="java" description="type comment used by the class and interface wizards" enabled="true" name="typecomment">/**
  * @version 	1.0
- * @author 	${user}
+ * @author
  */
  </template>
 

@@ -141,7 +141,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
 		if (fStatusLineAboveButtons) {
-			layout.verticalSpacing= 0;
+			layout.marginWidth= 5;
 		} else {
 			layout.numColumns= 2;
 		}
@@ -153,7 +153,11 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fStatusLine.setMessage(""); //$NON-NLS-1$
-
+		
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalIndent= convertWidthInCharsToPixels(1);
+		fStatusLine.setLayoutData(gd);
+		
 		super.createButtonBar(composite);
 		return composite;
 	}

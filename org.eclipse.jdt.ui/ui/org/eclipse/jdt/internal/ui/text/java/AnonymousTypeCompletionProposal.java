@@ -1,6 +1,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.util.ArrayList;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -8,8 +8,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,6 +22,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ImplementMethodQuery;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -100,7 +99,9 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 				buf.append(')');
 			}	
 			buf.append(" {\n");
-			createStubs(buf, fImportStructure);
+			if (!createStubs(buf, fImportStructure)) {
+				return;
+			}
 			buf.append("};");
 			
 			// use the code formatter
@@ -122,20 +123,23 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		super.apply(document, trigger);
 	}
 	
-	private void createStubs(StringBuffer buf, ImportsStructure imports) throws JavaModelException {
+	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws JavaModelException {
 		if (fDeclaringType == null) {
-			return;
+			return true;
 		}
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
-		ArrayList res= new ArrayList();
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
-		StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, settings, res, imports);
-		
-		for (int i= 0; i < res.size(); i++) {
-			buf.append((String) res.get(i));
-			buf.append('\n');
+		ImplementMethodQuery selectionQuery= fDeclaringType.isClass() ? new ImplementMethodQuery(JavaPlugin.getActiveWorkbenchShell(), true) : null;
+		String[] unimplemented= StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, settings, selectionQuery, imports);
+		if (unimplemented != null) {
+			for (int i= 0; i < unimplemented.length; i++) {
+				buf.append(unimplemented[i]);
+				buf.append('\n');
+			}
+			return true;
 		}
+		return false;
 	}
 
 }

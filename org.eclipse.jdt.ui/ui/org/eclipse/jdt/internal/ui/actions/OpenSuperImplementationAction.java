@@ -103,7 +103,11 @@ public class OpenSuperImplementationAction extends Action implements IUpdate, IO
 				}
 			}
 			ITypeHierarchy hierarchy= declaringType.newSupertypeHierarchy(null);
-			IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			if (impl == null) {
+				// if no implementation found try to open a declaration
+				impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			}
 			if (impl != null) {
 				IEditorPart part= EditorUtility.openInEditor(impl);
 				EditorUtility.revealInEditor(part, impl);

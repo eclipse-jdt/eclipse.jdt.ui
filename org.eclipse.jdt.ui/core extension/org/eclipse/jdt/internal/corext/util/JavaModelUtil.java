@@ -434,41 +434,49 @@ public class JavaModelUtil {
 		return null;
 	}
 	
+
 	/**
 	 * Finds a method declararion in a type's hierarchy. The search is top down, so this
 	 * returns the first declaration of the method in the hierarchy.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
+	 * @param type Searches in this type's supertypes.
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
 	 * @return The first method found or null, if nothing found
 	 */
-	public static IMethod findMethodDeclarationInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSupertypes(hierarchy.getType());
+	public static IMethod findMethodDeclarationInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSupertypes(type);
 		for (int i= superTypes.length - 1; i >= 0; i--) {
-			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
-			if (found != null) {
-				return found;
+			IMethod first= findMethod(name, paramTypes, isConstructor, superTypes[i]);
+			if (first != null && !Flags.isPrivate(first.getFlags())) {
+				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursivly
+				IMethod res= findMethodDeclarationInHierarchy(hierarchy, first.getDeclaringType(), name, paramTypes, isConstructor);
+				if (res != null) {
+					return res;
+				}
+				return first;
 			}
 		}
 		return null;
 	}
 	
 	/**
-	 * Finds a method implementation in a type's hierarchy. The search is bottom-up, so this
-	 * returns the overwritten method.
+	 * Finds a method implementation in a type's classhierarchy. The search is bottom-up, so this
+	 * returns the overwritten method. Does not find method in intrefaces.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
+	 * @param type Type to search the superclasses
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
 	 * @return The first method found or null, if nothing found
 	 */
-	public static IMethod findMethodImplementationInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSupertypes(hierarchy.getType());
+	public static IMethod findMethodImplementationInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSuperclasses(type);
 		for (int i= 0; i < superTypes.length; i++) {
 			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
 			if (found != null) {

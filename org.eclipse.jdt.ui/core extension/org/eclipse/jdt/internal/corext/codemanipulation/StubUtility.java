@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -267,15 +268,17 @@ public class StubUtility {
 	 * Creates needed constructors for a type.
 	 * @param type The type to create constructors for
 	 * @param supertype The type's super type
-	 * @param newMethods The resulting source for the created constructors (List of String)
+	 * @param settings Options for comment generation
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
+	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
-	public static void evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws JavaModelException {
 		IMethod[] superMethods= supertype.getMethods();
 		String typeName= type.getElementName();
 		IMethod[] methods= type.getMethods();
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.callSuper= true;
+		ArrayList newMethods= new ArrayList(superMethods.length);
 		for (int i= 0; i < superMethods.length; i++) {
 			IMethod curr= superMethods[i];
 			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
@@ -285,6 +288,7 @@ public class StubUtility {
 				}
 			}
 		}
+		return (String[]) newMethods.toArray(new String[newMethods.size()]);
 	}
 
 
@@ -292,17 +296,20 @@ public class StubUtility {
 	 * Searches for unimplemented methods of a type.
 	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
 	 * evaluation is for the type itself.
-	 * @param commentOptions Options for comment generation (see above)
-	 * @param newMethods The source for the created methods (List of String)
+	 * @param settings Options for comment generation
+	 * @param selectionQuery If not null will select the methods to implement.
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
+	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
-	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
+				IImplementMethodQuery selectionQuery, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
+		List toImplement= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();
 		for (int i= 0; i < typeMethods.length; i++) {
 			IMethod curr= typeMethods[i];
-			if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags())) {
+			if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags()) && !Flags.isPrivate(curr.getFlags())) {
 				allMethods.add(curr);
 			}
 		}
@@ -312,7 +319,7 @@ public class StubUtility {
 			IMethod[] methods= superTypes[i].getMethods();
 			for (int k= 0; k < methods.length; k++) {
 				IMethod curr= methods[k];
-				if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags())) {
+				if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags()) && !Flags.isPrivate(curr.getFlags())) {
 					if (findMethod(curr, allMethods) == null) {
 						allMethods.add(curr);
 					}
@@ -320,20 +327,12 @@ public class StubUtility {
 			}
 		}
 
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
-		genStubSettings.methodOverwrites= true;
 		// do not call super
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod curr= (IMethod) allMethods.get(i);
 			if ((Flags.isAbstract(curr.getFlags()) || curr.getDeclaringType().isInterface()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
-				// implement all abstract methods. See tag points to declaration
-				IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-				if (desc == null) {
-					desc= curr;
-				}
-				
-				String newStub= genStub(type.getElementName(), desc, genStubSettings, imports);
-				newMethods.add(newStub);
+				// implement all abstract methods
+				toImplement.add(curr);
 			}
 		}
 
@@ -348,15 +347,44 @@ public class StubUtility {
 				if (!Flags.isStatic(curr.getFlags())) {
 					IMethod impl= findMethod(curr, allMethods);
 					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
+						if (impl != null) {
+							allMethods.remove(impl);
+						}
 						// implement an interface method when it does not exist in the hierarchy
 						// or when it throws less exceptions that the implemented
-						String newStub= genStub(type.getElementName(), curr, genStubSettings, imports);
-						newMethods.add(newStub);
+						toImplement.add(curr);
 						allMethods.add(curr);
 					}
 				}
 			}
 		}
+		IMethod[] toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);
+		if (selectionQuery != null) {
+			if (!isSubType) {
+				allMethods.removeAll(Arrays.asList(typeMethods));
+			}
+			IMethod[] choice= (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
+			toImplementArray= selectionQuery.select(choice, toImplementArray, hierarchy);
+			if (toImplementArray == null) {
+				//cancel pressed
+				return null;
+			}
+		}
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		genStubSettings.methodOverwrites= true;
+		String[] result= new String[toImplementArray.length];
+		for (int i= 0; i < toImplementArray.length; i++) {
+			IMethod curr= toImplementArray[i];
+			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+			genStubSettings.callSuper= (overrides != null) && !Flags.isAbstract(overrides.getFlags());
+						
+			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+			if (desc != null) {
+				curr= desc;
+			}
+			result[i]= genStub(type.getElementName(), curr, genStubSettings, imports);
+		}
+		return result;
 	}
 
 	/**
