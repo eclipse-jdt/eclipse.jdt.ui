@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2003.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.browsing;
@@ -316,7 +316,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 		}
 
-		if (kind == IJavaElementDelta.CHANGED) {
+		if (kind == IJavaElementDelta.CHANGED && ((flags & IJavaElementDelta.F_FINE_GRAINED) == 0)) {
 			if (fBrowsingPart.isValidElement(element)) {
 				postRefresh(element);
 			}
@@ -386,9 +386,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.setRedraw(false);
-					fViewer.refresh(root);
-					ctrl.setRedraw(true);
+					fViewer.refresh(root, false);
 				}
 			}
 		});
@@ -406,7 +404,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.setRedraw(false);
 					Object[] newElements= getNewElements(elements);
 					if (fViewer instanceof AbstractTreeViewer) {
 						if (fViewer.testFindItem(parent) == null) {
@@ -423,7 +420,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 						((TableViewer)fViewer).add(newElements);
 					if (fViewer.testFindItem(elements[0]) != null)
 						fBrowsingPart.adjustInputAndSetSelection((IJavaElement)elements[0]);
-					ctrl.setRedraw(true);
 				}
 			}
 		});
@@ -452,14 +448,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.setRedraw(false);
 					if (fViewer instanceof AbstractTreeViewer)
 						((AbstractTreeViewer)fViewer).remove(elements);
 					else if (fViewer instanceof ListViewer)
 						((ListViewer)fViewer).remove(elements);
 					else if (fViewer instanceof TableViewer)
 						((TableViewer)fViewer).remove(elements);
-					ctrl.setRedraw(true);
 				}
 			}
 		});
