@@ -73,24 +73,56 @@ public class LocalCorrectionsSubProcessor {
 				nodeToCast= frag.getInitializer();
 			}
 		}
+		{
+			ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
+			
+			String label;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 1, image);
+			String simpleCastType= proposal.addImport(castType);
+			
+			if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changecast.description", castType); //$NON-NLS-1$
+				CastExpression expression= (CastExpression) nodeToCast;
+				rewrite.markAsReplaced(expression.getType(), rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE));
+			} else {
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
+				
+				Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
+				Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
+				CastExpression castExpression= astRoot.getAST().newCastExpression();
+				castExpression.setExpression(expressionCopy);
+				castExpression.setType(typeCopy);
+				
+				rewrite.markAsReplaced(nodeToCast, castExpression);
+			}
+			proposal.setDisplayName(label);
+			proposal.ensureNoModifications();
+			
+			proposals.add(proposal);
+		}
 		
-		ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
-		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-		String simpleCastType= proposal.addImport(castType);
+		// change method return statement to actual type
+		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
+			ITypeBinding binding= nodeToCast.resolveTypeBinding();
+			
+			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+			if (binding != null && decl instanceof MethodDeclaration) {
+				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 	
-		Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
-		Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
-		CastExpression castExpression= astRoot.getAST().newCastExpression();
-		castExpression.setExpression(expressionCopy);
-		castExpression.setType(typeCopy);
-		
-		rewrite.markAsReplaced(nodeToCast, castExpression);
-		proposal.ensureNoModifications();
-		
-		proposals.add(proposal);
-		
+				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
+				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
+				rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
+	
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", binding.getName()); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+				proposal.addImport(binding);
+				proposal.ensureNoModifications();
+				proposals.add(proposal);
+			}
+		}
+
 		if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
 			ASTNode parent= fragment.getParent();
@@ -110,7 +142,7 @@ public class LocalCorrectionsSubProcessor {
 				ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 				String typeName= edit.addImport(args[0]);
 
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", typeName); //$NON-NLS-1$
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", typeName); //$NON-NLS-1$
 				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), typeName, 1);
 				varProposal.getRootTextEdit().add(edit);	
 				proposals.add(varProposal);
