@@ -1,3 +1,5 @@
+package p;
+
 public class A {
     {
         field= 10;

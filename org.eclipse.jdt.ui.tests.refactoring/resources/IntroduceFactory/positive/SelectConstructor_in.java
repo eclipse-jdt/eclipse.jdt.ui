@@ -1,3 +1,5 @@
+package p;
+
 public class SelectConstructor_in {
 	public /*[*/SelectConstructor_in/*]*/() {
 	}

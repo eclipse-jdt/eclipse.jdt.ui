@@ -1,3 +1,5 @@
+package p;
+
 public class ProtectConstructor2_in {
 	private int		fX, fY;
 

@@ -1,3 +1,5 @@
+package p;
+
 public class NestedClass_in {
 	public class InnerClass {
 		public InnerClass() { }

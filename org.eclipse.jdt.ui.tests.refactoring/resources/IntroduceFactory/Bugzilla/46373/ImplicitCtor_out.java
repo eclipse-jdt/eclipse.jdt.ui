@@ -1,3 +1,5 @@
+package p;
+
 public class ImplicitCtor {
 	public static ImplicitCtor createImplicitCtor() {
 		return new ImplicitCtor();

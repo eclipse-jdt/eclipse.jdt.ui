@@ -1,3 +1,5 @@
+package p;
+
 public class TestClass {
 	private TestClass() {
 	}

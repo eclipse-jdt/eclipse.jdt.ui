@@ -1,3 +1,5 @@
+package p;
+
 public class MultiUnit1A_in {
 	private int fN;
 	private MultiUnit1A_in(int N) {

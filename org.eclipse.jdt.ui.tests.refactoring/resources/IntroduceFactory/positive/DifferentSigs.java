@@ -1,3 +1,5 @@
+package p;
+
 public class DifferentSigs_in {
 	private int fN;
 	public DifferentSigs_in() {

@@ -1,3 +1,5 @@
+package p;
+
 public class InstanceContext_in {
 	private int fN;
 	public InstanceContext_in(int N) {

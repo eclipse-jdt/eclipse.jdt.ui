@@ -1,3 +1,5 @@
+package p;
+
 public class StaticContext_in {
 	private int fN;
 	public StaticContext_in(int N) {

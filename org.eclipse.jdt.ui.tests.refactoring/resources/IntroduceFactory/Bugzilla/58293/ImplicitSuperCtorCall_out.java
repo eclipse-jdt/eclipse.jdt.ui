@@ -1,3 +1,5 @@
+package p;
+
 public class ImplicitSuperCtorCall {
 	protected ImplicitSuperCtorCall/*]*/() {
 	}

@@ -1,3 +1,5 @@
+package p;
+
 import java.lang.StringBuffer;
 
 public class DifferentArgs_in {

@@ -1,3 +1,5 @@
+package p;
+
 public class B {
 	private static interface I {
 		public void foo();

@@ -1,3 +1,5 @@
+package p;
+
 public class ImplicitCtor {
 	public void foo() {
 		new ImplicitCtor();

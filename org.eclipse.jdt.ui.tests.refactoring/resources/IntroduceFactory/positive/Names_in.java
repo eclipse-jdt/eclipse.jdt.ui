@@ -1,3 +1,5 @@
+package p;
+
 public class Names_in {
 	private int fN;
 	public Names_in(int N) {

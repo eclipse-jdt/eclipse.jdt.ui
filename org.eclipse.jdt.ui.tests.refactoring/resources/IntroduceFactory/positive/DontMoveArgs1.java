@@ -1,3 +1,5 @@
+package p;
+
 public class DontMoveArgs1_in {
 	private int		fN;
 

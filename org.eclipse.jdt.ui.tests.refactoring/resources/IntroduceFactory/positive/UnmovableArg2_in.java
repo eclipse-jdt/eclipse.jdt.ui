@@ -1,3 +1,5 @@
+package p;
+
 public class UnmovableArg2_in {
 	private int fN;
 	public UnmovableArg2_in(int N) {

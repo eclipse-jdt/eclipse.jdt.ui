@@ -1,3 +1,5 @@
+package p;
+
 public class DifferentArgs1_in {
 	private int fN;
 	public DifferentArgs1_in(int N) {

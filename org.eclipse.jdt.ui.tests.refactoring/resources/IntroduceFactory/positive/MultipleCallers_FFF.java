@@ -1,3 +1,5 @@
+package p;
+
 public class MultipleCallers_in {
 	private int fN;
 	public MultipleCallers_in(int N) {

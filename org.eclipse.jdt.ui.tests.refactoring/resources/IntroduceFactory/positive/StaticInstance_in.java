@@ -1,3 +1,5 @@
+package p;
+
 public class StaticInstance_in {
 	private int fN;
 	public StaticInstance_in(int N) {

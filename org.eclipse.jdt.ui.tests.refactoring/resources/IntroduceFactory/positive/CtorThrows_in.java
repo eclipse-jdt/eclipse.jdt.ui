@@ -1,3 +1,5 @@
+package p;
+
 public class CtorThrows_in {
 	private int	fValue;
 
