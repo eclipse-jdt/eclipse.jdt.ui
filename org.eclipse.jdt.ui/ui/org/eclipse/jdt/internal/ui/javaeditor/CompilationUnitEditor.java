@@ -206,9 +206,16 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 			
 			private void handleDrawRequest(GC gc) {
-				IRegion region= fSourceViewer.getVisibleRegion();
-				int offset= fBracketPosition.getOffset();
+				
+				if (fBracketPosition.isDeleted)
+					return;
+					
 				int length= fBracketPosition.getLength();
+				if (length < 1)
+					return;
+					
+				int offset= fBracketPosition.getOffset();
+				IRegion region= fSourceViewer.getVisibleRegion();
 				
 				if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
 					offset -= region.getOffset();
