@@ -86,7 +86,7 @@ public class MemberFilterActionGroup {
 	}
 	
 	private String getPreferenceKey(int filterProperty) {
-		return "MemberFilterActionGroup." + fViewerId + '.' + String.valueOf(filterProperty);
+		return "MemberFilterActionGroup." + fViewerId + '.' + String.valueOf(filterProperty); //$NON-NLS-1$
 	}
 	
 	/**

@@ -94,7 +94,7 @@ public class MainMethodSearchEngine{
 		List typesFound= new ArrayList(200);
 		
 		IJavaSearchResultCollector collector= new MethodCollector(typesFound, style, pm);				
-		new SearchEngine().search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD, 
+		new SearchEngine().search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD,  //$NON-NLS-1$
 			IJavaSearchConstants.DECLARATIONS, scope, collector); //$NON-NLS-1$
 			
 		return (IType[]) typesFound.toArray(new IType[typesFound.size()]);

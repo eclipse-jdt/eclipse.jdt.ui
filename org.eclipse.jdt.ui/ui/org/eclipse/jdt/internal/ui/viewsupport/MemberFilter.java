@@ -60,7 +60,7 @@ public class MemberFilter extends ViewerFilter {
 			}
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
-				if (member.getElementName().startsWith("<")) { // filter out <clinit>
+				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$
 					return false;
 				}
 				int flags= member.getFlags();

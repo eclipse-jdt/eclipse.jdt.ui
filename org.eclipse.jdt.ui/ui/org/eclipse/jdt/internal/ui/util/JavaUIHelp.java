@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -135,7 +136,7 @@ public class JavaUIHelp {
 		}
 
 		private boolean doesNotExist(URL url) {
-			if (url.getProtocol().equals("file")) {
+			if (url.getProtocol().equals("file")) { //$NON-NLS-1$
 				File file= new File(url.getFile());
 				return !file.exists();
 			}
@@ -193,7 +194,7 @@ public class JavaUIHelp {
 
 		public String getLabel() {
 			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT);
-			return "Javadoc for " + label;
+			return JavaUIMessages.getFormattedString("JavaUIHelp.link.label", label); //$NON-NLS-1$
 		}
 	}
 
