@@ -333,7 +333,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 				} else if (s.equals(TYPES)) {
-					descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, true, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, true, false, Flags.AccPublic);
 				} else {
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
 				}
