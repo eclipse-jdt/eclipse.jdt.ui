@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="org.eclipse.jdt.ui.tests"
    name="%Plugin.name"
@@ -12,6 +13,7 @@
       </library>
    </runtime>
    <requires>
+      <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui"/>
@@ -56,11 +58,11 @@
          name="jdt-test-problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.textmarker">
+            type="org.eclipse.core.resources.problemmarker">
       </super>
    </extension>
    <extension
-         point="org.eclipse.ui.markerResolution">
+         point="org.eclipse.ui.ide.markerResolution">
       <markerResolutionGenerator
             markerType="org.eclipse.jdt.ui.tests.testmarker"
             class="org.eclipse.jdt.ui.tests.quickfix.MarkerResolutionGenerator">
