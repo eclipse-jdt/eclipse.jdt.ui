@@ -1,0 +1,71 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.text.tests.performance;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.test.performance.Dimension;
+
+
+/**
+ * Startup performance with an open Java editor.
+ * 
+ * @since 3.1
+ */
+public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
+
+	public static class Setup extends TestSetup {
+
+		private boolean fTearDown;
+		
+		private boolean fSetUp;
+
+		public Setup(Test test) {
+			this(test, true, true);
+		}
+
+		public Setup(Test test, boolean setUp, boolean tearDown) {
+			super(test);
+			fSetUp= setUp;
+			fTearDown= tearDown;
+		}
+
+		protected void setUp() throws Exception {
+			if (fSetUp)
+				EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
+		}
+
+		protected void tearDown() throws Exception {
+			if (fTearDown)
+				EditorTestHelper.closeAllEditors();
+		}
+	}
+
+	private static final Class THIS= OpenJavaEditorStartupTest.class;
+
+	private static final String SHORT_NAME= "Startup with open Java editor";
+
+	private static final String FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
+	
+	public static Test suite() {
+		return new PerformanceTestSetup(new Setup(new TestSuite(THIS)));
+	}
+
+	public static Test suiteForMeasurement() {
+		return new Setup(new TestSuite(THIS), false, true);
+	}
+	
+	public void testJavaEditorStartup() {
+		measureStartup(createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS));
+	}
+}
