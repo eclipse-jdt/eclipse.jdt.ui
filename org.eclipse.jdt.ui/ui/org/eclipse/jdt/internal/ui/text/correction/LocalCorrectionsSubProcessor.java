@@ -147,29 +147,6 @@ public class LocalCorrectionsSubProcessor {
 
 	}
 
-	public static void addUnusedVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode instanceof SimpleName) {
-			selectedNode= selectedNode.getParent();
-		}
-		if (selectedNode instanceof VariableDeclarationFragment) {
-			ASTNode parent= selectedNode.getParent();
-			int start= parent.getStartPosition();
-			int end= start + parent.getLength();
-			IBuffer buf= cu.getBuffer();
-			while (end < buf.getLength() && Character.isWhitespace(buf.getChar(end))) {
-				end++;
-			}
-			
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removelocalvar.description"); //$NON-NLS-1$
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0);  //$NON-NLS-1$
-			proposals.add(proposal);			
-		}
-	}
-
 	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
