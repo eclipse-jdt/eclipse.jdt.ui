@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.javadocexport;
@@ -158,7 +158,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		//if multiple projects selected anpath is empty or location of ant file
 		if (fWizard.getSelectedProjects().size() == 1) {
-			fAntText.setText(fStore.getSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().get(0)));
+			fAntText.setText(fStore.getSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
 		} else
 			fAntText.setText(fStore.getGeneralAntpath());
 		fAntText.setEnabled(false);
@@ -262,7 +262,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		if (fAntText.getEnabled()) {
 			fStore.setGeneralAntpath(fAntText.getText());
 			if (fWizard.getSelectedProjects().size() == 1)
-				fStore.setSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().get(0), fAntText.getText());
+				fStore.setSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next(), fAntText.getText());
 		}
 		fStore.setOpenInBrowser(fCheckbrowser.getSelection());
 

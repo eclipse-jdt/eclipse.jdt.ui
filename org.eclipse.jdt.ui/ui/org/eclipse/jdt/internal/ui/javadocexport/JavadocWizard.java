@@ -89,7 +89,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private JavadocOptionsManager fStore;
 	private IWorkspaceRoot fRoot;
-	private List fSelectedProjects;
+	private Set fSelectedProjects;
 
 	private IFile fXmlJavadocFile;
 
@@ -416,7 +416,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
 		IDialogSettings settings= getDialogSettings().getSection("javadoc"); //$NON-NLS-1$
 		fStore= new JavadocOptionsManager(fXmlJavadocFile, settings, structuredSelection);
-		this.fSelectedProjects= fStore.getJavaProjects();
+		fSelectedProjects= new HashSet(fStore.getJavaProjects());
 	}
 
 	private void refresh(IPath path) {
@@ -488,17 +488,16 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			return null;
 	}
 
-	protected void setSelectedProjects(List projects) {
-		this.fSelectedProjects= projects;
+	protected void setSelectedProjects(Set projects) {
+		fSelectedProjects= projects;
 	}
 
-	protected List getSelectedProjects() {
-		return this.fSelectedProjects;
+	protected Set getSelectedProjects() {
+		return fSelectedProjects;
 	}
 
 	protected void addSelectedProject(IJavaProject project) {
-		if (!fSelectedProjects.contains(project))
-			fSelectedProjects.add(project);
+		fSelectedProjects.add(project);
 	}
 
 	protected void removeSelectedProject(IJavaProject project) {

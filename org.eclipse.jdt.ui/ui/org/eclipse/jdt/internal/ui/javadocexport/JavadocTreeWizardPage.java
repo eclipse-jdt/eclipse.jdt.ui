@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.javadocexport;
@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -51,8 +52,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -162,20 +165,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fInputGroup.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				doValidation(TREESTATUS);
-
-				Object obj= e.getElement();
-				if (obj instanceof IJavaElement) {
-					IJavaElement iJavaElement= (IJavaElement) obj;
-					IJavaProject iJavaProject= iJavaElement.getJavaProject();
-					if (iJavaProject != null  && e.getChecked()) {
-						fWizard.addSelectedProject(iJavaProject);
-					} else
-						fWizard.removeSelectedProject(iJavaProject);
-				}
+				fWizard.removeAllProjects();
+				setProjects();
 			}
 		});
-		//fFilter= new JavadocTreeViewerFilter();
-		//fInputGroup.getTableViewer().addFilter(fFilter);
 
 		try {
 			//the store will contain at least one project in it's list so long as
@@ -203,13 +196,13 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fProtectedVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.protectedbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fPublicVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.publicbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 
-		fDescriptionLabel= createLabel(visibilityGroup, SWT.NONE, "", createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3)));
+		fDescriptionLabel= createLabel(visibilityGroup, SWT.NONE, "", createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3)));//$NON-NLS-1$
 
 		fPrivateVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PRIVATE;
-					fDescriptionLabel.setText("Private: Generate javadoc for all classes and members.");
+					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label")); //$NON-NLS-1$
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -219,7 +212,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PACKAGE;
-					fDescriptionLabel.setText("Package: Generate javadoc for only package, protected, and public classes and members.");
+					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label")); //$NON-NLS-1$
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -229,7 +222,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PROTECTED;
-					fDescriptionLabel.setText("Protected: Generate javadoc for only protected and public classes and members.");
+					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label")); //$NON-NLS-1$
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -240,7 +233,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PUBLIC;
-					fDescriptionLabel.setText("Public: Generate javadoc for only public classes and members.");
+					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label")); //$NON-NLS-1$
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -256,18 +249,16 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fVisibilitySelection= fStore.getAccess();
 		fPrivateVisibility.setSelection(fVisibilitySelection.equals(fStore.PRIVATE));
 		if (fPrivateVisibility.getSelection())
-			fDescriptionLabel.setText("(Private: Generate javadoc for all classes and members)");
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label"));//$NON-NLS-1$
 		fProtectedVisibility.setSelection(fVisibilitySelection.equals(fStore.PROTECTED));
 		if (fProtectedVisibility.getSelection())
-			fDescriptionLabel.setText("(Protected: Generate javadoc for only protected and public classes and members)");
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label"));//$NON-NLS-1$
 		fPackageVisibility.setSelection(fVisibilitySelection.equals(fStore.PACKAGE));
 		if (fPackageVisibility.getSelection())
-			fDescriptionLabel.setText("(Package: Generate javadoc for only package, protected, and public classes and members)");
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label"));//$NON-NLS-1$
 		fPublicVisibility.setSelection(fVisibilitySelection.equals(fStore.PUBLIC));
 		if (fPublicVisibility.getSelection())
-			fDescriptionLabel.setText("(Public: Generate javadoc for only public classes and members)");
-		//fFilter.setVisibility(fVisibilitySelection);
-
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label"));//$NON-NLS-1$
 	}
 
 	private void createOptionsSet(Composite composite) {
@@ -369,14 +360,14 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDocletText.setText(fStore.getDocletPath());
 			fDocletTypeText.setText(fStore.getDocletName());
 			//take the destination as the destination of the first project
-			fDestinationText.setText(fStore.getDestination((IJavaProject) fWizard.getSelectedProjects().get(0)));
+			fDestinationText.setText(fStore.getDestination((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
 			fDestinationText.setEnabled(false);
 			fDestinationBrowserButton.setEnabled(false);
 			fDestinationLabel.setEnabled(false);
 		} else {
 			fStandardButton.setSelection(true);
 			if(fWizard.getSelectedProjects().size()==1)
-				fDestinationText.setText(fStore.getDestination((IJavaProject)fWizard.getSelectedProjects().get(0)));
+				fDestinationText.setText(fStore.getDestination((IJavaProject)fWizard.getSelectedProjects().iterator().next()));
 			else fDestinationText.setText(fStore.getDestination());
 			fDocletText.setText(fStore.getDocletPath());
 			fDocletTypeText.setText(fStore.getDocletName());
@@ -503,6 +494,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					}
 				}
 			}
+			
 			Iterator checkedElements= fInputGroup.getAllCheckedListItems();
 			while (checkedElements.hasNext()) {
 				Object element= checkedElements.next();
@@ -520,9 +512,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			while (checkedElements.hasNext()) {
 				Object element= checkedElements.next();
 				if (element instanceof IPackageFragment) {
-					String name= ((IPackageFragment) element).getElementName();
+					IPackageFragment fragment= (IPackageFragment) element;
+					String name= fragment.getElementName();
 					if (!incompletePackages.contains(name) && !addedPackages.contains(name)) {
-						res.add(element);
+						res.add(fragment);
 						addedPackages.add(name);
 					}
 				}
@@ -546,19 +539,27 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			//in case of a single project selection the personal destination is updated for
 			//storage in the dialog settings
 			if (fWizard.getSelectedProjects().size() == 1) {
-				fStore.setDestination((IJavaProject) fWizard.getSelectedProjects().get(0), fDestinationText.getText());
+				fStore.setDestination((IJavaProject) fWizard.getSelectedProjects().iterator().next(), fDestinationText.getText());
 			}
 			//the destination used in javadoc generation
 			fStore.setDestination(fDestinationText.getText());
 		}
 
 		IJavaProject[] projects= (IJavaProject[]) fWizard.getSelectedProjects().toArray(new IJavaProject[fWizard.getSelectedProjects().size()]);
-		;
+		
 		fStore.setProjects(projects);
 		fStore.setSourcepath(getSourcePath(projects));
 		fStore.setClasspath(getClassPath(projects));
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSourceElements(getSourceElements(projects));
+	}
+	
+	protected void setProjects() {	
+		TreeItem[] treeItems= fInputGroup.getTree().getItems();
+		for (int i= 0; i < treeItems.length; i++) {
+			if (treeItems[i].getChecked())
+				fWizard.addSelectedProject((IJavaProject)treeItems[i].getData());
+		}
 	}
 
 	private void doValidation(int validate) {
@@ -603,8 +604,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (!path.isValidPath(path.toOSString()) || file.isFile()) {
 						fDestinationStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.invaliddestination.error")); //$NON-NLS-1$
 					}
-					if((path.append("package-list").toFile().exists()) || (path.append("index.html").toFile().exists())) //$NON-NLS-1$
-						fDestinationStatus.setWarning("Javadoc generation may overwrite existing files");
+					if((path.append("package-list").toFile().exists()) || (path.append("index.html").toFile().exists())) //$NON-NLS-1$//$NON-NLS-2$
+						fDestinationStatus.setWarning(JavadocExportMessages.getString("JavadocTreeWizardPage.warning.mayoverwritefiles")); //$NON-NLS-1$
 					updateStatus(findMostSevereStatus());
 				}
 				break;
@@ -612,9 +613,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			case TREESTATUS :
 
 				fTreeStatus= new StatusInfo();
-				Object[] items= fInputGroup.getAllCheckedTreeItems().toArray();
 
-				if (items.length == 0)
+				if (fInputGroup.getAllCheckedTreeItems().size() == 0)
 					fTreeStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.invalidtreeselection.error")); //$NON-NLS-1$
 				updateStatus(findMostSevereStatus());
 
