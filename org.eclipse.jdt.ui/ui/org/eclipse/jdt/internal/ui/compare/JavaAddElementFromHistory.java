@@ -54,7 +54,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 		ICompilationUnit cu= null;
 		IParent parent= null;
-		int insertPosition= -1;		// where to insert the element
+		IMember input= null;
 		
 		if (selection.isEmpty()) {
 			// no selection: we try to use the editor's input
@@ -67,25 +67,17 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				}
 			}
 		} else {
-			IMember input= getEditionElement(selection);
+			input= getEditionElement(selection);
 			if (input != null) {
 				cu= input.getCompilationUnit();
 			
 				if (input instanceof IParent) {
 					parent= (IParent)input;
+					input= null;
 				} else {
 					IJavaElement parentElement= input.getParent();
-					if (parentElement instanceof IParent) {
+					if (parentElement instanceof IParent)
 						parent= (IParent)parentElement;
-						if (input instanceof ISourceReference) {
-							ISourceReference sr= (ISourceReference) input;
-							try {
-								ISourceRange range= sr.getSourceRange();
-								insertPosition= range.getOffset() + range.getLength();
-							} catch(JavaModelException ex) {
-							}
-						}
-					}
 				}
 			}
 		}
@@ -94,13 +86,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			MessageDialog.openError(shell, fTitle, errorMessage);
 			return;
 		}
-		
-		if (insertPosition < 0) {
-			// haven't found an insertion point yet
-			
-			insertPosition= 0;
-		}
-		
+				
 		// extract CU from selection
 		if (cu.isWorkingCopy())
 			cu= (ICompilationUnit) cu.getOriginalElement();
@@ -151,12 +137,16 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			ITypedElement ti= d.selectEdition(target, editions, parent);
 
 			if (ti instanceof IStreamContentAccessor) {
-				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
-							
-				String text= JavaCompareUtilities.readString(sca.getContents());	
-				if (text != null && insertPosition >= 0) {
-					document.replace(insertPosition, 0, text);	// insert text
-					//	docManager.save(null);	// should not be necesssary
+				IStreamContentAccessor sca= (IStreamContentAccessor) ti;
+				
+				int insertPosition= findInsertPosition(parent, input, ti, document);
+				if (insertPosition >= 0) {
+					String text= JavaCompareUtilities.readString(sca.getContents());	
+					if (text != null) {
+						String delim= document.getLineDelimiter(0);
+						document.replace(insertPosition, 0, text+delim);	// insert text
+						//	docManager.save(null);	// should not be necesssary
+					}
 				}
 			}
 
@@ -168,7 +158,79 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			docManager.disconnect();
 		}
 	}
-	
+		
+	/**
+	 * Determines a position where to insert the given element into parent.
+	 * If child is an ISourceReference the element is added after the child.
+	 */
+	int findInsertPosition(IParent parent, IMember child, ITypedElement element, IDocument doc) {
+		
+		if (child instanceof ISourceReference) {
+			ISourceReference sr= (ISourceReference) child;
+			try {
+				ISourceRange range= sr.getSourceRange();
+				// the end of the selected method
+				return range.getOffset() + range.getLength();
+			} catch(JavaModelException ex) {
+			}
+		}
+						
+		// find a child where to insert before
+		IJavaElement[] children= null;
+		try {
+			children= parent.getChildren();
+		} catch(JavaModelException ex) {
+		}
+		if (children != null) {
+			for (int i= 0; i < children.length; i++) {
+				IJavaElement chld= children[i];
+				int type= chld.getElementType();
+				
+				if (type == IJavaElement.PACKAGE_DECLARATION || type == IJavaElement.IMPORT_CONTAINER)
+					continue;
+					
+				if (chld instanceof ISourceReference) {
+					ISourceReference sr= (ISourceReference) chld;
+					try {
+						ISourceRange range= sr.getSourceRange();
+						// the start of the first child
+						return range.getOffset();
+					} catch(JavaModelException ex) {
+					}
+				}
+			}
+		}
+		
+		// no children: insert at end (but before closing bracket)
+		if (parent instanceof IJavaElement && parent instanceof ISourceReference) {
+			switch (((IJavaElement)parent).getElementType()) {
+			case IJavaElement.TYPE:
+				ISourceReference sr= (ISourceReference) parent;
+				try {
+					ISourceRange range= sr.getSourceRange();
+					int start= range.getOffset();
+					int pos= start + range.getLength();
+					while (pos >= start) {
+						char c= doc.getChar(pos);
+						if (c == '}')
+							return pos;
+						pos--;
+					}
+					return pos;
+				} catch(JavaModelException ex) {
+				} catch(BadLocationException ex) {
+				}
+				break;
+			case IJavaElement.COMPILATION_UNIT:
+				return doc.getLength();
+			default:
+				break;
+			}
+		}
+						
+		return 0;
+	}
+		
 	IParent getContainer(ISelection selection) {
 		if (selection.isEmpty()) {
 			if (fEditor != null) {
