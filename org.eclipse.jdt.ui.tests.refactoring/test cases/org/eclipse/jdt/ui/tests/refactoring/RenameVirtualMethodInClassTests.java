@@ -42,6 +42,12 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	protected String getRefactoringPath(){
 		return REFACTORING_PATH;
 	}
+
+	private void helper1_not_available(String methodName, String[] signatures) throws Exception{
+		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
+		assertTrue(ref == null);
+	}	
 	
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
@@ -110,7 +116,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testFail1() throws Exception{
-		helper1_0("toString", "fred", new String[0]);
+		helper1_not_available("toString", new String[0]);
 	}
 	
 	public void testFail2() throws Exception{
@@ -234,7 +240,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testFail33() throws Exception{
-		helper1_0("toString", "k", new String[0]);
+		helper1_not_available("toString", new String[0]);
 	}
 	
 	public void testFail34() throws Exception{

@@ -130,7 +130,10 @@ public class InlineConstantTests extends RefactoringTest {
 			
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());
+										
+																								JavaPreferencesSettings.getCodeGenerationSettings());
+		if (ref == null)
+			return;
 		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());	
 
 		if(!result.isOK()) {
