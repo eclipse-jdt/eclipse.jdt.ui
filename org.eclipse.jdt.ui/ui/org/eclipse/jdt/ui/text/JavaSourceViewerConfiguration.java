@@ -120,6 +120,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * Preference key for inserting spaces rather than tabs.
 	 * 
 	 * @since 2.0
+	 * @deprecated as of 3.1 use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR}
 	 */
 	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
 	
@@ -485,7 +486,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 				
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		boolean useSpaces= fPreferenceStore.getBoolean(SPACES_FOR_TABS);
+		boolean useSpaces= JavaCore.SPACE.equals(fPreferenceStore.getString(org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 		
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();

@@ -1110,7 +1110,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/** Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
 	/** Preference key for inserting spaces rather than tabs */
-	private final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
+	private final static String SPACES_FOR_TABS= DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR;
 	/** Preference key for automatically closing strings */
 	private final static String CLOSE_STRINGS= PreferenceConstants.EDITOR_CLOSE_STRINGS;
 	/** Preference key for automatically closing brackets and parenthesis */
@@ -1573,7 +1573,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	
 	private boolean isTabConversionEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(SPACES_FOR_TABS);
+		return JavaCore.SPACE.equals(store.getString(SPACES_FOR_TABS));
 	}
 	
 	public void dispose() {

@@ -378,8 +378,8 @@ public class IndentAction extends TextEditorAction {
 	 */
 	private String getTabEquivalent() {
 		String tab;
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS)) {
-			int size= JavaCore.getPlugin().getPluginPreferences().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		if (JavaCore.SPACE.equals(JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+			int size= JavaPlugin.getDefault().getCombinedPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 			StringBuffer buf= new StringBuffer();
 			for (int i= 0; i< size; i++)
 				buf.append(' ');
