@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.util;
+package org.eclipse.jdt.internal.ui.dialogs;
 
 import org.eclipse.jface.util.Assert;
 

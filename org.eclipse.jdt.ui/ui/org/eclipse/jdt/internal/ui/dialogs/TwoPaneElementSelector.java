@@ -28,7 +28,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jdt.internal.ui.util.TwoArrayQuickSort;
 
 public class TwoPaneElementSelector extends SelectionStatusDialog {
 	// construction parameters

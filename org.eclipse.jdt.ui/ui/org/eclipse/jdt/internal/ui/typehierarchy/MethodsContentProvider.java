@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
@@ -37,6 +36,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 public class MethodsContentProvider implements IStructuredContentProvider, IElementChangedListener, ITypeHierarchyLifeCycleListener {
 	
 	private static final String[] UNSTRUCTURED= new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE };
+	protected static final Object[] NO_ELEMENTS = new Object[0];
 		
 	private boolean fShowInheritedMethods;
 	
@@ -118,7 +118,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 			}
 			return res.toArray();
 		}
-		return ArrayUtility.getEmptyArray();
+		return NO_ELEMENTS;
 	}		
 	
 	

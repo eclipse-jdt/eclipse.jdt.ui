@@ -9,8 +9,6 @@ import java.util.List;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
-
 /** 
  * A specialized content provider to show a list of editor parts.
  */ 
@@ -23,7 +21,7 @@ public class ListContentProvider implements IStructuredContentProvider {
 	public Object[] getElements(Object input) {
 		if (fContents != null && fContents == input)
 			return fContents.toArray();
-		return ArrayUtility.getEmptyArray();
+		return new Object[0];
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {

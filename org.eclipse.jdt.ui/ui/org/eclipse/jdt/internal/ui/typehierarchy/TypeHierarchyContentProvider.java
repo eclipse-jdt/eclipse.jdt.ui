@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
@@ -37,6 +36,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 public abstract class TypeHierarchyContentProvider implements ITreeContentProvider, IElementChangedListener {
 
 	protected static final String[] UNSTRUCTURED= new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE };
+	protected static final Object[] NO_ELEMENTS= new Object[0];
 
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
 	protected IMember[] fMemberFilter;
@@ -88,16 +88,16 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public Object[] getElements(Object parent) {
 		IType input= getInputType();
 		if (input == null) {
-			return ArrayUtility.getEmptyArray();
+			return NO_ELEMENTS;
 		} else {
 			if (fMemberFilter != null) {
 				try {
 					if (!hasFilteredChildren(input)) {
-						return ArrayUtility.getEmptyArray();
+						return NO_ELEMENTS;
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e.getStatus());
-					return ArrayUtility.getEmptyArray();
+					return NO_ELEMENTS;
 				}
 			}		 	
 			return new IType[] { input };
@@ -129,7 +129,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				return childrenTypes;
 			}			
 		}
-		return ArrayUtility.getEmptyArray();
+		return NO_ELEMENTS;
 	}
 	
 	/**

@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jdt.internal.ui.util.TwoArrayQuickSort;
 
 /**
  * A selection widget that consists of a list and a text entry field. The list

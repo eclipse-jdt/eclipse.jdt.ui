@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
+
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -184,7 +184,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							JavaPlugin.getDefault().logErrorStatus(JavaEditorMessages.getString("JavaOutlinePage.error.ChildrenProvider.getChildren.message1"), x.getStatus()); //$NON-NLS-1$
 						}
 					}
-					return ArrayUtility.getEmptyArray();
+					return new Object[0];
 				}
 				
 				public Object[] getElements(Object parent) {

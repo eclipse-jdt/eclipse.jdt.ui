@@ -33,8 +33,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
  
 /**
  * Abstract content provider for Java elements.
@@ -58,7 +56,8 @@ Java model (<code>IJavaModel</code>)
  * </p>
  */
 public abstract class AbstractJavaElementContentProvider implements IStructuredContentProvider, IElementChangedListener {
-	
+	protected static final Object[] NO_CHILDREN= new Object[0];
+
 	protected StructuredViewer fViewer;
 	protected Object fInput;
 	
@@ -94,7 +93,7 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 	 */
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
-			return ArrayUtility.getEmptyArray();
+			return NO_CHILDREN;
 			
 		try {
 			if (element instanceof IJavaModel) 
@@ -113,9 +112,9 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 				return getResources((IFolder)element);
 			
 		} catch (JavaModelException e) {
-			return ArrayUtility.getEmptyArray();
+			return NO_CHILDREN;
 		}		
-		return ArrayUtility.getEmptyArray();	
+		return NO_CHILDREN;	
 	}
 
 	/* (non-Javadoc)
@@ -177,13 +176,13 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 		Object[] nonJavaResources= root.getNonJavaResources();
 		if (nonJavaResources == null)
 			return fragments;
-		return ArrayUtility.merge(fragments, nonJavaResources);
+		return concatenate(fragments, nonJavaResources);
 	}
 	
 	private Object[] getNonProjectPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		// return an empty enumeration when the project is closed
 		if (!project.getProject().isOpen())
-			return ArrayUtility.getEmptyArray();
+			return NO_CHILDREN;
 			
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		List list= new ArrayList(roots.length);
@@ -210,7 +209,7 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 		}
 		if (projectIsRoot)
 			return list.toArray();
-		return ArrayUtility.merge(list.toArray(), project.getNonJavaResources());
+		return concatenate(list.toArray(), project.getNonJavaResources());
 	}
 
 	private Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
@@ -219,9 +218,9 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 	
 	private Object[] getPackageContents(IPackageFragment fragment) throws JavaModelException {
 		if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
-			return ArrayUtility.merge(fragment.getCompilationUnits(), fragment.getNonJavaResources());
+			return concatenate(fragment.getCompilationUnits(), fragment.getNonJavaResources());
 		}
-		return ArrayUtility.merge(fragment.getClassFiles(), fragment.getNonJavaResources());
+		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
 	}
 	
 	private Object[] getResources(IFolder folder) {
@@ -237,7 +236,7 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 			}
 			return nonJavaResources.toArray();
 		} catch(CoreException e) {
-			return ArrayUtility.getEmptyArray();
+			return NO_CHILDREN;
 		}
 	}
 	
@@ -311,5 +310,14 @@ public abstract class AbstractJavaElementContentProvider implements IStructuredC
 		if (element instanceof IJavaElement)
 			return ((IJavaElement)element).getParent();
 		return null;
+	}
+	
+	private static Object[] concatenate(Object[] a1, Object[] a2) {
+		int a1Len= a1.length;
+		int a2Len= a2.length;
+		Object[] res= new Object[a1Len + a2Len];
+		System.arraycopy(a1, 0, res, 0, a1Len);
+		System.arraycopy(a2, 0, res, a1Len, a2Len); 
+		return res;
 	}
 }

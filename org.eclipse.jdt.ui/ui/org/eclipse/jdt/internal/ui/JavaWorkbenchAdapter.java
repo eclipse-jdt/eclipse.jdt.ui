@@ -13,14 +13,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
-
 /**
  * An imlementation of the IWorkbenchAdapter for IJavaElements.
  */
   
 public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
-	
+	protected static final Object[] NO_CHILDREN= new Object[0];
+
 	public Object[] getChildren(Object o) {
 		if (o instanceof IParent) {
 			try {
@@ -29,7 +28,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 				JavaPlugin.logErrorMessage(getClass().getName() + ": Error getting children for: " + o); //$NON-NLS-1$
 			}
 		}
-		return ArrayUtility.getEmptyArray();
+		return NO_CHILDREN;
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
