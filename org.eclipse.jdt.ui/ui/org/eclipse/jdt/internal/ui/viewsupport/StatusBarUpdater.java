@@ -135,7 +135,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 		if (root.isExternal()) {
 			return root.getPath().toOSString();
 		}
-		return root.getPath().toString();		
+		return root.getPath().makeRelative().toString();		
 	}
 	
 	private String getUnderlyingResourcePath(IJavaElement elem, IPackageFragmentRoot root) throws JavaModelException {
@@ -144,15 +144,20 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 		}
 		
 		IOpenable openable= JavaModelUtil.getOpenable(elem);
+		IResource res= null;
 		if (openable instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) openable;
 			if (cu.isWorkingCopy()) {
-				return cu.getOriginalElement().getUnderlyingResource().getFullPath().toString();
+				res= cu.getOriginalElement().getUnderlyingResource();
 			}
-			return cu.getUnderlyingResource().getFullPath().toString();
+			res= cu.getUnderlyingResource();
 		} else if (openable instanceof IClassFile) {
-			return ((IClassFile)openable).getUnderlyingResource().getFullPath().toString();
+			res= ((IClassFile)openable).getUnderlyingResource();
 		}
+		if (res != null) {
+			return res.getFullPath().makeRelative().toString();
+		}
+		
 		return "";
 	}
 	

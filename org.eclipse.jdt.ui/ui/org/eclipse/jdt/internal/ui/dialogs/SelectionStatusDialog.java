@@ -146,7 +146,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 		    updateButtonsEnableState(status);
-		    StatusTool.applyToStatusLine(fStatusLine, status);			
+		    StatusUtil.applyToStatusLine(fStatusLine, status);			
 		}
 	}	
 

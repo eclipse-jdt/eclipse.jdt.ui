@@ -63,7 +63,7 @@ class CPListLabelProvider extends LabelProvider {
 				case IClasspathEntry.CPE_LIBRARY: {
 					IResource resource= cpentry.getResource();
 					if (resource instanceof IFolder) {
-						StringBuffer buf= new StringBuffer(path.toString());
+						StringBuffer buf= new StringBuffer(path.makeRelative().toString());
 						buf.append(' ');
 						buf.append(fClassLabel);
 						if (!resource.exists()) {
@@ -71,14 +71,19 @@ class CPListLabelProvider extends LabelProvider {
 							buf.append(fNewLabel);
 						}
 						return buf.toString();
-					} else {
-						String ext= path.getFileExtension();
-						if ("zip".equals(ext) || "jar".equals(ext)) { //$NON-NLS-1$ //$NON-NLS-2$
-							return path.lastSegment() + " - " + path.removeLastSegments(1).toString(); //$NON-NLS-1$
-						} else {
-							return path.toString();
+					} else if (resource instanceof IFile) {
+						if (ArchiveFileFilter.isArchivePath(path)) {
+							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).makeRelative().toString() };
+							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args);
 						}
-					}					
+					} else {
+						if (ArchiveFileFilter.isArchivePath(path)) {
+							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).toOSString() };
+							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args);
+						}
+					}
+					// should not come here
+					return path.makeRelative().toString();									
 				}
 				case IClasspathEntry.CPE_VARIABLE: {
 					String name= path.makeRelative().toString();
@@ -86,14 +91,14 @@ class CPListLabelProvider extends LabelProvider {
 					IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
 					if (entryPath != null) {
 						buf.append(" - "); //$NON-NLS-1$
-						buf.append(entryPath.append(path.removeFirstSegments(1).toString()));
+						buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
 					}
 					return buf.toString();
 				}
 				case IClasspathEntry.CPE_PROJECT:
 					return path.lastSegment();
 				case IClasspathEntry.CPE_SOURCE: {
-					StringBuffer buf= new StringBuffer(path.toString());
+					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
 					IResource resource= cpentry.getResource();
 					if (resource != null && !resource.exists()) {
 						buf.append(' ');

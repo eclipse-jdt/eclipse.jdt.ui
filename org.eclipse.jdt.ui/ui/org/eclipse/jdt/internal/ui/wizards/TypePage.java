@@ -212,8 +212,8 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Initializes all fields provided by the type page with a give
-	 * java element as selection.
+	 * Initializes all fields provided by the type page with a given
+	 * Java element as selection.
 	 * @param elem The initial selection of this page or null if no
 	 *             selection was available
 	 */
@@ -259,7 +259,7 @@ public abstract class TypePage extends ContainerPage {
 	// -------- UI Creation ---------
 	
 	/**
-	 * Creates a separator line
+	 * Creates a separator line.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */
@@ -270,7 +270,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the package name field
+	 * Creates the controls for the package name field.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */	
@@ -279,7 +279,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the enclosing type name field
+	 * Creates the controls for the enclosing type name field.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -294,7 +294,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Creates the controls for the type name field
+	 * Creates the controls for the type name field.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -305,7 +305,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the modifiers radio/ceckbox buttons
+	 * Creates the controls for the modifiers radio/ceckbox buttons.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -322,7 +322,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field
+	 * Creates the controls for the superclass name field.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -331,7 +331,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field
+	 * Creates the controls for the superclass name field.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */			
@@ -349,7 +349,7 @@ public abstract class TypePage extends ContainerPage {
 
 	
 	/**
-	 * Sets the focus on the container if empty, elso on type name
+	 * Sets the focus on the container if empty, elso on type name.
 	 */		
 	protected void setFocus() {
 		fTypeNameDialogField.setFocus();
@@ -478,14 +478,14 @@ public abstract class TypePage extends ContainerPage {
 	// ---- set / get ----------------
 	
 	/**
-	 * Gets the text of package field
+	 * Gets the text of package field.
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
 	}
 
 	/**
-	 * Gets the text of enclosing type field
+	 * Gets the text of enclosing type field.
 	 */	
 	public String getEnclosingTypeText() {
 		return fEnclosingTypeDialogField.getText();
@@ -546,14 +546,14 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Returns true if the enclosing type selection check box is enabled
+	 * Returns true if the enclosing type selection check box is enabled.
 	 */
 	public boolean isEnclosingTypeSelected() {
 		return fEnclosingTypeSelection.isSelected();
 	}
 
 	/**
-	 * Sets the enclosing type selection checkbox
+	 * Sets the enclosing type selection checkbox.
 	 * @param canBeModified Selects if the enclosing type selection can be changed by the user
 	 */	
 	public void setEnclosingTypeSelection(boolean isSelected, boolean canBeModified) {
@@ -563,14 +563,14 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Gets the type name
+	 * Gets the type name.
 	 */
 	public String getTypeName() {
 		return fTypeNameDialogField.getText();
 	}
 
 	/**
-	 * Sets the type name
+	 * Sets the type name.
 	 * @param canBeModified Selects if the type name can be changed by the user
 	 */	
 	public void setTypeName(String name, boolean canBeModified) {
@@ -633,14 +633,14 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Gets the content of the super class text field
+	 * Gets the content of the super class text field.
 	 */
 	public String getSuperClass() {
 		return fSuperClassDialogField.getText();
 	}
 
 	/**
-	 * Sets the super class name
+	 * Sets the super class name.
 	 * @param canBeModified Selects if the super class can be changed by the user
 	 */		
 	public void setSuperClass(String name, boolean canBeModified) {
@@ -649,7 +649,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 	
 	/**
-	 * Gets the currently chosen super interfaces
+	 * Gets the currently chosen super interfaces.
 	 * @return returns a list of String
 	 */
 	public List getSuperInterfaces() {
@@ -657,7 +657,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Sets the super interfaces
+	 * Sets the super interfaces.
 	 * @param interfacesNames a list of String
 	 */	
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
@@ -668,7 +668,7 @@ public abstract class TypePage extends ContainerPage {
 	// ----------- validation ----------
 		
 	/**
-	 * Called when the package field has changed
+	 * Called when the package field has changed.
 	 * The method validates the package name and returns the status of the validation
 	 * This also updates the package fragment model.
 	 * Can be extended to add more validation
@@ -717,7 +717,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/*
-	 * Updates the 'default' label next to the package field
+	 * Updates the 'default' label next to the package field.
 	 */	
 	private void updatePackageStatusLabel() {
 		String packName= fPackageDialogField.getText();
@@ -730,7 +730,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/*
-	 * Updates the enable state of buttons related to the enclosing type selection checkbox
+	 * Updates the enable state of buttons related to the enclosing type selection checkbox.
 	 */
 	private void updateEnableState() {
 		boolean enclosing= isEnclosingTypeSelected();
@@ -739,7 +739,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Called when the enclosing type name has changed
+	 * Called when the enclosing type name has changed.
 	 * The method validates the enclosing type and returns the status of the validation
 	 * This also updates the enclosing type model.
 	 * Can be extended to add more validation
@@ -782,8 +782,8 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Called when the type name has changed
-	 * The method validates the type name and returns the status of the validation
+	 * Called when the type name has changed.
+	 * The method validates the type name and returns the status of the validation.
 	 * Can be extended to add more validation
 	 */
 	protected IStatus typeNameChanged() {
@@ -831,8 +831,8 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Called when the superclass name has changed
-	 * The method validates the superclass name and returns the status of the validation
+	 * Called when the superclass name has changed.
+	 * The method validates the superclass name and returns the status of the validation.
 	 * Can be extended to add more validation
 	 */
 	protected IStatus superClassChanged() {
@@ -920,9 +920,9 @@ public abstract class TypePage extends ContainerPage {
 	
 	
 	/**
-	 * Called when the list of super interface has changed
-	 * The method validates the superinterfaces and returns the status of the validation
-	 * Can be extended to add more validation
+	 * Called when the list of super interface has changed.
+	 * The method validates the superinterfaces and returns the status of the validation.
+	 * Can be extended to add more validation.
 	 */
 	protected IStatus superInterfacesChanged() {
 		StatusInfo status= new StatusInfo();
@@ -960,9 +960,9 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Called when the modifiers have changed
-	 * The method validates the modifiers and returns the status of the validation
-	 * Can be extended to add more validation
+	 * Called when the modifiers have changed.
+	 * The method validates the modifiers and returns the status of the validation.
+	 * Can be extended to add more validation.
 	 */
 	protected IStatus modifiersChanged() {
 		StatusInfo status= new StatusInfo();
@@ -996,9 +996,10 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(packages);
 
-		return (dialog.open() == dialog.OK)
-			? (IPackageFragment) dialog.getPrimaryResult()
-			: null;
+		if (dialog.open() == dialog.OK) {
+			return (IPackageFragment) dialog.getPrimaryResult();
+		}
+		return null;
 	}
 	
 	private IType chooseEnclosingType() {
@@ -1062,7 +1063,7 @@ public abstract class TypePage extends ContainerPage {
 	// ---- creation ----------------
 
 	/**
-	 * Creates a type using the current field values
+	 * Creates a type using the current field values.
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		monitor.beginTask(NewWizardMessages.getString("TypePage.operationdesc"), 10); //$NON-NLS-1$

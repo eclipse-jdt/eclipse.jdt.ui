@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -328,7 +328,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	}	
 				
 	protected IStatus findMostSevereStatus() {
-		return StatusTool.getMoreSevere(fProjectStatus, fRootStatus);
+		return StatusUtil.getMoreSevere(fProjectStatus, fRootStatus);
 	}
 	
 	// ---- creation ----------------

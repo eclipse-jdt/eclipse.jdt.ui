@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
@@ -82,7 +82,7 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 	 * Finds the most severe error (if there is one)
 	 */
 	private IStatus findMostSevereStatus() {
-		return StatusTool.getMostSevere(new IStatus[] {
+		return StatusUtil.getMostSevere(new IStatus[] {
 			fContainerStatus,
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
 			fTypeNameStatus,

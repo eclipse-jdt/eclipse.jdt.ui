@@ -29,7 +29,7 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 			String name= curr.getName();
 			IPath path= curr.getPath();
 			StringBuffer buf= new StringBuffer(name);			if (curr.isReserved()) {				buf.append(' ');				buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.reserved")); //$NON-NLS-1$			}			if (fShowResolvedVariables || !curr.isReserved()) {				if (path != null) {
-					buf.append(" - "); //$NON-NLS-1$					if (!path.isEmpty()) {						buf.append(path.toString());					} else {						buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.empty")); //$NON-NLS-1$					}
+					buf.append(" - "); //$NON-NLS-1$					if (!path.isEmpty()) {						buf.append(path.toOSString());					} else {						buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.empty")); //$NON-NLS-1$					}
 				}			}			return buf.toString();
 		}		
 		

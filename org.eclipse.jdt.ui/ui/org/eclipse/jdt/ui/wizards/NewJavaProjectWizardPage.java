@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -234,7 +234,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		fCurrStatus= status;
 		setPageComplete(!status.matches(IStatus.ERROR));
 		if (fPageVisible) {
-			StatusTool.applyToStatusLine(this, status);
+			StatusUtil.applyToStatusLine(this, status);
 		}
 	}
 		

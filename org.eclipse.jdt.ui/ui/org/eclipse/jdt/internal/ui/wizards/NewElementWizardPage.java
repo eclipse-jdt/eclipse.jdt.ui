@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
 public abstract class NewElementWizardPage extends WizardPage {
 
@@ -47,7 +47,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 		fCurrStatus= status;
 		setPageComplete(!status.matches(IStatus.ERROR));
 		if (fPageVisible) {
-			StatusTool.applyToStatusLine(this, status);
+			StatusUtil.applyToStatusLine(this, status);
 		}
 	}
 			

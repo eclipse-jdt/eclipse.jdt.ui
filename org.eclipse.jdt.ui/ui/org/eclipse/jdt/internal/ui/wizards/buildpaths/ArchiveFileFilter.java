@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -48,15 +49,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
-			String ext= ((IFile)element).getFullPath().getFileExtension();
-			if (ext != null && ext.length() != 0) {
-				for (int i= 0; i < fgArchiveExtensions.length; i++) {
-					if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
-						return true;
-					}
-				}
-			}
-			return false;
+			return isArchivePath(((IFile)element).getFullPath());
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			try {
 				IResource[] resources= ((IContainer)element).members();
@@ -72,5 +65,18 @@ public class ArchiveFileFilter extends ViewerFilter {
 		}
 		return false;
 	}
+	
+	public static boolean isArchivePath(IPath path) {
+		String ext= path.getFileExtension();
+		if (ext != null && ext.length() != 0) {
+			for (int i= 0; i < fgArchiveExtensions.length; i++) {
+				if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}		
+	
 			
 }

@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -170,7 +170,7 @@ public class VariableCreationDialog extends StatusDialog {
 		} else if (field == fPathField) {
 			fPathStatus= pathUpdated();
 		}		
-		updateStatus(StatusTool.getMoreSevere(fPathStatus, fNameStatus));
+		updateStatus(StatusUtil.getMoreSevere(fPathStatus, fNameStatus));
 	}		
 	
 	protected StatusInfo nameUpdated() {

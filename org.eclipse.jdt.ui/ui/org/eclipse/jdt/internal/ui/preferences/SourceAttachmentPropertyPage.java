@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
@@ -138,7 +138,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	 */
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
-		StatusTool.applyToStatusLine(this, status);
+		StatusUtil.applyToStatusLine(this, status);
 	}	
 
 }

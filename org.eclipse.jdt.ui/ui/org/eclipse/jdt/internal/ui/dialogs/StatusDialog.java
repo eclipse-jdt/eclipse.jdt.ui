@@ -59,7 +59,7 @@ public abstract class StatusDialog extends Dialog {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 			updateButtonsEnableState(status);
-			StatusTool.applyToStatusLine(fStatusLine, status);	
+			StatusUtil.applyToStatusLine(fStatusLine, status);	
 		}
 	}
 	

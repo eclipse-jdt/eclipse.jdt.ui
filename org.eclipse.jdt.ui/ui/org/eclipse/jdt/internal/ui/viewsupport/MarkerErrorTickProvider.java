@@ -30,7 +30,8 @@ public class MarkerErrorTickProvider implements IErrorTickProvider {
 			
 			int type= element.getElementType();
 			
-			if (type < IJavaElement.TYPE) {
+			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT
+				|| type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.CLASS_FILE || type == IJavaElement.COMPILATION_UNIT) {
 				res= element.getCorrespondingResource();
 				if (type == IJavaElement.PACKAGE_FRAGMENT) {
 					depth= IResource.DEPTH_ONE;

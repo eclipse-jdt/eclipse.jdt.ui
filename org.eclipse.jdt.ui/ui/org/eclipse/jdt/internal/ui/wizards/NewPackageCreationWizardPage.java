@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -171,7 +171,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 * Finds the most severe error (if there is one)
 	 */
 	protected IStatus findMostSevereStatus() {
-		return StatusTool.getMoreSevere(fContainerStatus, fPackageStatus);
+		return StatusUtil.getMoreSevere(fContainerStatus, fPackageStatus);
 	}	
 		
 	// ----------- validation ----------

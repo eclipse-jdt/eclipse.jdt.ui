@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -409,7 +409,7 @@ public class BuildPathsBlock {
 	}
 	
 	private IStatus findMostSevereStatus() {
-		return StatusTool.getMoreSevere(fClassPathStatus, fBuildPathStatus);
+		return StatusUtil.getMoreSevere(fClassPathStatus, fBuildPathStatus);
 	}
 	
 	

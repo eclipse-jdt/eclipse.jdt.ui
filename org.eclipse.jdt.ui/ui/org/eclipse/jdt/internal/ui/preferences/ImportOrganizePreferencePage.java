@@ -4,7 +4,32 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.ArrayList;import java.util.StringTokenizer;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Point;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.jface.dialogs.IInputValidator;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.jface.preference.ListEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.ListEditor;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaConventions;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /*
@@ -44,24 +69,9 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 			}
 			
 			protected String getNewInputObject() {
-				final String errorMessage= JavaUIMessages.getString("ImportOrganizePreferencePage.errorMessage"); //$NON-NLS-1$
-				
-				IInputValidator validator= new IInputValidator() {
-					public String isValid(String newText) {
-						if (JavaConventions.validatePackageName(newText).isOK()) {
-							return null;
-						} else if (!"".equals(newText)) { //$NON-NLS-1$
-							return errorMessage;
-						} else {
-							return ""; //$NON-NLS-1$
-						}
-					}
-				};
-				String title= JavaUIMessages.getString("ImportOrganizePreferencePage.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("ImportOrganizePreferencePage.message"); //$NON-NLS-1$			
-				StringInputDialog dialog= new StringInputDialog(getShell(), title, null, message, "", validator); //$NON-NLS-1$
+				ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell()); 
 				if (dialog.open() == dialog.OK) {
-					return dialog.getValue();
+					return (String) dialog.getResult();
 				} else {
 					return null;
 				}

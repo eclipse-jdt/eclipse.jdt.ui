@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -484,12 +484,12 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				Text curr= (Text) fTextBoxes.get(i);
 				if (!(curr == fTabSizeTextBox && usesTabs())) {
 					IStatus currStatus= validatePositiveNumber(curr.getText());
-					status= StatusTool.getMoreSevere(currStatus, status);
+					status= StatusUtil.getMoreSevere(currStatus, status);
 				}
 			}
 		}	
 		setValid(!status.matches(IStatus.ERROR));
-		StatusTool.applyToStatusLine(this, status);
+		StatusUtil.applyToStatusLine(this, status);
 	}
 	
 	private boolean usesTabs() {

@@ -262,7 +262,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 */ 
 	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
 		fCurrRoot= root;
-		String str= (root == null) ? "" : root.getPath().toString(); //$NON-NLS-1$
+		String str= (root == null) ? "" : root.getPath().makeRelative().toString(); //$NON-NLS-1$
 		fContainerDialogField.setText(str);
 		fContainerDialogField.setEnabled(canBeModified);
 	}	

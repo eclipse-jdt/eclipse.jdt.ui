@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -353,7 +353,7 @@ public class SourceAttachmentBlock {
 			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
 		}
 		
-		IStatus status= StatusTool.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus, fJavaDocStatus });
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus, fJavaDocStatus });
 		fContext.statusChanged(status);
 	}
 	
