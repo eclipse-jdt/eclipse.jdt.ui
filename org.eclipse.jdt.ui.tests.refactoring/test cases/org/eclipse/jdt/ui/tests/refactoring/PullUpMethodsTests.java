@@ -228,6 +228,18 @@ public class PullUpMethodsTests extends RefactoringTest {
 		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 	
+	public void test14() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
+	}
+	
+	public void test15() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
+	}
+	
+	public void test16() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
+	}
+	
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false);
@@ -314,5 +326,14 @@ public class PullUpMethodsTests extends RefactoringTest {
 //		boolean deleteAllMatchingMethods= false;
 //		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods);
 	}
+	
+	public void testFail13() throws Exception{
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		boolean deleteAllInSourceType= true;
+		boolean deleteAllMatchingMethods= false;
+		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods);
+	}
+	
 }
 
