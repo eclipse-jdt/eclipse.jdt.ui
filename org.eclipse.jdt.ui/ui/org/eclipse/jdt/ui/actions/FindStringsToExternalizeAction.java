@@ -287,19 +287,19 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	} 
 	
 	private NonNLSElement analyze(ICompilationUnit cu) throws JavaModelException{
-		int count = countNotExternalizedStrings(cu);
+		int count = countNonExternalizedStrings(cu);
 		if (count == 0)
 			return null;
 		else	
 			return new NonNLSElement(cu, count);
 	}
 	
-	private int countNotExternalizedStrings(ICompilationUnit cu){
+	private int countNonExternalizedStrings(ICompilationUnit cu){
 		try{
 			NLSLine[] lines= NLSScanner.scan(cu);
 			int result= 0;
 			for (int i= 0; i < lines.length; i++) {
-				result += countNotExternalizedStrings(lines[i]);
+				result += countNonExternalizedStrings(lines[i]);
 			}
 			return result;
 		}catch(JavaModelException e) {
@@ -313,7 +313,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		}	
 	}
 
-	private int countNotExternalizedStrings(NLSLine line){
+	private int countNonExternalizedStrings(NLSLine line){
 		int result= 0;
 		NLSElement[] elements= line.getElements();
 		for (int i= 0; i < elements.length; i++){
@@ -346,7 +346,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			super(parent);
 			setInput(Arrays.asList(input));
 			setTitle(ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"));  //$NON-NLS-1$
-			setMessage(ActionMessages.getFormattedString("FindStringsToExternalizeAction.not_externalized", new Object[] {new Integer(count)} )); //$NON-NLS-1$
+			setMessage(ActionMessages.getFormattedString("FindStringsToExternalizeAction.non_externalized", new Object[] {new Integer(count)} )); //$NON-NLS-1$
 			setContentProvider(new ListContentProvider());
 			setLabelProvider(createLabelProvider());
 		}
