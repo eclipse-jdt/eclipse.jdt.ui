@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2002 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- ******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.extensions.TestSetup;
@@ -74,12 +74,49 @@ public class InlineMethodTestSetup extends TestSetup {
 		
 		fImport.createCompilationUnit(
 			"Provider.java",
-			"package import_in;\n" +			"\n" +			"import import_use.List;\n" +			"import java.io.File;\n" +			"import java.util.Map;\n" +			"\n" +			"public class Provider {\n" +			"	public File useAsReturn() {\n" +			"		return null;\n" +			"	}\n" +			"	public void useInArgument(File file) {\n" +			"		file= null;\n" +			"	}\n" +			"	public void useInDecl() {\n" +			"		List list= null;\n" +			"	}\n" +			"	public void useInClassLiteral() {\n" +			"		Class clazz= File.class;\n" +			"	}\n" +			"	public void useArray() {\n" +			"		List[] lists= null;\n" +			"	}\n" +			"	public void useInLocalClass() {\n" +			"		class Local extends File implements Comparable {\n" +			"			public Local(String s) {\n" +			"				super(s);\n" +			"			}\n" +			"			public void foo(Map map) {\n" +			"			}\n" +			"			public int compareTo(Object o) {\n" +			"				return 0;\n" +			"			}\n" +			"		}\n" +			"	}\n" +			"}\n", 
+			"package import_in;\n" +
+			"\n" +
+			"import import_use.List;\n" +
+			"import java.io.File;\n" +
+			"import java.util.Map;\n" +
+			"\n" +
+			"public class Provider {\n" +
+			"	public File useAsReturn() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	public void useInArgument(File file) {\n" +
+			"		file= null;\n" +
+			"	}\n" +
+			"	public void useInDecl() {\n" +
+			"		List list= null;\n" +
+			"	}\n" +
+			"	public void useInClassLiteral() {\n" +
+			"		Class clazz= File.class;\n" +
+			"	}\n" +
+			"	public void useArray() {\n" +
+			"		List[] lists= null;\n" +
+			"	}\n" +
+			"	public void useInLocalClass() {\n" +
+			"		class Local extends File implements Comparable {\n" +
+			"			public Local(String s) {\n" +
+			"				super(s);\n" +
+			"			}\n" +
+			"			public void foo(Map map) {\n" +
+			"			}\n" +
+			"			public int compareTo(Object o) {\n" +
+			"				return 0;\n" +
+			"			}\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n", 
 			true, null);
 			
 			IPackageFragment importUse= fRoot.createPackageFragment("import_use", true, null);
 			importUse.createCompilationUnit("List.java",
-			"package import_use;" +			"" +			"public class List {" +			"}", 
+			"package import_use;" +
+			"" +
+			"public class List {" +
+			"}", 
 			true, null);
 			
 	}
