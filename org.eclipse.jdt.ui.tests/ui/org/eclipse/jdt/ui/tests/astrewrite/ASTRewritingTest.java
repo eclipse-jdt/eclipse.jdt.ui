@@ -75,7 +75,7 @@ public class ASTRewritingTest extends TestCase {
 	 */
 	protected String evaluateRewrite(ICompilationUnit cu, NewASTRewrite rewrite) throws Exception {
 		Document document= new Document(cu.getSource());
-		TextEdit res= rewrite.rewriteAST(document);
+		TextEdit res= rewrite.rewriteAST(document, null);
 		
 		res.apply(document);
 		return document.get();

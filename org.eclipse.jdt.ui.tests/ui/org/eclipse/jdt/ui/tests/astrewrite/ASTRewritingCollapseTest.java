@@ -113,7 +113,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		ExpressionStatement st2= ast.newExpressionStatement(newMethodInv2);
 		
 		Block placeholder= rewrite.getCollapseTargetPlaceholder(new Statement[] { st1, st2 });
-		rewrite.markAsReplaced(returnStatement, placeholder);
+		rewrite.markAsReplaced(returnStatement, placeholder, null);
 			
 		String preview= evaluateRewrite(cu, rewrite); 
 		
@@ -159,10 +159,10 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		newMethodInv2.setName(ast.newSimpleName("foo2"));
 		ExpressionStatement st2= ast.newExpressionStatement(newMethodInv2);
 		
-		ReturnStatement st3= (ReturnStatement) rewrite.createCopyPlaceholder(returnStatement);
+		ReturnStatement st3= (ReturnStatement) rewrite.createCopyTarget(returnStatement);
 		
 		Block placeholder= rewrite.getCollapseTargetPlaceholder(new Statement[] { st1, st2, st3 });
-		rewrite.markAsReplaced(returnStatement.getParent(), placeholder);
+		rewrite.markAsReplaced(returnStatement.getParent(), placeholder, null);
 		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -208,8 +208,8 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
-			ASTNode placeholder= rewrite.createCopyPlaceholder(collapsed);
-			rewrite.markAsRemoved(collapsed);
+			ASTNode placeholder= rewrite.createCopyTarget(collapsed);
+			rewrite.markAsRemoved(collapsed, null);
 			
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder, null);
 		}	
@@ -258,7 +258,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(collapsed);
+			ASTNode placeholder= rewrite.createMoveTarget(collapsed);
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder, null);
 		}	
 					
@@ -308,7 +308,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
 			ASTNode newStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(collapsed, newStatement);
+			rewrite.markAsReplaced(collapsed, newStatement, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);

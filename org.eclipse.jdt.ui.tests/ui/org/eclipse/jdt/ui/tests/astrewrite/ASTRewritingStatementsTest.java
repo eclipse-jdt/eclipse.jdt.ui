@@ -137,7 +137,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		MethodDeclaration methodDeclGoo= findMethodDeclaration(type, "goo");
 		List bodyStatements= methodDeclGoo.getBody().statements();
 
-		ASTNode copy= rewrite.createCopyPlaceholder((ASTNode) bodyStatements.get(0));
+		ASTNode copy= rewrite.createCopyTarget((ASTNode) bodyStatements.get(0));
 		
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "hoo");
 		Block block= methodDecl.getBody();
@@ -250,7 +250,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		List statements= block.statements();
 		assertTrue("No statements in block", !statements.isEmpty());
 		
-		rewrite.markAsRemoved((ASTNode) statements.get(0));
+		rewrite.markAsRemoved((ASTNode) statements.get(0), null);
 				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -293,7 +293,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		
 		ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 		Expression expr= returnStatement.getExpression();
-		rewrite.markAsRemoved(expr);
+		rewrite.markAsRemoved(expr, null);
 		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -335,9 +335,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertTrue("No block" , block != null);
 		
 		List statements= methodDecl.getBody().statements();
-		rewrite.markAsRemoved((ASTNode) statements.get(0));
-		rewrite.markAsRemoved((ASTNode) statements.get(1));
-		rewrite.markAsRemoved((ASTNode) statements.get(2));
+		rewrite.markAsRemoved((ASTNode) statements.get(0), null);
+		rewrite.markAsRemoved((ASTNode) statements.get(1), null);
+		rewrite.markAsRemoved((ASTNode) statements.get(2), null);
 		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -378,7 +378,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertTrue("No statements in block", !statements.isEmpty());
 		
 		ReturnStatement returnStatement= block.getAST().newReturnStatement();
-		rewrite.markAsReplaced((ASTNode) statements.get(0), returnStatement);
+		rewrite.markAsReplaced((ASTNode) statements.get(0), returnStatement, null);
 				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -426,7 +426,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		Expression expr= returnStatement.getExpression();
 		Expression modified= block.getAST().newNullLiteral();
 
-		rewrite.markAsReplaced(expr, modified);
+		rewrite.markAsReplaced(expr, modified, null);
 		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -475,7 +475,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertTrue("Has label", statement.getLabel() == null);
 			
 			SimpleName newLabel= ast.newSimpleName("label2");
-			rewrite.markAsInsert(statement, BreakStatement.LABEL_PROPERTY, newLabel, null);
+			rewrite.set(statement, BreakStatement.LABEL_PROPERTY, newLabel, null);
 		}
 		{ // replace label
 			BreakStatement statement= (BreakStatement) statements.get(1);
@@ -485,7 +485,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			SimpleName newLabel= ast.newSimpleName("label2");	
 
-			rewrite.markAsReplaced(label, newLabel);
+			rewrite.markAsReplaced(label, newLabel, null);
 		}
 		{ // remove label
 			BreakStatement statement= (BreakStatement) statements.get(2);
@@ -493,7 +493,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			SimpleName label= statement.getLabel();
 			assertTrue("Has no label", label != null);
 			
-			rewrite.markAsRemoved(label);
+			rewrite.markAsRemoved(label, null);
 		}	
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -561,8 +561,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			List arguments= invocation.arguments();
 			
-			rewrite.markAsRemoved((ASTNode) arguments.get(0));
-			rewrite.markAsRemoved((ASTNode) arguments.get(1));
+			rewrite.markAsRemoved((ASTNode) arguments.get(0), null);
+			rewrite.markAsRemoved((ASTNode) arguments.get(1), null);
 		}		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -610,7 +610,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			SimpleName newLabel= ast.newSimpleName("label2");	
 
-			rewrite.markAsInsert(statement, ContinueStatement.LABEL_PROPERTY, newLabel, null);
+			rewrite.set(statement, ContinueStatement.LABEL_PROPERTY, newLabel, null);
 		}
 		{ // replace label
 			ContinueStatement statement= (ContinueStatement) statements.get(1);
@@ -620,7 +620,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			SimpleName newLabel= ast.newSimpleName("label2");	
 
-			rewrite.markAsReplaced(label, newLabel);
+			rewrite.markAsReplaced(label, newLabel, null);
 		}
 		{ // remove label
 			ContinueStatement statement= (ContinueStatement) statements.get(2);
@@ -628,7 +628,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			SimpleName label= statement.getLabel();
 			assertTrue("Has no label", label != null);
 			
-			rewrite.markAsRemoved(label);
+			rewrite.markAsRemoved(label, null);
 		}	
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -682,10 +682,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(doStatement.getBody(), newBody);
+			rewrite.markAsReplaced(doStatement.getBody(), newBody, null);
 
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			rewrite.markAsReplaced(doStatement.getExpression(), literal);
+			rewrite.markAsReplaced(doStatement.getExpression(), literal, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -754,7 +754,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(doStatement.getBody(), newTry);
+			rewrite.markAsReplaced(doStatement.getBody(), newTry, null);
 		}
 		{ // replace body statement with block
 			DoStatement doStatement= (DoStatement) statements.get(1);
@@ -767,7 +767,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(doStatement.getBody(), newBody);
+			rewrite.markAsReplaced(doStatement.getBody(), newBody, null);
 
 		}
 		{ // replace body block with block
@@ -781,7 +781,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(doStatement.getBody(), newBody);
+			rewrite.markAsReplaced(doStatement.getBody(), newBody, null);
 
 		}		
 		{ // replace body statement with body
@@ -797,7 +797,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(doStatement.getBody(), newTry);
+			rewrite.markAsReplaced(doStatement.getBody(), newTry, null);
 		}
 		
 		
@@ -859,14 +859,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			
 			Assignment assignment= (Assignment) stmt.getExpression();
-			Expression placeholder= (Expression) rewrite.createCopyPlaceholder(assignment);
+			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment);
 									
 			Assignment newExpression= ast.newAssignment();
 			newExpression.setLeftHandSide(ast.newSimpleName("x"));
 			newExpression.setRightHandSide(placeholder);
 			newExpression.setOperator(Assignment.Operator.ASSIGN);
 	
-			rewrite.markAsReplaced(stmt.getExpression(), newExpression);
+			rewrite.markAsReplaced(stmt.getExpression(), newExpression, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -926,7 +926,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			assignment.setRightHandSide(ast.newNumberLiteral("3"));
 			
-			rewrite.markAsReplaced((ASTNode) initializers.get(0), assignment);
+			rewrite.markAsReplaced((ASTNode) initializers.get(0), assignment, null);
 			
 			Assignment assignment2= ast.newAssignment();
 			assignment2.setLeftHandSide(ast.newSimpleName("j"));
@@ -936,7 +936,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.getListRewrite(forStatement, ForStatement.INITIALIZERS_PROPERTY).insertLast(assignment2, null);
 			
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			rewrite.markAsReplaced(forStatement.getExpression(), literal);
+			rewrite.markAsReplaced(forStatement.getExpression(), literal, null);
 			
 			// add updater
 			PrefixExpression prefixExpression= ast.newPrefixExpression();
@@ -954,7 +954,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(forStatement.getBody(), newBody);
+			rewrite.markAsReplaced(forStatement.getBody(), newBody, null);
 		}
 		{ // remove initializers, expression and updaters
 			ForStatement forStatement= (ForStatement) statements.get(1);
@@ -962,16 +962,16 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			List initializers= forStatement.initializers();
 			assertTrue("Number of initializers not 2", initializers.size() == 2);
 			
-			rewrite.markAsRemoved((ASTNode) initializers.get(0));
-			rewrite.markAsRemoved((ASTNode) initializers.get(1));
+			rewrite.markAsRemoved((ASTNode) initializers.get(0), null);
+			rewrite.markAsRemoved((ASTNode) initializers.get(1), null);
 			
-			rewrite.markAsRemoved(forStatement.getExpression());
+			rewrite.markAsRemoved(forStatement.getExpression(), null);
 			
 			List updaters= forStatement.updaters();
 			assertTrue("Number of initializers not 2", updaters.size() == 2);
 			
-			rewrite.markAsRemoved((ASTNode) updaters.get(0));
-			rewrite.markAsRemoved((ASTNode) updaters.get(1));
+			rewrite.markAsRemoved((ASTNode) updaters.get(0), null);
+			rewrite.markAsRemoved((ASTNode) updaters.get(1), null);
 		}
 		{ // insert updater
 			ForStatement forStatement= (ForStatement) statements.get(2);
@@ -1010,12 +1010,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			VariableDeclarationExpression varDecl= ast.newVariableDeclarationExpression(varFragment);
 			varFragment.setName(ast.newSimpleName(leftHandSide.getIdentifier()));
 			
-			Expression placeholder= (Expression) rewrite.createCopyPlaceholder(assignment.getRightHandSide());
+			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			varFragment.setInitializer(placeholder);
 			varDecl.setType(ast.newPrimitiveType(PrimitiveType.INT));
 
 			
-			rewrite.markAsReplaced(assignment, varDecl);
+			rewrite.markAsReplaced(assignment, varDecl, null);
 		}	
 		
 		
@@ -1087,7 +1087,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(forStatement.getBody(), newTry);
+			rewrite.markAsReplaced(forStatement.getBody(), newTry, null);
 		}
 		{ // replace body statement with block
 			ForStatement forStatement= (ForStatement) statements.get(1);
@@ -1100,7 +1100,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(forStatement.getBody(), newBody);
+			rewrite.markAsReplaced(forStatement.getBody(), newBody, null);
 
 		}
 		{ // replace body block with block
@@ -1114,7 +1114,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(forStatement.getBody(), newBody);
+			rewrite.markAsReplaced(forStatement.getBody(), newBody, null);
 
 		}		
 		{ // replace body statement with body
@@ -1130,7 +1130,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(forStatement.getBody(), newTry);
+			rewrite.markAsReplaced(forStatement.getBody(), newTry, null);
 		}
 		
 		
@@ -1196,7 +1196,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			IfStatement ifStatement= (IfStatement) statements.get(0);
 			
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			rewrite.markAsReplaced(ifStatement.getExpression(), literal);			
+			rewrite.markAsReplaced(ifStatement.getExpression(), literal, null);			
 			
 			MethodInvocation invocation= ast.newMethodInvocation();
 			invocation.setName(ast.newSimpleName("hoo"));
@@ -1204,9 +1204,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(ifStatement.getThenStatement(), newBody);
+			rewrite.markAsReplaced(ifStatement.getThenStatement(), newBody, null);
 			
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}
 		{ // add else body
 			IfStatement ifStatement= (IfStatement) statements.get(1);
@@ -1217,7 +1217,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newBody, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newBody, null);
 		}		
 		
 				
@@ -1279,9 +1279,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 		}
 		{ // replace then block by statement
 			IfStatement ifStatement= (IfStatement) statements.get(1);
@@ -1289,9 +1289,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 		}
 		{ // replace then block by statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
@@ -1299,9 +1299,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1369,12 +1369,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 			
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, returnStatement, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, returnStatement, null);
 			
 		}
 		{ // replace then block by statement, remove else statement
@@ -1383,10 +1383,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsReplaced(body, newBody, null);
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}
 		{ // replace then block by statement, add else statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
@@ -1394,15 +1394,15 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 			
 			Block newElseBlock= ast.newBlock();
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);
 			
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
 
 			
 		}
@@ -1412,10 +1412,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsReplaced(body, newBody, null);
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -1479,33 +1479,33 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 		}
 		{ // replace then block by statement
 			IfStatement ifStatement= (IfStatement) statements.get(1);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 		}
 		{ // replace then block by statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1571,14 +1571,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, returnStatement, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, returnStatement, null);
 			
 		}
 		{ // replace then statement by block, remove else statement
@@ -1586,43 +1586,43 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}
 		{ // replace then block by statement, add else statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			Block newElseBlock= ast.newBlock();
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);
 			
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
 		}
 		{ // replace then block by statement, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -1690,11 +1690,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -1705,31 +1705,31 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
 		}
 		{ // replace then statement by block, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(1);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}
 		{ // replace then block by statement, add else statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -1737,20 +1737,20 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 
 			newElseBlock.setThenStatement(returnStatement);
-			rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
+			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, newElseBlock, null);
 		}
 		{ // replace then block by statement, remove else statement
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 	
 			ASTNode statement= ifStatement.getThenStatement();
 			
-			ASTNode placeholder= rewrite.createMovePlaceholder(statement);
+			ASTNode placeholder= rewrite.createMoveTarget(statement);
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
-			rewrite.markAsRemoved(ifStatement.getElseStatement());
+			rewrite.markAsRemoved(ifStatement.getElseStatement(), null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -1817,7 +1817,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry);			
+			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry, null);			
 		}
 		{ // replace then statement by a try statement
 			IfStatement ifStatement= (IfStatement) statements.get(1);
@@ -1831,7 +1831,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry);	
+			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry, null);	
 		}
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -1888,10 +1888,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		
 		{ // replace else statement by a block containing the old then statement
 			IfStatement ifStatement= (IfStatement) node;
-			ASTNode placeholder = rewrite.createMovePlaceholder(ifStatement);
+			ASTNode placeholder = rewrite.createMoveTarget(ifStatement);
 			Block newBlock = ast.newBlock();
 			newBlock.statements().add(placeholder);
-			rewrite.markAsReplaced(ifStatement, newBlock);
+			rewrite.markAsReplaced(ifStatement, newBlock, null);
 		}
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -1962,7 +1962,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);			
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 			
 		}
 		{ // replace then statement by block, replace else statement
@@ -1972,20 +1972,20 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);			
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then block by statement, replace else statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
 				
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement, null);
 			
 		}
 		{ // replace then block by statement, replace else statement
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 				
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement, null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -2063,16 +2063,16 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			Block newElseBlock= ast.newBlock();
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);			
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 			
 		}
 		{ // replace then statement by block, replace else statement
@@ -2081,15 +2081,15 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			Block newElseBlock= ast.newBlock();
 			Statement returnStatement= ast.newReturnStatement();
 			newElseBlock.statements().add(returnStatement);			
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then block by statement, replace else statement
 			IfStatement ifStatement= (IfStatement) statements.get(2);
@@ -2097,13 +2097,13 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);				
+			rewrite.markAsReplaced(statement, newBody, null);				
 			
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement, null);
 			
 		}
 		{ // replace then block by statement, replace else statement
@@ -2112,12 +2112,12 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			Statement returnStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement, null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -2194,18 +2194,18 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then statement by block, replace else with if statement (no block)
 			IfStatement ifStatement= (IfStatement) statements.get(1);
@@ -2213,17 +2213,17 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then block by statement, replace else with if statement (block)
 			IfStatement ifStatement= (IfStatement) statements.get(2);
@@ -2231,18 +2231,18 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);				
+			rewrite.markAsReplaced(statement, newBody, null);				
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 			
 		}
 		{ // replace then block by statement, replace else with if statement (block)
@@ -2251,17 +2251,17 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
 			
-			Statement newBody2= (Statement) rewrite.createMovePlaceholder(ifStatement.getElseStatement());
+			Statement newBody2= (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -2338,10 +2338,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);
+			rewrite.markAsReplaced(statement, newBody, null);
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -2352,7 +2352,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then statement by block, replace else with if statement (block)
 			IfStatement ifStatement= (IfStatement) statements.get(1);
@@ -2360,9 +2360,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -2373,7 +2373,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}
 		{ // replace then block by statement, replace else with if statement (no block)
 			IfStatement ifStatement= (IfStatement) statements.get(2);
@@ -2381,10 +2381,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ASTNode statement= ifStatement.getThenStatement();
 			
 			Block newBody= ast.newBlock();
-			ASTNode newStatement= rewrite.createMovePlaceholder(statement);
+			ASTNode newStatement= rewrite.createMoveTarget(statement);
 			newBody.statements().add(newStatement);
 			
-			rewrite.markAsReplaced(statement, newBody);				
+			rewrite.markAsReplaced(statement, newBody, null);				
 			
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -2392,7 +2392,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement newBody2= ast.newReturnStatement();
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 			
 		}
 		{ // replace then block by statement, replace else with if statement (no block)
@@ -2401,9 +2401,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= (Block) ifStatement.getThenStatement();
 			ASTNode statement= (ASTNode) body.statements().get(0);
 			
-			ASTNode newBody= rewrite.createMovePlaceholder(statement);
+			ASTNode newBody= rewrite.createMoveTarget(statement);
 			
-			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsReplaced(body, newBody, null);
 				
 			IfStatement newElseBlock= ast.newIfStatement();
 			newElseBlock.setExpression(ast.newBooleanLiteral(true));
@@ -2411,7 +2411,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Statement newBody2= ast.newReturnStatement();
 			newElseBlock.setThenStatement(newBody2);
 
-			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock, null);
 		}				
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -2473,7 +2473,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			Name newLabel= ast.newSimpleName("newLabel");
 			
-			rewrite.markAsReplaced(labeledStatement.getLabel(), newLabel);
+			rewrite.markAsReplaced(labeledStatement.getLabel(), newLabel, null);
 						
 			Assignment newExpression= ast.newAssignment();
 			newExpression.setLeftHandSide(ast.newSimpleName("x"));
@@ -2482,7 +2482,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			Statement newStatement= ast.newExpressionStatement(newExpression);
 			
-			rewrite.markAsReplaced(labeledStatement.getBody(), newStatement);
+			rewrite.markAsReplaced(labeledStatement.getBody(), newStatement, null);
 		}		
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -2528,7 +2528,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertTrue("Has expression", statement.getExpression() == null);
 			
 			SimpleName newExpression= ast.newSimpleName("x");	
-			rewrite.markAsInsert(statement, ReturnStatement.EXPRESSION_PROPERTY, newExpression, null);
+			rewrite.set(statement, ReturnStatement.EXPRESSION_PROPERTY, newExpression, null);
 		}
 		{ // replace expression
 			ReturnStatement statement= (ReturnStatement) statements.get(1);
@@ -2538,7 +2538,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			SimpleName newExpression= ast.newSimpleName("x");
 
-			rewrite.markAsReplaced(expression, newExpression);
+			rewrite.markAsReplaced(expression, newExpression, null);
 		}
 		{ // remove expression
 			ReturnStatement statement= (ReturnStatement) statements.get(2);
@@ -2546,13 +2546,13 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Expression expression= statement.getExpression();
 			assertTrue("Has no label", expression != null);
 			
-			rewrite.markAsRemoved(expression);
+			rewrite.markAsRemoved(expression, null);
 		}
 		{ // modify in expression (no change)
 			ReturnStatement statement= (ReturnStatement) statements.get(3);
 			
 			InfixExpression expression= (InfixExpression) statement.getExpression();
-			rewrite.markAsReplaced(expression.getLeftOperand(), ast.newNumberLiteral("9"));
+			rewrite.markAsReplaced(expression.getLeftOperand(), ast.newNumberLiteral("9"), null);
 		}		
 		
 				
@@ -2610,7 +2610,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			ASTNode expression= switchStatement.getExpression();
 			SimpleName newExpression= ast.newSimpleName("x");	
-			rewrite.markAsReplaced(expression, newExpression);
+			rewrite.markAsReplaced(expression, newExpression, null);
 			
 			List statements= switchStatement.statements();
 			assertTrue("Number of statements not 0", statements.size() == 0);
@@ -2637,14 +2637,14 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			// remove statements
 			
-			rewrite.markAsRemoved((ASTNode) statements.get(0));
-			rewrite.markAsRemoved((ASTNode) statements.get(1));
-			rewrite.markAsRemoved((ASTNode) statements.get(2));
+			rewrite.markAsRemoved((ASTNode) statements.get(0), null);
+			rewrite.markAsRemoved((ASTNode) statements.get(1), null);
+			rewrite.markAsRemoved((ASTNode) statements.get(2), null);
 			
 			// change case statement
 			SwitchCase caseStatement= (SwitchCase) statements.get(3);
 			Expression newCaseExpression= ast.newNumberLiteral("10");
-			rewrite.markAsReplaced(caseStatement.getExpression(), newCaseExpression);
+			rewrite.markAsReplaced(caseStatement.getExpression(), newCaseExpression, null);
 			
 			ListRewriter listRewrite= rewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
 			
@@ -2729,7 +2729,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{ // replace expression and body
 			SynchronizedStatement statement= (SynchronizedStatement) statements.get(0);
 			ASTNode newExpression= ast.newSimpleName("obj");
-			rewrite.markAsReplaced(statement.getExpression(), newExpression);
+			rewrite.markAsReplaced(statement.getExpression(), newExpression, null);
 			
 			Block newBody= ast.newBlock();
 						
@@ -2740,7 +2740,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(assign));
 			
-			rewrite.markAsReplaced(statement.getBody(), newBody);
+			rewrite.markAsReplaced(statement.getBody(), newBody, null);
 		}		
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -2791,7 +2791,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			creation.setName(ast.newSimpleName("NullPointerException"));
 			creation.arguments().add(ast.newSimpleName("x"));
 			
-			rewrite.markAsReplaced(statement.getExpression(), creation);
+			rewrite.markAsReplaced(statement.getExpression(), creation, null);
 		}
 		
 		{ // modify expression
@@ -2805,7 +2805,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ClassInstanceCreation creation= (ClassInstanceCreation) statement.getExpression();
 			
 			ASTNode newArgument= ast.newSimpleName("x");
-			rewrite.markAsReplaced((ASTNode) creation.arguments().get(0), newArgument);
+			rewrite.markAsReplaced((ASTNode) creation.arguments().get(0), newArgument, null);
 		}				
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -2872,7 +2872,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			Block body= ast.newBlock();
 			body.statements().add(ast.newReturnStatement());
 			
-			rewrite.markAsReplaced(tryStatement.getFinally(), body);
+			rewrite.markAsReplaced(tryStatement.getFinally(), body, null);
 		}
 		{ // replace catch, remove finally
 			TryStatement tryStatement= (TryStatement) blockStatements.get(1);
@@ -2885,21 +2885,21 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			decl.setName(ast.newSimpleName("x"));
 			catchClause.setException(decl);
 			
-			rewrite.markAsReplaced((ASTNode) catchClauses.get(0), catchClause);
+			rewrite.markAsReplaced((ASTNode) catchClauses.get(0), catchClause, null);
 					
-			rewrite.markAsRemoved(tryStatement.getFinally());
+			rewrite.markAsRemoved(tryStatement.getFinally(), null);
 		}
 		{ // remove catch, add finally
 			TryStatement tryStatement= (TryStatement) blockStatements.get(2);
 			
 			List catchClauses= tryStatement.catchClauses();
-			rewrite.markAsRemoved((ASTNode) catchClauses.get(0));
+			rewrite.markAsRemoved((ASTNode) catchClauses.get(0), null);
 			
 			
 			Block body= ast.newBlock();
 			body.statements().add(ast.newReturnStatement());
 
-			rewrite.markAsInsert(tryStatement, TryStatement.FINALLY_PROPERTY, body, null);
+			rewrite.set(tryStatement, TryStatement.FINALLY_PROPERTY, body, null);
 		}
 		{ // insert catch before and after existing
 			TryStatement tryStatement= (TryStatement) blockStatements.get(3);
@@ -2983,7 +2983,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newDeclaration.setName(ast.newSimpleName("X"));
 			newDeclaration.setInterface(true);
 				
-			rewrite.markAsReplaced(stmt.getTypeDeclaration(), newDeclaration);
+			rewrite.markAsReplaced(stmt.getTypeDeclaration(), newDeclaration, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -3032,10 +3032,10 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			// add modifier
 			int newModifiers= Modifier.FINAL;
-			rewrite.markAsReplaced(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 			
 			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
-			rewrite.markAsReplaced(decl.getType(), newType);
+			rewrite.markAsReplaced(decl.getType(), newType, null);
 					
 			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
 			frag.setName(ast.newSimpleName("k1"));
@@ -3048,26 +3048,26 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			// add modifier
 			int newModifiers= Modifier.FINAL;
-			rewrite.markAsReplaced(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 			
 			List fragments= decl.fragments();
 			assertTrue("Number of fragments not 3", fragments.size() == 3);
 			
-			rewrite.markAsRemoved((ASTNode) fragments.get(0));
-			rewrite.markAsRemoved((ASTNode) fragments.get(1));
+			rewrite.markAsRemoved((ASTNode) fragments.get(0), null);
+			rewrite.markAsRemoved((ASTNode) fragments.get(1), null);
 			
 			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
 			frag.setName(ast.newSimpleName("k2"));
 			frag.setInitializer(null);
 			
-			rewrite.markAsReplaced((ASTNode) fragments.get(2), frag);
+			rewrite.markAsReplaced((ASTNode) fragments.get(2), frag, null);
 		}
 		{	// remove modifiers
 			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(2);
 			
 			// add modifiers
 			int newModifiers= 0;
-			rewrite.markAsReplaced(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -3115,7 +3115,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			WhileStatement whileStatement= (WhileStatement) statements.get(0);
 
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			rewrite.markAsReplaced(whileStatement.getExpression(), literal);
+			rewrite.markAsReplaced(whileStatement.getExpression(), literal, null);
 			
 			Block newBody= ast.newBlock();
 			
@@ -3125,7 +3125,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
+			rewrite.markAsReplaced(whileStatement.getBody(), newBody, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -3188,7 +3188,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(whileStatement.getBody(), newTry);
+			rewrite.markAsReplaced(whileStatement.getBody(), newTry, null);
 		}
 		{ // replace body statement with block
 			WhileStatement whileStatement= (WhileStatement) statements.get(1);
@@ -3201,7 +3201,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
+			rewrite.markAsReplaced(whileStatement.getBody(), newBody, null);
 
 		}
 		{ // replace body block with block
@@ -3215,7 +3215,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
-			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
+			rewrite.markAsReplaced(whileStatement.getBody(), newBody, null);
 
 		}		
 		{ // replace body statement with body
@@ -3231,7 +3231,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newCatchClause.setException(varDecl);
 			newTry.catchClauses().add(newCatchClause);
 			
-			rewrite.markAsReplaced(whileStatement.getBody(), newTry);
+			rewrite.markAsReplaced(whileStatement.getBody(), newTry, null);
 		}
 		
 		
@@ -3293,7 +3293,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			String comment= "//hello";
 			ASTNode placeHolder= rewrite.createStringPlaceholder(comment, NewASTRewrite.STATEMENT);
 			
-			rewrite.markAsReplaced(whileStatement, placeHolder);
+			rewrite.markAsReplaced(whileStatement, placeHolder, null);
 			
 			StringBuffer buf1= new StringBuffer();
 			buf1.append("if (i == 3) {\n");

@@ -103,7 +103,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			assertTrue("Has fragments", !fragments.isEmpty());
 			
 			SimpleName name= (SimpleName) fragments.get(0);
-			rewrite.markAsReplaced(name, ast.newSimpleName("newName"));
+			rewrite.markAsReplaced(name, ast.newSimpleName("newName"), null);
 			}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -152,7 +152,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			assertTrue("Has fragments", !fragments.isEmpty());
 			
 			SimpleName name= (SimpleName) fragments.get(0);
-			rewrite.markAsReplaced(name, ast.newSimpleName("Vector"));
+			rewrite.markAsReplaced(name, ast.newSimpleName("Vector"), null);
 			}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -202,7 +202,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			assertTrue("Has fragments", !fragments.isEmpty());
 			
 			MemberRef ref= (MemberRef) fragments.get(0);
-			rewrite.markAsReplaced(ref.getName(), ast.newSimpleName("hashCode"));
+			rewrite.markAsReplaced(ref.getName(), ast.newSimpleName("hashCode"), null);
 			}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -253,7 +253,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			assertTrue("Has fragments", !fragments.isEmpty());
 			
 			MemberRef ref= (MemberRef) fragments.get(0);
-			rewrite.markAsInsert(ref, MemberRef.QUALIFIER_PROPERTY, ast.newSimpleName("E"), null);
+			rewrite.set(ref, MemberRef.QUALIFIER_PROPERTY, ast.newSimpleName("E"), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -577,7 +577,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			List tags= javadoc.tags();
 			assertTrue("Has one tag", tags.size() == 1);
 			
-			rewrite.markAsRemoved((ASTNode) tags.get(0));
+			rewrite.markAsRemoved((ASTNode) tags.get(0), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -621,7 +621,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			List tags= javadoc.tags();
 			assertTrue("Has one tag", tags.size() == 2);
 			
-			rewrite.markAsRemoved((ASTNode) tags.get(0));
+			rewrite.markAsRemoved((ASTNode) tags.get(0), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -667,7 +667,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			List tags= javadoc.tags();
 			assertTrue("Has one tag", tags.size() == 2);
 			
-			rewrite.markAsRemoved((ASTNode) tags.get(1));
+			rewrite.markAsRemoved((ASTNode) tags.get(1), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -772,7 +772,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			element.fragments().add(textElement);
 			javadoc.tags().add(element);
 			
-			rewrite.markAsInsert(methodDecl, MethodDeclaration.JAVADOC_PROPERTY, javadoc, null);
+			rewrite.set(methodDecl, MethodDeclaration.JAVADOC_PROPERTY, javadoc, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -819,7 +819,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			element.fragments().add(textElement);
 			javadoc.tags().add(element);
 			
-			rewrite.markAsInsert(fieldDecl, FieldDeclaration.JAVADOC_PROPERTY, javadoc, null);
+			rewrite.set(fieldDecl, FieldDeclaration.JAVADOC_PROPERTY, javadoc, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -857,7 +857,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		{  // insert method at first position
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 			Initializer initializer= (Initializer) type.bodyDeclarations().get(0);
-			rewrite.markAsRemoved(initializer.getJavadoc());
+			rewrite.markAsRemoved(initializer.getJavadoc(), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -891,7 +891,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		{  // insert method at first position
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 			
-			rewrite.markAsRemoved(type.getJavadoc());
+			rewrite.markAsRemoved(type.getJavadoc(), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);

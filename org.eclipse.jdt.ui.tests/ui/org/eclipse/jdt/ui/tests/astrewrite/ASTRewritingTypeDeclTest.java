@@ -107,43 +107,43 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SimpleName name= type.getName();
 			SimpleName newName= ast.newSimpleName("X");
 			
-			rewrite.markAsReplaced(name, newName);
+			rewrite.markAsReplaced(name, newName, null);
 			
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
-			rewrite.markAsReplaced(superClass, newSuperclass);
+			rewrite.markAsReplaced(superClass, newSuperclass, null);
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
-			rewrite.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface);
+			rewrite.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface, null);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			FieldDeclaration newFieldDecl= createNewField(ast, "fCount");
 			
-			rewrite.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
+			rewrite.markAsReplaced((ASTNode) members.get(0), newFieldDecl, null);
 		}
 		{ // replace method in F, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
 			// change flags
 			int newModifiers= 0;
-			rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			// change to interface
-			rewrite.markAsReplaced(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
+			rewrite.set(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
 			MethodDeclaration methodDecl= createNewMethod(ast, "newFoo", true);
 
-			rewrite.markAsReplaced((ASTNode) members.get(0), methodDecl);
+			rewrite.markAsReplaced((ASTNode) members.get(0), methodDecl, null);
 		}
 		
 		{ // change to class, add supertype
@@ -151,14 +151,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			// change flags
 			int newModifiers= 0;
-			rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			// change to class
-			rewrite.markAsReplaced(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.FALSE, null);
+			rewrite.set(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.FALSE, null);
 			
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
-			rewrite.markAsInsert(type, TypeDeclaration.SUPERCLASS_PROPERTY, newSuperclass, null);
+			rewrite.set(type, TypeDeclaration.SUPERCLASS_PROPERTY, newSuperclass, null);
 		}			
 					
 
@@ -221,51 +221,51 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			// change flags
 			int newModifiers= 0;
-			rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			// change to interface
-			rewrite.markAsReplaced(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
+			rewrite.set(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
 		
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
 			
-			rewrite.markAsRemoved(superClass);
+			rewrite.markAsRemoved(superClass, null);
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
-			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0));
+			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0), null);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 					
-			rewrite.markAsRemoved((ASTNode) members.get(1));
+			rewrite.markAsRemoved((ASTNode) members.get(1), null);
 			
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
-			rewrite.markAsRemoved(meth);
+			rewrite.markAsRemoved(meth, null);
 		}
 		{ // remove superinterface & method, change to interface & final
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 					
 			// change flags
 			int newModifiers= Modifier.FINAL;
-			rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			// change to interface
-			rewrite.markAsReplaced(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
+			rewrite.set(type, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
 			
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
-			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0));
+			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0), null);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
-			rewrite.markAsRemoved((ASTNode) members.get(0));			
+			rewrite.markAsRemoved((ASTNode) members.get(0), null);			
 		}			
 		{ // remove class G
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
-			rewrite.markAsRemoved(type);		
+			rewrite.markAsRemoved(type, null);		
 		}				
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -324,7 +324,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 					
 			// change flags
 			int newModifiers= Modifier.PUBLIC | Modifier.FINAL;
-			rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 				
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
 			
@@ -353,7 +353,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
-			rewrite.markAsInsert(type, TypeDeclaration.SUPERCLASS_PROPERTY, newSuperclass, null);
+			rewrite.set(type, TypeDeclaration.SUPERCLASS_PROPERTY, newSuperclass, null);
 					
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
 			rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertLast(newMethodDecl, null);
@@ -548,7 +548,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List decls= anonym.bodyDeclarations();
 			assertTrue("Number of bodyDeclarations not 1", decls.size() == 1);
 
-			rewrite.markAsRemoved((ASTNode) decls.get(0));
+			rewrite.markAsRemoved((ASTNode) decls.get(0), null);
 		}		
 		{	// replace body decl in AnonymousClassDeclaration
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
@@ -561,7 +561,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
 
-			rewrite.markAsReplaced((ASTNode) decls.get(0), newMethod);
+			rewrite.markAsReplaced((ASTNode) decls.get(0), newMethod, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -613,26 +613,26 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			ImportDeclaration imp= (ImportDeclaration) imports.get(0);
 			
 			Name name= ast.newName(new String[] { "org", "eclipse", "X" });
-			rewrite.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name, null);
 		}
 		{ // change to import on demand
 			ImportDeclaration imp= (ImportDeclaration) imports.get(1);
 			
 			Name name= ast.newName(new String[] { "java", "util" });
-			rewrite.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name, null);
 			
-			rewrite.markAsReplaced(imp, ImportDeclaration.ON_DEMAND_PROPERTY, Boolean.TRUE, null);
+			rewrite.set(imp, ImportDeclaration.ON_DEMAND_PROPERTY, Boolean.TRUE, null);
 		}
 		{ // change to single import
 			ImportDeclaration imp= (ImportDeclaration) imports.get(2);
 			
-			rewrite.markAsReplaced(imp, ImportDeclaration.ON_DEMAND_PROPERTY, Boolean.FALSE, null);
+			rewrite.set(imp, ImportDeclaration.ON_DEMAND_PROPERTY, Boolean.FALSE, null);
 		}
 		{ // rename import
 			ImportDeclaration imp= (ImportDeclaration) imports.get(3);
 			
 			Name name= ast.newName(new String[] { "org", "eclipse" });
-			rewrite.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name, null);
 		}		
 		
 				
@@ -669,7 +669,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			Name name= ast.newName(new String[] { "org", "eclipse" });
 			
-			rewrite.markAsReplaced(packageDeclaration.getName(), name);
+			rewrite.markAsReplaced(packageDeclaration.getName(), name, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -697,7 +697,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		{
 			PackageDeclaration packageDeclaration= astRoot.getPackage();
-			rewrite.markAsRemoved(packageDeclaration);
+			rewrite.markAsRemoved(packageDeclaration, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -728,7 +728,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			Name name= ast.newName(new String[] { "org", "eclipse" });
 			packageDeclaration.setName(name);
 			
-			rewrite.markAsInsert(astRoot, CompilationUnit.PACKAGE_PROPERTY, packageDeclaration, null);
+			rewrite.set(astRoot, CompilationUnit.PACKAGE_PROPERTY, packageDeclaration, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -765,29 +765,29 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(0);
 					
 			int newModifiers= Modifier.FINAL;
-			rewrite.markAsReplaced(decl, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
-			rewrite.markAsReplaced(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(1), null);
+			rewrite.set(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(1), null);
 			
 			ArrayType newVarType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 2);
-			rewrite.markAsReplaced(decl.getType(), newVarType);
+			rewrite.markAsReplaced(decl.getType(), newVarType, null);
 			
 			Name newName= ast.newSimpleName("count");
-			rewrite.markAsReplaced(decl.getName(), newName);
+			rewrite.markAsReplaced(decl.getName(), newName, null);
 		}
 		{ // remove modifier, change type
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(1);
 						
 			int newModifiers= 0;
-			rewrite.markAsReplaced(decl, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 			
 			Type newVarType= ast.newPrimitiveType(PrimitiveType.FLOAT);
-			rewrite.markAsReplaced(decl.getType(), newVarType);
+			rewrite.markAsReplaced(decl.getType(), newVarType, null);
 		}
 		{ // remove extra dim
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(2);
 			
-			rewrite.markAsReplaced(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+			rewrite.set(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 		}			
 			
 		String preview= evaluateRewrite(cu, rewrite);
@@ -834,9 +834,9 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(0);
 			
 			ASTNode name= ast.newSimpleName("a");
-			rewrite.markAsReplaced(fragment.getName(), name);
+			rewrite.markAsReplaced(fragment.getName(), name, null);
 			
-			rewrite.markAsReplaced(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(2), null);
+			rewrite.set(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(2), null);
 		}
 		
 		{ // add initializer
@@ -845,29 +845,29 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Has initializer", fragment.getInitializer() == null);
 			
 			Expression initializer= ast.newNumberLiteral("1");
-			rewrite.markAsInsert(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, initializer, null);
+			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, initializer, null);
 		}
 		
 		{ // remove initializer
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(2);
 			
 			assertTrue("Has no initializer", fragment.getInitializer() != null);
-			rewrite.markAsRemoved(fragment.getInitializer());
+			rewrite.markAsRemoved(fragment.getInitializer(), null);
 		}
 		{ // add dimension, add initializer
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(3);			
 			
-			rewrite.markAsReplaced(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(4), null);
+			rewrite.set(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(4), null);
 
 			assertTrue("Has initializer", fragment.getInitializer() == null);
 			
 			Expression initializer= ast.newNullLiteral();
-			rewrite.markAsInsert(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, initializer, null);
+			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, initializer, null);
 		}
 		{ // remove dimension
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(4);			
 			
-			rewrite.markAsReplaced(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+			rewrite.set(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 		}					
 			
 		String preview= evaluateRewrite(cu, rewrite);

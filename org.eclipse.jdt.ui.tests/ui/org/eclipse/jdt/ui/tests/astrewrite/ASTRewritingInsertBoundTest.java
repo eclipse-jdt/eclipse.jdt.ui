@@ -533,8 +533,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -581,7 +581,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -632,8 +632,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -680,9 +680,9 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -728,8 +728,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -790,8 +790,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -863,7 +863,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -929,8 +929,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -992,8 +992,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1064,7 +1064,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1129,8 +1129,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -1193,8 +1193,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1255,8 +1255,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -1329,8 +1329,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1403,9 +1403,9 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -1462,9 +1462,9 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1522,9 +1522,9 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -1583,9 +1583,9 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0));
-		rewrite.markAsRemoved((ASTNode) decls.get(1));
-		rewrite.markAsRemoved((ASTNode) decls.get(2));
+		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
