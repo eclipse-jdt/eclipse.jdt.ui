@@ -40,7 +40,7 @@ public class ShowInNavigator extends SelectionProviderAction {
 	
 	public ShowInNavigator(ISelectionProvider viewer) {
 		super(viewer, "Show in &Navigator");
-		setDescription("Show the selected objects in the navigator view");
+		setDescription("Show the selected object(s) in the navigator view");
 	}
 
 	/**
@@ -70,29 +70,15 @@ public class ShowInNavigator extends SelectionProviderAction {
 		
 	public void selectionChanged(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
-			this.setEnabled(false);
+			setEnabled(false);
 			return;
 		}
 		Iterator elements= selection.iterator();
 		boolean enabled= false;
 		if (elements.hasNext()) {
 			Object o= elements.next();
-			if (o instanceof IJavaElement) {
-				IJavaElement element=(IJavaElement) o;
-				try {
-					setEnabled(element.getUnderlyingResource() != null);
-					return;
-				} catch (JavaModelException e) {
-				}
-				setEnabled(false);
-				return;
-			}
-			if (o instanceof IResource) {
-				setEnabled(true);
-				return;
-			}
-
-			if (o instanceof IJavaElement || o instanceof IResource) {
+			if ((o instanceof IAdaptable) &&  
+				(((IAdaptable)o).getAdapter(IResource.class) != null)) {
 				setEnabled(true);
 				return;
 			}
