@@ -14,8 +14,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -186,6 +188,20 @@ public class QuickFixTest extends TestCase {
 		}
 		return null;
 	}
+	
+	public static VariableDeclarationFragment findFieldDeclaration(TypeDeclaration typeDecl, String fieldName) {
+		FieldDeclaration[] fields= typeDecl.getFields();
+		for (int i= 0; i < fields.length; i++) {
+			List list= fields[i].fragments();
+			for (int k= 0; k < list.size(); k++) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) list.get(k);
+				if (fieldName.equals(fragment.getName().getIdentifier())) {
+					return fragment;
+				}				
+			}
+		}
+		return null;
+	}	
 	
 	public static CorrectionContext getCorrectionContext(ICompilationUnit cu, IProblem problem) {
 		CorrectionContext context= new CorrectionContext(cu);
