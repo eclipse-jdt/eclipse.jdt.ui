@@ -196,6 +196,9 @@ public class AllTypesCache {
 			try {
 				if (! search(requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null))
 					return null;
+			} catch (OperationCanceledException e) {
+				// query cancelled
+				return null;
 			} catch (RequestorAbort e) {
 				// query cancelled
 				return null;
@@ -297,7 +300,7 @@ public class AllTypesCache {
 						}	
 					} else {
 					    	
-					    // update searchingMonitor with data from XxxProgressMonitor
+					    // update searchingMonitor with data from fCountingProgressMonitor
 					    searchingMonitor.beginTask(fCountingProgressMonitor.fTaskName, fCountingProgressMonitor.fTotalWork);
 					    double lastWorked= fCountingProgressMonitor.getWorked();
 					    searchingMonitor.internalWorked(lastWorked);
@@ -306,10 +309,8 @@ public class AllTypesCache {
 						try {
 							while (fgTypeCache == null) {
 								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel and ProgressMonitor updates
-								if (searchingMonitor.isCanceled()) {
-								    fCountingProgressMonitor.setCanceled(true);
+								if (searchingMonitor.isCanceled())
 									throw new OperationCanceledException();
-								}
 								double currentWorked= fCountingProgressMonitor.getWorked();
 								int newDelta= (int) (currentWorked - lastWorked);
 								if (newDelta > 0)
@@ -541,8 +542,10 @@ public class AllTypesCache {
 	static boolean search(ITypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
 		long start= System.currentTimeMillis();
 		try {
-			if (monitor == null)
+			if (monitor == null) {
+				fCountingProgressMonitor= new CountingProgressMonitor();
 				monitor= fCountingProgressMonitor;
+			}
 		
 			new SearchEngine().searchAllTypeNames(
 				null,
@@ -553,6 +556,7 @@ public class AllTypesCache {
 				requestor,
 				waitingPolicy,
 				monitor);
+			
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			if (TRACING) {
