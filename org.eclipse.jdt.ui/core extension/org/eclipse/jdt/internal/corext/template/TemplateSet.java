@@ -242,8 +242,12 @@ public class TemplateSet {
 	}
 
 	private static void throwReadException(Throwable t) throws CoreException {
-		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
-			TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
+		int code;
+		if (t instanceof SAXException)
+			code= IJavaStatusConstants.TEMPLATE_PARSE_EXCEPTION;
+		else
+			code= IJavaStatusConstants.TEMPLATE_IO_EXCEPTION;
+		IStatus status= JavaUIStatus.createError(code, TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}
 	

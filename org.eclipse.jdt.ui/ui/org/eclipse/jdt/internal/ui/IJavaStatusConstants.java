@@ -18,11 +18,11 @@ public interface IJavaStatusConstants {
 	public static final int INTERNAL_ERROR= 10001;
 	
 	/**
-	 * Status constant indicating that an exception occured on
+	 * Status constant indicating that an exception occurred on
 	 * storing or loading templates.
 	 */
 	public static final int TEMPLATE_IO_EXCEPTION = 10002;
-	
+
 	/**
 	 * Status constant indicating that an validateEdit call has changed the
 	 * content of a file on disk.
@@ -34,4 +34,10 @@ public interface IJavaStatusConstants {
 	 * caught.
  	 */
 	public static final int CHANGE_ABORTED= 10004;
+
+	/**
+	 * Status constant indicating that an exception occurred while
+	 * parsing template file.
+	 */
+	public static final int TEMPLATE_PARSE_EXCEPTION = 10005;
  }

@@ -67,8 +67,10 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class TemplatePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -602,7 +604,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		try {
 			fTemplates.restoreDefaults();
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
 			openReadErrorDialog(e);
 		}
 		
@@ -637,7 +638,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		try {
 			fTemplates.reset();			
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
 			openReadErrorDialog(e);
 		}
 
@@ -645,9 +645,20 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 	private void openReadErrorDialog(CoreException e) {
-		ErrorDialog.openError(getShell(),
-			TemplateMessages.getString("TemplatePreferencePage.error.read.title"), //$NON-NLS-1$
-			null, e.getStatus());
+		String title= TemplateMessages.getString("TemplatePreferencePage.error.read.title"); //$NON-NLS-1$
+
+		// Show parse error in a user dialog without logging
+		if (e.getStatus().getCode() == IJavaStatusConstants.TEMPLATE_PARSE_EXCEPTION) {
+			String message= e.getStatus().getException().getLocalizedMessage();
+			if (message != null)
+				message= TemplateMessages.getFormattedString("TemplatePreferencePage.error.parse.message", message); //$NON-NLS-1$
+			else
+				message= TemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+		} else {
+			String message= TemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);		
+		}
 	}
 	
 	private void openWriteErrorDialog(CoreException e) {

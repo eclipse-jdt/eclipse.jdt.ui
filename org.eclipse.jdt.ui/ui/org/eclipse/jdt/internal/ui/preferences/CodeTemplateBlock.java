@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -350,7 +353,7 @@ public class CodeTemplateBlock {
 		if (path != null) {
 			try {
 				fTemplates.addFromFile(new File(path), false);
-			} catch (CoreException e) {			
+			} catch (CoreException e) {
 				openReadErrorDialog(e);
 			}
 			fCodeTemplateTree.refresh();
@@ -395,10 +398,30 @@ public class CodeTemplateBlock {
 		
 		File file= new File(path);		
 
+		if (file.isHidden()) {
+			String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$ 
+			String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.hidden", file.getAbsolutePath()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+			return;
+		}
+		
+		if (file.exists() && !file.canWrite()) {
+			String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$
+			String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.canNotWrite", file.getAbsolutePath()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+			return;
+		}
+
 		if (!file.exists() || confirmOverwrite(file)) {
 			try {
 				templateSet.saveToFile(file);			
 			} catch (CoreException e) {			
+				if (e.getStatus().getException() instanceof FileNotFoundException) {
+					String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$
+					String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.fileNotFound", e.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
+					MessageDialog.openError(getShell(), title, message);
+					return;
+				}
 				JavaPlugin.log(e);
 				openWriteErrorDialog(e);
 			}		
@@ -452,8 +475,19 @@ public class CodeTemplateBlock {
 	
 	private void openReadErrorDialog(CoreException e) {
 		String title= PreferencesMessages.getString("CodeTemplateBlock.error.read.title"); //$NON-NLS-1$
-		String message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
-		ExceptionHandler.handle(e, getShell(), title, message);		
+		
+		// Show parse error in a user dialog without logging
+		if (e.getStatus().getCode() == IJavaStatusConstants.TEMPLATE_PARSE_EXCEPTION) {
+			String message= e.getStatus().getException().getLocalizedMessage();
+			if (message != null)
+				message= PreferencesMessages.getFormattedString("CodeTemplateBlock.error.parse.message", message); //$NON-NLS-1$
+			else
+				message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+		} else {
+			String message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);		
+		}
 	}
 	
 	private void openWriteErrorDialog(CoreException e) {
