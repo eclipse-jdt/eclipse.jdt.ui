@@ -43,6 +43,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private static final Class clazz= IntroduceFactoryTests.class;
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
+	/**
+	 * JDT/Core search engine bug: fails to locate calls to varargs methods
+	 */
+	private static final boolean BUG_84724= true;
+
 	public IntroduceFactoryTests(String name) {
 		super(name);
 	} 
@@ -252,9 +257,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * Like singleUnitHelper(), but allows for the specification of the names of
 	 * the generated factory method, class, and interface, as appropriate.
 	 * @param factoryMethodName the name to use for the generated factory method
+	 * @param factoryClassName the name of the factory class
 	 * @throws Exception
 	 */
-	void namesHelper(String factoryMethodName)
+	void namesHelper(String factoryMethodName, String factoryClassName)
 		throws Exception
 	{
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), true, true);
@@ -265,7 +271,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 
-		ref.setNewMethodName(factoryMethodName);
+		if (factoryMethodName != null)
+			ref.setNewMethodName(factoryMethodName);
+		if (factoryClassName != null)
+			ref.setFactoryClass(factoryClassName);
 
 		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
@@ -526,7 +535,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	static final String[]	k_Names = { "createThing", "ThingFactory", "IThingFactory" };
 
 	public void testNames_FFF() throws Exception {
-		namesHelper(k_Names[0]);
+		namesHelper(k_Names[0], null);
 	}
 	//
 	// ================================================================================
@@ -604,7 +613,59 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void testNestedClass() throws Exception {
 		failHelper(false, RefactoringStatus.FATAL);
 	}
-	//
+    //
+    // ================================================================================
+    // Generics-related tests
+    public void testTypeParam() throws Exception {
+        singleUnitHelper(true);
+    }
+
+    public void testTwoTypeParams() throws Exception {
+        singleUnitHelper(true);
+    }
+
+    public void testBoundedTypeParam() throws Exception {
+        singleUnitHelper(true);
+    }
+
+    public void testTwoBoundedTypeParams() throws Exception {
+        singleUnitHelper(true);
+    }
+
+	public void testWildcardParam() throws Exception {
+		singleUnitHelper(true);
+	}
+
+    public void testTypeParam2() throws Exception {
+        namesHelper(null, "p.Factory");
+    }
+    //
+	// ================================================================================
+	// Other J2SE 5.0 tests
+    public void testEnum() throws Exception {
+    	failHelper(true, RefactoringStatus.FATAL);
+    }
+
+    public void testAnnotation1() throws Exception {
+   		singleUnitHelper(true);
+    }
+
+    public void testAnnotation2() throws Exception {
+   		singleUnitHelper(true);
+    }
+
+    public void testAnnotation3() throws Exception {
+   		singleUnitHelper(true);
+    }
+
+	public void testVarArgsCtor() throws Exception {
+	    // RMF - As of I20050202, search engine doesn't reliably find call sites to varargs methods
+		if (BUG_84724)
+			System.err.println("Test " + getName() + " disabled due to JDT/Core bug #84724.");
+		else
+			singleUnitHelper(true);
+	}
+    //
 	// ================================================================================
 	//
 	public void testMultipleUnits_FFF() throws Exception {

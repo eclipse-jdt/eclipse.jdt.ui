@@ -15,20 +15,17 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,12 +49,14 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -84,7 +83,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -175,6 +178,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * the constructor arguments, in order.
 	 */
 	private ITypeBinding[] fArgTypes;
+
+	/**
+	 * True iff the given constructor has a varargs signature.
+	 */
+	private boolean fCtorIsVarArgs;
 
 	/**
 	 * If true, change the visibility of the constructor to protected to better
@@ -300,6 +308,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (ctorOwningType.isBinary())
 				// Can't modify binary CU; don't know what CU to put factory method
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInBinaryClass")); //$NON-NLS-1$
+			if (ctorOwningType.isEnum())
+				// Doesn't make sense to encapsulate enum constructors
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInEnum")); //$NON-NLS-1$
 	
 			// Put the generated factory method inside the type that owns the constructor
 			fFactoryUnitHandle= ctorOwningType.getCompilationUnit();
@@ -453,6 +464,29 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		return groups;
 	}
 
+	private IType findNonPrimaryType(String fullyQualifiedName, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		SearchPattern p= SearchPattern.createPattern(fullyQualifiedName, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(p);
+
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(fCtorBinding.getJavaElement().getJavaProject()));
+		engine.setStatus(status);
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+
+		SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
+
+		if (groups.length != 0) {
+			for(int i= 0; i < groups.length; i++) {
+				SearchMatch[] matches= groups[i].getSearchResults();
+				for(int j= 0; j < matches.length; j++) {
+					if (matches[j].getAccuracy() == SearchMatch.A_ACCURATE)
+						return (IType) matches[j].getElement();
+				}
+			}
+		}
+		return null;
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -462,6 +496,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			
 			fArgTypes= fCtorBinding.getParameterTypes();
+			fCtorIsVarArgs= fCtorBinding.isVarargs();
 			fAllCallsTo= findAllCallsTo(fCtorBinding, pm, result);
 			fFormalArgNames= findCtorArgNames();
  
@@ -528,17 +563,75 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		newMethod.setName(newMethodName);
 		newMethod.setBody(body);
-		newMethod.setReturnType2(ast.newSimpleType(ast.newSimpleName(retTypeName)));
+
+        ITypeBinding[] ctorOwnerTypeParameters= fCtorBinding.getDeclaringClass().getTypeParameters();
+
+        setMethodReturnType(newMethod, retTypeName, ctorOwnerTypeParameters, ast);
+
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.STATIC | Modifier.PUBLIC));
 
-		newCtorCall.setType(ASTNodeFactory.newType(ast, retTypeName));
+        setCtorTypeArguments(newCtorCall, retTypeName, ctorOwnerTypeParameters, ast);
 
-		createFactoryMethodConstructorArgs(ast, newCtorCall);
+        createFactoryMethodConstructorArgs(ast, newCtorCall);
 
 		ret.setExpression(newCtorCall);
 		stmts.add(ret);
 
 		return newMethod;
+	}
+
+	/**
+	 * Sets the type being instantiated in the given constructor call, including
+     * specifying any necessary type arguments.
+	 * @param newCtorCall the constructor call to modify
+	 * @param ctorTypeName the simple name of the type being instantiated
+	 * @param ctorOwnerTypeParameters the formal type parameters of the type being
+	 * instantiated
+	 * @param ast utility object used to create AST nodes
+	 */
+	private void setCtorTypeArguments(ClassInstanceCreation newCtorCall, String ctorTypeName, ITypeBinding[] ctorOwnerTypeParameters, AST ast) {
+        if (ctorOwnerTypeParameters.length == 0) // easy, just a simple type
+            newCtorCall.setType(ASTNodeFactory.newType(ast, ctorTypeName));
+        else {
+            Type baseType= ast.newSimpleType(ast.newSimpleName(ctorTypeName));
+            ParameterizedType newInstantiatedType= ast.newParameterizedType(baseType);
+            List/*<Type>*/ newInstTypeArgs= newInstantiatedType.typeArguments();
+
+            for(int i= 0; i < ctorOwnerTypeParameters.length; i++) {
+                Type typeArg= ASTNodeFactory.newType(ast, ctorOwnerTypeParameters[i].getName());
+
+                newInstTypeArgs.add(typeArg);
+            }
+            newCtorCall.setType(newInstantiatedType);
+        }
+	}
+
+	/**
+	 * Sets the return type of the factory method, including any necessary type
+	 * arguments. E.g., for constructor <code>Foo()</code> in <code>Foo&lt;T&gt;</code>,
+	 * the factory method defines a method type parameter <code>&lt;T&gt;</code> and
+	 * returns a <code>Foo&lt;T&gt;</code>.
+	 * @param newMethod the method whose return type is to be set
+	 * @param retTypeName the simple name of the return type (without type parameters)
+	 * @param ctorOwnerTypeParameters the formal type parameters of the type that the
+	 * factory method instantiates (whose constructor is being encapsulated)
+	 * @param ast utility object used to create AST nodes
+	 */
+	private void setMethodReturnType(MethodDeclaration newMethod, String retTypeName, ITypeBinding[] ctorOwnerTypeParameters, AST ast) {
+        if (ctorOwnerTypeParameters.length == 0)
+            newMethod.setReturnType2(ast.newSimpleType(ast.newSimpleName(retTypeName)));
+        else {
+            Type baseType= ast.newSimpleType(ast.newSimpleName(retTypeName));
+            ParameterizedType newRetType= ast.newParameterizedType(baseType);
+            List/*<Type>*/ newRetTypeArgs= newRetType.typeArguments();
+
+            for(int i= 0; i < ctorOwnerTypeParameters.length; i++) {
+                Type retTypeArg= ASTNodeFactory.newType(ast, ctorOwnerTypeParameters[i].getName());
+
+                newRetTypeArgs.add(retTypeArg);
+            }
+            newMethod.setReturnType2(newRetType);
+        }
 	}
 
 	/**
@@ -553,23 +646,73 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param newMethod the <code>MethodDeclaration</code> for the factory method
 	 */
 	private void createFactoryMethodSignature(AST ast, MethodDeclaration newMethod) {
-		List	argTypes= newMethod.parameters();
+		List argDecls= newMethod.parameters();
 
 		for(int i=0; i < fArgTypes.length; i++) {
-			SingleVariableDeclaration	argDecl= ast.newSingleVariableDeclaration();
+			SingleVariableDeclaration argDecl= ast.newSingleVariableDeclaration();
+			Type argType;
+
+			if (i == (fArgTypes.length - 1) && fCtorIsVarArgs) {
+				// The trailing varargs arg has an extra array dimension, compared to
+				// what we need to pass to setType()...
+				argType= typeNodeForTypeBinding(fArgTypes[i].getElementType(),
+						fArgTypes[i].getDimensions()-1, ast);
+				argDecl.setVarargs(true);
+			} else
+				argType= typeNodeForTypeBinding(fArgTypes[i], 0, ast);
 
 			argDecl.setName(ast.newSimpleName(fFormalArgNames[i]));
-			argDecl.setType(typeForArgType(fArgTypes[i], ast));
-			argTypes.add(argDecl);
+			argDecl.setType(argType);
+			argDecls.add(argDecl);
 		}
 
-		ITypeBinding[]	ctorExcepts= fCtorBinding.getExceptionTypes();
-		List			exceptions= newMethod.thrownExceptions();
+		ITypeBinding[] ctorExcepts= fCtorBinding.getExceptionTypes();
+		List exceptions= newMethod.thrownExceptions();
 
 		for(int i=0; i < ctorExcepts.length; i++) {
-			String	excName= fImportRewriter.addImport(ctorExcepts[i]);
+			String excName= fImportRewriter.addImport(ctorExcepts[i]);
 
 			exceptions.add(ASTNodeFactory.newName(ast, excName));
+		}
+
+        copyTypeParameters(ast, newMethod);
+	}
+
+	/**
+	 * Copies the constructor's parent type's type parameters, if any, as
+	 * method type parameters of the new static factory method. (Recall
+	 * that static methods can't refer to type arguments of the enclosing
+	 * class, since they have no instance to serve as a context.)<br>
+	 * Makes sure to copy the bounds from the owning type, to ensure that the
+	 * return type of the factory method satisfies the bounds of the type
+	 * being instantiated.<br>
+	 * E.g., for ctor Foo() in the type Foo<T extends Number>, be sure that
+	 * the factory method is declared as<br>
+	 * <code>static <T extends Number> Foo<T> createFoo()</code><br>
+	 * and not simply<br>
+	 * <code>static <T> Foo<T> createFoo()</code><br>
+	 * or the compiler will bark.
+	 * @param ast utility object needed to create ASTNode's for the new method
+	 * @param newMethod the method onto which to copy the type parameters
+	 */
+	private void copyTypeParameters(AST ast, MethodDeclaration newMethod) {
+		ITypeBinding[] ctorOwnerTypeParms= fCtorBinding.getDeclaringClass().getTypeParameters();
+		List/*<TypeParameter>*/ factoryMethodTypeParms= newMethod.typeParameters();
+		for(int i= 0; i < ctorOwnerTypeParms.length; i++) {
+            TypeParameter newParm= ast.newTypeParameter();
+            ITypeBinding[] parmTypeBounds= ctorOwnerTypeParms[i].getTypeBounds();
+            List/*<Type>*/ newParmBounds= newParm.typeBounds();
+
+            newParm.setName(ast.newSimpleName(ctorOwnerTypeParms[i].getName()));
+            for(int b=0; b < parmTypeBounds.length; b++) {
+            	if (!parmTypeBounds[b].isClass() || parmTypeBounds[b].getSuperclass() == null)
+            		continue;
+
+            	Type newBound= fImportRewriter.addImport(parmTypeBounds[b], ast);
+
+                newParmBounds.add(newBound);
+            }
+			factoryMethodTypeParms.add(newParm);
 		}
 	}
 
@@ -578,12 +721,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * refers to an object type, use the import rewriter to determine whether
 	 * the reference requires a new import, or instead needs to be qualified.<br>
 	 * Like ASTNodeFactory.newType(), but for the handling of imports.
+	 * @param extraDims number of extra array dimensions to add to the resulting type
 	 */
-	private Type typeForArgType(ITypeBinding argType, AST ast) {
+	private Type typeNodeForTypeBinding(ITypeBinding argType, int extraDims, AST ast) {
+		if (extraDims > 0)
+			return ast.newArrayType(typeNodeForTypeBinding(argType, 0, ast), extraDims);
 		if (argType.isPrimitive())
 			return ASTNodeFactory.newType(ast, argType, false);
 		else if (argType.isArray()) {
-			Type elementType= typeForArgType(argType.getElementType(), ast);
+			Type elementType= typeNodeForTypeBinding(argType.getElementType(), extraDims, ast);
 
 			return ast.newArrayType(elementType, argType.getDimensions());
 		} else {
@@ -813,14 +959,16 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @return may return null if this is really a constructor->constructor call (e.g. "this(...)")
 	 */
 	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws CoreException {
-		ICompilationUnit	unitHandle= ASTCreator.getCu(unitAST);
-		ASTNode		node= NodeFinder.perform(unitAST, start, length);
+		ICompilationUnit unitHandle= ASTCreator.getCu(unitAST);
+		ASTNode node= NodeFinder.perform(unitAST, start, length);
 
 		if (node == null)
-			throw new CoreException(new StatusInfo(IStatus.ERROR, RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
-					new Object[] {	Integer.toString(start), Integer.toString(start + length),
-									unitHandle.getSource().substring(start, start + length),
-									unitHandle.getElementName() })));
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
+					RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
+							new Object[] { Integer.toString(start), Integer.toString(start + length),
+								unitHandle.getSource().substring(start, start + length),
+								unitHandle.getElementName() }),
+					null));
 
 		if (node instanceof ClassInstanceCreation) {
 			return (ClassInstanceCreation) node;
@@ -830,13 +978,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (init instanceof ClassInstanceCreation) {
 				return (ClassInstanceCreation) init;
 			} else if (init != null)
-				throw new CoreException(new StatusInfo(IStatus.ERROR,
-					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedInitializerNodeType", //$NON-NLS-1$
-										new Object[] { init.toString(), unitHandle.getElementName() })));
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
+						RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedInitializerNodeType", //$NON-NLS-1$
+								new Object[] { init.toString(), unitHandle.getElementName() }),
+						null));
 			else
-				throw new CoreException(new StatusInfo(IStatus.ERROR,
-					RefactoringCoreMessages.getFormattedString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl", //$NON-NLS-1$
-										new Object[] { node.toString() })));
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
+						RefactoringCoreMessages.getFormattedString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl", //$NON-NLS-1$
+								new Object[] { node.toString() }),
+						null));
 		} else if (node instanceof ConstructorInvocation) {
 			// This is a call we can bypass; it's from one constructor flavor
 			// to another flavor on the same class.
@@ -852,9 +1002,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (expr instanceof ClassInstanceCreation)
 				return (ClassInstanceCreation) expr;
 			else
-				throw new CoreException(new StatusInfo(IStatus.ERROR,
-					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
-						new Object[] { expr.toString(), unitHandle.getElementName() })));
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
+						RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+								new Object[] { expr.toString(), unitHandle.getElementName() }),
+						null));
 		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof AbstractTypeDeclaration)) {
 			// We seem to have been given a hit for an implicit call to the base-class constructor.
 			// Do nothing with this (implicit) call, but have to make sure we make the derived class
@@ -862,9 +1013,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			fConstructorVisibility= Modifier.PROTECTED;
 			return null;
 		} else
-			throw new CoreException(new StatusInfo(IStatus.ERROR,
-				RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
-					new Object[] {	node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }))); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
+					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+							new Object[] { node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }), //$NON-NLS-1$ //$NON-NLS-2$
+					null));
 	}
 
 	/**
@@ -1030,6 +1182,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		try {
 			factoryType= getProject().findType(fullyQualifiedTypeName);
+
+			if (factoryType == null) // presumably a non-primary type; try the search engine
+				factoryType= findNonPrimaryType(fullyQualifiedTypeName, new NullProgressMonitor(), new RefactoringStatus());
 
 			if (factoryType == null)
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("IntroduceFactory.noSuchClass", fullyQualifiedTypeName)); //$NON-NLS-1$
