@@ -111,9 +111,9 @@ public class DeleteRefactoring extends Refactoring{
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(RefactoringStatus.create(Resources.checkInSync(fResources)));
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fResources))));
 		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
-		result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
 		pm.done();
 		return result;
 	}
@@ -245,7 +245,7 @@ public class DeleteRefactoring extends Refactoring{
 		for (int i = 0; i < subFolders.length; i++) {
 			if (! (subFolders[i] instanceof IFolder))
 				continue;
-			IJavaElement element= JavaCore.create((IFolder)folder);
+			IJavaElement element= JavaCore.create(folder);
 			if (element instanceof IPackageFragmentRoot)	
 				return true;
 			if (element instanceof IPackageFragment)	

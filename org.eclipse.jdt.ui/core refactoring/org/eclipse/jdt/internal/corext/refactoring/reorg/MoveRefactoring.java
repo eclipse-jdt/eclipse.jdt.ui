@@ -64,9 +64,9 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 		pm.beginTask("", 1);
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(RefactoringStatus.create(Resources.checkInSync(fMovePolicy.getResources())));
+			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fMovePolicy.getResources()))));
 			IResource[] javaResources= ReorgUtils.getResources(fMovePolicy.getJavaElements());
-			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
+			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
 			return result;
 		} finally {
 			pm.done();

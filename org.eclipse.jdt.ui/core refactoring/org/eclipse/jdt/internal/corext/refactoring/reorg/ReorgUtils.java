@@ -278,8 +278,7 @@ public class ReorgUtils {
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 		if (cu.equals(wc))
 			return false;
-		IJavaElement element= (IJavaElement)elem;
-		IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, element);
+		IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, elem);
 		return wcElement == null || ! wcElement.exists();
 	}
 	
@@ -542,5 +541,15 @@ public class ReorgUtils {
 		if (r1Location == null || r2Location == null)
 			return false;
 		return r1Location.equals(r2Location);
+	}
+	
+	public static IResource[] getNotNulls(IResource[] resources) {
+		Set set= new HashSet(resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource != null)
+				set.add(resource);
+		}
+		return (IResource[]) set.toArray(new IResource[set.size()]);
 	}
 }

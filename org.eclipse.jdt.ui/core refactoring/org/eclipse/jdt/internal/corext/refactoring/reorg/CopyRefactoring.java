@@ -65,9 +65,9 @@ public final class CopyRefactoring extends Refactoring{
 		pm.beginTask("", 1);
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(RefactoringStatus.create(Resources.checkInSync(fCopyPolicy.getResources())));
+			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
 			IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
-			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
+			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
 			return result;
 		} finally {
 			pm.done();
