@@ -41,27 +41,21 @@
     
   </target>
   
-    <!-- leak test target -->
+  <!-- leak test target -->
   <target name="leaksuite" depends="checkOS" if="os.isWindows">
-    <property name="jdt-folder" 
-              value="${eclipse-home}/jdt_folder"/>
+    <property name="jdt-folder" value="${eclipse-home}/jdt_folder"/>
 
     <delete dir="${jdt-folder}" quiet="true"/>
-  	
     <copy file="${eclipse-home}/plugins/${org.eclipse.jdt.ui.tests}/leaks/ProfileNatives.dll" todir="${java.home}/bin" />	
     
-		<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+	<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="vmargs" value="-Xint -XrunProfileNatives"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
     </ant>
-    
   </target>
 
-  
-  
   <target name="checkOS">
    	<condition property="os.isWindows">
     	<os family="windows"/>
@@ -85,4 +79,49 @@
 
   </target>
 
+  <!-- performance test target -->
+  <target name="performance-suite">
+    <property name="jdt-ui-performance-folder" value="${eclipse-home}/jdt_ui_performance_folder"/>
+    <property name="data-dir" value="${jdt-ui-performance-folder}"/>
+    <property name="plugin-name" value="${plugin-name}"/>
+    
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
+    </ant>
+    
+    <!-- run the package explorer perf test 5 time -->
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+    </ant>
+    
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+    </ant>
+    
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+    </ant>
+    
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+    </ant>
+    
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest"/>
+    </ant>
+  </target>
+	
+  <!-- This target runs the performance test suites. -->
+  <target name="performance" depends="init,performance-suite,cleanup">
+    <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="includes" value="org*.xml"/>
+      <property name="output-file" value="${plugin-name}.xml"/>
+    </ant>
+  </target>		
 </project>
