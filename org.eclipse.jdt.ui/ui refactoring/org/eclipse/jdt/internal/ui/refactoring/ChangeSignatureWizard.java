@@ -64,7 +64,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		
 		public ChangeSignatureInputPage() {
 			super(PAGE_NAME, true);
-			setMessage(RefactoringMessages.getString("ChangeSignatureInputPage.new_order")); //$NON-NLS-1$
+			setMessage(RefactoringMessages.getString("ChangeSignatureInputPage.change")); //$NON-NLS-1$
 			fSignaturePreviewDocument= new Document();
 		}
 	
