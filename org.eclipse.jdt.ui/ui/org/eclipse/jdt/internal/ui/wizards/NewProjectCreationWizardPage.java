@@ -35,7 +35,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	private WizardNewProjectCreationPage fMainPage;
 
 	private IPath fCurrProjectLocation;
-	private IProject fCurrProject;
+	protected IProject fCurrProject;
 
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
@@ -44,6 +44,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		super();
 		fMainPage= mainPage;
 		fCurrProjectLocation= null;
+		fCurrProject= null;
 	}
 	
 	/* (non-Javadoc)
@@ -130,6 +131,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
+			fCurrProject= null;
 		}
 	}
 
@@ -152,6 +154,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 					throw new InvocationTargetException(e);
 				} finally {
 					monitor.done();
+					fCurrProject= null;
 				}
 			}
 		};
