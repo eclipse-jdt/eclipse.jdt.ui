@@ -14,8 +14,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 
 
 public class JavaTestPlugin extends Plugin {
@@ -52,6 +55,32 @@ public class JavaTestPlugin extends Plugin {
 			return null;
 		}
 	}
+	
+	public static String getPluginId() {
+		return getDefault().getDescriptor().getUniqueIdentifier();
+	}
+
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+	
+	public static void logErrorMessage(String message) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
+	}
+
+	public static void logErrorStatus(String message, IStatus status) {
+		if (status == null) {
+			logErrorMessage(message);
+			return;
+		}
+		MultiStatus multi= new MultiStatus(getPluginId(), IStatus.ERROR, message, null);
+		multi.add(status);
+		log(multi);
+	}
+	
+	public static void log(Throwable e) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getMessage(), e)); //$NON-NLS-1$
+	}	
 	
 		
 

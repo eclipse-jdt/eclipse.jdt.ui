@@ -66,4 +66,21 @@
    </markerResolutionGenerator> 
 </extension> 
 
+<extension point="org.eclipse.ui.popupMenus">
+	<objectContribution
+		id="org.eclipse.jdt.ui.examples.AddTestMarkersAction"
+		objectClass="org.eclipse.jdt.core.ICompilationUnit">
+		<action
+			id="addTestmarkers"
+			label="Add Test Markers"
+			tooltip="Add Test Markers"
+			menubarPath="Add Test Markers"
+			enablesFor="1"
+			class="org.eclipse.jdt.ui.examples.AddTestMarkersAction">
+		</action>
+	</objectContribution>
+</extension> 
+
 </plugin>
+
+

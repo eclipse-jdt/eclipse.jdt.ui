@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -56,6 +57,11 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 			} else {
 				// resource is not open in editor
 				// to do: work on the resource
+			}
+			try {
+				marker.delete();
+			} catch (CoreException e) {
+				e.printStackTrace();
 			}
 		}
 		
