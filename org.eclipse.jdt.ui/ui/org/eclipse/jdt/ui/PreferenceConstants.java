@@ -18,6 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
@@ -549,6 +550,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_CURRENT_LINE= "currentLine"; //$NON-NLS-1$
 
@@ -561,6 +563,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_CURRENT_LINE_COLOR= "currentLineColor"; //$NON-NLS-1$
 
@@ -569,6 +572,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_PRINT_MARGIN= "printMargin"; //$NON-NLS-1$
 	
@@ -581,11 +585,13 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_PRINT_MARGIN_COLOR= "printMarginColor"; //$NON-NLS-1$
 
 	/**
 	 * Print margin column. Int value.
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_PRINT_MARGIN_COLUMN= "printMarginColumn"; //$NON-NLS-1$
 
@@ -961,6 +967,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
 
@@ -969,6 +976,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
 
@@ -982,6 +990,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @see #EDITOR_LINE_NUMBER_RULER
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants}
 	 */
 	public final static String EDITOR_LINE_NUMBER_RULER_COLOR= "lineNumberColor"; //$NON-NLS-1$
 
@@ -1137,7 +1146,7 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_STRING_BOLD= IJavaColorConstants.JAVA_STRING + EDITOR_BOLD_SUFFIX;
-	
+
 	/**
 	 * A named preference that holds the color used to render method names.
 	 * <p>
@@ -1815,68 +1824,6 @@ public class PreferenceConstants {
 	 */	
 	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
 	
-	
-	/**
-	 * A named preference that controls the background color for changed lines in the line number bar.
-	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string
-	 * using class <code>PreferenceConverter</code>
-	 * </p>
-	 * 
-	 * @see org.eclipse.jface.resource.StringConverter
-	 * @see org.eclipse.jface.preference.PreferenceConverter
-	 * @since 3.0
-	 */
-	public static final String QUICK_DIFF_CHANGED_COLOR= "lineNumberBar.colors.changed"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls the background color for added lines in the line number bar.
-	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string
-	 * using class <code>PreferenceConverter</code>
-	 * </p>
-	 * 
-	 * @see org.eclipse.jface.resource.StringConverter
-	 * @see org.eclipse.jface.preference.PreferenceConverter
-	 * @since 3.0
-	 */
-	public static final String QUICK_DIFF_ADDED_COLOR= "lineNumberBar.colors.added"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls the color for the deleted lines indicator in the line number bar.
-	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string
-	 * using class <code>PreferenceConverter</code>
-	 * </p>
-	 * 
-	 * @see org.eclipse.jface.resource.StringConverter
-	 * @see org.eclipse.jface.preference.PreferenceConverter
-	 * @since 3.0
-	 */
-	public static final String QUICK_DIFF_DELETED_COLOR= "lineNumberBar.colors.deleted"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls whether quick diff information is shown on a newly opened editor.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static String QUICK_DIFF_ALWAYS_ON= "quickdiff.alwaysOn"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls the preferred provider to be used for quick diff reference.
-	 * <p>
-	 * Value is of type <code>String</code>.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static String QUICK_DIFF_DEFAULT_PROVIDER= "quickdiff.preferredProvider"; //$NON-NLS-1$
-
-
-
 	/**
 	 * Initializes the given preference store with the default values.
 	 * 
@@ -1885,6 +1832,9 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public static void initializeDefaultValues(IPreferenceStore store) {
+		// set the default values from ExtendedTextEditor
+		ExtendedTextEditorPreferenceConstants.initializeDefaultValues(store);
+		
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage
@@ -2060,12 +2010,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, mod1Name);
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.MOD1);
 		
-		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR, new RGB(255, 230, 230));
-		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR, new RGB(230, 230, 255));
-		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_DELETED_COLOR, new RGB(0, 0, 0));
-		store.setDefault(PreferenceConstants.QUICK_DIFF_ALWAYS_ON, true);
-		store.setDefault(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, "org.eclipse.ui.internal.editors.quickdiff.LastSaveReferenceProvider"); //$NON-NLS-1$
-
 		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	
@@ -2075,7 +2019,7 @@ public class PreferenceConstants {
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	
 	}
-	
+
 	/**
 	 * Returns the JDT-UI preference store.
 	 * 
@@ -2134,3 +2078,4 @@ public class PreferenceConstants {
 		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
 	}		
 }
+

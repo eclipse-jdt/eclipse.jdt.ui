@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -699,7 +700,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static int getMargin() {
-		return getPreferenceStore().getInt(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN);
+		return getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN);
 	}
 
 	private static final String[] fgInlineTags= {

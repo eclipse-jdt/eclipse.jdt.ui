@@ -56,24 +56,27 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -90,8 +93,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
 
-	public final OverlayPreferenceStore.OverlayKey[] fKeys;
-	
+	public final OverlayPreferenceStore.OverlayKey[] fKeys;	
 	private final String[][] fSyntaxColorListModel= new String[][] {
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
@@ -108,10 +110,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fAppearanceColorListModel= new String[][] {
-		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), PreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
@@ -199,7 +201,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
 		fAnnotationColorListModel= createAnnotationTypeListModel(markerAnnotationPreferences);
 	}
-
+	
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(MarkerAnnotationPreferences preferences) {
 		
 		ArrayList overlayKeys= new ArrayList();
@@ -252,12 +254,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CURRENT_LINE));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_PRINT_MARGIN));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 
@@ -268,10 +270,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_OVERVIEW_RULER));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_OVERVIEW_RULER));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_LINE_NUMBER_RULER));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER));
 				
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS));
 		
@@ -323,9 +325,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
-	}
-	
-	/*
+	}	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */	
 	public void init(IWorkbench workbench) {
@@ -603,22 +603,22 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
-		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
+		addTextField(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
 				
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
+		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
 				
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_LINE_NUMBER_RULER, 0);
+		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_CURRENT_LINE, 0);
+		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE, 0);
 				
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN, 0);
+		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
@@ -722,7 +722,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		fAnnotationList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(8);
+		gd.heightHint= convertHeightInCharsToPixels(10);
 		fAnnotationList.setLayoutData(gd);
 						
 		Composite optionsComposite= new Composite(editorComposite, SWT.NONE);
@@ -818,9 +818,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
 		return items;
-	}
-	
-	private Control createTypingPage(Composite parent) {
+	}	private Control createTypingPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;

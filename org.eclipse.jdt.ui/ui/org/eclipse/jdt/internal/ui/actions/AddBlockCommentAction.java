@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.core.Assert;
  * 
  * @since 3.0
  */
-public class BlockCommentAction extends TextEditorAction {
+public class AddBlockCommentAction extends TextEditorAction {
 
 	/**
 	 * Creates a new instance.
@@ -45,7 +45,7 @@ public class BlockCommentAction extends TextEditorAction {
 	 *   <code>null</code> if none
 	 * @param editor the text editor
 	 */
-	public BlockCommentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
+	public AddBlockCommentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
 	}
 	

@@ -21,7 +21,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 
@@ -58,6 +57,15 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -83,32 +91,13 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationRulerColumn;
-import org.eclipse.jface.text.source.ChangeRulerColumn;
-import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelExtension;
-import org.eclipse.jface.text.source.IChangeRulerColumn;
 import org.eclipse.jface.text.source.IOverviewRuler;
-import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.ISourceViewerExtension;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.IVerticalRulerColumn;
-import org.eclipse.jface.text.source.LineNumberChangeRulerColumn;
-import org.eclipse.jface.text.source.LineNumberRulerColumn;
-import org.eclipse.jface.text.source.OverviewRuler;
+import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -120,33 +109,25 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.quickdiff.IQuickDiffProviderImplementation;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
-import org.eclipse.ui.texteditor.StatusTextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
-
-import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
-import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -169,7 +150,6 @@ import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -185,16 +165,16 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 /**
  * Java specific text editor.
  */
-public abstract class JavaEditor extends StatusTextEditor implements IViewPartInputProvider {
+public abstract class JavaEditor extends ExtendedTextEditor implements IViewPartInputProvider {
 	
 	/**
 	 * Internal implementation class for a change listener.
@@ -1115,28 +1095,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 	
 	
-	/** Preference key for showing the line number ruler */
-	protected final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
-	/** Preference key for the foreground color of the line numbers */
-	protected final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
 	/** Preference key for the link color */
 	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-	/** Preference key for highlighting current line */
-	protected final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
-	/** Preference key for highlight color of current line */
-	protected final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
-	/** Preference key for showing print marging ruler */
-	protected final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
-	/** Preference key for print margin ruler color */
-	protected final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
-	/** Preference key for print margin ruler column */
-	protected final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
-	/** Preference key for shwoing the overview ruler */
-	protected final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
 	/** Preference key for compiler task tags */
 	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/** Preference key for browser like links */
@@ -1168,30 +1132,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
-	/** The line number ruler column */
-	private LineNumberRulerColumn fLineNumberRulerColumn;
-	/**
-	 * The change ruler column.
-	 * @since 3.0
-	 */
-	private IChangeRulerColumn fChangeRulerColumn;
-	/** This editor's encoding support */
-	private DefaultEncodingSupport fEncodingSupport;
 	/** The mouse listener */
 	private MouseClickListener fMouseListener;
 	/** The information presenter. */
 	private InformationPresenter fInformationPresenter;
-	/**
-	 * The annotation preferences.
-	 * @since 3.0
-	 */
-	private MarkerAnnotationPreferences fAnnotationPreferences;
-	/** The annotation access */
-	protected IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
-	/** The source viewer decoration support */
-	protected SourceViewerDecorationSupport fSourceViewerDecorationSupport;
-	/** The overview ruler */
-	protected OverviewRuler fOverviewRuler;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
 	/** The preference property change listener for java core. */
@@ -1199,11 +1143,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
-	/**
-	 * Whether quick diff information is displayed, either on a change ruler or the line number ruler.
-	 * @since 3.0
-	 */
-	private boolean fIsChangeInformationShown;
 
 		
 	/**
@@ -1230,7 +1169,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public JavaEditor() {
 		super();
-		fAnnotationPreferences= new MarkerAnnotationPreferences();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this, IJavaPartitions.JAVA_PARTITIONING));
 		setRangeIndicator(new DefaultRangeIndicator());
@@ -1243,17 +1181,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 		
-		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
-		
-		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);		
-		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext()) {
-			AnnotationPreference preference= (AnnotationPreference) e.next();
-			if (preference.contributesToHeader())
-				fOverviewRuler.addHeaderAnnotationType(preference.getAnnotationType());
-		}
-		
-		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
+		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isPrefOverviewRulerVisible(), styles);
 		
 		StyledText text= viewer.getTextWidget();
 		text.addBidiSegmentListener(new  BidiSegmentListener() {
@@ -1263,11 +1191,18 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		});
 		
 		JavaUIHelp.setHelp(this, text, IJavaHelpContextIds.JAVA_EDITOR);
-				
-		fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, sharedColors);
-		configureSourceViewerDecorationSupport();
+
+		// ensure source viewer decoration support has been created and configured
+		getSourceViewerDecorationSupport(viewer);				
 		
 		return viewer;
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createAnnotationAccess()
+	 */
+	protected IAnnotationAccess createAnnotationAccess() {
+		return new AnnotationAccess();
 	}
 	
 	public final ISourceViewer getViewer() {
@@ -1278,7 +1213,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
-			return new JavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
+		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isPrefOverviewRulerVisible(), styles);
 	}
 	
 	/*
@@ -1348,7 +1283,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected void synchronizeOutlinePage(ISourceReference element) {
 		synchronizeOutlinePage(element, true);
 	}
-
+	
 	/**
 	 * Synchronizes the outliner selection with the given element
 	 * position in the editor.
@@ -1363,7 +1298,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fOutlineSelectionChangedListener.install(fOutlinePage);
 		}
 	}
-	
+		
 	/**
 	 * Synchronizes the outliner selection with the actual cursor
 	 * position in the editor.
@@ -1395,9 +1330,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			return fOutlinePage;
 		}
 		
-		if (IEncodingSupport.class.equals(required))
-			return fEncodingSupport;
-
 		if (required == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
@@ -1590,48 +1522,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 	
 	/*
-	 * @see StatusTextEditor#getStatusHeader(IStatus)
-	 */
-	protected String getStatusHeader(IStatus status) {
-		if (fEncodingSupport != null) {
-			String message= fEncodingSupport.getStatusHeader(status);
-			if (message != null)
-				return message;
-		}
-		return super.getStatusHeader(status);
-	}
-	
-	/*
-	 * @see StatusTextEditor#getStatusBanner(IStatus)
-	 */
-	protected String getStatusBanner(IStatus status) {
-		if (fEncodingSupport != null) {
-			String message= fEncodingSupport.getStatusBanner(status);
-			if (message != null)
-				return message;
-		}
-		return super.getStatusBanner(status);
-	}
-	
-	/*
-	 * @see StatusTextEditor#getStatusMessage(IStatus)
-	 */
-	protected String getStatusMessage(IStatus status) {
-		if (fEncodingSupport != null) {
-			String message= fEncodingSupport.getStatusMessage(status);
-			if (message != null)
-				return message;
-		}
-		return super.getStatusMessage(status);
-	}
-	
-	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-		if (fEncodingSupport != null)
-			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
 	}
 	
@@ -1643,20 +1537,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (isBrowserLikeLinks())
 			disableBrowserLikeLinks();
 			
-		if (fEncodingSupport != null) {
-				fEncodingSupport.dispose();
-				fEncodingSupport= null;
-		}
-		
 		if (fPropertyChangeListener != null) {
 			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 			preferences.removePropertyChangeListener(fPropertyChangeListener);
 			fPropertyChangeListener= null;
-		}
-		
-		if (fSourceViewerDecorationSupport != null) {
-			fSourceViewerDecorationSupport.dispose();
-			fSourceViewerDecorationSupport= null;
 		}
 		
 		if (fBracketMatcher != null) {
@@ -1719,9 +1603,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
 		
-		fEncodingSupport= new DefaultEncodingSupport();
-		fEncodingSupport.initialize(this);
-		
 		fSelectionHistory= new SelectionHistory(this);
 
 		action= new StructureSelectEnclosingAction(this, fSelectionHistory);
@@ -1775,40 +1656,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
 				}
 				return;
-			}
-			
-			if (OVERVIEW_RULER.equals(property))  {
-				if (isOverviewRulerVisible())
-					showOverviewRuler();
-				else
-					hideOverviewRuler();
-				return;
-			}
-			
-			if (LINE_NUMBER_RULER.equals(property)) {
-				if (isLineNumberRulerVisible())
-					showLineNumberRuler();
-				else
-					hideLineNumberRuler();
-				return;
-			}
-			
-			if (fLineNumberRulerColumn != null
-				&&	(LINE_NUMBER_COLOR.equals(property)
-					||	PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT.equals(property)
-					||	PREFERENCE_COLOR_BACKGROUND.equals(property))) {
-					
-				initializeLineNumberRulerColumn(fLineNumberRulerColumn);
-			}
-			
-			if (PreferenceConstants.QUICK_DIFF_CHANGED_COLOR.equals(property)
-				||	PreferenceConstants.QUICK_DIFF_ADDED_COLOR.equals(property)
-				||	PreferenceConstants.QUICK_DIFF_DELETED_COLOR.equals(property)) {
-					
-				if (fLineNumberRulerColumn instanceof IChangeRulerColumn)
-					initializeChangeRulerColumn((IChangeRulerColumn) fLineNumberRulerColumn);
-				else if (fChangeRulerColumn != null)
-					initializeChangeRulerColumn(fChangeRulerColumn);
 			}
 			
 			if (isJavaEditorHoverProperty(property))
@@ -1894,254 +1741,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				sourceViewer.invalidateTextPresentation();
 		}
 	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.ITextEditorExtension3#showChangeInformation(boolean)
-	 */
-	public void showChangeInformation(boolean show) {
-		if (show == fIsChangeInformationShown)
-			return;
-		
-		if (fIsChangeInformationShown) {
-			uninstallChangeRulerModel();
-			showChangeRuler(false); // hide change ruler if its displayed - if the line number ruler is showing, only the colors get removed by deinstalling the model
-		} else {
-			ensureChangeInfoCanBeDisplayed(); // can be replaced w/ showChangeRuler(false) once the old line number ruler is gone
-			installChangeRulerModel();
-		}
-		
-		fIsChangeInformationShown= show;
-	}
 
-	/**
-	 * Installs the differ annotation model with the current quick diff display. 
-	 * @since R3.0
-	 */
-	private void installChangeRulerModel() {
-		IChangeRulerColumn column= getChangeColumn();
-		if (column != null)
-			column.setModel(getOrCreateDiffer());
-	}
-
-	/**
-	 * Uninstalls the differ annotation model from the current quick diff display.
-	 * 
-	 * @since R3.0
-	 */
-	private void uninstallChangeRulerModel() {
-		IChangeRulerColumn column= getChangeColumn();
-		if (column != null)
-			column.setModel(null);
-	}
-
-	/**
-	 * Ensures that either the line number display is a <code>LineNumberChangeRuler</code> or
-	 * a separate change ruler gets displayed.
-	 * 
-	 * @since R3.0
-	 */
-	private void ensureChangeInfoCanBeDisplayed() {
-		if (isLineNumberRulerVisible()) {
-			if (!(fLineNumberRulerColumn instanceof IChangeRulerColumn)) {
-				hideLineNumberRuler();
-				// HACK: set state already so a change ruler is created. Not needed once always a change line number bar gets installed
-				fIsChangeInformationShown= true;
-				showLineNumberRuler();
-			}
-		} else 
-			showChangeRuler(true);
-	}
-
-	/*
-	 * @see org.eclipse.ui.texteditor.ITextEditorExtension3#isChangeInformationShowing()
-	 */
-	public boolean isChangeInformationShowing() {
-		return fIsChangeInformationShown;
-	}
-	
-	/**
-	 * Creates a new <code>DocumentLineDiffer</code> and installs it with <code>model</code>.
-	 * The default reference provider is installed with the newly created differ.
-	 * 
-	 * @param model the annotation model of the current document.
-	 * @return a new <code>DocumentLineDiffer</code> instance.
-	 * @since R3.0
-	 */
-	private DocumentLineDiffer createDiffer(IAnnotationModelExtension model) {
-		DocumentLineDiffer differ;
-		differ= new DocumentLineDiffer();
-		IQuickDiffProviderImplementation provider= getDefaultReferenceProvider();
-		if (provider != null)
-			differ.setReferenceProvider(provider);
-		model.addAnnotationModel(IChangeRulerColumn.QUICK_DIFF_MODEL_ID, differ);
-		return differ;
-	}
-	
-	/**
-	 * Returns the default quick diff reference provider. It is determined by first trying to 
-	 * enable the preferred provider as specified by the preferences; if this is unsuccessful, the
-	 * default provider as specified by the extension point mechanism is installed. If that fails
-	 * as well, <code>null</code> is returned.
-	 * 
-	 * @return the default reference provider
-	 * @since R3.0
-	 */
-	private IQuickDiffProviderImplementation getDefaultReferenceProvider() {
-		String defaultID= getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER);
-		EditorsPlugin editorPlugin= EditorsPlugin.getDefault();
-		ReferenceProviderDescriptor[] descs= editorPlugin.getExtensions();
-		IQuickDiffProviderImplementation provider= null;
-		// try to fetch preferred provider; load if needed
-		for (int i= 0; i < descs.length; i++) {
-			if (descs[i].getId().equals(defaultID)) {
-				provider= descs[i].createProvider();
-				if (provider != null) {
-					provider.setActiveEditor(this);
-					if (provider.isEnabled())
-						break;
-					provider.dispose();
-					provider= null;
-				}
-			}
-		}
-		// if not found, get default provider as specified by the extension point
-		if (provider == null) {
-			ReferenceProviderDescriptor defaultDescriptor= editorPlugin.getDefaultProvider();
-			if (defaultDescriptor != null) {
-				provider= defaultDescriptor.createProvider();
-				if (provider != null) {
-					provider.setActiveEditor(this);
-					if (!provider.isEnabled()) {
-						provider.dispose();
-						provider= null;
-					}
-				}
-			}
-		}
-		return provider;
-	}
-
-	/**
-	 * Returns the annotation model associated with the document displayed in the 
-	 * viewer if it is an <code>IAnnotationModelExtension</code>, or <code>null</code>.
-	 * 
-	 * @return the displayed document's annotation model if it is an <code>IAnnotationModelExtension</code>, or <code>null</code> 
-	 * @since R3.0
-	 */
-	private IAnnotationModelExtension getModel() {
-		ISourceViewer viewer= getSourceViewer();
-		if (viewer == null)
-			return null;
-		IAnnotationModel m= viewer.getAnnotationModel();
-		if (m instanceof IAnnotationModelExtension)
-			return (IAnnotationModelExtension) m;
-		else
-			return null;
-	}
-
-	/**
-	 * Extracts the line differ from the displayed document's annotation model. If none can be found,
-	 * a new differ is created and attached to the annotation model.
-	 * 
-	 * @return the linediffer, or <code>null</code> if none could be found or created.
-	 * @since R3.0
-	 */
-	private DocumentLineDiffer getOrCreateDiffer() {
-		IAnnotationModelExtension model= getModel();
-		if (model == null)
-			return null;
-
-		DocumentLineDiffer differ= (DocumentLineDiffer)model.getAnnotationModel(IChangeRulerColumn.QUICK_DIFF_MODEL_ID);
-		if (differ == null)
-			differ= createDiffer(model);
-		return differ;
-	}
-
-	/**
-	 * Returns the <code>IChangeRulerColumn</code> of this editor, or <code>null</code> if there is none. Either
-	 * the line number bar or a separate change ruler column can be returned.
-	 * 
-	 * @return an instance of <code>IChangeRulerColumn</code> or <code>null</code>.
-	 * @since R3.0
-	 */
-	private IChangeRulerColumn getChangeColumn() {
-		if (fChangeRulerColumn != null)
-			return fChangeRulerColumn;
-		else if (fLineNumberRulerColumn instanceof IChangeRulerColumn)
-			return (IChangeRulerColumn) fLineNumberRulerColumn;
-		else
-			return null;
-	}
-
-	/**
-	 * Sets the display state of the separate change ruler column (not the quick diff display on
-	 * the line number ruler column) to <code>show</code>.
-	 * 
-	 * @param show <code>true</code> if the change ruler column should be shown, <code>false</code> if it should be hidden
-	 * @since R3.0
-	 */
-	private void showChangeRuler(boolean show) {
-		IVerticalRuler v= getVerticalRuler();
-		if (v instanceof CompositeRuler) {
-			CompositeRuler c= (CompositeRuler) v;
-			if (show && fChangeRulerColumn == null)
-				c.addDecorator(1, createChangeRulerColumn());
-			else if (!show && fChangeRulerColumn != null) {
-				c.removeDecorator(fChangeRulerColumn);
-				fChangeRulerColumn= null;
-			}
-		}
-	}
-
-	/**
-	 * Shows the line number ruler column.
-	 */
-	private void showLineNumberRuler() {
-		showChangeRuler(false);
-		IVerticalRuler v= getVerticalRuler();
-		if (v instanceof CompositeRuler) {
-			CompositeRuler c= (CompositeRuler) v;
-			c.addDecorator(1, createLineNumberRulerColumn());
-		}
-	}
-	
-	/**
-	 * Hides the line number ruler column.
-	 */
-	private void hideLineNumberRuler() {
-		IVerticalRuler v= getVerticalRuler();
-		if (fLineNumberRulerColumn != null && v instanceof CompositeRuler) {
-			CompositeRuler c= (CompositeRuler) v;
-			c.removeDecorator(fLineNumberRulerColumn);
-			fLineNumberRulerColumn= null;
-		}
-		if (fIsChangeInformationShown)
-			showChangeRuler(true);
-	}
-	
-	/**
-	 * Return whether the line number ruler column should be 
-	 * visible according to the preference store settings.
-	 * 
-	 * @return <code>true</code> if the line numbers should be visible
-	 */
-	private boolean isLineNumberRulerVisible() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(LINE_NUMBER_RULER);
-	}
-	
-	/**
-	 * Returns whether quick diff info should be visible upon opening an editor 
-	 * according to the preference store settings.
-	 * 
-	 * @return <code>true</code> if the line numbers should be visible
-	 * @since R3.0
-	 */
-	private boolean isQuickDiffAlwaysOn() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(PreferenceConstants.QUICK_DIFF_ALWAYS_ON);
-	}
-	
 	/**
 	 * Returns a segmentation of the line of the given viewer's input document appropriate for
 	 * bidi rendering. The default implementation returns only the string literals of a java code
@@ -2153,7 +1753,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @throws BadLocationException in case lineOffset is not valid in document
 	 */
 	public static int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
-		
+			
 		IDocument document= viewer.getDocument();
 		if (document == null)
 			return null;
@@ -2230,160 +1830,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		return null;
 	}
 	
-	/**
-	 * Initializes the given line number ruler column from the preference store.
-	 * 
-	 * @param rulerColumn the ruler column to be initialized
-	 */
-	protected void initializeLineNumberRulerColumn(LineNumberRulerColumn rulerColumn) {
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IColorManager manager= textTools.getColorManager();	
-		
-		IPreferenceStore store= getPreferenceStore();
-		if (store != null) {
-		
-			RGB rgb=  null;
-			// foreground color
-			if (store.contains(LINE_NUMBER_COLOR)) {
-				if (store.isDefault(LINE_NUMBER_COLOR))
-					rgb= PreferenceConverter.getDefaultColor(store, LINE_NUMBER_COLOR);
-				else
-					rgb= PreferenceConverter.getColor(store, LINE_NUMBER_COLOR);
-			}
-			rulerColumn.setForeground(manager.getColor(rgb));
-			
-			
-			rgb= null;
-			// background color
-			if (!store.getBoolean(PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)) {
-				if (store.contains(PREFERENCE_COLOR_BACKGROUND)) {
-					if (store.isDefault(PREFERENCE_COLOR_BACKGROUND))
-						rgb= PreferenceConverter.getDefaultColor(store, PREFERENCE_COLOR_BACKGROUND);
-					else
-						rgb= PreferenceConverter.getColor(store, PREFERENCE_COLOR_BACKGROUND);
-				}
-			}
-			rulerColumn.setBackground(manager.getColor(rgb));
-			rulerColumn.redraw();
-		}
-	}
-	
-	/**
-	 * Creates a new line number ruler column that is appropriately initialized.
-	 * 
-	 * @return a new line number ruler column
-	 */
-	protected IVerticalRulerColumn createLineNumberRulerColumn() {
-		if (isQuickDiffAlwaysOn() || isChangeInformationShowing()) {
-			LineNumberChangeRulerColumn column= new LineNumberChangeRulerColumn();
-			column.setHover(new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING));
-			initializeChangeRulerColumn(column);
-			fLineNumberRulerColumn= column;
-		} else {
-			fLineNumberRulerColumn= new LineNumberRulerColumn();
-		}
-		initializeLineNumberRulerColumn(fLineNumberRulerColumn);
-		return fLineNumberRulerColumn;
-	}
-	
-	/**
-	 * Initializes the given change ruler column from the preference store.
-	 * 
-	 * @param changeColumn the ruler column to be initialized
-	 * @since R3.0
-	 */
-	private void initializeChangeRulerColumn(IChangeRulerColumn changeColumn) {
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IColorManager manager= textTools.getColorManager();
-		
-		IPreferenceStore store= getPreferenceStore();
-		if (store != null) {
-			RGB rgb= null;
-
-			ISourceViewer v= getSourceViewer();
-			if (v != null && v.getAnnotationModel() != null) {
-				changeColumn.setModel(v.getAnnotationModel());
-			}
-				
-			rgb= null;
-			// change color
-			if (!store.getBoolean(PreferenceConstants.QUICK_DIFF_CHANGED_COLOR)) {
-				if (store.contains(PreferenceConstants.QUICK_DIFF_CHANGED_COLOR)) {
-					if (store.isDefault(PreferenceConstants.QUICK_DIFF_CHANGED_COLOR))
-						rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR);
-					else
-						rgb= PreferenceConverter.getColor(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR);
-				}
-			}
-			changeColumn.setChangedColor(manager.getColor(rgb));
-				
-			rgb= null;
-			// addition color
-			if (!store.getBoolean(PreferenceConstants.QUICK_DIFF_ADDED_COLOR)) {
-				if (store.contains(PreferenceConstants.QUICK_DIFF_ADDED_COLOR)) {
-					if (store.isDefault(PreferenceConstants.QUICK_DIFF_ADDED_COLOR))
-						rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR);
-					else
-						rgb= PreferenceConverter.getColor(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR);
-				}
-			}
-			changeColumn.setAddedColor(manager.getColor(rgb));
-				
-			rgb= null;
-			// deletion indicator color
-			if (!store.getBoolean(PreferenceConstants.QUICK_DIFF_DELETED_COLOR)) {
-				if (store.contains(PreferenceConstants.QUICK_DIFF_DELETED_COLOR)) {
-					if (store.isDefault(PreferenceConstants.QUICK_DIFF_DELETED_COLOR))
-						rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.QUICK_DIFF_DELETED_COLOR);
-					else
-						rgb= PreferenceConverter.getColor(store, PreferenceConstants.QUICK_DIFF_DELETED_COLOR);
-				}
-			}
-			changeColumn.setDeletedColor(manager.getColor(rgb));
-		}
-		
-		changeColumn.redraw();
-	}
-	
-	/**
-	 * Creates a new change ruler column for quick diff display independent of the 
-	 * line number ruler column
-	 * 
-	 * @return a new change ruler column
-	 * @since R3.0
-	 */
-	protected IChangeRulerColumn createChangeRulerColumn() {
-		IChangeRulerColumn column= new ChangeRulerColumn();
-		column.setHover(new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING));
-		fChangeRulerColumn= column;
-		initializeChangeRulerColumn(fChangeRulerColumn);
-		return fChangeRulerColumn;
-	}
-	
-	/*
-	 * @see AbstractTextEditor#createVerticalRuler()
-	 */
-	protected IVerticalRuler createVerticalRuler() {
-		CompositeRuler ruler= new CompositeRuler();
-		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
-		
-		if (isLineNumberRulerVisible())
-			ruler.addDecorator(1, createLineNumberRulerColumn());
-		else if (isQuickDiffAlwaysOn())
-			ruler.addDecorator(1, createChangeRulerColumn());
-			
-		return ruler;
-	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updatePropertyDependentActions()
-	 */
-	protected void updatePropertyDependentActions() {
-		super.updatePropertyDependentActions();
-		if (fEncodingSupport != null)
-			fEncodingSupport.reset();
-	}
-
 	/*
 	 * Update the hovering behavior depending on the preferences.
 	 */
@@ -2438,7 +1884,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		fSourceViewerDecorationSupport.install(getPreferenceStore());
+		getSourceViewerDecorationSupport(getViewer()).install(getPreferenceStore());
 
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.addPropertyChangeListener(fPropertyChangeListener);			
@@ -2465,46 +1911,62 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			configureInsertMode(OVERWRITE, false);
-		
-		if (isQuickDiffAlwaysOn())
-			showChangeInformation(true);
 	}
 	
-	protected void showOverviewRuler() {
-		if (fOverviewRuler != null) {
-			if (getSourceViewer() instanceof ISourceViewerExtension) {
-				((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(true);
-				fSourceViewerDecorationSupport.updateOverviewDecorations();
+	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
+		
+		support.setCharacterPairMatcher(fBracketMatcher);
+		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
+		
+		super.configureSourceViewerDecorationSupport(support);
+	}
+	
+	/**
+	 * Jumps to the next enabled annotation according to the given direction.
+	 * An annotation type is enabled if it is configured to be in the
+	 * Next/Previous tool bar drop down menu and if it is checked.
+	 */
+	public void gotoAnnotation(boolean forward) {
+		
+		ISelectionProvider provider= getSelectionProvider();
+		
+		ITextSelection s= (ITextSelection) provider.getSelection();
+		Position annotationPosition= new Position(0, 0);
+		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), forward, annotationPosition);
+		
+		setStatusLineErrorMessage(null);
+
+		if (nextAnnotation != null) {
+			
+			IMarker marker= null;
+			if (nextAnnotation instanceof MarkerAnnotation)
+				marker= ((MarkerAnnotation) nextAnnotation).getMarker();
+			else {
+				Iterator e= nextAnnotation.getOverlaidIterator();
+				if (e != null) {
+					while (e.hasNext()) {
+						Object o= e.next();
+						if (o instanceof MarkerAnnotation) {
+							marker= ((MarkerAnnotation) o).getMarker();
+							break;
+						}
+					}
+				}
 			}
+			
+			if (marker != null) {
+				IWorkbenchPage page= getSite().getPage();
+				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
+				if (view instanceof TaskList) {
+					StructuredSelection ss= new StructuredSelection(marker);
+					((TaskList) view).setSelection(ss, true);
+				}
+			}
+			
+			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
+			if (nextAnnotation.isProblem())
+				setStatusLineErrorMessage(nextAnnotation.getMessage());
 		}
-	}
-
-	protected void hideOverviewRuler() {
-		if (getSourceViewer() instanceof ISourceViewerExtension) {
-			fSourceViewerDecorationSupport.hideAnnotationOverview();
-			((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(false);
-		}
-	}
-
-	protected boolean isOverviewRulerVisible() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(OVERVIEW_RULER);
-	}
-
-	protected void configureSourceViewerDecorationSupport() {
-
-
-		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext())
-			fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());	
-
-		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
-		
-		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
-		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
-		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
-		
-		fSourceViewerDecorationSupport.setSymbolicFontName(getFontPropertyPreferenceKey());
 	}
 	
 	/**
@@ -2623,53 +2085,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	}
 
-	/**
-	 * Jumps to the next enabled annotation according to the given direction.
-	 * An annotation type is enabled if it is configured to be in the
-	 * Next/Previous tool bar drop down menu and if it is checked.
-	 */
-	public void gotoAnnotation(boolean forward) {
-		
-		ISelectionProvider provider= getSelectionProvider();
-		
-		ITextSelection s= (ITextSelection) provider.getSelection();
-		Position annotationPosition= new Position(0, 0);
-		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), forward, annotationPosition);
-		
-		setStatusLineErrorMessage(null);
 
-		if (nextAnnotation != null) {
-			
-			IMarker marker= null;
-			if (nextAnnotation instanceof MarkerAnnotation)
-				marker= ((MarkerAnnotation) nextAnnotation).getMarker();
-			else {
-				Iterator e= nextAnnotation.getOverlaidIterator();
-				if (e != null) {
-					while (e.hasNext()) {
-						Object o= e.next();
-						if (o instanceof MarkerAnnotation) {
-							marker= ((MarkerAnnotation) o).getMarker();
-							break;
-						}
-					}
-				}
-			}
-			
-			if (marker != null) {
-				IWorkbenchPage page= getSite().getPage();
-				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
-				if (view instanceof TaskList) {
-					StructuredSelection ss= new StructuredSelection(marker);
-					((TaskList) view).setSelection(ss, true);
-				}
-			}
-			
-			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
-			if (nextAnnotation.isProblem())
-				setStatusLineErrorMessage(nextAnnotation.getMessage());
-		}
-	}
 
 	private IJavaAnnotation getNextAnnotation(int offset, boolean forward, Position annotationPosition) {
 		
@@ -2685,7 +2101,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		while (e.hasNext()) {
 			IJavaAnnotation a= (IJavaAnnotation) e.next();
 			Preferences workbenchTextEditorPrefStore= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
-			Iterator iter= fAnnotationPreferences.getAnnotationPreferences().iterator();
+			Iterator iter= getAnnotationPreferences().getAnnotationPreferences().iterator();
 			boolean isNavigationTarget= false;
 			while (iter.hasNext()) {
 				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
@@ -2796,4 +2212,16 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		return getElementAt(offset);
 	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createChangeHover()
+	 */
+	protected LineChangeHover createChangeHover() {
+		return new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING);
+	}
+
+	protected boolean isPrefQuickDiffAlwaysOn() {
+		return false; // never show change ruler for the non-editable java editor. Overridden in subclasses like CompilationUnitEditor
+	}
+
 }

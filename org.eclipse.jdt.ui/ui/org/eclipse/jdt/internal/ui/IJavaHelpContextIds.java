@@ -243,6 +243,7 @@ public interface IJavaHelpContextIds {
 	public static final String JARMANIFEST_WIZARD_PAGE= PREFIX + "jar_manifest_wizard_page_context"; //$NON-NLS-1$
 	public static final String JAROPTIONS_WIZARD_PAGE= PREFIX + "jar_options_wizard_page_context"; //$NON-NLS-1$
 	public static final String JAVA_WORKING_SET_PAGE= PREFIX + "java_working_set_page_context"; //$NON-NLS-1$
+
 	public static final String CLASSPATH_CONTAINER_DEFAULT_PAGE= PREFIX + "classpath_container_default_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_STANDARD_PAGE= PREFIX + "javadoc_standard_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_SPECIFICS_PAGE= PREFIX + "javadoc_specifics_page_context"; //$NON-NLS-1$

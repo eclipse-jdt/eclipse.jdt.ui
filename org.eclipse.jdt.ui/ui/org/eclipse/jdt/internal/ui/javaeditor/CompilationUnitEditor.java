@@ -64,17 +64,17 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -94,7 +94,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.BlockCommentAction;
+import org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
@@ -669,7 +669,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
 		
-		action= new BlockCommentAction(JavaEditorMessages.getResourceBundle(), "AddBlockComment.", this);  //$NON-NLS-1$
+		action= new AddBlockCommentAction(JavaEditorMessages.getResourceBundle(), "AddBlockComment.", this);  //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_BLOCK_COMMENT);		
 		setAction("AddBlockComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("AddBlockComment", true); //$NON-NLS-1$
@@ -1053,6 +1053,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer instanceof ITextViewerExtension)
 			((ITextViewerExtension) sourceViewer).prependVerifyKeyListener(fBracketInserter);
+		
 	}
 	
 	private static char getEscapeCharacter(char character) {
@@ -1292,4 +1293,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		return oldExtension.equals(newExtension);
 	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#isPrefQuickDiffAlwaysOn()
+	 */
+	protected boolean isPrefQuickDiffAlwaysOn() {
+		// reestablishes the behaviour from ExtendedTextEditor which was hacked by JavaEditor
+		// to disable the change bar for the class file (attached source) java editor.
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
+	}
+
 }

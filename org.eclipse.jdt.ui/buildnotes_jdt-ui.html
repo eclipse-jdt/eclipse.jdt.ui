@@ -23,6 +23,12 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
   declared in org.eclipse.ui.workbench.texteditor plug-in. This enables the
   editor to show new markers/annotations if they have a marker annotation
   specification.
+- The JDT extends now ExtendedJavaEditor, an additional layer combining features 
+  used in rich editors, such as the annotation, line number and overview rulers, 
+  the print margin, current text highlighting, and quick diff.
+- Fixed Java auto indentation after conditionals / loops without braces (e.g. <code>if</code> 
+  statements without block).
+- Added block commenting and uncommenting actions.
 </pre>
 ========== Eclipse Build Input August 13th 2003 ==========<br>
 <pre>

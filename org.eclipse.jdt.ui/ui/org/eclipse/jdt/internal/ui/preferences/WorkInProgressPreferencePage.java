@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -30,15 +30,14 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.quickdiff.QuickDiff;
+import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -65,16 +64,6 @@ WorkInProgressPreferencePage
 	private List fRadioButtons;
 	private List fTextControls;
 	
-	/** Color editor for choosing line number ruler colors. */
-	private ColorEditor fColorEditor;
-	/** List containing the colors for the diff line number ruler. */
-	private org.eclipse.swt.widgets.List fColorList;
-	/** Preferences keys and label text for the color list */
-	final static String[][] fColorModels= new String[][] {
-		{PreferencesMessages.getString(PREFIX + "quickdiff.changedLineColor"), PreferenceConstants.QUICK_DIFF_CHANGED_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString(PREFIX + "quickdiff.addedLineColor"), PreferenceConstants.QUICK_DIFF_ADDED_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString(PREFIX + "quickdiff.deletedLineColor"), PreferenceConstants.QUICK_DIFF_DELETED_COLOR}, //$NON-NLS-1$
-	};
 	/** List for the reference provider default. */
 	private org.eclipse.swt.widgets.List fQuickDiffProviderList;
 	/** The reference provider default's list model. */
@@ -91,14 +80,15 @@ WorkInProgressPreferencePage
 		fCheckBoxes= new ArrayList();
 		fTextControls= new ArrayList();
 
-		ReferenceProviderDescriptor[] providers= EditorsPlugin.getDefault().getExtensions();
+		List providers= new QuickDiff().getReferenceProviderDescriptors();
 		fQuickDiffProviderListModel= createQuickDiffReferenceListModel(providers);
 	}
 
-	private String[][] createQuickDiffReferenceListModel(ReferenceProviderDescriptor[] providers) {
+	private String[][] createQuickDiffReferenceListModel(List providers) {
 		ArrayList listModelItems= new ArrayList();
-		for (int i= 0; i < providers.length; i++) {
-			listModelItems.add(new String[] { providers[i].getId(), providers[i].getLabel() });
+		for (Iterator it= providers.iterator(); it.hasNext();) {
+			ReferenceProviderDescriptor provider= (ReferenceProviderDescriptor) it.next();
+			listModelItems.add(new String[] { provider.getId(), provider.getLabel() });
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
@@ -108,7 +98,7 @@ WorkInProgressPreferencePage
 	private void handleProviderListSelection() {
 		int i= fQuickDiffProviderList.getSelectionIndex();
 		
-		boolean b= getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]);
+		boolean b= getPreferenceStore().getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]);
 		fSetDefaultButton.setEnabled(!b);
 	}
 	
@@ -175,85 +165,8 @@ WorkInProgressPreferencePage
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 	
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "showQuickDiffPerDefault"), PreferenceConstants.QUICK_DIFF_ALWAYS_ON); //$NON-NLS-1$
-		
-		l= new Label(group, SWT.LEFT );
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-		l.setLayoutData(gd);
-	
-		l= new Label(group, SWT.LEFT);
-		l.setText(PreferencesMessages.getString(PREFIX + "quickdiff.appearanceOptions")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		l.setLayoutData(gd);
-
-		Composite editorComposite= new Composite(group, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
-	
-		fColorList= new org.eclipse.swt.widgets.List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(3);
-		fColorList.setLayoutData(gd);
-				
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-	
-		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
-		l.setLayoutData(gd);
-	
-		fColorEditor= new ColorEditor(stylesComposite);
-		Button foregroundColorButton= fColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		foregroundColorButton.setLayoutData(gd);
-	
-		for (int i= 0; i < fColorModels.length; i++)
-			fColorList.add(fColorModels[i][0]);
-		fColorList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fColorList != null && !fColorList.isDisposed()) {
-					fColorList.select(0);
-					handleListSelection();
-				}
-			}
-		});
-				
-		fColorList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				handleListSelection();
-			}
-		});
-		foregroundColorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				int i= fColorList.getSelectionIndex();
-				String key= fColorModels[i][1];
-		
-				PreferenceConverter.setValue(getPreferenceStore(), key, fColorEditor.getColorValue());
-			}
-		});
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "showQuickDiffPerDefault"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON); //$NON-NLS-1$
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickdiff.characterMode"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE); //$NON-NLS-1$
 		
 		l= new Label(group, SWT.LEFT );
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -267,7 +180,7 @@ WorkInProgressPreferencePage
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
 
-		editorComposite= new Composite(group, SWT.NONE);
+		Composite editorComposite= new Composite(group, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
@@ -282,7 +195,7 @@ WorkInProgressPreferencePage
 		gd.heightHint= convertHeightInCharsToPixels(4);
 		fQuickDiffProviderList.setLayoutData(gd);
 						
-		stylesComposite= new Composite(editorComposite, SWT.NONE);
+		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -316,7 +229,7 @@ WorkInProgressPreferencePage
 			public void widgetSelected(SelectionEvent e) {
 				int i= fQuickDiffProviderList.getSelectionIndex();
 				for (int j= 0; j < fQuickDiffProviderListModel.length; j++) {
-					if (getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[j][0])) {
+					if (getPreferenceStore().getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[j][0])) {
 						fQuickDiffProviderList.remove(j);
 						fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1], j);
 					}
@@ -329,13 +242,13 @@ WorkInProgressPreferencePage
 				fQuickDiffProviderList.setSelection(i);
 				fQuickDiffProviderList.redraw();
 				
-				getPreferenceStore().setValue(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, fQuickDiffProviderListModel[i][0]);
+				getPreferenceStore().setValue(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, fQuickDiffProviderListModel[i][0]);
 			}
 		});
 		
 		for (int i= 0; i < fQuickDiffProviderListModel.length; i++) {
 			String sLabel= fQuickDiffProviderListModel[i][1];
-			if (getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
+			if (getPreferenceStore().getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
 				sLabel += " " + PreferencesMessages.getString(PREFIX + "quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
 			fQuickDiffProviderList.add(sLabel);
 		}
@@ -368,16 +281,6 @@ WorkInProgressPreferencePage
 	}
 	
  
-	/**
-	 * Handles selection in the color list for the diff line number ruler.
-	 */
-	void handleListSelection() {
-		int i= fColorList.getSelectionIndex();
-		String key= fColorModels[i][1];
-		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
-		fColorEditor.setColorValue(rgb);
-	}
-
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
@@ -418,11 +321,6 @@ WorkInProgressPreferencePage
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
-		// color table
-		store.setToDefault(PreferenceConstants.QUICK_DIFF_CHANGED_COLOR);
-		store.setToDefault(PreferenceConstants.QUICK_DIFF_ADDED_COLOR);
-		store.setToDefault(PreferenceConstants.QUICK_DIFF_DELETED_COLOR);
-		handleListSelection();
 		handleProviderListSelection();
 		
 		super.performDefaults();
