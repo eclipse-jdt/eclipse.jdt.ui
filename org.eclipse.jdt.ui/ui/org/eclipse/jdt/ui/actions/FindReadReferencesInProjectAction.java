@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -62,7 +63,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 	}
 	
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
+		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, JavaSearchPage.getSearchJRE());
 	}
 
 	String getScopeDescription(IJavaElement type) {

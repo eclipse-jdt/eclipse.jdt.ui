@@ -165,6 +165,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
+	public static final String PREF_SEARCH_JRE= "org.eclipse.jdt.ui.searchJRE"; //$NON-NLS-1$
+	
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
 	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; //$NON-NLS-1$
@@ -196,7 +198,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.getString("SearchPage.limitTo.references"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.limitTo.allOccurrences"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
-		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.writeReferences")};//$NON-NLS-1$
+
+	private Button fSearchJRE; 
+	private static final int INDEX_REFERENCES= 2;
+	private static final int INDEX_ALL= 3;
 
 
 	//---- Action Handling ------------------------------------------------
@@ -218,6 +224,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		// Setup search scope
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
+		
+		boolean includeJRE= false;
+		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
 				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
@@ -225,10 +234,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
+				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection, includeJRE);
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
@@ -243,7 +252,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				if (workingSets == null || workingSets.length < 1)
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}
 		
@@ -278,17 +287,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
 		
+		boolean includeJRE= getSearchJRE() || !mayExcludeJRE();
+		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
 				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
-				scope= SearchEngine.createWorkspaceScope();
+				scope= ReferenceScopeFactory.createWorkspaceScope(includeJRE);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
+				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection, includeJRE);
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length >= 1) {
 					if (projects.length == 1)
@@ -304,7 +315,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				if (workingSets == null || workingSets.length < 1)
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		
 		}
@@ -474,7 +485,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		layouter.setDefaultSpan();
 
 		layouter.perform(createExpression(result));
-		layouter.perform(createSearchFor(result), createLimitTo(result), -1);
+		Control searchFor= createSearchFor(result);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.verticalAlignment= GridData.FILL;
+		searchFor.setLayoutData(gd);
+
+		Control limitTo= createLimitTo(result);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.verticalAlignment= GridData.FILL;
+		limitTo.setLayoutData(gd);
 
 		createParticipants(result);
 		
@@ -502,9 +521,28 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		initSelections();
 	}
 
-	private void createParticipants(Composite result) {
+	private Control createSearchJRE(Composite result) {
+		fSearchJRE= new Button(result, SWT.CHECK);
+		fSearchJRE.setText(SearchMessages.getString("SearchPage.searchJRE.label")); //$NON-NLS-1$
+		fSearchJRE.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setSearchJRE(fSearchJRE.getSelection());
+			}
+		});
+		return fSearchJRE;
+	}
+	
+	public static boolean getSearchJRE() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SEARCH_JRE);
+	}
+
+	public static void setSearchJRE(boolean value) {
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PREF_SEARCH_JRE, value);
+	}
+	
+	private Control createParticipants(Composite result) {
 		if (!SearchParticipantsPreferencePage.hasAnyParticipants())
-			return;
+			return new Composite(result, SWT.NULL);
 		Button selectParticipants= new Button(result, SWT.PUSH);
 		selectParticipants.setText(SearchMessages.getString("SearchPage.select_participants.label")); //$NON-NLS-1$
 		GridData gd= new GridData();
@@ -520,6 +558,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 
 		});
+		return selectParticipants;
 	}
 
 
@@ -640,13 +679,21 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		result.setLayout(layout);
+		
+		SelectionAdapter listener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				updateUseJRE();
+			}
+		};
 
 		fLimitTo= new Button[fLimitToText.length];
 		for (int i= 0; i < fLimitToText.length; i++) {
 			Button button= new Button(result, SWT.RADIO);
 			button.setText(fLimitToText[i]);
 			fLimitTo[i]= button;
+			button.addSelectionListener(listener);
 		}
+		createSearchJRE(result);
 		return result;		
 	}	
 	
@@ -665,6 +712,22 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		setLimitTo(fInitialData.getSearchFor());
 		fLimitTo[fInitialData.getLimitTo()].setSelection(true);		
 		fPattern.setText(fInitialData.getPattern());
+		updateUseJRE();
+	}
+
+	private void updateUseJRE() {
+		boolean shouldEnable= mayExcludeJRE();
+		if (shouldEnable) {
+			fSearchJRE.setSelection(getSearchJRE());
+			fSearchJRE.setEnabled(true);
+		} else {
+			fSearchJRE.setEnabled(false);
+			fSearchJRE.setSelection(true);
+		}
+	}
+
+	private boolean mayExcludeJRE() {
+		return getLimitTo() == INDEX_REFERENCES || getLimitTo() == INDEX_ALL;
 	}
 
 	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {

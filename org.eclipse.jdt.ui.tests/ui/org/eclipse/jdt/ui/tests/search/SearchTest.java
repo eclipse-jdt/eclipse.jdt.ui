@@ -45,7 +45,7 @@ public class SearchTest {
 	static JavaSearchQuery runMethodRefQuery(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
 		IMethod method= getMethod(TypeName, methodName, parameterTypes);
 		NewSearchUI.activateSearchResultView();
-		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.create(method), "workspace scope"));
+		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}

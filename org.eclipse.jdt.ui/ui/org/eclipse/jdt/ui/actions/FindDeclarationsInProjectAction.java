@@ -71,7 +71,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	}
 
 	IJavaSearchScope getScope(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
+		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, true);
 	}
 
 	String getScopeDescription(IJavaElement element) {

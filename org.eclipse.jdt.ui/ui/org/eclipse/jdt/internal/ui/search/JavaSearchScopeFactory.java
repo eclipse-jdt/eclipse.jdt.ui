@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -72,48 +73,48 @@ public class JavaSearchScopeFactory {
 		return null;
 	}
 
-	public IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets) {
+	public IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets, boolean includeJRE) {
 		if (workingSets == null || workingSets.length < 1)
 			return EMPTY_SCOPE;
 
 		Set javaElements= new HashSet(workingSets.length * 10);
 		for (int i= 0; i < workingSets.length; i++)
 			addJavaElements(javaElements, workingSets[i]);
-		return createJavaSearchScope(javaElements);
+		return createJavaSearchScope(javaElements, includeJRE);
 	}
 	
-	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet) {
+	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, boolean includeJRE) {
 		Set javaElements= new HashSet(10);
 		addJavaElements(javaElements, workingSet);
-		return createJavaSearchScope(javaElements);
+		return createJavaSearchScope(javaElements, includeJRE);
 	}
 
-	public IJavaSearchScope createJavaSearchScope(IResource[] resources) {
+	public IJavaSearchScope createJavaSearchScope(IResource[] resources, boolean includeJRE) {
 		if (resources == null)
 			return EMPTY_SCOPE;
 		Set javaElements= new HashSet(resources.length);
 		addJavaElements(javaElements, resources);
-		return createJavaSearchScope(javaElements);
+		return createJavaSearchScope(javaElements, includeJRE);
 	}
 	
-	public IJavaSearchScope createJavaSearchScope(ISelection selection) {
-		return createJavaSearchScope(getJavaElements(selection));
+	public IJavaSearchScope createJavaSearchScope(ISelection selection, boolean includeJRE) {
+		return createJavaSearchScope(getJavaElements(selection), includeJRE);
 	}
 	
-	private IJavaSearchScope internalCreateProjectScope(ISelection selection) {
+	private IJavaSearchScope internalCreateProjectScope(ISelection selection, boolean includeJRE) {
 		Set javaProjects= getJavaProjects(selection);
-		return createJavaSearchScope(javaProjects);
+		return createJavaSearchScope(javaProjects, includeJRE);
 	}
 	
-	public IJavaSearchScope createJavaProjectSearchScope(IJavaElement selection) {
-		return createJavaProjectSearchScope(new StructuredSelection(selection));
+	public IJavaSearchScope createJavaProjectSearchScope(IJavaElement selection, boolean includeJRE) {
+		return createJavaProjectSearchScope(new StructuredSelection(selection), includeJRE);
 	}
 	
-	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
+	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection, boolean includeJRE) {
 		IEditorInput input= getActiveEditorInput();
 		if (input != null)
-			return JavaSearchScopeFactory.getInstance().internalCreateProjectScope(input);
-		return internalCreateProjectScope(selection);
+			return JavaSearchScopeFactory.getInstance().internalCreateProjectScope(input, includeJRE);
+		return internalCreateProjectScope(selection, includeJRE);
 		
 	}
 	private IEditorInput getActiveEditorInput() {
@@ -127,7 +128,7 @@ public class JavaSearchScopeFactory {
 		return null;
 	}
 
-	private IJavaSearchScope internalCreateProjectScope(IEditorInput editorInput) {
+	private IJavaSearchScope internalCreateProjectScope(IEditorInput editorInput, boolean includeJRE) {
 		IAdaptable inputElement = getEditorInputElement(editorInput);
 		StructuredSelection selection;
 		if (editorInput != null) {
@@ -135,7 +136,7 @@ public class JavaSearchScopeFactory {
 		} else {
 			selection= StructuredSelection.EMPTY;
 		}
-		return internalCreateProjectScope(selection);
+		return internalCreateProjectScope(selection, includeJRE);
 	}
 	
 	private IAdaptable getEditorInputElement(IEditorInput editorInput) {
@@ -241,10 +242,18 @@ public class JavaSearchScopeFactory {
 		return javaElements;
 	}
 
-	private IJavaSearchScope createJavaSearchScope(Set javaElements) {
+	private IJavaSearchScope createJavaSearchScope(Set javaElements, boolean includeJRE) {
 		if (javaElements.isEmpty())
 			return EMPTY_SCOPE;
-		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]), false);
+		IJavaElement[] elementArray= (IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]);
+		return SearchEngine.createJavaSearchScope(elementArray, getSearchFlags(includeJRE));
+	}
+	
+	static int getSearchFlags(boolean includeJRE) {
+		int flags= IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES;
+		if (includeJRE)
+			flags |= IJavaSearchScope.SYSTEM_LIBRARIES;
+		return flags;
 	}
 
 	private void addJavaElements(Set javaElements, IResource[] resources) {

@@ -140,7 +140,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	}
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets, true);
 	}
 
 	private String getScopeDescription(IWorkingSet[] workingSets) {

@@ -98,7 +98,7 @@ public class WorkspaceScopeTest extends TestCase {
 	public void testPrivateScope() throws JavaModelException {
 		IType type= fCompilationUnit.findPrimaryType();
 		IMethod privateMethod= type.getMethod("privateMethod", new String[0]); //$NON-NLS-1$
-		IJavaSearchScope scope= ReferenceScopeFactory.create(privateMethod);
+		IJavaSearchScope scope= ReferenceScopeFactory.createWorkspaceScope(true);
 		
 		assertTrue(scope.encloses(fCompilationUnit));
 		
@@ -117,7 +117,7 @@ public class WorkspaceScopeTest extends TestCase {
 	public void testDefaultScope() throws JavaModelException {
 		IType type= fCompilationUnit.findPrimaryType();
 		IMethod privateMethod= type.getMethod("defaultMethod", new String[0]); //$NON-NLS-1$
-		IJavaSearchScope scope= ReferenceScopeFactory.create(privateMethod);
+		IJavaSearchScope scope= ReferenceScopeFactory.createWorkspaceScope(true);
 		
 		assertTrue(scope.encloses(fCompilationUnit.getParent()));
 		
@@ -138,7 +138,7 @@ public class WorkspaceScopeTest extends TestCase {
 	public void testPublicMethod() throws JavaModelException {
 		IType type= fCompilationUnit.findPrimaryType();
 		IMethod publicMethod= type.getMethod("publicMethod", new String[0]); //$NON-NLS-1$
-		IJavaSearchScope scope= ReferenceScopeFactory.create(publicMethod);
+		IJavaSearchScope scope= ReferenceScopeFactory.createWorkspaceScope(true);
 		checkNoJreRoots(scope, fProject1);
 		checkNoJreRoots(scope, fProject2);
 		checkNoRoots(scope, fProject3);
@@ -147,7 +147,7 @@ public class WorkspaceScopeTest extends TestCase {
 	public void testProtectedMethod() throws JavaModelException {
 		IType type= fCompilationUnit.findPrimaryType();
 		IMethod protectedMethod= type.getMethod("protectedMethod", new String[0]); //$NON-NLS-1$
-		IJavaSearchScope scope= ReferenceScopeFactory.create(protectedMethod);
+		IJavaSearchScope scope= ReferenceScopeFactory.createWorkspaceScope(true);
 		checkNoJreRoots(scope, fProject1);
 		checkNoJreRoots(scope, fProject2);
 		checkNoRoots(scope, fProject3);
@@ -192,7 +192,7 @@ public class WorkspaceScopeTest extends TestCase {
 	public void testJREProtected() throws JavaModelException {
 		IType object= fProject1.findType("java.lang.Object"); //$NON-NLS-1$
 		IMethod protectedMethod= object.getMethod("clone", new String [0]); //$NON-NLS-1$
-		IJavaSearchScope scope= ReferenceScopeFactory.create(protectedMethod);
+		IJavaSearchScope scope= ReferenceScopeFactory.createWorkspaceScope(true);
 		
 		checkAllRoots(scope, fProject1);
 		checkAllRoots(scope, fProject2);

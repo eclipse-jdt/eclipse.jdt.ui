@@ -35,7 +35,7 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	}
 	
 	public IJavaSearchScope getSearchScope() {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets);
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets, true);
 	}
 	
 	/**

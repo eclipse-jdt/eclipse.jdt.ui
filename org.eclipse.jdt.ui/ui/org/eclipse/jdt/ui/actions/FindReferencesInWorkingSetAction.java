@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
+import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -139,7 +140,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets, JavaSearchPage.getSearchJRE());
 	}
 
 	private String getScopeDescription(IWorkingSet[] workingSets) {
