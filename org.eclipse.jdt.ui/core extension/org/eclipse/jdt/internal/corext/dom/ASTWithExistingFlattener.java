@@ -36,6 +36,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			case ASTRewrite.EXPRESSION:
 				placeHolder= ast.newSimpleName("z");
 				break;
+			case ASTRewrite.TYPE:
+				placeHolder= ast.newSimpleType(ast.newSimpleName("X"));
+				break;				
 			case ASTRewrite.STATEMENT:
 				placeHolder= ast.newReturnStatement();
 				break;

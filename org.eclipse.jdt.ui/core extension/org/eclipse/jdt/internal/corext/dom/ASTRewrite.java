@@ -77,6 +77,7 @@ public class ASTRewrite {
 	public static final int EXPRESSION= 3;
 	public static final int STATEMENT= 4;
 	public static final int SINGLEVAR_DECLARATION= 5;
+	public static final int TYPE= 6;
 	
 	private static final String CHANGEKEY= "ASTChangeData";
 	private static final String COPYSOURCEKEY= "ASTCopySource";
@@ -259,7 +260,8 @@ public class ASTRewrite {
 	 * be inserted or used to replace at the target position.
 	 * @param code String that will be inserted. The string must have no extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
-	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>, and <code>EXPRESSION</code>.
+	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>,
+	 * <code>TYPE</code> and <code>EXPRESSION</code>.
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
