@@ -364,6 +364,9 @@ public class EditorUtility {
 	private static String appendModifierString(String modifierString, int modifier) {
 		if (modifierString == null)
 			modifierString= ""; //$NON-NLS-1$
-		return JavaEditorMessages.getFormattedString("EditorUtility.concatModifierStrings", new String[] {modifierString, Action.findModifierString(modifier)}); //$NON-NLS-1$
+		String newModifierString= Action.findModifierString(modifier);
+		if (modifierString.length() == 0)
+			return newModifierString;
+		return JavaEditorMessages.getFormattedString("EditorUtility.concatModifierStrings", new String[] {modifierString, newModifierString}); //$NON-NLS-1$
 	}
 }
