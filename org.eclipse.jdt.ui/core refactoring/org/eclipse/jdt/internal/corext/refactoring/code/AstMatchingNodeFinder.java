@@ -74,9 +74,9 @@ class AstMatchingNodeFinder {
 	private AstMatchingNodeFinder(){
 	}
 	
-	public static ASTNode[] findMatchingNodes(MethodDeclaration method, ASTNode node){
+	public static ASTNode[] findMatchingNodes(ASTNode scope, ASTNode node){
 		Visitor visitor= new Visitor(node);
-		method.accept(visitor);
+		scope.accept(visitor);
 		return visitor.getMatchingNodes();
 	}
 	
