@@ -125,7 +125,9 @@ public class JavaSearchQuery implements ISearchQuery {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
 				stringPattern = patternSpec.getPattern();
 				int matchMode = stringPattern.indexOf('*') != -1 || stringPattern.indexOf('?') != -1 ? SearchPattern.R_PATTERN_MATCH : SearchPattern.R_EXACT_MATCH;
-				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode, patternSpec.isCaseSensitive());
+				if (patternSpec.isCaseSensitive())
+					matchMode |= SearchPattern.R_CASE_SENSITIVE;
+				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
 			}
 			
 			if (pattern == null) {

@@ -80,7 +80,8 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 		
 		//fix for bug 37333
 		if (element == null) {
-			SearchPattern pattern=	SearchPattern.createPattern(className, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true);
+			SearchPattern pattern=	SearchPattern.createPattern(className, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS,
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, false);
 			NonPublicClassInCUCollector requestor= new NonPublicClassInCUCollector();
 

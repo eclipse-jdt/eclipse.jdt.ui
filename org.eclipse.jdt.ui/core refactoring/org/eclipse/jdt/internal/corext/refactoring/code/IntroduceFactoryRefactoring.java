@@ -394,7 +394,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			}
 			buf.append(")"); //$NON-NLS-1$
 			return SearchPattern.createPattern(buf.toString(), IJavaSearchConstants.CONSTRUCTOR,
-					IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH, true);
+					IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		}
 	}
 

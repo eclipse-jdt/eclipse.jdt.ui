@@ -135,7 +135,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 					};
 					SearchPattern pattern= SearchPattern.createPattern("*", //$NON-NLS-1$
 							IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
-							SearchPattern.R_PATTERN_MATCH, true);
+							SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
 					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);

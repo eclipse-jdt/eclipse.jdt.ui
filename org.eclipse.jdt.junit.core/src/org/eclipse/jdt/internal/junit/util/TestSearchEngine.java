@@ -92,8 +92,8 @@ public class TestSearchEngine {
 
 	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {		
 		SearchRequestor requestor= new JUnitSearchResultCollector(v);
-		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true); //$NON-NLS-1$
-		SearchPattern testPattern= SearchPattern.createPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH, true); //$NON-NLS-1$
+		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
+		SearchPattern testPattern= SearchPattern.createPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
 		SearchPattern pattern= SearchPattern.createOrPattern(suitePattern, testPattern);
 		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		new SearchEngine().search(pattern, participants, scope, requestor, progressMonitor); 

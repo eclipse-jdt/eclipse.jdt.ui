@@ -356,7 +356,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	 * @return all package fragments in <code>scope</code> with same name as <code>fPackage</code>, excluding fPackage
 	 */
 	private IPackageFragment[] getNamesakePackages(IJavaSearchScope scope, IProgressMonitor pm) throws CoreException {
-		SearchPattern pattern= SearchPattern.createPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true);
+		SearchPattern pattern= SearchPattern.createPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		
 		//TODO: put filter logic into requestor
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
