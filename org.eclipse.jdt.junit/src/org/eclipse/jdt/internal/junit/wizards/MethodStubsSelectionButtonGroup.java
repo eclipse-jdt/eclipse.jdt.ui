@@ -50,6 +50,8 @@ public class MethodStubsSelectionButtonGroup {
 	private int fGroupBorderStyle;
 	private int fGroupNumberOfColumns;
 	private int fButtonsStyle;	
+	private boolean fUseSuiteInMainForTextRunner= false;
+	
 
 	public interface SelectionButtonGroupListener {
 		/**
@@ -94,6 +96,10 @@ public class MethodStubsSelectionButtonGroup {
 		fGroupNumberOfColumns= (nColumns <= 0) ? nButtons : nColumns;
 		
 		fButtonsStyle= buttonsStyle;
+	}
+	
+	public void setUseSuiteInMainForTextRunner(boolean useSuiteInMain) {
+		fUseSuiteInMainForTextRunner= useSuiteInMain;
 	}
 	
 	/*
@@ -183,7 +189,12 @@ public class MethodStubsSelectionButtonGroup {
 					main.append("textui"); //$NON-NLS-1$
 					break;
 			}
-			main.append(".TestRunner.run(" + typeName + ".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
+			// fix for 53352 Test case wizard generates wrong code 
+			if (fUseSuiteInMainForTextRunner && getComboSelection() == 0) {
+				main.append(".TestRunner.run(" + typeName + ".suite());"); //$NON-NLS-1$ //$NON-NLS-2$				
+			} else {
+				main.append(".TestRunner.run(" + typeName + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 		main.append("}\n\n"); //$NON-NLS-1$
 		return main.toString();

@@ -110,7 +110,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
 		fMethodStubsButtons.setLabelText(WizardMessages.getString("NewTestClassWizPage2.method.Stub.label")); //$NON-NLS-1$
-		
+		fMethodStubsButtons.setUseSuiteInMainForTextRunner(true);
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
