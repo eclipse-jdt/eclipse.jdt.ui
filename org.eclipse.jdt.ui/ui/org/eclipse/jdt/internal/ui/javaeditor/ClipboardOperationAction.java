@@ -386,7 +386,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 		
 		ArrayList res= new ArrayList();
-		ImportReferencesCollector collector= new ImportReferencesCollector(new Region(offset, length), res);
+		ImportReferencesCollector collector= new ImportReferencesCollector(new Region(offset, length), res, null);
 		astRoot.accept(collector);
 		
 		HashSet namesToImport= new HashSet(res.size());

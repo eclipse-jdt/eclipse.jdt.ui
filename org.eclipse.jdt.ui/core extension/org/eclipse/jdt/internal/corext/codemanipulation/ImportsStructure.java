@@ -39,6 +39,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -205,6 +206,7 @@ public final class ImportsStructure implements IImportsStructure {
 			
 		for (int i= 1; i < decls.length; i++) {
 			String name= curr.getElementName();
+			boolean isStatic= Flags.isStatic(curr.getFlags());
 				
 			String packName= Signature.getQualifier(name);
 			if (currPackage == null || !packName.equals(currPackage.getName())) {
@@ -223,7 +225,7 @@ public final class ImportsStructure implements IImportsStructure {
 				currEndLine++;
 				nextOffset= document.getLineInformation(currEndLine).getOffset();
 			}
-			currPackage.add(new ImportDeclEntry(name, document.get(currOffset, nextOffset - currOffset)));
+			currPackage.add(new ImportDeclEntry(name, document.get(currOffset, nextOffset - currOffset), isStatic));
 			currOffset= nextOffset;
 			curr= next;
 				
@@ -233,7 +235,7 @@ public final class ImportsStructure implements IImportsStructure {
 				
 				currPackage= new PackageEntry(); // create a comment package entry for this
 				fPackageEntries.add(currPackage);
-				currPackage.add(new ImportDeclEntry(null, document.get(currOffset, nextOffset - currOffset)));
+				currPackage.add(new ImportDeclEntry(null, document.get(currOffset, nextOffset - currOffset), false));
 					
 				currOffset= nextOffset;
 			}
@@ -241,6 +243,7 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 
 		String name= curr.getElementName();
+		boolean isStatic= Flags.isStatic(curr.getFlags());
 		String packName= Signature.getQualifier(name);
 		if (currPackage == null || !packName.equals(currPackage.getName())) {
 			currPackage= new PackageEntry(packName, null);
@@ -249,7 +252,7 @@ public final class ImportsStructure implements IImportsStructure {
 		ISourceRange range= curr.getSourceRange();			
 		int endOffset= range.getOffset() + range.getLength();
 		String content= document.get(currOffset, endOffset - currOffset) + TextUtilities.getDefaultLineDelimiter(document);
-		currPackage.add(new ImportDeclEntry(name, content));
+		currPackage.add(new ImportDeclEntry(name, content, isStatic));
 	}		
 		
 	/**
@@ -425,7 +428,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @return Returns the a new AST node that is either simple if the import was successful or 
 	 * fully qualified type name if the import could not be added due to a conflict. 
 	 */
-	public Type addImport(ITypeBinding binding, AST ast) {
+	public Type addImport(ITypeBinding binding, AST ast, boolean isStaticImport) {
 		if (binding.isPrimitive()) {
 			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
 		}
@@ -443,34 +446,34 @@ public final class ImportsStructure implements IImportsStructure {
 			WildcardType wcType= ast.newWildcardType();
 			ITypeBinding bound= normalizedBinding.getBound();
 			if (bound != null) {
-				Type boundType= addImport(bound, ast);
+				Type boundType= addImport(bound, ast, isStaticImport);
 				wcType.setBound(boundType, normalizedBinding.isUpperbound());
 			}
 			return wcType;
 		}
 		
 		if (normalizedBinding.isArray()) {
-			Type elementType= addImport(normalizedBinding.getElementType(), ast);
+			Type elementType= addImport(normalizedBinding.getElementType(), ast, isStaticImport);
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
 			
-			Type erasureType= addImport(erasure, ast);
+			Type erasureType= addImport(erasure, ast, isStaticImport);
 			ParameterizedType paramType= ast.newParameterizedType(erasureType);
 			List arguments= paramType.typeArguments();
 			
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
-				arguments.add(addImport(typeArguments[i], ast));
+				arguments.add(addImport(typeArguments[i], ast, isStaticImport));
 			}
 			return paramType;
 		}
 		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			String res= internalAddImport(qualifiedName);
+			String res= internalAddImport(qualifiedName, isStaticImport);
 			return ast.newSimpleType(ast.newSimpleName(res));
 		}
 		return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
@@ -486,7 +489,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * was added, fully qualified type name if the import could not be added due
 	 * to a conflict. 
 	 */
-	public String addImport(ITypeBinding binding) {
+	public String addImport(ITypeBinding binding, boolean isStaticImport) {
 		
 		if (binding.isPrimitive() || binding.isTypeVariable()) {
 			return binding.getName();
@@ -505,13 +508,13 @@ public final class ImportsStructure implements IImportsStructure {
 				} else {
 					res.append(" super "); //$NON-NLS-1$
 				}
-				res.append(addImport(bound));
+				res.append(addImport(bound, isStaticImport));
 			}
 			return res.toString();
 		}
 		
 		if (normalizedBinding.isArray()) {
-			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType()));
+			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType(), isStaticImport));
 			for (int i= normalizedBinding.getDimensions(); i > 0; i--) {
 				res.append("[]"); //$NON-NLS-1$
 			}
@@ -520,21 +523,21 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
-			StringBuffer res= new StringBuffer(addImport(erasure));
+			StringBuffer res= new StringBuffer(addImport(erasure, isStaticImport));
 			res.append('<');
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
 				if (i > 0) {
 					res.append(','); //$NON-NLS-1$
 				}
-				res.append(addImport(typeArguments[i]));
+				res.append(addImport(typeArguments[i], isStaticImport));
 			}
 			return res.toString();
 		}
 		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			return internalAddImport(qualifiedName);
+			return internalAddImport(qualifiedName, isStaticImport);
 		}
 		return normalizedBinding.getName();
 	}
@@ -543,14 +546,13 @@ public final class ImportsStructure implements IImportsStructure {
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
-	 * @param typeContainerName The type container name (package name / outer type name) of the type to import
-	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
+	 * @param qualifiedName The fully qualified name of the type to import
 	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
-	 */			
-	public String addImport(String typeContainerName, String typeName) {
-		return addImport(JavaModelUtil.concatenateName(typeContainerName, typeName));
+	 */
+	public String addImport(String qualifiedName) {
+		return addImport(qualifiedName, false);
 	}
-
+	
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
@@ -558,17 +560,31 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
 	 */
-	public String addImport(String qualifiedTypeName) {
+	public String addImport(String qualifiedTypeName, boolean isStaticImport) {
 		int bracketOffset= qualifiedTypeName.indexOf('[');
 		if (bracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
+			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset), isStaticImport) + qualifiedTypeName.substring(bracketOffset);
 		}
-		return internalAddImport(qualifiedTypeName);
+		return internalAddImport(qualifiedTypeName, isStaticImport);
 	}
 		
-	private String internalAddImport(String fullTypeName) {
-		String typeContainerName= Signature.getQualifier(fullTypeName);
-		String typeName= Signature.getSimpleName(fullTypeName);
+	private String internalAddImport(String fullTypeName, boolean isStaticImport) {
+		int idx= fullTypeName.lastIndexOf('.');
+		if (isStaticImport) {
+			if (idx == -1) {
+				return fullTypeName;
+			}
+			idx= fullTypeName.lastIndexOf('.', idx - 1); // to second last dot
+		}
+		
+		String typeContainerName, typeName;
+		if (idx != -1) {
+			typeContainerName= fullTypeName.substring(0, idx);
+			typeName= fullTypeName.substring(idx + 1);
+		} else {
+			typeContainerName= ""; //$NON-NLS-1$
+			typeName= fullTypeName;
+		}
 		
 		if (typeContainerName.length() == 0 && PrimitiveType.toCode(typeName) != null) {
 			return fullTypeName;
@@ -577,24 +593,31 @@ public final class ImportsStructure implements IImportsStructure {
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
 			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
 			
-			if (typeName.equals(topLevelTypeName)) {
-				if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
-					return fullTypeName;
-				} else {
-					return typeName;
+			if (!isStaticImport) {
+				if (typeName.equals(topLevelTypeName)) {
+					if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
+						return fullTypeName;
+					} else {
+						return typeName;
+					}
 				}
-			}
-			String existing= findImport(typeName);
-			if (existing != null) {
+				String existing= findImport(null, typeName, isStaticImport);
+				if (existing != null) {
+					if (fullTypeName.equals(existing)) {
+						return typeName;
+					} else {
+						return fullTypeName;
+					}
+				}
+			} else {
+				String existing= findImport(typeContainerName, typeName, isStaticImport);
 				if (fullTypeName.equals(existing)) {
 					return typeName;
-				} else {
-					return fullTypeName;
 				}
 			}
 		}
 		
-		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
+		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null, isStaticImport);
 			
 		PackageEntry bestMatch= findBestMatch(typeContainerName);
 		if (bestMatch == null) {
@@ -631,9 +654,10 @@ public final class ImportsStructure implements IImportsStructure {
 	/**
 	 * Removes an import from the structure.
 	 * @param qualifiedTypeName The qualified type name to remove from the imports
+	 * @param isStaticImport
 	 * @return Returns <code>true</code> if the import was found and removed
 	 */
-	public boolean removeImport(String qualifiedTypeName) {
+	public boolean removeImport(String qualifiedTypeName, boolean isStaticImport) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
 		int bracketOffset= qualifiedTypeName.indexOf('[');
 		if (bracketOffset != -1) {
@@ -644,7 +668,7 @@ public final class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.getName().equals(typeContainerName)) {
-				if (entry.remove(qualifiedTypeName)) {
+				if (entry.remove(qualifiedTypeName, isStaticImport)) {
 					fHasChanges= true;
 					return true;
 				}
@@ -658,30 +682,33 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @param binding The type to remove from the imports
 	 * @return Returns <code>true</code> if the import was found and removed
 	 */
-	public boolean removeImport(ITypeBinding binding) {
+	public boolean removeImport(ITypeBinding binding, boolean isStaticImport) {
 		binding= Bindings.normalizeTypeBinding(binding);
 		if (binding == null) {
 			return false;
 		}		
 		String qualifiedName= binding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			return removeImport(qualifiedName);
+			return removeImport(qualifiedName, isStaticImport);
 		}
 		return false;
 	}	
 
 	/**
 	 * Looks if there already is single import for the given type name.
+	 * @param containerName The container name or <code>null</code>
 	 * @param simpleName The simple name to find
 	 * @return Returns the qualified import name or <code>null</code>.
 	 */	
-	public String findImport(String simpleName) {
+	private String findImport(String containerName, String simpleName, boolean isStatic) {
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			ImportDeclEntry found= entry.find(simpleName);
-			if (found != null) {
-				return found.getElementName();
+			if (containerName == null || entry.getName().equals(containerName)) {
+				ImportDeclEntry found= entry.find(simpleName, isStatic);
+				if (found != null) {
+					return found.getElementName();
+				}
 			}
 		}
 		return null;		
@@ -815,7 +842,7 @@ public final class ImportsStructure implements IImportsStructure {
 				int nImports= pack.getNumberOfImports();
 	
 				if (fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
-					pack.removeAllNew();
+					pack.removeAllNewNonStatic();
 					nImports= pack.getNumberOfImports();
 				}
 				if (nImports == 0) {
@@ -834,20 +861,21 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 				lastPackage= pack;
 				
-				boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
-				if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
+				boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts, false);
+				if (doStarImport && (pack.find("*", false) == null)) { //$NON-NLS-1$
 					String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
-					appendImportToBuffer(buf, starImportString, lineDelim);
+					appendImportToBuffer(buf, starImportString, false, lineDelim);
 					nCreated++;
 				}
 				
 				for (int k= 0; k < nImports; k++) {
 					ImportDeclEntry currDecl= pack.getImportAt(k);
+					boolean isStatic= currDecl.isStatic();
 					String content= currDecl.getContent();
 					
 					if (content == null) { // new entry
-						if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
-							appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
+						if (!doStarImport || currDecl.isOnDemand() || isStatic || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
+							appendImportToBuffer(buf, currDecl.getElementName(), isStatic, lineDelim);
 							nCreated++;
 						}
 					} else {
@@ -926,7 +954,7 @@ public final class ImportsStructure implements IImportsStructure {
 		HashSet starImportPackages= new HashSet(nPackageEntries);
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
-			if (pack.hasStarImport(fImportOnDemandThreshold, null)) {
+			if (pack.hasStarImport(fImportOnDemandThreshold, null, false)) {
 				starImportPackages.add(pack.getName());
 			}
 		}
@@ -979,10 +1007,15 @@ public final class ImportsStructure implements IImportsStructure {
 		return false;
 	}
 	
-	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
-		String str= "import " + importName + ';' + lineDelim; //$NON-NLS-1$
+	private void appendImportToBuffer(StringBuffer buf, String importName, boolean isStatic, String lineDelim) {
+		buf.append("import "); //$NON-NLS-1$
+		if (isStatic) {
+			buf.append("static "); //$NON-NLS-1$
+		}
+		buf.append(importName);
+		buf.append(';');
+		buf.append(lineDelim);
 		// str= StubUtility.codeFormat(str, 0, lineDelim);
-		buf.append(str);
 	}
 	
 	private int getPackageStatementEndPos(IDocument document) throws JavaModelException, BadLocationException {
@@ -1016,14 +1049,27 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		private String fElementName;
 		private String fContent;
+		private final boolean fIsStatic;
 		
-		public ImportDeclEntry(String elementName, String existingContent) {
+		public ImportDeclEntry(String elementName, String existingContent, boolean isStatic) {
 			fElementName= elementName;
 			fContent= existingContent;
+			fIsStatic= isStatic;
 		}
-		
+				
 		public String getElementName() {
 			return fElementName;
+		}
+		
+		public int compareTo(String fullName, boolean isStatic) {
+			int cmp= fElementName.compareTo(fullName);
+			if (cmp == 0) {
+				if (fIsStatic == isStatic) {
+					return 0;
+				}
+				return fIsStatic ? -1 : 1;
+			}
+			return cmp;
 		}
 		
 		public String getSimpleName() {
@@ -1032,6 +1078,10 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		public boolean isOnDemand() {
 			return fElementName != null && fElementName.endsWith(".*"); //$NON-NLS-1$
+		}
+		
+		public boolean isStatic() {
+			return fIsStatic;
 		}
 			
 		public boolean isNew() {
@@ -1085,20 +1135,7 @@ public final class ImportsStructure implements IImportsStructure {
 			fImportEntries= new ArrayList(5);
 			fGroup= group;
 		}	
-		
-		public int findInsertPosition(String fullImportName) {
-			int nInports= fImportEntries.size();
-			for (int i= 0; i < nInports; i++) {
-				ImportDeclEntry curr= getImportAt(i);
-				if (!curr.isComment()) {
-					if (fullImportName.compareTo(curr.getElementName()) <= 0) {
-						return i;
-					}
-				}
-			}
-			return nInports;
-		}
-				
+						
 		public void sortIn(ImportDeclEntry imp) {
 			String fullImportName= imp.getElementName();
 			int insertPosition= -1;
@@ -1106,10 +1143,10 @@ public final class ImportsStructure implements IImportsStructure {
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
 				if (!curr.isComment()) {
-					int cmp= fullImportName.compareTo(curr.getElementName());
+					int cmp= curr.compareTo(fullImportName, imp.isStatic());
 					if (cmp == 0) {
 						return; // exists already
-					} else if (cmp < 0 && insertPosition == -1) {
+					} else if (cmp > 0 && insertPosition == -1) {
 						insertPosition= i;
 					}
 				}
@@ -1126,11 +1163,11 @@ public final class ImportsStructure implements IImportsStructure {
 			fImportEntries.add(imp);
 		}
 		
-		public ImportDeclEntry find(String simpleName) {
+		public ImportDeclEntry find(String simpleName, boolean isStatic) {
 			int nInports= fImportEntries.size();
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (!curr.isComment()) {
+				if (!curr.isComment() && curr.isStatic() == isStatic) {
 					String name= curr.getElementName();
 					if (name.endsWith(simpleName)) {
 						int dotPos= name.length() - simpleName.length() - 1;
@@ -1143,11 +1180,11 @@ public final class ImportsStructure implements IImportsStructure {
 			return null;
 		}		
 		
-		public boolean remove(String fullName) {
+		public boolean remove(String fullName, boolean isStaticImport) {
 			int nInports= fImportEntries.size();
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (!curr.isComment() && fullName.equals(curr.getElementName())) {
+				if (!curr.isComment() && curr.compareTo(fullName, isStaticImport) == 0) {
 					fImportEntries.remove(i);
 					return true;
 				}
@@ -1155,21 +1192,21 @@ public final class ImportsStructure implements IImportsStructure {
 			return false;
 		}
 		
-		public void removeAllNew() {
+		public void removeAllNewNonStatic() {
 			int nInports= fImportEntries.size();
 			for (int i= nInports - 1; i >= 0; i--) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isNew()) {
+				if (curr.isNew() && !curr.isStatic()) {
 					fImportEntries.remove(i);
 				}
 			}
 		}
 		
-		public  ImportDeclEntry getImportAt(int index) {
+		public ImportDeclEntry getImportAt(int index) {
 			return (ImportDeclEntry) fImportEntries.get(index);
 		}
 		
-		public boolean hasStarImport(int threshold, Set explicitImports) {
+		public boolean hasStarImport(int threshold, Set explicitImports, boolean forStaticImports) {
 			if (isComment() || isDefaultPackage()) { // can not star import default package
 				return false;
 			}
@@ -1178,13 +1215,15 @@ public final class ImportsStructure implements IImportsStructure {
 			boolean containsNew= false;
 			for (int i= 0; i < nImports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isOnDemand()) {
-					return true;
-				}
-				if (!curr.isComment()) {
-					count++;
-					boolean isExplicit= (explicitImports != null) && explicitImports.contains(curr.getSimpleName());
-					containsNew |= curr.isNew() && !isExplicit;
+				if (curr.isStatic() == forStaticImports) {
+					if (curr.isOnDemand()) {
+						return true;
+					}
+					if (!curr.isComment()) {
+						count++;
+						boolean isExplicit= (explicitImports != null) && explicitImports.contains(curr.getSimpleName());
+						containsNew |= curr.isNew() && !isExplicit;
+					}
 				}
 			}
 			return (count >= threshold) && containsNew;
@@ -1240,6 +1279,9 @@ public final class ImportsStructure implements IImportsStructure {
 				for (int i= 0; i < nImports; i++) {
 					ImportDeclEntry curr= getImportAt(i);
 					buf.append("  "); //$NON-NLS-1$
+					if (curr.isStatic()) {
+						buf.append("static "); //$NON-NLS-1$
+					}
 					buf.append(curr.getSimpleName());
 					if (curr.isNew()) {
 						buf.append(" (new)"); //$NON-NLS-1$

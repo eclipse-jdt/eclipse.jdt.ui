@@ -348,7 +348,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				ImportsStructure impStructure= null;
 				if (fTypeProposal != null) {
 					impStructure= getImportStructure();
-					replaceString= impStructure.addImport(fTypeProposal);
+					replaceString= impStructure.addImport(fTypeProposal, false);
 				}
 				IRegion region= getReplaceRegion(viewer, offset);
 				document.replace(region.getOffset(), region.getLength(), replaceString);

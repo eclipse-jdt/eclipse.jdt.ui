@@ -19,16 +19,19 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 
 public class ImportReferencesCollector extends GenericVisitor {
 
 	private Region fSubRange;
-	private Collection fResult;
+	private Collection fTypeImports;
+	private Collection fStaticImports;
 
-	public ImportReferencesCollector(Region rangeLimit, Collection result) {
+	public ImportReferencesCollector(Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
 		super(true);
-		fResult= result;
+		fTypeImports= resultingTypeImports;
+		fStaticImports= resultingStaticImports;
 		fSubRange= rangeLimit;
 	}
 	
@@ -43,7 +46,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	
 	private void addReference(SimpleName name) {
 		if (isAffected(name)) {
-			fResult.add(name);
+			fTypeImports.add(name);
 		}
 	}			
 	
@@ -66,6 +69,47 @@ public class ImportReferencesCollector extends GenericVisitor {
 			// we have a type binding or not, so we will assume
 			// we do.
 			addReference((SimpleName) node);
+		}
+	}
+	
+	private void possibleStaticImportFound(Name name) {
+		if (fStaticImports == null) {
+			return;
+		}
+		
+		while (name.isQualifiedName()) {
+			name= ((QualifiedName) name).getQualifier();
+		}
+		IBinding binding= name.resolveBinding();
+		if (binding == null || !Modifier.isStatic(binding.getModifiers()) || ((SimpleName) name).isDeclaration()) {
+			return;
+		}
+		if (fStaticImports.contains(binding)) {
+			return;
+		}
+		
+		
+		int flags= 0;
+		ITypeBinding declaringClass= null;
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding varBinding= (IVariableBinding) binding;
+			if (varBinding.isField()) {
+				declaringClass= varBinding.getDeclaringClass();
+				flags= ScopeAnalyzer.VARIABLES;
+			}
+		} else if (binding instanceof IMethodBinding) {
+			IMethodBinding methodBinding= (IMethodBinding) binding;
+			declaringClass= methodBinding.getDeclaringClass();
+			flags= ScopeAnalyzer.METHODS;
+		}
+		if (declaringClass != null && !declaringClass.isLocal()) {
+			IBinding[] declarationsInScope= new ScopeAnalyzer((CompilationUnit) name.getRoot()).getDeclarationsInScope(name.getStartPosition(), flags);
+			for (int i= 0; i < declarationsInScope.length; i++) {
+				if (declarationsInScope[i] == binding) {
+					return;
+				}
+			}
+			fStaticImports.add(binding);
 		}
 	}
 	
@@ -106,10 +150,19 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	/*
+	 * @see ASTVisitor#visit(QualifiedType)
+	 */
+	public boolean visit(QualifiedType node) {
+		// nothing to do here, let the qualifier be visited
+		return true;
+	}
+	
+	/*
 	 * @see ASTVisitor#visit(QualifiedName)
 	 */
 	public boolean visit(QualifiedName node) {
 		possibleTypeRefFound(node); // possible ref
+		possibleStaticImportFound(node);
 		return false;
 	}		
 
@@ -135,13 +188,17 @@ public class ImportReferencesCollector extends GenericVisitor {
 		return false;
 	}
 
-	private void evalQualifyingExpression(Expression expr) {
+	private void evalQualifyingExpression(Expression expr, Name selector) {
 		if (expr != null) {
 			if (expr instanceof Name) {
-				possibleTypeRefFound((Name) expr);
+				Name name= (Name) expr;
+				possibleTypeRefFound(name);
+				possibleStaticImportFound(name);
 			} else {
 				expr.accept(this);
 			}
+		} else if (selector != null) {
+			possibleStaticImportFound(selector);
 		}
 	}			
 
@@ -154,7 +211,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		} else {
 			doVisitNode(node.getType());
 		}
-		evalQualifyingExpression(node.getExpression());
+		evalQualifyingExpression(node.getExpression(), null);
 		if (node.getAnonymousClassDeclaration() != null) {
 			node.getAnonymousClassDeclaration().accept(this);
 		}
@@ -166,7 +223,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @see ASTVisitor#endVisit(MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
-		evalQualifyingExpression(node.getExpression());
+		evalQualifyingExpression(node.getExpression(), node.getName());
 		doVisitChildren(node.arguments());
 		return false;
 	}
@@ -179,7 +236,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			return false;
 		}
 		
-		evalQualifyingExpression(node.getExpression());
+		evalQualifyingExpression(node.getExpression(), null);
 		doVisitChildren(node.arguments());
 		return false;	
 	}		
@@ -188,7 +245,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @see ASTVisitor#visit(FieldAccess)
 	 */
 	public boolean visit(FieldAccess node) {
-		evalQualifyingExpression(node.getExpression());
+		evalQualifyingExpression(node.getExpression(), node.getName());
 		return false;
 	}
 	
@@ -197,6 +254,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	public boolean visit(SimpleName node) {
 		// if the call gets here, it can only be a variable reference
+		possibleStaticImportFound(node);
 		return false;
 	}
 
@@ -249,16 +307,18 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	public boolean visit(TagElement node) {
-		String name= node.getTagName();
+		String tagName= node.getTagName();
 		List list= node.fragments();
 		int idx= 0;
-		if (name != null && !list.isEmpty()) {
+		if (tagName != null && !list.isEmpty()) {
 			Object first= list.get(0);
 			if (first instanceof Name) {
-				if ("@throws".equals(name) || "@exception".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$
+				if ("@throws".equals(tagName) || "@exception".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$
 					typeRefFound((Name) first);
-				} else if ("@see".equals(name) || "@link".equals(name) || "@linkplain".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					possibleTypeRefFound((Name) first);
+				} else if ("@see".equals(tagName) || "@link".equals(tagName) || "@linkplain".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					Name name= (Name) first;
+					possibleTypeRefFound(name);
+					possibleStaticImportFound(name);
 				}
 				idx++;
 			}
@@ -270,9 +330,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	public boolean visit(MemberRef node) {
-		Name name= node.getQualifier();
-		if (name != null) {
-			typeRefFound(name);
+		Name qualifier= node.getQualifier();
+		if (qualifier != null) {
+			typeRefFound(qualifier);
+		} else {
+			SimpleName name= node.getName();
+			if (name != null) {
+				possibleStaticImportFound(name);
+			}
 		}
 		return false;
 	}
@@ -281,6 +346,11 @@ public class ImportReferencesCollector extends GenericVisitor {
 		Name qualifier= node.getQualifier();
 		if (qualifier != null) {
 			typeRefFound(qualifier);
+		} else {
+			SimpleName name= node.getName();
+			if (name != null) {
+				possibleStaticImportFound(name);
+			}
 		}
 		List list= node.parameters();
 		if (list != null) {

@@ -107,7 +107,7 @@ public final class ImportRewrite {
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public String addImport(ITypeBinding binding) {
-		return fImportsStructure.addImport(binding);
+		return fImportsStructure.addImport(binding, false);
 	}
 	
 	
@@ -122,7 +122,7 @@ public final class ImportRewrite {
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
-		return fImportsStructure.addImport(binding, ast);
+		return fImportsStructure.addImport(binding, ast, false);
 	}
 	
 
@@ -132,7 +132,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
-		return fImportsStructure.removeImport(binding);
+		return fImportsStructure.removeImport(binding, false);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(String qualifiedTypeName) {
-		return fImportsStructure.removeImport(qualifiedTypeName);
+		return fImportsStructure.removeImport(qualifiedTypeName, false);
 	}
 	
 	/**

@@ -60,7 +60,7 @@ public class ImportRemover {
 	
 	public ITypeBinding[] getImportsToRemove() {
 		ArrayList/*<SimpleName>*/ simpleNames= new ArrayList();
-		fRoot.accept(new ImportReferencesCollector(null, simpleNames));
+		fRoot.accept(new ImportReferencesCollector(null, simpleNames, null));
 		List/*<SimpleName>*/ removedTypeRefs= new ArrayList();
 		List/*<SimpleName>*/ notRemovedTypeRefs= new ArrayList();
 		divideTypeRefs(simpleNames, removedTypeRefs, notRemovedTypeRefs);

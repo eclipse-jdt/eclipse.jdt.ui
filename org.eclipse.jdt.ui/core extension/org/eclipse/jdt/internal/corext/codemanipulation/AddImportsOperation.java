@@ -157,7 +157,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, settings.importOrder, settings.importThreshold, true);
 			impStructure.setFindAmbiguousImports(true);
-			impStructure.addImport(chosen.getTypeContainerName(), chosen.getTypeName());
+			impStructure.addImport(chosen.getFullyQualifiedName(), false);
 			impStructure.create(false, new SubProgressMonitor(monitor, 1));
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));

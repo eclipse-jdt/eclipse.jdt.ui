@@ -631,7 +631,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private void addImportsToTypesReferencedInFieldDeclarations(ImportsStructure is, IProgressMonitor pm) throws JavaModelException {
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(getExtractedFields(getInputTypeCU()), pm);
 		for (int i= 0; i < referencedTypes.length; i++) {
-			is.addImport(JavaModelUtil.getFullyQualifiedName(referencedTypes[i]));
+			is.addImport(JavaModelUtil.getFullyQualifiedName(referencedTypes[i]), false);
 		}
 	}
 	
@@ -639,7 +639,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		ITypeBinding[] typesUsed= getTypesUsedInExtractedMethodDeclarations(cuNode);
 		pm.beginTask("", typesUsed.length); //$NON-NLS-1$
 		for (int i= 0; i < typesUsed.length; i++) {
-			is.addImport(typesUsed[i]);
+			is.addImport(typesUsed[i], false);
 			pm.worked(1);
 		}
 		pm.done();

@@ -109,7 +109,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Class used in stub creation routines to add needed imports to a 
 	 * compilation unit.
 	 */
-	public static class ImportsManager implements /* internal */ IImportsStructure {
+	public static class ImportsManager {
 
 		private ImportsStructure fImportsStructure;
 		private Set fAddedTypes;
@@ -134,7 +134,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		/* package */ ICompilationUnit getCompilationUnit() {
 			return fImportsStructure.getCompilationUnit();
 		}
-				
+						
 		/**
 		 * Adds a new import declaration that is sorted in the existing imports.
 		 * If an import already exists or the import would conflict with an import
@@ -149,14 +149,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fAddedTypes.add(qualifiedTypeName);
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
-		
+				
 		/* package */ void create(boolean needsSave, SubProgressMonitor monitor) throws CoreException {
 			fImportsStructure.create(needsSave, monitor);
 		}
 		
 		/* package */ void removeImport(String qualifiedName) {
 			if (fAddedTypes.contains(qualifiedName)) {
-				fImportsStructure.removeImport(qualifiedName);
+				fImportsStructure.removeImport(qualifiedName, false);
 			}
 		}
 		
@@ -1832,13 +1832,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= null;
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();	
 
 		if (doConstructors) {
 			hierarchy= type.newSupertypeHierarchy(monitor);
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports);
+				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports.fImportsStructure);
 				if (constructors != null) {
 					for (int i= 0; i < constructors.length; i++) {
 						newMethods.add(constructors[i]);
@@ -1851,7 +1851,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (hierarchy == null) {
 				hierarchy= type.newSupertypeHierarchy(monitor);
 			}			
-			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports);
+			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports.fImportsStructure);
 			if (unimplemented != null) {
 				for (int i= 0; i < unimplemented.length; i++) {
 					newMethods.add(unimplemented[i]);					
