@@ -16,6 +16,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.compiler.flow.LabelFlowContext;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -30,6 +31,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static final String PREF_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove"; //$NON-NLS-1$
 	public static final String PREF_SHOW_TEMP_PROBLEMS= "JavaEditor.ShowTemporaryProblem"; //$NON-NLS-1$
+	public static final String PREF_RECONCILE= "JavaUI.reconcile"; //$NON-NLS-1$
 
 	public WorkInProgressPreferencePage() {
 		super(GRID);
@@ -42,6 +44,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
 		store.setDefault(PREF_SHOW_TEMP_PROBLEMS, false);
+		store.setDefault(PREF_RECONCILE, false);
 	}
 	
 	/*
@@ -76,6 +79,13 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
+
+		boolEditor= new BooleanFieldEditor(
+			PREF_RECONCILE,
+			"Reconcile Packages view and Java Browsing views (only applied to new views)", //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
 	}
 	
 	/*
@@ -91,6 +101,10 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	
 	static public boolean showTempProblems() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SHOW_TEMP_PROBLEMS);
+	}
+
+	static public boolean reconcile() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_RECONCILE);
 	}
 }
 

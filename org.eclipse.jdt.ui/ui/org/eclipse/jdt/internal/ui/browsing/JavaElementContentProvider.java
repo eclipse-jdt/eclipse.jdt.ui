@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 
 
@@ -52,10 +53,15 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	
 
 	public JavaElementContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
-		super(provideMembers, false);
+
+		super(provideMembers, reconcile());
 		fBrowsingPart= browsingPart;
 		fViewer= fBrowsingPart.getViewer();
 		JavaCore.addElementChangedListener(this);
+	}
+
+	private static boolean reconcile() {
+		return WorkInProgressPreferencePage.reconcile();
 	}
 
 	public Object[] getChildren(Object element) {
@@ -267,6 +273,8 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 						postAdd(parent, ((ICompilationUnit)element).getAllTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
+				} else if (element instanceof IWorkingCopy) {
+					//	do nothing
 				} else
 					postAdd(parent, element);
 			} else	if (fInput == null) {
@@ -277,13 +285,15 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			return;
 		}
 
+		if (kind == IJavaElementDelta.CHANGED) {
+			if (fBrowsingPart.isValidElement(element)) {
+				postRefresh(element);
+			}
+		}
+
 		if (element instanceof IType && fBrowsingPart.isValidInput(element))
 			postRefresh(null);
 
-		if ((flags & IJavaElementDelta.F_MODIFIERS) != 0 && fBrowsingPart.isValidElement(element))
-			postRefresh(element);
-
-			
 		if (isClassPathChange(delta))
 			 // throw the towel and do a full refresh
 			postRefresh(null);

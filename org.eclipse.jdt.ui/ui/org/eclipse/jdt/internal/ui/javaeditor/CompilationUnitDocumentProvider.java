@@ -24,7 +24,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -59,11 +61,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -427,8 +431,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
 				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
-				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy(monitor, fBufferFactory, r);
-				DocumentAdapter a= (DocumentAdapter) c.getBuffer();
+				ICompilationUnit c= (ICompilationUnit) original.getSharedWorkingCopy(monitor, fBufferFactory, r);
+				DocumentAdapter a= null;
+				try {
+					a= (DocumentAdapter)c.getBuffer();
+				} catch (ClassCastException cce) {
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", cce); //$NON-NLS-1$
+					throw new CoreException(status);
+				}
 				_FileSynchronizer f= new _FileSynchronizer(input); 
 				f.install();
 				
