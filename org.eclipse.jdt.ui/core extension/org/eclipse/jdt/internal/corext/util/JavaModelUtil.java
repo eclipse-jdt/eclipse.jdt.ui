@@ -313,11 +313,13 @@ public class JavaModelUtil {
 		StringBuffer buf= new StringBuffer();
 		if (name1 != null && name1.length() > 0) {
 			buf.append(name1);
-			if (name2 != null && name2.length() > 0) {
-				buf.append('.');
-				buf.append(name2);
-			}
 		}
+		if (name2 != null && name2.length() > 0) {
+			if (buf.length() > 0) {
+				buf.append('.');
+			}
+			buf.append(name2);
+		}		
 		return buf.toString();
 	}
 	

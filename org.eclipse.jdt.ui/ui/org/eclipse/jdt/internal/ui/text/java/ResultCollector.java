@@ -358,7 +358,11 @@ public class ResultCollector implements ICompletionRequestor {
 		StringBuffer buf= new StringBuffer(typeName);
 		if (containerName != null) {
 			buf.append(" - "); //$NON-NLS-1$
-			buf.append(containerName);
+			if (containerName.length() > 0) {
+				buf.append(containerName);
+			} else {
+				buf.append(JavaTextMessages.getString("ResultCollector.default_package"));
+			}
 		}
 		String name= buf.toString();
 		
