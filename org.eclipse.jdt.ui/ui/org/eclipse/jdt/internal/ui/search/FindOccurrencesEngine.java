@@ -119,6 +119,9 @@ public abstract class FindOccurrencesEngine {
 	}
 	
 	public static FindOccurrencesEngine create(IJavaElement root) {
+		if (root == null)
+			return null;
+		
 		ICompilationUnit unit= (ICompilationUnit)root.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (unit != null)
 			return new FindOccurencesCUEngine(unit);
