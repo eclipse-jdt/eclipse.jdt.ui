@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,8 +64,11 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -98,6 +102,8 @@ public final class ImportsStructure implements IImportsStructure {
 	private IRegion fReplaceRange;
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
+	
+	private static final boolean USE_ALLTYPE_CACHE= true;
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
@@ -1061,59 +1067,114 @@ public final class ImportsStructure implements IImportsStructure {
 		return true;
 	}
 
-	private Set evaluateStarImportConflicts(IProgressMonitor monitor) {
+	private Set evaluateStarImportConflicts(IProgressMonitor monitor) throws JavaModelException {
+		//long start= System.currentTimeMillis();
+		
 		int nPackageEntries= fPackageEntries.size();
-		HashSet starImportPackages= new HashSet(nPackageEntries);
+		// all type containers to be star imported
+		final HashSet starImportPackages= new HashSet(nPackageEntries);
+		// all simple type names referenced in a star-imported package, annottaed with the container
+		final HashMap typeReferences= new HashMap();
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			if (!pack.isStatic() && pack.hasStarImport(fImportOnDemandThreshold, null)) {
 				starImportPackages.add(pack.getName());
+				for (int k= 0; k < pack.getNumberOfImports(); k++) {
+					ImportDeclEntry curr= pack.getImportAt(k);
+					if (!curr.isOnDemand() && !curr.isComment()) {
+						typeReferences.put(curr.getSimpleName(), pack.getName());
+					}
+				}
 			}
 		}
+
 		if (starImportPackages.isEmpty()) {
 			return null;
 		}
 		
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
 		starImportPackages.add(JAVA_LANG);
+		final HashSet onDemandConflicts= new HashSet();
 		
-		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
-		if (allTypes.length < 2) {
-			return null;
-		}
-		
-		HashSet onDemandConflicts= new HashSet();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
-		String curr= allTypes[0].getTypeName();
-		int offset= 0;
-		int i= 1;
-		while (i < allTypes.length) {
-			String name= allTypes[i].getTypeName();
-			if (!name.equals(curr)) {
-				if (i - offset > 1 && isConflictingTypeName(allTypes, offset, i, starImportPackages, scope)) {
+
+		if (!USE_ALLTYPE_CACHE) {
+			final int[] count= {0 };
+			ITypeNameRequestor requestor= new ITypeNameRequestor() {
+				public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+					processType(packageName, simpleTypeName, enclosingTypeNames);
+				}
+				public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+					processType(packageName, simpleTypeName, enclosingTypeNames);
+				}
+				private String getTypeContainerName(char[] packageName, char[][] enclosingTypeNames) {
+					StringBuffer buf= new StringBuffer();
+					buf.append(packageName);
+					for (int i= 0; i < enclosingTypeNames.length; i++) {
+						if (buf.length() > 0)
+							buf.append('.');
+						buf.append(enclosingTypeNames[i]);
+					}
+					return buf.toString();
+				}
+				private void processType(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames) {
+					count[0]++;
+					String name= new String(simpleTypeName);
+					String knownContainer= (String) typeReferences.get(name);
+					if (knownContainer != null) {
+						String containerName= getTypeContainerName(packageName, enclosingTypeNames);
+						if (starImportPackages.contains(containerName) && !knownContainer.equals(containerName)) {
+							onDemandConflicts.add(name);
+						}
+					}
+				}
+			};
+			
+			new SearchEngine().searchAllTypeNames(null, null, SearchPattern.R_PATTERN_MATCH, IJavaSearchConstants.TYPE,
+					scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+			
+			//System.out.println("Ambiguous import computation (with search): " + (System.currentTimeMillis() - start) + " ms, elements: " + count[0]); //$NON-NLS-1$ //$NON-NLS-2$
+
+		} else { // USE_ALLTYPE_CACHE
+			TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
+			if (allTypes.length < 2) {
+				return null;
+			}
+			
+			String curr= allTypes[0].getTypeName();
+			int offset= 0;
+			int i= 1;
+			while (i < allTypes.length) {
+				String name= allTypes[i].getTypeName();
+				if (!name.equals(curr)) {
+					if (i - offset > 1) {
+						String knownContainer= (String) typeReferences.get(curr);
+						if (knownContainer != null && isConflictingTypeName(allTypes, offset, i, starImportPackages, knownContainer, scope)) {
+							onDemandConflicts.add(curr);
+						}
+					}
+					curr= name;
+					offset= i;
+				}
+				i++;
+			}
+			if (i - offset > 1) {
+				String knownContainer= (String) typeReferences.get(curr);
+				if (knownContainer != null && isConflictingTypeName(allTypes, offset, i, starImportPackages, knownContainer, scope)) {
 					onDemandConflicts.add(curr);
 				}
-				curr= name;
-				offset= i;
 			}
-			i++;
-		}
-		if (i - offset > 1 && isConflictingTypeName(allTypes, offset, i, starImportPackages, scope)) {
-			onDemandConflicts.add(curr);
+			//System.out.println("Ambiguous import computation (with all type cache): " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		}
 		return onDemandConflicts;
 	}
 	
-	private boolean isConflictingTypeName(TypeInfo[] allTypes, int start, int end, HashSet starImportPackages, IJavaSearchScope scope) {
-		String conflictingContainer= null; // set only when entry is validated to be conflicting
+	private boolean isConflictingTypeName(TypeInfo[] allTypes, int start, int end, HashSet starImportPackages, String knownContainer, IJavaSearchScope scope) {
 		for (int i= start; i < end; i++) {
 			TypeInfo curr= allTypes[i];
 			String containerName= curr.getTypeContainerName();
-			if (!containerName.equals(conflictingContainer) && starImportPackages.contains(containerName) && curr.isEnclosed(scope)) {
-				if (conflictingContainer != null) {
-					return true;
-				}
-				conflictingContainer= containerName;
+			if (!containerName.equals(knownContainer) && starImportPackages.contains(containerName) && curr.isEnclosed(scope)) {
+				return true;
 			}
 		}
 		return false;
