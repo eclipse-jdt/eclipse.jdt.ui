@@ -1,0 +1,96 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 2000
+ */
+
+
+import java.util.ResourceBundle;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.TextEditorAction;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+
+/**
+ * A toolbar action which toggles the presentation model of the
+ * connected text editor. The editor shows either the highlight range
+ * only or always the whole document.
+ */
+public class TogglePresentationAction extends TextEditorAction {
+	
+	private final static String SHOW_SEGMENTS= "TooglePresentationAction.show_segments";
+	
+	
+	/**
+	 * Constructs and updates the action.
+	 */
+	public TogglePresentationAction(ResourceBundle bundle, String prefix) {
+		super(bundle, prefix, null);
+		setImageDescriptor(JavaPluginImages.DESC_TOOL_SHOW_SEGMENTS);
+		update();
+	}
+	
+	/**
+	 * @see IAction#actionPerformed
+	 */
+	public void run() {
+		
+		ITextEditor editor= getTextEditor();
+		if (editor == null)
+			return;
+		
+		IRegion remembered= editor.getHighlightRange();
+		editor.resetHighlightRange();
+		
+		boolean showAll= !editor.showsHighlightRangeOnly();
+		setChecked(showAll);
+		
+		editor.showHighlightRangeOnly(showAll);
+		if (remembered != null)
+			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
+		
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		settings.put(SHOW_SEGMENTS, showAll);
+	}
+	
+	/**
+	 * @see TextEditorAction#update
+	 */
+	public void update() {
+		ITextEditor editor= getTextEditor();
+		setChecked(editor != null && editor.showsHighlightRangeOnly());
+		setEnabled(true);
+	}
+	
+	/**
+	 * @see TextEditorAction#setEditor(ITextEditor)
+	 */
+	public void setEditor(ITextEditor editor) {
+		
+		super.setEditor(editor);
+		
+		if (editor != null) {
+			
+			boolean showSegments= JavaPlugin.getDefault().getDialogSettings().getBoolean(SHOW_SEGMENTS);
+			
+			if (isChecked() != showSegments)
+				setChecked(showSegments);
+			
+			if (editor.showsHighlightRangeOnly() != showSegments) {
+				IRegion remembered= editor.getHighlightRange();
+				editor.resetHighlightRange();
+				editor.showHighlightRangeOnly(showSegments);
+				if (remembered != null)
+					editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
+			}
+		}
+	}
+}

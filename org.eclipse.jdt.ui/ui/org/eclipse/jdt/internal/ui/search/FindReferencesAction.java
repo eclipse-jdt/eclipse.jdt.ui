@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.search;
+
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public class FindReferencesAction extends ElementSearchAction {
+
+	public FindReferencesAction() {
+		super(JavaPlugin.getResourceString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class});
+		setToolTipText(JavaPlugin.getResourceString("Search.FindReferencesAction.label"));
+	}
+
+	protected int getLimitTo() {
+		return IJavaSearchConstants.REFERENCES;
+	}	
+}

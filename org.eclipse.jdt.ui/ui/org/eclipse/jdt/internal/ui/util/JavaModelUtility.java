@@ -1,0 +1,306 @@
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+
+
+/**
+ * Utility methods for the Java Model. These methods should be part of
+ * <code>IJavaModel</code> but unfortunately they aren't.
+ */
+public class JavaModelUtility {
+	
+	public static IType findType(IJavaProject jproject, String str) {
+		String pathStr= str.replace('.', '/') + ".java";
+		IJavaElement jelement= null;
+		try {
+			jelement= jproject.findElement(new Path(pathStr));
+		} catch (JavaModelException e) {
+			// an illegal path -> no element found
+		}
+		IType resType= null;
+		if (jelement instanceof ICompilationUnit) {
+			String simpleName= Signature.getSimpleName(str);
+			resType= ((ICompilationUnit)jelement).getType(simpleName);
+		} else if (jelement instanceof IClassFile) {
+			try {
+				resType= ((IClassFile)jelement).getType();
+			} catch (JavaModelException e) {
+				// Fall through and return null.
+			}
+		}
+		return resType;
+	}
+	
+	/** 
+	 * Finds a type in a compilation unit
+	 * @param cu the compilation unit to search in
+	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
+	 * @return the type found, or null if not existing
+	 */		
+	public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
+		IType[] types= cu.getAllTypes();
+		for (int i= 0; i < types.length; i++) {
+			String currName= getTypeQualifiedName(types[i]);
+			if (typeQualifiedName.equals(currName)) {
+				return types[i];
+			}
+		}
+		return null;
+	}	
+	
+
+	/**
+	 * Returns the qualified type name of the given type using '.' as separators.
+	 * This is a replace to IType.getTypeQualifiedName()
+	 * which uses '$' as separators. As '$' is also a valid character in an id
+	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
+	 */
+	public static String getTypeQualifiedName(IType type) {
+		StringBuffer buf= new StringBuffer();
+		getTypeQualifiedName(type, buf);
+		return buf.toString();
+	}
+	
+	private static void getTypeQualifiedName(IType type, StringBuffer buf) {
+		IType outerType= type.getDeclaringType();
+		if (outerType != null) {
+			getTypeQualifiedName(outerType, buf);
+			buf.append('.');
+		}
+		buf.append(type.getElementName());
+	}	
+
+	/**
+	 * Returns the fully qualified name of the given type using '.' as separators.
+	 * This is a replace to IType.getFullyQualifiedTypeName
+	 * which uses '$' as separators. As '$' is also a valid character in an id
+	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
+	 */
+	public static String getFullyQualifiedName(IType type) {
+		StringBuffer buf= new StringBuffer();
+		String packName= type.getPackageFragment().getElementName();
+		if (packName.length() > 0) {
+			buf.append(packName);
+			buf.append('.');
+		}
+		getTypeQualifiedName(type, buf);
+		return buf.toString();
+	}
+	
+	/**
+	 * Returns the fully qualified name of a type's container. (package name + enclosing type name)
+	 */
+	public static String getTypeContainerName(IType type) {
+		IType outerType= type.getDeclaringType();
+		if (outerType != null) {
+			return getFullyQualifiedName(outerType);
+		} else {
+			return type.getPackageFragment().getElementName();
+		}
+	}
+		
+	
+	/**
+	 * Concatenates to names. Uses a dot for separation
+	 * Both strings can be empty or null
+	 */
+	public static String concatenateName(String name1, String name2) {
+		StringBuffer buf= new StringBuffer();
+		if (name1 != null && name1.length() > 0) {
+			buf.append(name1);
+			if (name2 != null && name2.length() > 0) {
+				buf.append('.');
+				buf.append(name2);
+			}
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * Evaluate if a package is visible from another package with the given modifiers
+	 */
+	public static boolean isVisible(IPackageFragment ourpack, int otherflags, IPackageFragment otherpack) {
+		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
+			return true;
+		}
+		if (Flags.isPrivate(otherflags)) {
+			return false;
+		}		
+		
+		return (ourpack != null && ourpack.equals(otherpack));
+	}
+
+	/**
+	 * Convert an import declaration into the java element the import declaration
+	 * stands for. An on demand import declaration is converted into a package
+	 * fragement or type depending of the kind of import statement (e.g. p1.p2.*
+	 * versus p1.p2.T1.*). A normal import declaration is converted into the 
+	 * corresponding <code>IType</code>.
+	 */
+	public static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) {
+		if (declaration.isOnDemand()) {
+			String pattern= declaration.getElementName();
+			pattern= pattern.substring(0, pattern.length() - 2);
+			IJavaProject project= declaration.getJavaProject();
+			
+			JdtHackFinder.fixme("1GBRLSV: ITPJCORE:WIN2000 - Question: how to I find an inner type");
+			// First try if the import statement is of form p1.p2.T1.* which would lead
+			// to a type not to a package.
+			IJavaElement result= findType(project, pattern);
+			if (result != null)
+				return result;
+			
+			return convertToPackageFragment(pattern, project);
+		} else {
+			return convertToType(declaration);	
+		}
+	}
+	
+	private static IPackageFragment convertToPackageFragment(IImportDeclaration declaration) {
+		String pattern= declaration.getElementName();
+		pattern= pattern.substring(0, pattern.length() - 2);
+		return convertToPackageFragment(pattern, declaration.getJavaProject());
+	}	
+		
+	private static IPackageFragment convertToPackageFragment(String pattern, IJavaProject project) {
+		
+		try {
+			// Check the project itself.
+			JdtHackFinder.fixme("1GAOLWQ: ITPJCORE:WIN2000 - IJavaProject.findPackageFragment strange semantic");
+			IPackageFragment[] packages= project.getPackageFragments();
+			for (int i= 0; i < packages.length; i++) {
+				if (pattern.equals(packages[i].getElementName()))
+					return packages[i];
+			}
+			
+			// Convert to a path and search on the class path.
+			pattern= pattern.replace('.', IPath.SEPARATOR);
+			IPath path= new Path(pattern).makeAbsolute();
+			return project.findPackageFragment(path);
+		} catch (JavaModelException e) {
+			return null;
+		}	
+	}
+	
+	private static IType convertToType(IImportDeclaration declaration) {
+		IJavaProject project= declaration.getJavaProject();
+		return findType(project, declaration.getElementName());
+	}
+	
+	/**
+	 * Returns true if the element is on the build path
+	 */	
+	public static boolean isOnBuildPath(IJavaElement element) throws JavaModelException {
+		IJavaProject jproject= element.getJavaProject();
+		if (jproject != null) {			
+			IPath rootPath;
+			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+				rootPath= jproject.getProject().getFullPath();
+			} else {
+				IPackageFragmentRoot root= getPackageFragmentRoot(element);
+				if (root == null) {
+					return false;
+				}
+				rootPath= root.getPath();
+			}
+			return jproject.findPackageFragmentRoot(rootPath) != null;
+		}
+		return false;
+	}	
+	
+	/**
+	 * Returns the package fragment root of <code>IJavaElement</code>. If the given
+	 * element is already a package fragment root, the element itself is returned.
+	 */
+	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement element) {
+		return (IPackageFragmentRoot)findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT_ROOT);
+	}
+
+	/**
+	 * Returns the parent of the supplied java element that conforms to the given 
+	 * parent type or <code>null</code>, if such a parent doesn't exit.
+	 */
+	public static IJavaElement getParent(IJavaElement element, int kind) {
+		if (element == null)
+			return null;
+		return findElementOfKind(element.getParent(), kind);	
+	}
+	
+	/**
+	 * Returns the first java element that conforms to the given type walking the
+	 * java element's parent relationship. If the given element alrady conforms to
+	 * the given kind, the element is returned.
+	 */
+	public static IJavaElement findElementOfKind(IJavaElement element, int kind) {
+		while (element != null && element.getElementType() != kind)
+			element= element.getParent();
+		return element;				
+	}
+	
+	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1);
+	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1);
+	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1);
+
+	/**
+	 * Checks whether the given IType has a main method or not.
+	 */
+	public static boolean hasMainMethod(IType type) {
+		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) || 
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) || 
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) {
+				return true;
+		}
+		
+		return false;
+	}
+	
+	public static boolean isMainMethod(IMethod method) {
+		try {
+			if (!isStaticPublicVoidMethod(method))
+				return false;
+			String signature= method.getSignature();
+			if ("([Qjava.lang.String;)V".equals(signature) ||
+				"([Ljava/lang/String;)V".equals(signature))
+				return true;
+			if ("([QString;)V".equals(signature)) {
+				String[] resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType());
+				if (resolvedName != null && "java.lang".equals(resolvedName[0]))
+					return true;
+			}
+			return false;
+		} catch (JavaModelException e) {
+		}
+		return false;
+	}
+	
+	private static boolean isStaticPublicVoidMethod(IMethod m) {
+		try {
+			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags());
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
+	
+	
+}

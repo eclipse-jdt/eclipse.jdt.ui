@@ -1,0 +1,233 @@
+package org.eclipse.jdt.internal.ui.packageview;
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+
+/**
+ * Drag support class to allow dragging of files and folder from
+ * the packages view to another application.
+ */
+public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
+	
+	private ISelectionProvider fProvider;
+	private ResourceBundle fBundle= JavaPlugin.getResourceBundle();
+	
+	private final static String PREFIX= "PackageViewer.dragAndDrop.fileDrag.";
+	private final static String ERROR_PREFIX= PREFIX + "error.";
+	
+	public FileTransferDragAdapter(ISelectionProvider provider) {
+		fProvider= provider;
+		Assert.isNotNull(fProvider);
+	}
+
+	public Transfer getTransfer() {
+		return FileTransfer.getInstance();
+	}
+	
+	public void dragStart(DragSourceEvent event) {
+		StructuredSelection selection= (StructuredSelection)event.data;
+		event.doit= isDragable(selection);
+	}
+	
+	private boolean isDragable(StructuredSelection selection) {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IPackageFragment) {
+				return false;
+			} else if (element instanceof IJavaElement) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtility.findElementOfKind((IJavaElement)element, 
+					IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root != null && root.isArchive())
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	public void dragSetData(DragSourceEvent event){
+		List elements= getResources();
+		if (elements == null || elements.size() == 0) {
+			event.data= null;
+			return;
+		}
+		
+		String[] result= new String[elements.size()];
+		Iterator iter= elements.iterator();
+		for(int i= 0; iter.hasNext(); i++) {
+			IResource resource= (IResource)iter.next();
+			result[i]= resource.getLocation().toOSString();
+		}
+		event.data= result;
+	}
+	
+	public void dragFinished(DragSourceEvent event) {
+		if (!event.doit)
+			return;
+
+		if (event.detail == DND.DROP_MOVE) {
+			handleDropMove(event);
+		}	
+		else if (event.detail == DND.DROP_NONE) {
+			handleRefresh(event);
+		}
+	}
+	
+	private void handleDropMove(DragSourceEvent event) {
+		final List elements= getResources();
+		if (elements == null || elements.size() == 0)
+			return;
+		
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			public void execute(IProgressMonitor monitor) throws CoreException {
+				try {
+					monitor.beginTask(JavaPlugin.getResourceString(PREFIX + "deleting"), elements.size());
+					MultiStatus status= createMultiStatus();
+					Iterator iter= elements.iterator();
+					while(iter.hasNext()) {
+						IResource resource= (IResource)iter.next();
+						try {
+							monitor.subTask(resource.getFullPath().toOSString());
+							resource.delete(true, null);
+							
+						} catch (CoreException e) {
+							status.add(e.getStatus());
+						} finally {
+							monitor.worked(1);
+						}
+					}
+					if (!status.isOK()) {
+						throw new CoreException(status);
+					}
+				} finally {
+					monitor.done();
+				}
+			}
+		};
+		runOperation(op, true, false);
+	}
+	
+	private  void handleRefresh(DragSourceEvent event) {
+		final List elements= getResources();
+		final Set roots= new HashSet(10);
+
+		Iterator iter= elements.iterator();
+		while (iter.hasNext()) {
+			IResource resource= (IResource)iter.next();
+			IResource parent= resource.getParent();
+			if (parent == null) {
+				roots.add(resource);
+			} else {
+				roots.add(parent);
+			}
+		}
+		
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			public void execute(IProgressMonitor monitor) throws CoreException {
+				try {
+					monitor.beginTask(JavaPlugin.getResourceString(PREFIX + "refreshing"), roots.size());
+					MultiStatus status= createMultiStatus();
+					Iterator iter= roots.iterator();
+					while (iter.hasNext()) {
+						IResource r= (IResource)iter.next();
+						try {
+							r.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(monitor, 1));
+						} catch (CoreException e) {
+							status.add(e.getStatus());
+						}	
+					}
+					if (!status.isOK()) {
+						throw new CoreException(status);
+					}
+				} finally {
+					monitor.done();
+				}
+			}
+		};
+		
+		runOperation(op, true, false);
+	}
+	
+	private List getResources() {
+		ISelection s= fProvider.getSelection();
+		if (!(s instanceof IStructuredSelection)) {
+			return null;
+		}
+		
+		List result= new ArrayList(10);
+		Iterator iter= ((IStructuredSelection)s).iterator();
+		while (iter.hasNext()) {
+			Object o= iter.next();
+			IResource r= null;
+			if (o instanceof IResource) {
+				r= (IResource)o;
+			} else if (o instanceof IAdaptable) {
+				r= (IResource)((IAdaptable)o).getAdapter(IResource.class);
+			}
+			if (r != null)
+				result.add(r);
+		}
+		return result;
+	}
+	
+	private MultiStatus createMultiStatus() {
+		return new MultiStatus(JavaPlugin.getPluginId(), 
+			IStatus.OK, JavaPlugin.getResourceString(ERROR_PREFIX + "message"), null);
+	}
+	
+	private void runOperation(IRunnableWithProgress op, boolean fork, boolean cancelable) {
+		try {
+			Shell parent= JavaPlugin.getActiveWorkbenchShell();
+			new ProgressMonitorDialog(parent).run(fork, cancelable, op);
+		} catch (InvocationTargetException e) {
+			if (!ExceptionHandler.handle(e, fBundle, ERROR_PREFIX))
+				ExceptionHandler.log(e, fBundle, ERROR_PREFIX);
+		} catch (InterruptedException e) {
+			// Do nothing. Operation has been canceled by user.
+		}
+	}
+}

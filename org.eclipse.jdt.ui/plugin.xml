@@ -38,7 +38,7 @@
 	<perspective
 		id="org.eclipse.jdt.ui.JavaPerspective"
 		name="Java"
-		icon="icons/full/ctool16/java_pers.gif"
+		icon="icons/full/cview16/jperspective.gif"
 		class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory">
 	</perspective>
 </extension>
@@ -52,7 +52,7 @@
 	<view
 		id="org.eclipse.jdt.ui.PackageExplorer"
 		name="Packages"
-		icon="icons/full/view16/package.gif"
+		icon="icons/full/cview16/package.gif"
 		category="org.eclipse.jdt.ui.java"
 		class="org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart">
 	</view>
@@ -60,7 +60,7 @@
 		id="org.eclipse.jdt.ui.TypeHierarchy"
 		name="Hierarchy"
 		category="org.eclipse.jdt.ui.java"
-	   	icon="icons/full/view16/class_hi.gif"
+	   	icon="icons/full/cview16/class_hi.gif"
 		class="org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart">
 	</view>
 </extension>
@@ -347,6 +347,14 @@
 	</viewer>
 </extension>
 
+<extension
+	point="org.eclipse.compare.contentViewers">
+	<viewer
+		extensions="java,java2"
+		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
+	</viewer>
+</extension>
+
 <!-- End Java Compare -->
 
 
@@ -388,7 +396,6 @@
 		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
 		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncher"
 		label="Java Scrapbook Page"
-		wizard="org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard"
    		modes="debug" />
 </extension>	
 
@@ -559,7 +566,7 @@
 		<action id="org.eclipse.jdt.ui.actions.AddException"
 			label="Add Java Exception Breakpoint"
 			toolbarPath="javaExceptions"
-			icon="icons/full/elcl16/exc_catch.gif"
+			icon="icons/full/clcl16/exc_catch.gif"
 			tooltip="Add Java Exception"
 			class="org.eclipse.jdt.internal.ui.launcher.AddExceptionAction">
 		</action>

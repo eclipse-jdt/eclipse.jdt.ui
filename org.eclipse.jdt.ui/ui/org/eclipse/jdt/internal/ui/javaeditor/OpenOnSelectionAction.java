@@ -1,0 +1,109 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+
+
+import java.util.List;
+import java.util.ResourceBundle;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
+
+
+
+/**
+ * This action opens a java editor on the element represented by text selection of
+ * the connected java source viewer.
+ */
+public class OpenOnSelectionAction extends OpenJavaElementAction {
+		
+	protected ResourceBundle fBundle;
+	protected String fPrefix;
+	protected ITextEditor fEditor;
+	
+	public OpenOnSelectionAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
+		super(bundle, prefix);
+		fBundle= bundle;
+		fPrefix= prefix;
+		fEditor= editor;
+	}
+	
+	public OpenOnSelectionAction(ResourceBundle bundle, String prefix) {
+		this(bundle, prefix, null);
+	}
+	
+	public void setContentEditor(ITextEditor editor) {
+		fEditor= editor;
+	}
+	
+	protected String getResourceString(String key) {
+		return fBundle.getString(fPrefix + key);
+	}
+	
+	
+	protected ICodeAssist getCodeAssist() {	
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof ClassFileEditorInput) {
+			ClassFileEditorInput cfInput= (ClassFileEditorInput) input;
+			return cfInput.getClassFile();
+		}
+		
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
+		return manager.getWorkingCopy(input);
+	}
+	
+	/**
+	 * @see IAction#actionPerformed
+	 */
+	public void run() {
+		
+		ICodeAssist resolve= getCodeAssist();
+		if (resolve != null && fEditor.getSelectionProvider() != null) {
+			ISelection s= fEditor.getSelectionProvider().getSelection();
+			if (!s.isEmpty()) {
+				
+				ITextSelection selection= (ITextSelection) s;
+				
+				try {
+					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
+					if (result != null && result.length > 0) {
+						List filtered= filterResolveResults(result);
+						ISourceReference chosen= selectSourceReference(filtered, getShell(), getResourceString("title"), getResourceString("message"));
+						if (chosen != null) {
+							open(chosen);
+							return;
+						}
+					}
+				} catch (JavaModelException x) {
+				} catch (PartInitException x) {
+				}
+			}
+		}
+		
+		getShell().getDisplay().beep();		
+	}
+	
+	protected Shell getShell() {
+		return fEditor.getSite().getShell();
+	}					
+}

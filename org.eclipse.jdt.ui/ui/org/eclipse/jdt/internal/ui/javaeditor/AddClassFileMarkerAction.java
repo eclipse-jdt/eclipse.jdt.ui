@@ -1,0 +1,75 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+
+
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.AddMarkerAction;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.IResourceLocator;
+
+
+class AddClassFileMarkerAction extends AddMarkerAction {
+	
+	
+	/**
+	 * Creates a marker action.
+	 */
+	public AddClassFileMarkerAction(ResourceBundle bundle, String prefix, ITextEditor textEditor, String markerType, boolean askForLabel) {
+		super(bundle, prefix, textEditor, markerType, askForLabel);
+	}
+	
+	/**
+	 * @see AddMarkerAction#getResource()
+	 */
+	protected IResource getResource() {
+		
+		IResource resource= null;
+		
+		IEditorInput input= getTextEditor().getEditorInput();
+		if (input instanceof ClassFileEditorInput) {
+			IClassFile c= ((ClassFileEditorInput) input).getClassFile();
+			IResourceLocator locator= (IResourceLocator) c.getAdapter(IResourceLocator.class);
+			if (locator != null) {
+				try {
+					resource= locator.getContainingResource(c);
+				} catch (JavaModelException x) {
+					// ignore but should inform
+				}
+			}
+		}
+		
+		return resource;
+	}
+	
+	/**
+	 * @see AddMarkerAction#getInitialAttributes()
+	 */
+	protected Map getInitialAttributes() {
+		
+		Map attributes= super.getInitialAttributes();
+		
+		IEditorInput input= getTextEditor().getEditorInput();
+		if (input instanceof ClassFileEditorInput) {
+			
+			IClassFile classFile= ((ClassFileEditorInput) input).getClassFile();
+			JavaCore.addJavaElementMarkerAttributes(attributes, classFile);
+		}
+		
+		return attributes;
+	}
+}

@@ -1,0 +1,123 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+/**
+ * A class to select one or more elements out of an indexed property
+ */
+public class ElementListSelectionDialog extends AbstractElementListSelectionDialog {
+	
+	private List fElements;
+	
+	/**
+	 * Constructs a list selection dialog.
+	 * @param renderer The label renderer used
+	 * @param ignoreCase Decides if the match string ignores lower/upppr case
+	 * @param multipleSelection Allow multiple selection	 
+	 */
+	public ElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
+		this(parent, "", null, renderer, ignoreCase, multipleSelection);
+	}
+
+	/**
+	 * Constructs a list selection dialog.
+	 * @param renderer The label renderer used
+	 * @param ignoreCase Decides if the match string ignores lower/upppr case
+	 * @param multipleSelection Allow multiple selection	 
+	 */
+	public ElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
+		super (parent, title, image, renderer, ignoreCase, multipleSelection);
+	}
+
+	/**
+	 * Sets the elements presented by this dialog.
+	 */
+	public void setElements(List elements) {
+		fElements= elements;	
+	}
+	 
+	/**
+	 * Open the dialog.
+	 * @param elements The elements to show in the list
+	 * @param initialSelection The initial content of the match text box.
+	 * @return Returns OK or CANCEL
+	 */
+	public int open(List elements, String initialSelection) {
+		setElements(elements);
+		setInitialSelection(initialSelection);
+		return open();
+	}
+	
+	/**
+	 * Open the dialog.
+	 * @param elements The elements to show in the list
+	 * @return Returns OK or CANCEL
+	 */	
+	public int open(List elements) {
+		setElements(elements);
+		return open();
+	}
+
+	/*
+	 * @private
+	 */	
+	protected void handleDoubleClick() {
+		if (verifyCurrentSelection()) {
+			buttonPressed(IDialogConstants.OK_ID);
+		}
+	}
+	
+	/*
+	 * @private
+	 */
+	protected void computeResult() {
+		setResult(getWidgetSelection());
+	}
+
+	/*
+	 * @private
+	 */	
+	protected Control createDialogArea(Composite parent) {
+		Control result= super.createDialogArea(parent);
+		
+		setSelectionListElements(fElements, false);
+      	//a little trick to make the window come up faster
+      	String initialFilter= (String)getPrimaryInitialSelection();
+      	if (initialFilter != null)
+      		setFilter(initialFilter, true);
+      	else
+      		refilter();
+      				
+		return result;
+	}
+	
+	public int open(Object[] elements, String initialSelection) {
+		return open(Arrays.asList(elements), initialSelection);
+	}
+	
+	public int open(Object[] elements) {
+		return open(Arrays.asList(elements));
+	}
+	
+	public Object[] getSelectedElements() {
+		return getResult();
+	}
+	
+	public Object getSelectedElement() {
+		return getPrimaryResult();
+	}	
+}

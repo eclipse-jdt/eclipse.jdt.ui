@@ -1,0 +1,27 @@
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 2000
+ */
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
+
+/**
+ * A dialog to host refactoring wizards.
+ */
+public class RefactoringWizardDialog extends WizardDialog {
+
+	/**
+	 * Creates a new refactoring wizard dialag with the given wizard.
+	 */
+	public RefactoringWizardDialog(Shell parent, IWizard wizard) {
+		super(parent, wizard);
+		setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.RESIZE);
+		setMinimumPageSize(600, 400);
+	}	
+}
