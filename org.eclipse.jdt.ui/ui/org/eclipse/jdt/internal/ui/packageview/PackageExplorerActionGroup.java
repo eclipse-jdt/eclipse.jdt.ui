@@ -214,6 +214,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		actionBars.getMenuManager().removeAll();
 		fillActionBars(actionBars);
 		actionBars.updateActionBars();
+		fZoomInAction.setEnabled(true);
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
@@ -249,7 +250,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 
 	/* package */ void handleSelectionChanged(SelectionChangedEvent event) {
-		fZoomInAction.update();
 	}
 
 	//---- Context menu -------------------------------------------------------------------------
@@ -267,8 +267,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 	
 	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
-		
-		if (size == 1 && fPart.getViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer))
+		boolean enabled= size == 1 && fPart.getViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer);
+		fZoomInAction.setEnabled(enabled);
+		if (enabled)
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 	}
 	
