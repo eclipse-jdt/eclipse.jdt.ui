@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 public class BuildPathsBlock {
 
@@ -157,7 +157,7 @@ public class BuildPathsBlock {
 		
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(MGridUtil.createFill());
+		folder.setLayoutData(new MGridData(MGridData.FILL_BOTH));
 		folder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
@@ -215,7 +215,7 @@ public class BuildPathsBlock {
 		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
 		LayoutUtil.doDefaultLayout(editorcomp, editors, true);
 		
-		editorcomp.setLayoutData(MGridUtil.createHorizontalFill());
+		editorcomp.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
 		
 		if (fIsNewProject) {
 			folder.setSelection(0);

@@ -9,19 +9,17 @@ import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.view
 /**
  * Creates a new snippet page
  */
- 
-public class NewSnippetCreationWizard extends Wizard implements INewWizard {
+public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 
-	private NewSnippetFileCreationPage fPage;
+	private NewSnippetFileCreationWizardPage fPage;
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
-	private ImageDescriptor fImage;
 	
-	public NewSnippetCreationWizard() {
+	public NewSnippetFileCreationWizard() {
 		setNeedsProgressMonitor(true);
 	}
 
-	/**
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
@@ -34,17 +32,20 @@ public class NewSnippetCreationWizard extends Wizard implements INewWizard {
 				fSelection= StructuredSelection.EMPTY;
 			}
 		}
-		fPage= new NewSnippetFileCreationPage(fWorkbench, fSelection);
+		fPage= new NewSnippetFileCreationWizardPage(fSelection);
 		addPage(fPage);
 	}
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
 		return fPage.finish();
 	}
 
+	/*
+	 * @see org.eclipse.ui.IWorkbenchWizard#init
+	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fWorkbench= workbench;
 		fSelection= selection;

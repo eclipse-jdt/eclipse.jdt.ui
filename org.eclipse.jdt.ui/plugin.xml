@@ -155,9 +155,9 @@
 		<description>%NewJavaInterface.description</description>
 	</wizard>
 	<wizard
-		id="org.eclipse.jdt.ui.wizards.NewSnippetCreationWizard"
+		id="org.eclipse.jdt.ui.wizards.NewSnippetFileCreationWizard"
 		name="%NewJavaScrapbookPage.label"
-		class="org.eclipse.jdt.internal.ui.wizards.NewSnippetCreationWizard"
+		class="org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newsbook_wiz.gif">
 		<description>%NewJavaScrapbookPage.description</description>

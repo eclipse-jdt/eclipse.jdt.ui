@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.jface.wizard.Wizard;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 
-
 public class OpenPackageWizardAction extends AbstractOpenWizardAction {
 	
 	public OpenPackageWizardAction() {

@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
@@ -156,7 +155,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fProjectRadioButton.doFillIntoGrid(composite, 2);
 		fFolderRadioButton.doFillIntoGrid(composite, 2);
 		Control control= fFoldersList.getListControl(composite);
-		MGridData gd= MGridUtil.createFill();
+		MGridData gd= new MGridData(MGridData.FILL_BOTH);
 		gd.horizontalIndent= 10;
 		control.setLayoutData(gd);
 		

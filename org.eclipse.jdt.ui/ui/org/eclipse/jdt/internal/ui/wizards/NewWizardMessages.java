@@ -15,12 +15,7 @@ public class NewWizardMessages {
 
 	private NewWizardMessages() {
 	}
-	
-	// used by deprecated methods
-	static ResourceBundle getResourceBundle() {
-		return fgResourceBundle;
-	}
-	
+		
 	public static String getString(String key) {
 		try {
 			return fgResourceBundle.getString(key);

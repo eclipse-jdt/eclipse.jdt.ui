@@ -39,12 +39,12 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		setWindowTitle(NewWizardMessages.getString("NewProjectCreationWizard.title")); //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
 		super.addPages();
-		fMainPage= new WizardNewProjectCreationPage("id"); //$NON-NLS-1$
+		fMainPage= new WizardNewProjectCreationPage("NewProjectCreationWizard"); //$NON-NLS-1$
 		fMainPage.setTitle(NewWizardMessages.getString("NewProjectCreationWizard.MainPage.title")); //$NON-NLS-1$
 		fMainPage.setDescription(NewWizardMessages.getString("NewProjectCreationWizard.MainPage.description")); //$NON-NLS-1$
 		addPage(fMainPage);
@@ -54,7 +54,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	}		
 	
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
@@ -74,7 +74,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		return true;
 	}
 		
-	/**
+	/*
 	 * Stores the configuration element for the wizard.  The config element will be used
 	 * in <code>performFinish</code> to set the result perspective.
 	 */

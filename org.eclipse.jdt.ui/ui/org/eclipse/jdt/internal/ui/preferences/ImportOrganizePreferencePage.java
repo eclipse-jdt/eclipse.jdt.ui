@@ -283,7 +283,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	private List loadImportOrder() {
 		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
 		dialog.setText(JavaUIMessages.getString("ImportOrganizePreferencePage.loadDialog.title")); //$NON-NLS-1$)
-		dialog.setFilterExtensions(new String[] {"*.importorder"}); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$
 		String lastPath= getPreferenceStore().getString(PREF_LASTLOADPATH);
 		if (lastPath != null) {
 			dialog.setFilterPath(lastPath);
@@ -318,7 +318,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	private void saveImportOrder(List elements) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(JavaUIMessages.getString("ImportOrganizePreferencePage.saveDialog.title")); //$NON-NLS-1$)
-		dialog.setFilterExtensions(new String[] {"*.importorder"}); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$
+		dialog.setFileName("example.importorder");
 		String lastPath= getPreferenceStore().getString(PREF_LASTSAVEPATH);
 		if (lastPath != null) {
 			dialog.setFilterPath(lastPath);

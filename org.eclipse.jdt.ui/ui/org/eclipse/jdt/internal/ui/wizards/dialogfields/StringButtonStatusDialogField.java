@@ -15,6 +15,11 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
+/**
+ * Dialog field containing a label, text control, status label and a button control.
+ * The status label can be either a image or text label, and can be usd to give
+ * additional information about the current element chosen.
+ */
 public class StringButtonStatusDialogField extends StringButtonDialogField {
 		
 	private Label fStatusLabelControl;
@@ -31,7 +36,10 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 	}
 	
 	// ------ set status
-	
+
+	/**
+	 * Sets the status string.
+	 */	
 	public void setStatus(String status) {
 		if (isOkToUse(fStatusLabelControl)) {
 			fStatusLabelControl.setText(status);
@@ -40,6 +48,7 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 	}
 	
 	/**
+	 * Sets the status image.
 	 * Caller is responsible to dispose image
 	 */
 	public void setStatus(Image image) {
@@ -52,19 +61,29 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		}
 		fStatus= image;		
 	}	
-		
+
+	/**
+	 * Sets the staus string hint of the status label.
+	 * The string is used to calculate the size of the status label.
+	 */		
 	public void setStatusWidthHint(String widthHintString) {
 		fWidthHintString= widthHintString;
 		fWidthHint= -1;
 	}
 	
+	/**
+	 * Sets the width hint of the status label.
+	 */
 	public void setStatusWidthHint(int widthHint) {
 		fWidthHint= widthHint;
 		fWidthHintString= null;
 	}
 	
 	// ------- layout helpers	
-		
+
+	/*
+	 * @see DialogField#doFillIntoGrid
+	 */		
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 		
@@ -80,6 +99,9 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		return new Control[] { label, text, status, button };
 	}
 	
+	/*
+	 * @see DialogField#getNumberOfControls
+	 */
 	public int getNumberOfControls() {
 		return 4;	
 	}
@@ -102,7 +124,12 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 	}
 	
 	// ------- ui creation	
-	
+
+	/**
+	 * Creates or returns the created status label widget.
+	 * @param parent The parent composite or <code>null</code> when the widget has
+	 * already been created.
+	 */			
 	public Label getStatusLabelControl(Composite parent) {
 		if (fStatusLabelControl == null) {
 			assertCompositeNotNull(parent);			
@@ -121,7 +148,10 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 	}
 	
 	// ------ enable / disable management
-	
+
+	/*
+	 * @see DialogField#updateEnableState
+	 */	
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (isOkToUse(fStatusLabelControl)) {

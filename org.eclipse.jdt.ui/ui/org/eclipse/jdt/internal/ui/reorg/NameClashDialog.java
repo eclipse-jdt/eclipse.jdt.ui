@@ -9,10 +9,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IInputValidator;
-
-import java.text.MessageFormat;
+import org.eclipse.jface.dialogs.IInputValidator;
+import java.text.MessageFormat;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -23,8 +21,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
-
 
 public class NameClashDialog extends StatusDialog {
 	
@@ -92,7 +88,7 @@ public class NameClashDialog extends StatusDialog {
 		fRenameRadioButton.doFillIntoGrid(composite, 1);
 		Control textControl= fNameDialogField.getTextControl(composite);
 		
-		MGridData gd= MGridUtil.createHorizontalFill();
+		MGridData gd= new MGridData(MGridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertHorizontalDLUsToPixels(15);
 		textControl.setLayoutData(gd);
 		return composite;

@@ -9,7 +9,12 @@ import java.util.ArrayList;import java.util.Iterator;import java.util.List;i
 import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
-
+/**
+ * A list with a button bar.
+ * Typical buttons are 'Add', 'Remove', 'Up' and 'Down'.
+ * List model is independend of widget creation.
+ * DialogFields controls are: Label, List and Composite containing buttons.
+ */
 public class ListDialogField extends DialogField {
 	
 	protected TableViewer fTable;
@@ -39,7 +44,11 @@ public class ListDialogField extends DialogField {
 	private Object fParentElement;
 
 	/**
-	 * Creates a table with buttons
+	 * Creates the <code>ListDialogField</code>.
+	 * @param adapter A listener for button invocation, selection changes.
+	 * @param buttonLabels The labels of all buttons: <code>null</code> is a valid array entry and
+	 * marks a separator.
+	 * @param lprovider The label provider to render the table entries
 	 */	
 	public ListDialogField(IListAdapter adapter, String[] buttonLabels, ILabelProvider lprovider) {
 		super();
@@ -68,17 +77,32 @@ public class ListDialogField extends DialogField {
 		fUpButtonIndex= -1;
 		fDownButtonIndex= -1;
 	}
-			
+		
+	/**
+	 * Sets the index of the 'remove' button in the button label array passed in the constructor.
+	 * The behaviour of the button marked as the 'remove' button will then be handled internally.
+	 * (enable state, button invocation behaviour)
+	 */	
 	public void setRemoveButtonIndex(int removeButtonIndex) {
 		Assert.isTrue(removeButtonIndex < fButtonLabels.length);
 		fRemoveButtonIndex= removeButtonIndex;
 	}
-	
+
+	/**
+	 * Sets the index of the 'up' button in the button label array passed in the constructor.
+	 * The behaviour of the button marked as the 'up' button will then be handled internally.
+	 * (enable state, button invocation behaviour)
+	 */	
 	public void setUpButtonIndex(int upButtonIndex) {
 		Assert.isTrue(upButtonIndex < fButtonLabels.length);
 		fUpButtonIndex= upButtonIndex;
 	}
-	
+
+	/**
+	 * Sets the index of the 'down' button in the button label array passed in the constructor.
+	 * The behaviour of the button marked as the 'down' button will then be handled internally.
+	 * (enable state, button invocation behaviour)
+	 */	
 	public void setDownButtonIndex(int downButtonIndex) {
 		Assert.isTrue(downButtonIndex < fButtonLabels.length);
 		fDownButtonIndex= downButtonIndex;
@@ -86,12 +110,16 @@ public class ListDialogField extends DialogField {
 	
 	// ------ adapter communication
 	
-	protected void buttonPressed(int index) {
+	private void buttonPressed(int index) {
 		if (!extraButtonPressed(index)) {
 			fListAdapter.customButtonPressed(this, index);
 		}
 	}
 	
+	/**
+	 * Checks if the button pressed is handled internally
+	 * @return Returns true if button has been handled.
+	 */
 	protected boolean extraButtonPressed(int index) {
 		if (index == fRemoveButtonIndex) {
 			remove();
@@ -108,6 +136,9 @@ public class ListDialogField extends DialogField {
 
 	// ------ layout helpers
 	
+	/*
+	 * @see DialogField#doFillIntoGrid
+	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 		
@@ -139,11 +170,17 @@ public class ListDialogField extends DialogField {
 		
 		return new Control[] { label, list, buttons };
 	}
-	
+
+	/*
+	 * @see DialogField#getNumberOfControls
+	 */	
 	public int getNumberOfControls() {
 		return 3;	
 	}
-	
+
+	/**
+	 * Sets the minimal width of the buttons. Must be called after widget creation.
+	 */		
 	public void setButtonsMinWidth(int minWidth) {
 		if (fLastSeparator != null) {
 			((MGridData)fLastSeparator.getLayoutData()).widthHint= minWidth;
@@ -153,6 +190,11 @@ public class ListDialogField extends DialogField {
 	
 	// ------ ui creation
 	
+	/**
+	 * Returns the list control. When called the first time, the control will be created.
+	 * @param The parent composite when called the first time, or <code>null</code>
+	 * after.
+	 */
 	public Control getListControl(Composite parent) {
 		if (fTableControl == null) {
 			assertCompositeNotNull(parent);
@@ -169,7 +211,6 @@ public class ListDialogField extends DialogField {
 			tableLayout.addColumnData(new ColumnWeightData(100));
 			fTableColumn= new TableColumn(fTableControl, SWT.NONE);
 			fTableColumn.setResizable(false);
-			//fTableColumn.setWidth(calcColumnWidth);
 			fTableControl.setLayout(tableLayout);
 			
 			fTable.setInput(fParentElement);
@@ -188,13 +229,16 @@ public class ListDialogField extends DialogField {
 		}
 		return fTableControl;
 	}
-	
+
+	/**
+	 * Returns the internally used table viewer.
+	 */ 		
 	public TableViewer getTableViewer() {
 		return fTable;
 	}
 	
 	/* 
-	 * subclasses may override to specify a different style
+	 * Subclasses may override to specify a different style.
 	 */
 	protected int getListStyle(){
 		return SWT.BORDER + SWT.MULTI + SWT.H_SCROLL + SWT.V_SCROLL;
@@ -206,7 +250,6 @@ public class ListDialogField extends DialogField {
 	}	
 	
 	protected Button createButton(Composite parent, String label, SelectionListener listener) {
-
 		Button button= new Button(parent, SWT.PUSH);
 		button.setText(label);
 		button.addSelectionListener(listener);
@@ -231,7 +274,13 @@ public class ListDialogField extends DialogField {
 		separator.setLayoutData(gd);
 		return separator;
 	}			
-	
+
+	/**
+	 * Returns the composite containing the buttons. When called the first time, the control
+	 * will be created.
+	 * @param The parent composite when called the first time, or <code>null</code>
+	 * after.
+	 */	
 	public Composite getButtonBox(Composite parent) {
 		if (fButtonsControl == null) {
 			assertCompositeNotNull(parent);
@@ -286,7 +335,10 @@ public class ListDialogField extends DialogField {
 	}	
 	
 	// ------ enable / disable management
-	
+
+	/*
+	 * @see DialogField#dialogFieldChanged
+	 */ 	
 	public void dialogFieldChanged() {
 		super.dialogFieldChanged();
 		if (fTableColumn != null && !fTableColumn.isDisposed()) {
@@ -303,7 +355,7 @@ public class ListDialogField extends DialogField {
 	}
 
 	/*
-	 * Update the enable state of the all buttons
+	 * Updates the enable state of the all buttons
 	 */ 
 	protected void updateButtonState() {
 		if (fButtonControls != null) {
@@ -328,7 +380,10 @@ public class ListDialogField extends DialogField {
 		}
 		return true;
 	}		
-	
+
+	/*
+	 * @see DialogField#updateEnableState
+	 */ 	
 	protected void updateEnableState() {
 		super.updateEnableState();
 		
@@ -347,7 +402,7 @@ public class ListDialogField extends DialogField {
 	}
 
 	/**
-	 * Sets a button enabled or disabled
+	 * Sets a button enabled or disabled.
 	 */	
 	public void enableButton(int index, boolean enable) {
 		if (fButtonsEnabled != null && index < fButtonsEnabled.length) {
@@ -359,7 +414,7 @@ public class ListDialogField extends DialogField {
 	// ------ model access
 	
 	/**
-	 * Sets the elements shown in the list
+	 * Sets the elements shown in the list.
 	 */
 	public void setElements(List elements) {
 		fElements= elements;
@@ -371,22 +426,21 @@ public class ListDialogField extends DialogField {
 
 	/**
 	 * Gets the elements shown in the list.
-	 * The list returned is a copy, so it can be changed by the user
-	 * 
+	 * The list returned is a copy, so it can be modified by the user.
 	 */	
 	public List getElements() {
 		return new ArrayList(fElements);
 	}
 
 	/**
-	 * Gets the elements shown at the given index
+	 * Gets the elements shown at the given index.
 	 */		
 	public Object getElement(int index) {
 		return fElements.get(index);
 	}	
 
 	/**
-	 * Replace an element
+	 * Replace an element.
 	 */		
 	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException { 
 		int idx= fElements.indexOf(oldElement);
@@ -405,7 +459,7 @@ public class ListDialogField extends DialogField {
 	}	
 
 	/**
-	 * Adds an element at the end of the list
+	 * Adds an element at the end of the list.
 	 */		
 	public void addElement(Object element) {		
 		if (fElements.contains(element)) {
@@ -419,7 +473,7 @@ public class ListDialogField extends DialogField {
 	}
 
 	/**
-	 * Adds elements at the end of the list
+	 * Adds elements at the end of the list.
 	 */	
 	public void addElements(List elements) {
 		int nElements= elements.size();
@@ -443,7 +497,7 @@ public class ListDialogField extends DialogField {
 	}	
 
 	/**
-	 * Adds an element at a position
+	 * Adds an element at a position.
 	 */		
 	public void insertElementAt(Object element, int index) {
 		if (fElements.contains(element)) {
@@ -459,7 +513,7 @@ public class ListDialogField extends DialogField {
 
 
 	/**
-	 * Adds an element at a position
+	 * Adds an element at a position.
 	 */	
 	public void removeAllElements() {
 		if (fElements.size() > 0) {
@@ -472,7 +526,7 @@ public class ListDialogField extends DialogField {
 	}
 		
 	/**
-	 * Removes an element from the list
+	 * Removes an element from the list.
 	 */		
 	public void removeElement(Object element) throws IllegalArgumentException {
 		if (fElements.remove(element)) {
@@ -486,7 +540,7 @@ public class ListDialogField extends DialogField {
 	}
 
 	/**
-	 * Removes elements from the list
+	 * Removes elements from the list.
 	 */		
 	public void removeElements(List elements) {
 		if (elements.size() > 0) {
@@ -526,15 +580,15 @@ public class ListDialogField extends DialogField {
 		}
 	}
 	
+	/**
+	 * Refreshes the table.
+	 */
 	public void refresh() {
 		fTable.refresh();
 	}
 	
 	// ------- list maintenance
 	
-	/** 
-	 * returns a Vector where the given elements are moved up one position
-	 */
 	private List moveUp(List elements, List move) {
 		int nElements= elements.size();
 		List res= new ArrayList(nElements);
@@ -557,15 +611,15 @@ public class ListDialogField extends DialogField {
 	}	
 	
 	private void moveUp(List toMoveUp) {
-		setElements(moveUp(fElements, toMoveUp));
 		if (toMoveUp.size() > 0) {
+			setElements(moveUp(fElements, toMoveUp));
 			fTable.reveal(toMoveUp.get(0));
 		}
 	}
 	
 	private void moveDown(List toMoveDown) {
-		setElements(reverse(moveUp(reverse(fElements), toMoveDown)));
 		if (toMoveDown.size() > 0) {
+			setElements(reverse(moveUp(reverse(fElements), toMoveDown)));
 			fTable.reveal(toMoveDown.get(toMoveDown.size() - 1));
 		}
 	}
@@ -615,8 +669,10 @@ public class ListDialogField extends DialogField {
 		}
 		return false;
 	}	
-	
 
+	/**
+	 * Returns the selected elements.
+	 */
 	public List getSelectedElements() {
 		ISelection selection= fTable.getSelection();		
 		List result= new ArrayList();
@@ -628,9 +684,6 @@ public class ListDialogField extends DialogField {
 		}
 		return result;
 	}
-	
-	
-	
 	
 	// ------- ListViewerAdapter
 	

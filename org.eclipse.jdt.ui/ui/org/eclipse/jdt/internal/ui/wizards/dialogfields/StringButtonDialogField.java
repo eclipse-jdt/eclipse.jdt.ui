@@ -16,6 +16,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
+/**
+ * Dialog field containing a label, text control and a button control.
+ */
 public class StringButtonDialogField extends StringDialogField {
 		
 	private Button fBrowseButton;
@@ -30,19 +33,28 @@ public class StringButtonDialogField extends StringDialogField {
 		fBrowseButtonLabel= "!Browse...!"; //$NON-NLS-1$
 		fButtonEnabled= true;
 	}
-	
+
+	/**
+	 * Sets the label of the button.
+	 */
 	public void setButtonLabel(String label) {
 		fBrowseButtonLabel= label;
 	}
 	
 	// ------ adapter communication
-	
+
+	/**
+	 * Programmatical pressing of the button
+	 */	
 	public void changeControlPressed() {
 		fStringButtonAdapter.changeControlPressed(this);
 	}
 	
 	// ------- layout helpers
-		
+
+	/*
+	 * @see DialogField#doFillIntoGrid
+	 */		
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 		
@@ -55,7 +67,10 @@ public class StringButtonDialogField extends StringDialogField {
 	
 		return new Control[] { label, text, button };
 	}	
-	
+
+	/*
+	 * @see DialogField#getNumberOfControls
+	 */		
 	public int getNumberOfControls() {
 		return 3;	
 	}
@@ -71,7 +86,12 @@ public class StringButtonDialogField extends StringDialogField {
 	}		
 	
 	// ------- ui creation	
-	
+
+	/**
+	 * Creates or returns the created buttom widget.
+	 * @param parent The parent composite or <code>null</code> if the widget has
+	 * already been created.
+	 */		
 	public Button getChangeControl(Composite parent) {
 		if (fBrowseButton == null) {
 			assertCompositeNotNull(parent);
@@ -94,19 +114,23 @@ public class StringButtonDialogField extends StringDialogField {
 	
 	// ------ enable / disable management
 	
+	/**
+	 * Sets the enable state of the button.
+	 */
 	public void enableButton(boolean enable) {
 		if (isOkToUse(fBrowseButton)) {
 			fBrowseButton.setEnabled(isEnabled() && enable);
 		}
 		fButtonEnabled= enable;
 	}
-	
+
+	/*
+	 * @see DialogField#updateEnableState
+	 */	
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (isOkToUse(fBrowseButton)) {
 			fBrowseButton.setEnabled(isEnabled() && fButtonEnabled);
 		}
 	}	
-	
-	
 }

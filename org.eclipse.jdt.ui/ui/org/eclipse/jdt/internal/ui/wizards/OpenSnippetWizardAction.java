@@ -16,7 +16,7 @@ public class OpenSnippetWizardAction extends AbstractOpenWizardAction {
 	}
 	
 	protected Wizard createWizard() { 
-		return new NewSnippetCreationWizard(); 
+		return new NewSnippetFileCreationWizard(); 
 	}
 	
 	protected boolean shouldAcceptElement(Object obj) { 

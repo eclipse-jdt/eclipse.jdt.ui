@@ -14,6 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 
+/**
+ * Copy of GridLayout with fixes for 1FUMNGH: SWT:ALL - GridLayout weakness
+ */
 public final class MGridLayout extends Layout {
 	/**
 	 * marginWidth specifies the number of pixels of horizontal margin
@@ -60,7 +63,7 @@ public final class MGridLayout extends Layout {
 	
 	
 	// --------- added to original GridLayout --------
-	
+	/* start change MA */
 	/**
 	 * minimumWidth specifies a minimum width of this layout
 	 * If SWT.DEFAULT is set, no minimum width is forced 
@@ -75,11 +78,8 @@ public final class MGridLayout extends Layout {
 	 * The default value is SWT.DEFAULT.
 	 */	
 	public int minimumHeight= SWT.DEFAULT;
+	/* end change MA */
 	
-	/**
-	 * id specifies an identifier string for this layout.
-	 */
-	public String id;
 
 	// Private variables.  Cached values used to cut down on grid calculations.
 	boolean initialLayout= true;
@@ -204,7 +204,6 @@ public final class MGridLayout extends Layout {
 			}
 		}
 	}
-
 	void calculateGridDimensions(Composite composite, boolean flushCache) {
 		int maxWidth, childWidth, maxHeight, childHeight;
 
@@ -263,7 +262,6 @@ public final class MGridLayout extends Layout {
 			pixelRowHeights[row]= maxHeight;
 		}
 	}
-
 	void computeExpandableCells() {
 		// If a widget grabs excess horizontal space, the last column that the widget spans
 		// will be expandable.  Similarly, if a widget grabs excess vertical space, the 
@@ -274,18 +272,22 @@ public final class MGridLayout extends Layout {
 			for (int row= 0; row < grid.size(); row++) {
 				MGridData spec= ((MGridData[]) grid.elementAt(row))[col];
 				if (spec.grabExcessHorizontalSpace) {
+					/* start change MA */
 					if (spec.grabColumn >= 0 && spec.grabColumn < spec.horizontalSpan) {
 						growColumns.put(new Integer(col + spec.grabColumn), new Object());
 					} else {
 						growColumns.put(new Integer(col + spec.horizontalSpan - 1), new Object());
 					}
+					/* end change MA */
 				}
 				if (spec.grabExcessVerticalSpace) {
+					/* start change MA */
 					if (spec.grabRow >= 0 && spec.grabRow < spec.verticalSpan) {
 						growRows.put(new Integer(row + spec.grabRow), new Object());
 					} else {					
 						growRows.put(new Integer(row + spec.verticalSpan - 1), new Object());
 					}
+					/* end change MA */
 				}
 			}
 		}
@@ -306,7 +308,6 @@ public final class MGridLayout extends Layout {
 			i= i + 1;
 		}
 	}
-
 	Point computeLayoutSize(Composite composite, int wHint, int hHint, boolean flushCache) {
 		int totalMarginHeight, totalMarginWidth;
 		int totalWidth, totalHeight;
@@ -323,8 +324,8 @@ public final class MGridLayout extends Layout {
 		//
 		cols= numColumns;
 		rows= grid.size();
-		totalMarginHeight= marginHeight + composite.getBorderWidth();
-		totalMarginWidth= marginWidth + composite.getBorderWidth();
+		totalMarginHeight= marginHeight;
+		totalMarginWidth= marginWidth;
 
 		// The total width is the margin plus border width plus space between each column, 
 		// plus the width of each column.
@@ -353,10 +354,11 @@ public final class MGridLayout extends Layout {
 		// The preferred extent is the width and height that will accomodate the grid's widgets.
 		return new Point(totalWidth, totalHeight);
 	}
-
 	protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
+		Control[] children= composite.getChildren();
+		int numChildren= children.length;
 
-		if (composite.getChildren().length == 0)
+		if (numChildren == 0)
 			return new Point(0, 0);
 
 		// Make sure that all of the composite children have a layout spec.  Do this by
@@ -373,7 +375,7 @@ public final class MGridLayout extends Layout {
 			// again.
 			grid.removeAllElements();
 		}
-		
+		/* start change MA */
 		Point size= computeLayoutSize(composite, wHint, hHint, flushCache);
 		if (minimumWidth != SWT.DEFAULT && size.x < minimumWidth) {
 			size.x= minimumWidth;
@@ -382,8 +384,8 @@ public final class MGridLayout extends Layout {
 			size.y= minimumHeight;
 		}		
 		return size;
+		/* end change MA */
 	}
-
 	void createGrid(Composite composite) {
 		int row, column, rowFill, columnFill;
 		Vector rows;
@@ -468,7 +470,6 @@ public final class MGridLayout extends Layout {
 			((MGridData[]) grid.elementAt(k))[column]= spacerSpec;
 		}
 	}
-
 	MGridData[] emptyRow() {
 		MGridData[] row= new MGridData[numColumns];
 		for (int i= 0; i < numColumns; i++) {
@@ -476,7 +477,6 @@ public final class MGridLayout extends Layout {
 		}
 		return row;
 	}
-
 	void initializeLayoutData(Composite composite) {
 		Control[] children= composite.getChildren();
 		for (int i= 0; i < children.length; i++) {
@@ -486,10 +486,7 @@ public final class MGridLayout extends Layout {
 			}
 		}
 	}
-
 	protected void layout(Composite composite, boolean flushCache) {
-		//System.out.println("start layout " + id);
-		//new Error (). printStackTrace();
 		int[] columnWidths;
 		int[] rowHeights;
 		int columnSize, rowSize, rowY, columnX;
@@ -505,7 +502,7 @@ public final class MGridLayout extends Layout {
 		if (children.length == 0)
 			return;
 
-		//
+		// fix MA
 		Point extent= computeLayoutSize(composite, SWT.DEFAULT, SWT.DEFAULT, flushCache);
 		columnWidths= new int[numColumns];
 		for (int i= 0; i < pixelColumnWidths.length; i++) {
@@ -594,8 +591,8 @@ public final class MGridLayout extends Layout {
 		}
 
 		// Get the starting x and y.
-		columnX= marginWidth + composite.getBorderWidth() + composite.getClientArea().x;
-		rowY= marginHeight + composite.getBorderWidth() + composite.getClientArea().y;
+		columnX= marginWidth + composite.getClientArea().x;
+		rowY= marginHeight + composite.getClientArea().y;
 
 		// Layout the widget left to right, top to bottom.
 		for (int r= 0; r < rowSize; r++) {
@@ -612,7 +609,7 @@ public final class MGridLayout extends Layout {
 				//
 				MGridData spec= (MGridData) row[c];
 				if (makeColumnsEqualWidth) {
-					columnWidth= composite.getBounds().width - ((marginWidth + composite.getBorderWidth()) * 2) - ((numColumns - 1) * horizontalSpacing);
+					columnWidth= composite.getClientArea().width - 2 * (marginWidth) - ((numColumns - 1) * horizontalSpacing);
 					columnWidth= columnWidth / numColumns;
 					for (int i= 0; i < columnWidths.length; i++) {
 						columnWidths[i]= columnWidth;
@@ -686,10 +683,7 @@ public final class MGridLayout extends Layout {
 			}
 			// Update the starting y value and since we're starting a new row, reset the starting x value.
 			rowY= rowY + rowHeights[r] + verticalSpacing;
-			columnX= marginWidth + composite.getBorderWidth() + composite.getClientArea().x;
+			columnX= marginWidth + composite.getClientArea().x;
 		}
-		//System.out.println("end layout " + id);
 	}
 }
-
-

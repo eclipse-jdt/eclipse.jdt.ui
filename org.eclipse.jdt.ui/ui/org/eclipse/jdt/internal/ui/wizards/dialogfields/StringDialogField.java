@@ -14,7 +14,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
-
+/**
+ * Dialog field containing a label and a text control.
+ */
 public class StringDialogField extends DialogField {
 		
 	private String fText;
@@ -28,6 +30,9 @@ public class StringDialogField extends DialogField {
 			
 	// ------- layout helpers
 		
+	/*
+	 * @see DialogField#doFillIntoGrid
+	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 		
@@ -38,7 +43,10 @@ public class StringDialogField extends DialogField {
 		
 		return new Control[] { label, text };
 	} 
-	
+
+	/*
+	 * @see DialogField#getNumberOfControls
+	 */
 	public int getNumberOfControls() {
 		return 2;	
 	}
@@ -54,6 +62,9 @@ public class StringDialogField extends DialogField {
 	
 	// ------- focus methods
 	
+	/*
+	 * @see DialogField#setFocus
+	 */
 	public boolean setFocus() {
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setFocus();
@@ -63,7 +74,12 @@ public class StringDialogField extends DialogField {
 	}
 		
 	// ------- ui creation			
-		
+
+	/**
+	 * Creates or returns the created text control.
+	 * @param parent The parent composite or <code>null</code> when the widget has
+	 * already been created.
+	 */		
 	public Text getTextControl(Composite parent) {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
@@ -79,7 +95,6 @@ public class StringDialogField extends DialogField {
 			fTextControl.setFont(parent.getFont());
 			fTextControl.addModifyListener(fModifyListener);
 			
-			
 			fTextControl.setEnabled(isEnabled());
 		}
 		return fTextControl;
@@ -94,6 +109,9 @@ public class StringDialogField extends DialogField {
 	
 	// ------ enable / disable management
 	
+	/*
+	 * @see DialogField#updateEnableState
+	 */		
 	protected void updateEnableState() {
 		super.updateEnableState();		
 		if (isOkToUse(fTextControl)) {
@@ -104,14 +122,14 @@ public class StringDialogField extends DialogField {
 	// ------ text access 
 	
 	/**
-	 * Get the text
+	 * Gets the text.
 	 */	
 	public String getText() {
 		return fText;
 	}
 	
 	/**
-	 * Set the text. Triggers an dialog-changed event
+	 * Sets the text. Triggers a dialog-changed event.
 	 */
 	public void setText(String text) {
 		fText= text;
@@ -123,7 +141,7 @@ public class StringDialogField extends DialogField {
 	}
 
 	/**
-	 * Set the text without triggering a dialog-changed event
+	 * Sets the text without triggering a dialog-changed event.
 	 */
 	public void setTextWithoutUpdate(String text) {
 		fText= text;

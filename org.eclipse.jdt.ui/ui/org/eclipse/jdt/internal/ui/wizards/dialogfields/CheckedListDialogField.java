@@ -21,6 +21,11 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TableViewer;
 
+/**
+ * A list with checkboxes and a button bat. Typical buttons are 'Check All' and 'Uncheck All'.
+ * List model is independend of widget creation.
+ * DialogFields controls are: Label, List and Composite containing buttons.
+ */
 public class CheckedListDialogField extends ListDialogField {
 	
 	private int fCheckAllButtonIndex;
@@ -35,19 +40,31 @@ public class CheckedListDialogField extends ListDialogField {
 		fCheckAllButtonIndex= -1;
 		fUncheckAllButtonIndex= -1;
 	}
-	
+
+	/**
+	 * Sets the index of the 'check' button in the button label array passed in the constructor.
+	 * The behaviour of the button marked as the check button will then be handled internally.
+	 * (enable state, button invocation behaviour)
+	 */	
 	public void setCheckAllButtonIndex(int checkButtonIndex) {
 		Assert.isTrue(checkButtonIndex < fButtonLabels.length);
 		fCheckAllButtonIndex= checkButtonIndex;
 	}
-	
+
+	/**
+	 * Sets the index of the 'uncheck' button in the button label array passed in the constructor.
+	 * The behaviour of the button marked as the uncheck button will then be handled internally.
+	 * (enable state, button invocation behaviour)
+	 */	
 	public void setUncheckAllButtonIndex(int uncheckButtonIndex) {
 		Assert.isTrue(uncheckButtonIndex < fButtonLabels.length);
 		fUncheckAllButtonIndex= uncheckButtonIndex;
 	}
 	
 
-	// hook to create the CheckboxTableViewer
+	/*
+	 * @see ListDialogField#createTableViewer
+	 */
 	protected TableViewer createTableViewer(Composite parent) {
 		Table table= new Table(parent, SWT.CHECK + getListStyle());
 		CheckboxTableViewer tableViewer= new CheckboxTableViewer(table);
@@ -60,15 +77,19 @@ public class CheckedListDialogField extends ListDialogField {
 	}		
 	
 	
-	// hook to set the checked elements (can only be done after widget creation)
+	/*
+	 * @see ListDialogField#getListControl
+	 */
 	public Control getListControl(Composite parent) {
 		Control control= super.getListControl(parent);
 		((CheckboxTableViewer)fTable).setCheckedElements(fCheckElements.toArray());
 		return control;
 	}	
 	
-	
-	// hook in to get element changes to update check model
+	/*
+	 * @see DialogField#dialogFieldChanged
+	 * Hooks in to get element changes to update check model.
+	 */
 	public void dialogFieldChanged() {
 		for (int i= fCheckElements.size() -1; i >= 0; i--) {
 			if (!fElements.contains(fCheckElements.get(i))) {
@@ -82,12 +103,17 @@ public class CheckedListDialogField extends ListDialogField {
 		//call super and do not update check model
 		super.dialogFieldChanged();
 	}		
-		
+
+	/**
+	 * Gets the checked elements.
+	 */
 	public List getCheckedElements() {
 		return new ArrayList(fCheckElements);
 	}
 	
-	
+	/**
+	 * Sets the checked elements.
+	 */	
 	public void setCheckedElements(List list) {
 		fCheckElements= list;
 		if (fTable != null) {
@@ -95,7 +121,10 @@ public class CheckedListDialogField extends ListDialogField {
 		}
 		checkStateChanged();
 	}
-	
+
+	/**
+	 * Sets the checked state of an element.
+	 */		
 	public void setChecked(Object object, boolean state) {
 		if (!fCheckElements.contains(object)) {
 			fCheckElements.add(object);
@@ -106,6 +135,9 @@ public class CheckedListDialogField extends ListDialogField {
 		checkStateChanged();
 	}
 
+	/**
+	 * Sets the check state of all elements
+	 */	
 	public void checkAll(boolean state) {
 		if (state) {
 			fCheckElements= getElements();
@@ -130,6 +162,9 @@ public class CheckedListDialogField extends ListDialogField {
 	
 	// ------ enable / disable management
 	
+	/*
+	 * @see ListDialogField#getExtraButtonState
+	 */
 	protected boolean getExtraButtonState(ISelection sel, int index) {
 		if (index == fCheckAllButtonIndex) {
 			return !fElements.isEmpty();
@@ -138,7 +173,10 @@ public class CheckedListDialogField extends ListDialogField {
 		}
 		return super.getExtraButtonState(sel, index);
 	}	
-	
+
+	/*
+	 * @see ListDialogField#extraButtonPressed
+	 */	
 	protected boolean extraButtonPressed(int index) {
 		if (index == fCheckAllButtonIndex) {
 			checkAll(true);

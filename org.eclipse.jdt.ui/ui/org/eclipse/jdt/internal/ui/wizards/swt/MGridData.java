@@ -6,6 +6,9 @@ package org.eclipse.jdt.internal.ui.wizards.swt;
 
 import org.eclipse.swt.SWT;
 
+/**
+ * Copy of GridData with fixes for 1FUMNGH: SWT:ALL - GridLayout weakness
+ */
 public final class MGridData {
 	/**
 	 * verticalAlignment specifies how controls will be positioned 
@@ -87,9 +90,9 @@ public final class MGridData {
 
 
 	// --------- added to original GridData --------
-
+	/* start change MA */
 	/**
-	 * if a span is defined that is also grabing, this defines the column that
+	 * If a span is defined that is also grabing, this defines the column that
 	 * will grab the space
 	 *
 	 * The default value is -1, which will result in the default behavior
@@ -105,6 +108,7 @@ public final class MGridData {
 	 * (=last row)
 	 */
 	public int grabRow= -1;
+	/* end change MA */
 
 	// Alignment constants.
 	public static final int BEGINNING= 1;
@@ -123,6 +127,11 @@ public final class MGridData {
 	public static final int HORIZONTAL_ALIGN_FILL= 1 << 8;
 	public static final int GRAB_HORIZONTAL= 1 << 9;
 	public static final int GRAB_VERTICAL= 1 << 10;
+
+	// Style convenience constants
+	public static final int FILL_VERTICAL= VERTICAL_ALIGN_FILL | GRAB_VERTICAL;
+	public static final int FILL_HORIZONTAL= HORIZONTAL_ALIGN_FILL | GRAB_HORIZONTAL;
+	public static final int FILL_BOTH= FILL_VERTICAL | FILL_HORIZONTAL;
 
 	// Private
 	int childIndex;
@@ -166,7 +175,6 @@ public final class MGridData {
 	boolean isItemData() {
 		return isItemData;
 	}
-
 	boolean isSpacerData() {
 		return !isItemData;
 	}

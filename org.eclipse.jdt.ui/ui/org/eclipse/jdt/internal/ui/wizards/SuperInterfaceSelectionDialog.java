@@ -37,9 +37,8 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		//to restore the content of the dialog field if the dialog is canceled
 		fOldContent= fList.getElements(); 
 	}
-	
 
-	/**
+	/*
 	 * @see Dialog#createButtonsForButtonBar
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -47,7 +46,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		super.createButtonsForButtonBar(parent);
 	}
 
-	/**
+	/*
 	 * @see Dialog#cancelPressed
 	 */
 	protected void cancelPressed() {
@@ -55,7 +54,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		super.cancelPressed();
 	}
 	
-	/**
+	/*
 	 * @see Dialog#buttonPressed
 	 */
 	protected void buttonPressed(int buttonId) {
@@ -65,7 +64,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		super.buttonPressed(buttonId);	
 	}
 	
-	/**
+	/*
 	 * @see Dialog#okPressed
 	 */
 	protected void okPressed() {
@@ -74,9 +73,9 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	}
 		
 	private void addSelectedInterface(){
-		TypeInfo ref= (TypeInfo)getLowerSelectedElement();
-		if (ref != null)
-			fList.addElement(ref.getFullyQualifiedName());
+		Object ref= getLowerSelectedElement();
+		if (ref instanceof TypeInfo)
+			fList.addElement(((TypeInfo)ref).getFullyQualifiedName());
 	}
 	
 	private static IJavaSearchScope createSearchScope(IProject p) {
@@ -85,7 +84,8 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		scope.setIncludesClasspaths(true);
 		return scope;
 	}
-	/**
+	
+	/*
 	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
 	 */
 	protected void handleDefaultSelected() {

@@ -14,15 +14,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
-public class NewPackageRootCreationWizard extends NewElementWizard {
+public class NewSourceFolderCreationWizard extends NewElementWizard {
 
-	private NewPackageRootCreationWizardPage fPage;
+	private NewSourceFolderCreationWizardPage fPage;
 
-	public NewPackageRootCreationWizard() {
+	public NewSourceFolderCreationWizard() {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.getString("NewPackageRootCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(NewWizardMessages.getString("NewSourceFolderCreationWizard.title")); //$NON-NLS-1$
 	}
 
 	/**
@@ -31,7 +31,7 @@ public class NewPackageRootCreationWizard extends NewElementWizard {
 	public void addPages() {
 		super.addPages();
 		IWorkspace workspace= JavaPlugin.getWorkspace();
-		fPage= new NewPackageRootCreationWizardPage(workspace.getRoot());
+		fPage= new NewSourceFolderCreationWizardPage(workspace.getRoot());
 		addPage(fPage);
 		fPage.init(getSelection());
 	}			

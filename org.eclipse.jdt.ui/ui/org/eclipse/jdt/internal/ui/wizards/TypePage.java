@@ -67,7 +67,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public abstract class TypePage extends ContainerPage {
 	
@@ -291,7 +290,7 @@ public abstract class TypePage extends ContainerPage {
 		fEnclosingTypeSelection.doFillIntoGrid(composite, 1);
 		
 		Control c= fEnclosingTypeDialogField.getTextControl(composite);
-		c.setLayoutData(MGridUtil.createHorizontalFill());
+		c.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
 		LayoutUtil.setHorizontalSpan(c, 2);
 		c= fEnclosingTypeDialogField.getChangeControl(composite);
 		c.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));

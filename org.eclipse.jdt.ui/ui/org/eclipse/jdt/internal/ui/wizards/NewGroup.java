@@ -86,7 +86,7 @@ public class NewGroup extends ContextMenuGroup {
 		acceptedTypes= new Class[] { IJavaProject.class };
 		fNewPackageRootAction= 
 			new AbstractOpenWizardAction(label, acceptedTypes, false) {
-				protected Wizard createWizard() { return new NewPackageRootCreationWizard(); }
+				protected Wizard createWizard() { return new NewSourceFolderCreationWizard(); }
 				protected boolean shouldAcceptElement(Object obj) { return !isOnBuildPath(obj); }
 			};
 		fNewPackageRootAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);	
