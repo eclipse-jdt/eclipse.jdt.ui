@@ -20,9 +20,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		try{
-//			setPageTitle(); 
-			
+		try{			
 			//no input page if the type is static
 			if (! JdtFlags.isStatic(getMoveRefactoring().getInputType()))
 				addPage(new MoveInnerToToplnputPage());
