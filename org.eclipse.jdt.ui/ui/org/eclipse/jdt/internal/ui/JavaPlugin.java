@@ -81,11 +81,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/*
 	 * XXX: Work in progress. Might be moved to Java UI.
 	 */
-	public static String ID_BROWSING_PERSPECTIVE= JavaUI.ID_PLUGIN + ".JavaBrowsingPerspective";	
-	public static String ID_PROJECTS_VIEW= JavaUI.ID_PLUGIN + ".ProjectsView";
-	public static String ID_PACKAGES_VIEW= JavaUI.ID_PLUGIN + ".PackagesView";
-	public static String ID_TYPES_VIEW= JavaUI.ID_PLUGIN + ".TypesView";
-	public static String ID_MEMBERS_VIEW= JavaUI.ID_PLUGIN + ".MembersView";
+	public static String ID_BROWSING_PERSPECTIVE= JavaUI.ID_PLUGIN + ".JavaBrowsingPerspective";	 //$NON-NLS-1$
+	public static String ID_PROJECTS_VIEW= JavaUI.ID_PLUGIN + ".ProjectsView"; //$NON-NLS-1$
+	public static String ID_PACKAGES_VIEW= JavaUI.ID_PLUGIN + ".PackagesView"; //$NON-NLS-1$
+	public static String ID_TYPES_VIEW= JavaUI.ID_PLUGIN + ".TypesView"; //$NON-NLS-1$
+	public static String ID_MEMBERS_VIEW= JavaUI.ID_PLUGIN + ".MembersView"; //$NON-NLS-1$
 	
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
