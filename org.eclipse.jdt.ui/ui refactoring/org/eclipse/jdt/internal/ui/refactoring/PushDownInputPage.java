@@ -98,7 +98,11 @@ public class PushDownInputPage extends UserInputWizardPage {
 				return;
 
 			int action= ((Integer)value).intValue();
-			MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
+			MemberActionInfo mac;
+			if (element instanceof Item) {
+				mac= (MemberActionInfo)((Item)element).getData();
+			} else
+				mac= (MemberActionInfo)element;
 			mac.setAction(action);
 			PushDownInputPage.this.updateUIElements(null);
 		}
