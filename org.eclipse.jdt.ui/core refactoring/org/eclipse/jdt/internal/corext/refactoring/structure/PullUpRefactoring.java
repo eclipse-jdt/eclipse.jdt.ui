@@ -1,7 +1,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,7 +72,7 @@ public class PullUpRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 
 	//caches
-	private IType fCachedSuperType;
+	private IType fCachedSuperTypeOfDeclaringType;
 	private ITypeHierarchy fCachedSuperTypeHierarchy;
 	private IType fCachedDeclaringType;
 	private IType[] fTypesReferencedInMovedMembers;
@@ -100,6 +102,16 @@ public class PullUpRefactoring extends Refactoring {
 		Assert.isNotNull(methodsToDelete);
 		fMethodsToDelete= getOriginals(methodsToDelete);
 	}
+
+	/*
+	* no validation is done here - the members must be a subset of those
+	* returned by the call to getPullableMembersOfDeclaringType
+	*/
+	public void setElementsToPullUp(IMember[] elements){
+		Assert.isNotNull(elements);
+		fElementsToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
+		fElementsToPullUp= getOriginals(fElementsToPullUp);
+	}
 	
 	private IMember[] getMembersToDelete(IProgressMonitor pm){
 		try{
@@ -126,28 +138,61 @@ public class PullUpRefactoring extends Refactoring {
 		return fCachedDeclaringType;
 	}
 	
+	public IMember[] getPullableMembersOfDeclaringType() {
+		try{
+			List list= new ArrayList(3);
+			addAllPullable(getDeclaringType().getFields(), list);
+			addAllPullable(getDeclaringType().getMethods(), list);
+			return (IMember[]) list.toArray(new IMember[list.size()]);
+		} catch (JavaModelException e){
+			return new IMember[0];
+		}	
+	}
+	
+	private void addAllPullable(IMember[] members, List list) throws JavaModelException{
+		for (int i= 0; i < members.length; i++) {
+			if (isPullable(members[i]))
+				list.add(members[i]);
+		}	
+	}
+	private boolean isPullable(IMember member) throws JavaModelException {
+		return checkElement(member) == null;
+	}
+	
 	//XXX added for performance reasons
-	public ITypeHierarchy getSuperTypeHierarchy(IProgressMonitor pm) throws JavaModelException {
+	public ITypeHierarchy getTypeHierarchyOfDeclaringClassSuperclass(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			if (fCachedSuperTypeHierarchy != null)
 				return fCachedSuperTypeHierarchy;
-			fCachedSuperTypeHierarchy= getSuperType(new SubProgressMonitor(pm, 1)).newTypeHierarchy(new SubProgressMonitor(pm, 1));
+			fCachedSuperTypeHierarchy= getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)).newTypeHierarchy(new SubProgressMonitor(pm, 1));
 			return fCachedSuperTypeHierarchy;
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	public IType getSuperType(IProgressMonitor pm) throws JavaModelException {
+	public IType[] getPossibleSuperclasses(IProgressMonitor pm) throws JavaModelException {
+		//TODO
+		IType[] array= new IType[]{getSuperTypeOfDeclaringType(pm)};
+		return reverse(array);
+	}
+	
+	private static IType[] reverse(IType[] array){
+		List list= Arrays.asList(array);
+		Collections.reverse(list);
+		return (IType[]) list.toArray(new IType[list.size()]);
+	}
+	
+	public IType getSuperTypeOfDeclaringType(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
-			if (fCachedSuperType != null)
-				return fCachedSuperType;
+			if (fCachedSuperTypeOfDeclaringType != null)
+				return fCachedSuperTypeOfDeclaringType;
 			IType declaringType= getDeclaringType();
 			ITypeHierarchy st= declaringType.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
-			fCachedSuperType= st.getSuperclass(declaringType);
-			return fCachedSuperType;
+			fCachedSuperTypeOfDeclaringType= st.getSuperclass(declaringType);
+			return fCachedSuperTypeOfDeclaringType;
 		} finally{
 			pm.done();
 		}			
@@ -157,8 +202,8 @@ public class PullUpRefactoring extends Refactoring {
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			Set result= new HashSet();
-			IType superType= getSuperType(new SubProgressMonitor(pm, 1));
-			ITypeHierarchy hierarchy= getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
+			IType superType= getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1));
+			ITypeHierarchy hierarchy= getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
 			IType[] subTypes= hierarchy.getAllSubtypes(superType);
 			for (int i = 0; i < subTypes.length; i++) {
 				result.addAll(getMatchingMembers(hierarchy, subTypes[i]));
@@ -182,7 +227,7 @@ public class PullUpRefactoring extends Refactoring {
 	/*
 	 * mapping: Map: IMember -> Set of IMembers (of the same type as key)
 	 */	
-	private static void addToMapping(Map mapping, IMember key, IMember matchingMethod){
+	private static void addToMapping(Map mapping, IMember key, IMember matchingMember){
 		Set matchingSet;
 		if (mapping.containsKey(key)){
 			matchingSet= (Set)mapping.get(key);
@@ -190,7 +235,8 @@ public class PullUpRefactoring extends Refactoring {
 			matchingSet= new HashSet();
 			mapping.put(key, matchingSet);
 		}
-		matchingSet.add(matchingMethod);
+		Assert.isTrue(! matchingSet.contains(matchingMember));
+		matchingSet.add(matchingMember);
 	}
 	
 	/*
@@ -201,6 +247,49 @@ public class PullUpRefactoring extends Refactoring {
 			IMember member= (IMember) iter.next();
 			Assert.isTrue(key.getElementType() == member.getElementType());
 			addToMapping(mapping, key, member);
+		}
+	}
+	
+	private Map getMatchingMembersMappingFromTypeAndAllSubtypes(ITypeHierarchy hierarchy, IType type) throws JavaModelException {
+		Map result= new HashMap(); //IMember -> Set of IMembers (of the same type as key)
+		result.putAll(getMatchingMembersMapping(hierarchy, type));
+		IType[]  subTypes= hierarchy.getAllSubtypes(type);
+		for (int i = 0; i < subTypes.length; i++) {
+			mergeSets(result, getMatchingMembersMapping(hierarchy, subTypes[i]));
+		}
+		return result;
+	}
+	
+	/*
+	 * result: IMember -> Set 
+	 * map: IMember -> Set
+	 * this method merges sets for common keys and adds entries to result for
+	 * those keys that exist only in map
+	 */
+	private static void mergeSets(Map result, Map map) {
+		mergeSetsForCommonKeys(result, map);
+		putAllThatDoNotExistInResultYet(result, map);
+	}
+	
+	private static void mergeSetsForCommonKeys(Map result, Map map) {
+		for (Iterator iter= result.keySet().iterator(); iter.hasNext();) {
+			IMember key= (IMember) iter.next();
+			if (map.containsKey(key)){
+				Set resultSet= (Set)result.get(key);
+				Set mapSet= (Set)map.get(key);
+				resultSet.addAll(mapSet);
+			}
+		}
+	}
+	
+	private static void putAllThatDoNotExistInResultYet(Map result, Map map) {
+		for (Iterator iter= map.keySet().iterator(); iter.hasNext();) {
+			IMember key= (IMember) iter.next();
+			if (! result.containsKey(key)){
+				Set mapSet= (Set)map.get(key);
+				Set resultSet= new HashSet(mapSet);
+				result.put(key, resultSet);
+			}
 		}
 	}
 	
@@ -219,17 +308,6 @@ public class PullUpRefactoring extends Refactoring {
 				IField found= type.getField(field.getElementName());
 				if (found.exists())
 					addToMapping(result, field, found);
-			}
-		}
-		
-		//subtypes
-		IType[] subTypes= hierarchy.getAllSubtypes(type);
-		for (int i = 0; i < subTypes.length; i++) {
-			IType subType = subTypes[i];
-			Map subTypeMapping= getMatchingMembersMapping(hierarchy, subType);
-			for (Iterator iter= subTypeMapping.keySet().iterator(); iter.hasNext();) {
-				IMember m= (IMember) iter.next();
-				addToMapping(result, m, (Set)subTypeMapping.get(m));
 			}
 		}
 		return result;		
@@ -273,9 +351,9 @@ public class PullUpRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;			
 
-			if (getSuperType(new SubProgressMonitor(pm, 1)) == null)
+			if (getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)) == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.not_allowed")); //$NON-NLS-1$
-			if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
+			if (getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)).isBinary())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.subtypes_of_binary_types")); //$NON-NLS-1$
 
 			for (int i= 0; i < fElementsToPullUp.length; i++) {
@@ -363,7 +441,7 @@ public class PullUpRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
-			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getSuperType(new SubProgressMonitor(pm, 1))));
+			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1))));
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			
@@ -385,33 +463,40 @@ public class PullUpRefactoring extends Refactoring {
 	private RefactoringStatus checkAllElements() throws JavaModelException {
 		//just 1 error message
 		for (int i = 0; i < fElementsToPullUp.length; i++) {
-			IMember member = fElementsToPullUp[i];
-
-			if (member.getElementType() != IJavaElement.METHOD && 
-				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
-			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
-	
-			if (member.isBinary())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
-
-			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
-
-			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
-
-			if (JdtFlags.isStatic(member)) //for now
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
-			
-			if (member.getElementType() == IJavaElement.METHOD){
-				RefactoringStatus substatus= checkMethod((IMethod)member);
-				if (substatus != null && ! substatus.isOK())
-					return substatus;	
-			}	
+			RefactoringStatus status= checkElement(fElementsToPullUp[i]);
+			if (status != null)
+				return status;
 		}
 		return null;
+	}
+	
+	//returns null if ok
+	private RefactoringStatus checkElement(IMember member) throws JavaModelException{
+		if (member.getElementType() != IJavaElement.METHOD && 
+			member.getElementType() != IJavaElement.FIELD)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
+		if (! member.exists())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
+	
+		if (member.isBinary())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
+
+		if (member.isReadOnly())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
+
+		if (! member.isStructureKnown())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
+
+		if (JdtFlags.isStatic(member))
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
+			
+		if (member.getElementType() == IJavaElement.METHOD){
+			RefactoringStatus substatus= checkMethod((IMethod)member);
+			if (substatus != null && ! substatus.isOK())
+				return substatus;	
+		}
+		
+		return null;	
 	}
 	
 	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
@@ -443,13 +528,13 @@ public class PullUpRefactoring extends Refactoring {
 		if (declaringType.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_types"));	 //$NON-NLS-1$
 	
-		if (getSuperType(new SubProgressMonitor(pm, 1)) == null)	
+		if (getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)) == null)	
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.not_this_type"));	 //$NON-NLS-1$
 			
-		if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
+		if (getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)).isBinary())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_subclasses_of_binary_types"));	 //$NON-NLS-1$
 
-		if (getSuperType(new SubProgressMonitor(pm, 1)).isReadOnly())
+		if (getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1)).isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_subclasses_of_read_only_types"));	 //$NON-NLS-1$
 		
 		return null;
@@ -490,7 +575,7 @@ public class PullUpRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		IType[] accessedTypes= getTypeReferencedInMovedMembers(pm);
-		IType superType= getSuperType(new NullProgressMonitor());
+		IType superType= getSuperTypeOfDeclaringType(new NullProgressMonitor());
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
 			if (! iType.exists())
@@ -512,7 +597,7 @@ public class PullUpRefactoring extends Refactoring {
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fElementsToPullUp, pm);
 		
-		IType superType= getSuperType(new NullProgressMonitor());
+		IType superType= getSuperTypeOfDeclaringType(new NullProgressMonitor());
 		for (int i= 0; i < accessedFields.length; i++) {
 			IField iField= accessedFields[i];
 			if (! iField.exists())
@@ -534,7 +619,7 @@ public class PullUpRefactoring extends Refactoring {
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fElementsToPullUp, pm);
 		
-		IType superType= getSuperType(new NullProgressMonitor());
+		IType superType= getSuperTypeOfDeclaringType(new NullProgressMonitor());
 		for (int i= 0; i < accessedMethods.length; i++) {
 			IMethod iMethod= accessedMethods[i];
 			if (! iMethod.exists())
@@ -596,13 +681,14 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private void checkMethodReturnTypes(IProgressMonitor pm, RefactoringStatus result, Set notDeletedMembers) throws JavaModelException {
-		ITypeHierarchy hierarchy= getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
-		Map mapping= getMatchingMembersMapping(hierarchy, hierarchy.getType());//IMember -> Set of IMembers
+		ITypeHierarchy hierarchy= getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
+		Map mapping= getMatchingMembersMappingFromTypeAndAllSubtypes(hierarchy, hierarchy.getType());//IMember -> Set of IMembers
 		for (int i= 0; i < fElementsToPullUp.length; i++) {
 			if (fElementsToPullUp[i].getElementType() != IJavaElement.METHOD)
 				continue;
 			IMethod method= (IMethod)fElementsToPullUp[i];
 			String returnType= getReturnTypeName(method);
+			Assert.isTrue(mapping.containsKey(method));
 			for (Iterator iter= ((Set)mapping.get(method)).iterator(); iter.hasNext();) {
 				IMethod matchingMethod= (IMethod) iter.next();
 				if (!notDeletedMembers.contains(matchingMethod))
@@ -619,13 +705,14 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private void checkFieldTypes(IProgressMonitor pm, RefactoringStatus result) throws JavaModelException {
-		ITypeHierarchy hierarchy= getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
-		Map mapping= getMatchingMembersMapping(hierarchy, hierarchy.getType());//IMember -> Set of IMembers
+		ITypeHierarchy hierarchy= getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
+		Map mapping= getMatchingMembersMappingFromTypeAndAllSubtypes(hierarchy, hierarchy.getType());//IMember -> Set of IMembers
 		for (int i= 0; i < fElementsToPullUp.length; i++) {
 			if (fElementsToPullUp[i].getElementType() != IJavaElement.FIELD)
 				continue;
 			IField field= (IField)fElementsToPullUp[i];
 			String type= getTypeName(field);
+			Assert.isTrue(mapping.containsKey(field));
 			for (Iterator iter= ((Set)mapping.get(field)).iterator(); iter.hasNext();) {
 				IField matchingField= (IField) iter.next();
 				if (type.equals(getTypeName(matchingField)))
@@ -729,7 +816,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private boolean needsAddingImports() throws JavaModelException {
-		return ! getSuperType(new NullProgressMonitor()).getCompilationUnit().equals(getDeclaringType().getCompilationUnit());
+		return ! getSuperTypeOfDeclaringType(new NullProgressMonitor()).getCompilationUnit().equals(getDeclaringType().getCompilationUnit());
 	}
 	
 	private void addCopyMembersChange(TextChangeManager manager) throws CoreException {
@@ -746,7 +833,7 @@ public class PullUpRefactoring extends Refactoring {
 			changeName += RefactoringCoreMessages.getFormattedString("PullUpRefactoring.changing_visibility_to", //$NON-NLS-1$
 					"protected"); //$NON-NLS-1$
 		}	
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperTypeOfDeclaringType(new NullProgressMonitor()).getCompilationUnit());
 		manager.get(cu).addTextEdit(changeName, createAddMemberEdit(source));
 	}
 
@@ -763,12 +850,12 @@ public class PullUpRefactoring extends Refactoring {
 	}
 		
 	private TextEdit createAddMemberEdit(String methodSource) throws JavaModelException {
-		IMethod sibling= getLastMethod(getSuperType(new NullProgressMonitor()));
+		IMethod sibling= getLastMethod(getSuperTypeOfDeclaringType(new NullProgressMonitor()));
 		String[] sourceLines= Strings.removeTrailingEmptyLines(Strings.convertIntoLines(methodSource));
 		if (sibling != null)
 			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, sourceLines, CodeFormatterUtil.getTabWidth());
 		return
-			new MemberEdit(getSuperType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, sourceLines, CodeFormatterUtil.getTabWidth());
+			new MemberEdit(getSuperTypeOfDeclaringType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, sourceLines, CodeFormatterUtil.getTabWidth());
 	}
 
 	private void addDeleteMembersChange(TextChangeManager manager) throws CoreException {
@@ -794,7 +881,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void addAddImportsChange(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());		
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperTypeOfDeclaringType(new NullProgressMonitor()).getCompilationUnit());		
 		IType[] referencedTypes= getTypeReferencedInMovedMembers(pm);
 		ImportEditManager importEditManager= new ImportEditManager(fPreferenceSettings);
 		for (int i= 0; i < referencedTypes.length; i++) {
@@ -851,7 +938,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private String replaceSuperCalls(IMethod method) throws JavaModelException {
-		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperType(new NullProgressMonitor())));
+		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperTypeOfDeclaringType(new NullProgressMonitor())));
 		
 		StringBuffer source= new StringBuffer(SourceRangeComputer.computeSource(method));
 		ISourceRange originalMethodRange= SourceRangeComputer.computeSourceRange(method, method.getCompilationUnit().getSource());
