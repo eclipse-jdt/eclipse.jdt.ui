@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		return new SourceRange(offset, end - offset);
 	}
 	
-	
 	private void helper1() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		ISourceRange selection= getSelection(cu);
