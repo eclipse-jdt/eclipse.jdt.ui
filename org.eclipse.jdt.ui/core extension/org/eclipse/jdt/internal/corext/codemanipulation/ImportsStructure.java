@@ -671,7 +671,7 @@ public class ImportsStructure implements IImportsStructure {
 			lastPackage= pack;
 			
 			boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
-			if (doStarImport && (!fRestoreExistingImports || pack.find("*") == null)) { //$NON-NLS-1$
+			if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
 				String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
 				appendImportToBuffer(buf, starImportString, lineDelim);
 				nCreated++;
