@@ -29,7 +29,7 @@
 	${cursor}
 }</template>
 
-<template name="for" description="%Templates.for_iterable" id="org.eclipse.jdt.ui.templates.for_iterable" context="java" enabled="false">for (${iterable_type} ${iterable_element} : ${iterable}) {
+<template name="foreach" description="%Templates.for_iterable" id="org.eclipse.jdt.ui.templates.for_iterable" context="java" enabled="true">for (${iterable_type} ${iterable_element} : ${iterable}) {
 	${cursor}
 }</template>
 
