@@ -30,6 +30,13 @@ public class Selection {
 	protected Selection() {
 	}
 	
+	/* non javadoc
+	 * for debugging only
+	 */
+	public String toString(){
+		return "<start == " + start + ", end == " + end + "/>"; 
+	}
+	
 	/**
 	 * Creates a new selection from the given start and length.
 	 * 
