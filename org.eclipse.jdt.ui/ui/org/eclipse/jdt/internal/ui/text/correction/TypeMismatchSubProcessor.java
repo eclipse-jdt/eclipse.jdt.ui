@@ -108,7 +108,7 @@ public class TypeMismatchSubProcessor {
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
 		if (binding == null || canCast(castTypeName, castTypeBinding, binding)) {
-			proposals.add(createCastProposal(context, castTypeName, nodeToCast, 5));
+			proposals.add(createCastProposal(context, castTypeName, nodeToCast, 7));
 		}
 		
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
