@@ -89,7 +89,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	
 	private void showResults(List l){
 		if (l.isEmpty())
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Externalize strings", "No strings to externalize were found");
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Externalize Strings", "No strings to externalize were found");
 		else	
 			new NonNLSListDialog(l, countStrings(l)).open();
 	}
