@@ -77,8 +77,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -421,7 +423,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			  .append(CONST_ASSIGN)
 			  .append("null") //$NON-NLS-1$
 			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, string.length());
@@ -462,7 +464,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
 			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
@@ -781,7 +783,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(newCuSource.toCharArray());
 		p.setUnitName(cu.getElementName());
 		p.setProject(cu.getJavaProject());
@@ -1062,8 +1064,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		newConstructor.setConstructor(true);
 		newConstructor.setExtraDimensions(0);
 		newConstructor.setJavadoc(null);
-		newConstructor.setModifiers(getAccessModifier(subclass));
-		newConstructor.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getAccessModifier(subclass)));
+		newConstructor.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		Block body= ast.newBlock();
 		newConstructor.setBody(body);
 		SuperConstructorInvocation superCall= ast.newSuperConstructorInvocation();
@@ -1456,7 +1458,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private void changeReturnType() throws JavaModelException {
 		    if (isReturnTypeSameAsInitial())
 		    	return;
-			replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
+			replaceTypeNode(fMethDecl.getReturnType2(), fReturnTypeName);
 	        removeExtraDimensions(fMethDecl);
 	    	//TODO: Remove expression from return statement when changed to void?
 	    	//      Add return statement with default value and //TODO automatically generated ...
@@ -1481,8 +1483,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		private void changeVisibility() {
-			int newModifiers= JdtFlags.clearAccessModifiers(fMethDecl.getModifiers()) | fVisibility;
-			getASTRewrite().set(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), fDescription);
+			ModifierRewrite.create(getASTRewrite(), fMethDecl).setVisibility(fVisibility, fDescription);
 		}
 	
 		private void changeExceptions() {
@@ -1793,7 +1794,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
 			if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
 				ClassInstanceCreation cic= (ClassInstanceCreation) ASTNodes.getParent(decl, ClassInstanceCreation.class);
-				return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getName())}); //$NON-NLS-1$
+				return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getType())}); //$NON-NLS-1$
 			} else 
 				return typeDecl.getName().getIdentifier();
 		}

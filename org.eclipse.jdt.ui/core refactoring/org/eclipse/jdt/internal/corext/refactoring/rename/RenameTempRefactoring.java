@@ -225,7 +225,7 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 	}
 
 	private void initAST(){
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 	
@@ -280,7 +280,7 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
 		}
 		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(newCuSource.toCharArray());
 		p.setUnitName(fCu.getElementName());
 		p.setProject(fCu.getJavaProject());

@@ -31,16 +31,14 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -50,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * This class is used to find references to construcotors.
@@ -96,7 +95,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
 			List realConstructorReferences= new ArrayList(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
@@ -162,7 +161,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
 			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				SearchMatch searchResult= results[j];
@@ -175,9 +174,9 @@ class ConstructorReferenceFinder {
 	}
 	
 	public static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node){
-		if (node instanceof Name && node.getParent() instanceof ClassInstanceCreation){
+		if (node instanceof Type && node.getParent() instanceof ClassInstanceCreation){
 			ClassInstanceCreation cic= (ClassInstanceCreation)node.getParent();
-			return (node.equals(cic.getName()));
+			return (node.equals(cic.getType()));
 		}
 		return false;
 	}
@@ -206,7 +205,7 @@ class ConstructorReferenceFinder {
 	//Collection of SearchResults
 	private static Collection getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(type.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), false);
 		List result= new ArrayList(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);

@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
-    private static final int TEXTFLAGS= DEFAULT_TEXTFLAGS | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED;
+    private static final long TEXTFLAGS= DEFAULT_TEXTFLAGS | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED;
     private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS;
 
     private ILabelDecorator fDecorator;

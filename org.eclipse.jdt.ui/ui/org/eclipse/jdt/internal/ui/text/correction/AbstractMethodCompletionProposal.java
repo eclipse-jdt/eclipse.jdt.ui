@@ -20,22 +20,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -44,6 +29,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionProposal {
@@ -77,7 +63,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			newTypeDecl= typeDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
@@ -86,10 +72,10 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			
+			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
+			
 			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 			List members= (List) newTypeDecl.getStructuralProperty(property);
-			
-			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
 			int insertIndex;
 			if (isConstructor()) {
@@ -114,10 +100,12 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		SimpleName newNameNode= getNewName(rewrite);
 		
 		decl.setConstructor(isConstructor());
-		decl.setModifiers(evaluateModifiers(targetTypeDecl));
-		decl.setName(newNameNode);
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
 		
 		ArrayList takenNames= new ArrayList();
+		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
+		
+		decl.setName(newNameNode);
 		
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
@@ -133,9 +121,9 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		if (!isConstructor()) {
 			Type returnType= getNewMethodType(rewrite);
 			if (returnType == null) {
-				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+				decl.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 			} else {
-				decl.setReturnType(returnType);
+				decl.setReturnType2(returnType);
 			}
 			if (!fSenderBinding.isInterface() && returnType != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
@@ -193,6 +181,8 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	}
 	
 	protected abstract boolean isConstructor();
+
+	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
 	protected abstract void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
 	protected abstract void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException;
 

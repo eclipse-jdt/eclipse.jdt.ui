@@ -205,7 +205,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
 				if (expression.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-					fExpressionBinding= ASTNodes.getTypeBinding(((ClassInstanceCreation)expression).getName());
+					fExpressionBinding= ((ClassInstanceCreation)expression).getType().resolveBinding();
 				} else {
 					fExpressionBinding= expression.resolveTypeBinding();
 				}
@@ -222,8 +222,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 				break;	
 			case RETURN_STATEMENT_VALUE:
 				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
-					fReturnType= ((MethodDeclaration)fEnclosingBodyDeclaration).getReturnType();
-					// TODO: ma: check for MethodDeclaration extra dimensions?
+					fReturnType= ((MethodDeclaration)fEnclosingBodyDeclaration).getReturnType2();
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);

@@ -30,7 +30,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -38,6 +37,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 	
@@ -85,7 +85,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 						// reconcile
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener) {
-								ast= unit.reconcile(AST.JLS2, true, null, fProgressMonitor);
+								ast= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
 								if (ast != null) {
 									// mark as unmodifiable
 									ASTNodes.setFlagsToAST(ast, ASTNode.PROTECT);

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -172,7 +173,11 @@ public class CodeScopeBuilder extends ASTVisitor {
 	}
 	
 	public boolean visit(TypeDeclarationStatement node) {
-		fScope.addName(node.getTypeDeclaration().getName().getIdentifier());
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			fScope.addName(node.getTypeDeclaration().getName().getIdentifier());
+		} else {
+			fScope.addName(node.getDeclaration().getName().getIdentifier());
+		}
 		return false;
 	}
 	

@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -862,14 +863,14 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
-					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
-						fSource.getASTRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
+					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers) {
+						ModifierRewrite.create(fSource.getASTRewrite(), fieldDecl).setModifiers(psfModifiers, null);
+					}
 				} else if (declaration instanceof TypeDeclaration) {
 					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
-						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
-						fSource.getASTRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
+						ModifierRewrite.create(fSource.getASTRewrite(), typeDecl).setModifiers(typeDecl.getModifiers() | psModifiers, null);
 					}
 				}
 			}

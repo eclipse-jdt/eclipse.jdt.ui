@@ -65,8 +65,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -197,7 +199,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
 		
-		fRoot= new RefactoringASTParser(AST.JLS2).parse(fField.getCompilationUnit(), true, pm);
+		fRoot= new RefactoringASTParser(AST.JLS3).parse(fField.getCompilationUnit(), true, pm);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -308,7 +310,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				rewriter= fRewriter;
 				descriptions= ownerDescriptions;
 			} else {
-				root= new RefactoringASTParser(AST.JLS2).parse(unit, true);
+				root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 				rewriter= new OldASTRewrite(root);
 				descriptions= new ArrayList();
 			}
@@ -471,12 +473,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			int index= bodyDeclarations.indexOf(decl);
 			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopyTarget(fFieldDeclaration);
 			decl= ast.newFieldDeclaration(newField);
-			decl.setModifiers(Modifier.PRIVATE);
+			decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
 			bodyDeclarations.add(index + 1, decl);
 			rewriter.markAsInserted(decl, description);
 		} else {
-			int newModifiers= ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE);
-			rewriter.set(decl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), description);
+			ModifierRewrite.create(rewriter, decl).setVisibility(Modifier.PRIVATE, description);
 		}
 		return description;
 	}
@@ -487,9 +488,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fSetterName));
-		result.setModifiers(createModifiers());
+		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
 		if (fSetterMustReturnValue) {
-			result.setReturnType((Type)rewriter.createCopyTarget(type));
+			result.setReturnType2((Type)rewriter.createCopyTarget(type));
 		}
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		result.parameters().add(param);
@@ -529,8 +530,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fGetterName));
-		result.setModifiers(createModifiers());
-		result.setReturnType((Type)rewriter.createCopyTarget(type));
+		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
+		result.setReturnType2((Type)rewriter.createCopyTarget(type));
 		
 		Block block= ast.newBlock();
 		result.setBody(block);
@@ -610,7 +611,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return ((AbstractTypeDeclaration)type).getName().getIdentifier();
 		} else if (type instanceof AnonymousClassDeclaration) {
 			ClassInstanceCreation node= (ClassInstanceCreation)ASTNodes.getParent(type, ClassInstanceCreation.class);
-			return ASTNodes.asString(node.getName());
+			return ASTNodes.asString(node.getType());
 		}
 		Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
 		return null;

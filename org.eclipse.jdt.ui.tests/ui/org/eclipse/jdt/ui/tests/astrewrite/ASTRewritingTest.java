@@ -21,6 +21,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -53,7 +55,7 @@ public class ASTRewritingTest extends TestCase {
 	}
 	
 	protected CompilationUnit createAST(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setResolveBindings(false);
 		return (CompilationUnit) parser.createAST(null);
@@ -107,7 +109,7 @@ public class ASTRewritingTest extends TestCase {
 		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 		frag.setName(ast.newSimpleName(name));
 		FieldDeclaration newFieldDecl= ast.newFieldDeclaration(frag);
-		newFieldDecl.setModifiers(Modifier.PRIVATE);
+		newFieldDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
 		newFieldDecl.setType(ast.newPrimitiveType(PrimitiveType.DOUBLE));
 		return newFieldDecl;
 	}
@@ -115,8 +117,8 @@ public class ASTRewritingTest extends TestCase {
 	protected MethodDeclaration createNewMethod(AST ast, String name, boolean isAbstract) {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setName(ast.newSimpleName(name));
-		decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-		decl.setModifiers(isAbstract ? (Modifier.ABSTRACT | Modifier.PRIVATE) : Modifier.PRIVATE);
+		decl.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, (isAbstract ? (Modifier.ABSTRACT | Modifier.PRIVATE) : Modifier.PRIVATE)));
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName("str"));
 		param.setType(ast.newSimpleType(ast.newSimpleName("String")));

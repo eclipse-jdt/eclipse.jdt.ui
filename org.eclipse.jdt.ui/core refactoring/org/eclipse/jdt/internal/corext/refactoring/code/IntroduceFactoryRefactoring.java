@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -66,6 +67,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -243,25 +245,20 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @return ClassInstanceCreation or MethodDeclaration
 	 */
 	private ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
-		ASTNode		node= NodeFinder.perform(fCU, offset, length);
-
-		// First, find the proper node to inspect (may be the parent or child
-		// of the selected node, e.g., when the selected node is the name of
-		// the constructor to call, such that the parent is really the ctor
-		// invocation expression.
-		if (node.getNodeType() == ASTNode.SIMPLE_NAME)
-			node= node.getParent();
-		else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
-			node= ((ExpressionStatement) node).getExpression();
-
-		if (node.getNodeType() == ASTNode.QUALIFIED_NAME)
-			node= node.getParent();
-
-		if (node.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION ||
-			(node.getNodeType() == ASTNode.METHOD_DECLARATION && ((MethodDeclaration) node).isConstructor()))
+		ASTNode node= ASTNodes.getNormalizedNode(NodeFinder.perform(fCU, offset, length));
+		if (node.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION)
 			return node;
-		else
-			return null;
+		if (node.getNodeType() == ASTNode.METHOD_DECLARATION && ((MethodDeclaration)node).isConstructor())
+			return node;
+		// we have some sub node. Make sure its the right child of the parent
+		StructuralPropertyDescriptor location= node.getLocationInParent();
+		ASTNode parent= node.getParent();
+		if (location == ClassInstanceCreation.TYPE_PROPERTY) {
+			return parent;
+		} else if (location == MethodDeclaration.NAME_PROPERTY && ((MethodDeclaration)parent).isConstructor()) {
+			return parent;
+		}
+		return null;
 	}
 
 	/**
@@ -537,10 +534,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		newMethod.setName(newMethodName);
 		newMethod.setBody(body);
-		newMethod.setReturnType(ast.newSimpleType(ast.newSimpleName(retTypeName)));
-		newMethod.setModifiers(Modifier.STATIC | Modifier.PUBLIC);
+		newMethod.setReturnType2(ast.newSimpleType(ast.newSimpleName(retTypeName)));
+		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.STATIC | Modifier.PUBLIC));
 
-		newCtorCall.setName(ast.newSimpleName(retTypeName));
+		newCtorCall.setType(ASTNodeFactory.newType(ast, retTypeName));
 
 		createFactoryMethodConstructorArgs(ast, newCtorCall);
 
@@ -703,10 +700,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
 		if (constructor == null || (constructor.getModifiers() & VISIBILITY_MASK) == fConstructorVisibility)
 			return false;
-		unitRewriter.set(
-			constructor, MethodDeclaration.MODIFIERS_PROPERTY,
-			new Integer(ASTNodes.changeVisibility(constructor.getModifiers(), fConstructorVisibility)),
-			declGD);
+		ModifierRewrite.create(unitRewriter, constructor).setVisibility(fConstructorVisibility, declGD);
 		return true;
 	}
 

@@ -241,7 +241,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		result.addAll(Arrays.asList(constraints));
 		if (! methodBinding.isConstructor() && ! methodBinding.getReturnType().isPrimitive()){
 			ConstraintVariable returnTypeBindingVariable= fConstraintVariableFactory.makeReturnTypeVariable(methodBinding);
-			ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeTypeVariable(declaration.getReturnType());
+			ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeTypeVariable(declaration.getReturnType2());
 			ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
 					returnTypeBindingVariable, returnTypeVariable);
 			result.addAll(Arrays.asList(defines));

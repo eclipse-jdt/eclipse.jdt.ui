@@ -35,7 +35,7 @@ public class ASTCreator {
 	}
 
 	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit cu) {
-		ASTParser p = ASTParser.newParser(AST.JLS2);
+		ASTParser p = ASTParser.newParser(AST.JLS3);
 		p.setSource(cu);
 		p.setResolveBindings(true);
 		p.setWorkingCopyOwner(workingCopyOwner);

@@ -23,17 +23,17 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements IPropertyChangeListener {
 
-	public final static int DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES |  
-		JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
+	public final static long DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES |  
+		JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE  | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
 	public final static int DEFAULT_IMAGEFLAGS= JavaElementImageProvider.OVERLAY_ICONS;
 	
-	private int fTextFlagMask;
+	private long fTextFlagMask;
 	private int fImageFlagMask;
 
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
 	 */
-	public AppearanceAwareLabelProvider(int textFlags, int imageFlags) {
+	public AppearanceAwareLabelProvider(long textFlags, int imageFlags) {
 		super(textFlags, imageFlags);
 		initMasks();
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
@@ -52,6 +52,9 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_RETURNTYPE;
 		}
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)) {
+			fTextFlagMask ^= JavaElementLabels.M_APP_TYPE_PARAMETERS;
+		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
@@ -65,6 +68,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
+				|| property.equals(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
 				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			initMasks();
@@ -91,7 +95,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateTextFlags()
 	 */
-	protected int evaluateTextFlags(Object element) {
+	protected long evaluateTextFlags(Object element) {
 		return getTextFlags() & fTextFlagMask;
 	}
 

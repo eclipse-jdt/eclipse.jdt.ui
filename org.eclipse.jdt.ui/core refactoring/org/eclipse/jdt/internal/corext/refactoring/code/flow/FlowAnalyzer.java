@@ -57,11 +57,13 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -457,7 +459,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getExpression());
-		process(info, node.getName());
+		process(info, node.getType());
 		process(info, node.arguments());
 		process(info, node.getAnonymousClassDeclaration());
 	}
@@ -588,7 +590,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public void endVisit(MethodDeclaration node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.getReturnType());
+		GenericSequentialFlowInfo info= processSequential(node, node.getReturnType2());
 		process(info, node.parameters());
 		process(info, node.thrownExceptions());
 		process(info, node.getBody());
@@ -610,6 +612,13 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getName());
+	}
+	
+	public void endVisit(ParameterizedType node) {
+		if (skipNode(node))
+			return;
+		GenericSequentialFlowInfo info= processSequential(node, node.getType());
+		process(info, node.typeArguments());
 	}
 	
 	public void endVisit(ParenthesizedExpression node) {
@@ -636,6 +645,12 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(QualifiedName node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getQualifier(), node.getName());
+	}
+	
+	public void endVisit(QualifiedType node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getQualifier(), node.getName());
@@ -754,8 +769,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public void endVisit(TypeDeclaration node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.getSuperclass());
-		process(info, node.superInterfaces());
+		GenericSequentialFlowInfo info= processSequential(node, node.getSuperclassType());
+		process(info, node.superInterfaceTypes());
 		process(info, node.bodyDeclarations());
 		info.setNoReturn();
 	}
@@ -763,7 +778,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public void endVisit(TypeDeclarationStatement node) {
 		if (skipNode(node))
 			return;
-		assignFlowInfo(node, node.getTypeDeclaration());
+		assignFlowInfo(node, node.getDeclaration());
 	}
 	
 	public void endVisit(TypeLiteral node) {

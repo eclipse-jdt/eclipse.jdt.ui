@@ -161,7 +161,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
-		newDecl.setModifiers(modifiers);
+		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));

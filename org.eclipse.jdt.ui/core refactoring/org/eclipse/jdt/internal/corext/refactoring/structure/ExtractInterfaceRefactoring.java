@@ -48,8 +48,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
@@ -63,8 +63,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
@@ -288,7 +288,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			TextChangeManager manager= new TextChangeManager(true);
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(typeCu);
 			p.setResolveBindings(true);
 			p.setWorkingCopyOwner(fWorkingCopyOwner);
@@ -345,9 +345,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (fInputType.isInterface())
 			deleteExtractedMethods(typeCuNode, typeCu, typeCuRewrite);
 		
-		Name newInterfaceName= td.getAST().newSimpleName(fNewInterfaceName);
-		td.superInterfaces().add(newInterfaceName);
-		typeCuRewrite.markAsInserted(newInterfaceName);
+		AST ast= td.getAST();
+		Type newInterface= ast.newSimpleType(ast.newSimpleName(fNewInterfaceName));
+		td.superInterfaceTypes().add(newInterface);
+		typeCuRewrite.markAsInserted(newInterface);
 	}
 
 	private static void setContent(ICompilationUnit cu, String newContent) throws JavaModelException {
@@ -472,7 +473,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(getInputTypeCU(), true);			
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(getInputTypeCU(), true);			
 		String typeComment= CodeGeneration.getTypeComment(newCu, fNewInterfaceName, getLineSeperator());//$NON-NLS-1$
 		String compilationUnitContent = CodeGeneration.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(cuNode), getLineSeperator());
 		if (compilationUnitContent == null)
@@ -556,7 +557,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (methodDeclaration == null)
 			return ""; //$NON-NLS-1$
 		
-		int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
+		int methodDeclarationOffset= methodDeclaration.getReturnType2().getStartPosition();
 		int length= getMethodDeclarationLength(iMethod, methodDeclaration);
 		
 		StringBuffer methodDeclarationSource= new StringBuffer();
@@ -583,7 +584,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private static int getMethodDeclarationLength(IMethod iMethod, MethodDeclaration methodDeclaration) throws JavaModelException{
-		int preDeclarationSourceLength= methodDeclaration.getReturnType().getStartPosition() - iMethod.getSourceRange().getOffset();
+		int preDeclarationSourceLength= methodDeclaration.getReturnType2().getStartPosition() - iMethod.getSourceRange().getOffset();
 		if (methodDeclaration.getBody() == null)
 			return iMethod.getSourceRange().getLength() - preDeclarationSourceLength;
 		else

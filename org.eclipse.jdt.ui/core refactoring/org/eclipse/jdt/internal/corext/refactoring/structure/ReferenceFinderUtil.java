@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 
@@ -124,10 +125,14 @@ public class ReferenceFinderUtil {
 	public static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) {
 		if (methodDeclaration == null)
 			return new HashSet(0);
-		Set result= new HashSet();	
-		ITypeBinding binding = methodDeclaration.getReturnType().resolveBinding();
-		if (binding != null)
-			result.add(binding);
+		Set result= new HashSet();
+		ITypeBinding binding= null;
+		Type returnType= methodDeclaration.getReturnType2();
+		if (returnType != null) {
+			binding = returnType.resolveBinding();
+			if (binding != null)
+				result.add(binding);
+		}
 				
 		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
 			binding = ((SingleVariableDeclaration)iter.next()).getType().resolveBinding();

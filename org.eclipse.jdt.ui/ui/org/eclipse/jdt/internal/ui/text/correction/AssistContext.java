@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -21,6 +20,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
   */
@@ -72,7 +72,7 @@ public class AssistContext implements IInvocationContext {
 			fASTRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, true, null);
 			if (fASTRoot == null) {
 				// see bug 63554
-				ASTParser parser= ASTParser.newParser(AST.JLS2);
+				ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 				parser.setSource(fCompilationUnit);
 				parser.setResolveBindings(true);
 				fASTRoot= (CompilationUnit) parser.createAST(null);

@@ -2007,7 +2007,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("}\n");
         ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
         
-        String str= "E().sequals";
+        String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         

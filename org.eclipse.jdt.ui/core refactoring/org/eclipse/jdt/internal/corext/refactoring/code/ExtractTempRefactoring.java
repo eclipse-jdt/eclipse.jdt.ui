@@ -297,7 +297,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			ASTNode associatedNode= selectedExpression.getAssociatedNode();
 			if (associatedNode instanceof Name
 					&& associatedNode.getParent() instanceof ClassInstanceCreation
-					&& associatedNode.getLocationInParent() == ClassInstanceCreation.NAME_PROPERTY)
+					&& associatedNode.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
 			pm.worked(1);				
 	
@@ -366,7 +366,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void initializeAST(IProgressMonitor monitor) {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, monitor);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, monitor);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -423,7 +423,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
 			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
 			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());
 			p.setProject(fCu.getJavaProject());
@@ -766,7 +766,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
 		Assert.isTrue(cic.getAnonymousClassDeclaration() != null);
-		return ASTNodes.asString(cic.getName());
+		return ASTNodes.asString(cic.getType());
 	}
 	
 	private String getInitializerSource() throws JavaModelException {

@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -630,7 +631,7 @@ class ReorgPolicyFactory {
 			FieldDeclaration newFieldDeclaration= targetAst.newFieldDeclaration(copiedFragment);
 			if (fieldDeclaration.getJavadoc() != null)
 				newFieldDeclaration.setJavadoc((Javadoc) ASTNode.copySubtree(targetAst, fieldDeclaration.getJavadoc()));
-			newFieldDeclaration.setModifiers(fieldDeclaration.getModifiers());
+			newFieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, fieldDeclaration.getModifiers()));
 			newFieldDeclaration.setType((Type) ASTNode.copySubtree(targetAst, fieldDeclaration.getType()));
 			return newFieldDeclaration;
 		}
@@ -1054,7 +1055,7 @@ class ReorgPolicyFactory {
 			try {					
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
-				ASTParser parser= ASTParser.newParser(AST.JLS2);
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(destinationCu);
 				CompilationUnit destinationCuNode= (CompilationUnit) parser.createAST(pm);
 				OldASTRewrite rewrite= new OldASTRewrite(destinationCuNode);
@@ -1073,7 +1074,7 @@ class ReorgPolicyFactory {
 		private CompilationUnit createSourceCuNode(){
 			Assert.isTrue(getSourceCu() != null || getSourceClassFile() != null);
 			Assert.isTrue(getSourceCu() == null || getSourceClassFile() == null);
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			if (getSourceCu() != null)
 				parser.setSource(getSourceCu());
 			else
@@ -1958,7 +1959,7 @@ class ReorgPolicyFactory {
 		}
 
 		private CompilationUnit createSourceCuNode(ICompilationUnit cu){
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(cu);
 			return (CompilationUnit) parser.createAST(null);
 		}

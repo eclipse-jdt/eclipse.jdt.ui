@@ -102,7 +102,7 @@ public class NLSHintHelper {
 		if (unit == null) {
 			return null;
 		}
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(unit);
 		parser.setResolveBindings(true);
 		parser.setFocalPosition(0);

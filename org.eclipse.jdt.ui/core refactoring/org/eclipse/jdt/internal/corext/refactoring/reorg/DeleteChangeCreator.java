@@ -106,7 +106,7 @@ class DeleteChangeCreator {
 	 * List<IJavaElement> javaElements 
 	 */
 	private static Change createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
 		OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 		IJavaElement[] elements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
 		ASTNodeDeleteUtil.markAsDeleted(elements, cuNode, rewrite);

@@ -47,6 +47,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -636,7 +638,8 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
 		if (!decl.isConstructor()) {
-			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(decl.getReturnType()));
+			ASTNode returnType= (decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2();
+			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(returnType));
 		}
 		if (isOverridden) {
 			String methodName= decl.getName().getIdentifier();
@@ -674,7 +677,11 @@ public class StubUtility {
 		for (int i= 0; i < exceptions.size(); i++) {
 			exceptionNames[i]= ASTNodes.getSimpleNameIdentifier((Name) exceptions.get(i));
 		}
-		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
+		
+		String returnType= null;
+		if (!decl.isConstructor()) {
+			returnType= ASTNodes.asString((decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2());
+		}
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
 			try {
@@ -740,6 +747,10 @@ public class StubUtility {
 	}
 
 	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
+		String[] typeParameters= Signature.getTypeParameters(refTypeSig);
+		if (typeParameters.length > 0) {
+			// see bug 68847 
+		}
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
 			StringBuffer buf= new StringBuffer();

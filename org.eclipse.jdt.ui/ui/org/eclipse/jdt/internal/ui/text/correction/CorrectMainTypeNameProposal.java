@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Renames the primary type to be compatible with the name of the compilation unit.
@@ -56,7 +57,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
 		
-		ASTParser astParser= ASTParser.newParser(AST.JLS2);
+		ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		astParser.setSource(content);
 		astParser.setUnitName(fOldName + ".java"); //$NON-NLS-1$
 		astParser.setProject(getCompilationUnit().getJavaProject());

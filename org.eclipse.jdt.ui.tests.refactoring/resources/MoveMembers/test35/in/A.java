@@ -1,4 +1,4 @@
 package p;
 public interface A{
-	public /*static final*/ int i= 0;
+	public int i= 0;
 }

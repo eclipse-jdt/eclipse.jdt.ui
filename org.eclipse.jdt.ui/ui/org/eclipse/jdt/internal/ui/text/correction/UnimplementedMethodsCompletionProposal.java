@@ -90,12 +90,13 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		ImportRewrite imports= getImportRewrite();
 		
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.setModifiers(binding.getModifiers() & ~Modifier.ABSTRACT);
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT));
+
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
 		
 		String returnTypeName= imports.addImport(binding.getReturnType());
-		decl.setReturnType(ASTNodeFactory.newType(ast, returnTypeName));
+		decl.setReturnType2(ASTNodeFactory.newType(ast, returnTypeName));
 		
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
@@ -119,7 +120,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		decl.setBody(body);
 	
 		String bodyStatement= ""; //$NON-NLS-1$
-		Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
+		Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(expression);

@@ -59,7 +59,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testHidingVariable1"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1381,6 +1381,43 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}
+	
+	public void testUnneededCatchBlockInInitializer() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.text.ParseException;\n");				
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        try {\n");		
+		buf.append("            int x= 1;\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");	
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.text.ParseException;\n");				
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        int x= 1;\n");
+		buf.append("    }\n");	
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
 	}
 	
 	public void testUnneededCatchBlockSingle() throws Exception {

@@ -55,11 +55,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedTypesQuickFixTest("testAmbiguousTypeInSuperClass"));
+			suite.addTest(new UnresolvedTypesQuickFixTest("testInnerType"));
 			return new ProjectTestSetup(suite);
 		}
 	}

@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.EditDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
@@ -140,7 +141,7 @@ public class UnresolvedElementsSubProcessor {
 				binding= declaringTypeBinding.getSuperclass();
 				node= ((SuperFieldAccess) selectedNode).getName();
 				break;
-			default:	
+			default:
 		}
 		
 		if (node == null) {
@@ -381,34 +382,45 @@ public class UnresolvedElementsSubProcessor {
 		return false;
 	}
 	
-
-	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-		
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
-			return;
-		}
+	private static int evauateTypeKind(ASTNode node) {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 		
-		ASTNode parent= selectedNode.getParent();
-		while (parent.getLength() == selectedNode.getLength()) { // get parent of type or variable fragment
-			parent= parent.getParent(); 
+		ASTNode parent= node.getParent();
+		while (parent instanceof QualifiedName) {
+			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
+				return SimilarElementsRequestor.REF_TYPES;
+			}
+			node= parent;
+			parent= parent.getParent();
 		}
+		while (parent instanceof Type) {
+			if (parent instanceof QualifiedType) {
+				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
+			} else if (parent instanceof ParameterizedType) {
+				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
+			}
+			node= parent;
+			parent= parent.getParent();
+		}
+		
 		switch (parent.getNodeType()) {
 			case ASTNode.TYPE_DECLARATION:
 				TypeDeclaration typeDeclaration=(TypeDeclaration) parent;
-				if (typeDeclaration.superInterfaces().contains(selectedNode)) {					
+				if (typeDeclaration.superInterfaceTypes().contains(node)) {					
 					kind= SimilarElementsRequestor.INTERFACES;
-				} else if (selectedNode.equals(typeDeclaration.getSuperclass())) {
+				} else if (node.equals(typeDeclaration.getSuperclassType())) {
 					kind= SimilarElementsRequestor.CLASSES;
 				}
 				break;
 			case ASTNode.METHOD_DECLARATION:
 				MethodDeclaration methodDeclaration= (MethodDeclaration) parent;
-				if (methodDeclaration.thrownExceptions().contains(selectedNode)) {
+				if (methodDeclaration.thrownExceptions().contains(node)) {
 					kind= SimilarElementsRequestor.CLASSES;
-				} else if (selectedNode.equals(methodDeclaration.getReturnType())) {
+				} else if (node.equals(methodDeclaration.getReturnType2())) {
 					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
 				}
 				break;
@@ -435,8 +447,25 @@ public class UnresolvedElementsSubProcessor {
 				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
 			default:
-		}		
+		}
+		return kind;
+	}
+	
+	
+	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+
+		int kind= evauateTypeKind(selectedNode);
+		
+		while (selectedNode.getParent() instanceof QualifiedName) {
+			selectedNode= selectedNode.getParent();
+		}
+
 		Name node= null;
 		if (selectedNode instanceof SimpleType) {
 			node= ((SimpleType) selectedNode).getName();
@@ -987,7 +1016,7 @@ public class UnresolvedElementsSubProcessor {
 					return false;
 				}
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			parser.setSource(targetCU);
 			parser.setFocalPosition(0);
 			parser.setResolveBindings(true);
@@ -1228,7 +1257,7 @@ public class UnresolvedElementsSubProcessor {
 		if (type == ASTNode.CLASS_INSTANCE_CREATION) {
 			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
 			
-			IBinding binding= creation.getName().resolveBinding();
+			IBinding binding= creation.getType().resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				targetBinding= (ITypeBinding) binding;
 				arguments= creation.arguments();		

@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -245,7 +246,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
-		fDeclaringCuNode= new RefactoringASTParser(AST.JLS2).parse(getDeclaringCu(), true, pm);
+		fDeclaringCuNode= new RefactoringASTParser(AST.JLS3).parse(getDeclaringCu(), true, pm);
 		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(fType);
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
@@ -298,7 +299,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private RefactoringStatus checkConstructorParameterNames(){
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(getInputTypeCu(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(getInputTypeCu(), false);
 		TypeDeclaration type= findTypeDeclaration(fType, cuNode);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(type);
 		for (int i= 0; i < nodes.length; i++) {
@@ -380,7 +381,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
 		TextChangeCompatibility.addTextEdit(ch, "", edit); //$NON-NLS-1$
 		String newSource= ch.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(newSource.toCharArray());
 		CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 		TypeDeclaration td= findTypeDeclaration(fType, cuNode);
@@ -420,7 +421,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private CompilationUnit getAST(ICompilationUnit processedCu) {		
 		if (processedCu.equals(getDeclaringCu()))
 			return fDeclaringCuNode;
-		return new RefactoringASTParser(AST.JLS2).parse(processedCu, true);
+		return new RefactoringASTParser(AST.JLS3).parse(processedCu, true);
 	}
 
 	private boolean typeHasNoConstructors() throws JavaModelException {
@@ -758,11 +759,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void addEnclosingInstanceDeclaration(TypeDeclaration type, OldASTRewrite rewrite){
-		VariableDeclarationFragment fragment= type.getAST().newVariableDeclarationFragment();
-		fragment.setName(type.getAST().newSimpleName(fEnclosingInstanceFieldName));
-		FieldDeclaration newField= type.getAST().newFieldDeclaration(fragment);
-		newField.setModifiers(getEnclosingInstanceAccessModifiers());
-		newField.setType(ASTNodeFactory.newType(type.getAST(), getTypeOfEnclosingInstanceField()));
+		AST ast= type.getAST();
+		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+		fragment.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+		FieldDeclaration newField= ast.newFieldDeclaration(fragment);
+		newField.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getEnclosingInstanceAccessModifiers()));
+		newField.setType(ASTNodeFactory.newType(ast, getTypeOfEnclosingInstanceField()));
 		type.bodyDeclarations().add(0, newField);
 		rewrite.markAsInserted(newField);
 	}
@@ -776,8 +778,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void removeUnusedTypeModifiers(TypeDeclaration type, OldASTRewrite rewrite) {
 		int newModifiers= JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, type.getModifiers());
-		rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
-		
+		ModifierRewrite.create(rewrite, type).setModifiers(newModifiers, null);
 	}
 	
 	private void updateTypeReference(ASTNode node, OldASTRewrite rewrite, ICompilationUnit cu) throws CoreException{

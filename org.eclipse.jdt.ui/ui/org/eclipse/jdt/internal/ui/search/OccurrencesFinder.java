@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -221,10 +222,16 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		// match with the constructor and the type.
-		Name name= node.getName();
-		if (name instanceof QualifiedName)
-			name= ((QualifiedName)name).getName();
-		match(name, fUsages, node.resolveConstructorBinding());
+		Type type= node.getType();
+		if (type instanceof ParameterizedType) {
+			type= ((ParameterizedType) type).getType();
+		}
+		if (type instanceof SimpleType) {
+			Name name= ((SimpleType) type).getName();
+			if (name instanceof QualifiedName)
+				name= ((QualifiedName)name).getName();
+			match(name, fUsages, node.resolveConstructorBinding());
+		}
 		return super.visit(node);
 	}
 	public boolean visit(Assignment node) {

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
 
@@ -18,94 +19,155 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class ASTFlattener extends GenericVisitor {
 
-	public static String asString(ASTNode node) {
-		ASTFlattener flattener= new ASTFlattener();
-		node.accept(flattener);
-		return flattener.getResult();
-	}
-	
-	protected StringBuffer fResult;
+	/**
+	 * The string buffer into which the serialized representation of the AST is
+	 * written.
+	 */
+	private StringBuffer fBuffer;
 
+	/**
+	 * Creates a new AST printer.
+	 */
 	public ASTFlattener() {
-		super(true);
-		fResult= new StringBuffer();
+		this.fBuffer= new StringBuffer();
 	}
-	
+
 	/**
 	 * Returns the string accumulated in the visit.
 	 *
 	 * @return the serialized 
 	 */
 	public String getResult() {
-		// convert to a string, but lose any extra space in the string buffer by copying
-		return new String(fResult.toString());
+		return this.fBuffer.toString();
 	}
-	
+
 	/**
 	 * Resets this printer so that it can be used again.
 	 */
 	public void reset() {
-		fResult.setLength(0);
+		this.fBuffer.setLength(0);
 	}
-	
+
+	public static String asString(ASTNode node) {
+		ASTFlattener flattener= new ASTFlattener();
+		node.accept(flattener);
+		return flattener.getResult();
+	}
+
 
 	protected boolean visitNode(ASTNode node) {
-		Assert.isTrue(false, "No implementation to flatten node: " + node.toString());  //$NON-NLS-1$
+		Assert.isTrue(false, "No implementation to flatten node: " + node.toString()); //$NON-NLS-1$
 		return false;
 	}
 	
 	/**
 	 * Appends the text representation of the given modifier flags, followed by a single space.
+	 * Used for 3.0 modifiers and annotations.
 	 * 
-	 * @param modifiers the modifiers
-	 * @param buf The <code>StringBuffer</code> to write the result to.
+	 * @param ext the list of modifier and annotation nodes
+	 * (element type: <code>IExtendedModifiers</code>)
 	 */
-	public static void printModifiers(int modifiers, StringBuffer buf) {
+	private void printModifiers(List ext) {
+		for (Iterator it= ext.iterator(); it.hasNext();) {
+			ASTNode p= (ASTNode) it.next();
+			p.accept(this);
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Appends the text representation of the given modifier flags, followed by a single space.
+	 * Used for JLS2 modifiers.
+	 * 
+	 * @param modifiers the modifier flags
+	 */
+	private void printModifiers(int modifiers) {
 		if (Modifier.isPublic(modifiers)) {
-			buf.append("public "); //$NON-NLS-1$
+			this.fBuffer.append("public ");//$NON-NLS-1$
 		}
 		if (Modifier.isProtected(modifiers)) {
-			buf.append("protected "); //$NON-NLS-1$
+			this.fBuffer.append("protected ");//$NON-NLS-1$
 		}
 		if (Modifier.isPrivate(modifiers)) {
-			buf.append("private "); //$NON-NLS-1$
+			this.fBuffer.append("private ");//$NON-NLS-1$
 		}
 		if (Modifier.isStatic(modifiers)) {
-			buf.append("static "); //$NON-NLS-1$
+			this.fBuffer.append("static ");//$NON-NLS-1$
 		}
 		if (Modifier.isAbstract(modifiers)) {
-			buf.append("abstract "); //$NON-NLS-1$
+			this.fBuffer.append("abstract ");//$NON-NLS-1$
 		}
 		if (Modifier.isFinal(modifiers)) {
-			buf.append("final "); //$NON-NLS-1$
+			this.fBuffer.append("final ");//$NON-NLS-1$
 		}
 		if (Modifier.isSynchronized(modifiers)) {
-			buf.append("synchronized "); //$NON-NLS-1$
+			this.fBuffer.append("synchronized ");//$NON-NLS-1$
 		}
 		if (Modifier.isVolatile(modifiers)) {
-			buf.append("volatile "); //$NON-NLS-1$
+			this.fBuffer.append("volatile ");//$NON-NLS-1$
 		}
 		if (Modifier.isNative(modifiers)) {
-			buf.append("native "); //$NON-NLS-1$
+			this.fBuffer.append("native ");//$NON-NLS-1$
 		}
 		if (Modifier.isStrictfp(modifiers)) {
-			buf.append("strictfp "); //$NON-NLS-1$
+			this.fBuffer.append("strictfp ");//$NON-NLS-1$
 		}
 		if (Modifier.isTransient(modifiers)) {
-			buf.append("transient "); //$NON-NLS-1$
+			this.fBuffer.append("transient ");//$NON-NLS-1$
 		}
-	}		
-	
+	}
+
+	/*
+	 * @see ASTVisitor#visit(AnnotationTypeDeclaration)
+	 * @since 3.0
+	 */
+	public boolean visit(AnnotationTypeDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		this.fBuffer.append("@interface ");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append(" {");//$NON-NLS-1$
+		for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
+			BodyDeclaration d= (BodyDeclaration) it.next();
+			d.accept(this);
+		}
+		this.fBuffer.append("}");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(AnnotationTypeMemberDeclaration)
+	 * @since 3.0
+	 */
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		node.getType().accept(this);
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append("()");//$NON-NLS-1$
+		if (node.getDefault() != null) {
+			this.fBuffer.append(" default ");//$NON-NLS-1$
+			node.getDefault().accept(this);
+		}
+		this.fBuffer.append(";");//$NON-NLS-1$
+		return false;
+	}
+
 	/*
 	 * @see ASTVisitor#visit(AnonymousClassDeclaration)
 	 */
 	public boolean visit(AnonymousClassDeclaration node) {
-		fResult.append('{');
-		for (Iterator it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
-			BodyDeclaration b = (BodyDeclaration) it.next();
+		this.fBuffer.append("{");//$NON-NLS-1$
+		for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
+			BodyDeclaration b= (BodyDeclaration) it.next();
 			b.accept(this);
 		}
-		fResult.append('}');
+		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
 	}
 
@@ -114,9 +176,9 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ArrayAccess node) {
 		node.getArray().accept(this);
-		fResult.append('[');
+		this.fBuffer.append("[");//$NON-NLS-1$
 		node.getIndex().accept(this);
-		fResult.append(']');
+		this.fBuffer.append("]");//$NON-NLS-1$
 		return false;
 	}
 
@@ -124,21 +186,21 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ArrayCreation)
 	 */
 	public boolean visit(ArrayCreation node) {
-		fResult.append("new "); //$NON-NLS-1$
-		ArrayType at = node.getType();
-		int dims = at.getDimensions();
-		Type elementType = at.getElementType();
+		this.fBuffer.append("new ");//$NON-NLS-1$
+		ArrayType at= node.getType();
+		int dims= at.getDimensions();
+		Type elementType= at.getElementType();
 		elementType.accept(this);
-		for (Iterator it = node.dimensions().iterator(); it.hasNext(); ) {
-			fResult.append('[');
-			Expression e = (Expression) it.next();
+		for (Iterator it= node.dimensions().iterator(); it.hasNext();) {
+			this.fBuffer.append("[");//$NON-NLS-1$
+			Expression e= (Expression) it.next();
 			e.accept(this);
-			fResult.append(']');
+			this.fBuffer.append("]");//$NON-NLS-1$
 			dims--;
 		}
 		// add empty "[]" for each extra array dimension
 		for (int i= 0; i < dims; i++) {
-			fResult.append("[]"); //$NON-NLS-1$
+			this.fBuffer.append("[]");//$NON-NLS-1$
 		}
 		if (node.getInitializer() != null) {
 			node.getInitializer().accept(this);
@@ -150,15 +212,15 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ArrayInitializer)
 	 */
 	public boolean visit(ArrayInitializer node) {
-		fResult.append('{');
-		for (Iterator it = node.expressions().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
+		this.fBuffer.append("{");//$NON-NLS-1$
+		for (Iterator it= node.expressions().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
 			e.accept(this);
 			if (it.hasNext()) {
-				fResult.append(',');
+				this.fBuffer.append(",");//$NON-NLS-1$
 			}
 		}
-		fResult.append('}');
+		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
 	}
 
@@ -167,7 +229,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ArrayType node) {
 		node.getComponentType().accept(this);
-		fResult.append("[]"); //$NON-NLS-1$
+		this.fBuffer.append("[]");//$NON-NLS-1$
 		return false;
 	}
 
@@ -175,13 +237,13 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(AssertStatement)
 	 */
 	public boolean visit(AssertStatement node) {
-		fResult.append("assert "); //$NON-NLS-1$
+		this.fBuffer.append("assert ");//$NON-NLS-1$
 		node.getExpression().accept(this);
 		if (node.getMessage() != null) {
-			fResult.append(':');
+			this.fBuffer.append(" : ");//$NON-NLS-1$
 			node.getMessage().accept(this);
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -190,7 +252,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(Assignment node) {
 		node.getLeftHandSide().accept(this);
-		fResult.append(node.getOperator().toString());
+		this.fBuffer.append(node.getOperator().toString());
 		node.getRightHandSide().accept(this);
 		return false;
 	}
@@ -199,12 +261,21 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Block)
 	 */
 	public boolean visit(Block node) {
-		fResult.append('{');
-		for (Iterator it = node.statements().iterator(); it.hasNext(); ) {
-			Statement s = (Statement) it.next();
+		this.fBuffer.append("{");//$NON-NLS-1$
+		for (Iterator it= node.statements().iterator(); it.hasNext();) {
+			Statement s= (Statement) it.next();
 			s.accept(this);
 		}
-		fResult.append('}');
+		this.fBuffer.append("}");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(BlockComment)
+	 * @since 3.0
+	 */
+	public boolean visit(BlockComment node) {
+		this.fBuffer.append("/* */");//$NON-NLS-1$
 		return false;
 	}
 
@@ -213,9 +284,9 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(BooleanLiteral node) {
 		if (node.booleanValue() == true) {
-			fResult.append("true"); //$NON-NLS-1$
+			this.fBuffer.append("true");//$NON-NLS-1$
 		} else {
-			fResult.append("false"); //$NON-NLS-1$
+			this.fBuffer.append("false");//$NON-NLS-1$
 		}
 		return false;
 	}
@@ -224,12 +295,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(BreakStatement)
 	 */
 	public boolean visit(BreakStatement node) {
-		fResult.append("break"); //$NON-NLS-1$
+		this.fBuffer.append("break");//$NON-NLS-1$
 		if (node.getLabel() != null) {
-			fResult.append(' ');
+			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -237,9 +308,9 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(CastExpression)
 	 */
 	public boolean visit(CastExpression node) {
-		fResult.append('(');
+		this.fBuffer.append("(");//$NON-NLS-1$
 		node.getType().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(")");//$NON-NLS-1$
 		node.getExpression().accept(this);
 		return false;
 	}
@@ -248,9 +319,9 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(CatchClause)
 	 */
 	public boolean visit(CatchClause node) {
-		fResult.append("catch ("); //$NON-NLS-1$
+		this.fBuffer.append("catch (");//$NON-NLS-1$
 		node.getException().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
 		return false;
 	}
@@ -259,7 +330,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(CharacterLiteral)
 	 */
 	public boolean visit(CharacterLiteral node) {
-		fResult.append(node.getEscapedValue());
+		this.fBuffer.append(node.getEscapedValue());
 		return false;
 	}
 
@@ -269,19 +340,35 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(ClassInstanceCreation node) {
 		if (node.getExpression() != null) {
 			node.getExpression().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		fResult.append("new "); //$NON-NLS-1$
-		node.getName().accept(this);
-		fResult.append('(');
-		for (Iterator it = node.arguments().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
+		this.fBuffer.append("new ");//$NON-NLS-1$
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			node.getName().accept(this);
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeArguments().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
+			}
+			node.getType().accept(this);
+		}
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
 			e.accept(this);
 			if (it.hasNext()) {
-				fResult.append(',');
+				this.fBuffer.append(",");//$NON-NLS-1$
 			}
 		}
-		fResult.append(')');
+		this.fBuffer.append(")");//$NON-NLS-1$
 		if (node.getAnonymousClassDeclaration() != null) {
 			node.getAnonymousClassDeclaration().accept(this);
 		}
@@ -295,12 +382,12 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getPackage() != null) {
 			node.getPackage().accept(this);
 		}
-		for (Iterator it = node.imports().iterator(); it.hasNext(); ) {
-			ImportDeclaration d = (ImportDeclaration) it.next();
+		for (Iterator it= node.imports().iterator(); it.hasNext();) {
+			ImportDeclaration d= (ImportDeclaration) it.next();
 			d.accept(this);
 		}
-		for (Iterator it = node.types().iterator(); it.hasNext(); ) {
-			TypeDeclaration d = (TypeDeclaration) it.next();
+		for (Iterator it= node.types().iterator(); it.hasNext();) {
+			AbstractTypeDeclaration d= (AbstractTypeDeclaration) it.next();
 			d.accept(this);
 		}
 		return false;
@@ -311,9 +398,9 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ConditionalExpression node) {
 		node.getExpression().accept(this);
-		fResult.append('?');
+		this.fBuffer.append("?");//$NON-NLS-1$
 		node.getThenExpression().accept(this);
-		fResult.append(':');
+		this.fBuffer.append(":");//$NON-NLS-1$
 		node.getElseExpression().accept(this);
 		return false;
 	}
@@ -322,15 +409,28 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ConstructorInvocation)
 	 */
 	public boolean visit(ConstructorInvocation node) {
-		fResult.append("this("); //$NON-NLS-1$
-		for (Iterator it = node.arguments().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
-			e.accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeArguments().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
 			}
 		}
-		fResult.append(");"); //$NON-NLS-1$
+		this.fBuffer.append("this(");//$NON-NLS-1$
+		for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
+			e.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(");");//$NON-NLS-1$
 		return false;
 	}
 
@@ -338,12 +438,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ContinueStatement)
 	 */
 	public boolean visit(ContinueStatement node) {
-		fResult.append("continue"); //$NON-NLS-1$
+		this.fBuffer.append("continue");//$NON-NLS-1$
 		if (node.getLabel() != null) {
-			fResult.append(' ');
+			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -351,11 +451,11 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(DoStatement)
 	 */
 	public boolean visit(DoStatement node) {
-		fResult.append("do "); //$NON-NLS-1$
+		this.fBuffer.append("do ");//$NON-NLS-1$
 		node.getBody().accept(this);
-		fResult.append(" while ("); //$NON-NLS-1$
+		this.fBuffer.append(" while (");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(");"); //$NON-NLS-1$
+		this.fBuffer.append(");");//$NON-NLS-1$
 		return false;
 	}
 
@@ -363,7 +463,97 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(EmptyStatement)
 	 */
 	public boolean visit(EmptyStatement node) {
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(EnhancedForStatement)
+	 * @since 3.0
+	 */
+	public boolean visit(EnhancedForStatement node) {
+		this.fBuffer.append("for (");//$NON-NLS-1$
+		node.getParameter().accept(this);
+		this.fBuffer.append(" : ");//$NON-NLS-1$
+		node.getExpression().accept(this);
+		this.fBuffer.append(") ");//$NON-NLS-1$
+		node.getBody().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(EnumConstantDeclaration)
+	 * @since 3.0
+	 */
+	public boolean visit(EnumConstantDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		node.getName().accept(this);
+		if (!node.arguments().isEmpty()) {
+			this.fBuffer.append("(");//$NON-NLS-1$
+			for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+				Expression e= (Expression) it.next();
+				e.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(",");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(")");//$NON-NLS-1$
+		}
+		if (!node.bodyDeclarations().isEmpty()) {
+			this.fBuffer.append("{");//$NON-NLS-1$
+			for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
+				BodyDeclaration d= (BodyDeclaration) it.next();
+				d.accept(this);
+			}
+			this.fBuffer.append("}");//$NON-NLS-1$
+		}
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(EnumDeclaration)
+	 * @since 3.0
+	 */
+	public boolean visit(EnumDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		this.fBuffer.append("enum ");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		if (!node.superInterfaceTypes().isEmpty()) {
+			this.fBuffer.append("implements ");//$NON-NLS-1$
+			for (Iterator it= node.superInterfaceTypes().iterator(); it.hasNext();) {
+				Type t= (Type) it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
+		this.fBuffer.append("{");//$NON-NLS-1$
+		BodyDeclaration prev= null;
+		for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
+			BodyDeclaration d= (BodyDeclaration) it.next();
+			if (prev instanceof EnumConstantDeclaration) {
+				// enum constant declarations do not include punctuation
+				if (d instanceof EnumConstantDeclaration) {
+					// enum constant declarations are separated by commas
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				} else {
+					// semicolon separates last enum constant declaration from 
+					// first class body declarations
+					this.fBuffer.append("; ");//$NON-NLS-1$
+				}
+			}
+			d.accept(this);
+		}
+		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
 	}
 
@@ -372,7 +562,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ExpressionStatement node) {
 		node.getExpression().accept(this);
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -381,7 +571,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(FieldAccess node) {
 		node.getExpression().accept(this);
-		fResult.append('.');
+		this.fBuffer.append(".");//$NON-NLS-1$
 		node.getName().accept(this);
 		return false;
 	}
@@ -393,17 +583,22 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers(), fResult);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
 		node.getType().accept(this);
-		fResult.append(' ');
-		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
-			VariableDeclarationFragment f = (VariableDeclarationFragment) it.next();
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		for (Iterator it= node.fragments().iterator(); it.hasNext();) {
+			VariableDeclarationFragment f= (VariableDeclarationFragment) it.next();
 			f.accept(this);
 			if (it.hasNext()) {
-				fResult.append(',');
+				this.fBuffer.append(", ");//$NON-NLS-1$
 			}
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -411,21 +606,21 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ForStatement)
 	 */
 	public boolean visit(ForStatement node) {
-		fResult.append("for ("); //$NON-NLS-1$
-		for (Iterator it = node.initializers().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
+		this.fBuffer.append("for (");//$NON-NLS-1$
+		for (Iterator it= node.initializers().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
 			e.accept(this);
 		}
-		fResult.append(';');
+		this.fBuffer.append("; ");//$NON-NLS-1$
 		if (node.getExpression() != null) {
 			node.getExpression().accept(this);
 		}
-		fResult.append(';');
-		for (Iterator it = node.updaters().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
+		this.fBuffer.append("; ");//$NON-NLS-1$
+		for (Iterator it= node.updaters().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
 			e.accept(this);
 		}
-		fResult.append(')');
+		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
 		return false;
 	}
@@ -434,12 +629,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(IfStatement)
 	 */
 	public boolean visit(IfStatement node) {
-		fResult.append("if ("); //$NON-NLS-1$
+		this.fBuffer.append("if (");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getThenStatement().accept(this);
 		if (node.getElseStatement() != null) {
-			fResult.append(" else "); //$NON-NLS-1$
+			this.fBuffer.append(" else ");//$NON-NLS-1$
 			node.getElseStatement().accept(this);
 		}
 		return false;
@@ -449,12 +644,17 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ImportDeclaration)
 	 */
 	public boolean visit(ImportDeclaration node) {
-		fResult.append("import "); //$NON-NLS-1$
+		this.fBuffer.append("import ");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (node.isStatic()) {
+				this.fBuffer.append("static ");//$NON-NLS-1$
+			}
+		}
 		node.getName().accept(this);
 		if (node.isOnDemand()) {
-			fResult.append(".*"); //$NON-NLS-1$
+			this.fBuffer.append(".*");//$NON-NLS-1$
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -463,13 +663,13 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(InfixExpression node) {
 		node.getLeftOperand().accept(this);
-		fResult.append(' ');
-		fResult.append(node.getOperator().toString());
-		fResult.append(' ');
+		this.fBuffer.append(' '); // for cases like x= i - -1; or x= i++ + ++i;
+		this.fBuffer.append(node.getOperator().toString());
+		this.fBuffer.append(' ');
 		node.getRightOperand().accept(this);
-		for (Iterator it = node.extendedOperands().iterator(); it.hasNext(); ) {
-			fResult.append(node.getOperator().toString());
-			Expression e = (Expression) it.next();
+		for (Iterator it= node.extendedOperands().iterator(); it.hasNext();) {
+			this.fBuffer.append(node.getOperator().toString());
+			Expression e= (Expression) it.next();
 			e.accept(this);
 		}
 		return false;
@@ -480,7 +680,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(InstanceofExpression node) {
 		node.getLeftOperand().accept(this);
-		fResult.append(" instanceof "); //$NON-NLS-1$
+		this.fBuffer.append(" instanceof ");//$NON-NLS-1$
 		node.getRightOperand().accept(this);
 		return false;
 	}
@@ -492,7 +692,12 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers(), fResult);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
 		node.getBody().accept(this);
 		return false;
 	}
@@ -501,12 +706,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Javadoc)
 	 */
 	public boolean visit(Javadoc node) {
-		fResult.append("/**"); //$NON-NLS-1$
-		for (Iterator it = node.tags().iterator(); it.hasNext(); ) {
-			fResult.append("\n * "); //$NON-NLS-1$
-			((ASTNode) it.next()).accept(this);
+		this.fBuffer.append("/** ");//$NON-NLS-1$
+		for (Iterator it= node.tags().iterator(); it.hasNext();) {
+			ASTNode e= (ASTNode) it.next();
+			e.accept(this);
 		}
-		fResult.append("\n */\n"); //$NON-NLS-1$
+		this.fBuffer.append("\n */");//$NON-NLS-1$
 		return false;
 	}
 
@@ -515,8 +720,86 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(LabeledStatement node) {
 		node.getLabel().accept(this);
-		fResult.append(": "); //$NON-NLS-1$
+		this.fBuffer.append(": ");//$NON-NLS-1$
 		node.getBody().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(LineComment)
+	 * @since 3.0
+	 */
+	public boolean visit(LineComment node) {
+		this.fBuffer.append("//\n");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(MarkerAnnotation)
+	 * @since 3.0
+	 */
+	public boolean visit(MarkerAnnotation node) {
+		this.fBuffer.append("@");//$NON-NLS-1$
+		node.getTypeName().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(MemberRef)
+	 * @since 3.0
+	 */
+	public boolean visit(MemberRef node) {
+		if (node.getQualifier() != null) {
+			node.getQualifier().accept(this);
+		}
+		this.fBuffer.append("#");//$NON-NLS-1$
+		node.getName().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(MemberValuePair)
+	 * @since 3.0
+	 */
+	public boolean visit(MemberValuePair node) {
+		node.getName().accept(this);
+		this.fBuffer.append("=");//$NON-NLS-1$
+		node.getValue().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(MethodRef)
+	 * @since 3.0
+	 */
+	public boolean visit(MethodRef node) {
+		if (node.getQualifier() != null) {
+			node.getQualifier().accept(this);
+		}
+		this.fBuffer.append("#");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.parameters().iterator(); it.hasNext();) {
+			MethodRefParameter e= (MethodRefParameter) it.next();
+			e.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(MethodRefParameter)
+	 * @since 3.0
+	 */
+	public boolean visit(MethodRefParameter node) {
+		node.getType().accept(this);
+		if (node.getName() != null) {
+			this.fBuffer.append(" ");//$NON-NLS-1$
+			node.getName().accept(this);
+		}
 		return false;
 	}
 
@@ -527,37 +810,62 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers(), fResult);
-		if (!node.isConstructor()) {
-			node.getReturnType().accept(this);
-			fResult.append(' ');
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
 		}
-		node.getName().accept(this);
-		fResult.append('(');
-		for (Iterator it = node.parameters().iterator(); it.hasNext(); ) {
-			SingleVariableDeclaration v = (SingleVariableDeclaration) it.next();
-			v.accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+			if (!node.typeParameters().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeParameters().iterator(); it.hasNext();) {
+					TypeParameter t= (TypeParameter) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
 			}
 		}
-		fResult.append(')');
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			fResult.append("[]"); //$NON-NLS-1$
-		}		
-		if (!node.thrownExceptions().isEmpty()) {
-			fResult.append(" throws "); //$NON-NLS-1$
-			for (Iterator it = node.thrownExceptions().iterator(); it.hasNext(); ) {
-				Name n = (Name) it.next();
-				n.accept(this);
-				if (it.hasNext()) {
-					fResult.append(',');
+		if (!node.isConstructor()) {
+			if (node.getAST().apiLevel() == AST.JLS2) {
+				node.getReturnType().accept(this);
+			} else {
+				if (node.getReturnType2() != null) {
+					node.getReturnType2().accept(this);
+				} else {
+					// methods really ought to have a return type
+					this.fBuffer.append("void");//$NON-NLS-1$
 				}
 			}
-			fResult.append(' ');
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
+		node.getName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.parameters().iterator(); it.hasNext();) {
+			SingleVariableDeclaration v= (SingleVariableDeclaration) it.next();
+			v.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
+		for (int i= 0; i < node.getExtraDimensions(); i++) {
+			this.fBuffer.append("[]"); //$NON-NLS-1$
+		}
+		if (!node.thrownExceptions().isEmpty()) {
+			this.fBuffer.append(" throws ");//$NON-NLS-1$
+			for (Iterator it= node.thrownExceptions().iterator(); it.hasNext();) {
+				Name n= (Name) it.next();
+				n.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
 		}
 		if (node.getBody() == null) {
-			fResult.append(';');
+			this.fBuffer.append(";");//$NON-NLS-1$
 		} else {
 			node.getBody().accept(this);
 		}
@@ -570,18 +878,59 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(MethodInvocation node) {
 		if (node.getExpression() != null) {
 			node.getExpression().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		node.getName().accept(this);
-		fResult.append('(');
-		for (Iterator it = node.arguments().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
-			e.accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeArguments().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
 			}
 		}
-		fResult.append(')');
+		node.getName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
+			e.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(Modifier)
+	 * @since 3.0
+	 */
+	public boolean visit(Modifier node) {
+		this.fBuffer.append(node.getKeyword().toString());
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(NormalAnnotation)
+	 * @since 3.0
+	 */
+	public boolean visit(NormalAnnotation node) {
+		this.fBuffer.append("@");//$NON-NLS-1$
+		node.getTypeName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.values().iterator(); it.hasNext();) {
+			MemberValuePair p= (MemberValuePair) it.next();
+			p.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
 		return false;
 	}
 
@@ -589,7 +938,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(NullLiteral)
 	 */
 	public boolean visit(NullLiteral node) {
-		fResult.append("null"); //$NON-NLS-1$
+		this.fBuffer.append("null");//$NON-NLS-1$
 		return false;
 	}
 
@@ -597,7 +946,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(NumberLiteral)
 	 */
 	public boolean visit(NumberLiteral node) {
-		fResult.append(node.getToken());
+		this.fBuffer.append(node.getToken());
 		return false;
 	}
 
@@ -605,9 +954,37 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PackageDeclaration)
 	 */
 	public boolean visit(PackageDeclaration node) {
-		fResult.append("package "); //$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (node.getJavadoc() != null) {
+				node.getJavadoc().accept(this);
+			}
+			for (Iterator it= node.annotations().iterator(); it.hasNext();) {
+				Annotation p= (Annotation) it.next();
+				p.accept(this);
+				this.fBuffer.append(" ");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append("package ");//$NON-NLS-1$
 		node.getName().accept(this);
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(ParameterizedType)
+	 * @since 3.0
+	 */
+	public boolean visit(ParameterizedType node) {
+		node.getType().accept(this);
+		this.fBuffer.append("<");//$NON-NLS-1$
+		for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+			Type t= (Type) it.next();
+			t.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(">");//$NON-NLS-1$
 		return false;
 	}
 
@@ -615,9 +992,9 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ParenthesizedExpression)
 	 */
 	public boolean visit(ParenthesizedExpression node) {
-		fResult.append('(');
+		this.fBuffer.append("(");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(")");//$NON-NLS-1$
 		return false;
 	}
 
@@ -626,7 +1003,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(PostfixExpression node) {
 		node.getOperand().accept(this);
-		fResult.append(node.getOperator().toString());
+		this.fBuffer.append(node.getOperator().toString());
 		return false;
 	}
 
@@ -634,7 +1011,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PrefixExpression)
 	 */
 	public boolean visit(PrefixExpression node) {
-		fResult.append(node.getOperator().toString());
+		this.fBuffer.append(node.getOperator().toString());
 		node.getOperand().accept(this);
 		return false;
 	}
@@ -643,7 +1020,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PrimitiveType)
 	 */
 	public boolean visit(PrimitiveType node) {
-		fResult.append(node.getPrimitiveTypeCode().toString());
+		this.fBuffer.append(node.getPrimitiveTypeCode().toString());
 		return false;
 	}
 
@@ -652,7 +1029,18 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(QualifiedName node) {
 		node.getQualifier().accept(this);
-		fResult.append('.');
+		this.fBuffer.append(".");//$NON-NLS-1$
+		node.getName().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(QualifiedType)
+	 * @since 3.0
+	 */
+	public boolean visit(QualifiedType node) {
+		node.getQualifier().accept(this);
+		this.fBuffer.append(".");//$NON-NLS-1$
 		node.getName().accept(this);
 		return false;
 	}
@@ -661,12 +1049,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ReturnStatement)
 	 */
 	public boolean visit(ReturnStatement node) {
-		fResult.append("return"); //$NON-NLS-1$
+		this.fBuffer.append("return");//$NON-NLS-1$
 		if (node.getExpression() != null) {
-			fResult.append(' ');
+			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getExpression().accept(this);
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -674,7 +1062,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
-		fResult.append(node.getIdentifier());
+		this.fBuffer.append(node.getIdentifier());
 		return false;
 	}
 
@@ -686,18 +1074,41 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	/*
+	 * @see ASTVisitor#visit(SingleMemberAnnotation)
+	 * @since 3.0
+	 */
+	public boolean visit(SingleMemberAnnotation node) {
+		this.fBuffer.append("@");//$NON-NLS-1$
+		node.getTypeName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		node.getValue().accept(this);
+		this.fBuffer.append(")");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
 	 * @see ASTVisitor#visit(SingleVariableDeclaration)
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
-		printModifiers(node.getModifiers(), fResult);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
 		node.getType().accept(this);
-		fResult.append(' ');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (node.isVarargs()) {
+				this.fBuffer.append("...");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(" ");//$NON-NLS-1$
 		node.getName().accept(this);
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			fResult.append("[]"); //$NON-NLS-1$
-		}			
+		for (int i= 0; i < node.getExtraDimensions(); i++) {
+			this.fBuffer.append("[]"); //$NON-NLS-1$
+		}
 		if (node.getInitializer() != null) {
-			fResult.append('=');
+			this.fBuffer.append("=");//$NON-NLS-1$
 			node.getInitializer().accept(this);
 		}
 		return false;
@@ -707,7 +1118,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(StringLiteral)
 	 */
 	public boolean visit(StringLiteral node) {
-		fResult.append(node.getEscapedValue());
+		this.fBuffer.append(node.getEscapedValue());
 		return false;
 	}
 
@@ -717,17 +1128,30 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(SuperConstructorInvocation node) {
 		if (node.getExpression() != null) {
 			node.getExpression().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		fResult.append("super("); //$NON-NLS-1$
-		for (Iterator it = node.arguments().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
-			e.accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeArguments().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
 			}
 		}
-		fResult.append(");"); //$NON-NLS-1$
+		this.fBuffer.append("super(");//$NON-NLS-1$
+		for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
+			e.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(");");//$NON-NLS-1$
 		return false;
 	}
 
@@ -737,9 +1161,9 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(SuperFieldAccess node) {
 		if (node.getQualifier() != null) {
 			node.getQualifier().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		fResult.append("super."); //$NON-NLS-1$
+		this.fBuffer.append("super.");//$NON-NLS-1$
 		node.getName().accept(this);
 		return false;
 	}
@@ -750,19 +1174,32 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		if (node.getQualifier() != null) {
 			node.getQualifier().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		fResult.append("super."); //$NON-NLS-1$
-		node.getName().accept(this);
-		fResult.append('(');
-		for (Iterator it = node.arguments().iterator(); it.hasNext(); ) {
-			Expression e = (Expression) it.next();
-			e.accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
+		this.fBuffer.append("super.");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeArguments().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeArguments().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
 			}
 		}
-		fResult.append(')');
+		node.getName().accept(this);
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator it= node.arguments().iterator(); it.hasNext();) {
+			Expression e= (Expression) it.next();
+			e.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
 		return false;
 	}
 
@@ -770,14 +1207,13 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SwitchCase)
 	 */
 	public boolean visit(SwitchCase node) {
-		Expression expression= node.getExpression();
-		if (expression == null) {
-			fResult.append("default"); //$NON-NLS-1$
+		if (node.isDefault()) {
+			this.fBuffer.append("default :");//$NON-NLS-1$
 		} else {
-			fResult.append("case "); //$NON-NLS-1$
-			expression.accept(this);
+			this.fBuffer.append("case ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+			this.fBuffer.append(":");//$NON-NLS-1$
 		}
-		fResult.append(':');
 		return false;
 	}
 
@@ -785,15 +1221,15 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SwitchStatement)
 	 */
 	public boolean visit(SwitchStatement node) {
-		fResult.append("switch ("); //$NON-NLS-1$
+		this.fBuffer.append("switch (");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(')');
-		fResult.append('{');
-		for (Iterator it = node.statements().iterator(); it.hasNext(); ) {
-			Statement s = (Statement) it.next();
+		this.fBuffer.append(") ");//$NON-NLS-1$
+		this.fBuffer.append("{");//$NON-NLS-1$
+		for (Iterator it= node.statements().iterator(); it.hasNext();) {
+			Statement s= (Statement) it.next();
 			s.accept(this);
 		}
-		fResult.append('}');
+		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
 	}
 
@@ -801,10 +1237,59 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SynchronizedStatement)
 	 */
 	public boolean visit(SynchronizedStatement node) {
-		fResult.append("synchronized ("); //$NON-NLS-1$
+		this.fBuffer.append("synchronized (");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(TagElement)
+	 * @since 3.0
+	 */
+	public boolean visit(TagElement node) {
+		if (node.isNested()) {
+			// nested tags are always enclosed in braces
+			this.fBuffer.append("{");//$NON-NLS-1$
+		} else {
+			// top-level tags always begin on a new line
+			this.fBuffer.append("\n * ");//$NON-NLS-1$
+		}
+		boolean previousRequiresWhiteSpace= false;
+		if (node.getTagName() != null) {
+			this.fBuffer.append(node.getTagName());
+			previousRequiresWhiteSpace= true;
+		}
+		boolean previousRequiresNewLine= false;
+		for (Iterator it= node.fragments().iterator(); it.hasNext();) {
+			ASTNode e= (ASTNode) it.next();
+			// assume text elements include necessary leading and trailing whitespace
+			// but Name, MemberRef, MethodRef, and nested TagElement do not include white space
+			boolean currentIncludesWhiteSpace= (e instanceof TextElement);
+			if (previousRequiresNewLine && currentIncludesWhiteSpace) {
+				this.fBuffer.append("\n * ");//$NON-NLS-1$
+			}
+			previousRequiresNewLine= currentIncludesWhiteSpace;
+			// add space if required to separate
+			if (previousRequiresWhiteSpace && !currentIncludesWhiteSpace) {
+				this.fBuffer.append(" "); //$NON-NLS-1$
+			}
+			e.accept(this);
+			previousRequiresWhiteSpace= !currentIncludesWhiteSpace && !(e instanceof TagElement);
+		}
+		if (node.isNested()) {
+			this.fBuffer.append("}");//$NON-NLS-1$
+		}
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(TextElement)
+	 * @since 3.0
+	 */
+	public boolean visit(TextElement node) {
+		this.fBuffer.append(node.getText());
 		return false;
 	}
 
@@ -814,9 +1299,9 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(ThisExpression node) {
 		if (node.getQualifier() != null) {
 			node.getQualifier().accept(this);
-			fResult.append('.');
+			this.fBuffer.append(".");//$NON-NLS-1$
 		}
-		fResult.append("this"); //$NON-NLS-1$
+		this.fBuffer.append("this");//$NON-NLS-1$
 		return false;
 	}
 
@@ -824,9 +1309,9 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ThrowStatement)
 	 */
 	public boolean visit(ThrowStatement node) {
-		fResult.append("throw "); //$NON-NLS-1$
+		this.fBuffer.append("throw ");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
@@ -834,15 +1319,15 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TryStatement)
 	 */
 	public boolean visit(TryStatement node) {
-		fResult.append("try "); //$NON-NLS-1$
+		this.fBuffer.append("try ");//$NON-NLS-1$
 		node.getBody().accept(this);
-		fResult.append(' ');
-		for (Iterator it = node.catchClauses().iterator(); it.hasNext(); ) {
-			CatchClause cc = (CatchClause) it.next();
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		for (Iterator it= node.catchClauses().iterator(); it.hasNext();) {
+			CatchClause cc= (CatchClause) it.next();
 			cc.accept(this);
 		}
 		if (node.getFinally() != null) {
-			fResult.append(" finally "); //$NON-NLS-1$
+			this.fBuffer.append("finally ");//$NON-NLS-1$
 			node.getFinally().accept(this);
 		}
 		return false;
@@ -855,32 +1340,82 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers(), fResult);
-		fResult.append(node.isInterface() ? "interface " : "class "); //$NON-NLS-1$ //$NON-NLS-2$
-		node.getName().accept(this);
-		fResult.append(' ');
-		if (node.getSuperclass() != null) {
-			fResult.append("extends "); //$NON-NLS-1$
-			node.getSuperclass().accept(this);
-			fResult.append(' ');
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
 		}
-		if (!node.superInterfaces().isEmpty()) {
-			fResult.append(node.isInterface() ? "extends " : "implements "); //$NON-NLS-1$ //$NON-NLS-2$
-			for (Iterator it = node.superInterfaces().iterator(); it.hasNext(); ) {
-				Name n = (Name) it.next();
-				n.accept(this);
-				if (it.hasNext()) {
-					fResult.append(',');
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
+		this.fBuffer.append(node.isInterface() ? "interface " : "class ");//$NON-NLS-2$//$NON-NLS-1$
+		node.getName().accept(this);
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (!node.typeParameters().isEmpty()) {
+				this.fBuffer.append("<");//$NON-NLS-1$
+				for (Iterator it= node.typeParameters().iterator(); it.hasNext();) {
+					TypeParameter t= (TypeParameter) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(",");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(">");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			if (node.getSuperclass() != null) {
+				this.fBuffer.append("extends ");//$NON-NLS-1$
+				node.getSuperclass().accept(this);
+				this.fBuffer.append(" ");//$NON-NLS-1$
+			}
+			if (!node.superInterfaces().isEmpty()) {
+				this.fBuffer.append(node.isInterface() ? "extends " : "implements ");//$NON-NLS-2$//$NON-NLS-1$
+				for (Iterator it= node.superInterfaces().iterator(); it.hasNext();) {
+					Name n= (Name) it.next();
+					n.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(", ");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(" ");//$NON-NLS-1$
+			}
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (node.getSuperclassType() != null) {
+				this.fBuffer.append("extends ");//$NON-NLS-1$
+				node.getSuperclassType().accept(this);
+				this.fBuffer.append(" ");//$NON-NLS-1$
+			}
+			if (!node.superInterfaceTypes().isEmpty()) {
+				this.fBuffer.append(node.isInterface() ? "extends " : "implements ");//$NON-NLS-2$//$NON-NLS-1$
+				for (Iterator it= node.superInterfaceTypes().iterator(); it.hasNext();) {
+					Type t= (Type) it.next();
+					t.accept(this);
+					if (it.hasNext()) {
+						this.fBuffer.append(", ");//$NON-NLS-1$
+					}
+				}
+				this.fBuffer.append(" ");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append("{");//$NON-NLS-1$
+		BodyDeclaration prev= null;
+		for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
+			BodyDeclaration d= (BodyDeclaration) it.next();
+			if (prev instanceof EnumConstantDeclaration) {
+				// enum constant declarations do not include punctuation
+				if (d instanceof EnumConstantDeclaration) {
+					// enum constant declarations are separated by commas
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				} else {
+					// semicolon separates last enum constant declaration from 
+					// first class body declarations
+					this.fBuffer.append("; ");//$NON-NLS-1$
 				}
 			}
-			fResult.append(' ');
-		}
-		fResult.append('{');
-		for (Iterator it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
-			BodyDeclaration d = (BodyDeclaration) it.next();
 			d.accept(this);
 		}
-		fResult.append('}');
+		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
 	}
 
@@ -888,7 +1423,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TypeDeclarationStatement)
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
-		node.getTypeDeclaration().accept(this);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			node.getTypeDeclaration().accept(this);
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			node.getDeclaration().accept(this);
+		}
 		return false;
 	}
 
@@ -897,7 +1437,26 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(TypeLiteral node) {
 		node.getType().accept(this);
-		fResult.append(".class"); //$NON-NLS-1$
+		this.fBuffer.append(".class");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(TypeParameter)
+	 * @since 3.0
+	 */
+	public boolean visit(TypeParameter node) {
+		node.getName().accept(this);
+		if (!node.typeBounds().isEmpty()) {
+			this.fBuffer.append(" extends ");//$NON-NLS-1$
+			for (Iterator it= node.typeBounds().iterator(); it.hasNext();) {
+				Type t= (Type) it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(" & ");//$NON-NLS-1$
+				}
+			}
+		}
 		return false;
 	}
 
@@ -905,14 +1464,19 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationExpression)
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		printModifiers(node.getModifiers(), fResult);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
 		node.getType().accept(this);
-		fResult.append(' ');
-		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
-			VariableDeclarationFragment f = (VariableDeclarationFragment) it.next();
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		for (Iterator it= node.fragments().iterator(); it.hasNext();) {
+			VariableDeclarationFragment f= (VariableDeclarationFragment) it.next();
 			f.accept(this);
 			if (it.hasNext()) {
-				fResult.append(',');
+				this.fBuffer.append(", ");//$NON-NLS-1$
 			}
 		}
 		return false;
@@ -923,11 +1487,11 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
 		node.getName().accept(this);
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			fResult.append("[]"); //$NON-NLS-1$
+		for (int i= 0; i < node.getExtraDimensions(); i++) {
+			this.fBuffer.append("[]");//$NON-NLS-1$
 		}
 		if (node.getInitializer() != null) {
-			fResult.append('=');
+			this.fBuffer.append("=");//$NON-NLS-1$
 			node.getInitializer().accept(this);
 		}
 		return false;
@@ -937,17 +1501,40 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationStatement)
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
-		printModifiers(node.getModifiers(), fResult);
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			printModifiers(node.getModifiers());
+		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			printModifiers(node.modifiers());
+		}
 		node.getType().accept(this);
-		fResult.append(' ');
-		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
-			VariableDeclarationFragment f = (VariableDeclarationFragment) it.next();
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		for (Iterator it= node.fragments().iterator(); it.hasNext();) {
+			VariableDeclarationFragment f= (VariableDeclarationFragment) it.next();
 			f.accept(this);
 			if (it.hasNext()) {
-				fResult.append(',');
+				this.fBuffer.append(", ");//$NON-NLS-1$
 			}
 		}
-		fResult.append(';');
+		this.fBuffer.append(";");//$NON-NLS-1$
+		return false;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(WildcardType)
+	 * @since 3.0
+	 */
+	public boolean visit(WildcardType node) {
+		this.fBuffer.append("?");//$NON-NLS-1$
+		Type bound= node.getBound();
+		if (bound != null) {
+			if (node.isUpperBound()) {
+				this.fBuffer.append(" extends ");//$NON-NLS-1$
+			} else {
+				this.fBuffer.append(" super ");//$NON-NLS-1$
+			}
+			bound.accept(this);
+		}
 		return false;
 	}
 
@@ -955,96 +1542,11 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(WhileStatement)
 	 */
 	public boolean visit(WhileStatement node) {
-		fResult.append("while ("); //$NON-NLS-1$
+		this.fBuffer.append("while (");//$NON-NLS-1$
 		node.getExpression().accept(this);
-		fResult.append(')');
+		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
 		return false;
-	}	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BlockComment)
-	 */
-	public boolean visit(BlockComment node) {
-		return false; // cant flatten, needs source
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LineComment)
-	 */
-	public boolean visit(LineComment node) {
-		return false; // cant flatten, needs source
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
-	 */
-	public boolean visit(MemberRef node) {
-		Name qualifier= node.getQualifier();
-		if (qualifier != null) {
-			qualifier.accept(this);
-		}
-		fResult.append('#');
-		node.getName().accept(this);
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
-	 */
-	public boolean visit(MethodRef node) {
-		Name qualifier= node.getQualifier();
-		if (qualifier != null) {
-			qualifier.accept(this);
-		}
-		fResult.append('#');
-		node.getName().accept(this);
-		fResult.append('(');
-		for (Iterator it = node.parameters().iterator(); it.hasNext(); ) {
-			((ASTNode) it.next()).accept(this);
-			if (it.hasNext()) {
-				fResult.append(',');
-			}
-		}
-		fResult.append(')');
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
-	 */
-	public boolean visit(MethodRefParameter node) {
-		node.getType().accept(this);
-		SimpleName name= node.getName();
-		if (name != null) {
-			fResult.append(' ');
-			name.accept(this);
-		}
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
-	 */
-	public boolean visit(TagElement node) {
-		if (node.isNested()) {
-			fResult.append('{');
-		}
-		String tagName= node.getTagName();
-		if (tagName != null) {
-			fResult.append(tagName);
-			fResult.append(' ');
-		}
-		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
-			((ASTNode) it.next()).accept(this);
-			if (it.hasNext()) {
-				fResult.append(' ');
-			}
-		}
-		if (node.isNested()) {
-			fResult.append('}');
-		}
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
-	 */
-	public boolean visit(TextElement node) {
-		fResult.append(node.getText());
-		return false;
-	}
+
 }

@@ -124,21 +124,21 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		SimpleName newNameNode= ast.newSimpleName(name);
 		addLinkedPosition(rewrite.track(newNameNode), false, KEY_NAME);
 
-		Name invocationName= getInvocationNameNode();
+		ASTNode invocationName= getInvocationNameNode();
 		if (invocationName != null && invocationName.getAST() == ast) { // in the same CU
 			addLinkedPosition(rewrite.track(invocationName), true, KEY_NAME);
 		}	
 		return newNameNode;
 	}
 	
-	private Name getInvocationNameNode() {
+	private ASTNode getInvocationNameNode() {
 		ASTNode node= getInvocationNode();
 		if (node instanceof MethodInvocation) {
 			return ((MethodInvocation)node).getName();
 		} else if (node instanceof SuperMethodInvocation) {
 			return ((SuperMethodInvocation)node).getName();
 		} else if (node instanceof ClassInstanceCreation) {
-			return ((ClassInstanceCreation)node).getName();
+			return ((ClassInstanceCreation)node).getType();
 		}		
 		return null;
 	}
@@ -281,6 +281,13 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
 	 */
 	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
+	 */
+	protected void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+		
 	}
 
 

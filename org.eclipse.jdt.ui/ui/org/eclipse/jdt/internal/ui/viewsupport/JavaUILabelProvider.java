@@ -30,7 +30,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	private ArrayList fLabelDecorators;
 
 	private int fImageFlags;
-	private int fTextFlags;
+	private long fTextFlags;
 
 	/**
 	 * Creates a new label provider with default flags.
@@ -43,7 +43,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
 	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
 	 */
-	public JavaUILabelProvider(int textFlags, int imageFlags) {
+	public JavaUILabelProvider(long textFlags, int imageFlags) {
 		fImageLabelProvider= new JavaElementImageProvider();
 		fLabelDecorators= null; 
 		
@@ -66,7 +66,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	 * Sets the textFlags.
 	 * @param textFlags The textFlags to set
 	 */
-	public final void setTextFlags(int textFlags) {
+	public final void setTextFlags(long textFlags) {
 		fTextFlags= textFlags;
 	}
 
@@ -91,7 +91,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	 * Gets the text flags.
 	 * @return Returns a int
 	 */
-	public final int getTextFlags() {
+	public final long getTextFlags() {
 		return fTextFlags;
 	}
 	
@@ -108,7 +108,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	 * Evaluates the text flags for a element. Can be overwriten by super classes.
 	 * @return Returns a int
 	 */
-	protected int evaluateTextFlags(Object element) {
+	protected long evaluateTextFlags(Object element) {
 		return getTextFlags();
 	}
 	

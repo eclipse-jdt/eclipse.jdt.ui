@@ -48,12 +48,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PublicClassMustMatchFileName:
 			case IProblem.PackageIsNotExpectedPackage:
 			case IProblem.UndefinedType:
-			case IProblem.FieldTypeNotFound:
-			case IProblem.ArgumentTypeNotFound:
-			case IProblem.ReturnTypeNotFound:
-			case IProblem.SuperclassNotFound:
-			case IProblem.ExceptionTypeNotFound:
-			case IProblem.InterfaceNotFound: 
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
 			case IProblem.UnreachableCatch:
@@ -71,14 +65,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
-			case IProblem.SuperclassNotVisible:
-			case IProblem.InterfaceNotVisible:
-			case IProblem.FieldTypeNotVisible:
-			case IProblem.ArgumentTypeNotVisible:
-			case IProblem.ReturnTypeNotVisible:
-			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
-			case IProblem.ImportNotVisible:
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
 			case IProblem.AbstractMethodMustBeImplemented:	
@@ -88,12 +75,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedConstructorInDefaultConstructor:
 			case IProblem.UnhandledExceptionInDefaultConstructor:
 			case IProblem.NotVisibleConstructorInDefaultConstructor:
-			case IProblem.FieldTypeAmbiguous:
-			case IProblem.ArgumentTypeAmbiguous:
-			case IProblem.ExceptionTypeAmbiguous:
-			case IProblem.ReturnTypeAmbiguous:
-			case IProblem.SuperclassAmbiguous:
-			case IProblem.InterfaceAmbiguous:
 			case IProblem.AmbiguousType:
 			case IProblem.UnusedPrivateMethod:
 			case IProblem.UnusedPrivateConstructor:
@@ -210,7 +191,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		if (id == 0) { // no proposals for none-problem locations
 			return;
 		}
-		
 		switch (id) {
 			case IProblem.UnterminatedString:
 				String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
@@ -243,12 +223,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedName:
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
 				break;
-			case IProblem.FieldTypeAmbiguous:
-			case IProblem.ArgumentTypeAmbiguous:
-			case IProblem.ExceptionTypeAmbiguous:
-			case IProblem.ReturnTypeAmbiguous:
-			case IProblem.SuperclassAmbiguous:
-			case IProblem.InterfaceAmbiguous:
 			case IProblem.AmbiguousType:
 			case IProblem.JavadocAmbiguousType:
 				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, problem, proposals);
@@ -260,12 +234,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(context, problem, proposals);
 				break;
 			case IProblem.UndefinedType:
-			case IProblem.FieldTypeNotFound:
-			case IProblem.ArgumentTypeNotFound:
-			case IProblem.ReturnTypeNotFound:
-			case IProblem.SuperclassNotFound:
-			case IProblem.ExceptionTypeNotFound:
-			case IProblem.InterfaceNotFound: 
 			case IProblem.JavadocUndefinedType:
 				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;	
@@ -347,14 +315,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
-			case IProblem.SuperclassNotVisible:
-			case IProblem.InterfaceNotVisible:
-			case IProblem.FieldTypeNotVisible:
-			case IProblem.ArgumentTypeNotVisible:
-			case IProblem.ReturnTypeNotVisible:
-			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
-			case IProblem.ImportNotVisible:
 			case IProblem.JavadocNotVisibleType:
 				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10); 
 				break;

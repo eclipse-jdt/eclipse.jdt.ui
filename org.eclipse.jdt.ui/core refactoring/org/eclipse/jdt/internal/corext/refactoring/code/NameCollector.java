@@ -55,7 +55,7 @@ class NameCollector extends GenericVisitor {
 		return result;
 	}
 	public boolean visit(TypeDeclarationStatement node) {
-		names.add(node.getTypeDeclaration().getName().getIdentifier());
+		names.add(node.getDeclaration().getName().getIdentifier());
 		return false;
 	}
 

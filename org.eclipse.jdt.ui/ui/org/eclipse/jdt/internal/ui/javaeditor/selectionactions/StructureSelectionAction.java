@@ -162,11 +162,11 @@ public abstract class StructureSelectionAction extends Action {
 	private CompilationUnit getAST(ISourceReference sr) {
 
 		if (sr instanceof ICompilationUnit) {
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource((ICompilationUnit) sr);
 			return (CompilationUnit) p.createAST(null);
 		} else if (sr instanceof IClassFile) {
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource((IClassFile) sr);
 			return (CompilationUnit) p.createAST(null);
 		}

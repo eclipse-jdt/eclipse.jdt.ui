@@ -134,7 +134,7 @@ public class TypeMismatchSubProcessor {
 				String returnTypeName= imports.addImport(currBinding);
 				
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
-				rewrite.replace(methodDeclaration.getReturnType(), newReturnType, null);
+				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 				
 				String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changereturntype.description", currBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

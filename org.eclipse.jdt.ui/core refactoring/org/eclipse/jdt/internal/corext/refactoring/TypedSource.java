@@ -115,7 +115,7 @@ public class TypedSource {
 		List result= new ArrayList(javaElements.length);
 		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(cu);
 			CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 			for (Iterator iterator= ((List) grouped.get(cu)).iterator(); iterator.hasNext();) {

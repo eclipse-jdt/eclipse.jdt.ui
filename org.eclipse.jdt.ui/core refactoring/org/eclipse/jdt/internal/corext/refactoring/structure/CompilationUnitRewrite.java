@@ -53,7 +53,7 @@ public class CompilationUnitRewrite {
 	
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		fCu= cu;
-		fRoot= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 		fTextEditGroups= new ArrayList();
 	}
 	

@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -285,7 +286,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl == null) {
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
@@ -305,8 +306,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
-						
-			newDecl.setModifiers(evaluateFieldModifiers(newTypeDecl));
+			newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateFieldModifiers(newTypeDecl)));
+
 			if (fSenderBinding.isInterface() || fVariableKind == CONST_FIELD) {
 				fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, type, 0));
 			}

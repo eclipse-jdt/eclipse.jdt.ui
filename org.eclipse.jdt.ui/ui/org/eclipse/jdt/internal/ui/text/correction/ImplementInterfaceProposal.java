@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  *
@@ -54,7 +55,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
@@ -66,7 +67,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 			
 			String typeString= getImportRewrite().addImport(fNewInterface);
 			Name newInterface= ASTNodeFactory.newName(ast, typeString);
-			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACES_PROPERTY);
+			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 			listRewrite.insertLast(newInterface, null);
 
 			// set up linked mode

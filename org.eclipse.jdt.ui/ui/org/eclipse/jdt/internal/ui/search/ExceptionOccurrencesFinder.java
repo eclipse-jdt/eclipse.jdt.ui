@@ -249,7 +249,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (matches(node.resolveConstructorBinding())) {
-			fResult.add(node.getName());
+			fResult.add(node.getType());
 		}
 		return super.visit(node);
 	}

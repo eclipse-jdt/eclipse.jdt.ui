@@ -218,7 +218,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test10() throws Exception{
-		helper1(7, 15, 7, 16, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 13, 7, 14, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test11() throws Exception{
@@ -246,7 +246,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 	
 	public void test17() throws Exception{
-		helper1(6, 16, 6, 19, true, "Inner", Modifier.PRIVATE);
+		helper1(6, 14, 6, 15, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test18() throws Exception{

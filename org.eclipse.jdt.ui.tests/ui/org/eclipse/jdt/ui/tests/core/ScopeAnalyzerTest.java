@@ -50,7 +50,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests(); 
 		} else {
 			TestSuite suite= new TestSuite();
@@ -763,7 +763,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);

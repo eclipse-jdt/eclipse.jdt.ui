@@ -71,7 +71,7 @@ public class WorkingCopyUtil {
 		/*
 		 * Explicitly create a new working copy.
 		 */
-		return (getOriginal(cu).getWorkingCopy(null));
+		return getOriginal(cu).getWorkingCopy(null);
 	}
 
 	/**

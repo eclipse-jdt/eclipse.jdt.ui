@@ -92,7 +92,7 @@ public class JavadocView extends AbstractInfoView {
 	private static final String DO_NOT_WARN_PREFERENCE_KEY= "JavadocView.error.doNotWarn"; //$NON-NLS-1$
 
 	/** Flags used to render a label in the text widget. */
-	private static final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 

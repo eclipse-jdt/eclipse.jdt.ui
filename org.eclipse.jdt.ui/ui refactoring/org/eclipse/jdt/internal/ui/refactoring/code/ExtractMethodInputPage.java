@@ -238,7 +238,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(node, ClassInstanceCreation.class);
 			return RefactoringMessages.getFormattedString(
 				"ExtractMethodInputPage.anonymous_type_label",  //$NON-NLS-1$
-				creation.getName().getFullyQualifiedName()); 
+				ASTNodes.asString(creation.getType()));
 		}
 	}
 

@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -370,7 +371,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
 	private void initAST(IProgressMonitor pm){
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, pm);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, pm);
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 
@@ -712,7 +713,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
     	Type type= (Type)rewrite.createCopyTarget(vds.getType());
     	fieldDeclaration.setType(type);
-    	fieldDeclaration.setModifiers(getModifiers());
+	    fieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(getAST(), getModifiers()));	
     	return fieldDeclaration;
     }
     

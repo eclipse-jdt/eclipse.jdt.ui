@@ -494,7 +494,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private RefactoringStatus analyseEnclosedTypes() throws CoreException {
 		final ISourceRange typeRange= fType.getSourceRange();
 		final RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(fType.getCompilationUnit(), false);
 		cuNode.accept(new ASTVisitor(){
 			public boolean visit(TypeDeclaration node){
 				if (node.getStartPosition() <= typeRange.getOffset())

@@ -100,13 +100,6 @@ public class LinkedNodeFinder  {
 			case IProblem.UndefinedName:
 				return NAME;
 			case IProblem.UndefinedType:
-			case IProblem.ReturnTypeNotFound:
-			case IProblem.ExceptionTypeNotFound:
-			case IProblem.ImportNotFound:
-			case IProblem.ArgumentTypeNotFound:
-			case IProblem.FieldTypeNotFound:
-			case IProblem.InterfaceNotFound:
-			case IProblem.SuperclassNotFound:
 				return TYPE;
 		}
 		return 0;

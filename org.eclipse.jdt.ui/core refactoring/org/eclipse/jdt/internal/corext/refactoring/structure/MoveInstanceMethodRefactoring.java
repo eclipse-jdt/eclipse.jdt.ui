@@ -108,7 +108,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	}
 	
 	private MethodDeclaration findMethodDeclaration(RefactoringStatus status) {
-		CompilationUnit root=  new RefactoringASTParser(AST.JLS2).parse(fCU, true);
+		CompilationUnit root=  new RefactoringASTParser(AST.JLS3).parse(fCU, true);
 		
 		ASTNode node= NodeFinder.perform(root, fSelectionStart, fSelectionLength);
 

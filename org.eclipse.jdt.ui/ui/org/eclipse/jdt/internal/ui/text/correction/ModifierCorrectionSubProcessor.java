@@ -23,12 +23,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -352,15 +353,17 @@ public class ModifierCorrectionSubProcessor {
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-
-			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			
+			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
+			if (modifierNode != null) {
+				rewrite.remove(modifierNode, null);
+			}
 
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
 				rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 				
-				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
+				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 				if (expr != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expr);
@@ -413,13 +416,15 @@ public class ModifierCorrectionSubProcessor {
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			int newModifiers= decl.getModifiers() & ~Modifier.NATIVE;
-			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.NATIVE, decl.modifiers());
+			if (modifierNode != null) {
+				rewrite.remove(modifierNode, null);
+			}
 
 			Block newBody= ast.newBlock();
 			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 			
-			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
+			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 			if (expr != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(expr);
@@ -447,14 +452,15 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	public static ASTRewriteCorrectionProposal getMakeTypeAbstractProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) {
-		ASTRewrite rewrite= ASTRewrite.create(typeDeclaration.getAST());
-				
-		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
-		rewrite.set(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		AST ast= typeDeclaration.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
+		rewrite.getListRewrite(typeDeclaration, TypeDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier()); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, relevance, image);
+		proposal.addLinkedPosition(rewrite.track(newModifier), true, "modifier"); //$NON-NLS-1$
 		return proposal;
 	}
 
@@ -470,14 +476,17 @@ public class ModifierCorrectionSubProcessor {
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
+			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
+			if (modifierNode != null) {
+				rewrite.remove(modifierNode, null);
+			}
 			
 			Block body= ast.newBlock();
 			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, body, null);
 			
-			Type returnType= decl.getReturnType();
+			
 			if (!decl.isConstructor()) {
+				Type returnType= decl.getReturnType2();
 				Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -495,12 +504,13 @@ public class ModifierCorrectionSubProcessor {
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
-			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
-			
+			Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
+			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
+						
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.setmethodabstract.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 8, image);
+			proposal.addLinkedPosition(rewrite.track(newModifier), true, "modifier"); //$NON-NLS-1$
 			
 			proposals.add(proposal);
 		}

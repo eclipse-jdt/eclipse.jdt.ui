@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -138,19 +138,6 @@ class SourceAnalyzer  {
 			if (fTypeCounter++ == 0) {
 				addNameData(node.getName());
 			}
-			Name superclass= node.getSuperclass();
-			if (superclass != null) {
-				ITypeBinding superBinding= ASTNodes.getTypeBinding(superclass);
-				if (superBinding != null)
-					fTypes.add(superclass);
-			}
-			List interfaces= node.superInterfaces();
-			for (Iterator iter= interfaces.iterator(); iter.hasNext();) {
-				Name element= (Name)iter.next();
-				ITypeBinding binding= ASTNodes.getTypeBinding(element);
-				if (binding != null)
-					fTypes.add(element);
-			}
 			return true;
 		}
 		public void endVisit(TypeDeclaration node) {
@@ -211,20 +198,7 @@ class SourceAnalyzer  {
 			if (name != null)
 				name.addReference(node);
 			if (binding instanceof ITypeBinding) {
-				ITypeBinding tb= (ITypeBinding)binding;
-				Name qName= node;
-				QualifiedName parent;
-				while ((parent= (QualifiedName)ASTNodes.getParent(qName, ASTNode.QUALIFIED_NAME)) != null &&
-						parent.getQualifier() != qName) {
-					qName= parent; 
-				}
-				String typeName= null;
-				if (tb.isArray())
-					typeName= tb.getElementType().getQualifiedName();
-				else
-					typeName= tb.getQualifiedName();
-				if (!ASTNodes.asString(qName).equals(typeName))
-					fTypes.add(qName);
+				fTypes.add(node);
 			} else if (binding instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)binding;
 				if (vb.isField()) {
@@ -235,6 +209,34 @@ class SourceAnalyzer  {
 				}
 			}
 			return true;
+		}
+		public boolean visit(QualifiedName node) {
+			if (!(node.resolveBinding() instanceof ITypeBinding))
+				return true;
+			// the name denotes a type
+			SimpleName name= ASTNodes.getLeftMostSimpleName(node);
+			if (!(name.resolveBinding() instanceof ITypeBinding))
+				return false;
+			
+			// the left most name denotes a type. This type may not
+			// be visible in the target so check if we need to import 
+			// it.
+			fTypes.add(name);
+			
+			// don't inspect the simple names
+			return false;
+		}
+		public boolean visit(QualifiedType node) {
+			ITypeBinding tb= node.resolveBinding();
+			if (tb == null)
+				return false;
+			SimpleName name= ASTNodes.getLeftMostSimpleName(ASTNodes.getLeftMostSimpleType(node).getName());
+			if (!(name.resolveBinding() instanceof ITypeBinding))
+				return false;
+			
+			fTypes.add(name);
+			
+			return false;
 		}
 		public boolean visit(ThisExpression node) {
 			if (fTypeCounter == 0) {

@@ -257,7 +257,7 @@ public class QuickFixTest extends TestCase {
 	}
 	
 	protected CompilationUnit getASTRoot(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
@@ -285,7 +285,4 @@ public class QuickFixTest extends TestCase {
 	private void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
 		
 	}
-	
-	
-	
 }

@@ -223,7 +223,7 @@ public class BindingsNameTest extends TestCase {
 	}
 	
 	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);

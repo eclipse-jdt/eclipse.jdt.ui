@@ -758,7 +758,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	protected void toggleShowInheritedMembers() {
-		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
+		long flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
 		if (!fOutlineContentProvider.isShowingInheritedMembers())
 			flags |= JavaElementLabels.ALL_POST_QUALIFIED;
 		fInnerLabelProvider.setTextFlags(flags);

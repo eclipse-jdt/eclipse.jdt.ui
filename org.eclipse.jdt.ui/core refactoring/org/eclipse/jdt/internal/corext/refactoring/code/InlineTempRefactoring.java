@@ -108,7 +108,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 	}
 	
 	/*

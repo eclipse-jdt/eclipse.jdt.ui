@@ -352,7 +352,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private void initializeAST(IProgressMonitor pm) {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, pm);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, pm);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -432,7 +432,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
 
 			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-			ASTParser p= ASTParser.newParser(AST.JLS2);
+			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());
 			p.setProject(fCu.getJavaProject());
@@ -775,7 +775,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		ClassInstanceCreation cic= (ClassInstanceCreation) expression;
 		Assert.isNotNull(cic.getAnonymousClassDeclaration());
 		
-		return ASTNodes.asString(cic.getName());
+		return ASTNodes.asString(cic.getType());
 	}
 
 	private String getInitializerSource() throws JavaModelException {

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -57,7 +58,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
@@ -72,7 +73,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 			
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
-				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE_PROPERTY, type, null);
+				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
 				rewrite.set(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();

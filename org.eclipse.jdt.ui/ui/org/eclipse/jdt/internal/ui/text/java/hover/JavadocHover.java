@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
 
-	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+	private final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
@@ -82,6 +82,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String getInfoText(IJavaElement member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+		String label= JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < label.length(); i++) {
+			char ch= label.charAt(i);
+			if (ch == '<') {
+				buf.append("&lt;"); //$NON-NLS-1$
+			} else if (ch == '>') {
+				buf.append("&gt;"); //$NON-NLS-1$
+			} else {
+				buf.append(ch);
+			}
+		}
+		return buf.toString();
 	}
 }

@@ -422,9 +422,22 @@ public final class ImportsStructure implements IImportsStructure {
 	 */
 	public String addImport(ITypeBinding binding) {
 		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
-		if (normalizedBinding == null) {
+		if (normalizedBinding == null || normalizedBinding.isTypeVariable() || normalizedBinding.isWildcardType()) {
 			return binding.getName();
 		}
+		if (normalizedBinding.isParameterizedType()) {
+			ITypeBinding erasure= normalizedBinding.getErasure();
+			StringBuffer buf= new StringBuffer();
+			buf.append(addImport(erasure)); // recursive
+			buf.append('<');
+			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
+			for (int i= 0; i < typeArguments.length; i++) {
+				buf.append(addImport(typeArguments[i])); // recursive
+			}
+			buf.append('>');
+			return buf.toString();
+		}
+		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
 			return addImport(qualifiedName);

@@ -97,7 +97,7 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		fImportContainer.setAppendPosition(declarationEnd+2);		// FIXME
 	}
 	
-	public void enterClass(int declarationStart, int p2, char[] name, int p4, int p5, char[] p6, char[][] p7) {
+	public void enterClass(int declarationStart, int p2, char[] name, int p4, int p5, char[] p6, char[][] p7, char[][] typeParameterNames, char[][][] typeParameterBounds) {
 		push(JavaNode.CLASS, new String(name), declarationStart);
 	}
 	
@@ -105,7 +105,7 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		pop(declarationEnd);
 	}
 
-	public void enterInterface(int declarationStart, int p2, char[] name, int p4, int p5, char[][] p6) {
+	public void enterInterface(int declarationStart, int p2, char[] name, int p4, int p5, char[][] p6, char[][] typeParameterNames, char[][][] typeParameterBounds) {
 		push(JavaNode.INTERFACE, new String(name), declarationStart);
 	}
 	
@@ -121,7 +121,7 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		pop(declarationEnd);
 	}
 	
-	public void enterConstructor(int declarationStart, int p2, char[] name, int p4, int p5, char[][] parameterTypes, char[][] p7, char[][] p8) {
+	public void enterConstructor(int declarationStart, int p2, char[] name, int p4, int p5, char[][] parameterTypes, char[][] p7, char[][] p8, char[][] typeParameterNames, char[][][] typeParameterBounds) {
 		push(JavaNode.CONSTRUCTOR, getSignature(name, parameterTypes), declarationStart);
 	}
 	
@@ -129,7 +129,7 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		pop(declarationEnd);
 	}
 	
-	public void enterMethod(int declarationStart, int p2, char[] p3, char[] name, int p5, int p6, char[][] parameterTypes, char[][] p8, char[][] p9){
+	public void enterMethod(int declarationStart, int p2, char[] p3, char[] name, int p5, int p6, char[][] parameterTypes, char[][] p8, char[][] p9, char[][] typeParameterNames, char[][][] typeParameterBounds){
 		push(JavaNode.METHOD, getSignature(name, parameterTypes), declarationStart);
 	}
 	

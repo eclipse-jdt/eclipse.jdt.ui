@@ -144,10 +144,10 @@ public class PartialASTTest extends CoreTests {
 			TypeDeclaration decl= (TypeDeclaration) list.get(i);
 			assertTrue(decl.resolveBinding() != null);
 			
-			if (!decl.isInterface() && decl.getSuperclass() != null) {
-				assertTrue(decl.getSuperclass().resolveBinding() != null);
+			if (!decl.isInterface() && decl.getSuperclassType() != null) {
+				assertTrue(decl.getSuperclassType().resolveBinding() != null);
 			}
-			List interfaces= decl.superInterfaces();
+			List interfaces= decl.superInterfaceTypes();
 			for (int j= 0; j < interfaces.size(); j++) {
 				assertTrue(((Type) interfaces.get(j)).resolveBinding() != null);
 			}
@@ -162,7 +162,7 @@ public class PartialASTTest extends CoreTests {
 					assertTrue(arg.resolveBinding() != null);
 				}
 				if (!meth.isConstructor()) {		
-					assertTrue(meth.getReturnType().resolveBinding() != null);
+					assertTrue(meth.getReturnType2().resolveBinding() != null);
 				}
 			}
 		}
@@ -503,7 +503,7 @@ public class PartialASTTest extends CoreTests {
 	}		
 	
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(cu);
 		p.setFocalPosition(offset);
 		p.setResolveBindings(true);

@@ -616,7 +616,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			fReferences= new Expression[references.length];
 			
-			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, true);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 			for(int i= 0; i < references.length; i++) {
 				ASTNode node= NodeFinder.perform(cuNode, references[i].getOffset(), references[i].getLength());
 				Assert.isTrue(node instanceof Name);
@@ -852,7 +852,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 	}
 
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {

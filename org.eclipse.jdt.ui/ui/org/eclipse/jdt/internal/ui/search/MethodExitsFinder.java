@@ -79,7 +79,7 @@ public class MethodExitsFinder extends ASTVisitor {
 		fResult= new ArrayList();
 		markReferences();
 		if (fResult.size() > 0) {
-			fResult.add(fMethodDeclaration.getReturnType());
+			fResult.add(fMethodDeclaration.getReturnType2());
 		}
 		return fResult;
 	}
@@ -176,7 +176,7 @@ public class MethodExitsFinder extends ASTVisitor {
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
-			fResult.add(node.getName());
+			fResult.add(node.getType());
 		}
 		return true;
 	}

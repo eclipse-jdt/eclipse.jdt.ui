@@ -305,7 +305,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	private static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
-		CompilationUnit root= new RefactoringASTParser(AST.JLS2).parse(unit, true);
+		CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 		ASTNode node= null;
 		try {
 			node= checkNode(NodeFinder.perform(root, offset, length, unit));

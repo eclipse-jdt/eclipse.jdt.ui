@@ -219,7 +219,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		
-		CompilationUnit root= new RefactoringASTParser(AST.JLS2).parse(fCUnit, true, pm);
+		CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
 		fAST= root.getAST();
 		root.accept(createVisitor());
 		
@@ -716,14 +716,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 		MethodDeclaration result= fAST.newMethodDeclaration();
 		int modifiers= fVisibility;
 		if (Modifier.isStatic(fAnalyzer.getEnclosingBodyDeclaration().getModifiers()) || fAnalyzer.getForceStatic()) {
-			modifiers= modifiers | Modifier.STATIC;
+			modifiers|= Modifier.STATIC;
 		}
-		result.setModifiers(modifiers);
+		result.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, modifiers));
 		if (fAnalyzer.isExpressionSelected()) {
 			String type= fImportRewriter.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
-			result.setReturnType(ASTNodeFactory.newType(fAST, type));
+			result.setReturnType2(ASTNodeFactory.newType(fAST, type));
 		} else {
-			result.setReturnType((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
+			result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
 		}
 		result.setName(fAST.newSimpleName(name));
 		
@@ -732,7 +732,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ParameterInfo info= (ParameterInfo)fParameterInfos.get(i);
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
-			parameter.setModifiers(ASTNodes.getModifiers(infoDecl));
+			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
 			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
 			parameters.add(parameter);
@@ -832,7 +832,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fragment.setName((SimpleName)ASTNode.copySubtree(fAST, original.getName()));
 		fragment.setInitializer(intilizer);	
 		VariableDeclarationStatement result= fAST.newVariableDeclarationStatement(fragment);
-		result.setModifiers(ASTNodes.getModifiers(original));
+		result.modifiers().addAll(ASTNode.copySubtrees(fAST, ASTNodes.getModifiers(original)));
 		result.setType(ASTNodeFactory.newType(fAST, original));
 		return result;
 	}	

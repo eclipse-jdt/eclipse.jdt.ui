@@ -471,7 +471,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 		CompilationUnit compilationUnit= null;
 		try {
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(info.buffer);
 			compilationUnit= (CompilationUnit) parser.createAST(null);
 		} catch (ArrayIndexOutOfBoundsException x) {
