@@ -39,9 +39,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class ASTNodes {
 
-	public static final int NODE_ONLY=						0;
+	public static final int NODE_ONLY=					0;
 	public static final int INCLUDE_FIRST_PARENT= 	1;
 	public static final int INCLUDE_ALL_PARENTS= 	2;
+	
+	public static final int WARINING=						1 << 0;
+	public static final int ERROR=							1 << 1;
+	public static final int PROBLEMS=						WARINING | ERROR;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -323,29 +327,38 @@ public class ASTNodes {
 		return -1;
 	}
 	
-	public static IProblem[] getProblems(ASTNode node, int flags) {
+	public static IProblem[] getProblems(ASTNode node, int scope, int severity) {
 		ASTNode root= node.getRoot();
 		if (!(root instanceof CompilationUnit))
 			return EMPTY_PROBLEMS;
 		IProblem[] problems= ((CompilationUnit)root).getProblems();
 		if (root == node)
 			return problems;
-		final int iterations= computeIterations(flags);
+		final int iterations= computeIterations(scope);
 		List result= new ArrayList(5);
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			ASTNode temp= node;
-			int count= iterations;
-			do {
-				int nodeOffset= temp.getStartPosition();
-				int problemOffset= problem.getSourceStart();
-				if (nodeOffset <= problemOffset && problemOffset < nodeOffset + temp.getLength()) {
-					result.add(problem);
-					count= 0;
-				} else {
-					count--;
-				}
-			} while ((temp= temp.getParent()) != null && count > 0);
+			boolean consider= false;
+			if ((severity & PROBLEMS) == PROBLEMS)
+				consider= true;
+			else if ((severity & WARINING) != 0)
+				consider= problem.isWarning();
+			else if ((severity & ERROR) != 0)
+				consider= problem.isError();
+			if (consider) {
+				ASTNode temp= node;
+				int count= iterations;
+				do {
+					int nodeOffset= temp.getStartPosition();
+					int problemOffset= problem.getSourceStart();
+					if (nodeOffset <= problemOffset && problemOffset < nodeOffset + temp.getLength()) {
+						result.add(problem);
+						count= 0;
+					} else {
+						count--;
+					}
+				} while ((temp= temp.getParent()) != null && count > 0);
+			}
 		}
 		return (IProblem[]) result.toArray(new IProblem[result.size()]);
 	}

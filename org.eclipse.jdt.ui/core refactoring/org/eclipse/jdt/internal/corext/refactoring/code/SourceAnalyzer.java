@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -209,8 +210,8 @@ class SourceAnalyzer  {
 				JavaSourceContext.create(fCUnit));		
 			return result;
 		}
-		Message[] messages= ASTNodes.getMessages(fDeclaration, ASTNodes.NODE_ONLY);
-		if (messages.length > 0) {
+		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
+		if (problems.length > 0) {
 			result.addFatalError(		
 				"Method declaration has compile errors. Please fix errors first.",
 				JavaSourceContext.create(fCUnit, fDeclaration));		
@@ -258,5 +259,5 @@ class SourceAnalyzer  {
 	private ASTNode[] getStatements() {
 		List statements= fDeclaration.getBody().statements();
 		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);
-	}
+	}	
 }

@@ -116,7 +116,7 @@ public class RefactoringAnalyzeUtil {
 	public static IProblem[] getIntroducedCompileProblems(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		Set subResult= new HashSet();				
 		Set oldProblems= getOldProblems(oldCuNode);
-		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
+		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS);
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem correspondingOld= findCorrespondingProblem(oldProblems, newProblems[i]);
 			if (correspondingOld == null)
@@ -171,7 +171,7 @@ public class RefactoringAnalyzeUtil {
 	}
 
 	private static Set getOldProblems(CompilationUnit oldCuNode) {
-		return new HashSet(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS)));
+		return new HashSet(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS)));
 	}
 
 	private static Set getOldErrorMessages(CompilationUnit cuNode) {
