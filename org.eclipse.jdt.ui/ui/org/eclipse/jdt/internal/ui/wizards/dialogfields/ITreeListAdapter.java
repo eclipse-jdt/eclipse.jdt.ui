@@ -19,11 +19,15 @@ public interface ITreeListAdapter {
 	 */	
 	void selectionChanged(TreeListDialogField field);
 
+	/**
+	 * The list has been double clicked
+	 */
+	void doubleClicked(TreeListDialogField field);
 
-	public Object[] getChildren(TreeListDialogField field, Object element);
+	Object[] getChildren(TreeListDialogField field, Object element);
 
-	public Object getParent(TreeListDialogField field, Object element);
+	Object getParent(TreeListDialogField field, Object element);
 
-	public boolean hasChildren(TreeListDialogField field, Object element);
+	boolean hasChildren(TreeListDialogField field, Object element);
 
 }

@@ -8,6 +8,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -21,21 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
-
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * A list with a button bar.
@@ -256,6 +256,7 @@ public class TreeListDialogField extends DialogField {
 			fTree.setContentProvider(fListViewerAdapter);
 			fTree.setLabelProvider(fLabelProvider);
 			fTree.addSelectionChangedListener(fListViewerAdapter);
+			fTree.addDoubleClickListener(fListViewerAdapter);
 
 			fTree.setInput(fParentElement);
 			fTree.expandToLevel(fTreeExpandLevel);
@@ -800,7 +801,7 @@ public class TreeListDialogField extends DialogField {
 
 	// ------- ListViewerAdapter
 
-	private class ListViewerAdapter implements ITreeContentProvider, ISelectionChangedListener {
+	private class ListViewerAdapter implements ITreeContentProvider, ISelectionChangedListener, IDoubleClickListener {
 
 		private final Object[] NO_ELEMENTS= new Object[0];
 
@@ -841,14 +842,29 @@ public class TreeListDialogField extends DialogField {
 		public void selectionChanged(SelectionChangedEvent event) {
 			doListSelected(event);
 		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
+		 */
+		public void doubleClick(DoubleClickEvent event) {
+			doDoubleClick(event);
+		}		
 
 	}
 
-	private void doListSelected(SelectionChangedEvent event) {
+	protected void doListSelected(SelectionChangedEvent event) {
 		updateButtonState();
 		if (fTreeAdapter != null) {
 			fTreeAdapter.selectionChanged(this);
 		}
 	}
+	
+	protected void doDoubleClick(DoubleClickEvent event) {
+		if (fTreeAdapter != null) {
+			fTreeAdapter.doubleClicked(this);
+		}
+	}
+
+	
 
 }

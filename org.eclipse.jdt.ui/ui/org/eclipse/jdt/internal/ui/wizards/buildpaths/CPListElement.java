@@ -152,7 +152,7 @@ public class CPListElement {
 	}	
 	
 	
-	public Object[] getChildren() {
+	public Object[] getChildren(boolean hideOutputFolder) {
 		if (fEntryKind == IClasspathEntry.CPE_CONTAINER) {
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
@@ -166,6 +166,9 @@ public class CPListElement {
 			} catch (JavaModelException e) {
 				return new Object[0];
 			}
+		}
+		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
+			return new Object[] { fAttributes.get(EXCLUSION) };
 		}
 		return fAttributes.values().toArray();
 	}

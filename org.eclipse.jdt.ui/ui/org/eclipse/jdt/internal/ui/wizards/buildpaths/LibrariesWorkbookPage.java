@@ -183,9 +183,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			libaryPageSelectionChanged(field);
 		}
 		
+		public void doubleClicked(TreeListDialogField field) {
+			libaryPageDoubleClicked(field);
+		}
+
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (element instanceof CPListElement) {
-				return ((CPListElement) element).getChildren();
+				return ((CPListElement) element).getChildren(false);
 			}
 			return EMPTY_ARR;
 		}
@@ -247,6 +251,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 			fLibrariesList.addElements(elementsToAdd);
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
+		}
+	}
+	
+	protected void libaryPageDoubleClicked(TreeListDialogField field) {
+		List selection= fLibrariesList.getSelectedElements();
+		if (canEdit(selection)) {
+			editEntry();
 		}
 	}
 

@@ -12,8 +12,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -58,6 +56,7 @@ public class HistoryListAction extends Action {
 				}
 				
 				public void doubleClicked(ListDialogField field) {
+					doDoubleClicked();
 				}				
 			};
 		
@@ -93,14 +92,6 @@ public class HistoryListAction extends Action {
 			LayoutUtil.setHeigthHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
 			LayoutUtil.setHorizontalGrabbing(fHistoryList.getListControl(null));
 
-				
-			fHistoryList.getTableViewer().addDoubleClickListener(new IDoubleClickListener() {
-				public void doubleClick(DoubleClickEvent event) {
-					if (fHistoryStatus.isOK()) {
-						okPressed();
-					}
-				}
-			});
 			return composite;
 		}
 
@@ -109,7 +100,14 @@ public class HistoryListAction extends Action {
 		 */
 		private void doCustomButtonPressed() {
 			fHistoryList.removeElements(fHistoryList.getSelectedElements());
-		}	
+		}
+		
+		private void doDoubleClicked() {
+			if (fHistoryStatus.isOK()) {
+				okPressed();
+			}
+		}
+		
 		
 		private void doSelectionChanged() {
 			StatusInfo status= new StatusInfo();

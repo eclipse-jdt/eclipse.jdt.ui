@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
@@ -60,16 +61,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
-//	private SelectionButtonDialogField fProjectRadioButton;
-//	private SelectionButtonDialogField fFolderRadioButton;
 	private TreeListDialogField fFoldersList;
-	
-//	private List fProjectCPEntry;
-//	private List fFolderCPEntries;
 	
 	private StringDialogField fOutputLocationField;
 	
-//	private boolean fIsProjSelected;
+	private SelectionButtonDialogField fUseFolderOutputs;
 	
 	private final int IDX_ADDNEW= 0;
 	private final int IDX_ADDEXIST= 1;
@@ -86,15 +82,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fSWTControl= null;
 				
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
-				
-//		fProjectRadioButton= new SelectionButtonDialogField(SWT.RADIO);
-//		fProjectRadioButton.setDialogFieldListener(adapter);
-//		fProjectRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb1.label")); //$NON-NLS-1$
-//						
-//		fFolderRadioButton= new SelectionButtonDialogField(SWT.RADIO);
-//		fFolderRadioButton.setDialogFieldListener(adapter);
-//		fFolderRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb2.label")); //$NON-NLS-1$
-		
+					
 		String[] buttonLabels;
 		int removeIndex;
 		buttonLabels= new String[] { 
@@ -115,8 +103,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
 		
-//		fFolderRadioButton.setSelection(true);
-//		fProjectRadioButton.setSelection(false);
+		fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
+		fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check"));
+		fUseFolderOutputs.setDialogFieldListener(adapter);
 	}
 	
 	public void init(IJavaProject jproject) {
@@ -127,32 +116,20 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private void updateFoldersList() {	
 		fFoldersList.removeAllElements();
-//		fProjectCPEntry= new ArrayList(1);
-//		fFolderCPEntries= new ArrayList(4);		
-		
+	
+		boolean useFolderOutputs= false;
 		List cpelements= fClassPathList.getElements();
 		for (int i= 0; i < cpelements.size(); i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-				if (fProjPath.equals(cpe.getPath())) {
-					// remember the entry to ensure a unique CPListElement for the project-cpentry
-					//fProjectCPEntry.add(cpe);
-					fFoldersList.addElement(cpe);
-					break;
-				} else {
-					fFoldersList.addElement(cpe);
-//					fFolderCPEntries.add(cpe);
+				fFoldersList.addElement(cpe);
+				if (cpe.getAttribute(CPListElement.OUTPUT) != null) {
+					useFolderOutputs= true;
 				}
 			}
 		}
-//		boolean isFoldersSelected= fProjectCPEntry.isEmpty();
-//		if (isFoldersSelected) {
-//			fProjectCPEntry.add(newCPSourceElement(fCurrJProject.getResource()));
-//		}
 		
-		// fix for 1G47IYV: ITPJUI:WINNT - Both radio buttons get selected in Project properties
-//		fFolderRadioButton.setSelection(isFoldersSelected);
-//		fProjectRadioButton.setSelection(!isFoldersSelected);
+		fUseFolderOutputs.setSelection(useFolderOutputs);
 	}			
 	
 	public Control getControl(Composite parent) {
@@ -163,9 +140,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;		
 		composite.setLayout(layout);
-		
-//		fProjectRadioButton.doFillIntoGrid(composite, 2);
-//		fFolderRadioButton.doFillIntoGrid(composite, 2);
 		
 		Control control= fFoldersList.getListControl(composite);
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -180,6 +154,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fFoldersList.setButtonsMinWidth(buttonBarWidth);
+		
+		fUseFolderOutputs.doFillIntoGrid(composite, 2);
 			
 		fSWTControl= composite;
 		
@@ -207,9 +183,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			sourcePageSelectionChanged(field);
 		}
 		
+		public void doubleClicked(TreeListDialogField field) {
+			sourcePageDoubleClicked(field);
+		}
+
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (element instanceof CPListElement) {
-				return ((CPListElement) element).getChildren();
+				return ((CPListElement) element).getChildren(!fUseFolderOutputs.isSelected());
 			}
 			return EMPTY_ARR;
 		}
@@ -231,7 +211,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
-	private void sourcePageCustomButtonPressed(DialogField field, int index) {
+	protected void sourcePageDoubleClicked(TreeListDialogField field) {
+		if (field == fFoldersList) {
+			List selection= fFoldersList.getSelectedElements();
+			if (canEdit(selection)) {
+				editEntry();
+			}
+		}
+	}
+	
+	
+	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
 			List elementsToAdd= new ArrayList(10);
 			switch (index) {
@@ -318,7 +308,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 
 	
-	private void sourcePageSelectionChanged(DialogField field) {
+	protected void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
 	}
@@ -343,22 +333,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 		
-//		if (field == fFolderRadioButton) {
-//			if (fFolderRadioButton.isSelected()) {
-//				fFoldersList.setElements(fFolderCPEntries);
-//			}
-//			updateClasspathList();
-//			if (fFoldersList.getSize() > 0) {
-//				askForChangingBuildPathDialog();
-//			}
-//		} else if (field == fProjectRadioButton) {
-//			if (fProjectRadioButton.isSelected()) {
-//				fFolderCPEntries= fFoldersList.getElements();
-//				fFoldersList.setElements(fProjectCPEntry);
-//				updateClasspathList();
-//			}
-//		} else
-		if (field == fFoldersList) {
+		if (field == fUseFolderOutputs) {
+			if (fUseFolderOutputs.isSelected()) {
+				int nFolders= fFoldersList.getSize();
+				for (int i= 0; i < nFolders; i++) {
+					CPListElement cpe= (CPListElement) fFoldersList.getElement(i);
+					cpe.setAttribute(CPListElement.OUTPUT, null);
+				}
+			}
+			fFoldersList.refresh();
+		} else if (field == fFoldersList) {
 			updateClasspathList();
 		}
 	}	

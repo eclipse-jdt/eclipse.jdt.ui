@@ -95,8 +95,6 @@ public class ListDialogField extends DialogField {
 	private int fUpButtonIndex;
 	private int fDownButtonIndex;
 	
-	private int fDefaultSelectIndex;
-	
 	private Label fLastSeparator;
 	
 	private Table fTableControl;
@@ -311,7 +309,7 @@ public class ListDialogField extends DialogField {
 			fTable.setContentProvider(fListViewerAdapter);
 			fTable.setLabelProvider(fLabelProvider);
 			fTable.addSelectionChangedListener(fListViewerAdapter);
-
+			fTable.addDoubleClickListener(fListViewerAdapter);
 			
 			fTable.setInput(fParentElement);
 			
@@ -866,15 +864,22 @@ public class ListDialogField extends DialogField {
 		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
 		 */
 		public void doubleClick(DoubleClickEvent event) {
+			doDoubleClick(event);
 		}
 
 	}
 	
 	
-	private void doListSelected(SelectionChangedEvent event) {
+	protected void doListSelected(SelectionChangedEvent event) {
 		updateButtonState();
 		if (fListAdapter != null) {
 			fListAdapter.selectionChanged(this);
+		}
+	}
+	
+	protected void doDoubleClick(DoubleClickEvent event) {
+		if (fListAdapter != null) {
+			fListAdapter.doubleClicked(this);
 		}
 	}	
 

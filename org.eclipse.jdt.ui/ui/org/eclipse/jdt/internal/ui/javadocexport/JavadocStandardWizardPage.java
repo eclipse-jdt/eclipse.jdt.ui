@@ -39,8 +39,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -542,14 +540,16 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 */
 	private void doEditButtonPressed() {
 
-		StructuredSelection selection= (StructuredSelection) fListDialogField.getTableViewer().getSelection();
-		Object obj= selection.getFirstElement();
+		List selected= fListDialogField.getSelectedElements();
+		if (selected.isEmpty()) {
+			return;
+		}
+		Object obj= selected.get(0);
 		if (obj instanceof IAdaptable) {
 			IJavaElement el= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
 
 			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), el);
 			jdialog.open();
-
 		}
 	}
 

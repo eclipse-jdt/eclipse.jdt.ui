@@ -4,64 +4,88 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class ExclusionPatternDialog extends StatusDialog {
 	
-	private StringButtonDialogField fExclusionPatternDialog;
-	private StatusInfo fExclusionPatternStatus;
+	private static class ExclusionPatternLabelProvider extends LabelProvider {
+				
+		public Image getImage(Object element) {
+			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
+			return registry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
+		}
+
+		public String getText(Object element) {
+			return ((IPath) element).toString();
+		}
+
+	}
 	
+	
+	private ListDialogField fExclusionPatternList;
+	private CPListElement fCurrElement;
 	private IProject fCurrProject;
-	private IPath[] fExclusionPattern;
+	
+	private static final int IDX_ADD= 0;
+	private static final int IDX_EDIT= 1;
+	private static final int IDX_REMOVE= 3;
+	
 		
 	public ExclusionPatternDialog(Shell parent, CPListElement entryToEdit) {
 		super(parent);
+		fCurrElement= entryToEdit;
 		setTitle(NewWizardMessages.getString("ExclusionPatternDialog.title"));
-		fExclusionPatternStatus= new StatusInfo();
-		
+
 		String label= NewWizardMessages.getFormattedString("ExclusionPatternDialog.pattern.label", entryToEdit.getPath().makeRelative().toString());
 		
+		String[] buttonLabels= new String[] {
+			/* IDX_ADD */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.add"),
+			/* IDX_EDIT */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.edit"),
+			null,
+			/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.remove")
+		};
+
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
-		fExclusionPatternDialog= new StringButtonDialogField(adapter);
-		fExclusionPatternDialog.setLabelText(label);
-		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionPatternDialog.pattern.button"));
-		fExclusionPatternDialog.setDialogFieldListener(adapter);
-		fExclusionPatternDialog.enableButton(false);
-		
+
+		fExclusionPatternList= new ListDialogField(adapter, buttonLabels, new ExclusionPatternLabelProvider());
+		fExclusionPatternList.setDialogFieldListener(adapter);
+		fExclusionPatternList.setLabelText(label); //$NON-NLS-1$
+		fExclusionPatternList.setRemoveButtonIndex(IDX_REMOVE); //$NON-NLS-1$
+
+		fExclusionPatternList.enableButton(IDX_EDIT, false); // edit
+	
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(CPListElement.EXCLUSION);
-		if (pattern == null) {
-			fExclusionPatternDialog.setText(""); //$NON-NLS-1$
-		} else {
-			fExclusionPatternDialog.setText(getPatternString(pattern));
-		}
+		
+		fExclusionPatternList.setElements(Arrays.asList(pattern));
 	}
 	
 	
@@ -77,80 +101,95 @@ public class ExclusionPatternDialog extends StatusDialog {
 		layout.numColumns= 2;
 		inner.setLayout(layout);
 		
-		Label description= new Label(inner, SWT.WRAP);
-		description.setText(NewWizardMessages.getString("ExclusionPatternDialog.description"));
-		GridData gd= new GridData();
-		gd.horizontalSpan= 2;
-		gd.widthHint= convertWidthInCharsToPixels(80);
-		description.setLayoutData(gd);
+		fExclusionPatternList.doFillIntoGrid(inner, 3);
+		LayoutUtil.setHorizontalSpan(fExclusionPatternList.getLabelControl(null), 2);
 		
-		fExclusionPatternDialog.doFillIntoGrid(inner, 3);
-		
-		LayoutUtil.setWidthHint(fExclusionPatternDialog.getLabelControl(null), widthHint);
-		LayoutUtil.setHorizontalSpan(fExclusionPatternDialog.getLabelControl(null), 2);
-		
-		LayoutUtil.setWidthHint(fExclusionPatternDialog.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fExclusionPatternDialog.getTextControl(null));
-				
-		fExclusionPatternDialog.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;
 	}
-
+	
+	protected void doCustomButtonPressed(ListDialogField field, int index) {
+		if (index == IDX_ADD) {
+			addEntry();
+		} else if (index == IDX_EDIT) {
+			editEntry();
+		}
+	}
+	
+	protected void doDoubleClicked(ListDialogField field) {
+		editEntry();
+	}
+	
+	protected void doSelectionChanged(ListDialogField field) {
+		List selected= field.getSelectedElements();
+		fExclusionPatternList.enableButton(IDX_EDIT, canEdit(selected));
+	}
+	
+	private boolean canEdit(List selected) {
+		return selected.size() == 1;
+	}
+	
+	private void editEntry() {
+		List selElements= fExclusionPatternList.getSelectedElements();
+		if (selElements.size() != 1) {
+			return;
+		}
+		IPath entry= (IPath) selElements.get(0);
+		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), entry, fCurrElement);
+		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
+			fExclusionPatternList.replaceElement(entry, dialog.getExclusionPattern());
+		}
+	}
+	
+	private void addEntry() {
+		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), null, fCurrElement);
+		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
+			fExclusionPatternList.addElement(dialog.getExclusionPattern());
+		}
+	}	
+	
+	
 		
 	// -------- ExclusionPatternAdapter --------
 
-	private class ExclusionPatternAdapter implements IDialogFieldListener, IStringButtonAdapter {
-		
-		// -------- IDialogFieldListener
-		
+	private class ExclusionPatternAdapter implements IListAdapter, IDialogFieldListener {
+		/**
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
+		 */
+		public void customButtonPressed(ListDialogField field, int index) {
+			doCustomButtonPressed(field, index);
+		}
+
+		/**
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 */
+		public void selectionChanged(ListDialogField field) {
+			doSelectionChanged(field);
+		}
+		/**
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 */
+		public void doubleClicked(ListDialogField field) {
+			doDoubleClicked(field);
+		}
+
+		/**
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
 		public void dialogFieldChanged(DialogField field) {
-			doStatusLineUpdate();
 		}
-
-		public void changeControlPressed(DialogField field) {
-			doChangeControlPressed();
-		}
+		
 	}
-	
-	protected void doChangeControlPressed() {
-		IPath[] pattern= chooseExclusionPattern();
-		if (pattern != null) {
-			fExclusionPatternDialog.setText(getPatternString(pattern));
-		}
-	}
-
-	private String getPatternString(IPath[] pattern) {
-		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < pattern.length; i++) {
-			if (i > 0) {
-				buf.append(File.pathSeparatorChar);
-			}
-			buf.append(pattern[i].toString());
-		}
-		return buf.toString();
-	}
-	
 	
 	protected void doStatusLineUpdate() {
-		checkIfPatternValid();
-		updateStatus(fExclusionPatternStatus);
 	}		
 	
 	protected void checkIfPatternValid() {
-		ArrayList res= new ArrayList();
-		String pattern= fExclusionPatternDialog.getText();
-		StringTokenizer tok= new StringTokenizer(pattern, ";");
-		while (tok.hasMoreTokens()) {
-			String curr= tok.nextToken();
-			res.add(new Path(curr));
-		}
-		fExclusionPattern= (IPath[]) res.toArray(new IPath[res.size()]);
-		fExclusionPatternStatus.setOK();
 	}
 	
 		
 	public IPath[] getExclusionPattern() {
-		return fExclusionPattern;
+		List elements= fExclusionPatternList.getElements();
+		return (IPath[]) elements.toArray(new IPath[elements.size()]);
 	}
 		
 	/*
@@ -161,44 +200,4 @@ public class ExclusionPatternDialog extends StatusDialog {
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.EXCLUSION_PATTERN_DIALOG);
 	}
 	
-	// ---------- util method ------------
-
-	private IPath[] chooseExclusionPattern() {
-//		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
-//		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-//		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-//		IProject[] allProjects= root.getProjects();
-//		ArrayList rejectedElements= new ArrayList(allProjects.length);
-//		for (int i= 0; i < allProjects.length; i++) {
-//			if (!allProjects[i].equals(fCurrProject)) {
-//				rejectedElements.add(allProjects[i]);
-//			}
-//		}
-//		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
-//
-//		ILabelProvider lp= new WorkbenchLabelProvider();
-//		ITreeContentProvider cp= new WorkbenchContentProvider();
-//
-//		IResource initSelection= null;
-//		if (fOutputLocation != null) {
-//			initSelection= root.findMember(fOutputLocation);
-//		}
-//
-//		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
-//		dialog.setTitle(NewWizardMessages.getString("ExclusionPatternDialog.ChooseExclusionPattern.title")); //$NON-NLS-1$
-//		dialog.setValidator(validator);
-//		dialog.setMessage(NewWizardMessages.getString("ExclusionPatternDialog.ChooseExclusionPattern.description")); //$NON-NLS-1$
-//		dialog.addFilter(filter);
-//		dialog.setInput(root);
-//		dialog.setInitialSelection(initSelection);
-//		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-//
-//		if (dialog.open() == ElementTreeSelectionDialog.OK) {
-//			return (IContainer)dialog.getFirstResult();
-//		}
-		return null;
-	}
-	
-
-
 }
