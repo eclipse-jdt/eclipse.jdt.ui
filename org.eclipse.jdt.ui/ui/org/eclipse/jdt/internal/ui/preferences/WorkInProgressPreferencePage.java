@@ -330,6 +330,6 @@ WorkInProgressPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		
-		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, true); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
 	}
 }
