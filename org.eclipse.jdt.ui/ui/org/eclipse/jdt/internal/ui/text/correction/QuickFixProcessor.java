@@ -105,6 +105,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SuperfluousSemicolon:
 			case IProblem.UnnecessaryCast:
 			case IProblem.UnnecessaryArgumentCast:
+			case IProblem.UnnecessaryInstanceof:
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
 			case IProblem.Task:
@@ -299,6 +300,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryArgumentCast:
 				LocalCorrectionsSubProcessor.addUnnecessaryCastProposal(context, problem, proposals);
 				break;
+			case IProblem.UnnecessaryInstanceof:	
+			LocalCorrectionsSubProcessor.addUnnecessaryInstanceofProposal(context, problem, proposals);
+				break;				
 			case IProblem.Task:
 				proposals.add(new TaskMarkerProposal(context.getCompilationUnit(), problem, 10));
 				break;

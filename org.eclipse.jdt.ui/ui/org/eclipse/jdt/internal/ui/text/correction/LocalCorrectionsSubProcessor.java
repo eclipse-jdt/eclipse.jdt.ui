@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -715,6 +716,37 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void addUnnecessaryInstanceofProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+			
+		if (selectedNode instanceof InstanceofExpression) {
+			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+			
+			InstanceofExpression inst= (InstanceofExpression) selectedNode;
+			
+			AST ast= inst.getAST();
+			InfixExpression expression= ast.newInfixExpression();
+			expression.setLeftOperand((Expression) rewrite.createCopy(inst.getLeftOperand()));
+			expression.setOperator(InfixExpression.Operator.NOT_EQUALS);
+			expression.setRightOperand(ast.newNullLiteral());
+			
+			
+			if (false/*ASTNodes.needsParentheses(expression)*/) {
+				ParenthesizedExpression parents= ast.newParenthesizedExpression();
+				parents.setExpression(expression);
+				rewrite.markAsReplaced(inst, parents);
+			} else {
+				rewrite.markAsReplaced(inst, expression);
+			}
+			
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessaryinstanceof.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposals.add(proposal);
+		}
+	
 	}
 
 
