@@ -110,6 +110,9 @@ public class TreeListDialogFieldExample {
 		public void dialogFieldChanged(DialogField field) {
 		}
 
+		public void doubleClicked(TreeListDialogField field) {
+		}
+
 	}	
 	
 	public TreeListDialogFieldExample run () {
