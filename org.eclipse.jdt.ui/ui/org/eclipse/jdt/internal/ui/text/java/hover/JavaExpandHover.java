@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.IDoubleClickListener;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.Position;
@@ -188,83 +187,4 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		}
 		return false;
 	}
-	
-	
-	private static class FilteredAnnotationModel {
-		private IAnnotationModel fModel;
-		private List fFilteredAnnotations;
-		private int fFirst;
-
-		/**
-		 * @param model
-		 */
-		public FilteredAnnotationModel(IAnnotationModel model) {
-			fModel= model;
-		}
-		
-		public Iterator getAnnotationIterator() {
-			if (fFilteredAnnotations == null) {
-				fFilteredAnnotations= new ArrayList();
-				for (Iterator it= fModel.getAnnotationIterator(); it.hasNext();) {
-					Annotation a= (Annotation) it.next();
-					if (filter(a))
-						fFilteredAnnotations.add(a);
-				}
-			}
-			
-			return fFilteredAnnotations.iterator();
-		}
-		
-		/**
-		 * @param a
-		 * @return
-		 */
-		protected boolean filter(Annotation a) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		/**
-		 * @param first
-		 * @param count
-		 */
-		public void setValidLines(int first, int count) {
-			fFirst= first;
-			
-		}
-	}
-	
-	interface AnnotationFilter {
-		/**
-		 * Returns <code>true</code> if <code>annotation</code> passes this 
-		 * filter, <code>false</code> if it does not.
-		 * 
-		 * @param annotation the <code>Annotation</code> to filter
-		 * @return <code>true</code> if <code>annotation</code> passes the filter
-		 */
-		boolean filter(Annotation annotation);
-	}
-	
-	static class LineAnnotationFilter implements AnnotationFilter {
-		private int fCount;
-		private int fFirst;
-
-		/**
-		 * @param first
-		 * @param count
-		 */
-		public LineAnnotationFilter(int first, int count) {
-			Assert.isTrue(first >= 0 && count >= 0);
-			fFirst= first;
-			fCount= count;
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover.AnnotationFilter#filter(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean filter(Annotation annotation) {
-			return false;
-		}
-	}
-
 }
