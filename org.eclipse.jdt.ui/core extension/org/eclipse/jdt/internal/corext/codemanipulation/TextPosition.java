@@ -2,7 +2,7 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.codemanipulation;
+package org.eclipse.jdt.internal.corext.codemanipulation;
 
 // This is a layer breaker
 import org.eclipse.jface.text.Position;

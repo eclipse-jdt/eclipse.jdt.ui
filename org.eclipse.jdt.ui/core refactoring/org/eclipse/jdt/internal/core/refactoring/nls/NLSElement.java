@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.core.refactoring.nls;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 
 public class NLSElement {
 

@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;

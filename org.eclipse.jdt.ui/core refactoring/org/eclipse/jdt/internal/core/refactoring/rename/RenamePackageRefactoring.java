@@ -22,8 +22,8 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;

@@ -29,10 +29,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;

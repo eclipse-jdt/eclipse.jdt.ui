@@ -17,7 +17,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.core.codemanipulation.*;
+import org.eclipse.jdt.internal.corext.codemanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;

@@ -6,8 +6,8 @@ package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.core.codemanipulation.IUndoTextEdits;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 

@@ -8,10 +8,10 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 
 final class EncapsulateWriteAccess extends TextEdit {

@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;

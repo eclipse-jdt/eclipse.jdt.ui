@@ -56,7 +56,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.core.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.core.refactoring.Assert;

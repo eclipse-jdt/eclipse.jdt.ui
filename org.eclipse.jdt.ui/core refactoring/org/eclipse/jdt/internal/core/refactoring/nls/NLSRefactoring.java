@@ -35,11 +35,11 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
-import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;

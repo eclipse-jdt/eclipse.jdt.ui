@@ -5,9 +5,9 @@
 package org.eclipse.jdt.internal.core.refactoring.sef;
 
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 
 final class EncapsulateReadAccess extends SimpleTextEdit {
 

@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.codemanipulation.IUndoTextEdits;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.core.codemanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.Change;

@@ -19,9 +19,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
-import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.Change;
@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.codemanipulation.*;
+import org.eclipse.jdt.internal.corext.codemanipulation.*;
 
 public abstract class TextChange extends AbstractTextChange {
 

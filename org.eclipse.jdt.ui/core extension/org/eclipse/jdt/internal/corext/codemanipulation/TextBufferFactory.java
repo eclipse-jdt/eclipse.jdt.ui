@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.codemanipulation;
+package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
