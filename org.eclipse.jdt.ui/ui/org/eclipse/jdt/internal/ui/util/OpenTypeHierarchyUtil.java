@@ -46,7 +46,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
@@ -67,23 +66,6 @@ public class OpenTypeHierarchyUtil {
 		return (element != null) 
 			? (getCandidates(element) != null) 
 			: false;
-	}
-	
-	/**
-	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
-	 */
-	public static void addToMenu(IWorkbenchWindow window, IMenuManager menu, ISelection s) {
-		addToMenu(window, menu, getElement(s));
-	}
-	
-	/**
-	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
-	 */
-	public static void addToMenu(IWorkbenchWindow window, IMenuManager menu, Object element) {	
-		IJavaElement[] candidates= getCandidates(element);
-		if (candidates != null) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, new OpenHierarchyAction(window, candidates));
-		}
 	}
 	
 	public static TypeHierarchyViewPart open(IJavaElement element, IWorkbenchWindow window) {

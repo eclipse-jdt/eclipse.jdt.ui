@@ -242,9 +242,7 @@ public class RefactoringStarter {
 	
 	private void triggerBuild() {
 		if (fSavedFiles && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
-			new GlobalBuildAction(JavaPlugin.getDefault().getWorkbench(), 
-								  JavaPlugin.getActiveWorkbenchShell(),
-								  IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
+			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
 	}
 }
