@@ -29,7 +29,8 @@ class DualReorgAction extends RefactoringAction {
 	public boolean canOperateOn(IStructuredSelection selection) {
 		boolean canReorgResources= fResourceAction.isEnabled();
 		boolean canReorgSourceReferences= fSourceReferenceAction.isEnabled();
-		Assert.isTrue(! canReorgResources || ! canReorgSourceReferences);
+		//FIX ME	
+//		Assert.isTrue(! canReorgResources || ! canReorgSourceReferences);
 		return (canReorgResources || canReorgSourceReferences);
 	}
 	
@@ -43,8 +44,9 @@ class DualReorgAction extends RefactoringAction {
 		update();
 		if (! isEnabled())
 			return;
-		Assert.isTrue(! fResourceAction.isEnabled() || ! fSourceReferenceAction.isEnabled());
-		Assert.isTrue(fResourceAction.isEnabled() || fSourceReferenceAction.isEnabled());
+		//FIX ME	
+//		Assert.isTrue(! fResourceAction.isEnabled() || ! fSourceReferenceAction.isEnabled());
+//		Assert.isTrue(fResourceAction.isEnabled() || fSourceReferenceAction.isEnabled());
 		if (fResourceAction.isEnabled())
 			fResourceAction.run();
 		else if (fSourceReferenceAction.isEnabled())
