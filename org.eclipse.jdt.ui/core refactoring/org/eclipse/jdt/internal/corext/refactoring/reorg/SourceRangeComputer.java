@@ -104,7 +104,7 @@ public class SourceRangeComputer {
 		try{	
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(fCuSource.toCharArray());
-			scanner.resetTo(end, fCuSource.length());
+			scanner.resetTo(end, fCuSource.length() - 1);
 			TextBuffer buff= TextBuffer.create(fCuSource);
 			int startLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 			
@@ -165,7 +165,7 @@ public class SourceRangeComputer {
 			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(buff.getContent().toCharArray());
-			scanner.resetTo(lineOffset, buff.getLength());
+			scanner.resetTo(lineOffset, buff.getLength() - 1);
 			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {

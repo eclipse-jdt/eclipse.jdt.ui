@@ -240,7 +240,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	private IPath getPackagePath(String source) throws InvalidInputException {
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(source.toCharArray());
-		scanner.resetTo(0, scanner.getSource().length);
+		scanner.resetTo(0, source.length() - 1);
 		int tok= scanner.getNextToken();
 		if (tok != ITerminalSymbols.TokenNamepackage) {
 			return null;

@@ -109,7 +109,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		try {
 			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 			scanner.setSource(buffer.getContent().toCharArray());
-			scanner.resetTo(0, buffer.getLength());
+			scanner.resetTo(0, buffer.getLength() - 1);
 				
 			int start= fLocation.getOffset();
 			int end= start + fLocation.getLength();

@@ -299,7 +299,7 @@ public class CodeFormatterUtil {
 	private static IScanner getTokenScanner(String str) {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(str.toCharArray());
-		scanner.resetTo(0, str.length());
+		scanner.resetTo(0, str.length() - 1);
 		return scanner;
 	}
 

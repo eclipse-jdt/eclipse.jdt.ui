@@ -19,13 +19,13 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 public class CompilationUnitBuffer {
 	private IScanner fScanner;
-	private int fEndPosition;
+	private int fSourceLength;
 	
 	public CompilationUnitBuffer(ICompilationUnit unit) throws JavaModelException {
 		fScanner= ToolFactory.createScanner(true, false, false, false);
 		char[] source= unit.getBuffer().getCharacters();
-		fEndPosition= source.length - 1;
 		fScanner.setSource(source);
+		fSourceLength= source.length;
 	}
 	
 	public char[] getCharacters() {
@@ -37,7 +37,7 @@ public class CompilationUnitBuffer {
 	}
 	
 	public int indexOf(int token, int start) {
-		return indexOf(token, start, fEndPosition);
+		return indexOf(token, start, fSourceLength - start);
 	}
 	
 	public int indexOf(int token, int start, int length) {
@@ -75,7 +75,7 @@ public class CompilationUnitBuffer {
 	 */
 	public int indexOfNextToken(int start, boolean considerComments) {
 		try {
-			fScanner.resetTo(start, fEndPosition);
+			fScanner.resetTo(start, fSourceLength - 1);
 			int token;
 			while ((token= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (!considerComments && isComment(token))

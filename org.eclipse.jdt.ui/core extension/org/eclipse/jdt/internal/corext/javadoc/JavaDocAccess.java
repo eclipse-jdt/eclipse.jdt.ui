@@ -52,7 +52,7 @@ public class JavaDocAccess {
 		if (length > 0 && buf.getChar(start) == '/') {
 			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 			scanner.setSource(buf.getCharacters());
-			scanner.resetTo(start, start + length);
+			scanner.resetTo(start, start + length - 1);
 			try {
 				int terminal= scanner.getNextToken();
 				while (terminal == ITerminalSymbols.TokenNameCOMMENT_LINE || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK)
