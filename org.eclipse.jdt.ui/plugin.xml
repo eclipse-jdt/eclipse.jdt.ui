@@ -2138,7 +2138,7 @@
 	point="org.eclipse.ui.decorators">
 	<decorator
 		label="%ProblemsLabelDecorator.label"
-		state="true"
+		state="false"
 		lightweight="true"
 		quadrant="BOTTOM_LEFT"
 		class="org.eclipse.jdt.ui.ProblemsLabelDecorator"
@@ -2161,7 +2161,7 @@
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
 		quadrant="BOTTOM_RIGHT"		
-		state="true"
+		state="false"
 		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
 		id="org.eclipse.jdt.ui.override.decorator">
 		<description>
