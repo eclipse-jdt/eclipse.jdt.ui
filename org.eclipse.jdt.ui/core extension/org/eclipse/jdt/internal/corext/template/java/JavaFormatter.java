@@ -4,8 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
@@ -83,7 +85,7 @@ public class JavaFormatter implements ITemplateEditor {
 		{
 			final String MARKER= "/*${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-			MultiTextEdit positions= variablesToPositions(variables);
+			List positions= variablesToPositions(variables);
 
 		    TextEdit insert= SimpleTextEdit.createInsert(caretOffset, MARKER);
 		    string= edit(string, positions, insert);
@@ -128,7 +130,7 @@ public class JavaFormatter implements ITemplateEditor {
 		TemplatePosition[] variables= templateBuffer.getVariables();
    		String indentation= CodeFormatterUtil.createIndentString(indentationLevel);   		
 
-		MultiTextEdit positions= variablesToPositions(variables);
+		List positions= variablesToPositions(variables);
 		MultiTextEdit multiEdit= new MultiTextEdit();
 		
 		TextBuffer textBuffer= TextBuffer.create(string);
@@ -152,7 +154,7 @@ public class JavaFormatter implements ITemplateEditor {
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
 
-		MultiTextEdit positions= variablesToPositions(variables);
+		List positions= variablesToPositions(variables);
 
 		int i= 0;
 		while ((i != string.length()) && Character.isWhitespace(string.charAt(i)))
@@ -164,21 +166,11 @@ public class JavaFormatter implements ITemplateEditor {
 		templateBuffer.setContent(string, variables);
 	}
 	
-	private static String edit(String string, MultiTextEdit positions, MultiTextEdit multiEdit) throws CoreException {
+	private static String edit(String string, List positions, TextEdit edit) throws CoreException {
 	    TextBuffer textBuffer= TextBuffer.create(string);
 		TextBufferEditor editor= new TextBufferEditor(textBuffer);
-		editor.add(positions);
-		editor.add(multiEdit);
-		editor.performEdits(null);
-		
-		return textBuffer.getContent();
-	}
-
-	private static String edit(String string, MultiTextEdit positions, TextEdit singleEdit) throws CoreException {
-	    TextBuffer textBuffer= TextBuffer.create(string);
-		TextBufferEditor editor= new TextBufferEditor(textBuffer);
-		editor.add(positions);
-		editor.add(singleEdit);
+		addEdits(editor, positions);
+		editor.add(edit);
 		editor.performEdits(null);
 		
 		return textBuffer.getContent();
@@ -237,18 +229,17 @@ public class JavaFormatter implements ITemplateEditor {
 			variables[i].setOffsets(offsets[i]);	
 	}
 
-	private static MultiTextEdit variablesToPositions(TemplatePosition[] variables) {
-   		MultiTextEdit positions= new MultiTextEdit();
+	private static List variablesToPositions(TemplatePosition[] variables) {
+   		List positions= new ArrayList(5);
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
 		    for (int j= 0; j != offsets.length; j++)
 				positions.add(new NopTextEdit(offsets[j], 0));
 		}
-		
 		return positions;	    
 	}
 	
-	private static void positionsToVariables(MultiTextEdit positions, TemplatePosition[] variables) {
+	private static void positionsToVariables(List positions, TemplatePosition[] variables) {
 		Iterator iterator= positions.iterator();
 		
 		for (int i= 0; i != variables.length; i++) {
@@ -261,4 +252,10 @@ public class JavaFormatter implements ITemplateEditor {
 		 	variable.setOffsets(offsets);   
 		}
 	}	
+
+	private static void addEdits(TextBufferEditor editor, List edits) throws CoreException {
+		for (Iterator iter= edits.iterator(); iter.hasNext();) {
+			editor.add((TextEdit) iter.next());
+		}
+	}
 }

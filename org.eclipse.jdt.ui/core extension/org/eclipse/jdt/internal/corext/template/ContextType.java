@@ -4,13 +4,16 @@
  */
 package org.eclipse.jdt.internal.corext.template;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import java.util.Vector;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.internal.corext.textmanipulation.AutoOrganizingTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -85,8 +88,8 @@ public abstract class ContextType implements ITemplateEditor {
 		TextBuffer textBuffer= TextBuffer.create(templateBuffer.getString());
 		TemplatePosition[] variables= templateBuffer.getVariables();
 
-		MultiTextEdit positions= variablesToPositions(variables);
-		MultiTextEdit multiEdit= new MultiTextEdit();
+		List positions= variablesToPositions(variables);
+		List edits= new ArrayList(5);
 
         // iterate over all variables and try to resolve them
         for (int i= 0; i != variables.length; i++) {
@@ -111,12 +114,12 @@ public abstract class ContextType implements ITemplateEditor {
 			variable.setResolved(evaluator.isResolved(context));
 
         	for (int k= 0; k != offsets.length; k++)
-				multiEdit.add(SimpleTextEdit.createReplace(offsets[k], length, value));
+				edits.add(SimpleTextEdit.createReplace(offsets[k], length, value));
         }
 
-		TextBufferEditor editor= new TextBufferEditor(textBuffer);        
-		editor.add(positions);
-		editor.add(multiEdit);		
+		TextBufferEditor editor= new TextBufferEditor(textBuffer);
+		addEdits(editor, positions);
+		addEdits(editor, edits);
         editor.performEdits(null);
 
 		positionsToVariables(positions, variables);
@@ -124,18 +127,24 @@ public abstract class ContextType implements ITemplateEditor {
         templateBuffer.setContent(textBuffer.getContent(), variables);
     }
 
-	private static MultiTextEdit variablesToPositions(TemplatePosition[] variables) {
-   		MultiTextEdit positions= new MultiTextEdit();
+	private static void addEdits(TextBufferEditor editor, List edits) throws CoreException {
+		for (Iterator iter= edits.iterator(); iter.hasNext();) {
+			editor.add((TextEdit) iter.next());
+		}
+	}
+
+	private static List variablesToPositions(TemplatePosition[] variables) {
+   		List positions= new ArrayList(5);
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
 		    for (int j= 0; j != offsets.length; j++)
 				positions.add(new NopTextEdit(offsets[j], 0));
 		}
 		
-		return positions;	    
+		return positions;
 	}
 	
-	private static void positionsToVariables(MultiTextEdit positions, TemplatePosition[] variables) {
+	private static void positionsToVariables(List positions, TemplatePosition[] variables) {
 		Iterator iterator= positions.iterator();
 		
 		for (int i= 0; i != variables.length; i++) {
