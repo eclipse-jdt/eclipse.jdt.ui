@@ -175,13 +175,12 @@ public class EditTemplateDialog extends StatusDialog {
 	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
 		super(parent);
 		
-		int shellStyle= getShellStyle();
-		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
+		setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
 		
-		if (edit)
-			setTitle(TemplateMessages.getString("EditTemplateDialog.title.edit")); //$NON-NLS-1$
-		else
-			setTitle(TemplateMessages.getString("EditTemplateDialog.title.new")); //$NON-NLS-1$
+		String title= edit
+			? TemplateMessages.getString("EditTemplateDialog.title.edit") //$NON-NLS-1$
+			: TemplateMessages.getString("EditTemplateDialog.title.new"); //$NON-NLS-1$
+		setTitle(title);
 
 		fTemplate= template;
 		
@@ -226,14 +225,8 @@ public class EditTemplateDialog extends StatusDialog {
 		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
 		fContextCombo= new Combo(composite, SWT.READ_ONLY);
 
-		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); ) {
-			String contextName= (String) iterator.next();
-			
-			if (contextName.equals("java"))
-				fContextCombo.add(contextName, 0);
-			else
-				fContextCombo.add(contextName);
-		}
+		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); )
+			fContextCombo.add((String) iterator.next());
 
 		fContextCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {

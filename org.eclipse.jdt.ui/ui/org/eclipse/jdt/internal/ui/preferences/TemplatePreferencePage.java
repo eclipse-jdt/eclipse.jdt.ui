@@ -357,10 +357,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		Template template= new Template();
 
 		ContextTypeRegistry registry=ContextTypeRegistry.getInstance();
-		Iterator iterator= registry.iterator();
-		String contextTypeName= (String) iterator.next();
+		ContextType type= registry.getContextType("java");
+		
+		String contextTypeName;
+		if (type != null)
+			contextTypeName= type.getName();
+		else {
+			Iterator iterator= registry.iterator();
+			contextTypeName= (String) iterator.next();
+		}
 		template.setContext(contextTypeName); //$NON-NLS-1$
-
+		
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false);
 		if (dialog.open() == dialog.OK) {
 			fTemplates.add(template);
