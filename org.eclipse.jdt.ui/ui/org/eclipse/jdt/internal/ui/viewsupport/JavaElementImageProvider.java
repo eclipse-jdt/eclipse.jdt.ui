@@ -270,10 +270,13 @@ public class JavaElementImageProvider {
 					
 				case IJavaElement.JAVA_MODEL:
 					return JavaPluginImages.DESC_OBJS_JAVA_MODEL;
+
+				case IJavaElement.TYPE_PARAMETER:
+					return JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
 			}
 			
 			Assert.isTrue(false, JavaUIMessages.getString("JavaImageLabelprovider.assert.wrongImage")); //$NON-NLS-1$
-			return null; //$NON-NLS-1$
+			return JavaPluginImages.DESC_OBJS_GHOST;
 		
 		} catch (JavaModelException e) {
 			if (e.isDoesNotExist())
