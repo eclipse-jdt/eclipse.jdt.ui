@@ -109,12 +109,15 @@ public class ChangeSignatureTests extends RefactoringTest {
 							  	String[] newParamNames, 
 							  	int[] permutation, 
 							  	int newVisibility,
-							  	int[] deleted)  throws Exception{
+							  	int[] deleted,
+							  	String returnTypeName)  throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		if (returnTypeName != null)
+			ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -436,7 +439,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 	public void test22() throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -452,7 +456,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 	public void test23() throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -468,7 +473,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 	public void test24() throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -488,7 +494,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 	public void test25() throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -504,7 +511,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 	public void test26() throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -520,7 +528,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		int[] deleted= null;
-		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted);
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deleted, newReturnTypeName);
 	}
 
 	public void testRenameReorder26() throws Exception{
@@ -604,7 +613,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {2, -1, 0};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll35()throws Exception{
@@ -620,7 +630,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0, 1};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll36()throws Exception{
@@ -636,7 +647,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0, 1};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PRIVATE;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll37()throws Exception{
@@ -652,7 +664,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0, 1};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PROTECTED;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll38()throws Exception{
@@ -668,7 +681,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0, 1};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PROTECTED;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll39()throws Exception{
@@ -684,7 +698,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {2, -1, 0};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll40()throws Exception{
@@ -700,7 +715,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {2, -1, 0};
 		int[] deletedIndices= null;
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll41()throws Exception{
@@ -716,7 +732,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0};
 		int[] deletedIndices= {0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PACKAGE;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll42()throws Exception{
@@ -732,7 +749,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {0, -1};
 		int[] deletedIndices= {0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PACKAGE;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 
 	public void testAll43()throws Exception{
@@ -748,6 +766,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= {1, 0};
 		int[] deletedIndices= {0};
 		int newVisibility= JdtFlags.VISIBILITY_CODE_PACKAGE;
-		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices);
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}	
+
+	public void testAll44()throws Exception{
+		String[] signature= {"I", "I"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "j"};
+		String[] newParamNames= {"i", "j"};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= {0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PACKAGE;
+		String newReturnTypeName= "boolean";
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 }

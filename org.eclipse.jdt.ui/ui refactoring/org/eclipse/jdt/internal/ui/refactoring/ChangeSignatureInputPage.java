@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -11,6 +13,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -42,6 +45,8 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 		composite.setLayout((new GridLayout()));
 		
 		createVisibilityControl(composite);
+		if ( getChangeMethodSignatureRefactoring().canChangeReturnType())
+			createReturnTypeControl(composite);
 		createParameterTableComposite(composite);
 		
 		Label label= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -55,6 +60,29 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 		
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
+	}
+
+	private void createReturnTypeControl(Composite parent) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2; layout.marginWidth= 0;
+			composite.setLayout(layout);
+			
+			Label label= new Label(composite, SWT.NONE);
+			label.setText("Return type:");
+			label.setLayoutData((new GridData()));
+			
+			final Text text= new Text(composite, SWT.BORDER);
+			text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
+			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			
+			text.addModifyListener(new ModifyListener(){
+				public void modifyText(ModifyEvent e) {
+					getChangeMethodSignatureRefactoring().setNewReturnTypeName(text.getText());
+					update(true);
+				}
+			});
 	}
 	
 	private void createVisibilityControl(Composite parent) {
@@ -150,7 +178,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 
 	private void updateStatus(boolean displayErrorMessage) {
 		try{
-			RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkParameters();
+			RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkSignature();
 			if (nameCheck.hasFatalError()){
 				if (displayErrorMessage)
 					setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
