@@ -41,9 +41,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
@@ -213,6 +215,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @since 3.0
 	 */
 	private Rectangle fBounds;
+	private Rectangle fTrim;
 
 	
 	/**
@@ -328,6 +331,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		installFilter();
 		
 		addDisposeListener(this);
+		fShell.addListener(SWT.Deactivate, new Listener() {
+			/**
+			 * {@inheritDoc}
+			 */
+			public void handleEvent(Event event) {
+				dispose();
+			}
+		});
 		
 		fShell.addControlListener(new ControlAdapter() {
 			/**
@@ -335,6 +346,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			 */
 			public void controlMoved(ControlEvent e) {
 				fBounds= fShell.getBounds();
+				if (fTrim != null) {
+					Point location= fComposite.getLocation();
+					fBounds.x= fBounds.x - fTrim.x + location.x;		
+					fBounds.y= fBounds.y - fTrim.y + location.y;
+				}
+				
 			}
 			
 			/**
@@ -342,6 +359,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			 */
 			public void controlResized(ControlEvent e) {
 				fBounds= fShell.getBounds();
+				if (fTrim != null) {
+					Point location= fComposite.getLocation();
+					fBounds.x= fBounds.x - fTrim.x + location.x;		
+					fBounds.y= fBounds.y - fTrim.y + location.y;
+				}
 			}
 		});
 	}
@@ -699,10 +721,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setLocation(Point location) {
-		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
-		Point textLocation= fComposite.getLocation();				
-		location.x += trim.x - textLocation.x;		
-		location.y += trim.y - textLocation.y;		
+		fTrim= fShell.computeTrim(0, 0, 0, 0);
+		Point compositeLocation= fComposite.getLocation();
+		location.x += fTrim.x - compositeLocation.x;		
+		location.y += fTrim.y - compositeLocation.y;		
 		fShell.setLocation(location);		
 	}
 	
