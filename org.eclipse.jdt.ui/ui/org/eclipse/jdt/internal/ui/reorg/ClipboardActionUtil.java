@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
