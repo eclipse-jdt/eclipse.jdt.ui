@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -19,7 +17,6 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -56,12 +53,7 @@ public final class ImportRewrite {
 	
 	public final TextEdit createEdit(IDocument document) throws CoreException {
 		try {
-			IRegion region= fImportsStructure.getReplaceRange();
-			String text= fImportsStructure.getReplaceString(document, region);
-			if (text == null) {
-				return new MultiTextEdit(region.getOffset(), 0);
-			}
-			return new ReplaceEdit(region.getOffset(), region.getLength(), text);
+			return fImportsStructure.getResultingEdits(document);
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}

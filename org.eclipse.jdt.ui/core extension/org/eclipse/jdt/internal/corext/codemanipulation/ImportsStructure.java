@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -55,6 +60,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -573,9 +579,9 @@ public final class ImportsStructure implements IImportsStructure {
 		IDocument document= null;
 		try {
 			document= aquireDocument();
-			String replaceString= getReplaceString(document, fReplaceRange);
-			if (replaceString != null) {
-				document.replace(fReplaceRange.getOffset(), fReplaceRange.getLength(), replaceString);
+			MultiTextEdit edit= getResultingEdits(document);
+			if (edit.hasChildren()) {
+				edit.apply(document);
 				if (save) {
 					commitDocument(document);
 				}
@@ -624,10 +630,6 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 		}
 	}
-	
-	public IRegion getReplaceRange() {
-		return fReplaceRange;
-	}
 		
 	private IRegion evaluateReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
 		JavaModelUtil.reconcile(fCompilationUnit);
@@ -656,12 +658,9 @@ public final class ImportsStructure implements IImportsStructure {
 		}		
 	}
 	
-	/**
-	 * Returns the replace string or <code>null</code> if no replace is needed.
-	 */
-	public String getReplaceString(IDocument document, IRegion textRange) throws JavaModelException, BadLocationException {
-		int importsStart=  textRange.getOffset();
-		int importsLen= textRange.getLength();
+	public MultiTextEdit getResultingEdits(IDocument document) throws JavaModelException, BadLocationException {
+		int importsStart=  fReplaceRange.getOffset();
+		int importsLen= fReplaceRange.getLength();
 				
 		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		boolean useSpaceBetween= useSpaceBetweenGroups();
@@ -738,11 +737,32 @@ public final class ImportsStructure implements IImportsStructure {
 		fNumberOfImportsCreated= nCreated;
 		
 		String newContent= buf.toString();
-		if (hasChanged(document, importsStart, importsLen, newContent)) {
-			return newContent;
-		}
-		return null;
+		String oldContent= document.get(importsStart, importsLen);
+		
+		return getTextEdit(oldContent, importsStart, newContent);
 	}
+	
+	private MultiTextEdit getTextEdit(String oldContent, int offset, String newContent) {
+		MultiTextEdit edit= new MultiTextEdit();
+		
+		ITokenComparator leftSide= new JavaTokenComparator(newContent, false); 
+		ITokenComparator rightSide= new JavaTokenComparator(oldContent, false);
+		
+		RangeDifference[] differences= RangeDifferencer.findRanges(leftSide, rightSide);
+		for (int i= 0; i < differences.length; i++) {
+			RangeDifference curr= differences[i];
+			if (curr.kind() == RangeDifference.CHANGE) {
+				int oldStart= rightSide.getTokenStart(curr.rightStart());
+				int oldEnd= rightSide.getTokenStart(curr.rightEnd());
+				int newStart= leftSide.getTokenStart(curr.leftStart());
+				int newEnd= leftSide.getTokenStart(curr.leftEnd());
+				String newString= newContent.substring(newStart, newEnd);
+				edit.addChild(new ReplaceEdit(offset + oldStart, oldEnd - oldStart, newString));
+			}
+		}
+		return edit;
+	}
+	
 	
 	/**
 	 * Probes if the formatter allows
@@ -823,18 +843,6 @@ public final class ImportsStructure implements IImportsStructure {
 		return false;
 	}
 	
-	private boolean hasChanged(IDocument document, int offset, int length, String content) throws BadLocationException {
-		if (content.length() != length) {
-			return true;
-		}
-		for (int i= 0; i < length; i++) {
-			if (content.charAt(i) != document.getChar(offset + i)) {
-				return true;
-			}
-		}
-		return false;	
-	}
-
 	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
 		String str= "import " + importName + ';' + lineDelim; //$NON-NLS-1$
 		// str= StubUtility.codeFormat(str, 0, lineDelim);

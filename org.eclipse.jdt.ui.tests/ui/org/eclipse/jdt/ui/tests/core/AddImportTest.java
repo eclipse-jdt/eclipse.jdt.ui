@@ -45,7 +45,7 @@ public class AddImportTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AddImportTest("testAddImports_bug25113"));
+			suite.addTest(new AddImportTest("testRemoveImports1"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -145,6 +145,46 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testRemoveImports1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import pack.List;\n");
+		buf.append("import pack.List2;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		String[] order= new String[] { "java", "com", "pack" };
+		
+		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		imports.removeImport("java.util.Set");
+		imports.removeImport("pack.List");
+		
+		imports.create(true, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import pack.List2;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	
 	public void testAddImports_bug23078() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
