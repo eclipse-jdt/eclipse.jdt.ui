@@ -57,7 +57,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	/** The amount of characters already read on first call to nextToken(). */
 	private int fPrefixLength;
 	
-	// XXX hack to emulate JavaPartitionScanner
+	//emulate JavaPartitionScanner
 	private static final boolean fgEmulate= false;
 	private int fJavaOffset;
 	private int fJavaLength;
@@ -76,7 +76,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	 */
 	public IToken nextToken() {
 		
-		// XXX hack to emulate JavaPartitionScanner
+		// emulate JavaPartitionScanner
 		if (fgEmulate) {
 			if (fJavaOffset != -1 && fTokenOffset + fTokenLength != fJavaOffset + fJavaLength) {
 				fTokenOffset += fTokenLength;		
@@ -106,7 +106,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 		 		}
 
 	 		case '\r':
-	 			// XXX hack to simulate JavaPartitionScanner
+	 			// emulate JavaPartitionScanner
 	 			if (!fgEmulate && fLast != CARRIAGE_RETURN) {
 					fLast= CARRIAGE_RETURN;
 					fTokenLength++;
@@ -122,7 +122,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 							fTokenLength++;
 							IToken token= fTokens[fState];
 							
-				 			// XXX hack to simulate JavaPartitionScanner
+				 			// emulate JavaPartitionScanner
 							if (fgEmulate) {
 								fLast= NONE;
 								fPrefixLength= 0;
@@ -149,18 +149,67 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 				switch (fState) {
 				case SINGLE_LINE_COMMENT:
 				case CHARACTER:
-				case STRING:
-					if (fTokenLength > 0) { // XXX verify! never false?
-						return postFix(fState);
-
-					} else {
-						consume();
-						continue;	
-					}
+				case STRING:				
+					// assert(fTokenLength > 0);
+					return postFix(fState);
 
 				default:
 					consume();
 					continue;
+				}
+
+			default:
+				if (!fgEmulate && fLast == CARRIAGE_RETURN) {			
+					switch (fState) {
+					case SINGLE_LINE_COMMENT:
+					case CHARACTER:
+					case STRING:
+
+						int last;
+						int newState;
+						switch (ch) {
+						case '/':
+							last= SLASH;
+							newState= JAVA;
+							break;
+
+						case '*':
+							last= STAR;
+							newState= JAVA;
+							break;
+						
+						case '\'':
+							last= NONE;
+							newState= CHARACTER;
+							break;
+
+						case '"':
+							last= NONE;
+							newState= STRING;
+							break;
+
+						case '\r':
+							last= CARRIAGE_RETURN;
+							newState= JAVA;
+							break;
+
+						case '\\':
+							last= BACKSLASH;
+							newState= JAVA;
+							break;
+
+						default:
+							last= NONE;
+							newState= JAVA;
+							break;
+						}
+						
+						fLast= NONE; // ignore fLast
+						return preFix(fState, newState, last, 1);
+	
+					default:
+						break;
+					}
 				}
 			}
 
@@ -370,7 +419,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	}
 
 	private final IToken preFix(int state, int newState, int last, int prefixLength) {
-		// XXX hack to emulate JavaPartitionScanner
+		// emulate JavaPartitionScanner
 		if (fgEmulate && state == JAVA && (fTokenLength - getLastLength(fLast) > 0)) {
 			fTokenLength -= getLastLength(fLast);
 			fJavaOffset= fTokenOffset;
@@ -433,7 +482,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 			fState= getState(contentType);			
 		}
 
-		// XXX hack to emulate JavaPartitionScanner
+		// emulate JavaPartitionScanner
 		if (fgEmulate) {
 			fJavaOffset= -1;
 			fJavaLength= 0;
@@ -452,7 +501,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 		fLast= NONE;
 		fState= JAVA;
 
-		// XXX hack to emulate JavaPartitionScanner
+		// emulate JavaPartitionScanner
 		if (fgEmulate) {
 			fJavaOffset= -1;
 			fJavaLength= 0;
