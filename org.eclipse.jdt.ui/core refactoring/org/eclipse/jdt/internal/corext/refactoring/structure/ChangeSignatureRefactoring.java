@@ -449,6 +449,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 6); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
+			clearManagers();
+
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
 			result.merge(checkSignature());
@@ -484,6 +486,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		} finally{
 			pm.done();
 		}
+	}
+
+	private void clearManagers() {
+		fAstManager.clear();
+		fImportEditManager.clear();
+		fRewriteManager.clear();
 	}
 
 	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws JavaModelException {

@@ -486,6 +486,8 @@ public class PushDownRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.creating_preview"), 5); //$NON-NLS-1$
+			clearManagers();
+						
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(pm, 1)));
@@ -509,6 +511,12 @@ public class PushDownRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private void clearManagers() {
+		fAstManager.clear();
+		fImportEditManager.clear();
+		fRewriteManager.clear();
 	}
 
 	private RefactoringStatus checkReferencesToPushedDownMembers(IProgressMonitor pm) throws JavaModelException {

@@ -673,6 +673,8 @@ public class PullUpRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.creating_preview"), 7); //$NON-NLS-1$
+			clearManagers();
+
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
@@ -697,6 +699,11 @@ public class PullUpRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
+	}
+	private void clearManagers() {
+		fAstManager.clear();
+		fImportEditManager.clear();
+		fRewriteManager.clear();
 	}
 	
 	private RefactoringStatus checkCallsToTargetClassConstructors(IProgressMonitor pm) throws JavaModelException {
