@@ -100,17 +100,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 		
 	boolean canOperateOn(IJavaElement element) {
-		if (fValidTypes == null || fValidTypes.length == 0)
+		if (element == null || fValidTypes == null || fValidTypes.length == 0 || !ActionUtil.isOnBuildPath(element))
 			return false;
 
-		if (element != null) {
-			for (int i= 0; i < fValidTypes.length; i++) {
-				if (fValidTypes[i].isInstance(element)) {
-					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
-						return hasChildren((IPackageFragment)element);
-					else
-						return true;
-				}
+		for (int i= 0; i < fValidTypes.length; i++) {
+			if (fValidTypes[i].isInstance(element)) {
+				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+					return hasChildren((IPackageFragment)element);
+				else
+					return true;
 			}
 		}
 		return false;
