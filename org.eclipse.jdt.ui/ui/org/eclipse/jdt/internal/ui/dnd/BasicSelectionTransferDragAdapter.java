@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 	public void dragStart(DragSourceEvent event) {
 		ISelection selection= fProvider.getSelection();
 		LocalSelectionTransfer.getInstance().setSelection(selection);
+		LocalSelectionTransfer.getInstance().setSelectionSetTime(event.time);
 		event.doit= isDragable(selection);
 	}
 	
@@ -66,5 +67,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 		// the work.
 		Assert.isTrue(event.detail == DND.DROP_NONE);
 		LocalSelectionTransfer.getInstance().setSelection(null);
+		LocalSelectionTransfer.getInstance().setSelectionSetTime(0);
 	}	
 }

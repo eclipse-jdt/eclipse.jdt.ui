@@ -7,7 +7,9 @@ package org.eclipse.jdt.internal.ui.dnd;
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TransferData;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class LocalSelectionTransfer extends ByteArrayTransfer {
@@ -21,6 +23,7 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	private static final LocalSelectionTransfer INSTANCE= new LocalSelectionTransfer();
 	
 	private ISelection fSelection;
+	private int fSelectionSetTime;
 	
 	private LocalSelectionTransfer() {
 	}
@@ -73,4 +76,13 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	protected String[] getTypeNames(){
 		return new String[] {TYPE_NAME};
 	}	
+	
+	public int getSelectionSetTime() {
+		return fSelectionSetTime;
+	}
+
+	public void setSelectionSetTime(int time) {
+		fSelectionSetTime= time;
+	}
+
 }
