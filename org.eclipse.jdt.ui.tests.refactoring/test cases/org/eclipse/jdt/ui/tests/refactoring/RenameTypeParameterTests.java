@@ -179,6 +179,12 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		helper2("T", "S", "A", true);
 	}
 
+	public void test14() throws Exception {
+		helper2("ELEMENT", "E", "A", true);
+	}
+	
+// ------------------------------------------------
+	
 	public void testFail0() throws Exception {
 		helper1("T", "S", "A", true);
 	}

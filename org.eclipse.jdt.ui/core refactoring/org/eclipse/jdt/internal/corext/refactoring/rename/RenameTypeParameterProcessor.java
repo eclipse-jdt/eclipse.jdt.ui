@@ -84,6 +84,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		 * @param status the status to update
 		 */
 		public RenameTypeParameterVisitor(final CompilationUnitRewrite rewrite, final ISourceRange range, final RefactoringStatus status) {
+			super(true);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(range);
 			Assert.isNotNull(status);
