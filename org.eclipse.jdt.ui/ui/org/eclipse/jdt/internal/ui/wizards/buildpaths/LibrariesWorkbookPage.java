@@ -501,9 +501,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public SourceAttachmentDialog(Shell parent, IClasspathEntry entry) {
 			super(parent);
 			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.SourceAttachmentDialog.title", entry.getPath().toString())); //$NON-NLS-1$
-			
-			IProject proj= fCurrJProject.getProject();
-			fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, entry);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(fWorkspaceRoot, this, entry);
 		}
 		
 		/**

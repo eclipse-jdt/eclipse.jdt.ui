@@ -40,7 +40,7 @@ public class NewPackageRootCreationWizard extends NewElementWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (finishPage(fPage)) {
+		if (finishPage(fPage.getRunnable())) {
 			IPackageFragmentRoot root= fPage.getNewPackageFragmentRoot();
 			try {
 				IResource resource= root.getUnderlyingResource();

@@ -39,7 +39,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (finishPage(fPage)) {
+		if (finishPage(fPage.getRunnable())) {
 			ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();

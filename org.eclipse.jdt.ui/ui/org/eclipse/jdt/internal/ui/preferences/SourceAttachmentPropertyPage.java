@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.dialogs.PropertyPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.dialogs.PropertyPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class SourceAttachmentPropertyPage extends PropertyPage implements IStatusChangeListener {
@@ -24,16 +25,17 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		fJarRoot= getJARPackageFragmentRoot();
 		if (fJarRoot != null) {
 			try {
-				IJavaProject jproject= fJarRoot.getJavaProject();
 				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(fJarRoot);
 				if (entry == null) {
 					// use a dummy entry to use for initialization
 					entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
 				}
-				fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
+				IWorkspaceRoot wsroot= fJarRoot.getJavaModel().getWorkspace().getRoot();
+				fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
 				return fSourceAttachmentBlock.createControl(composite);				
 			} catch (CoreException e) {
 				ErrorDialog.openError(getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.error"), "", e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+				JavaPlugin.log(e.getStatus());
 			}		
 		}
 		Label label= new Label(composite, SWT.LEFT + SWT.WRAP);
@@ -50,86 +52,23 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
-				IJavaProject jproject= fJarRoot.getJavaProject();
-				
-				IPath attachPath= fSourceAttachmentBlock.getSourceAttachmentPath();
-				IPath attachRoot= fSourceAttachmentBlock.getSourceAttachmentRootPath();				
-				
-				IClasspathEntry[] entries= modifyClasspath(fJarRoot, attachPath, attachRoot);
-				if (entries == null) {
-					// root not found in classpath
-					if (fSourceAttachmentBlock.getSourceAttachmentPath() == null) {
-						return true;
-					} else if (!putJarOnClasspath()) {
-						// ignore changes and return
-						return true;
-					}
-					// put new on class path
-					entries= jproject.getRawClasspath();
-					int nEntries= entries.length;
-					IClasspathEntry[] incrEntries= new IClasspathEntry[nEntries + 1];
-					System.arraycopy(entries, 0, incrEntries, 0, nEntries);
-					incrEntries[nEntries]= JavaCore.newLibraryEntry(fJarRoot.getPath(), attachPath, attachRoot);
-					entries= incrEntries;
-				}
-				final IClasspathEntry[] newEntries= entries;
-				
-				IRunnableWithProgress runnable= new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException {
-						try {
-							IJavaProject jproject= fJarRoot.getJavaProject();
-							jproject.setRawClasspath(newEntries, monitor);
-						} catch (JavaModelException e) {
-							throw new InvocationTargetException(e);
-						}
-					}
-				};				
-				new ProgressMonitorDialog(getShell()).run(true, true, runnable);
-			} catch (JavaModelException e) {
-				MessageDialog.openError(getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.error"), e.getMessage()); //$NON-NLS-1$
-				return false;							
+				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(fJarRoot.getJavaProject(), getShell());		
+				new ProgressMonitorDialog(getShell()).run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
-				if (!ExceptionHandler.handle(e.getTargetException(), getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.errorTitle"), JavaUIMessages.getString("SourceAttachmentPropertyPage.errorMessage"))) { //$NON-NLS-2$ //$NON-NLS-1$
-					MessageDialog.openError(getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.error"), e.getMessage()); //$NON-NLS-1$
+				String title= JavaUIMessages.getString("SourceAttachmentPropertyPage.errorTitle"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("SourceAttachmentPropertyPage.errorMessage"); //$NON-NLS-1$
+				if (!ExceptionHandler.handle(e, getShell(), title, message)) {
+					MessageDialog.openError(getShell(), title, message);
 				}
 				return false;
 			} catch (InterruptedException e) {
+				// cancelled
 				return false;
 			}				
 		}
 		return true;
 	}
 				
-	private IClasspathEntry[] modifyClasspath(IPackageFragmentRoot root, IPath attachPath, IPath attachRoot) throws JavaModelException{
-		IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(root);
-		if (entry != null) {
-			IClasspathEntry[] oldClasspath= root.getJavaProject().getRawClasspath();
-			IClasspathEntry[] newClasspath= new IClasspathEntry[oldClasspath.length];
-			for (int i= 0; i < oldClasspath.length; i++) {
-				if (oldClasspath[i] == entry) {
-					if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-						newClasspath[i]= JavaCore.newVariableEntry(entry.getPath(), attachPath, attachRoot);
-					} else {
-						newClasspath[i]= JavaCore.newLibraryEntry(entry.getPath(), attachPath, attachRoot);
-					}
-				} else {
-					newClasspath[i]= oldClasspath[i];
-				}
-			}
-			return newClasspath;
-		}
-		return null;
-	}		
-	
-	private boolean putJarOnClasspath() {
-		String title= JavaUIMessages.getString("SourceAttachmentPropertyPage.dialogTitle"); //$NON-NLS-1$
-		String message= JavaUIMessages.getString("SourceAttachmentPropertyPage.dialogMessage"); //$NON-NLS-1$
-		MessageDialog dialog= new MessageDialog(getShell(), title, null, message, SWT.ICON_QUESTION,
-	 			new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL } , 0
-	 	);
-	 	return (dialog.open() == dialog.OK);
-	}	
-	
 	private IPackageFragmentRoot getJARPackageFragmentRoot() {
 		// try to find it as Java element (needed for external jars)
 		IAdaptable adaptable= getElement();
@@ -152,16 +91,12 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					return jproject.getPackageFragmentRoot(resource);
 				}
 			} catch (CoreException e) {
-				ErrorDialog.openError(getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.error"), null, e.getStatus()); //$NON-NLS-1$
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 		return null;		
 	}
-	
-	protected SourceAttachmentBlock getSourceAttachmentBlock(){
-		return fSourceAttachmentBlock;
-	}
-	
+		
 	// ------- IStatusChangeListener --------
 	
 	public void statusChanged(IStatus status) {

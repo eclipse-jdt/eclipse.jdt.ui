@@ -6,8 +6,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
 import org.eclipse.swt.SWT;
@@ -23,10 +25,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -36,7 +40,9 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -92,11 +98,10 @@ public class SourceAttachmentBlock {
 	private Label fFullPathResolvedLabel;
 	private Label fPrefixResolvedLabel;
 	
-	public SourceAttachmentBlock(IProject project, IStatusChangeListener context, IClasspathEntry oldEntry) {
+	public SourceAttachmentBlock(IWorkspaceRoot root, IStatusChangeListener context, IClasspathEntry oldEntry) {
 		fContext= context;
-		fCurrProject= project;
 				
-		fRoot= fCurrProject.getWorkspace().getRoot();		
+		fRoot= root;		
 		fIsVariableEntry= (oldEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
 		
 		fNameStatus= new StatusInfo();
@@ -638,6 +643,67 @@ public class SourceAttachmentBlock {
 			path= new Path(path.lastSegment());
 		}
 		return new Path(varName).append(path);
+	}
+	
+	
+	/**
+	 * Creates a runnable that sets the source attachment by modifying the project's classpath.
+	 */
+	public IRunnableWithProgress getRunnable(final IJavaProject jproject, final Shell shell) {
+		return new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
+				try {
+					IClasspathEntry newEntry;
+					if (fIsVariableEntry) {
+						newEntry= JavaCore.newVariableEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath());
+					} else {
+						newEntry= JavaCore.newLibraryEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath());
+					}
+					IClasspathEntry[] entries= modifyClasspath(jproject, newEntry, shell);		
+					if (entries != null) {
+						jproject.setRawClasspath(entries, monitor);
+					}
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
+			}
+		};
+	}
+
+	private IClasspathEntry[] modifyClasspath(IJavaProject jproject, IClasspathEntry newEntry, Shell shell) throws JavaModelException{
+		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
+		int nEntries= oldClasspath.length;
+		ArrayList newEntries= new ArrayList(nEntries + 1);
+		int entryKind= newEntry.getEntryKind();
+		IPath jarPath= newEntry.getPath();
+		boolean added= false;
+		for (int i= 0; i < nEntries; i++) {
+			IClasspathEntry curr= oldClasspath[i];
+			if (curr.getEntryKind() == entryKind && curr.getPath().equals(jarPath)) {
+				newEntries.add(newEntry);
+				added= true;
+			} else {
+				newEntries.add(curr);
+			}
+		}
+		if (!added) {
+			if (newEntry.getSourceAttachmentPath() == null && !putJarOnClasspathDialog(shell)) {
+				return null;
+			}
+		}
+		return (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
+	}	
+				
+	private boolean putJarOnClasspathDialog(Shell shell) {
+		final boolean[] result= new boolean[1];
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				String title= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.message"); //$NON-NLS-1$
+				result[0]= MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, message);
+			}
+		});
+		return result[0];
 	}
 		
 }

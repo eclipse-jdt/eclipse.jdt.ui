@@ -38,24 +38,12 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 				}
 			}
 		}
-	}
+	}		
 	
 	/**
-	 * Called by the wizard to create the new element
-	 */		
-	public boolean finishPage(NewElementWizardPage page) {
-		IRunnableWithProgress runnable= page.getRunnable();
-		if (runnable != null) {
-			return invokeRunnable(runnable);
-		}
-		return true;
-	}
-		
-	
-	/**
-	 * Utility method: call a runnable in a WorkbenchModifyDelegatingOperation
-	 */
-	protected boolean invokeRunnable(IRunnableWithProgress runnable) {
+	 * Run a runnbable
+	 */	
+	public boolean finishPage(IRunnableWithProgress runnable) {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 		try {
 			getContainer().run(false, true, op);

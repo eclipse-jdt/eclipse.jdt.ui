@@ -40,7 +40,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (finishPage(fPage)) {
+		if (finishPage(fPage.getRunnable())) {
 			IPackageFragment pack= fPage.getNewPackageFragment();
 			try {
 				IResource resource= pack.getUnderlyingResource();
