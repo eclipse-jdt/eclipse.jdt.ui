@@ -692,7 +692,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		final Combo compliance= addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);
 		compliance.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if ("1.5".equals(compliance.getText())) { //$NON-NLS-1$
+				if ("5.0".equals(compliance.getText())) { //$NON-NLS-1$
 					MessageDialog.openWarning(compliance.getShell(), 
 						"Compiler Settings",  //$NON-NLS-1$
 						"Please note that the J2SE 5.0 support is still under development."); //$NON-NLS-1$
