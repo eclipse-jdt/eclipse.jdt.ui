@@ -18,8 +18,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -33,11 +35,13 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -51,6 +55,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -378,6 +384,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 
+			result.merge(checkIfDeletedParametersUsed());
 			if (mustAnalyzeAst()) 
 				result.merge(analyzeAst()); 
 			if (result.hasFatalError())
@@ -391,7 +398,45 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
-
+	private RefactoringStatus checkIfDeletedParametersUsed() {
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < fOccurrenceNodes.length; i++) {
+			ASTNode methodOccurrence= fOccurrenceNodes[i];
+			if (isReferenceNode(methodOccurrence))
+				continue;
+			ICompilationUnit cu= fAstManager.getCompilationUnit(methodOccurrence);
+			MethodDeclaration decl= getMethodDeclaration(methodOccurrence);
+			String typeName= getFullTypeName(decl);
+			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
+				ParameterInfo info= (ParameterInfo) iter.next();
+				SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) decl.parameters().get(info.getOldIndex());
+				ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
+				if (paramRefs.length > 0){
+					Context context= JavaSourceContext.create(cu, paramRefs[0]);
+					String pattern= "Parameter ''{0}'' is used in method ''{1}'' declared in type ''{2}''";
+					String msg= MessageFormat.format(pattern, new String[]{
+													paramDecl.getName().getIdentifier(),
+													decl.getName().getIdentifier(),
+													typeName
+													});
+					result.addWarning(msg, context);
+				}
+			}	
+		}
+		return result;
+	}
+	
+	private String getFullTypeName(MethodDeclaration decl) {
+		TypeDeclaration typeDecl= (TypeDeclaration)ASTNodes.getParent(decl, TypeDeclaration.class);
+		AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration)ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
+		if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
+			ClassInstanceCreation cic= (ClassInstanceCreation)ASTNodes.getParent(decl, ClassInstanceCreation.class);
+			String pattern= "anonymous subclass of ''{0}''";
+			return MessageFormat.format(pattern, new String[]{ASTNodes.getNameIdentifier(cic.getName())});
+		} else 
+			return typeDecl.getName().getIdentifier();
+	}
+	
 	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {
 		if (isVisibilitySameAsInitial())
 			return null;
@@ -417,7 +462,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return buff.toString();
 	}
 
-	public String getPreviewOfVisibityString() {
+	private String getPreviewOfVisibityString() {
 		String visibilityString= JdtFlags.getVisibilityString(fVisibility);
 		if ("".equals(visibilityString))
 			return visibilityString;
@@ -468,11 +513,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 						
-			CompilationUnit compliationUnitNode= fAstManager.getAST(getCu());
-			TextChange change= fChangeManager.get(getCu());
-			String newCuSource= change.getPreviewContent();
-			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), getCu().getElementName(), getCu().getJavaProject());
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, compliationUnitNode));
+			result.merge(checkCompilation());
 			if (result.hasError())
 				return result;
 //
@@ -488,6 +529,26 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		}	
+	}
+	private RefactoringStatus checkCompilation() throws CoreException {
+		ICompilationUnit cu= getCu();
+		CompilationUnit compliationUnitNode= fAstManager.getAST(cu);
+		TextChange change= fChangeManager.get(cu);
+		String newCuSource= change.getPreviewContent();
+		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject());
+		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCuSource, newCUNode, compliationUnitNode);
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			if (problem.getID() != IProblem.UndefinedName)
+				result.addEntry(createErrorEntry(problem, newCuSource));
+		}
+		return result;
+	}
+	
+	private RefactoringStatusEntry createErrorEntry(IProblem problem, String newWcSource) {
+		Context context= new StringContext(newWcSource, new SourceRange(problem));
+		return new RefactoringStatusEntry(problem.getMessage(), RefactoringStatus.ERROR, context);
 	}
 	
 	private static GroupDescription findEditGroupDescription(Set descriptions, ParameterInfo info){
@@ -535,6 +596,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			buff.append(createDeclarationString(info));
 		}
 		return buff.toString();
+	}
+		
+	private List getDeletedInfos(){
+		List result= new ArrayList(1);
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.isDeleted())
+				result.add(info);
+		}
+		return result;
 	}
 	
 	private List getNotDeletedInfos(){
