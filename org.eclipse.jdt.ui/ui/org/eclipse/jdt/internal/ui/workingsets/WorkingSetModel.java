@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class WorkingSetModel {
 	
 	private static class ElementMapper {
 		private Map fElementToWorkingSet= new HashMap();
-		private Map fWorkingSetToElement= new HashMap();
+		private Map fWorkingSetToElement= new IdentityHashMap();
 		
 		private Map fResourceToWorkingSet= new HashMap();
 
@@ -87,7 +88,7 @@ public class WorkingSetModel {
 			}
 		}
 		public IAdaptable[] remove(IWorkingSet ws) {
-			IAdaptable[] elements= (IAdaptable[])fWorkingSetToElement.remove(new Integer(System.identityHashCode(ws)));
+			IAdaptable[] elements= (IAdaptable[])fWorkingSetToElement.remove(ws);
 			if (elements != null) {
 				for (int i= 0; i < elements.length; i++) {
 					removeElement(elements[i], ws);
@@ -96,8 +97,7 @@ public class WorkingSetModel {
 			return elements;
 		}
 		public IAdaptable[] refresh(IWorkingSet ws) {
- 			Integer workingSetKey= new Integer(System.identityHashCode(ws));
-			IAdaptable[] oldElements= (IAdaptable[])fWorkingSetToElement.get(workingSetKey);
+			IAdaptable[] oldElements= (IAdaptable[])fWorkingSetToElement.get(ws);
 			if (oldElements == null)
 				return null;
 			IAdaptable[] newElements= ws.getElements();
@@ -111,7 +111,7 @@ public class WorkingSetModel {
 				removeElement((IAdaptable)iter.next(), ws);
 			}
 			if (toRemove.size() > 0 || toAdd.size() > 0)
-				fWorkingSetToElement.put(workingSetKey, newElements);
+				fWorkingSetToElement.put(ws, newElements);
 			return oldElements;
 		}
 		private void computeDelta(List toRemove, List toAdd, IAdaptable[] oldElements, IAdaptable[] newElements) {
@@ -136,11 +136,10 @@ public class WorkingSetModel {
 			return getAllElements(fResourceToWorkingSet, resource);
 		}
 		private void put(IWorkingSet ws) {
-			Integer workingSetKey= new Integer(System.identityHashCode(ws));
-			if (fWorkingSetToElement.containsKey(workingSetKey))
+			if (fWorkingSetToElement.containsKey(ws))
 				return;
 			IAdaptable[] elements= ws.getElements();
-			fWorkingSetToElement.put(workingSetKey, elements);
+			fWorkingSetToElement.put(ws, elements);
 			for (int i= 0; i < elements.length; i++) {
 				addElement(elements[i], ws);
 			}
