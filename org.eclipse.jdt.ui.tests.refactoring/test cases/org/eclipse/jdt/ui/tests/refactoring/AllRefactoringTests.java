@@ -47,6 +47,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenamePrivateMethodTests.suite());	
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
+		suite.addTest(MoveInstanceMethodTests.suite());
 		
 		//--types
 		suite.addTest(RenameTypeTests.suite());	
@@ -58,9 +59,6 @@ public class AllRefactoringTests {
 		suite.addTest(RenamePrivateFieldTests.suite());
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		
-		//--compilation units
-		suite.addTest(MultiMoveTests.suite());
-
 		//--projects
 		suite.addTest(RenameJavaProjectTests.suite());		
 		return suite;
