@@ -40,7 +40,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			 JavaProjectHelper.addRTJar(referencing2);
 			 JavaProjectHelper.addRequiredProject(referencing2, p1);
 			 JavaProjectHelper.addSourceContainer(referencing2, "src");
-			 
+
 			 JavaProjectHelper.addRTJar(p1);
 			 
 			 RenameJavaProjectRefactoring ref= new RenameJavaProjectRefactoring(p1);
@@ -73,9 +73,12 @@ public class RenameJavaProjectTests extends RefactoringTest {
 		}	finally{
 			JavaProjectHelper.removeSourceContainer(referencing1, "src");
 			JavaProjectHelper.removeSourceContainer(referencing2, "src");
-			JavaProjectHelper.delete(p1);
-			JavaProjectHelper.delete(referencing1);
-			JavaProjectHelper.delete(referencing2);
+			
+			if (p1 != null && p1.exists()){
+				JavaProjectHelper.delete(p1);
+				JavaProjectHelper.delete(referencing1);
+				JavaProjectHelper.delete(referencing2);
+			}	
 		}	
 	}
 }
