@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -156,12 +157,18 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			actualOptions.put(key, val);
 			store.setValue(key, val);
 		}
-		JavaCore.setOptions(actualOptions);
 		
 		if (hasChanges) {
 			String title= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.title"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.message"); //$NON-NLS-1$
-			if (MessageDialog.openQuestion(getShell(), title, message)) {
+			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+			int res= dialog.open();
+			if (res != 0 && res != 1) {
+				return false;
+			}
+			
+			JavaCore.setOptions(actualOptions);
+			if (res == 0) {
 				doFullBuild();
 			}
 		}

@@ -24,10 +24,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -36,6 +38,7 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.dialogs.YesNoCancelListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -549,16 +552,29 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			actualOptions.put(key, val);
 			store.setValue(key, val);
 		}
-		JavaCore.setOptions(actualOptions);
+		
 		
 		if (hasChanges) {
 			String title= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.title"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.message"); //$NON-NLS-1$
-			if (MessageDialog.openQuestion(getShell(), title, message)) {
+			
+			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+			int res= dialog.open();
+			if (res != 0 && res != 1) {
+				return false;
+			}
+			
+			JavaCore.setOptions(actualOptions);
+			if (res == 0) {
 				doFullBuild();
 			}
 		}
 		return super.performOk();
+	}
+	
+	public static boolean openQuestion(Shell parent, String title, String message) {
+		MessageDialog dialog= new MessageDialog(parent, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+		return dialog.open() == 0;
 	}
 	
 	private void doFullBuild() {
