@@ -325,7 +325,7 @@ class QuickdiffConfigurationBlock {
 		for (int i= 0; i < fQuickDiffProviderListModel.length; i++) {
 			String label= fQuickDiffProviderListModel[i][1];
 			if (fStore.getString(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
-				label += " " + PreferenceMessages.getString(fPrefix + ".quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
+				label += " " + PreferencesMessages.getString(fPrefix + ".quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
 			fQuickDiffProviderList.add(label);
 		}
 		fQuickDiffProviderList.getDisplay().asyncExec(new Runnable() {

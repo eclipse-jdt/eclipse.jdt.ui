@@ -23,7 +23,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -67,7 +66,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 			JavaPlugin.log(e);
 
 			Shell shell= fViewer.getTextWidget().getShell();
-			MessageDialog.openError(shell, JavaTemplateMessages.getString("TemplateVariableProposal.error.title"), e.getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(shell, TemplatePreferencesMessages.getString("TemplateVariableProposal.error.title"), e.getMessage()); //$NON-NLS-1$
 		}
 	}
 

@@ -8,18 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.template.java;
+package org.eclipse.jdt.internal.ui.text.template.preferences;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-class JavaTemplateMessages {
+class TemplatePreferencesMessages {
 
-	private static final String RESOURCE_BUNDLE= JavaTemplateMessages.class.getName();
+	private static final String RESOURCE_BUNDLE= TemplatePreferencesMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
-	private JavaTemplateMessages() {
+	private TemplatePreferencesMessages() {
 	}
 
 	public static String getString(String key) {

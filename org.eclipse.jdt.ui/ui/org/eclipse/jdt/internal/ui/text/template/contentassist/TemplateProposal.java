@@ -55,7 +55,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -343,7 +342,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public String getDisplayString() {
 		if (fDisplayString == null) {
-			fDisplayString= fTemplate.getName() + JavaTemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
+			fDisplayString= fTemplate.getName() + TemplateContentAssistMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
 		}
 		return fDisplayString;
 	}
@@ -367,11 +366,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	}
 
 	private void openErrorDialog(Shell shell, Exception e) {
-		MessageDialog.openError(shell, JavaTemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, TemplateContentAssistMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
 
 	private void handleException(Shell shell, CoreException e) {
-		ExceptionHandler.handle(e, shell, JavaTemplateMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
+		ExceptionHandler.handle(e, shell, TemplateContentAssistMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
 	}
 
 	/*

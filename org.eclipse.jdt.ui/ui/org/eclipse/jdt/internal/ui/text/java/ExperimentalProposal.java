@@ -29,7 +29,6 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -126,7 +125,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= fViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, JavaTextMessages.getString("ExperimentalProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
 	}	
 
 }

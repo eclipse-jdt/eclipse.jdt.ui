@@ -1431,7 +1431,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.title")); //$NON-NLS-1$
 		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage", new QuickdiffConfigurationBlock.IMessages() { //$NON-NLS-1$
 			public String getString(String key) {
-				return PreferenceMessages.getString(key);
+				return PreferencesMessages.getString(key);
 			}
 		});
 		item.setControl(fQuickDiffBlock.createControl(folder));
