@@ -426,22 +426,6 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		"}}}"
 	);
 	
-	
-	
-	private final Category assertCategory= new Category(
-		"'assert'",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, "before colon"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, "after colon")
-		},
-		"class Example {" +
-		"  void foo(int a) {" +
-		"	 assert a==0 : \"Oops\";" +
-		"  }" +
-		"}"
-	);
-	
-	
 	private final Category labelCategory= new Category(
 		"Labels",
 		new Option [] {
