@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.core.refactoring.util;import java.util.List;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 
 /**
- * This interface give AST node visitors access to the parent
+ * This interface gives AST node visitors access to the parent
  * of an </code>AstNode<code>.
  */
 public interface IParentTracker {

@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 
-public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentTrackable {
+public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvider {
 
 	private IParentTracker fParentTracker;
 	private CompilationUnitDeclaration fRoot;

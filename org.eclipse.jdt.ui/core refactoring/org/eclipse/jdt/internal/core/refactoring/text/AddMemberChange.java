@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.text;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
@@ -33,6 +34,10 @@ public class AddMemberChange extends SimpleReplaceTextChange {
 		Assert.isNotNull(fSource);
 		fTabWidth= tabWidth;
 		Assert.isTrue(fTabWidth >= 0);
+	}
+	
+	public IJavaElement getCorrespondingJavaElement() {
+		return fSibling.getDeclaringType();
 	}
 	
 	protected SimpleTextChange[] adjust(ITextBuffer buffer) throws JavaModelException {

@@ -53,7 +53,7 @@ public class RefactoringWizard extends Wizard {
 	}
 
 	//---- Hooks to overide ---------------------------------------------------------------
-	
+
 	/**
 	 * Some refactorings do activation checking when the wizard is going to be opened. 
 	 * They do this since activation checking is expensive and can't be performed on 
@@ -275,7 +275,8 @@ public class RefactoringWizard extends Wizard {
 			}
 			setStatus(status, style);
 		} else {
-			ExceptionHandler.handle(exception, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			if (exception != null)
+				ExceptionHandler.handle(exception, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		IChange change= op.getChange();	
 		return change;
@@ -288,14 +289,15 @@ public class RefactoringWizard extends Wizard {
 		try{
 			op.setChangeContext(context);
 			undoManager.aboutToPerformRefactoring();
-			getContainer().run(false, false, op);	
-			if (! op.getChange().isUndoable()){
-				success= false;
-			} else { 
-				if (op.changeExecuted())
+			getContainer().run(false, false, op);
+			if (op.changeExecuted()) {
+				if (! op.getChange().isUndoable()){
+					success= false;
+				} else { 
 					undoManager.addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
-				success= true;
-			}	
+					success= true;
+				}	
+			}
 		} catch (InvocationTargetException e) {
 			Throwable t= e.getTargetException();
 			if (t instanceof ChangeAbortException) {

@@ -18,13 +18,12 @@ public class EncapsulateReadAccess extends SimpleReplaceTextChange {
 
 	private static final String READ_ACCESS= "Encapsulate read access";
 	
-	public EncapsulateReadAccess(String getter, int offset, int length) {
-		super(READ_ACCESS, offset, length, getter + "()");
-	}
-	
 	public EncapsulateReadAccess(String getter, SingleNameReference node) {
 		this(getter, node.sourceStart, node.sourceEnd - node.sourceStart + 1);
 	}
-
+	
+	protected EncapsulateReadAccess(String getter, int offset, int length) {
+		super(READ_ACCESS, offset, length, getter + "()");
+	}
 }
 

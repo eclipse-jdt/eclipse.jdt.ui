@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.util;
 
-public interface IParentTrackable {
+public interface IParentProvider {
 	
 	public void setParentTracker(IParentTracker tracker);
 

@@ -62,9 +62,9 @@ public class AST {
 	}
 	
 	public void accept(IAbstractSyntaxTreeVisitor visitor) {
-		if (visitor instanceof IParentTrackable) {
+		if (visitor instanceof IParentProvider) {
 			ASTParentTrackingAdapter tracker= new ASTParentTrackingAdapter(visitor);
-			((IParentTrackable)visitor).setParentTracker(tracker);
+			((IParentProvider)visitor).setParentTracker(tracker);
 			visitor= tracker;
 		}
 		fRootVisitor.root.traverse(visitor, fRootVisitor.scope);

@@ -32,9 +32,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.AddMemberChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ChangeVisibilityChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.AST;
-import org.eclipse.jdt.internal.core.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.core.refactoring.util.JavaElementMapper;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
 
@@ -45,7 +43,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private TextBufferChangeManager fChangeManager;
 	private CompositeChange fChange;
 	
-	private AST fAST;
 	private FieldDeclaration fFieldDeclaration;
 	private TypeDeclaration fTypeDeclaration;
 
@@ -91,6 +88,43 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fInsertionIndex= index;
 	}
 	
+	/*
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		RefactoringStatus result=  new RefactoringStatus();
+		ICompilationUnit unit= fField.getCompilationUnit();
+		if (!unit.isStructureKnown()) {
+			result.addFatalError(RefactoringCoreMessages.getFormattedString(
+				"SelfEncapsulateField.syntax_errors",
+				unit.getElementName()));
+			return result;
+		}
+		JavaElementMapper mapper= new JavaElementMapper(fField);
+		AstNode node= mapper.getResult();
+		if (node == null || !(node instanceof FieldDeclaration)) {
+			return mappingErrorFound(result, mapper);
+		}
+		fFieldDeclaration= (FieldDeclaration)node;
+		if (fFieldDeclaration.binding.type.isBaseType()) {
+			result.addFatalError("Self Encapsulate Field is not applicable to base types.");
+			return result;
+		}
+		return result;
+	}
+
+	private RefactoringStatus mappingErrorFound(RefactoringStatus result, JavaElementMapper mapper) {
+		IProblem[] problems= mapper.getProblems();		
+		if (problems.length > 0) {
+			result.addFatalError(RefactoringCoreMessages.getFormattedString(
+				"SelfEncapsulateField.compilation_error",
+				new Object[]{new Integer(problems[0].getSourceLineNumber()), problems[0].getMessage()}));
+		} else {
+			result.addFatalError("Internal error. Cannot map Java element to AST node.");
+		}
+		return result;
+	}
+
 	public RefactoringStatus checkMethodNames() {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkFieldName(fGetterName));
@@ -109,56 +143,33 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		pm.worked(1);
 		if (result.hasFatalError())
 			return result;
+		pm.setTaskName("Searching for affected compilation units");
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
 			SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
+		pm.setTaskName("Analyzing");	
 		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 		sub.beginTask("", affectedCUs.length);
 		for (int i= 0; i < affectedCUs.length; i++) {
 			ICompilationUnit unit= affectedCUs[i];
-			sub.subTask("Analyzing " + unit.getElementName());
-			AST ast= new AST(affectedCUs[i]);
-			ITextBufferChange change= fChangeManager.get(unit);
-			AccessAnalyzer analyzer= new AccessAnalyzer(this, fFieldDeclaration, change);
-			ast.accept(analyzer);
+			if (unit.isStructureKnown()) {
+				sub.subTask(unit.getElementName());
+				AST ast= new AST(affectedCUs[i]);
+				ITextBufferChange change= fChangeManager.get(unit);
+				AccessAnalyzer analyzer= new AccessAnalyzer(this, fFieldDeclaration, change);
+				ast.accept(analyzer);
+				if (ast.hasProblems()) {
+					compilerErrorFound(result, unit);
+				}
+				result.merge(analyzer.getStatus());
+				if (result.hasFatalError())
+					break;
+			} else {
+				syntaxErrorFound(result, unit);
+			}
 			sub.worked(1);
 		}
 		sub.done();
-		return result;
-	}
-
-	/*
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result=  new RefactoringStatus();
-		ICompilationUnit unit= fField.getCompilationUnit();
-		if (!unit.isStructureKnown()) {
-			result.addFatalError(RefactoringCoreMessages.getFormattedString(
-				"SelfEncapsulateField.syntax_errors",
-				unit.getElementName()));
-			return result;
-		}
-		fAST= new AST(fField.getCompilationUnit());
-		IProblem[] problems= fAST.getProblems();
-		if (problems.length > 0) {
-			result.addFatalError(RefactoringCoreMessages.getFormattedString(
-				"SelfEncapsulateField.compilation_error",
-				new Object[]{new Integer(problems[0].getSourceLineNumber()), problems[0].getMessage()}));
-			return result;
-		}
-		JavaElementMapper mapper= new JavaElementMapper(fField);
-		fAST.accept(mapper);
-		AstNode node= mapper.getResult();
-		if (node == null || !(node instanceof FieldDeclaration)) {
-			result.addFatalError("Internal error. Cannot map Java element to AST node.");
-			return result;
-		}
-		fFieldDeclaration= (FieldDeclaration)node;
-		if (fFieldDeclaration.binding.type.isBaseType()) {
-			result.addFatalError("Self Encapsulate Field is not applicable to base types.");
-			return result;
-		}
 		return result;
 	}
 
@@ -171,9 +182,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		pm.subTask("Create changes");
 		addChanges(result, new SubProgressMonitor(pm, 2));
 		ITextBufferChange[] changes= fChangeManager.getAllChanges();
+		SubProgressMonitor sub= new SubProgressMonitor(pm, 8);
+		sub.beginTask("", changes.length);
 		for (int i= 0; i < changes.length; i++) {
 			result.addChange(changes[i]);
+			sub.worked(1);
 		}
+		sub.done();
+		pm.done();
 		return result;
 	}
 
@@ -206,6 +222,18 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			proposal);
 	}
 	
+	private void compilerErrorFound(RefactoringStatus result, ICompilationUnit unit) {
+		result.addError(RefactoringCoreMessages.getFormattedString(
+			"SelfEncapsulateField.compiler_errors_update",
+			unit.getElementName()));
+	}
+
+	private void syntaxErrorFound(RefactoringStatus result, ICompilationUnit unit) {
+		result.addError(RefactoringCoreMessages.getFormattedString(
+			"SelfEncapsulateField.syntax_errors_update",
+			unit.getElementName()));
+	}
+
 	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws JavaModelException {
 		int insertionIndex= fInsertionIndex;
 		int insertionKind= AddMemberChange.INSERT_AFTER;

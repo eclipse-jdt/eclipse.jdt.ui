@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.text;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
@@ -25,6 +26,10 @@ public class ChangeVisibilityChange extends SimpleReplaceTextChange {
 		setText(visibility);
 	}
 
+	public IJavaElement getCorrespondingJavaElement() {
+		return fMember;
+	}
+	
 	protected SimpleTextChange[] adjust(ITextBuffer buffer) throws JavaModelException {
 		ISourceRange range= fMember.getSourceRange();
 		Scanner scanner= new Scanner();

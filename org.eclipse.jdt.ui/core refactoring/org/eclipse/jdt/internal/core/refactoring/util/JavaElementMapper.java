@@ -5,31 +5,42 @@
 package org.eclipse.jdt.internal.core.refactoring.util;
 
 import java.util.List;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
+import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.core.refactoring.Assert;
 
 public class JavaElementMapper extends GenericVisitor {
 
+	private boolean fMapped;
+	private IMember fElement;
 	private int fStart;
 	private int fEnd;
 	private AstNode fResult;
 	private AstNode[] fParents;
+	private IProblem[] fProblems;
 	
-	public JavaElementMapper(ISourceReference element) {
+	public JavaElementMapper(IMember element) throws JavaModelException {
+		fElement= element;
+		Assert.isNotNull(fElement);
 		try {
-			ISourceRange sourceRange= element.getSourceRange();
+			ISourceRange sourceRange= fElement.getSourceRange();
 			fStart= sourceRange.getOffset();
 			fEnd= fStart + sourceRange.getLength() - 1;
+			ICompilationUnit unit= fElement.getCompilationUnit();
+			AST ast= new AST(unit);
+			ast.accept(this);
+			fProblems= ast.getProblems();
 		} catch (JavaModelException e) {
 			fStart= -1;
 			fEnd= -1;
+			fMapped= true;
 		}
 	}
 	
@@ -41,8 +52,14 @@ public class JavaElementMapper extends GenericVisitor {
 		return fParents;
 	}
 	
+	public IProblem[] getProblems() {
+		return fProblems;
+	}
+	
 	protected boolean visitRange(int start, int end, AstNode node, Scope scope) {
-		if (start == fStart && end == fEnd) {
+		if (fResult != null) {
+			return false;
+		} else if (start == fStart && end == fEnd) {
 			fResult= node;
 			List p= internalGetParents();
 			if (p != null)

@@ -57,7 +57,7 @@ public abstract class RefactoringAction extends Action {
 		setEnabled(enabled);
 	}	
 	
-	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle) throws JavaModelException{
+	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle) throws JavaModelException {
 		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 		if (! status.hasFatalError()){
 			wizard.setActivationStatus(status);
