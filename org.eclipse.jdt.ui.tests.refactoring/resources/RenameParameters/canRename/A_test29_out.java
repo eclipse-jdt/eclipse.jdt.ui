@@ -1,13 +1,13 @@
-//renaming to B
+//renaming to b
 package p;
 class A{
    A A;
-   A m(A B){
+   A m(A b){
      A:
         for (;;){
-          if (B.m(B)==B)
+          if (b.m(b)==b)
              break A;
         }
-      return B;
+      return b;
    };
 }

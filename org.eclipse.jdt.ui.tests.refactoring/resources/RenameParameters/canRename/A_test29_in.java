@@ -1,4 +1,4 @@
-//renaming to B
+//renaming to b
 package p;
 class A{
    A A;

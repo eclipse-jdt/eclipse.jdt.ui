@@ -200,7 +200,7 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	}		
 	
 	public void test29() throws Exception{
-		helper1(new String[]{"B"}, new String[]{"QA;"});
+		helper1(new String[]{"b"}, new String[]{"QA;"});
 	}
 
 	public void test30() throws Exception{

@@ -1,14 +1,14 @@
 //renaming to: j
 package p;
 class A{
-	void m(i j){
+	Object m(i j){
 		j.i.i= j.i;
 		i:{
 			while(true){
 				break i;
-				return j;
 			}
 		}
+		return j;
 	};
 }
 class i{
