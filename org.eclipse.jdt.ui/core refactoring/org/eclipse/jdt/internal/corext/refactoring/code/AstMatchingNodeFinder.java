@@ -89,7 +89,7 @@ class AstMatchingNodeFinder {
 		Visitor(ASTNode nodeToMatch){
 			fNodeToMatch= nodeToMatch;
 			fFound= new ArrayList();
-			fMatcher= new ASTMatcher();
+			fMatcher= new JdtASTMatcher();
 		}
 		
 		ASTNode[] getMatchingNodes(){
