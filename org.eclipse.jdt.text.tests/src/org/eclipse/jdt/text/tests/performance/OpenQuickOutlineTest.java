@@ -46,7 +46,7 @@ public class OpenQuickOutlineTest extends TestCase {
 	protected void setUp() throws Exception {
 		fFirstMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "cold");
 		fSecondMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "warm");
-		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW);
+		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW); // TODO: find solution to hide view in other perspectives too
 		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", N_OF_RUNS, ORIG_NAME, ORIG_NAME);
 		ResourceTestHelper.incrementalBuild();
 	}
