@@ -399,9 +399,6 @@ class JavaEditorHoverConfigurationBlock {
 
 		fHoverTableViewer.setInput(hoverDescs);
 		
-		for (int i= 0; i < hoverDescs.length; i++)
-			fHoverTable.getItem(i).setChecked(hoverDescs[i].isEnabled());
-
 		initializeFields();
 	}
 
@@ -416,6 +413,11 @@ class JavaEditorHoverConfigurationBlock {
 			String key= (String) fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
+
+		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
+		for (int i= 0; i < hoverDescs.length; i++)
+			fHoverTable.getItem(i).setChecked(hoverDescs[i].isEnabled());
+		fHoverTableViewer.refresh();
 	}
 
 	void performOk() {
@@ -448,7 +450,6 @@ class JavaEditorHoverConfigurationBlock {
 	void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
-		fHoverTableViewer.refresh();
 	}
 
 	private void restoreFromPreferences() {
