@@ -687,10 +687,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
 		
 		if (nextError != null) {
-			
-			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
-//			setStatusLineErrorMessage(nextError.getMessage());
-			
+						
 			IMarker marker= null;
 			if (nextError instanceof MarkerAnnotation)
 				marker= ((MarkerAnnotation) nextError).getMarker();
@@ -715,6 +712,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					((TaskList) view).setSelection(ss, true);
 				}
 			}
+			
+			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
+			setStatusLineErrorMessage(nextError.getMessage());
 			
 		} else {
 			
