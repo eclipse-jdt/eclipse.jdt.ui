@@ -265,9 +265,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			event.doit= false;
 			break;
 
-		// ESC = cancel
+		// ENTER
+		case 0x0D:
+			leave(UNINSTALL | COMMIT | UPDATE_CARET);
+			event.doit= false;
+			break;
+
+		// ESC
 		case 0x1B:
-			leave(UNINSTALL);
+			leave(UNINSTALL | COMMIT);
 			event.doit= false;
 			break;
 		}

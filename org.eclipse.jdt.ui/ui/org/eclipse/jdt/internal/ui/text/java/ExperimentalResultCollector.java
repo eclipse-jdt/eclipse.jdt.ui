@@ -37,9 +37,11 @@ public class ExperimentalResultCollector extends ResultCollector {
 			lengths[i]= buffer.length() - offsets[i];
 		}
 		buffer.append(')');
-		
-		return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(),
-			original.getDisplayString(), offsets, lengths, fViewer);
+
+		return new JavaCompletionProposal(buffer.toString(), start, end - start, original.getImage(),
+			original.getDisplayString());		
+//		return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(),
+//			original.getDisplayString(), offsets, lengths, fViewer);
 	}
 
 	/**
