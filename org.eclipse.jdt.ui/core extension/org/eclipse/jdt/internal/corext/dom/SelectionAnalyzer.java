@@ -44,6 +44,18 @@ public class SelectionAnalyzer extends GenericVisitor {
 		return (ASTNode)fSelectedNodes.get(0);
 	}
 	
+	public ASTNode getLastSelectedNode() {
+		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
+			return null;
+		return (ASTNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
+	}
+	
+	public boolean isExpressionSelected() {
+		if (!hasSelectedNodes())
+			return false;
+		return fSelectedNodes.get(0) instanceof Expression;
+	}
+	
 	protected Selection getSelection() {
 		return fSelection;
 	}

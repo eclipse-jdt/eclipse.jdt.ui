@@ -21,15 +21,29 @@ public class ASTNode2String extends ASTVisitor {
 		return converter.fResult.toString();
 	}
 	
-	public boolean visit(SimpleName name) {
-		fResult.append(name.getIdentifier());
+	public boolean visit(SimpleName node) {
+		fResult.append(node.getIdentifier());
 		return true;
 	}
 	
-	public boolean visit(QualifiedName name) {
-		name.getQualifier().accept(this);
+	public boolean visit(QualifiedName node) {
+		node.getQualifier().accept(this);
 		fResult.append('.');
-		name.getName().accept(this);
+		node.getName().accept(this);
 		return false;
+	}
+	
+	public void endVisit(ArrayType node) {
+		fResult.append("[]");
+	}
+	
+	public boolean visit(PrimitiveType node) {
+		fResult.append(node.getPrimitiveTypeCode().toString());
+		return true;
+	}
+	
+	public boolean visit(SimpleType node) {
+		// no special action. SimpleType has a Name.
+		return true;
 	}
 }
