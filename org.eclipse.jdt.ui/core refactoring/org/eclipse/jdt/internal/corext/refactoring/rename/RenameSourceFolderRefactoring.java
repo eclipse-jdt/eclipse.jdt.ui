@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -140,21 +139,10 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (isReadOnly()){
-				String message= RefactoringCoreMessages.getFormattedString("RenameSourceFolderRefactoring.read_only", //$NON-NLS-1$
-									fSourceFolder.getElementName());
-				return RefactoringStatus.createErrorStatus(message);
-			}	
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
 		}		
-	}
-	
-	private boolean isReadOnly() throws JavaModelException{
-		if (Checks.isClasspathDelete(fSourceFolder))
-			return false;
-		return fSourceFolder.getResource().isReadOnly();
 	}
 	
 	//-- changes
