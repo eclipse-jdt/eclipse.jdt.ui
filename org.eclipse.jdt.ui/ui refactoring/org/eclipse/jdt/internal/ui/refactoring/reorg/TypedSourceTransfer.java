@@ -16,8 +16,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TransferData;
 
@@ -97,8 +95,6 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 			super.javaToNative(out.toByteArray(), transferData);
 		} catch (IOException e) {
 			//it's best to send nothing if there were problems
-		} catch (JavaModelException e) {
-			//it's best to send nothing if there were problems
 		}		
 	}
 
@@ -131,7 +127,7 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 		return TypedSource.create(source, type);
 	}
 
-	private static void writeJavaElement(DataOutputStream dataOut, TypedSource sourceReference) throws IOException, JavaModelException {
+	private static void writeJavaElement(DataOutputStream dataOut, TypedSource sourceReference) throws IOException {
 		dataOut.writeInt(sourceReference.getType());
 		dataOut.writeUTF(sourceReference.getSource());
 	}
