@@ -51,9 +51,9 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		fSettings= settings;
 	}
 
-
-	private String createTypeComment(IType type) throws CoreException {
+	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
 		Template[] templates= Templates.getInstance().getTemplates();
+		StringBuffer buf= new StringBuffer();
 		String comment= null;
 		for (int i= 0; i < templates.length; i++) {
 			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
@@ -62,15 +62,16 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			}
 		}
 		if (comment == null || comment.length() == 0) {
-			StringBuffer buf= new StringBuffer();
 			buf.append("/**\n"); //$NON-NLS-1$
 			buf.append(" * "); //$NON-NLS-1$
 			buf.append(CodeGenerationMessages.getString("AddJavaDocStubOperation.configure.message")); //$NON-NLS-1$
 			buf.append('\n');
 			buf.append(" */\n"); //$NON-NLS-1$
-			return buf.toString();
-		}		
-		return comment;
+		} else {
+			buf.append(comment);
+			buf.append(lineDelimiter);
+		}
+		return buf.toString();
 	}		
 	
 	private String createMethodComment(IMethod meth) throws JavaModelException {
@@ -141,7 +142,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				String comment= null;
 				switch (curr.getElementType()) {
 					case IJavaElement.TYPE:
-						comment= createTypeComment((IType) curr);
+						comment= createTypeComment((IType) curr, lineDelim);
 						break;
 					case IJavaElement.FIELD:
 						comment= createFieldComment((IField) curr);	
