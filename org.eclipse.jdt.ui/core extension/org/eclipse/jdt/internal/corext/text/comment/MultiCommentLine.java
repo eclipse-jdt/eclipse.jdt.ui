@@ -22,7 +22,7 @@ import org.eclipse.jface.text.Region;
  * 
  * @since 3.0
  */
-public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, ILinkTagConstants, IJavaDocTagConstants {
+public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, IJavaDocTagConstants {
 
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_CONTENT_PREFIX= " * "; //$NON-NLS-1$

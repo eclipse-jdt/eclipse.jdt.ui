@@ -41,4 +41,16 @@ public interface IJavaDocTagConstants {
 
 	/** Javadoc tag prefix */
 	public static final char JAVADOC_TAG_PREFIX= '@';
+
+	/** Link tag postfix */
+	public static final char LINK_TAG_POSTFIX= '}';
+
+	/** Link tag prefix */
+	public static final String LINK_TAG_PREFIX= "{@"; //$NON-NLS-1$
+
+	/** Comment root tags */
+	public static final String[] COMMENT_ROOT_TAGS= new String[] { "@deprecated", "@see", "@since", "@version" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+	/** Tag prefix of comment tags */
+	public static final char COMMENT_TAG_PREFIX= '@';
 }

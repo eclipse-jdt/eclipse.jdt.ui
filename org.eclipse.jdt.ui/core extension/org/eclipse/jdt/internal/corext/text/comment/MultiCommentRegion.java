@@ -24,7 +24,7 @@ import org.eclipse.jface.text.TypedPosition;
  * 
  * @since 3.0
  */
-public class MultiCommentRegion extends CommentRegion implements ICommentTagConstants {
+public class MultiCommentRegion extends CommentRegion implements IJavaDocTagConstants {
 
 	/** Should root tag parameter descriptions be indented after the tag? */
 	private final boolean fIndentDescriptions;
