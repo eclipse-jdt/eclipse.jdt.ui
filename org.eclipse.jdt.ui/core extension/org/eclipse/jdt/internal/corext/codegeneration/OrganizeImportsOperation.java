@@ -57,7 +57,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private ImportsStructure fImpStructure;
 				
-		private ArrayList fTypeRefsFound;
+		private ArrayList fTypeRefsFound; // cached array list for reuse
+		private ArrayList fNamesFound; // cached array list for reuse
+		
 		private ArrayList fAllTypes;
 		
 		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, IProgressMonitor monitor) {
@@ -65,7 +67,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
 					
-			fTypeRefsFound= new ArrayList();  	// cached array list for reuse			
+			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
+			fNamesFound= new ArrayList();  	// cached array list for reuse		
 			
 			fAllTypes= new ArrayList(500);
 			IJavaProject project= impStructure.getCompilationUnit().getJavaProject();
@@ -88,7 +91,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			try {
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 						
-				findTypeRefs(typeName, typeRefsFound);				
+				findTypeRefs(typeName, typeRefsFound, fNamesFound);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
 					// nothing found
@@ -128,15 +131,20 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 			} finally {
 				fTypeRefsFound.clear();
+				fNamesFound.clear();
 			}
 			return null;
 		}
 
-		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound) {
+		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound, ArrayList namesFound) {
 			for (int i= fAllTypes.size() - 1; i >= 0; i--) {
 				TypeInfo curr= (TypeInfo) fAllTypes.get(i);
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					typeRefsFound.add(curr);
+					String fullyQualifiedName= curr.getFullyQualifiedName();
+					if (!namesFound.contains(fullyQualifiedName)) {
+						namesFound.add(fullyQualifiedName);
+						typeRefsFound.add(curr);
+					}
 				}
 			}
 		}
