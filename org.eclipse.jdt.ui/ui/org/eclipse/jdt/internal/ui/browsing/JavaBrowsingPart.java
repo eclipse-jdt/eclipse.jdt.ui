@@ -95,9 +95,9 @@ import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.packageview.OpenResourceAction;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.ShowInNavigatorAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -125,7 +125,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private Action fOpenToAction;
 	private Action fShowNavigatorAction;
 	private PropertyDialogAction fPropertyDialogAction;
- 	private RefactoringAction fDeleteAction;
+ 	private IRefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
@@ -367,7 +367,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			new JavaSearchGroup()
 		};
 		
-		fDeleteAction= new DeleteAction(provider);
+		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
 //		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 //		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$

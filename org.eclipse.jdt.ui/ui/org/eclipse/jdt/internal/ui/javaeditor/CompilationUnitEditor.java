@@ -111,7 +111,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelect
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchAction;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
@@ -405,7 +405,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		//page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
 		//page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		
-		DeleteAction deleteElement= new DeleteAction(page);
+		IAction deleteElement= ReorgGroup.createDeleteAction(page);
 		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
 		
 		return page;

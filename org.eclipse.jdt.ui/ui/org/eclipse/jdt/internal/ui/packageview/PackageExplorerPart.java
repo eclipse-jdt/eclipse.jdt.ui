@@ -116,9 +116,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -172,7 +172,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
 	private PropertyDialogAction fPropertyDialogAction;
- 	private RefactoringAction fDeleteAction;
+ 	private IRefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
@@ -569,7 +569,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new JavaSearchGroup()
 		};
 		
-		fDeleteAction= new DeleteAction(provider);
+		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
