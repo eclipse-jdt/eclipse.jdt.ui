@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -35,6 +36,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 	private Label		fDescriptionFileLabel;
 	private Text		fDescriptionFileText;
 	private Button		fDescriptionFileBrowseButton;
+	private Button		fBuildIfNeededCheckbox;
 
 	// dialog store id constants
 	private final static String PAGE_NAME= "jarOptionsWizardPage"; //$NON-NLS-1$
@@ -44,6 +46,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
 	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION"; //$NON-NLS-1$
 	private final static String STORE_USE_SRC_FOLDERS= PAGE_NAME + ".STORE_USE_SRC_FOLDERS"; //$NON-NLS-1$
+	private final static String STORE_BUILD_IF_NEEDED= PAGE_NAME + ".BUILD_IF_NEEDED"; //$NON-NLS-1$
 
 	/**
 	 *	Create an instance of this class
@@ -54,6 +57,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		setDescription(JarPackagerMessages.getString("JarOptionsPage.description")); //$NON-NLS-1$
 		fJarPackage= jarPackage;
 	}
+
 	/*
 	 * Method declared on IDialogPage.
 	 */
@@ -72,6 +76,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE);								
 		
 	}
+
 	/**
 	 *	Create the export options specification widgets.
 	 *
@@ -107,12 +112,18 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 
 		createSpacer(optionsGroup);
 
+		fBuildIfNeededCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fBuildIfNeededCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.buildIfNeeded")); //$NON-NLS-1$
+		fBuildIfNeededCheckbox.addListener(SWT.Selection, selectionListener);
+
+		createSpacer(optionsGroup);
+		
 		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fSaveDescriptionCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.saveDescription.text")); //$NON-NLS-1$
 		fSaveDescriptionCheckbox.addListener(SWT.Selection, selectionListener);
-
 		createDescriptionFileGroup(parent);
 	}
+
 	/**
 	 * Persists resource specification control setting that are to be restored
 	 * in the next instance of this page. Subclasses wishing to persist
@@ -126,17 +137,20 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			settings.put(STORE_EXPORT_WARNINGS, fJarPackage.exportWarnings());
 			settings.put(STORE_EXPORT_ERRORS, fJarPackage.exportErrors());
 			settings.put(STORE_USE_SRC_FOLDERS, fJarPackage.useSourceFolderHierarchy());
+			settings.put(STORE_BUILD_IF_NEEDED, fJarPackage.isBuildingIfNeeded());
 			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
 			settings.put(STORE_DESCRIPTION_LOCATION, fJarPackage.getDescriptionLocation().toString());
 		}
 		// Allow subclasses to save values
 		internalSaveWidgetValues();
 	}
+
 	/**
 	 * Hook method for subclasses to persist their settings.
 	 */
 	protected void internalSaveWidgetValues() {
 	}
+
 	/**
 	 *	Hook method for restoring widget values to the values that they held
 	 *	last time this wizard was used to completion.
@@ -147,6 +161,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 
 		fExportWarningsCheckbox.setSelection(fJarPackage.exportWarnings());
 		fExportErrorsCheckbox.setSelection(fJarPackage.exportErrors());
+		fBuildIfNeededCheckbox.setSelection(fJarPackage.isBuildingIfNeeded());
 		fUseSourceFoldersCheckbox.setSelection(fJarPackage.useSourceFolderHierarchy());
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
 		fDescriptionFileText.setText(fJarPackage.getDescriptionLocation().toString());
@@ -166,6 +181,8 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			if (pathStr == null)
 				pathStr= ""; //$NON-NLS-1$
 			fJarPackage.setDescriptionLocation(new Path(pathStr));
+			if (settings.get(STORE_BUILD_IF_NEEDED) != null)
+				fJarPackage.setBuildIfNeeded(settings.getBoolean(STORE_BUILD_IF_NEEDED));
 		}
 	}
 
@@ -183,6 +200,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			return;
 		fJarPackage.setExportWarnings(fExportWarningsCheckbox.getSelection());
 		fJarPackage.setExportErrors(fExportErrorsCheckbox.getSelection());
+		fJarPackage.setBuildIfNeeded(fBuildIfNeededCheckbox.getSelection());
 		fJarPackage.setSaveDescription(fSaveDescriptionCheckbox.getSelection());
 		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
 		fJarPackage.setUseSourceFolderHierarchy(fUseSourceFoldersCheckbox.getSelection());
@@ -204,6 +222,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			fDescriptionFileText.setText(path.toString());
 		}
 	}
+
 	/**
 	 * Updates the enablements of this page's controls. Subclasses may extend.
 	 */
@@ -214,6 +233,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		fDescriptionFileText.setEnabled(saveDescription);
 		fDescriptionFileLabel.setEnabled(saveDescription);
 	}
+
 	/*
 	 * Implements method from IJarPackageWizardPage
 	 */
@@ -284,6 +304,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			}
 		});
 	}
+
 	/**
 	 * Creates a file resource handle for the file with the given workspace path.
 	 * This method does not create the file resource; this is the responsibility

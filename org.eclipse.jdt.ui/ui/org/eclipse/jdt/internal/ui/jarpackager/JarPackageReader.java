@@ -114,6 +114,7 @@ public class JarPackageReader extends Object {
 			jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
 			jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
 			jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
+			jarPackage.setBuildIfNeeded(getBooleanAttribute(element, "buildIfNeeded", jarPackage.isBuildingIfNeeded())); //$NON-NLS-1$
 		}
 	}
 
