@@ -69,7 +69,10 @@ public class UnresolvedElementsSubProcessor {
 		}			
 		
 		if (node.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-			getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
+			MethodInvocation invocation= (MethodInvocation) node.getParent();
+			if (node.equals(invocation.getExpression())) {
+				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
+			}
 		}
 	}
 	
