@@ -433,6 +433,10 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
 		public boolean consumes(SemanticToken token) {
+			SimpleName node= token.getNode();
+			if (node.isDeclaration())
+				return false;
+			
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.METHOD && (binding.getModifiers() & Modifier.ABSTRACT) == Modifier.ABSTRACT;
 		}
