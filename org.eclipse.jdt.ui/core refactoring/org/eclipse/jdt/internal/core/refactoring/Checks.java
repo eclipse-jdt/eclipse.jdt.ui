@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.Flags;
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -78,7 +78,32 @@ public class Checks {
 	public static RefactoringStatus checkPackageName(String name) {
 		return checkName(name, JavaConventions.validatePackageName(name));
 	}
-		
+	
+	/**
+	 * Checks if the given name is a valid compilation unit name.
+	 *
+	 * @param the compilation unit name.
+	 * @return a refactoring status containing the error message if the
+	 *  name is not a valid java package name.
+	 */
+	public static RefactoringStatus checkCompilationUnitName(String name) {
+		return checkName(name, JavaConventions.validateCompilationUnitName(name));
+	}
+	
+	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
+		IPath newPath= RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName);
+		if (resourceExists(newPath)){
+			RefactoringStatus result= new RefactoringStatus();	
+			result.addFatalError("Cannot rename a compilation unit to " + newName + ".java - name already used by another file in this directory");
+			return result;
+		} else
+			return null;
+	}
+
+	public static boolean resourceExists(IPath resourcePath){
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(resourcePath) != null;
+	}
+	
 	/**
 	 * Returns <code>true</code> if the parameter is a top-level type, <code>false</code> otherwise.
 	 * 
