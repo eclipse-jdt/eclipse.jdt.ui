@@ -124,7 +124,7 @@ public class MoveAction extends ReorgDestinationAction {
 	private static int askIfUpdateReferences(){
 		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
 		String title= "Move";
-		String preview= "Preview";
+		String preview= "Pre&view";
 		String question= "Do you want to update references to the moved elements? Press '" + preview + "' to see the preview of the reference updates.";
 		
 		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL,
