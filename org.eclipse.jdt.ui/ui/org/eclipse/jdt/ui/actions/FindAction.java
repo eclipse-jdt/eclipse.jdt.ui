@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -22,7 +23,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -42,6 +45,7 @@ import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -268,7 +272,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		try {
 			performNewSearch(element);
 		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search_notsuccessful.title"), SearchMessages.getString("Search.Error.search_notsuccessful.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -276,7 +280,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 		JavaSearchQuery query= createJob(element);
 		if (query != null) {
 			NewSearchUI.activateSearchResultView();
-			NewSearchUI.runQuery(query);
+			if (query.canRunInBackground()) {
+				NewSearchUI.runQueryInBackground(query);
+			} else {
+				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+				IStatus status= NewSearchUI.runQueryInForeground(progressService, query);
+				if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
+					ProblemDialog.open(getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message"), status); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 		}
 	}
 

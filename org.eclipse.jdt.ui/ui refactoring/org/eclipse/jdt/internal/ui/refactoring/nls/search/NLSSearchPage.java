@@ -17,14 +17,11 @@ import java.util.ArrayList;
 
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -95,7 +92,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -121,12 +117,12 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 	private static class SearchPatternData {
 
-		String			propertyFileName;
-		IFile			propertyFile;
-		String			wrapperClassName;
-		IJavaElement	wrapperClass;
-		int			scope;
-		IWorkingSet[]	workingSets;
+		String propertyFileName;
+		IFile propertyFile;
+		String wrapperClassName;
+		IJavaElement wrapperClass;
+		int scope;
+		IWorkingSet[] workingSets;
 
 		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p) {
 			this(wrapperClassName, wrapperClass, p, ISearchPageContainer.WORKSPACE_SCOPE, null);
@@ -197,7 +193,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		
 		NLSSearchQuery query= new NLSSearchQuery(data.wrapperClass, data.propertyFile, scope, scopeDescription);
 		NewSearchUI.activateSearchResultView();
-		NewSearchUI.runQuery(query);
+		NewSearchUI.runQueryInBackground(query); // NLSSearchQuery can be run in background
 		return true;
 	}
 
@@ -474,8 +470,8 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		if (o instanceof IJavaElement) {
 			fWrapperClass= (IJavaElement) o;
 			result= determineInitValuesFrom(fWrapperClass);
-		} else if (o instanceof ISearchResultViewEntry) {
-			fWrapperClass= getJavaElement(((ISearchResultViewEntry) o).getSelectedMarker());
+		} else if (SearchUtil.isISearchResultViewEntry(o)) {
+			fWrapperClass= SearchUtil.getJavaElement(o);
 			result= determineInitValuesFrom(fWrapperClass);
 		} else if (o instanceof IAdaptable) {
 			IWorkbenchAdapter element= (IWorkbenchAdapter) ((IAdaptable) o).getAdapter(IWorkbenchAdapter.class);
@@ -483,18 +479,6 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				result= new SearchPatternData(element.getLabel(o), null, ""); //$NON-NLS-1$
 		}
 		return result;
-	}
-
-	private IJavaElement getJavaElement(IMarker marker) {
-		try {
-			String handle= (String) marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
-			if (handle != null) {
-				return JavaCore.create(handle);
-			}
-		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-		}
-		return null;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {

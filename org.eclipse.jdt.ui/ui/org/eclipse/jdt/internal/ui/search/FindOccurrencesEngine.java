@@ -114,6 +114,6 @@ public abstract class FindOccurrencesEngine {
 	
 	private void performNewSearch(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
 		NewSearchUI.activateSearchResultView();
-		NewSearchUI.runQuery(new OccurrencesSearchQuery(finder, document, element));
+		NewSearchUI.runQueryInBackground(new OccurrencesSearchQuery(finder, document, element));
 	}
 }

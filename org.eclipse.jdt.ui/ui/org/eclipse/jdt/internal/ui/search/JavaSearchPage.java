@@ -249,7 +249,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		}
 		
-		JavaSearchQuery textSearchJob= null;
 		QuerySpecification querySpec= null;
 		if (data.getJavaElement() != null && getPattern().equals(fInitialData.getPattern())) {
 			if (data.getLimitTo() == IJavaSearchConstants.REFERENCES)
@@ -260,10 +259,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			data.setJavaElement(null);
 		} 
 		
-		textSearchJob= new JavaSearchQuery(querySpec);
-		org.eclipse.search.ui.NewSearchUI.activateSearchResultView();
-
-		NewSearchUI.runQuery(textSearchJob);	
+		JavaSearchQuery textSearchJob= new JavaSearchQuery(querySpec);
+		NewSearchUI.activateSearchResultView();
+		NewSearchUI.runQueryInBackground(textSearchJob);
 		return true;
 	}
 
