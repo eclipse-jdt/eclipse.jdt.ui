@@ -80,13 +80,13 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 	
 	private static class SearchPatternData {
-		private int			searchFor;
-		private int			limitTo;
-		private String			pattern;
-		private boolean		isCaseSensitive;
-		private IJavaElement	javaElement;
-		private int			scope;
-		private IWorkingSet[]	 	workingSets;
+		private int searchFor;
+		private int limitTo;
+		private String pattern;
+		private boolean isCaseSensitive;
+		private IJavaElement javaElement;
+		private int scope;
+		private IWorkingSet[] workingSets;
 		
 		public SearchPatternData(int searchFor, int limitTo, boolean isCaseSensitive, String pattern, IJavaElement element) {
 			this(searchFor, limitTo, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
