@@ -167,7 +167,7 @@ public class CPListLabelProvider extends LabelProvider {
 					buf.append(patterns[i].toString());
 				}
 			} else {
-				buf.append(notAvailable);
+				buf.append(NewWizardMessages.getString("CPListLabelProvider.all")); //$NON-NLS-1$
 			}
 		}
 		return buf.toString();

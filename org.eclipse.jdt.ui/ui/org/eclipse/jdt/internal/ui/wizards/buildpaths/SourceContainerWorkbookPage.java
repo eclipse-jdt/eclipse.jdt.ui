@@ -352,26 +352,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				fClassPathList.dialogFieldChanged(); // validate
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
-			CPListElement selElement= elem.getParent();
-			ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(getShell(), selElement, true);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
-				fFoldersList.refresh();
-				fClassPathList.dialogFieldChanged(); // validate
-			}		
+			showExclusionInclusionDialog(elem.getParent(), true);		
 		} else if (key.equals(CPListElement.INCLUSION)) {
-			CPListElement selElement= elem.getParent();
-			ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(getShell(), selElement, false);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.INCLUSION, dialog.getExclusionPattern());
-				fFoldersList.refresh();
-				fClassPathList.dialogFieldChanged(); // validate
-			}		
+			showExclusionInclusionDialog(elem.getParent(), false);
 		}
 	}
 
+	private void showExclusionInclusionDialog(CPListElement selElement, boolean focusOnExclusion) {
+		ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(getShell(), selElement, focusOnExclusion);
+		if (dialog.open() == Window.OK) {
+			selElement.setAttribute(CPListElement.INCLUSION, dialog.getInclusionPattern());
+			selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+			fFoldersList.refresh();
+			fClassPathList.dialogFieldChanged(); // validate
+		}
+	}
 
-	
 	protected void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
