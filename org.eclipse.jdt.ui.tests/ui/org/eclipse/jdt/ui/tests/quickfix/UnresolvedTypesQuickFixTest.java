@@ -98,7 +98,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -147,7 +147,17 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+		proposal= (CUCorrectionProposal) proposals.get(4);
+		String preview5= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E <Vector1> {\n");
+		buf.append("    Vector1 vec;\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 
 	}
 
@@ -163,7 +173,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -213,7 +223,18 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+		proposal= (CUCorrectionProposal) proposals.get(4);
+		String preview5= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E <Vect1or> {\n");
+		buf.append("    void foo(Vect1or[] vec) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
 	
 	public void testTypeInMethodReturnType() throws Exception {
@@ -229,7 +250,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -280,7 +301,19 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+		proposal= (CUCorrectionProposal) proposals.get(4);
+		String preview5= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E <Vect1or> {\n");
+		buf.append("    Vect1or[] foo() {\n");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
 
 	public void testTypeInExceptionType() throws Exception {
@@ -388,7 +421,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -457,7 +490,33 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });		
+		proposal= (CUCorrectionProposal) proposals.get(5);
+		String preview6= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");		
+		buf.append("public class E <ArrayListExtra> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Serializable[] v= new ArrayListExtra[10];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(6);
+		String preview7= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    <ArrayListExtra> void foo() {\n");
+		buf.append("        Serializable[] v= new ArrayListExtra[10];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected7= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
 	}
 	
 	public void testQualifiedType() throws Exception {
@@ -702,7 +761,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 6);
+		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -768,7 +827,17 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });		
+		proposal= (CUCorrectionProposal) proposals.get(6);
+		String preview7= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E <floot> {\n");
+		buf.append("    floot vec= 1.0;\n");
+		buf.append("}\n");
+		String expected7= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
 	}
 
 	private void createSomeAmbiguity(boolean ifc, boolean isException) throws Exception {

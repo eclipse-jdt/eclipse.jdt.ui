@@ -16,9 +16,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,20 +23,24 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.RenameNodeCompletionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
@@ -102,7 +103,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -179,7 +180,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -263,7 +264,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -350,7 +351,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -415,7 +416,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -487,7 +488,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -538,7 +539,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -591,7 +592,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -654,7 +655,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -708,7 +709,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 6);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -836,7 +837,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -885,143 +886,122 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 8);
+		assertNumberOfProposals(proposals, 10);
 		assertCorrectLabels(proposals);
 
-		boolean doField= true, doParam= true, doLocal= true, doConst= true, doInterface= true, doClass= true, doEnum= true, doChange= true;
-		for (int i= 0; i < proposals.size(); i++) {
+		int i= 0;
+		String[] expected= new String[proposals.size()];
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    private Object Fixe;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Object Fixe;\n");					
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo(Object Fixe) {\n");
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    private static final String Fixe = null;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Fixe {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface Fixe {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum Fixe {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        char ch= File.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F <Fixe> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("public class F {\n");
+		buf.append("    <Fixe> void foo() {\n");
+		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[i++]= buf.toString();
+		
+		String[] previews= new String[proposals.size()];
+		for (i= 0; i < previews.length; i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof NewVariableCompletionProposal) {
-				NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(i);
-				String preview= getPreviewContent(proposal);
-	
-				if (proposal.getVariableKind() == NewVariableCompletionProposal.FIELD) {
-					assertTrue("2 field proposals", doField);
-					doField= false;
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("import java.io.File;\n");
-					buf.append("public class F {\n");
-					buf.append("    private Object Fixe;\n");
-					buf.append("\n");
-					buf.append("    void foo() {\n");
-					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-					buf.append("    }\n");
-					buf.append("}\n");
-					assertEqualString(preview, buf.toString());
-				} else if (proposal.getVariableKind() == NewVariableCompletionProposal.LOCAL) {
-					assertTrue("2 local proposals", doLocal);
-					doLocal= false;
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("import java.io.File;\n");
-					buf.append("public class F {\n");
-					buf.append("    void foo() {\n");
-					buf.append("        Object Fixe;\n");					
-					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-					buf.append("    }\n");
-					buf.append("}\n");
-					assertEqualString(preview, buf.toString());
-				} else if (proposal.getVariableKind() == NewVariableCompletionProposal.PARAM) {
-					assertTrue("2 param proposals", doParam);
-					doParam= false;
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("import java.io.File;\n");
-					buf.append("public class F {\n");
-					buf.append("    void foo(Object Fixe) {\n");
-					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-					buf.append("    }\n");
-					buf.append("}\n");
-					assertEqualString(preview, buf.toString());
-				} else if (proposal.getVariableKind() == NewVariableCompletionProposal.CONST_FIELD) {
-					assertTrue("2 const proposals", doConst);
-					doConst= false;
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("import java.io.File;\n");
-					buf.append("public class F {\n");
-					buf.append("    private static final String Fixe = null;\n");
-					buf.append("\n");
-					buf.append("    void foo() {\n");
-					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-					buf.append("    }\n");
-					buf.append("}\n");
-					assertEqualString(preview, buf.toString());
-					
-				} else {
-					assertTrue("unknown type", false);
-				}
-			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
-				NewCUCompletionUsingWizardProposal proposal= (NewCUCompletionUsingWizardProposal) curr;
-				proposal.setShowDialog(false);
-				proposal.apply(null);
-				
-				ICompilationUnit newCU= pack1.getCompilationUnit("Fixe.java");
-				assertTrue("Nothing created", newCU.exists());
-
-				if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_CLASS) {
-					assertTrue("2 class proposals", doClass);
-					doClass= false;
-
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("\n");
-					buf.append("public class Fixe {\n");
-					buf.append("\n");
-					buf.append("}\n");
-					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-					JavaProjectHelper.performDummySearch();
-					newCU.delete(true, null);
-				} else if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_INTERFACE) {
-					assertTrue("2 interface proposals", doInterface);
-					doInterface= false;					
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("\n");
-					buf.append("public interface Fixe {\n");
-					buf.append("\n");
-					buf.append("}\n");
-					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-					JavaProjectHelper.performDummySearch();
-					newCU.delete(true, null);
-				} else if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_ENUM) {
-					assertTrue("2 enum proposals", doEnum);
-					doEnum= false;					
-					
-					buf= new StringBuffer();
-					buf.append("package test1;\n");
-					buf.append("\n");
-					buf.append("public enum Fixe {\n");
-					buf.append("\n");
-					buf.append("}\n");
-					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-					JavaProjectHelper.performDummySearch();
-					newCU.delete(true, null);
-				}
+			if (curr instanceof NewCUCompletionUsingWizardProposal) {
+				previews[i]= getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr);
 			} else {
-				assertTrue("2 replace proposals", doChange);
-				doChange= false;
-				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
-				String preview= getPreviewContent(proposal);
-	
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.io.File;\n");
-				buf.append("public class F {\n");
-				buf.append("    void foo() {\n");
-				buf.append("        char ch= File.pathSeparatorChar;\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
+				previews[i]= getPreviewContent((CUCorrectionProposal) curr);
 			}
-		}		
-	
+		}
+		assertEqualStringsIgnoreOrder(previews, expected);	
 	}
 	
 	public void testVarWithGenricType() throws Exception {
@@ -1047,7 +1027,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1110,7 +1090,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1176,7 +1156,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1245,7 +1225,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1282,7 +1262,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal localProposal= null;
@@ -1323,7 +1303,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal localProposal= null;
@@ -1365,7 +1345,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal localProposal= null;
@@ -1407,7 +1387,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1441,7 +1421,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1521,7 +1501,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1592,7 +1572,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1659,7 +1639,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1732,7 +1712,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);

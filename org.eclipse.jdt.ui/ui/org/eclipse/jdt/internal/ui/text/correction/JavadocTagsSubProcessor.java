@@ -399,7 +399,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 	 
-	private static Set getPreviousTypeParamNames(List typeParams, ASTNode missingNode) {
+	public static Set getPreviousTypeParamNames(List typeParams, ASTNode missingNode) {
 		Set previousNames=  new HashSet();
 		for (int i = 0; i < typeParams.size(); i++) {
 			TypeParameter curr= (TypeParameter) typeParams.get(i);

@@ -292,7 +292,7 @@ public class UnresolvedElementsSubProcessor {
 			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
 		} else {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 		}
 		
@@ -300,7 +300,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// create field in outer class (if inside anonymous)
 		if (outsideAnonymous != null) {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, getTypeSignature(outsideAnonymous) } ); //$NON-NLS-1$
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, ASTResolving.getTypeSignature(outsideAnonymous) } ); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, outsideAnonymous, relevance + 1, image));
 		}
@@ -314,7 +314,7 @@ public class UnresolvedElementsSubProcessor {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.description", name); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
 			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.other.description", new Object[] { name, getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			}
 			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.CONST_FIELD, simpleName, target, relevance, image));
@@ -421,7 +421,7 @@ public class UnresolvedElementsSubProcessor {
 						if (NameMatcher.isSimilarName(curr.getName(), identifier)) {
 							AST ast= astRoot.getAST();
 							ASTRewrite rewrite= ASTRewrite.create(ast);
-							String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetomethod.description", getMethodSignature(curr, false)); //$NON-NLS-1$
+							String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetomethod.description", ASTResolving.getMethodSignature(curr, false)); //$NON-NLS-1$
 							Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 							LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 8, image);
 							proposals.add(proposal);
@@ -517,13 +517,13 @@ public class UnresolvedElementsSubProcessor {
 				break;
 			case ASTNode.METHOD_DECLARATION:
 				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
-					kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.VARIABLES;
+					kind= SimilarElementsRequestor.CLASSES;
 				} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
 					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
 				}
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
-				kind= SimilarElementsRequestor.REF_TYPES;
+				kind= SimilarElementsRequestor.REF_TYPES  & ~SimilarElementsRequestor.VARIABLES;
 				break;
 			case ASTNode.THROW_STATEMENT:
 				kind= SimilarElementsRequestor.CLASSES;
@@ -559,7 +559,7 @@ public class UnresolvedElementsSubProcessor {
 			default:
 		}
 		if (!JavaModelUtil.is50OrHigher(project)) {
-			return kind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS);
+			return kind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
 		}
 		return kind;
 	}
@@ -631,6 +631,9 @@ public class UnresolvedElementsSubProcessor {
 		String simpleName= importRewrite.addImport(fullName);
 		String packName= Signature.getQualifier(fullName);		
 		String[] arg= { simpleName, packName };
+		if (!isLikelyTypeName(simpleName)) {
+			relevance -= 2;
+		}
 		
 		CUCorrectionProposal proposal;
 		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
@@ -651,11 +654,11 @@ public class UnresolvedElementsSubProcessor {
 		return proposal;
 	}
 	
-	private static boolean isPossibleTypeName(String name) {
+	private static boolean isLikelyTypeName(String name) {
 		return name.length() > 0 && Character.isUpperCase(name.charAt(0));
 	}
 	
-	private static boolean isPossiblePackageName(String name) {
+	private static boolean isLikelyPackageName(String name) {
 		if (name.length() != 0) {
 			int i= 0;
 			do {
@@ -667,6 +670,10 @@ public class UnresolvedElementsSubProcessor {
 		}
 		return true;
 	}
+	
+	private static boolean isLikelyTypeParameterName(String name) {
+		return name.length() == 1 && Character.isUpperCase(name.charAt(0));
+	}
 
 	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
 		Name node= refNode;
@@ -674,7 +681,7 @@ public class UnresolvedElementsSubProcessor {
 			String typeName= ASTNodes.getSimpleNameIdentifier(node);
 			Name qualifier= null;
 			// only propose to create types for qualifiers when the name starts with upper case
-			boolean isPossibleName= isPossibleTypeName(typeName) || (node == refNode);
+			boolean isPossibleName= isLikelyTypeName(typeName) || (node == refNode);
 			if (isPossibleName) {
 				IPackageFragment enclosingPackage= null;
 				IType enclosingType= null;
@@ -700,8 +707,8 @@ public class UnresolvedElementsSubProcessor {
 					 }
 				}
 				int rel= relevance;
-				if (enclosingPackage != null && !isPossiblePackageName(enclosingPackage.getElementName())) {
-					rel -= 3;
+				if (enclosingPackage != null && isLikelyPackageName(enclosingPackage.getElementName())) {
+					rel += 3;
 				}
 				
 				if ((enclosingPackage != null && !enclosingPackage.getCompilationUnit(typeName + ".java").exists()) // new top level type //$NON-NLS-1$
@@ -725,8 +732,30 @@ public class UnresolvedElementsSubProcessor {
 			node= qualifier;
 		} while (node != null);
 		
+		// type parameter proposals
 		if (refNode.isSimpleName() && ((kind & SimilarElementsRequestor.VARIABLES)  != 0)) {
-			
+			CompilationUnit root= (CompilationUnit) refNode.getRoot();
+			String name= ((SimpleName) refNode).getIdentifier();
+			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(refNode);
+			int baseRel= relevance;
+			if (isLikelyTypeParameterName(name)) {
+				baseRel += 4;
+			}
+			while (declaration != null) {
+				IBinding binding= null;
+				int rel= baseRel;
+				if (declaration instanceof MethodDeclaration) {
+					binding= ((MethodDeclaration) declaration).resolveBinding();
+				} else if (declaration instanceof TypeDeclaration) {
+					binding= ((TypeDeclaration) declaration).resolveBinding();
+					rel++;
+				}
+				if (binding != null) {
+					AddTypeParameterProposal proposal= new AddTypeParameterProposal(cu, binding, root, name, null, rel);
+					proposals.add(proposal);
+				}
+				declaration= ASTResolving.findParentBodyDeclaration(declaration.getParent());
+			}
 		}
 	}
 	
@@ -807,7 +836,7 @@ public class UnresolvedElementsSubProcessor {
 				String label;
 				Image image;
 				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
-				String sig= getMethodSignature(methodName, parameterTypes);
+				String sig= ASTResolving.getMethodSignature(methodName, parameterTypes);
 				
 				if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
 					if (cu.equals(targetCU)) {
@@ -824,7 +853,7 @@ public class UnresolvedElementsSubProcessor {
 					if (anonymDecl != null) {
 						senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 						if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-							String[] args= new String[] { sig, getTypeSignature(senderDeclBinding) };
+							String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", args); //$NON-NLS-1$
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
 							proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
@@ -991,7 +1020,7 @@ public class UnresolvedElementsSubProcessor {
 			
 		// add arguments
 		{			
-			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
+			String[] arg= new String[] { ASTResolving.getMethodSignature(methodBinding, false) };
 			String label;
 			if (diff == 1) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargument.description", arg); //$NON-NLS-1$
@@ -1020,7 +1049,7 @@ public class UnresolvedElementsSubProcessor {
 				changeDesc[idx]= new RemoveDescription();
 				changedTypes[i]= declParameterTypes[idx];
 			}
-			String[] arg= new String[] { getMethodSignature(methodDecl, !cu.equals(targetCU)), getTypeNames(changedTypes) };
+			String[] arg= new String[] { ASTResolving.getMethodSignature(methodDecl, !cu.equals(targetCU)), getTypeNames(changedTypes) };
 			String label;
 			if (methodDecl.isConstructor()) {
 				if (diff == 1) {
@@ -1048,7 +1077,7 @@ public class UnresolvedElementsSubProcessor {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			buf.append(getTypeSignature(types[i]));
+			buf.append(ASTResolving.getTypeSignature(types[i]));
 		}
 		return buf.toString();
 	}
@@ -1095,7 +1124,7 @@ public class UnresolvedElementsSubProcessor {
 			for (int i= diff - 1; i >= 0; i--) {
 				rewrite.remove((Expression) arguments.get(indexSkipped[i]), null);
 			}
-			String[] arg= new String[] { getMethodSignature(methodRef, false) };
+			String[] arg= new String[] { ASTResolving.getMethodSignature(methodRef, false) };
 			String label;
 			if (diff == 1) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeargument.description", arg); //$NON-NLS-1$
@@ -1138,7 +1167,7 @@ public class UnresolvedElementsSubProcessor {
 				changeDesc[idx]= new InsertDescription(newType, name);
 				changeTypes[i]= newType;
 			}
-			String[] arg= new String[] { getMethodSignature(methodDecl, isDifferentCU), getTypeNames(changeTypes) };
+			String[] arg= new String[] { ASTResolving.getMethodSignature(methodDecl, isDifferentCU), getTypeNames(changeTypes) };
 			String label;
 			if (methodDecl.isConstructor()) {
 				if (diff == 1) {
@@ -1180,14 +1209,6 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	
-	private static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
-		StringBuffer buf= new StringBuffer();
-		if (inOtherCU && !binding.isConstructor()) {
-			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
-		}
-		buf.append(binding.getName());
-		return getMethodSignature(buf.toString(), binding.getParameterTypes());
-	}
 	
 	private static ITypeBinding[] getParameterTypes(List args) {
 		ITypeBinding[] params= new ITypeBinding[args.size()];
@@ -1200,44 +1221,10 @@ public class UnresolvedElementsSubProcessor {
 			params[i]= curr;
 		}
 		return params;
-	}	
-	
-	private static String getMethodSignature(String name, ITypeBinding[] params) {
-		StringBuffer buf= new StringBuffer();
-		buf.append(name).append('(');
-		for (int i= 0; i < params.length; i++) {
-			if (i > 0) {
-				buf.append(", "); //$NON-NLS-1$
-			}
-			buf.append(getTypeSignature(params[i]));
-		}
-		buf.append(')');
-		return buf.toString();
-	}
-	
-	private static String getTypeSignature(ITypeBinding type) {
-		if (type.isRawType()) {
-			return type.getName();
-		}
-		if (type.isParameterizedType() || type.isGenericType()) {
-			StringBuffer buf= new StringBuffer(Bindings.getRawName(type));
-			buf.append('<');
-			ITypeBinding[] args=  type.isParameterizedType() ? type.getTypeArguments() : type.getTypeParameters();
-			for (int i= 0; i < args.length; i++) {
-				if (i > 0)
-					buf.append(", "); //$NON-NLS-1$
-				buf.append(getTypeSignature(args[i]));
-
-			}
-			buf.append('>');
-			return buf.toString();
-		} else if (type.isWildcardType()) {
-			return "?"; //$NON-NLS-1$
-		}
-		return type.getName();
 	}
 	
 
+	
 	private static void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
@@ -1311,7 +1298,7 @@ public class UnresolvedElementsSubProcessor {
 						ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
 						
 						ITypeBinding[] swappedTypes= new ITypeBinding[] { declParamTypes[idx1], declParamTypes[idx2] };
-						String[] args=  new String[] { getMethodSignature(methodDecl, !targetCU.equals(cu)), getTypeNames(swappedTypes) };
+						String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), getTypeNames(swappedTypes) };
 						String label;
 						if (methodDecl.isConstructor()) {
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.constr.description", args); //$NON-NLS-1$
@@ -1345,7 +1332,7 @@ public class UnresolvedElementsSubProcessor {
 					newParamTypes[i]= changeDesc[i] == null ? declParamTypes[i] : ((EditDescription) changeDesc[i]).type;
 				}
 				
-				String[] args=  new String[] { getMethodSignature(methodDecl, !targetCU.equals(cu)), getMethodSignature(methodDecl.getName(), newParamTypes) };
+				String[] args=  new String[] { ASTResolving.getMethodSignature(methodDecl, !targetCU.equals(cu)), ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes) };
 				String label;
 				if (methodDecl.isConstructor()) {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.constr.description", args); //$NON-NLS-1$
@@ -1413,7 +1400,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		rewrite.set(invocationNode, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 
-		String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetoouter.description", getTypeSignature(currType)); //$NON-NLS-1$	
+		String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetoouter.description", ASTResolving.getTypeSignature(currType)); //$NON-NLS-1$	
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 		proposal.setImportRewrite(imports);
@@ -1476,7 +1463,7 @@ public class UnresolvedElementsSubProcessor {
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 			if (targetCU != null) {
-				String[] args= new String[] { getMethodSignature( getTypeSignature(targetDecl), getParameterTypes(arguments)) };
+				String[] args= new String[] { ASTResolving.getMethodSignature( ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments)) };
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", args); //$NON-NLS-1$
 				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetDecl, 5, image));

@@ -769,8 +769,53 @@ public class ASTResolving {
 		}
 		return true;
 	}
+	
+	// pretty signatures
 
+	public static String getTypeSignature(ITypeBinding type) {
+		if (type.isRawType()) {
+			return type.getName();
+		}
+		if (type.isParameterizedType() || type.isGenericType()) {
+			StringBuffer buf= new StringBuffer(Bindings.getRawName(type));
+			buf.append('<');
+			ITypeBinding[] args=  type.isParameterizedType() ? type.getTypeArguments() : type.getTypeParameters();
+			for (int i= 0; i < args.length; i++) {
+				if (i > 0)
+					buf.append(", "); //$NON-NLS-1$
+				buf.append(getTypeSignature(args[i]));
+	
+			}
+			buf.append('>');
+			return buf.toString();
+		} else if (type.isWildcardType()) {
+			return "?"; //$NON-NLS-1$
+		}
+		return type.getName();
+	}
+	
+	public static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
+		StringBuffer buf= new StringBuffer();
+		if (inOtherCU && !binding.isConstructor()) {
+			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
+		}
+		buf.append(binding.getName());
+		return getMethodSignature(buf.toString(), binding.getParameterTypes());
+	}
 
+	
+	public static String getMethodSignature(String name, ITypeBinding[] params) {
+		StringBuffer buf= new StringBuffer();
+		buf.append(name).append('(');
+		for (int i= 0; i < params.length; i++) {
+			if (i > 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(getTypeSignature(params[i]));
+		}
+		buf.append(')');
+		return buf.toString();
+	}
 	
 	
 }
