@@ -19,7 +19,6 @@ class ShowLibrariesAction extends SelectionProviderAction {
 		LibraryFilter filter= fPackagesView.getLibraryFilter();
 		setChecked(filter.getShowLibraries());		
 		updateToolTipText();
-		setImageDescriptor(JavaPluginImages.DESC_OBJS_JAR);
 		setEnabled(true);
 		fShell= shell;
 	}

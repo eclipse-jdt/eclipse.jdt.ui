@@ -63,7 +63,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
  	private RefreshAction fRefreshAction;
 	private static final String SELECT_FILTERS_LABEL = "Select &Filters...";
  	private FilterSelectionAction fFilterAction;
-	private static final String SHOW_LIBRARIES_LABEL = "Show/Hide &Libraries";
+	private static final String SHOW_LIBRARIES_LABEL = "Show Referenced &Libraries";
  	private ShowLibrariesAction fShowLibrariesAction;
 
 	private IMemento fMemento;
@@ -201,12 +201,19 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		makeActions();
 		
-		// toolbar actions	
-		IToolBarManager toolbar= getViewSite().getActionBars().getToolBarManager();
-		toolbar.add(fShowLibrariesAction);
+		fillActionBars();
 
 	}
+
+	private void fillActionBars() {
+		IActionBars actionBars = getViewSite().getActionBars();
+		IToolBarManager toolBar = actionBars.getToolBarManager();
 	
+		IMenuManager menu = actionBars.getMenuManager();
+		menu.add(fFilterAction);
+		menu.add(fShowLibrariesAction);
+	}
+		
 	private Object findInputElement() {
 		Object input= getSite().getPage().getInput();
 		if (input instanceof IWorkspace) { 
@@ -283,7 +290,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);		
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fFilterAction);
 		if (selectionHasElements) {
 			// update the action to use the right selection since the refresh
 			// action doesn't listen to selection changes.
