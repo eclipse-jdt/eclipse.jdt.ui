@@ -103,9 +103,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private boolean fReplaceOccurrences= false;
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
-
 	private ASTNodeMappingManager fASTMappingManager;
-//	private Map fCUsToCuNodes;//ICompilationUnit -> CompilationUnit
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -114,7 +112,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
 		fBadVarSet= new HashSet(0);
-//		fCUsToCuNodes= new HashMap(0);
 		fASTMappingManager= new ASTNodeMappingManager();
 	}
 	
