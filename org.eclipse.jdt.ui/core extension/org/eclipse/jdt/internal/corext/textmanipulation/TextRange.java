@@ -178,5 +178,17 @@ public final class TextRange {
 		buffer.append(fLength);
 		return buffer.toString();
 	}
+
+	public boolean equals(Object obj) {
+		if (! (obj instanceof TextRange))
+			return false;
+		TextRange other= (TextRange)obj;	
+		return fOffset == other.getOffset() && fLength == other.getLength();
+	}
+
+	public int hashCode() {
+		return fOffset ^ fLength;
+	}
+
 }
 
