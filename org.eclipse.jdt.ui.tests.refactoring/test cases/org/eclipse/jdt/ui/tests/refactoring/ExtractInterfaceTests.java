@@ -359,6 +359,11 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		standardPassingTest();
 	}
 
+	public void test59() throws Exception{
+		printTestDisabledMessage("bug 22946 ");
+//		standardPassingTest();
+	}
+
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
