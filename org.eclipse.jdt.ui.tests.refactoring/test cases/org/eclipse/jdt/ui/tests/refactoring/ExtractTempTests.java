@@ -423,6 +423,15 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(10, 17, 10, 28, true, false, "temp");
 	}	
 
+	public void test65() throws Exception{
+//		printTestDisabledMessage("test for bug 35981 extract local variable causing exception [refactoring] ");
+		helper1(6, 19, 6, 22, true, false, "temp");
+	}	
+
+	public void test66() throws Exception{
+		helper1(7, 32, 7, 33, true, false, "temp");
+	}	
+
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp", RefactoringStatus.ERROR);
