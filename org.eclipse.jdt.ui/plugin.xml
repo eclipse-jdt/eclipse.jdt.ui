@@ -216,6 +216,7 @@
             id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
       </perspective>
    </extension>
+   
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
@@ -248,6 +249,7 @@
                id="org.eclipse.jdt.ui.JavaActionSet">
          </actionSet>
       </perspectiveExtension>
+      
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <showInPart
@@ -266,6 +268,13 @@
                id="org.eclipse.jdt.ui.PackageExplorer">
          </showInPart>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <showInPart
+               id="org.eclipse.jdt.ui.PackageExplorer">
+         </showInPart>
+      </perspectiveExtension>
+      
    </extension>
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
