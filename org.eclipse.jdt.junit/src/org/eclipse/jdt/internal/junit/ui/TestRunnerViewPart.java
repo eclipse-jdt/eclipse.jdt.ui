@@ -496,7 +496,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	protected void selectFirstFailure() {
 		TestRunInfo firstFailure= (TestRunInfo)fFailures.get(0);
-		if (firstFailure != null && isAutoScroll()) {
+		if (firstFailure != null && fActiveRunTab.getSelectedTestId() == null) {
 			fActiveRunTab.setSelectedTest(firstFailure.getTestId());
 			handleTestSelected(firstFailure.getTestId());
 		}
