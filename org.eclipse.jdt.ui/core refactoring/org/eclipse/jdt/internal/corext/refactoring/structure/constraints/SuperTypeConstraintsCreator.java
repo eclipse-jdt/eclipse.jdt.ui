@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -282,7 +283,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 					fModel.createSubtypeConstraint(thenVariable, ancestor);
 				if (elseVariable != null)
 					fModel.createSubtypeConstraint(elseVariable, ancestor);
-				fModel.createConditionalTypeConstraint(ancestor, thenVariable, elseVariable);
+				if (thenVariable != null && elseVariable != null)
+					fModel.createConditionalTypeConstraint(ancestor, thenVariable, elseVariable);
 			}
 		}
 	}
@@ -535,6 +537,13 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			if (variable != null)
 				invocation.setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
 		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.NullLiteral)
+	 */
+	public final void endVisit(final NullLiteral node) {
+		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createImmutableTypeVariable(node.resolveTypeBinding()));
 	}
 
 	/*
