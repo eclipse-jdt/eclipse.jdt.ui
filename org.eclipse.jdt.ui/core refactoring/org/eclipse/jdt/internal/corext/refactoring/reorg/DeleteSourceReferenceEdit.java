@@ -29,17 +29,12 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 
 	private ISourceReference fSourceReference;
 	private ICompilationUnit fCu;
-	private String fContent;
 	
 	public DeleteSourceReferenceEdit(ISourceReference sr, ICompilationUnit unit){
 		Assert.isNotNull(sr);
 		fSourceReference= sr;
 		Assert.isNotNull(unit);
 		fCu= unit;
-	}
-
-	public final String getContent() {
-		return fContent;
 	}
 
 	/* non Java-doc
@@ -73,8 +68,8 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	}
 	
 	public void perform(TextBuffer buffer) throws CoreException {
-		TextRange range= getTextRange();
-		fContent= buffer.getContent(range.getOffset(), range.getLength());
+//		TextRange range= getTextRange();
+//		fContent= buffer.getContent(range.getOffset(), range.getLength());
 		super.perform(buffer);
 	}
 	
