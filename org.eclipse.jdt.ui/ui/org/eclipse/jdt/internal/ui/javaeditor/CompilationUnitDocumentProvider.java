@@ -463,49 +463,55 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
-			try {					
+			// update structure, assumes lock on info.fCopy
+			info.fCopy.reconcile();
+			
+			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+			IResource resource= null;
+			try {
+				resource= original.getUnderlyingResource();
+			} catch (JavaModelException x) {
+				// workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=14940
+			}
+			
+			if (resource == null) {
+				// underlying resource has been deleted, just recreate file, ignore the rest
+				super.doSaveDocument(monitor, element, document, overwrite);
+				return;
+			}
+			
+			if (resource != null && !overwrite)
+				checkSynchronizationState(info.fModificationStamp, resource);
 				
-				// update structure, assumes lock on info.fCopy
-				info.fCopy.reconcile();
+			if (fSavePolicy != null)
+				fSavePolicy.preSave(info.fCopy);
 				
-				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				IResource resource= original.getUnderlyingResource();
+			try {
+				fIsAboutToSave= true;
+				// commit working copy
+				info.fCopy.commit(overwrite, monitor);
+			} finally {
+				fIsAboutToSave= false;
+			}
+			
+			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+			model.updateMarkers(info.fDocument);
+			
+			if (resource != null)
+				info.setModificationStamp(computeModificationStamp(resource));
 				
-				if (resource != null && !overwrite)
-					checkSynchronizationState(info.fModificationStamp, resource);
-					
-				if (fSavePolicy != null)
-					fSavePolicy.preSave(info.fCopy);
-					
-				try {
-					fIsAboutToSave= true;
-					// commit working copy
-					info.fCopy.commit(overwrite, monitor);
-				} finally {
-					fIsAboutToSave= false;
-				}
-				
-				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-				model.updateMarkers(info.fDocument);
-				
-				if (resource != null)
-					info.setModificationStamp(computeModificationStamp(resource));
-					
-				if (fSavePolicy != null) {
-					ICompilationUnit unit= fSavePolicy.postSave(original);
-					if (unit != null) {
-						IResource r= unit.getUnderlyingResource();
-						IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-						if (markers != null && markers.length > 0) {
-							for (int i= 0; i < markers.length; i++)
-								model.updateMarker(markers[i], info.fDocument, null);
-						}
+			if (fSavePolicy != null) {
+				ICompilationUnit unit= fSavePolicy.postSave(original);
+				if (unit != null) {
+					IResource r= unit.getUnderlyingResource();
+					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+					if (markers != null && markers.length > 0) {
+						for (int i= 0; i < markers.length; i++)
+							model.updateMarker(markers[i], info.fDocument, null);
 					}
 				}
-					
-			} catch (JavaModelException x) {
-				throw new CoreException(x.getStatus());
 			}
+				
 			
 		} else {
 			super.doSaveDocument(monitor, element, document, overwrite);

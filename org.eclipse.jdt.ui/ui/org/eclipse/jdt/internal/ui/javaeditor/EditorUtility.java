@@ -27,6 +27,7 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -141,10 +142,19 @@ public class EditorUtility {
 	public static String getEditorID(IEditorInput input, Object inputObject) {
 		
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
+		
+//		// check whether favorit editor as been remembered
+//		if (input instanceof IFileEditorInput) {
+//			String id= ((IFileEditorInput) input).getFile().getPersistentPropert(EDITOR_KEY);
+//			if (id != null)
+//				return id;
+//		}
+		
+		// get the default editor		
 		IEditorDescriptor descriptor= registry.getDefaultEditor(input.getName());
 		if (descriptor != null)
 			return descriptor.getId();
-		
+
 		return null;
 	}
 	

@@ -295,7 +295,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				public void reconcile(IJavaElementDelta delta) {
 					if (getSorter() == null) {
 						Widget w= findItem(fInput);
-						if (w != null)
+						if (w != null && !w.isDisposed())
 							update(w, delta);
 					} else {
 						// just for now
@@ -685,8 +685,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
-		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(
-			lprovider, PlatformUI.getWorkbench().getDecoratorManager()));
+		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager()));
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
@@ -769,6 +768,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		if (fActionGroups != null)
 			fActionGroups.dispose();
+			
+		fOutlineViewer= null;
 		
 		super.dispose();
 	}

@@ -28,7 +28,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	 * Constructs and updates the action.
 	 */
 	public TogglePresentationAction() {
-		super(JavaEditorMessages.getResourceBundle(), "TooglePresentation.", null); //$NON-NLS-1$
+		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null); //$NON-NLS-1$
 		
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
 		

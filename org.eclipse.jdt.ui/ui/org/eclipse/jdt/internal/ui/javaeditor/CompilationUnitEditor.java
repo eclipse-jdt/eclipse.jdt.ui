@@ -826,7 +826,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 * 1GF7WG9: ITPJUI:ALL - EXCEPTION: "Save As..." always fails
 		 */
 		final IPackageFragment fragment= getPackage(root, folderPath);
-		
 		IFile file= root.getFile(filePath);
 		
 		/*
@@ -834,39 +833,37 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 * Problem caused by http://dev.eclipse.org/bugs/show_bug.cgi?id=9351
 		 * Will be removed if #9351 is solved.
 		 */
-		if (original != null && original.equals(file)) {
+		if (original != null && original.equals(file) && original.exists()) {
 			doSave(progressMonitor);
 			return;
 		}
 		/* end of fix */
 		
 		final FileEditorInput newInput= new FileEditorInput(file);
+		final boolean originalExists= original.exists();
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
 				
-				if (fragment != null) {
-					try {	
+				if (fragment != null && originalExists) {
 						
-						// copy to another package
-						IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-						ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-						
-						/*
-						 * 1GJXY0L: ITPJUI:WINNT - NPE during save As in Java editor
-						 * Introduced null check, just go on in the null case
+					// copy to another package
+					IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+					ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+					
+					/*
+					 * 1GJXY0L: ITPJUI:WINNT - NPE during save As in Java editor
+					 * Introduced null check, just go on in the null case
+					 */
+					if (unit != null) {
+						/* 
+						 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+						 * Changed false to true.
 						 */
-						if (unit != null) {
-							/* 
-							 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
-							 * Changed false to true.
-							 */
-							unit.copy(fragment, null, fileName, true, monitor);
-							return;
-						}
-						
-					} catch (JavaModelException x) {
+						unit.copy(fragment, null, fileName, true, monitor);
+						return;
 					}
+						
 				}
 				
 				// if (fragment == null) then copy to a directory which is not a package

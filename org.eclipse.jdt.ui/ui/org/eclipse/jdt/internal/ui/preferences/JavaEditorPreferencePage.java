@@ -4,9 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,6 +32,8 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -58,10 +62,13 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
+
 
 /*
  * The page for setting the editor options.
@@ -182,10 +189,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private Map fTextFields= new HashMap();
+	private ArrayList fNumberFields= new ArrayList();
 	private ModifyListener fTextFieldListener= new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
-			Text text= (Text) e.widget;
-			fOverlayStore.setValue((String) fTextFields.get(text), text.getText());
+			if (!e.widget.isDisposed())
+				textChanged((Text) e.widget);
 		}
 	};
 	
@@ -197,7 +205,20 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundCustomRadioButton;
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
-	private SourceViewer fPreviewViewer;	
+	private SourceViewer fPreviewViewer;
+	
+	private Button fBracketHighlightButton;
+	private Control fBracketHighlightColor;
+	private Button fLineHighlightButton;
+	private Control fLineHighlightColor;
+	private Button fPrintMarginButton;
+	private Control fPrintMarginColor;
+	private Control fPrintMarginColumn;
+	private Button fProblemIndicationButton;
+	private Control fProblemIndicationColor;
+	private Control fFindScopeColor;
+	private Control fLinkedPositionColor;
+
 	
 	public JavaEditorPreferencePage() {
 		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -554,20 +575,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				setEnabled(children[i], enable);
 		}
 	}
-	
-	
-	private Button fBracketHighlightButton;
-	private Control fBracketHighlightColor;
-	private Button fLineHighlightButton;
-	private Control fLineHighlightColor;
-	private Button fPrintMarginButton;
-	private Control fPrintMarginColor;
-	private Control fPrintMarginColumn;
-	private Button fProblemIndicationButton;
-	private Control fProblemIndicationColor;
-	private Control fFindScopeColor;
-	private Control fLinkedPositionColor;
-	
+
 	private Control createBehaviorPage(Composite parent) {
 
 		Composite behaviorComposite= new Composite(parent, SWT.NULL);
@@ -579,7 +587,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
-		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
+		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0, true);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
@@ -642,7 +650,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fPrintMarginColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLOR, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
-		fPrintMarginColumn= addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 4, 0);
+		fPrintMarginColumn= addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 4, 0, true);
 		
 		fPrintMarginButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -689,13 +697,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0);
+		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 25, 0);
+		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 25, 0, false);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 25, 0);
+		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 25, 0, false);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_BACKGROUND, 0);
@@ -893,7 +901,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return checkBox;
 	}
 	
-	private Control addTextField(Composite parent, String label, String key, int textLimit, int indentation) {
+	private Control addTextField(Composite parent, String label, String key, int textLimit, int indentation, boolean isNumber) {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -920,7 +928,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		textControl.setTextLimit(textLimit);
 		textControl.addModifyListener(fTextFieldListener);
 		fTextFields.put(textControl, key);
-		
+		if (isNumber)
+			fNumberFields.add(textControl);
+			
 		return composite;
 	}
 	
@@ -957,6 +967,42 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		}
 		return buffer.toString();
+	}
+	
+	private void textChanged(Text textControl) {
+		String number= textControl.getText();
+		IStatus status= validatePositiveNumber(number);
+		if (!status.matches(IStatus.ERROR))
+			fOverlayStore.setValue((String) fTextFields.get(textControl), number);
+		updateStatus(status);
+	}
+	
+	private IStatus validatePositiveNumber(String number) {
+		StatusInfo status= new StatusInfo();
+		if (number.length() == 0) {
+			status.setError(JavaUIMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
+		} else {
+			try {
+				int value= Integer.parseInt(number);
+				if (value < 0)
+					status.setError(JavaUIMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+			} catch (NumberFormatException e) {
+				status.setError(JavaUIMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+			}
+		}
+		return status;
+	}
+	
+	private void updateStatus(IStatus status) {
+		if (!status.matches(IStatus.ERROR)) {
+			for (int i= 0; i < fNumberFields.size(); i++) {
+				Text text= (Text) fNumberFields.get(i);
+				IStatus s= validatePositiveNumber(text.getText());
+				status= StatusUtil.getMoreSevere(s, status);
+			}
+		}	
+		setValid(!status.matches(IStatus.ERROR));
+		StatusUtil.applyToStatusLine(this, status);
 	}
 }
 

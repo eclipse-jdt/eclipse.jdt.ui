@@ -53,7 +53,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			if (fPresentation == null) 
 				fPresentation= DebugUITools.newDebugModelPresentation();
 				
-			setLayer(2);
+			setLayer(4);
 			setImage(fPresentation.getImage(marker));					
 			
 			fIsProblemMarker= false;
