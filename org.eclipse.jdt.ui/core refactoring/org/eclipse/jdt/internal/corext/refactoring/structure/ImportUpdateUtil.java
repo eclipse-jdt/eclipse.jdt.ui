@@ -48,7 +48,7 @@ public final class ImportUpdateUtil {
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public final void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
+	public static void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeImports);
