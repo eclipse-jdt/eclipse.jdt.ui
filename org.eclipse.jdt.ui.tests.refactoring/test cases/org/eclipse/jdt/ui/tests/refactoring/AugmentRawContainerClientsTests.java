@@ -61,7 +61,7 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		
 		// set client options here (from instance variables)
 
-		status.merge(refactoring.checkFinalConditions(pm));
+		status.merge(refactoring.checkFinalConditions(pm)); //TODO: check final conditions only once!
 		assertEquals("wrong final condition status", expectedFinalStatus, status.getSeverity());
 		if (status.getSeverity() == RefactoringStatus.FATAL)
 			return;
@@ -114,6 +114,10 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 	}
 	
 	public void testCuContains() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuMethodParam() throws Exception {
 		performCuOK();
 	}
 	

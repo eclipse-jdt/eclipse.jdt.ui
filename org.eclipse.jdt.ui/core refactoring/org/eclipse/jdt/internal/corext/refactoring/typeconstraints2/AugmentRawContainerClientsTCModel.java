@@ -443,6 +443,7 @@ public class AugmentRawContainerClientsTCModel {
 		if (filterConstraintVariableType(typeBinding))
 			return null;
 		ParameterTypeVariable2 cv= new ParameterTypeVariable2(typeBinding, parameterIndex, methodBinding);
+		cv= (ParameterTypeVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return cv;

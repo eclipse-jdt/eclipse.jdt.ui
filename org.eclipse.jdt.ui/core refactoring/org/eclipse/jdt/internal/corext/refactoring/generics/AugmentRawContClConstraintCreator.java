@@ -43,7 +43,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -98,7 +100,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	public boolean visit(SimpleName node) {
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof IVariableBinding) {
-			VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable((IVariableBinding) binding, fCU);
+			VariableVariable2 cv= fTCFactory.makeVariableVariable((IVariableBinding) binding);
 			setConstraintVariable(node, cv);
 		}
 		// TODO else?
@@ -184,27 +186,32 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		setConstraintVariable(node, cv);
 	}
 	
-	public boolean visit(MethodDeclaration node) {
+	public void endVisit(MethodDeclaration node) {
 		IMethodBinding methodBinding= node.resolveBinding();
 
 		if (methodBinding == null)
-			return true; //TODO: emit error?
+			return; //TODO: emit error?
 
 		for (int i= 0, n= node.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) node.parameters().get(i);
 			//parameterTypeVariable currently not used, but need to register in order to store source range
-			ConstraintVariable2 parameterTypeVariable= fTCFactory.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
-			setConstraintVariable(paramDecl, parameterTypeVariable);
+			TypeConstraintVariable2 parameterTypeVariable= fTCFactory.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
+			//creating equals constraint between parameterTypeVariable's elements and the Type's elements
+			//TODO: should maybe avoid creating Type's ConstraintVariables
+			CollectionElementVariable2 parameterElementCv= fTCFactory.makeElementVariable(parameterTypeVariable);
+			if (parameterElementCv == null)
+				continue;
+			
+			ConstraintVariable2 typeCv= getConstraintVariable(paramDecl.getType());
+			CollectionElementVariable2 typeElementCv= fTCFactory.getElementVariable(typeCv);
+			fTCFactory.createEqualsConstraint(parameterElementCv, typeElementCv);
+			
+			//TODO: should avoid having a VariableVariable as well as a ParameterVariable for a parameter
+			ConstraintVariable2 nameCv= getConstraintVariable(paramDecl.getName());
+			CollectionElementVariable2 nameElementCv= fTCFactory.getElementVariable(nameCv);
+			fTCFactory.createEqualsConstraint(parameterElementCv, nameElementCv);
 		}
 		
-		//TODO: Who needs declaring type constraints?
-//		ITypeConstraint2[] declaring=
-//			fTCFactory.createEqualsConstraint(
-//				fTCFactory.makeDeclaringTypeVariable(methodBinding),
-//				fTCFactory.makePlainTypeVariable(methodBinding.getDeclaringClass()));
-//
-//		addConstraints(declaring);
-
 		if (! methodBinding.isConstructor()){
 			ConstraintVariable2 returnTypeBindingVariable= fTCFactory.makeDeclaredReturnTypeVariable(methodBinding, fCU);
 //			ConstraintVariable2 returnTypeVariable= getConstraintVariable(node.getReturnType2());
@@ -218,11 +225,12 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 //			Collection constraintsForOverriding = getConstraintsForOverriding(methodBinding);
 //			result.addAll(constraintsForOverriding);
 		}
-		return true;
 	}
 	
 	public void endVisit(MethodInvocation node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
+		if (methodBinding == null)
+			return;
 		
 		SpecialMethod specialMethod= fContainerMethods.getSpecialMethodFor(methodBinding);
 		if (specialMethod != null) {
@@ -231,6 +239,19 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		}
 		//TODO: normal method invocation
 		
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+		List arguments= node.arguments();
+		for (int i= 0; i < parameterTypes.length; i++) {
+			ITypeBinding parameterTypeBinding= parameterTypes[i];
+			if (! fTCFactory.isACollectionType(parameterTypeBinding))
+				continue;
+			ParameterTypeVariable2 parameterTypeVariable= fTCFactory.makeParameterTypeVariable(methodBinding, i);
+			ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
+			CollectionElementVariable2 parameterElementVariable= fTCFactory.makeElementVariable(parameterTypeVariable);
+			CollectionElementVariable2 argumentElementVariable= fTCFactory.getElementVariable(argumentCv);
+			// Elem[param] =^= Elem[arg]
+			fTCFactory.createEqualsConstraint(parameterElementVariable, argumentElementVariable);
+		}
 		return;
 	}
 	
