@@ -535,6 +535,7 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 				res.append(addImport(typeArguments[i]));
 			}
+			res.append('>');
 			return res.toString();
 		}
 		

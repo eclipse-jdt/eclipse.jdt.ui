@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -68,8 +67,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			String typeString= getImportRewrite().addImport(fNewType);
-			Type type= ASTNodeFactory.newType(ast, typeString);
+			Type type= getImportRewrite().addImport(fNewType, ast);
 			
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
