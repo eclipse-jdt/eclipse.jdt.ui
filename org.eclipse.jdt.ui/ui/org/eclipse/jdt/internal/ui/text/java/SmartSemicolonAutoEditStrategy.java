@@ -128,6 +128,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		} else {
 			command.length= 0;
 			command.caretOffset= position;
+			if (fCharacter == BRACECHAR) {
+				// TODO check for formatting options
+				command.text= " " + BRACE;  //$NON-NLS-1$
+			}
 		}
 		command.doit= false;
 	}
