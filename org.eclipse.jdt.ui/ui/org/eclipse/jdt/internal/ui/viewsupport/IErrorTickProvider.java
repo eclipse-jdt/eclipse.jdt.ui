@@ -12,10 +12,10 @@ public interface IErrorTickProvider {
 	public static final int ERRORTICK_ERROR= 2;	
 	
 	/**
-	 * Evaluate the error tick state of a Java element.
+	 * Evaluate the error tick state of an element.
 	 * @returns ERRORTICK_ERROR or ERRORTICK_WARNING
 	 */
-	int getErrorInfo(IJavaElement element);	
+	int getErrorInfo(Object element);	
 
 }
 

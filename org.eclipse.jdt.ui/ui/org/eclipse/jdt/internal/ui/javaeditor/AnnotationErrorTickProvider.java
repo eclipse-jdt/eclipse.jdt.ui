@@ -9,12 +9,9 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,7 +35,7 @@ public class AnnotationErrorTickProvider implements IErrorTickProvider {
 	/**
 	 * @see IErrorTickProvider#getErrorInfo(IJavaElement)
 	 */
-	public int getErrorInfo(IJavaElement element) {
+	public int getErrorInfo(Object element) {
 		int info= 0;
 		if (element instanceof ISourceReference) {
 			try {
@@ -68,7 +65,7 @@ public class AnnotationErrorTickProvider implements IErrorTickProvider {
 		try {
 			if (annot instanceof MarkerAnnotation) {
 				IMarker marker= ((MarkerAnnotation)annot).getMarker();
-				if (marker.exists() && marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+				if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
 					Position pos= fAnnotationModel.getPosition(annot);
 					if (pos.overlapsWith(range.getOffset(), range.getLength())) {
 						return marker;

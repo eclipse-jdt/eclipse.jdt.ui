@@ -239,13 +239,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getImage
 	 */
 	public Image getImage(Object element) {
-		if (element instanceof IJavaElement) {
-			IJavaElement e= (IJavaElement) element;
-		
-			return fImageLabelProvider.getImageLabel(e, fImageFlags);
-		}
-
-		Image result= fWorkbenchLabelProvider.getImage(element);
+		Image result= fImageLabelProvider.getImageLabel(element, fImageFlags);
 		if (result != null) {
 			return result;
 		}

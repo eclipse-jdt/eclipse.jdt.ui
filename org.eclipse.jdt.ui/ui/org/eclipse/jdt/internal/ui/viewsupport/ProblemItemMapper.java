@@ -1,15 +1,18 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Stack;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Item;
-
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
@@ -26,11 +29,15 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * Method <code>problemsChanged</code> updates all items that are affected from the changed
  * elements.
  */public class ProblemItemMapper {
+
+	private static final int NUMBER_LIST_REUSE= 10;
 	// map from path to item
 	private HashMap fPathToItem;
+	private Stack fReuseLists;
 
 	public ProblemItemMapper() {
 		fPathToItem= new HashMap();
+		fReuseLists= new Stack();
 	}
 
 	/**
@@ -85,12 +92,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 	private void refreshIcon(ILabelProvider lprovider, Item item) {
 		if (!item.isDisposed()) { // defensive code
 			Object data= item.getData();
-			if (data instanceof IJavaElement && ((IJavaElement)data).exists()) {
-				Image old= item.getImage();
-				Image image= lprovider.getImage(data);
-				if (image != null && image != old) {
-					item.setImage(image);
-				}
+			if (data instanceof IJavaElement && !((IJavaElement)data).exists()) {
+				return;
+			}
+			Image old= item.getImage();
+			Image image= lprovider.getImage(data);
+			if (image != null && image != old) {
+				item.setImage(image);
 			}
 		}
 	}
@@ -108,7 +116,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 				fPathToItem.put(path, item);
 			} else if (existingMapping instanceof Item) {
 				if (existingMapping != item) {
-					ArrayList list= new ArrayList(2);
+					List list= newList();
 					list.add(existingMapping);
 					list.add(item);
 					fPathToItem.put(path, list);
@@ -118,7 +126,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 				if (!list.contains(item)) {
 					list.add(item);
 				}
-				// leave the list for reuse
 			}
 		}
 	}
@@ -136,8 +143,25 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 				fPathToItem.remove(path);
 			} else { // List
 				List list= (List) existingMapping;
-				list.remove(item);			
+				list.remove(item);
+				if (list.isEmpty()) {
+					fPathToItem.remove(list);
+					releaseList(list);
+				}
 			}
+		}
+	}
+	
+	private List newList() {
+		if (!fReuseLists.isEmpty()) {
+			return (List) fReuseLists.pop();
+		}
+		return new ArrayList(2);
+	}
+	
+	private void releaseList(List list) {
+		if (fReuseLists.size() < NUMBER_LIST_REUSE) {
+			fReuseLists.push(list);
 		}
 	}
 	
@@ -155,6 +179,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 	private static IPath getCorrespondingPath(Object element) {
 		if (element instanceof IJavaElement) {
 			return getJavaElementPath((IJavaElement)element);
+		} else if (element instanceof IResource) {
+			return ((IResource)element).getFullPath();
 		}
 		return null;
 	}
@@ -181,7 +207,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 				if (rootPath != null && packName.length() > 0) {
 					rootPath= rootPath.append(packName.replace('.', '/'));
 				}
-				return rootPath;
+				return rootPath;		
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
 				IPath packPath= getJavaElementPath(elem.getParent());

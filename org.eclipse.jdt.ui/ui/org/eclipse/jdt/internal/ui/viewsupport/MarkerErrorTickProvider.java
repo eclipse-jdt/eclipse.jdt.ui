@@ -22,35 +22,40 @@ public class MarkerErrorTickProvider implements IErrorTickProvider {
 	/*
 	 * @see IErrorTickProvider#getErrorInfo
 	 */
-	public int getErrorInfo(IJavaElement element) {
+	public int getErrorInfo(Object obj) {
 		int info= 0;
 		try {
 			IResource res= null;
+			
 			ISourceRange range= null;
+			
 			int depth= IResource.DEPTH_INFINITE;
 			
-			int type= element.getElementType();
+			if (obj instanceof IJavaElement) {
+				IJavaElement element= (IJavaElement) obj;
 			
-			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT
-				|| type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.CLASS_FILE || type == IJavaElement.COMPILATION_UNIT) {
-				res= element.getCorrespondingResource();
-				if (type == IJavaElement.PACKAGE_FRAGMENT) {
-					depth= IResource.DEPTH_ONE;
-				} else if (type == IJavaElement.JAVA_PROJECT) {
-					IMarker[] bpMarkers= res.findMarkers(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ONE);
-					info= accumulateProblems(bpMarkers, info, null);
+				int type= element.getElementType();
+				
+				if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT
+					|| type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.CLASS_FILE || type == IJavaElement.COMPILATION_UNIT) {
+					res= element.getCorrespondingResource();
+					if (type == IJavaElement.PACKAGE_FRAGMENT) {
+						depth= IResource.DEPTH_ONE;
+					}
+				} else if (element instanceof ISourceReference) {
+					// I assume that only source elements in compilation unit can have markers
+					ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
+					if (cu != null) {
+						res= element.getUnderlyingResource();
+						range= ((ISourceReference)element).getSourceRange();
+					}
 				}
-			} else if (element instanceof ISourceReference) {
-				// I assume that only source elements in compilation unit can have markers
-				ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
-				if (cu != null) {
-					res= element.getUnderlyingResource();
-					range= ((ISourceReference)element).getSourceRange();
-				}
+			} else if (obj instanceof IResource) {
+				res= (IResource) obj;
 			}
 			
 			if (res != null) {
-				IMarker[] markers= res.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, depth);
+				IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
 				if (markers != null) {
 					info= accumulateProblems(markers, info, range);
 				}
@@ -61,7 +66,7 @@ public class MarkerErrorTickProvider implements IErrorTickProvider {
 		return info;
 	}
 	
-	private int accumulateProblems(IMarker[] markers, int info, ISourceRange range) {
+	private int accumulateProblems(IMarker[] markers, int info, ISourceRange range) throws CoreException {
 		if (markers != null) {	
 			for (int i= 0; i < markers.length && (info != ERRORTICK_ERROR); i++) {
 				IMarker curr= markers[i];
@@ -78,10 +83,13 @@ public class MarkerErrorTickProvider implements IErrorTickProvider {
 		return info;
 	}
 	
-	private boolean isInRange(IMarker marker, ISourceRange range) {
-		int pos= marker.getAttribute(IMarker.CHAR_START, -1);
-		int offset= range.getOffset();
-		return (offset <= pos && offset + range.getLength() > pos);
+	private boolean isInRange(IMarker marker, ISourceRange range) throws CoreException {
+		if (marker.isSubtypeOf(IMarker.TEXT)) {
+			int pos= marker.getAttribute(IMarker.CHAR_START, -1);
+			int offset= range.getOffset();
+			return (offset <= pos && offset + range.getLength() > pos);
+		}
+		return false;
 	}	
 
 }

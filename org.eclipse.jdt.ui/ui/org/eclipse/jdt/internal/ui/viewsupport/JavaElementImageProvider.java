@@ -4,13 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
@@ -28,10 +28,10 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
@@ -82,14 +82,22 @@ public class JavaElementImageProvider {
 	}
 		
 	/**
-	 * Returns the icon for a given Java elements. The icon depends on the element type
+	 * Returns the icon for a given element. The icon depends on the element type
 	 * and element properties. If configured, overlay icons are constructed for
 	 * <code>ISourceReference</code>s.
 	 * @param flags Flags as defined by the JavaImageLabelProvider
 	 */
-	public Image getImageLabel(IJavaElement element, int flags) {
-		ImageDescriptor descriptor= getImageDescriptor(element, flags);
-		return fRegistry.get(descriptor);
+	public Image getImageLabel(Object element, int flags) {
+		ImageDescriptor descriptor= null;
+		if (element instanceof IJavaElement) {
+			descriptor= getJavaImageDescriptor((IJavaElement) element, flags);
+		} else if (element instanceof IAdaptable) {
+			descriptor= getWorkbenchImageDescriptor((IAdaptable) element, flags);
+		}
+		if (descriptor != null) {
+			return fRegistry.get(descriptor);
+		}
+		return null;
 	}
 	
 	private boolean showOverlayIcons(int flags) {
@@ -107,10 +115,28 @@ public class JavaElementImageProvider {
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */
-	public ImageDescriptor getImageDescriptor(IJavaElement element, int flags) {
+	public ImageDescriptor getJavaImageDescriptor(IJavaElement element, int flags) {
 		int adornmentFlags= showOverlayIcons(flags) ? computeAdornmentFlags(element) : 0;
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 		return new JavaElementImageDescriptor(getBaseImageDescriptor(element, flags), adornmentFlags, size);
+	}
+
+	/**
+	 * Returns an image descriptor for a IAdaptable. The descriptor includes overlays, if specified (only error ticks apply).
+	 * Returns <code>null</code> if no image could be found.
+	 */	
+	public ImageDescriptor getWorkbenchImageDescriptor(IAdaptable adaptable, int flags) {
+		IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) adaptable.getAdapter(IWorkbenchAdapter.class);
+		if (wbAdapter == null) {
+			return null;
+		}
+		ImageDescriptor descriptor= wbAdapter.getImageDescriptor(adaptable);
+		if (descriptor == null) {
+			return null;
+		}
+		int adornmentFlags= computeErrorTickAdornmentFlags(adaptable);
+		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
+		return new JavaElementImageDescriptor(descriptor, adornmentFlags, size);
 	}
 	
 	// ---- Computation of base image key -------------------------------------------------
@@ -119,8 +145,7 @@ public class JavaElementImageProvider {
 	 * Returns an image descriptor for a java element. This is the base image, no overlays.
 	 */
 	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
-		try {
-			
+		try {			
 			switch (element.getElementType()) {
 				
 				case IJavaElement.INITIALIZER:
@@ -246,16 +271,7 @@ public class JavaElementImageProvider {
 	
 	private int computeAdornmentFlags(IJavaElement element) {
 		
-		int flags= 0;
-
-		if (fErrorTickProvider != null) {
-			int info= fErrorTickProvider.getErrorInfo(element);
-			if ((info & IErrorTickProvider.ERRORTICK_ERROR) != 0) {
-				flags |= JavaElementImageDescriptor.ERROR;
-			} else if ((info & IErrorTickProvider.ERRORTICK_WARNING) != 0) {
-				flags |= JavaElementImageDescriptor.WARNING;
-			}
-		}
+		int flags= computeErrorTickAdornmentFlags(element);
 					
 		if (element instanceof ISourceReference) { 
 			ISourceReference sourceReference= (ISourceReference)element;
@@ -281,6 +297,20 @@ public class JavaElementImageProvider {
 		}
 		return flags;
 	}
+	
+	private int computeErrorTickAdornmentFlags(Object element) {
+		int flags= 0;
+		if (fErrorTickProvider != null) {
+			int info= fErrorTickProvider.getErrorInfo(element);
+			if ((info & IErrorTickProvider.ERRORTICK_ERROR) != 0) {
+				flags |= JavaElementImageDescriptor.ERROR;
+			} else if ((info & IErrorTickProvider.ERRORTICK_WARNING) != 0) {
+				flags |= JavaElementImageDescriptor.WARNING;
+			}
+		}
+		return flags;
+	}
+	
 	
 	private boolean confirmAbstract(IMember member) {
 		 // Although all methods of a Java interface are abstract, the abstract 
