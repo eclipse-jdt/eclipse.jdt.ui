@@ -399,9 +399,8 @@ class JavaEditorHoverConfigurationBlock {
 			b.setSelection(fStore.getBoolean(key));
 		}
 
-		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
-		for (int i= 0; i < hoverDescs.length; i++)
-			fHoverTable.getItem(i).setChecked(hoverDescs[i].isEnabled());
+		for (int i= 0; i < fHoverConfigs.length; i++)
+			fHoverTable.getItem(i).setChecked(fHoverConfigs[i].fIsEnabled);
 		fHoverTableViewer.refresh();
 	}
 
