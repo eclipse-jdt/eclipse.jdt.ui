@@ -517,7 +517,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 						try {
 							fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
 						} catch (JavaModelException e) {
-							JavaPlugin.getDefault().getLog().log(e.getStatus());
+							JavaPlugin.log(e.getStatus());
 							clearInput();
 							return;
 						}
@@ -529,6 +529,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			}
 		});	
 	}
+	
+	private void checkedSyncExec(Runnable r) {
+		if (fPagebook != null && !fPagebook.isDisposed()) {
+			Display d= fPagebook.getDisplay();
+			if (d != null) {
+				d.syncExec(r);
+			}
+		}
+	}	
 	
 	private void becomesVisible() {
 		if (fTypesViewRefreshNeeded) {
@@ -555,17 +564,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		}
 		return false;
 	}
-	
-	
-	
-	private void checkedSyncExec(Runnable r) {
-		if (fPagebook != null && !fPagebook.isDisposed()) {
-			Display d= fPagebook.getDisplay();
-			if (d != null) {
-				d.syncExec(r);
-			}
-		}
-	}	
 	
 	private void updateTitle() {
 		String title= fCurrentViewer.getTitle();
