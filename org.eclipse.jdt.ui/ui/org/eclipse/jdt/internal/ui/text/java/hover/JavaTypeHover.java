@@ -33,12 +33,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 public class JavaTypeHover implements IJavaEditorTextHover {
 	
 	private IEditorPart fEditor;
+	private IJavaEditorTextHover fProblemHover;
 	
 	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	
 	public JavaTypeHover() {
+		fProblemHover= new JavaProblemHover();
 	}
 	
 	/**
@@ -46,6 +48,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 	 */
 	public void setEditor(IEditorPart editor) {
 		fEditor= editor;
+		fProblemHover.setEditor(editor);
 	}
 	
 	private ICodeAssist getCodeAssist() {
@@ -78,6 +81,11 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		
+		String hoverInfo= fProblemHover.getHoverInfo(textViewer, hoverRegion);
+		if (hoverInfo != null)
+			return hoverInfo;
+		
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {

@@ -117,7 +117,7 @@ public class CompilationUnitEditor extends JavaEditor {
 	
 	interface ITextConverter {
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
-	}
+	};
 	
 	
 	class InternalSourceViewer extends SourceViewer {
@@ -236,6 +236,10 @@ public class CompilationUnitEditor extends JavaEditor {
 	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn";
 	/** Preference key for inserting spaces rather than tabs */
 	public final static String SPACES_FOR_TABS= "spacesForTabs";
+	/** Preference key for problem indication */
+	public final static String PROBLEM_INDICATION= "problemIndication";
+	/** Preference key for problem highlight color */
+	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor";
 	
 	
 	
@@ -253,6 +257,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	private LinePainter fLinePainter;
 	/** The editor's print margin ruler painter */
 	private PrintMarginPainter fPrintMarginPainter;
+	/** The editor's problem painter */
+	private ProblemPainter fProblemPainter;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
 	
@@ -819,6 +825,28 @@ public class CompilationUnitEditor extends JavaEditor {
 		return store.getBoolean(PRINT_MARGIN);
 	}
 	
+	private void startProblemIndication() {
+		if (fProblemPainter == null) {
+			fProblemPainter= new ProblemPainter(getSourceViewer());
+			fProblemPainter.setHighlightColor(getColor(PROBLEM_INDICATION_COLOR));
+			fPaintManager.addPainter(fProblemPainter);
+		}
+	}
+	
+	private void stopProblemIndication() {
+		if (fProblemPainter != null) {
+			fPaintManager.removePainter(fProblemPainter);
+			fProblemPainter.deactivate(true);
+			fProblemPainter.dispose();
+			fProblemPainter= null;
+		}
+	}
+	
+	private boolean isProblemIndicationEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(PROBLEM_INDICATION);
+	}
+	
 	private void startTabConversion() {
 		if (fTabConverter == null) {
 			fTabConverter= new TabConverter();
@@ -883,6 +911,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			startLineHighlighting();
 		if (isShowingPrintMarginEnabled())
 			startShowingPrintMargin();
+		if (isProblemIndicationEnabled())
+			startProblemIndication();
 		if (isTabConversionEnabled())
 			startTabConversion();
 	}
@@ -966,6 +996,20 @@ public class CompilationUnitEditor extends JavaEditor {
 					return;
 				}
 				
+				if (PROBLEM_INDICATION.equals(p)) {
+					if (isProblemIndicationEnabled())
+						startProblemIndication();
+					else
+						stopProblemIndication();
+					return;
+				}
+				
+				if (PROBLEM_INDICATION_COLOR.equals(p)) {
+					if (fProblemPainter != null)
+						fProblemPainter.setHighlightColor(getColor(PROBLEM_INDICATION_COLOR));
+					return;
+				}
+				
 				IContentAssistant c= isv.getContentAssistant();
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
@@ -981,7 +1025,11 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
-		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p);
+		
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || 
+									CURRENT_LINE_COLOR.equals(p) ||
+									PROBLEM_INDICATION_COLOR.equals(p);
+									
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	
@@ -990,5 +1038,24 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		return new InternalSourceViewer(parent, ruler, styles);
+	}
+	
+	/**
+	 * Sets the given temporary problems as the editor's problems. This method
+	 * can be called from any thread.
+	 */
+	public void setProblems(final List problems) {	
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (fProblemPainter != null)
+					fProblemPainter.updateProblems(problems);
+			}
+		});
+	}
+	
+	public List getProblemPositions() {
+		if (fProblemPainter != null)
+			return fProblemPainter.getProblemPositions();
+		return null;
 	}
 }

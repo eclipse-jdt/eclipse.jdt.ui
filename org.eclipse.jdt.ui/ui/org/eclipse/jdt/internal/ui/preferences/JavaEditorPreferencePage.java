@@ -115,6 +115,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, CompilationUnitEditor.PRINT_MARGIN_COLUMN),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PRINT_MARGIN),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SPACES_FOR_TABS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
@@ -206,7 +209,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, true);
 		store.setDefault(CompilationUnitEditor.PRINT_MARGIN_COLUMN, 80);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(255, 0 , 128));
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
+		
+		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, false);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
@@ -529,6 +535,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	}
 	
+	
 	private Button fBracketHighlightButton;
 	private Control fBracketHighlightColor;
 	private Button fLineHighlightButton;
@@ -536,6 +543,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fPrintMarginButton;
 	private Control fPrintMarginColor;
 	private Control fPrintMarginColumn;
+	private Button fProblemIndicationButton;
+	private Control fProblemIndicationColor;
+	
 	
 	private Control createBehaviorPage(Composite parent) {
 
@@ -583,6 +593,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
+		label= "Show &temporary problems";
+		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+		
+		label= "Prob&lem highlight color:";
+		fProblemIndicationColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, 0);
+
+		fProblemIndicationButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				setEnabled(fProblemIndicationColor, fProblemIndicationButton.getSelection());
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
+				
 		label= "Show print &margin";
 		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 		
