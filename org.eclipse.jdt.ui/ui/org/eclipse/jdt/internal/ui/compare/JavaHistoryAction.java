@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.MissingResourceException;
@@ -34,7 +38,7 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 		update();
 	}
 	
-	private String getResourceString(String key, String dfltValue) {
+	protected String getResourceString(String key, String dfltValue) {
 		
 		if (fBundle != null) {
 			try {
@@ -43,6 +47,10 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 			}
 		}
 		return dfltValue;
+	}		
+		
+	protected String getResourceString(String key) {
+		return getResourceString(key, key);
 	}		
 		
 	/**

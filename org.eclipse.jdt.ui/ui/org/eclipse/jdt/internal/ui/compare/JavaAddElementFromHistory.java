@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.compare;
 
@@ -47,6 +46,8 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	 */
 	public final void run() {
 		
+		String errorMessage= getResourceString("internalError");
+		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		ISelection selection= fSelectionProvider.getSelection();
@@ -90,7 +91,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		}
 		
 		if (parent == null || cu == null) {
-			MessageDialog.openError(shell, fTitle, "Internal error");
+			MessageDialog.openError(shell, fTitle, errorMessage);
 			return;
 		}
 		
@@ -111,7 +112,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		} catch (JavaModelException ex) {
 		}
 		if (file == null) {
-			MessageDialog.openError(shell, fTitle, "Can't find underlying file");
+			MessageDialog.openError(shell, fTitle, errorMessage);
 			return;
 		}
 		
@@ -122,7 +123,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		} catch (CoreException ex) {
 		}	
 		if (states == null || states.length <= 0) {
-			MessageDialog.openInformation(shell, fTitle, "No editions available");
+			MessageDialog.openInformation(shell, fTitle, getResourceString("noLocalHistoryError"));
 			return;
 		}
 		
@@ -135,7 +136,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch(JavaModelException ex) {
-			MessageDialog.openError(shell, fTitle, "JavaModelException");
+			MessageDialog.openError(shell, fTitle, errorMessage);
 			return;
 		}
 		
@@ -160,9 +161,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
-			MessageDialog.openError(shell, fTitle, "BadLocationException");
+			MessageDialog.openError(shell, fTitle, errorMessage);
 		} catch(CoreException ex) {
-			MessageDialog.openError(shell, fTitle, "CoreException");
+			MessageDialog.openError(shell, fTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
 		}

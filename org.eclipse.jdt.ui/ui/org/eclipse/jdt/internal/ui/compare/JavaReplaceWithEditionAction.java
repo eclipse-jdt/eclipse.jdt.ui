@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2000,2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.compare;
 
@@ -74,13 +73,16 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 	 */
 	public final void run() {
 		
+		String errorMessage= getResourceString("internalError");
+		String noLocalHistoryError= getResourceString("noLocalHistoryError");
+		
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		
 		ISelection selection= fSelectionProvider.getSelection();
 		IMember input= getEditionElement(selection);
 		if (input == null) {
 			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openInformation(parent, fTitle, "No editions for selection");
+			MessageDialog.openInformation(parent, fTitle, errorMessage);
 			return;
 		}
 		
@@ -96,7 +98,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		} catch (JavaModelException ex) {
 		}
 		if (file == null) {
-			MessageDialog.openError(parent, fTitle, "Can't find underlying file");
+			MessageDialog.openError(parent, fTitle, errorMessage);
 			return;
 		}
 		
@@ -118,17 +120,12 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		if (states != null)		
 			for (int i= 0; i < states.length; i++)
 				editions[i+1]= new HistoryItem(editions[0], states[i]);
-		
-		if (editions.length <= 0) {
-			MessageDialog.openInformation(parent, fTitle, "No editions available");
-			return;
-		}
-		
+				
 		DocumentManager docManager= null;
 		try {
 			docManager= new DocumentManager(cu);
 		} catch(JavaModelException ex) {
-			MessageDialog.openError(parent, fTitle, "JavaModelException");
+			MessageDialog.openError(parent, fTitle, errorMessage);
 			return;
 		}
 		
@@ -159,9 +156,9 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
-			MessageDialog.openError(parent, fTitle, "BadLocationException");
+			MessageDialog.openError(parent, fTitle, errorMessage);
 		} catch(CoreException ex) {
-			MessageDialog.openError(parent, fTitle, "CoreException");
+			MessageDialog.openError(parent, fTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
 		}
