@@ -136,7 +136,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		for (int i = 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
-			fLabels.add(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
+			String methodLabel= JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES);
+			fLabels.add(ActionMessages.getFormattedString("SourceActionDialog.after", methodLabel)); //$NON-NLS-1$
 			fInsertPositions.add(findSibling(curr, members));
 		}
 		fInsertPositions.add(null);
@@ -510,6 +511,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fillWithPossibleInsertPositions(enterCombo);
 			
 		gd= new GridData(GridData.FILL_BOTH);
+		gd.widthHint= convertWidthInCharsToPixels(fWidth);
 		enterCombo.setLayoutData(gd);
 		enterCombo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
