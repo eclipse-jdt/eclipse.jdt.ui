@@ -35,7 +35,7 @@ public class SourceReferenceUtil {
 	//no instances
 	private SourceReferenceUtil(){}
 	
-	public static IFile getFile(ISourceReference ref) throws JavaModelException{
+	public static IFile getFile(ISourceReference ref) {
 		ICompilationUnit unit= getCompilationUnit(ref);
 		return (IFile) JavaModelUtil.toOriginal(unit).getResource();
 	}
@@ -78,7 +78,7 @@ public class SourceReferenceUtil {
 	/**
 	 * @return IFile -> List of ISourceReference (elements from that file)	
 	 */
-	public static Map groupByFile(ISourceReference[] elems) throws JavaModelException{
+	public static Map groupByFile(ISourceReference[] elems) {
 		Map map= new HashMap();
 		for (int i= 0; i < elems.length; i++) {
 			ISourceReference elem= elems[i];

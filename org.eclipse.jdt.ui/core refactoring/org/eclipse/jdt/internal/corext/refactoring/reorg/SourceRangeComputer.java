@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -86,20 +84,15 @@ public class SourceRangeComputer {
 //		}	
 	}
 	
-	public static ISourceRange computeSourceRange(ISourceRange sourceRange, String cuSource) throws JavaModelException{
-		try{
-			SourceRangeComputer inst= new SourceRangeComputer(sourceRange, cuSource);
-			int offset= inst.computeOffset();
-			int end= inst.computeEnd();
-			int length= end - offset;
-			return new SourceRange(offset, length);
-		}	catch(CoreException e){
-			//fall back to the default
-			return sourceRange;
-		}	
+	public static ISourceRange computeSourceRange(ISourceRange sourceRange, String cuSource) {
+		SourceRangeComputer inst= new SourceRangeComputer(sourceRange, cuSource);
+		int offset= inst.computeOffset();
+		int end= inst.computeEnd();
+		int length= end - offset;
+		return new SourceRange(offset, length);
 	}
 
-	private int computeEnd() throws CoreException{
+	private int computeEnd() {
 		int end= fSourceRange.getOffset() + fSourceRange.getLength();
 		try{	
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
@@ -158,7 +151,7 @@ public class SourceRangeComputer {
 		return (startLine == currentTokenStartLine && currentTokenStartLine != currentTokenEndLine);
 	}
 	
-	private int computeOffset() throws CoreException{
+	private int computeOffset() {
 		int offset= fSourceRange.getOffset();
 		try{
 			TextBuffer buff= TextBuffer.create(fCuSource);
