@@ -17,7 +17,7 @@ import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
-public class MoveStaticMembersPerfTests1 extends AbstractMoveCompilationUnitPrefTest {
+public class MoveStaticMembersPerfTests1 extends AbstractMoveStaticMemberPrefTest {
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
@@ -38,19 +38,19 @@ public class MoveStaticMembersPerfTests1 extends AbstractMoveCompilationUnitPref
 	}
 	
 	public void testCold_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, false, 3);
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, true, 3);
 	}
 	
 	public void test_100_10() throws Exception {
 		tagAsSummary("Move static member", Dimension.CPU_TIME);
-		executeRefactoring(generateSources(100, 10));
+		executeRefactoring(100, 10, true, 1);
 	}
 	
 	public void test_1000_10() throws Exception {
-		executeRefactoring(generateSources(1000, 10));
+		executeRefactoring(1000, 10, true, 1);
 	}
 }

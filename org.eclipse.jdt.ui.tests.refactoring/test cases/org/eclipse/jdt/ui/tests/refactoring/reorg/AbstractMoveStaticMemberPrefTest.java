@@ -19,34 +19,17 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
-public class AbstractMoveStaticMemberPrefTest extends RefactoringPerformanceTestCase {
-
-	private TestProject fTestProject;
+public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractMoveStaticMemberPrefTest(String name) {
 		super(name);
 	}
 	
-	public TestProject getTestProject() {
-		return fTestProject;
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-
-	protected void executeRefactoring(ICompilationUnit cunit) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
 		IMember member= type.getField("VALUE");
 		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(
@@ -60,10 +43,10 @@ public class AbstractMoveStaticMemberPrefTest extends RefactoringPerformanceTest
 		ICompilationUnit destination= destPack.createCompilationUnit("Dest.java", buf.toString(), false, null);
 		
 		processor.setDestinationTypeFullyQualifiedName(destination.findPrimaryType().getFullyQualifiedName());
-		executeRefactoring(new MoveRefactoring(processor));
+		executeRefactoring(new MoveRefactoring(processor), measure);
 	}
 
-	protected ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
+	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null); 
 		StringBuffer buf= new StringBuffer();
 		buf.append("package source;\n");

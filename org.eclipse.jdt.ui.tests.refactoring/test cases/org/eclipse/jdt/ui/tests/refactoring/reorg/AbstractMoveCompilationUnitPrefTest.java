@@ -20,36 +20,20 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.reorg.MockReorgQueries;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
-public class AbstractMoveCompilationUnitPrefTest extends RefactoringPerformanceTestCase {
-
-	private TestProject fTestProject;
+public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractMoveCompilationUnitPrefTest(String name) {
 		super(name);
 	}
 	
-	public TestProject getTestProject() {
-		return fTestProject;
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-
-	protected void executeRefactoring(ICompilationUnit cunit) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		JavaMoveProcessor processor= JavaMoveProcessor.create(
 			new IResource[0], 
 			new IJavaElement[] {cunit},
@@ -58,10 +42,10 @@ public class AbstractMoveCompilationUnitPrefTest extends RefactoringPerformanceT
 		processor.setDestination(destination);
 		processor.setReorgQueries(new MockReorgQueries());
 		processor.setUpdateReferences(true);
-		executeRefactoring(new MoveRefactoring(processor), RefactoringStatus.WARNING, false);
+		executeRefactoring(new MoveRefactoring(processor), measure, RefactoringStatus.WARNING, false);
 	}
 
-	protected ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
+	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null); 
 		StringBuffer buf= new StringBuffer();
 		buf.append("package source;\n");

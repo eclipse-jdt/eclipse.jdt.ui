@@ -21,16 +21,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestCase {
+public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerformanceTestCase {
 
-	private TestProject fTestProject;
-	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("RenameMethodWithHidingPerfTests");
@@ -47,33 +44,24 @@ public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestC
 		super(name);
 	}
 	
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-	
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-	
 	public void testCold() throws Exception {
-		executeRefactoring(generateSources(fTestProject));
+		executeRefactoring(0, 0, false, 10);
 	}
 	
 	public void testWarm() throws Exception {
 		tagAsSummary("Rename method with hiding", Dimension.CPU_TIME);
-		executeRefactoring(generateSources(fTestProject));
+		executeRefactoring(0, 0, true, 10);
 	}
 	
-	private void executeRefactoring(ICompilationUnit cunit) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		ICompilationUnit cunit= generateSources(fTestProject);
 		IMethod method= cunit.findPrimaryType().getMethod("setString", new String[] {"QString;"});
 		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
 		processor.setNewElementName("set");
-		executeRefactoring(new RenameRefactoring(processor), RefactoringStatus.ERROR);
+		executeRefactoring(new RenameRefactoring(processor), measure, RefactoringStatus.ERROR);
 	}
 	
-	private static ICompilationUnit generateSources(TestProject testProject) throws Exception {
+	private ICompilationUnit generateSources(TestProject testProject) throws Exception {
 		IPackageFragment definition= testProject.getSourceFolder().createPackageFragment("def", false, null); 
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");

@@ -13,36 +13,22 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-public class AbstractRenamePackagePerfTest extends RefactoringPerformanceTestCase {
-
-	protected TestProject fTestProject;
+public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenamePackagePerfTest(String name) {
 		super(name);
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-
-	protected void executeRefactoring(IPackageFragment pack) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		IPackageFragment pack= generateSources(numberOfCus, numberOfRefs);
 		RenamePackageProcessor processor= new RenamePackageProcessor(pack);
 		processor.setNewElementName("pack2");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(new RenameRefactoring(processor), measure);
 	}
 
-	protected IPackageFragment generateSources(int numberOfCus, int numberOfRefs) throws Exception {
+	private IPackageFragment generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment pack= fTestProject.getSourceFolder().createPackageFragment("pack", false, null);
 		for (int i= 0; i < numberOfRefs; i++) {
 			StringBuffer buf= new StringBuffer();

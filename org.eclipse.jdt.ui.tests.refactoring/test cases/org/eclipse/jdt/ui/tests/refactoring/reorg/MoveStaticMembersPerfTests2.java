@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
-public class MoveStaticMembersPerfTests2 extends AbstractMoveCompilationUnitPrefTest {
+public class MoveStaticMembersPerfTests2 extends AbstractMoveStaticMemberPrefTest {
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
@@ -36,18 +36,18 @@ public class MoveStaticMembersPerfTests2 extends AbstractMoveCompilationUnitPref
 	}
 	
 	public void testCold_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, false, 3);
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, true, 3);
 	}
 	
 	public void test_10_100() throws Exception {
-		executeRefactoring(generateSources(10, 100));
+		executeRefactoring(10, 100, true, 1);
 	}
 	
 	public void test_10_1000() throws Exception {
-		executeRefactoring(generateSources(10, 1000));
+		executeRefactoring(10, 1000, true, 1);
 	}
 }

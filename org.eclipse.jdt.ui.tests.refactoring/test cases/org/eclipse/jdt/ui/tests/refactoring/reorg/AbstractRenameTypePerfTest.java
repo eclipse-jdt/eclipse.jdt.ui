@@ -15,38 +15,24 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
-public class AbstractRenameTypePerfTest extends RefactoringPerformanceTestCase {
-
-	protected TestProject fTestProject;
+public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenameTypePerfTest(String name) {
 		super(name);
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-
-	protected void executeRefactoring(ICompilationUnit cunit) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
 		RenameTypeProcessor processor= new RenameTypeProcessor(type);
 		processor.setNewElementName("B");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(new RenameRefactoring(processor), measure);
 	}
 
-	protected ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
+	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null); 
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");

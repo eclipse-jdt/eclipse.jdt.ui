@@ -15,38 +15,24 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
-public class AbstractRenameMethodPerfTest extends RefactoringPerformanceTestCase {
-
-	protected TestProject fTestProject;
+public class AbstractRenameMethodPerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenameMethodPerfTest(String name) {
 		super(name);
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-
-	protected void executeRefactoring(ICompilationUnit cunit) throws Exception {
+	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
+		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IMethod method= cunit.findPrimaryType().getMethod("foo", new String[0]);
 		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
 		processor.setNewElementName("foo2");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(new RenameRefactoring(processor), measure);
 	}
 
-	protected ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
+	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null); 
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");

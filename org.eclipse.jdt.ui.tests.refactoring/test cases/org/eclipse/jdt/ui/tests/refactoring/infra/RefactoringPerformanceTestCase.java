@@ -20,7 +20,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
+public abstract class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 	
 	public RefactoringPerformanceTestCase() {
 		super();
@@ -30,21 +30,23 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 		super(name);
 	}
 	
-	protected void executeRefactoring(Refactoring refactoring) throws Exception {
-		executeRefactoring(refactoring, RefactoringStatus.WARNING);
+	protected void executeRefactoring(Refactoring refactoring, boolean measure) throws Exception {
+		executeRefactoring(refactoring, measure, RefactoringStatus.WARNING);
 	}
 	
-	protected void executeRefactoring(Refactoring refactoring, int maxSeverity) throws Exception {
-		executeRefactoring(refactoring, maxSeverity, true);
+	protected void executeRefactoring(Refactoring refactoring, boolean measure, int maxSeverity) throws Exception {
+		executeRefactoring(refactoring, measure, maxSeverity, true);
 	}
 	
-	protected void executeRefactoring(Refactoring refactoring, int maxSeverity, boolean checkUndo) throws Exception {
+	protected void executeRefactoring(Refactoring refactoring, boolean measure, int maxSeverity, boolean checkUndo) throws Exception {
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		joinBackgroudActivities();
 		System.gc();
-		startMeasuring();
+		if (measure)
+			startMeasuring();
 		ResourcesPlugin.getWorkspace().run(operation, null);
-		finishMeasurements();
+		if (measure)
+			finishMeasurements();
 		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
 		assertEquals(true, operation.getValidationStatus().isOK());
 		if (checkUndo) {

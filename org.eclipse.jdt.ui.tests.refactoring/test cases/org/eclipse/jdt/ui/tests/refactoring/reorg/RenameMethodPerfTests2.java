@@ -36,19 +36,18 @@ public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
 	}
 	
 	public void testCold_10_10() throws Exception {
-		// 100 referencing CUs each containing 10 references
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, false, 3);
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, true, 3);
 	}
 	
 	public void test_10_100() throws Exception {
-		executeRefactoring(generateSources(10, 100));
+		executeRefactoring(10, 100, true, 1);
 	}
 	
 	public void test_10_1000() throws Exception {
-		executeRefactoring(generateSources(10, 1000));
+		executeRefactoring(10, 1000, true, 1);
 	}
 }
