@@ -75,11 +75,14 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 				url= new URL(location, locale.toString().toLowerCase() + "." + JavaUIMessages.getString("Spelling.dictionary.file.extension")); //$NON-NLS-1$ //$NON-NLS-2$
 
 				try {
-
 					stream= url.openStream();
-					if (stream != null)
-						result.add(locale);
-
+					if (stream != null) {
+						try {
+							result.add(locale);
+						} finally {
+							stream.close();
+						}
+					}
 				} catch (IOException exception) {
 					// Do nothing
 				}
@@ -252,11 +255,15 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 				try {
 
-					final URL url= new URL("file", null, file);
-					if (url.openStream() != null) {
-
-						fUserDictionary= new PersistentSpellDictionary(url);
-						fChecker.addDictionary(fUserDictionary);
+					final URL url= new URL("file", null, file); //$NON-NLS-1$
+					InputStream stream= url.openStream();
+					if (stream != null) {
+						try {
+							fUserDictionary= new PersistentSpellDictionary(url);
+							fChecker.addDictionary(fUserDictionary);
+						} finally {
+							stream.close();
+						}
 					}
 				} catch (MalformedURLException exception) {
 					// Do nothing
