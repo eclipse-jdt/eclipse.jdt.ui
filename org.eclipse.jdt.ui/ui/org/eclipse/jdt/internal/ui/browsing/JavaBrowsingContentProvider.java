@@ -316,10 +316,11 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 		}
 
-		if (kind == IJavaElementDelta.CHANGED && ((flags & IJavaElementDelta.F_FINE_GRAINED) == 0)) {
-			if (fBrowsingPart.isValidElement(element)) {
+		if (kind == IJavaElementDelta.CHANGED && fBrowsingPart.isValidElement(element)) {
+			if ((flags & IJavaElementDelta.F_CHILDREN) == 0 && (flags & IJavaElementDelta.F_MODIFIERS) == 0)
 				postRefresh(element);
-			}
+			if ((flags & IJavaElementDelta.F_FINE_GRAINED) == 0 && (flags & IJavaElementDelta.F_MODIFIERS) != 0)
+				postUpdateIcon(element);
 		}
 
 		if (isClassPathChange(delta))
