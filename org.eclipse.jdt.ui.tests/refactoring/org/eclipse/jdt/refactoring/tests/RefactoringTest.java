@@ -73,8 +73,10 @@ public abstract class RefactoringTest extends TestCase {
 		if (fPackageP.exists()){	
 			IJavaElement[] kids= fPackageP.getChildren();
 			for (int i= 0; i < kids.length; i++){
-				if (kids[i] instanceof ISourceManipulation)
-					((ISourceManipulation)kids[i]).delete(true, null);
+				if (kids[i] instanceof ISourceManipulation){
+					if (kids[i].exists() && ! kids[i].isReadOnly())
+						((ISourceManipulation)kids[i]).delete(true, null);
+				}	
 			}
 		}	
 		
@@ -82,7 +84,7 @@ public abstract class RefactoringTest extends TestCase {
 			IJavaElement[] packages= fRoot.getChildren();
 			for (int i= 0; i < packages.length; i++){
 				IPackageFragment pack= (IPackageFragment)packages[i];
-				if (! pack.equals(fPackageP))	
+				if (! pack.equals(fPackageP) && pack.exists() && ! pack.isReadOnly())
 					pack.delete(true, null);
 			}
 		}
@@ -113,7 +115,12 @@ public abstract class RefactoringTest extends TestCase {
 	}
 	
 	protected void performChange(IChange change) throws JavaModelException{
-		change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
+		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
+		try {
+			change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
+		} finally {
+			change.performed();
+		}
 	}
 
 	/****************  helpers  ******************/
