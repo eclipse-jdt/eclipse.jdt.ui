@@ -111,8 +111,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		fgTitles= new String[SIZE];
 		fgTitles[STATE_PROP]= ""; //$NON-NLS-1$
-		fgTitles[KEY_PROP]= NLSUIMessages.getString("ExternalizeWizard.key"); //$NON-NLS-1$
-		fgTitles[VAL_PROP]= NLSUIMessages.getString("ExternalizeWizard.value"); //$NON-NLS-1$
+		fgTitles[KEY_PROP]= NLSUIMessages.getString("ExternalizeWizardPage.key"); //$NON-NLS-1$
+		fgTitles[VAL_PROP]= NLSUIMessages.getString("ExternalizeWizardPage.value"); //$NON-NLS-1$
 	}
 
 	private class CellModifier implements ICellModifier {
@@ -126,6 +126,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 			if (!(element instanceof NLSSubstitution))
 				return false;
+			
+			NLSSubstitution subst= (NLSSubstitution) element;
+			if (PROPERTIES[KEY_PROP].equals(property) && subst.getState() != NLSSubstitution.EXTERNALIZED) {
+				return false;
+			}
 			
 			return true;
 		}
@@ -308,11 +313,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fMessageField.setLabelText(message);
 
 			fKeyField= new StringDialogField();
-			fKeyField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_key")); //$NON-NLS-1$
+			fKeyField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Enter_key")); //$NON-NLS-1$
 			fKeyField.setDialogFieldListener(this);
 
 			fValueField= new StringDialogField();
-			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_value")); //$NON-NLS-1$
+			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Enter_value")); //$NON-NLS-1$
 			fValueField.setDialogFieldListener(this);
 
 			fKeyField.setText(substitution.getKeyWithoutPrefix());
@@ -377,15 +382,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				String val= values[i];
 				if (val.length() == 0) {
 					if (isKey) {
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
 					} else {
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_value")); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_empty_value")); //$NON-NLS-1$
 					}
 				}
 				// validation so keys don't contain spaces
 				if (isKey) {
 					if (!validateKey(val))
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getFormattedString("ExternalizeWizard.NLSInputDialog.Error_invalid_key", val)); //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getFormattedString("ExternalizeWizardPage.NLSInputDialog.Error_invalid_key", val)); //$NON-NLS-1$
 				}
 			}
 			return new StatusInfo();
@@ -482,11 +487,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		composite.setLayout(layout);
 		
 		Label accessorClassLabel= new Label(composite, SWT.NONE);
-		accessorClassLabel.setText("Accessor class:");
+		accessorClassLabel.setText(NLSUIMessages.getString("ExternalizeWizardPage.accessorclass.label")); //$NON-NLS-1$
 		accessorClassLabel.setLayoutData(new GridData());
 		
 		Label propertiesFileLabel= new Label(composite, SWT.NONE);
-		propertiesFileLabel.setText("Properties file:");
+		propertiesFileLabel.setText(NLSUIMessages.getString("ExternalizeWizardPage.propertiesfile.label")); //$NON-NLS-1$
 		propertiesFileLabel.setLayoutData(new GridData());
 				
 		fAccessorClassField= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -500,7 +505,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		//new Label(composite, SWT.NONE); // placeholder
 		
 		Button configure= new Button(accessorComposite, SWT.PUSH);
-		configure.setText("&Configure...");
+		configure.setText(NLSUIMessages.getString("ExternalizeWizardPage.configure.button")); //$NON-NLS-1$
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
 		data.widthHint= SWTUtil.getButtonWidthHint(configure);
 		data.heightHint= SWTUtil.getButtonHeightHint(configure);
@@ -653,7 +658,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		c.setLayout(gl);
 
 		Label l= new Label(c, SWT.NONE);
-		l.setText(NLSUIMessages.getString("wizardPage.context")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("ExternalizeWizardPage.context")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
 
 		// source viewer
@@ -679,7 +684,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fSourceViewer.getControl().setLayoutData(gd);
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage.title"), NLSUIMessages.getString("wizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("ExternalizeWizardPage.title"), NLSUIMessages.getString("ExternalizeWizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 
@@ -692,7 +697,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 
 		Label l= new Label(composite, SWT.NONE);
-		l.setText(NLSUIMessages.getString("wizardPage.common_prefix")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("ExternalizeWizardPage.common_prefix")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
 
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -719,7 +724,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution substitution= fSubstitutions[i];
 			if (hasDuplicateKey(substitution)) {
-				status.addWarning("Keys are duplicate.");
+				status.addWarning(NLSUIMessages.getString("ExternalizeWizardPage.warning.duplicatekeys")); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -729,7 +734,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution substitution= fSubstitutions[i];
 			if ((substitution.getValue() == null) && (substitution.getKey() != null)) {
-				status.addWarning("Entry is missing in Property File.");
+				status.addWarning(NLSUIMessages.getString("ExternalizeWizardPage.warning.keymissing")); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -759,11 +764,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		labelComp.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		
 		Label l= new Label(labelComp, SWT.NONE);
-		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("ExternalizeWizardPage.strings_to_externalize")); //$NON-NLS-1$
 		l.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fFilterCheckBox= new Button(labelComp, SWT.CHECK);
-		fFilterCheckBox.setText("&Filter all existing ignored and externalized entries");
+		fFilterCheckBox.setText(NLSUIMessages.getString("ExternalizeWizardPage.filter.label")); //$NON-NLS-1$
 		fFilterCheckBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		fFilterCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -847,15 +852,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		};
 
-		fExternalizeButton= createTaskButton(buttonComp, "wizardPage.Externalize_Selected", adapter); //$NON-NLS-1$
-		fIgnoreButton= createTaskButton(buttonComp, "wizardPage.Ignore_Selected", adapter); //$NON-NLS-1$
-		fInternalizeButton= createTaskButton(buttonComp, "wizardPage.Internalize_Selected", adapter); //$NON-NLS-1$
+		fExternalizeButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Externalize_Selected"), adapter); //$NON-NLS-1$
+		fIgnoreButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Ignore_Selected"), adapter); //$NON-NLS-1$
+		fInternalizeButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Internalize_Selected"), adapter); //$NON-NLS-1$
 
 		new Label(buttonComp, SWT.NONE); // separator
 		
-		fEditButton= createTaskButton(buttonComp, "ExternalizeWizardPage.Edit_key_and_value", adapter); //$NON-NLS-1$
-		fRevertButton= createTaskButton(buttonComp, "wizardPage.Revert_Selected", adapter); //$NON-NLS-1$	
-		fRenameButton= createTaskButton(buttonComp, "wizardPage.Rename_Keys", adapter); //$NON-NLS-1$
+		fEditButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Edit_key_and_value"), adapter); //$NON-NLS-1$
+		fRevertButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Revert_Selected"), adapter); //$NON-NLS-1$	
+		fRenameButton= createTaskButton(buttonComp, NLSUIMessages.getString("ExternalizeWizardPage.Rename_Keys"), adapter); //$NON-NLS-1$
 
 		fEditButton.setEnabled(false);
 		fRenameButton.setEnabled(false);
@@ -904,9 +909,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
 	}
 	
-	private Button createTaskButton(Composite parent, String labelKey, SelectionAdapter adapter) {
+	private Button createTaskButton(Composite parent, String label, SelectionAdapter adapter) {
 		Button button= new Button(parent, SWT.PUSH);
-		button.setText(NLSUIMessages.getString(labelKey)); //$NON-NLS-1$
+		button.setText(label); //$NON-NLS-1$
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(adapter);
@@ -917,8 +922,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		try {
 			IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
 			NLSSubstitution substitution= (NLSSubstitution) sel.getFirstElement();
-			NLSInputDialog dialog= new NLSInputDialog(getShell(), NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Title"), //$NON-NLS-1$
-					NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Label"), //$NON-NLS-1$
+			NLSInputDialog dialog= new NLSInputDialog(getShell(), NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Title"), //$NON-NLS-1$
+					NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Label"), //$NON-NLS-1$
 					substitution);
 			if (dialog.open() == Window.CANCEL)
 				return;
