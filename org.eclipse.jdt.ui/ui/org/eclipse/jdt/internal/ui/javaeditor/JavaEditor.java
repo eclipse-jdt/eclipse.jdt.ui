@@ -120,6 +120,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -132,9 +136,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -186,6 +187,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -245,7 +247,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		/**
 		 * Removes this selection changed listener from the given selection provider.
 		 * 
-		 * @param selectionProviderstyle
+		 * @param selectionProvider the selection provider
 		 */
 		public void uninstall(ISelectionProvider selectionProvider) {
 			if (selectionProvider == null)
@@ -271,15 +273,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
-			selectionChanged();
-		}
-
-		public void selectionChanged() {
-			ISourceReference element= computeHighlightRangeSourceReference();
-			if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
-				synchronizeOutlinePage(element);
-			setSelection(element, false);
-			updateStatusLine();
+			// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=56161
+			JavaEditor.this.selectionChanged();
 		}
 	}
 		
@@ -2333,6 +2328,19 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		return super.getAdapter(required);
 	}
 	
+	/**
+	 * React to changed selection.
+	 * 
+	 * @since 3.0
+	 */
+	protected void selectionChanged() {
+		ISourceReference element= computeHighlightRangeSourceReference();
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
+			synchronizeOutlinePage(element);
+		setSelection(element, false);
+		updateStatusLine();
+	}
+	
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
 		
 		ISelection selection= getSelectionProvider().getSelection();
@@ -2357,7 +2365,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				return;
 				
 			try {
-				
 				ISourceRange range= null;
 				if (reference instanceof ILocalVariable) {
 					IJavaElement je= ((ILocalVariable)reference).getParent();
@@ -2374,7 +2381,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 				if (offset < 0 || length < 0)
 					return;
-									
+				
 				setHighlightRange(offset, length, moveCursor);
 
 				if (!moveCursor)
@@ -2765,7 +2772,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue())
-					fEditorSelectionChangedListener.selectionChanged();
+					selectionChanged();
 				return;
 			}
 			

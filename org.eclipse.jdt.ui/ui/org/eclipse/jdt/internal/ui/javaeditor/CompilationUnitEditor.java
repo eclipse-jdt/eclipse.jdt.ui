@@ -1535,18 +1535,16 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			for (int i = 0, length= listeners.length; i < length; ++i)
 				((IJavaReconcilingListener)listeners[i]).reconciled(ast, cancelled, forced);
 		}
-		
+
 		// Update Java Outline page selection
 		if (!forced && !cancelled) {
-			if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
-				Shell shell= getSite().getShell();
-				if (shell != null && !shell.isDisposed()) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							synchronizeOutlinePageSelection();
-						}
-					});
-				}
+			Shell shell= getSite().getShell();
+			if (shell != null && !shell.isDisposed()) {
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						selectionChanged();
+					}
+				});
 			}
 		}
 	}
