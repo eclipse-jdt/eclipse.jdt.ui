@@ -49,6 +49,10 @@ public class RunInPackageAction extends SnippetAction {
 			SelectionDialog dialog= JavaUI.createPackageDialog(shell, p, IJavaElementSearchConstants.CONSIDER_BINARIES);
 			dialog.setTitle("Run");
 			dialog.setMessage("Choose the package in which code is run");
+			String pkg= fEditor.getPackage();
+			if (pkg != null) {
+				dialog.setInitialSelections(new String[] {pkg});
+			}
 			dialog.open();		
 			Object[] res= dialog.getResult();
 			if (res != null && res.length > 0) 

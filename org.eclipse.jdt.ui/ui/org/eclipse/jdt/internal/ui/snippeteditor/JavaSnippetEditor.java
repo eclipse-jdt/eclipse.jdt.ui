@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  */
 
 
-import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorSite;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import org.omg.CORBA.UNKNOWN;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
+import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.*;import org.eclipse.core.resources.*;import org.eclipse.core.runtime.*;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.IJavaUIStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.*;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.*;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.*;import org.omg.CORBA.UNKNOWN;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
 
 /**
  * An editor for Java snippets.
@@ -16,6 +16,8 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	public static final String PREFIX = "SnippetEditor.";
 	public static final String ERROR = PREFIX + "error.";
 	public static final String EVALUATING = PREFIX + "evaluating";
+	
+	public static final String PACKAGE_CONTEXT = PREFIX + "package";
 
 	private final static String TAG= "input_element";
 	
@@ -31,6 +33,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	private int fResultMode; // one of the RESULT_* constants from above
 	private boolean fEvaluating;
 	private IJavaThread fThread;
+	private int fAttempts= 0;
 	
 	private int fSnippetStart;
 	private int fSnippetEnd;
@@ -46,6 +49,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSnippetViewerConfiguration(textTools, this));		
 		fSnippetStateListeners= new ArrayList(4);
+	}
+	
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		super.doSetInput(input);
+		fPackageName = getPage().getPersistentProperty(new QualifiedName(JavaPlugin.getPluginId(), PACKAGE_CONTEXT));
 	}
 		
 	public void dispose() {
@@ -123,24 +131,56 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		}
 		evaluationStarts();
 		fireEvalStateChanged();
+		
+		fResultMode= resultMode;
+		buildAndLaunch();
+		
+		if (fVM == null) {
+			evaluationEnds();
+			return;
+		}
+		fireEvalStateChanged();
+
+		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
+		String snippet= selection.getText();
+		if (snippet.length() == 0) {
+			evaluationEnds();
+			return;
+		}
+		fSnippetStart= selection.getOffset();
+		fSnippetEnd= fSnippetStart + selection.getLength();
+		
+		evaluate(snippet);			
+	}	
+	
+	
+	protected void buildAndLaunch() {
+		final boolean build = !getJavaProject().getProject().getWorkspace().isAutoBuilding()
+			|| !getJavaProject().hasBuildState();
+		final boolean cpChange = classPathHasChanged();
+		final boolean launch = fVM == null || cpChange;
+		if (!build && !cpChange && !launch) {
+			// no need to build or launch VM or restart
+			return;
+		}
+		
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				pm.beginTask(JavaPlugin.getResourceString(EVALUATING), IProgressMonitor.UNKNOWN);
-				if (!getJavaProject().getProject().getWorkspace().isAutoBuilding()) {
+				if (build) {
 					try {
+						pm.beginTask("Building", IProgressMonitor.UNKNOWN);
 						getJavaProject().getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, pm);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 				}
-				fResultMode= resultMode;
-		
-				if (classPathHasChanged()) {
-					// need to relaunch VM
+				
+				if (cpChange) {
+					shutDownVM();
 				};
 			
-				fVM = ScrapbookLauncher.getDefault().getDebugTarget(getPage());
-				if (fVM == null) {
+				if (launch) {
+					pm.beginTask("Launching VM", IProgressMonitor.UNKNOWN);
 					launchVM();
 					fVM = ScrapbookLauncher.getDefault().getDebugTarget(getPage());
 				}
@@ -155,27 +195,20 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			evaluationEnds();
 			return;
 		}
-		if (fVM == null) {
-			evaluationEnds();
-			return;
-		}
-		fireEvalStateChanged();
-		DebugPlugin.getDefault().addDebugEventListener(JavaSnippetEditor.this);
-
-		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
-		String snippet= selection.getText();
-		if (snippet.length() == 0) {
-			evaluationEnds();
-			return;
-		}
-		fSnippetStart= selection.getOffset();
-		fSnippetEnd= fSnippetStart + selection.getLength();
-		
-		evaluate(snippet);			
-	}	
+	}
 	
 	public void setPackage(String packageName) {
 		fPackageName= packageName;
+		// persist
+		try {
+			getPage().setPersistentProperty(new QualifiedName(JavaPlugin.getPluginId(), PACKAGE_CONTEXT), packageName);
+		} catch (CoreException e) {
+			ErrorDialog.openError(getShell(), "Error setting package context", null, e.getStatus());
+		}
+	}
+	
+	public String getPackage() {
+		return fPackageName;
 	}
 			
 	protected IEvaluationContext getEvaluationContext() {
@@ -211,14 +244,20 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 				ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "cantshutdown"), null, e.getStatus());
 				return;
 			}
-			DebugPlugin.getDefault().getLaunchManager().deregisterLaunch(fVM.getLaunch());
-			fVM= null;
-			fThread = null;
-			fEvaluationContext= null;
-			Action action= (Action)getAction("Stop");
-			action.setEnabled(false);
-			fireEvalStateChanged();
+			vmTerminated();
 		}
+	}
+	
+	/**
+	 * The VM has termianted, update state
+	 */
+	protected void vmTerminated() {
+		DebugPlugin.getDefault().getLaunchManager().deregisterLaunch(fVM.getLaunch());
+		fVM= null;
+		fThread= null;
+		fEvaluationContext = null;
+		fLaunchedClassPath = null;
+		fireEvalStateChanged();
 	}
 	
 	public void addSnippetStateChangedListener(ISnippetStateChangedListener listener) {
@@ -245,8 +284,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	void evaluate(final String snippet) {
-		if (getThread() == null) {
-			// repost - wait for our main thread to suspend
+		if (fAttempts < 200 && getThread() == null) {
+			// wait for our main thread to suspend
+			fAttempts++;
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -258,7 +298,14 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			};
 			getShell().getDisplay().asyncExec(r);
 			return;
-		}	
+		}
+		if (getThread() == null) {
+			IStatus status = new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaUIStatus.INTERNAL_ERROR, 
+				"Evaluation failed: internal error - unable to obtain an execution context.", null);
+			ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "problemseval"), null, status);
+			evaluationEnds();
+			return;
+		}
 		try {
 			getThread().evaluate(snippet, JavaSnippetEditor.this, getEvaluationContext());
 		} catch (DebugException e) {
@@ -268,18 +315,20 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 
 	public void evaluationComplete(final IJavaEvaluationResult result) {
-		try {
-			fThread.resume();
-			int count= 0;
-			while (!fThread.isSuspended() && count < 20) {
-				try {
-					count++;
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
+		if (fThread != null) {
+			try {
+				fThread.resume();
+				int count= 0;
+				while (!fThread.isSuspended() && count < 20) {
+					try {
+						count++;
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
 				}
+			} catch (DebugException e) {
+				// XXX: error
 			}
-		} catch (DebugException e) {
-			// XXX: error
 		}
 		Runnable r = new Runnable() {
 			public void run() {
@@ -467,6 +516,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		
 	void evaluationStarts() {
 		fEvaluating= true;
+		fAttempts = 0;
 		fireEvalStateChanged();
 		showStatus(JavaPlugin.getResourceString(EVALUATING));
 		getSourceViewer().setEditable(false);
@@ -504,7 +554,12 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			if (de.getElementType() == IDebugElement.DEBUG_TARGET) {
 				if (de.getDebugTarget().equals(fVM)) {
 					if (e.getKind() == DebugEvent.TERMINATE) {
-						shutDownVM();
+						Runnable r = new Runnable() {
+							public void run() {
+								vmTerminated();
+							}
+						};
+						getShell().getDisplay().asyncExec(r);
 					}
 				}
 			}
@@ -534,6 +589,8 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	protected void launchVM() {
+		DebugPlugin.getDefault().addDebugEventListener(JavaSnippetEditor.this);
+		fLaunchedClassPath = getClassPath(getJavaProject());
 		ILauncher launcher = ScrapbookLauncher.getLauncher();
 		launcher.launch(new Object[] {getPage()}, ILaunchManager.DEBUG_MODE);
 	}
