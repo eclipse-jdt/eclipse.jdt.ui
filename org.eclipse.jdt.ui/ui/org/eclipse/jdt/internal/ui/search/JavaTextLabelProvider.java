@@ -117,28 +117,32 @@ public class JavaTextLabelProvider extends org.eclipse.jdt.internal.ui.viewsuppo
 	public String getTextLabel(IJavaElement element) {
 		StringBuffer buf= new StringBuffer();
 
-		if (showRoot() && !showRootPostfix()) {
+		if (showRoot()) {
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
+			String pathStr= null;
 			if (root != null) {
 				IPath path= root.getPath();
 				if (path != null) {
-					if (path.getDevice() == null)
-						path= path.makeRelative();
-					buf.append(path.toString());
-					buf.append(" - "); //$NON-NLS-1$
+					if (root.isExternal())
+						pathStr= path.toOSString();
+					else
+						pathStr= path.makeRelative().toString();
 				}
-			}	
-		}
+			}
 
-		renderName(element, buf);
-
-		if (showRoot() && showRootPostfix()) {
-			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
-			if (root != null) {
+			if (!showRootPostfix() && pathStr != null) {
+				buf.append(pathStr);
 				buf.append(" - "); //$NON-NLS-1$
-				buf.append(root.getPath().toString());
+			}
+
+			renderName(element, buf);
+		
+			if (showRootPostfix() && pathStr != null) {
+				buf.append(" - "); //$NON-NLS-1$
+				buf.append(pathStr);
 			}	
-		}
+		} else
+			renderName(element, buf);
 		return buf.toString();
 	}
 }
