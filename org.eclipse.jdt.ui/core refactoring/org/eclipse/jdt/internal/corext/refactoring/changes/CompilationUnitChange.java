@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.util.HashMap;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -73,11 +75,12 @@ public class CompilationUnitChange extends TextFileChange {
 	public String getPreviewContent(ISourceReference element, EditChange[] changes) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
 		TextBufferEditor editor= new TextBufferEditor(buffer);
+		HashMap positionMap= getPositionMap();
 		for (int i= 0; i < changes.length; i++) {
 			EditChange change= changes[i];
 			Assert.isTrue(change.getTextChange() == this);
 			if (change.isActive())
-				change.addTo(editor, true);
+				change.addTo(editor, true, positionMap);
 		}
 		int oldLength= buffer.getLength();
 		editor.performEdits(new NullProgressMonitor());

@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,9 +46,11 @@ public abstract class TextChange extends AbstractTextChange {
 		public TextChange getTextChange() {
 			return fTextChange;
 		}
-		public abstract void addTo(TextBufferEditor editor, boolean copy) throws CoreException;
 		public abstract TextRange getTextRange();
 		public abstract Object getModifiedElement();
+
+		protected abstract void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException;
+		abstract Object getEdit();
 	}
 
 	private static class TextEditChange extends EditChange {
@@ -56,14 +59,20 @@ public abstract class TextChange extends AbstractTextChange {
 			super(name, change);
 			fEdit= edit;
 		}
-		public void addTo(TextBufferEditor editor, boolean copy) throws CoreException {
-			editor.add(copy ? fEdit.copy() : fEdit);
+		protected void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException {
+			TextEdit edit= copy ? fEdit.copy() : fEdit;
+			if (positionMap != null)
+				positionMap.put(fEdit, edit);
+			editor.add(edit);
 		}
 		public TextRange getTextRange() {
 			return fEdit.getTextRange();
 		}
 		public Object getModifiedElement() {
 			return fEdit.getModifiedElement();
+		}
+		Object getEdit() {
+			return fEdit;
 		}
 	}
 
@@ -73,8 +82,11 @@ public abstract class TextChange extends AbstractTextChange {
 			super(name, change);
 			fEdit= edit;
 		}
-		public void addTo(TextBufferEditor editor, boolean copy) throws CoreException {
-			editor.add(copy ? fEdit.copy() : fEdit);
+		protected void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException {
+			MultiTextEdit edit= copy ? fEdit.copy() : fEdit;
+			if (positionMap != null)
+				positionMap.put(fEdit, edit);
+			editor.add(edit);
 		}
 		public TextRange getTextRange() {
 			return fEdit.getTextRange();
@@ -82,9 +94,13 @@ public abstract class TextChange extends AbstractTextChange {
 		public Object getModifiedElement() {
 			return fEdit.getModifiedElement();
 		}
+		Object getEdit() {
+			return fEdit;
+		}
 	}
 
 	private List fTextEditChanges;
+	private HashMap fPositionMap;
 
 	/**
 	 * Creates a new <code>TextChange</code> with the given name.
@@ -131,7 +147,7 @@ public abstract class TextChange extends AbstractTextChange {
 	public EditChange[] getTextEditChanges() {
 		return (EditChange[])fTextEditChanges.toArray(new EditChange[fTextEditChanges.size()]);
 	}
-	
+
 	/**
 	 * Returns the text this change is working on.
 	 * 
@@ -158,11 +174,18 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @exception JavaModelException if the preview could not be created
 	 */
 	public String getPreviewContent() throws JavaModelException {
+		return getPreviewTextBuffer().getContent();
+	}
+	
+	/**
+	 * Note: API is under construction
+	 */
+	public TextBuffer getPreviewTextBuffer() throws JavaModelException {
 		try {
 			TextBufferEditor editor= new TextBufferEditor(createTextBuffer());
 			addTextEdits(editor, true);
 			editor.performEdits(new NullProgressMonitor());
-			return editor.getTextBuffer().getContent();
+			return editor.getTextBuffer();
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
@@ -196,6 +219,48 @@ public abstract class TextChange extends AbstractTextChange {
 		return getContent(change, surroundingLines, true);
 	}
 
+	/**
+	 * Controls whether the text change should track position changes. If a change has been
+	 * executed a call to <code>getNewTextRange(TextEdit)</code> will return the text edit's
+	 * text range in the modified document.
+	 * 
+	 * @param track if <code>true</code> track text position changes.
+	 */
+	public void setTrackPositionChanges(boolean track) {
+		if (track)
+			fPositionMap= new HashMap(fTextEditChanges.size() * 2);
+		else
+			fPositionMap= null;
+	}
+	
+	/**
+	 * Returns the text range of the given text edit. If the change doesn't manage the given
+	 * text edit or if <code>setTrackPositionChanges</code> is set to <code>false</code>
+	 * <code>null</code> is returned.
+	 * 
+	 * <p>
+	 * Note: API is under construction
+	 * </P>
+	 */
+	public TextRange getNewTextRange(TextEdit edit) {
+		if (fPositionMap == null)
+			return null;
+		TextEdit result= (TextEdit)fPositionMap.get(edit);
+		if (result == null)
+			return null;
+		return result.getTextRange().copy();
+	}
+	
+	/**
+	 * Note: API is under construction
+	 */
+	public TextRange getNewTextRange(EditChange editChange) {
+		Object edit= editChange.getEdit();
+		if (edit instanceof TextEdit)
+			return getNewTextRange((TextEdit)edit);
+		return null;
+	}
+	
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
@@ -214,9 +279,13 @@ public abstract class TextChange extends AbstractTextChange {
 		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
 			EditChange edit= (EditChange)iter.next();
 			if (edit.isActive()) {
-				edit.addTo(editor, copy);
+				edit.addTo(editor, copy, fPositionMap);
 			}
 		}		
+	}
+	
+	protected HashMap getPositionMap() {
+		return fPositionMap;
 	}
 	
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
@@ -224,7 +293,7 @@ public abstract class TextChange extends AbstractTextChange {
 		TextBuffer buffer= createTextBuffer();
 		if (preview) {
 			TextBufferEditor editor= new TextBufferEditor(buffer);
-			change.addTo(editor, true);
+			change.addTo(editor, true, fPositionMap);
 			editor.performEdits(new NullProgressMonitor());
 		}
 		TextRange range= change.getTextRange();
