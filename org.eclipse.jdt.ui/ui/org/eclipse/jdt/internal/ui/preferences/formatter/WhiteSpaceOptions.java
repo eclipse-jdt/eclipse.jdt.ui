@@ -257,11 +257,10 @@ public final class WhiteSpaceOptions {
     CodeFormatter.K_STATEMENTS, 
     "result= (a *( b +  c + d) * (e + f));"); //$NON-NLS-1$
 
-    //TODO: integrate this
-//    private final static PreviewSnippet ASSERT_PREVIEW= new PreviewSnippet(
-//        CodeFormatter.K_STATEMENTS,
-//        "assert condition : reportError();"
-//    );
+    private final static PreviewSnippet ASSERT_PREVIEW= new PreviewSnippet(
+        CodeFormatter.K_STATEMENTS,
+        "assert condition : reportError();" //$NON-NLS-1$
+    );
 
     /**
      * Create the tree, in this order: position - syntax element - abstract
@@ -499,6 +498,7 @@ public final class WhiteSpaceOptions {
         createDoWhileTree(workingValues, statements);
         createSynchronizedTree(workingValues, statements);
         createTryStatementTree(workingValues, statements);
+        createAssertTree(workingValues, statements);
         
         final InnerNode expressions= new InnerNode(null, workingValues, "WhiteSpaceTabPage.expressions"); //$NON-NLS-1$
         createFunctionCallTree(workingValues, expressions);
@@ -535,7 +535,7 @@ public final class WhiteSpaceOptions {
     }
 
     private static void createBeforeColonTree(Map workingValues, final InnerNode parent) {
-//TODO:        createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW);
+    	createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
 
@@ -656,7 +656,7 @@ public final class WhiteSpaceOptions {
     }
 
     private static void createAfterColonTree(Map workingValues, final InnerNode parent) {
-//TODO:        createOption(parent, workingValues, "'assert'", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW);
+    	createOption(parent, workingValues, "WhiteSpaceOptions.assert", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.conditional", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, CONDITIONAL_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.label", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, LABEL_PREVIEW); //$NON-NLS-1$
     }
@@ -949,17 +949,17 @@ public final class WhiteSpaceOptions {
         createOption(root, workingValues, "WhiteSpaceTabPage.for.after_comma_init", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FOR_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.for.before_comma_inc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.for.after_comma_inc", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FOR_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_semicolon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_semicolon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
-//  TODO: include this category
-//  private static InnerNode createAssertTree(Map workingValues, InnerNode parent) {
-//  "'assert'",
-//  
-//  new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, "WhiteSpaceTabPage.before_colon"),
-//  new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, "WhiteSpaceTabPage.after_colon")
-//  }
+    private static InnerNode createAssertTree(Map workingValues, InnerNode parent) {
+    	final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.assert"); //$NON-NLS-1$
+    	createOption(root, workingValues, "WhiteSpaceTabPage.before_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+    	createOption(root, workingValues, "WhiteSpaceTabPage.after_colon", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); //$NON-NLS-1$
+    	return root;
+    }
     
     
     private static InnerNode createLabelTree(Map workingValues, InnerNode parent) {

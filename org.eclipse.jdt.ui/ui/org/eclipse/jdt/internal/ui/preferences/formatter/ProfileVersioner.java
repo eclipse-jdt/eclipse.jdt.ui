@@ -59,12 +59,11 @@ public class ProfileVersioner {
 		            newSettings.put(key, value);
 		        }
 		    }
-//		TODO: these should somehow be communicated to the formatter	in
-//		order for assert to work.
-//			newSettings.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
-//			newSettings.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-//			newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
-//			newSettings.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+
+			newSettings.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+			newSettings.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+			newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+			newSettings.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
 		}
 		profile.setVersion(CURRENT_VERSION);
 		profile.setSettings(newSettings);
