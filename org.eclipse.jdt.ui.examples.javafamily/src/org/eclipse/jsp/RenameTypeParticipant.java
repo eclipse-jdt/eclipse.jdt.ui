@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
@@ -84,7 +85,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 					change= new TextFileChange(resource.getName(), (IFile)resource);
 					changes.put(resource, change);
 				}
-				change.addTextEdit("Update type reference", new ReplaceEdit(start, length, newName)); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(change, "Update type reference", new ReplaceEdit(start, length, newName));
 			}
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
