@@ -77,12 +77,11 @@
 	</objectContribution>
 </extension>
 
-<extension
-      point="org.eclipse.jdt.ui.quickFixProcessors">
+<extension point="org.eclipse.jdt.ui.quickFixProcessors">
    <quickFixProcessor
          id= "org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
          class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
-         name="Example Quick Fix Processor">
+         name="%exampleQuickFixProcessor.name">
          <objectState adaptable="org.eclipse.core.resources.IResource">
            <property name="name" value="A.java"/>
         </objectState>
