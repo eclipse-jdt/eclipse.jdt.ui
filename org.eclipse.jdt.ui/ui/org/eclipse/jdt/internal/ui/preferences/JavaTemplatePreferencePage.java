@@ -118,9 +118,22 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 		if (selection.size() == 1 && selection.getFirstElement() instanceof TemplatePersistenceData) {
 			TemplatePersistenceData data= (TemplatePersistenceData) selection.getFirstElement();
 			Template template= data.getTemplate();
-			TemplateContextType type= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
+			String contextId= template.getContextTypeId();
+			TemplateContextType type= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
 			fTemplateProcessor.setContextType(type);
-			viewer.getDocument().set(template.getPattern());
+			
+			IDocument doc= viewer.getDocument();
+			
+			String start= null;
+			if ("javadoc".equals(contextId)) { //$NON-NLS-1$
+				start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
+			} else
+				start= ""; //$NON-NLS-1$
+			
+			doc.set(start + template.getPattern());
+			int startLen= start.length();
+			viewer.setDocument(doc, startLen, doc.getLength() - startLen);
+
 		} else {
 			viewer.getDocument().set(""); //$NON-NLS-1$
 		}		

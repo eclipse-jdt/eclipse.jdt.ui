@@ -169,10 +169,15 @@ public class EditTemplateDialog extends StatusDialog {
 		fTemplate= template;
 		fIsNameModifiable= isNameModifiable;
 		
+		String delim= new Document().getLegalLineDelimiters()[0];
+		
 		List contexts= new ArrayList();
 		for (Iterator it= registry.contextTypes(); it.hasNext();) {
 			TemplateContextType type= (TemplateContextType) it.next();
-			contexts.add(new String[] { type.getId(), type.getName() });
+			if (type.getId().equals("javadoc")) //$NON-NLS-1$
+				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
+			else
+				contexts.add(new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
 				
@@ -304,7 +309,8 @@ public class EditTemplateDialog extends StatusDialog {
 
 	protected void doSourceChanged(IDocument document) {
 		String text= document.get();
-		fTemplate.setPattern(text);
+		String prefix= getPrefix();
+		fTemplate.setPattern(text.substring(prefix.length(), text.length()));
 		fValidationStatus.setOK();
 		TemplateContextType contextType= fContextTypeRegistry.getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
@@ -342,7 +348,8 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private SourceViewer createEditor(Composite parent) {
-		IDocument document= new Document(fTemplate.getPattern());
+		String prefix= getPrefix();
+		IDocument document= new Document(prefix + fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
@@ -350,7 +357,7 @@ public class EditTemplateDialog extends StatusDialog {
 		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
 		viewer.setEditable(true);
-		viewer.setDocument(document);
+		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());
 		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
@@ -391,6 +398,17 @@ public class EditTemplateDialog extends StatusDialog {
 		return viewer;
 	}
 	
+	private String getPrefix() {
+		String prefix;
+		int idx= getIndex(fTemplate.getContextTypeId());
+		if (idx != -1)
+			prefix= fContextTypes[idx][2];
+		else
+			prefix= ""; //$NON-NLS-1$
+
+		return prefix;
+	}
+
 	private void handleVerifyKeyPressed(VerifyEvent event) {
 		if (!event.doit)
 			return;
