@@ -277,10 +277,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private boolean checkEnabledEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
-	}
-
 	//---- Helpers -------------------------------------------------------------------
 
 	/**build ui */
@@ -753,7 +749,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		//Interfaces are java.lang.Objects
 		if (type.isInterface()) {
-			type = JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object");
+			type = JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object"); //$NON-NLS-1$
 		}
 
 		IMethod[] methods = resolveMethodsHierarchy(type);
@@ -793,7 +789,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					buffer.append(fqn[0][0]).append('.').append(fqn[0][1]);
 					//TODO check for [][]
 					for (int j = 0; j < acount; j++) {
-						buffer.append("[]");
+						buffer.append("[]"); //$NON-NLS-1$
 					}
 				}
 			}else{
@@ -853,7 +849,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			IType type = typeName != null ? field.getJavaProject().findType(typeName) : null;
 			return type;
 		} else if (isArray) {
-			return JavaModelUtil.findType(field.getJavaProject(), "java.lang.Object");
+			return JavaModelUtil.findType(field.getJavaProject(), "java.lang.Object"); //$NON-NLS-1$
 		}
 		return null;
 
