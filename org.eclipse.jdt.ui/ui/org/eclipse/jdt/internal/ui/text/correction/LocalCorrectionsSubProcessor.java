@@ -474,8 +474,24 @@ public class LocalCorrectionsSubProcessor {
 		}
 		BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (declaration != null) {
-			ASTRewrite rewrite= new ASTRewrite(declaration.getParent());
-			rewrite.markAsRemoved(declaration);
+			
+			ASTNode nodeToRemove= declaration;
+			if (declaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+				List fragments= ((FieldDeclaration) declaration).fragments();
+				if (fragments.size() > 1) {
+					for (int i= 0; i < fragments.size(); i++) {
+						VariableDeclarationFragment node= (VariableDeclarationFragment) fragments.get(i);
+						if (ASTNodes.isParent(selectedNode, node)) {
+							nodeToRemove= node;
+							break;
+						}
+					}
+				}
+			}
+			
+			ASTRewrite rewrite= new ASTRewrite(nodeToRemove.getParent());		
+			rewrite.markAsRemoved(nodeToRemove);
+			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedmember.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
