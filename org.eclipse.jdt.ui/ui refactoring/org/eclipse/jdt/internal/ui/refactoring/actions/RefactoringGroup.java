@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.refactoring.methods.RenameStaticMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameVirtualMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.core.refactoring.types.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.core.refactoring.types.RenameTypeRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -35,7 +34,6 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.refactoring.AbstractOpenRefactoringWizardAction;
-import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveCompilationUnitWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -98,13 +96,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenamePackageAction(provider, changeCreator),
 			createRenamePrivateFieldAction(provider, changeCreator),
 			createRenameNonPrivateFieldAction(provider, changeCreator),
-			createMoveCompilationUnitAction(provider, changeCreator),
-			
-			//not supported now
-			//createSafeDeleteTypeAction(provider),
-			//createSafeDeleteMethodAction(provider),
-			//createSafeDeletePrivateFieldAction(provider),
-			//createExtractInterfaceAction(provider)
+			createMoveCompilationUnitAction(provider, changeCreator),			
 		};
 		fIntitialized= true;
 	}
@@ -169,18 +161,6 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameTypeRefactoring(changeCreator, (IType)obj);
-			}
-		};
-	}
-			
-	private AbstractOpenRefactoringWizardAction createExtractInterfaceAction(ISelectionProvider provider) {	
-		String label= RefactoringResources.getResourceString("Refactoring.ExtractInterface.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IType.class) {
-			protected Wizard createWizard() { 
-				return new ExtractInterfaceWizard(); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new ExtractInterfaceRefactoring((IType)obj);
 			}
 		};
 	}
