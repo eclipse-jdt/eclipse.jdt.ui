@@ -187,9 +187,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundCustomRadioButton;
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
-	private Button fAddJavaDocTagsButton;
-	private Button fEscapeStringsButton;
-	private Button fGuessMethodArgumentsButton;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
     private Control fAutoInsertDelayText;
@@ -208,7 +205,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
-	private Button fStickyOccurrencesButton;
 	
 	/**
 	 * Tells whether the fields are initialized.
@@ -640,17 +636,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Button master= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.stickyOccurrences"); //$NON-NLS-1$
-		fStickyOccurrencesButton= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
-		createDependency(master, fStickyOccurrencesButton);
+		Button slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
+		createDependency(master, PreferenceConstants.EDITOR_MARK_OCCURRENCES, slave);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS, 0);
+		master= addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
+		slave= addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
+		createDependency(master, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS, slave);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -886,15 +883,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		fDecorationStyleCombo.addSelectionListener(new SelectionListener() {
-			/**
-			 * {@inheritdoc}
+			/*
+			 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
 			 */
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
 			
-			/**
-			 * {@inheritdoc}
+			/*
+			 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 			 */
 			public void widgetSelected(SelectionEvent e) {
 				int i= fAnnotationList.getSelectionIndex();
@@ -970,11 +967,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		group.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.description")); //$NON-NLS-1$
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
-		Button button= addCheckBox(group, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
+		Button master= addCheckBox(group, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.escapeStrings"); //$NON-NLS-1$
-		fEscapeStringsButton= addCheckBox(group, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 1);
-		createDependency(button, fEscapeStringsButton);
+		Button slave= addCheckBox(group, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 1);
+		createDependency(master, PreferenceConstants.EDITOR_WRAP_STRINGS, slave);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
 		addCheckBox(group, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
@@ -992,11 +989,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		button= addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
+		master= addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
-		fAddJavaDocTagsButton= addCheckBox(group, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
-		createDependency(button, fAddJavaDocTagsButton);
+		slave= addCheckBox(group, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
+		createDependency(master, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, slave);
 
 //		label= PreferencesMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
 //		addCheckBox(group, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);
@@ -1017,15 +1014,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		control.setLayoutData(gridData);		
 	}
 	
-	private static void createDependency(final Button master, final Control slave) {
+	private void createDependency(final Button master, String masterKey, final Control slave) {
 		indent(slave);
+		boolean masterState= fOverlayStore.getBoolean(masterKey);
+		slave.setEnabled(masterState);
 		master.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				slave.setEnabled(master.getSelection());
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
-		});		
+		});
 	}
 
 	private Control createContentAssistPage(Composite parent) {
@@ -1054,11 +1053,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button button= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
+		Button master= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		fGuessMethodArgumentsButton= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
-		createDependency(button, fGuessMethodArgumentsButton);
+		Button slave= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
+		createDependency(master, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, slave);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
 		final Button autoactivation= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
@@ -1431,23 +1430,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundCustomRadioButton.setSelection(!default_);
 		fBackgroundColorButton.setEnabled(!default_);
 
-		boolean closeJavaDocs= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
-		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
-		
-		fEscapeStringsButton.setEnabled(fOverlayStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS));
-
-		boolean fillMethodArguments= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
-		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
-
 		boolean completionInserts= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		fCompletionInsertsRadioButton.setSelection(completionInserts);
 		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
 		
 		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
-		
-		boolean markOccurrences= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fStickyOccurrencesButton.setEnabled(markOccurrences);
-		
+
         updateAutoactivationControls();
         
         fFieldsInitialized= true;
