@@ -609,8 +609,12 @@ public class Checks {
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
 		status= Resources.makeCommittable(filesToModify, context);
-		if (!status.isOK())
+		if (!status.isOK()) {
 			result.merge(RefactoringStatus.create(status));
+			if (!result.hasFatalError()) {
+				result.addFatalError(RefactoringCoreMessages.getString("Checks.validateEdit")); //$NON-NLS-1$
+			}			
+		}
 		return result;
 	}
 	
@@ -623,8 +627,12 @@ public class Checks {
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
 		status= Resources.makeCommittable(resource, context);
-		if (!status.isOK())
+		if (!status.isOK()) {
 			result.merge(RefactoringStatus.create(status));
+			if (!result.hasFatalError()) {
+				result.addFatalError(RefactoringCoreMessages.getString("Checks.validateEdit")); //$NON-NLS-1$
+			}			
+		}
 		return result;
 	}	
 
