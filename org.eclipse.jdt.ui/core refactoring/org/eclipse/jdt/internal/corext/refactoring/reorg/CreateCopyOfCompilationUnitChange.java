@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
+public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
 	private ICompilationUnit fOldCu;
 	private INewNameQuery fNameQuery;
