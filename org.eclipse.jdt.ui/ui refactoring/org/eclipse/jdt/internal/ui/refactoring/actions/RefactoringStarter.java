@@ -18,9 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
-
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -45,7 +43,13 @@ public class RefactoringStarter {
 	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors, parent))
 			return null;
-		RefactoringStatus activationStatus= checkActivation(refactoring);
+		RefactoringStatus activationStatus= null;
+		try {
+			activationStatus= checkActivation(refactoring);
+		} catch (InterruptedException e) {
+			// the activation checking got canceled
+			return null;
+		}
 		if (activationStatus.hasFatalError()){
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus, parent);
 		} else {
@@ -61,7 +65,7 @@ public class RefactoringStarter {
 		} 
 	}
 		
-	private RefactoringStatus checkActivation(Refactoring refactoring){		
+	private RefactoringStatus checkActivation(Refactoring refactoring) throws InterruptedException {		
 		try {
 			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.INITIAL_CONDITONS);
 			IRunnableContext context= new BusyIndicatorRunnableContext();
@@ -70,9 +74,6 @@ public class RefactoringStarter {
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ //$NON-NLS-2$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
-		} catch (InterruptedException e) {
-			Assert.isTrue(false);
-			return null;
 		}
 	}
 	
