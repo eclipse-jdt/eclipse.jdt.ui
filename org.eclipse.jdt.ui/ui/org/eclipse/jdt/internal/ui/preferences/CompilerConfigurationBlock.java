@@ -49,6 +49,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_SOURCE_FILE_ATTR= JavaCore.COMPILER_SOURCE_FILE_ATTR;
 	private static final String PREF_CODEGEN_UNUSED_LOCAL= JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL;
 	private static final String PREF_CODEGEN_TARGET_PLATFORM= JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM;
+	//private static final String PREF_CODEGEN_INLINE_JSR_BYTECODE= JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE;
+	
 	//private static final String PREF_PB_UNREACHABLE_CODE= JavaCore.COMPILER_PB_UNREACHABLE_CODE;
 	//private static final String PREF_PB_INVALID_IMPORT= JavaCore.COMPILER_PB_INVALID_IMPORT;
 	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;
@@ -170,6 +172,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private final String[] KEYS= new String[] {
 		PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
+		//PREF_CODEGEN_INLINE_JSR_BYTECODE,
 		PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 		PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
 		PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
@@ -679,6 +682,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		group.setLayout(layout);
 
 		String[] generateValues= new String[] { GENERATE, DO_NOT_GENERATE };
+		//String[] enableDisableValues= new String[] { ENABLED, DISABLED };
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.variable_attr.label"); //$NON-NLS-1$
 		addCheckBox(group, label, PREF_LOCAL_VARIABLE_ATTR, generateValues, 0);
@@ -692,6 +696,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_unused_local.label"); //$NON-NLS-1$
 		addCheckBox(group, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT }, 0);	
 
+		//label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_inline_jsr_bytecode.label"); //$NON-NLS-1$
+		//addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
 		return compComposite;
 	}
