@@ -39,6 +39,7 @@ import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -93,10 +94,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
-import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
@@ -194,17 +193,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/** The static bindings to import */
 	private final Set fStaticBindings= new HashSet();
 
-	/** The type where to extract the supertype */
-	private final IType fType;
+	/** The subtype name */
+	private String fSubName;
+
+	/** The subtype where to extract the supertype */
+	private final IType fSubType;
+
+	/** The source of the new supertype */
+	private String fSuperSource= null;
 
 	/** The type bindings to import */
 	private final Set fTypeBindings= new HashSet();
-
-	/** The type name */
-	private String fTypeName;
-
-	/** The source of the new type */
-	private String fTypeSource= null;
 
 	/**
 	 * Creates a new extract interface processor.
@@ -215,9 +214,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	public ExtractInterfaceProcessor(final IType type, final CodeGenerationSettings settings) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(settings);
-		fType= type;
+		fSubType= type;
 		fSettings= settings;
-		fTypeName= fType.getElementName();
+		fSubName= fSubType.getElementName();
 	}
 
 	/*
@@ -231,18 +230,18 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 4); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.checking")); //$NON-NLS-1$
-			status.merge(Checks.checkIfCuBroken(fType));
+			status.merge(Checks.checkIfCuBroken(fSubType));
 			if (!status.hasError()) {
-				if (fType.isBinary() || fType.isReadOnly() || !fType.exists())
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_binary"), JavaStatusContext.create(fType))); //$NON-NLS-1$
-				else if (fType.isAnonymous())
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_anonymous"), JavaStatusContext.create(fType))); //$NON-NLS-1$
-				else if (fType.isAnnotation())
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_annotation"), JavaStatusContext.create(fType))); //$NON-NLS-1$
+				if (fSubType.isBinary() || fSubType.isReadOnly() || !fSubType.exists())
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_binary"), JavaStatusContext.create(fSubType))); //$NON-NLS-1$
+				else if (fSubType.isAnonymous())
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_anonymous"), JavaStatusContext.create(fSubType))); //$NON-NLS-1$
+				else if (fSubType.isAnnotation())
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_annotation"), JavaStatusContext.create(fSubType))); //$NON-NLS-1$
 				else {
 					status.merge(checkSuperType());
 					if (!status.hasFatalError()) {
-						status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fType.getCompilationUnit()}), null));
+						status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fSubType.getCompilationUnit()}), null));
 						monitor.worked(1);
 						if (!status.hasFatalError())
 							fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), status);
@@ -264,9 +263,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.checking")); //$NON-NLS-1$
-			status.merge(Checks.checkIfCuBroken(fType));
+			status.merge(Checks.checkIfCuBroken(fSubType));
 			if (!status.hasError()) {
-				if (Checks.isException(fType, new SubProgressMonitor(monitor, 1)))
+				if (Checks.isException(fSubType, new SubProgressMonitor(monitor, 1)))
 					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.no_throwable"))); //$NON-NLS-1$
 			}
 		} finally {
@@ -282,13 +281,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @throws JavaModelException if an error occurs
 	 */
 	protected RefactoringStatus checkSuperType() throws JavaModelException {
-		final IPackageFragment fragment= fType.getPackageFragment();
-		final IType type= Checks.findTypeInPackage(fragment, fTypeName);
+		final IPackageFragment fragment= fSubType.getPackageFragment();
+		final IType type= Checks.findTypeInPackage(fragment, fSubName);
 		if (type != null && type.exists()) {
 			if (fragment.isDefaultPackage())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.existing_default_type", new String[] { fTypeName})); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.existing_default_type", new String[] { fSubName})); //$NON-NLS-1$
 			else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.existing_type", new String[] { fTypeName, fragment.getElementName()})); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.existing_type", new String[] { fSubName, fragment.getElementName()})); //$NON-NLS-1$
 		}
 		return new RefactoringStatus();
 	}
@@ -308,8 +307,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			result.merge(Checks.checkCompilationUnitName(name + ".java")); //$NON-NLS-1$
 			if (result.hasFatalError())
 				return result;
-			final String path= fTypeName + ".java"; //$NON-NLS-1$
-			final IPackageFragment fragment= fType.getPackageFragment();
+			final String path= fSubName + ".java"; //$NON-NLS-1$
+			final IPackageFragment fragment= fSubType.getPackageFragment();
 			if (fragment.getCompilationUnit(path).exists()) {
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.existing_compilation_unit", new String[] { path, fragment.getElementName()})); //$NON-NLS-1$
 				return result;
@@ -330,9 +329,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			monitor.beginTask("", 6); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
 			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name"), fChangeManager.getAllChanges()); //$NON-NLS-1$
-			final IFile file= ResourceUtil.getFile(fType.getCompilationUnit());
-			if (fTypeSource != null && fTypeSource.length() > 0)
-				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(fTypeName + ".java"), fTypeSource, file.getCharset(false), "java")); //$NON-NLS-1$ //$NON-NLS-2$
+			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
+			if (fSuperSource != null && fSuperSource.length() > 0)
+				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(fSubName + ".java"), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$ //$NON-NLS-2$
 			return change;
 		} finally {
 			monitor.done();
@@ -354,38 +353,37 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 4); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
-			fTypeSource= null;
+			fSuperSource= null;
 			final TextChangeManager manager= new TextChangeManager();
-			final CompilationUnitRewrite sourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
-			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, sourceRewrite.getRoot());
+			final CompilationUnitRewrite sourceRewrite= new CompilationUnitRewrite(fSubType.getCompilationUnit());
+			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, sourceRewrite.getRoot());
 			if (declaration != null) {
 				createTypeSignature(sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 1));
-				final IField[] fields= getExtractedFields(fType.getCompilationUnit());
+				final IField[] fields= getExtractedFields(fSubType.getCompilationUnit());
 				if (fields.length > 0)
 					ASTNodeDeleteUtil.markAsDeleted(fields, sourceRewrite, null);
-				if (fType.isInterface()) {
-					final IMethod[] methods= getExtractedMethods(fType.getCompilationUnit());
+				if (fSubType.isInterface()) {
+					final IMethod[] methods= getExtractedMethods(fSubType.getCompilationUnit());
 					if (methods.length > 0)
 						ASTNodeDeleteUtil.markAsDeleted(methods, sourceRewrite, null);
 				}
-				ICompilationUnit copy= null;
+				ICompilationUnit superUnit= null;
 				try {
-					copy= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), fTypeName + ".java", fOwner, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
-					fTypeSource= createTypeSource(copy, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 1));
-					if (fTypeSource != null) {
-						copy.getBuffer().setContents(fTypeSource);
-						JavaModelUtil.reconcile(copy);
+					superUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getPackageFragment(), fSubName + ".java", fOwner, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
+					fSuperSource= createTypeSource(superUnit, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 1));
+					if (fSuperSource != null) {
+						superUnit.getBuffer().setContents(fSuperSource);
+						JavaModelUtil.reconcile(superUnit);
 					}
 					final Set replacements= new HashSet();
-					if (fReplace) {
-						createTypeOccurrencesReplacements(manager, copy, sourceRewrite, replacements, status, new SubProgressMonitor(monitor, 1));
-// TODO			rewriteTypeOccurrences(manager, sourceRewrite, replacements, status, new SubProgressMonitor(monitor, 1));
-					}
+					if (fReplace)
+						createTypeOccurrencesReplacements(manager, superUnit, sourceRewrite, replacements, status, new SubProgressMonitor(monitor, 1));
+					// rewriteTypeOccurrences(manager, sourceRewrite, superUnit, replacements, status, new SubProgressMonitor(monitor, 1));
 					createMethodComments(sourceRewrite, replacements);
-					manager.manage(fType.getCompilationUnit(), sourceRewrite.createChange());
+					manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange());
 				} finally {
-					if (copy != null)
-						copy.discardWorkingCopy();
+					if (superUnit != null)
+						superUnit.discardWorkingCopy();
 				}
 			}
 			return manager;
@@ -409,7 +407,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(fragment);
 		final FieldDeclaration field= (FieldDeclaration) fragment.getParent();
-		ImportRewriteUtil.collectImports(fType.getJavaProject(), field, fTypeBindings, fStaticBindings, false);
+		ImportRewriteUtil.collectImports(fSubType.getJavaProject(), field, fTypeBindings, fStaticBindings, false);
 		final ASTRewrite rewrite= ASTRewrite.create(field.getAST());
 		final ITrackedNodePosition position= rewrite.track(field);
 		final ListRewrite rewriter= rewrite.getListRewrite(field, FieldDeclaration.FRAGMENTS_PROPERTY);
@@ -481,8 +479,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		if (binding != null) {
 			IVariableBinding variable= null;
 			SingleVariableDeclaration argument= null;
-			final IPackageFragment fragment= fType.getPackageFragment();
-			final String string= fragment.isDefaultPackage() ? fTypeName : fragment.getElementName() + "." + fTypeName; //$NON-NLS-1$
+			final IPackageFragment fragment= fSubType.getPackageFragment();
+			final String string= fragment.isDefaultPackage() ? fSubName : fragment.getElementName() + "." + fSubName; //$NON-NLS-1$
 			final ITypeBinding[] bindings= binding.getParameterTypes();
 			final String[] names= new String[bindings.length];
 			for (int offset= 0; offset < names.length; offset++) {
@@ -499,7 +497,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 			}
-			final String comment= StubUtility.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), declaration, true, false, string, names, getLineDelimiter()); //$NON-NLS-1$
+			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, getLineDelimiter()); //$NON-NLS-1$
 			if (comment != null) {
 				if (declaration.getJavadoc() != null) {
 					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
@@ -521,7 +519,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(replacements);
 		if (fMembers.length > 0) {
-			final IJavaProject project= fType.getJavaProject();
+			final IJavaProject project= fSubType.getJavaProject();
 			final boolean annotations= JavaModelUtil.is50OrHigher(project);
 			final boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
 			IMember member= null;
@@ -556,7 +554,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
-		ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeBindings, fStaticBindings, true);
+		ImportRewriteUtil.collectImports(fSubType.getJavaProject(), declaration, fTypeBindings, fStaticBindings, true);
 		final ASTRewrite rewrite= ASTRewrite.create(declaration.getAST());
 		final ITrackedNodePosition position= rewrite.track(declaration);
 		if (declaration.getBody() != null)
@@ -622,12 +620,12 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
 		final String delimiter= getLineDelimiter();
-		if (JdtFlags.isPublic(fType)) {
+		if (JdtFlags.isPublic(fSubType)) {
 			buffer.append(JdtFlags.VISIBILITY_STRING_PUBLIC);
 			buffer.append(" "); //$NON-NLS-1$
 		}
 		buffer.append("interface "); //$NON-NLS-1$
-		buffer.append(fTypeName);
+		buffer.append(fSubName);
 		buffer.append(" {"); //$NON-NLS-1$
 		buffer.append(delimiter);
 		buffer.append(delimiter);
@@ -640,7 +638,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) unit.types().get(0);
 		createTypeParameters(targetRewrite, sourceDeclaration, targetDeclaration);
 		createMemberDeclarations(sourceRewrite, targetRewrite, targetDeclaration);
-		final TextEdit edit= targetRewrite.rewriteAST(document, fType.getJavaProject().getOptions(true));
+		final TextEdit edit= targetRewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true));
 		try {
 			edit.apply(document, TextEdit.UPDATE_REGIONS);
 		} catch (MalformedTreeException exception) {
@@ -656,10 +654,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * Creates the necessary imports for the extracted supertype.
 	 * 
 	 * @param unit the working copy of the new supertype
+	 * @param monitor the progress monitor to use
 	 * @return the generated import declaration
 	 * @throws CoreException if the imports could not be generated
 	 */
-	protected String createTypeImports(final ICompilationUnit unit) throws CoreException {
+	protected String createTypeImports(final ICompilationUnit unit, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(unit);
 		final ImportRewrite rewrite= new ImportRewrite(unit);
 		ITypeBinding type= null;
@@ -679,7 +678,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 		final IDocument document= new Document();
 		try {
-			rewrite.createEdit(document).apply(document);
+			rewrite.createEdit(document, new SubProgressMonitor(monitor, 1)).apply(document);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
 		} catch (BadLocationException exception) {
@@ -695,17 +694,20 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a supertype.
 	 * 
+	 * Delete ExtractInterfaceUtil if this method is deleted
+	 * 
+	 * 
 	 * @param manager the text change manager
-	 * @param workingCopy the working copy of the new supertype
+	 * @param superUnit the working copy of the new supertype
 	 * @param sourceRewrite the compilation unit source rewrite
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
 	 * @throws CoreException if an error occurs
 	 */
-	private void createTypeOccurrencesReplacements(final TextChangeManager manager, final ICompilationUnit workingCopy, final CompilationUnitRewrite sourceRewrite, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	private void createTypeOccurrencesReplacements(final TextChangeManager manager, final ICompilationUnit superUnit, final CompilationUnitRewrite sourceRewrite, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(manager);
-		Assert.isNotNull(workingCopy);
+		Assert.isNotNull(superUnit);
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(replacements);
 		Assert.isNotNull(status);
@@ -713,52 +715,52 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 5); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
-			ICompilationUnit type= null;
+			ICompilationUnit subUnit= null;
 			try {
-				type= WorkingCopyUtil.getNewWorkingCopy(fType.getCompilationUnit(), fOwner, new SubProgressMonitor(monitor, 1));
-				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+				subUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getCompilationUnit(), fOwner, new SubProgressMonitor(monitor, 1));
+				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSubType.getCompilationUnit());
 				final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 				try {
 					final IDocument document= new Document(buffer.getDocument().get());
 					try {
-						rewrite.rewriteAST(document, fType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+						rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 					} catch (MalformedTreeException exception) {
 						JavaPlugin.log(exception);
 					} catch (BadLocationException exception) {
 						JavaPlugin.log(exception);
 					}
-					type.getBuffer().setContents(document.get());
+					subUnit.getBuffer().setContents(document.get());
 				} finally {
-					RefactoringFileBuffers.release(fType.getCompilationUnit());
+					RefactoringFileBuffers.release(fSubType.getCompilationUnit());
 				}
-				JavaModelUtil.reconcile(type);
-				if (fTypeSource != null) {
-					workingCopy.getBuffer().setContents(fTypeSource);
-					JavaModelUtil.reconcile(workingCopy);
-					final IType interfaceType= workingCopy.getType(fTypeName);
-					final CompilationUnitRange[] ranges= ExtractInterfaceUtil.updateReferences(manager, (IType) JavaModelUtil.findInCompilationUnit(type, fType), interfaceType, fOwner, false, new SubProgressMonitor(monitor, 9), status);
+				JavaModelUtil.reconcile(subUnit);
+				if (fSuperSource != null) {
+					superUnit.getBuffer().setContents(fSuperSource);
+					JavaModelUtil.reconcile(superUnit);
+					final IType interfaceType= superUnit.getType(fSubName);
+					final CompilationUnitRange[] ranges= ExtractInterfaceUtil.updateReferences(manager, (IType) JavaModelUtil.findInCompilationUnit(subUnit, fSubType), interfaceType, fOwner, false, new SubProgressMonitor(monitor, 9), status);
 					if (!status.hasFatalError()) {
 						final RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-						final CompilationUnit source= parser.parse(type, true, new SubProgressMonitor(monitor, 1));
-						final CompilationUnit target= parser.parse(workingCopy, true, new SubProgressMonitor(monitor, 1));
-						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(interfaceType, target);
+						final CompilationUnit subNode= parser.parse(subUnit, true, new SubProgressMonitor(monitor, 1));
+						final CompilationUnit superNode= parser.parse(superUnit, true, new SubProgressMonitor(monitor, 1));
+						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(interfaceType, superNode);
 						if (declaration != null) {
 							final ITypeBinding binding= declaration.resolveBinding();
 							if (binding != null) {
 								final TypeEnvironment environment= new TypeEnvironment();
 								fSuperType= environment.create(binding);
-								final CompilationUnitRewrite rewriter= new CompilationUnitRewrite(workingCopy, target);
+								final CompilationUnitRewrite rewriter= new CompilationUnitRewrite(superUnit, superNode);
 								final TextEditGroup group= sourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.update_reference")); //$NON-NLS-1$
 								for (int index= 0; index < ranges.length; index++) {
 									final CompilationUnitRange range= ranges[index];
-									if (range.getCompilationUnit().equals(type))
-										rewriteTypeOccurrence(range, sourceRewrite, source, replacements, group);
-									else if (range.getCompilationUnit().equals(workingCopy))
-										rewriteTypeOccurrence(range, rewriter, target, replacements, group);
+									if (range.getCompilationUnit().equals(subUnit))
+										rewriteTypeOccurrence(range, sourceRewrite, subNode, replacements, group);
+									else if (range.getCompilationUnit().equals(superUnit))
+										rewriteTypeOccurrence(range, rewriter, superNode, replacements, group);
 								}
-								final IDocument document= new Document(fTypeSource);
+								final IDocument document= new Document(fSuperSource);
 								try {
-									rewriter.getASTRewrite().rewriteAST(document, fType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+									rewriter.getASTRewrite().rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 								} catch (MalformedTreeException exception) {
 									JavaPlugin.log(exception);
 								} catch (IllegalArgumentException exception) {
@@ -766,16 +768,16 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 								} catch (BadLocationException exception) {
 									JavaPlugin.log(exception);
 								}
-								fTypeSource= document.get();
-								manager.remove(workingCopy);
-								manager.remove(type);
+								fSuperSource= document.get();
+								manager.remove(superUnit);
+								manager.remove(subUnit);
 							}
 						}
 					}
 				}
 			} finally {
-				if (type != null)
-					type.discardWorkingCopy();
+				if (subUnit != null)
+					subUnit.discardWorkingCopy();
 			}
 		} finally {
 			monitor.done();
@@ -799,7 +801,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			for (final Iterator iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
 				parameter= (TypeParameter) iterator.next();
 				rewrite.insertLast(ASTNode.copySubtree(targetRewrite.getAST(), parameter), null);
-				ImportRewriteUtil.collectImports(fType.getJavaProject(), sourceDeclaration, fTypeBindings, fStaticBindings, false);
+				ImportRewriteUtil.collectImports(fSubType.getJavaProject(), sourceDeclaration, fTypeBindings, fStaticBindings, false);
 			}
 		}
 	}
@@ -819,8 +821,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		final AST ast= declaration.getAST();
-		final ITypeParameter[] parameters= fType.getTypeParameters();
-		Type type= ast.newSimpleType(ast.newSimpleName(fTypeName));
+		final ITypeParameter[] parameters= fSubType.getTypeParameters();
+		Type type= ast.newSimpleType(ast.newSimpleName(fSubName));
 		if (parameters.length > 0) {
 			final ParameterizedType parameterized= ast.newParameterizedType(type);
 			for (int index= 0; index < parameters.length; index++)
@@ -859,23 +861,23 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			String typeComment= null;
 			String fileComment= null;
 			if (fSettings.createComments) {
-				final ITypeParameter[] parameters= fType.getTypeParameters();
+				final ITypeParameter[] parameters= fSubType.getTypeParameters();
 				final String[] names= new String[parameters.length];
 				for (int index= 0; index < parameters.length; index++)
 					names[index]= parameters[index].getElementName();
-				typeComment= CodeGeneration.getTypeComment(copy, fType.getTypeQualifiedName('.'), names, delimiter);
+				typeComment= CodeGeneration.getTypeComment(copy, fSubType.getTypeQualifiedName('.'), names, delimiter);
 				fileComment= CodeGeneration.getFileComment(copy, delimiter);
 
 			}
 			final StringBuffer buffer= new StringBuffer(64);
 			createTypeDeclaration(sourceRewrite, declaration, buffer, status, new SubProgressMonitor(monitor, 1));
-			final String imports= createTypeImports(copy);
+			final String imports= createTypeImports(copy, monitor);
 			source= createTypeTemplate(copy, imports, fileComment, typeComment, buffer.toString());
 			if (source == null) {
-				if (!fType.getPackageFragment().isDefaultPackage()) {
+				if (!fSubType.getPackageFragment().isDefaultPackage()) {
 					if (imports.length() > 0)
 						buffer.insert(0, imports);
-					buffer.insert(0, "package " + fType.getPackageFragment().getElementName() + ";"); //$NON-NLS-1$//$NON-NLS-2$
+					buffer.insert(0, "package " + fSubType.getPackageFragment().getElementName() + ";"); //$NON-NLS-1$//$NON-NLS-2$
 				}
 				source= buffer.toString();
 			}
@@ -938,7 +940,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
 	public final Object[] getElements() {
-		return new Object[] { fType};
+		return new Object[] { fSubType};
 	}
 
 	/**
@@ -949,7 +951,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final IMember[] getExtractableMembers() throws JavaModelException {
 		final List list= new ArrayList();
-		IJavaElement[] children= fType.getChildren();
+		IJavaElement[] children= fSubType.getChildren();
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IMember && isExtractableMember((IMember) children[index]))
 				list.add(children[index]);
@@ -1015,7 +1017,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected String getLineDelimiter() {
 		try {
-			return StubUtility.getLineDelimiterUsed(fType);
+			return StubUtility.getLineDelimiterUsed(fSubType);
 		} catch (JavaModelException exception) {
 			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -1025,7 +1027,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public final String getProcessorName() {
-		return RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.name", new String[] { fType.getElementName()}); //$NON-NLS-1$
+		return RefactoringCoreMessages.getFormattedString("ExtractInterfaceProcessor.name", new String[] { fSubType.getElementName()}); //$NON-NLS-1$
 	}
 
 	/**
@@ -1043,7 +1045,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @return the type where to extract an interface
 	 */
 	public final IType getType() {
-		return fType;
+		return fSubType;
 	}
 
 	/**
@@ -1052,7 +1054,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @return the new interface name
 	 */
 	public final String getTypeName() {
-		return fTypeName;
+		return fSubName;
 	}
 
 	/**
@@ -1068,7 +1070,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	public final boolean isApplicable() throws CoreException {
-		return Checks.isAvailable(fType) && !fType.isBinary() && !fType.isReadOnly() && !fType.isAnnotation() && !fType.isAnonymous();
+		return Checks.isAvailable(fSubType) && !fSubType.isBinary() && !fSubType.isReadOnly() && !fSubType.isAnnotation() && !fSubType.isAnonymous();
 	}
 
 	/**
@@ -1106,31 +1108,28 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected String normalizeText(final String code) throws JavaModelException {
 		Assert.isNotNull(code);
 		final String[] lines= Strings.convertIntoLines(code);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(fType.getJavaProject()), false);
-		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fType));
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(fSubType.getJavaProject()), false);
+		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fSubType));
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
-			TType type= null;
 			ISourceConstraintVariable variable= null;
-			final ICompilationUnit subUnit= subRewrite.getCu();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, node);
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
 				variable= (ISourceConstraintVariable) iterator.next();
-				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
-				if (type != null && variable instanceof ITypeConstraintVariable) {
-					final CompilationUnitRange range= ((ITypeConstraintVariable) variable).getRange();
-					final ICompilationUnit primary= unit.getPrimary();
-					if (primary.equals(subUnit))
-						rewriteTypeOccurrence(range, subRewrite, node, replacements, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+				if (variable instanceof ITypeConstraintVariable) {
+					if (sourceRewrite.getCu().equals(unit.getPrimary()))
+						rewriteTypeOccurrence(((ITypeConstraintVariable) variable).getRange(), sourceRewrite, node, replacements, sourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
 					else {
-						rewriteTypeOccurrence(range, rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
-						manager.manage(primary, rewrite.createChange());
+						final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, node);
+						rewriteTypeOccurrence(((ITypeConstraintVariable) variable).getRange(), rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+						final TextChange change= rewrite.createChange();
+						if (change != null)
+							manager.manage(unit, change);
 					}
 				}
 			}
@@ -1141,15 +1140,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * Creates the necessary text edits to replace the subtype occurrences by a supertype.
 	 * 
 	 * @param manager the text change manager
-	 * @param sourceRewrite the compilation unit source rewrite
+	 * @param sourceRewrite the compilation unit of the subtype (not in working copy mode)
+	 * @param superUnit the compilation unit of the supertype (in working copy mode)
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
 	 * @throws CoreException if an error occurs
 	 */
-	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit superUnit, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(manager);
 		Assert.isNotNull(sourceRewrite);
+		Assert.isNotNull(superUnit);
 		Assert.isNotNull(replacements);
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
@@ -1158,13 +1159,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
 			ICompilationUnit subUnit= null;
 			try {
-				subUnit= WorkingCopyUtil.getNewWorkingCopy(fType.getCompilationUnit(), fOwner, new SubProgressMonitor(monitor, 1));
-				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+				subUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getCompilationUnit(), fOwner, new SubProgressMonitor(monitor, 1));
+				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSubType.getCompilationUnit());
 				final ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 				try {
 					final IDocument document= new Document(buffer.getDocument().get());
 					try {
-						rewrite.rewriteAST(document, fType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+						rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 					} catch (MalformedTreeException exception) {
 						JavaPlugin.log(exception);
 					} catch (BadLocationException exception) {
@@ -1172,26 +1173,44 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 					subUnit.getBuffer().setContents(document.get());
 				} finally {
-					RefactoringFileBuffers.release(fType.getCompilationUnit());
+					RefactoringFileBuffers.release(fSubType.getCompilationUnit());
 				}
 				JavaModelUtil.reconcile(subUnit);
 				final RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 				final CompilationUnit subNode= parser.parse(subUnit, fOwner, true, new SubProgressMonitor(monitor, 1));
-				final IType subType= (IType) JavaModelUtil.findInCompilationUnit(subUnit, fType);
+				final IType subType= (IType) JavaModelUtil.findInCompilationUnit(subUnit, fSubType);
 				final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subType, subNode);
 				if (subDeclaration != null) {
 					final ITypeBinding subBinding= subDeclaration.resolveBinding();
 					if (subBinding != null) {
+						String name= null;
 						ITypeBinding superBinding= null;
 						final ITypeBinding[] superBindings= subBinding.getInterfaces();
 						for (int index= 0; index < superBindings.length; index++) {
-							if (superBindings[index].getName().equals(fTypeName) && superBindings[index].getTypeParameters().length == subBinding.getTypeParameters().length)
+							name= superBindings[index].getName();
+							if (name.startsWith(fSubName) && superBindings[index].getTypeArguments().length == subBinding.getTypeParameters().length)
 								superBinding= superBindings[index];
 						}
 						if (superBinding != null) {
 							solveSuperTypeConstraints(subUnit, subNode, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
-							if (!status.hasFatalError())
+							if (!status.hasFatalError()) {
 								rewriteTypeOccurrences(manager, sourceRewrite, subUnit, subNode, replacements, status, new SubProgressMonitor(monitor, 1));
+								if (manager.containsChangesIn(superUnit)) {
+									final TextEdit edit= manager.get(superUnit).getEdit();
+									if (edit != null) {
+										final IDocument document= new Document(superUnit.getBuffer().getContents());
+										try {
+											edit.apply(document, TextEdit.UPDATE_REGIONS);
+										} catch (MalformedTreeException exception) {
+											JavaPlugin.log(exception);
+										} catch (BadLocationException exception) {
+											JavaPlugin.log(exception);
+										}
+										fSuperSource= document.get();
+										manager.remove(superUnit);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1266,6 +1285,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final void setTypeName(final String name) {
 		Assert.isNotNull(name);
-		fTypeName= name;
+		fSubName= name;
 	}
 }
