@@ -107,14 +107,14 @@ public class PerformanceFileParser {
 						continue;
 					attributes= value.getAttributes();
 					String dimension= getStringValue(attributes, WHAT);
-					int magnitude= getIntValue(attributes, RESULT);
+					long magnitude= getLongValue(attributes, RESULT);
 					scalars.put(dimension, new Scalar(dimension, magnitude));
 				}
 				
 				datapoints.add(new DataPoint(id, scalars));
 			}
 			
-			MeteringSession session= new MeteringSession(properties, datapoints);
+			MeteringSession session= new MeteringSession(properties, (DataPoint[]) datapoints.toArray(new DataPoint[datapoints.size()]));
 			return session;
 			
 		} catch (ParserConfigurationException e) {
@@ -183,13 +183,13 @@ public class PerformanceFileParser {
 		return val;
 	}
 
-	private int getIntValue(NamedNodeMap attributes, String attribute) throws SAXException {
+	private long getLongValue(NamedNodeMap attributes, String attribute) throws SAXException {
 		String val= getStringValue(attributes, attribute, null);
 		if (val == null)
 			throw new SAXException("missing attribute:" + attribute); //$NON-NLS-1$
 		else {
 			try {
-				return Integer.parseInt(val);
+				return Long.parseLong(val);
 			} catch (NumberFormatException e) {
 				throw new SAXException("not integer input for attribute: '" + attribute + "' was: '" + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance.data;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -19,9 +18,9 @@ import java.util.Map;
  */
 public class MeteringSession {
 	Map fProperties;
-	List fDataPoints;
+	DataPoint[] fDataPoints;
 	String fId;
-	MeteringSession(Map properties, List dataPoints) {
+	public MeteringSession(Map properties, DataPoint[] dataPoints) {
 		fProperties= properties;
 		fDataPoints= dataPoints;
 	}
@@ -29,12 +28,14 @@ public class MeteringSession {
 		return (String) fProperties.get(name);
 	}
 	public DataPoint[] getDataPoints() {
-		return (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]);
+		DataPoint[] dataPoints= new DataPoint[fDataPoints.length];
+		System.arraycopy(fDataPoints, 0, dataPoints, 0, fDataPoints.length);
+		return dataPoints;
 	}
 	public String getId() {
 		return fId;
 	}
 	public String toString() {
-		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.size() + "]";
+		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.length + "]";
 	}
 }
