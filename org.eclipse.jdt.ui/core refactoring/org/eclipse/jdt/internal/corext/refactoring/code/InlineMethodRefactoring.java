@@ -316,6 +316,8 @@ public class InlineMethodRefactoring extends Refactoring {
 		} catch (JavaModelException e) {
 			node= NodeFinder.perform(root, offset, length);
 		}
+		if (node == null)
+			return null;
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			node= node.getParent();
 		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
