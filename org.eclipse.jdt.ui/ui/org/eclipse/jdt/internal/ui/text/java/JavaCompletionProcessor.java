@@ -105,7 +105,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 
 		try {
 			if (unit != null) {			
-				fTemplateEngine.reset();
+				fTemplateEngine.reset(viewer);
 				fTemplateEngine.complete(unit, offset);
 			}			
 		} catch (JavaModelException x) {

@@ -226,13 +226,13 @@ public class TemplateSet {
 			DocumentBuilder builder= factory.newDocumentBuilder();		
 			Document document= builder.newDocument();
 
-			Node root= document.createElement("templates"); // $NON-NLS-1$
+			Node root= document.createElement("templates"); // $NON-NLS-1$ //$NON-NLS-1$
 			document.appendChild(root);
 			
 			for (int i= 0; i != fTemplates.size(); i++) {
 				Template template= (Template) fTemplates.get(i);
 				
-				Node node= document.createElement("template"); // $NON-NLS-1$
+				Node node= document.createElement("template"); // $NON-NLS-1$ //$NON-NLS-1$
 				root.appendChild(node);
 				
 				NamedNodeMap attributes= node.getAttributes();
@@ -250,7 +250,7 @@ public class TemplateSet {
 				attributes.setNamedItem(context);			
 
 				Attr enabled= document.createAttribute(ENABLED_ATTRIBUTE);
-				enabled.setValue(template.isEnabled() ? "true" : "false"); // $NON-NLS-1$ // $NON-NLS-2$
+				enabled.setValue(template.isEnabled() ? "true" : "false"); // $NON-NLS-1$ // $NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-2$
 				attributes.setNamedItem(enabled);
 				
 				Text pattern= document.createTextNode(template.getPattern());

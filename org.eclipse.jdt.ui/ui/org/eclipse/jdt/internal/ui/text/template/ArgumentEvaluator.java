@@ -18,9 +18,21 @@ public class ArgumentEvaluator implements VariableEvaluator {
 	}
 
 	/*
-	 * @see VariableEvaluator#evaluate(String, int)
+	 * @see VariableEvaluator#reset()
 	 */
-	public String evaluate(String variable, int offset) {
+	public void reset() {
+	}
+
+	/*
+	 * @see VariableEvaluator#acceptText(String, int)
+	 */
+	public void acceptText(String variable, int offset) {
+	}
+
+	/*
+	 * @see VariableEvaluator#evaluateVariable(String, int)
+	 */
+	public String evaluateVariable(String variable, int offset) {
 		if (fArguments == null)
 			return null;
 		
@@ -35,13 +47,6 @@ public class ArgumentEvaluator implements VariableEvaluator {
 		} catch (NumberFormatException e) {
 			return null;
 		}	
-	}
-
-	/*
-	 * @see VariableEvaluator#getRecognizedVariables()
-	 */
-	public String[] getRecognizedVariables() {
-		return new String[] {"0", "1"};  // $NON-NLS-1$ // XXX incomplete
 	}
 
 }

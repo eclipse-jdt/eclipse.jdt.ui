@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextStore;
 public class CodeIndentator {
 
 	private int fIndentationLevel= 0;
-	private int[] fPositions;
+	private int[] fPositions = new int[0];
 
 	/**
 	 * Sets the indentation level.
@@ -51,19 +51,22 @@ public class CodeIndentator {
 		String indentation= TextUtilities.createIndentString(fIndentationLevel);
 		String[] lines= splitIntoLines(string);
 
+		int[] positionDelta= new int[fPositions.length];
+		
 		int position= 0;
 		for (int i= 0; i != lines.length; i++) {
 			buffer.append(indentation);
 			buffer.append(lines[i]);
 			
-			if (fPositions != null) {
-				for (int j= 0; j != fPositions.length; j++)		
-					if (fPositions[j] >= position)
-						fPositions[j] += indentation.length();
-			}
+			for (int j= 0; j != fPositions.length; j++)		
+				if (fPositions[j] >= position)
+					positionDelta[j] += indentation.length();
 			
 			position += lines[i].length();
 		}
+		
+		for (int i= 0; i != fPositions.length; i++)
+			fPositions[i] += positionDelta[i];
 		
 		return buffer.toString();		
 	}

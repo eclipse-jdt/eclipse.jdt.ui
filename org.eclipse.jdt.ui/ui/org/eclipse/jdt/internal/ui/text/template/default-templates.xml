@@ -9,72 +9,107 @@ All Rights Reserved.
 
   <!-- java -->
 
+<!--
   <template description="for(array, index) - iterate over array" name="for" context="java"
   >for (int ${1} = 0; ${1} &lt; ${0}.length; ${1}++) {&#10;&#9;${cursor}&#10;}</template>
+-->
 
   <template description="iterate over array" name="for" context="java"
-  >for (int ${index} = 0; ${index} &lt; ${cursor}${array}${cursor-end}.length; ${index}++) {&#10;&#9;&#10;}</template>
+>for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
+	${type} ${element} = ${array}[${index}];
+	${cursor}
+}</template>
 
   <template description="iterate over collection" name="for" context="java"
 >for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
-	${element_type} ${element} = (${type}) ${iterator}.next();
+	${type} ${element} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
   <template description="iterate over vector" name="for" context="java"
 >for (int ${index}= 0; ${index} &lt; ${vector}.size(); ${index}++) {
-	${element_type} ${element} = (${type}) ${vector}.elementAt(${index});
+	${type} ${element} = (${type}) ${vector}.elementAt(${index});
 	${cursor}
 }</template>
 
-  <template description="iterate over enumeration" name="while" context="java"
+  <template description="iterate with enumeration" name="while" context="java"
 >while (${enumeration}.hasMoreElements()) {
-	${element_type} ${element}i = (${type}) ${enumeration}.nextElement();
+	${type} ${element} = (${type}) ${enumeration}.nextElement();
 	${cursor}
 }</template>
 
   <template description="iterate with iterator" name="while" context="java"
 >while (${iterator}.hasNext()) {
-	${element_type} ${element}i = (${type}) ${iterator}.next();
+	${type} ${element} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
-  <template description="do {} while ();" name="do" context="java"
-  >do {&#10;&#9;${cursor}&#10;} while ();</template>
+  <template description="do while statement" name="do" context="java"
+>do {
+	${cursor}
+} while (${condition});</template>
 
-  <template description="switch {}" name="switch" context="java"
-  >switch (${cursor}) {&#10;&#9;case :&#10;&#10;}</template>
+  <template description="switch statement" name="switch" context="java"
+>switch (${key}) {
+	case ${value}:
+		${cursor}
+		break;
+
+	default:
+		break;
+}</template>
 
   <template description="if () {}" name="if" context="java"
-  >if (${cursor}) {&#10;&#9;&#10;}</template>
+>if (${condition}) {
+	${cursor}
+}</template>
 
   <template description="else if () {}" name="elseif" context="java"
-  >else if (${cursor}) {&#10;&#9;&#10;}</template>
+>else if (${condition}) {
+	${cursor}
+}</template>
 
   <template description="else {}" name="else" context="java"
-  >else {&#10;&#9;${cursor}&#10;}</template>
+>else {
+	${cursor}
+}</template>
 
   <template description="try catch block" name="try" context="java"
-  >try {&#10;&#9;&#10;} catch (${cursor}Exception e) {&#10;}</template>
+>try {
+	${cursor}
+} catch (${Exception} e) {
+}</template>
 
   <template description="catch block" name="catch" context="java"
-  >catch (${cursor}Exception e) {&#10;&#9;&#10;}</template>
+>catch (${Exception} e) {
+	${cursor}
+}</template>
 
   <template description="main method" name="main" context="java"
-  >public static void main(String arguments[]) {&#10;&#9;${cursor}&#10;}</template>
+>public static void main(String arguments[]) {
+	${cursor}
+}</template>
 
+<!--
   <template description="instanceof(object, type)" name="instanceof" context="java"
 >if (${0} instanceof ${1}) {
-	${1} ${cursor}name${cursor-end} = (${1}) ${0};
-	
+	${1} ${name} = (${1}) ${0};
+	${cursor}
+}</template>
+-->
+
+  <template description="dynamic type test and cast" name="instanceof" context="java"
+>if (${name} instanceof ${type}) {
+	${type} ${new_name} = (${type}) ${name};
+	${cursor}
 }</template>
 
   <template description="convert collection to array" name="toarray" context="java"
-  >(${type}[]) ${collection}.toArray(new ${type}[${collection}]);</template>
+  >${type} ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}]);</template>
 
   <template description="copyright information" name="copyright" context="java"
 >/*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
 </template>

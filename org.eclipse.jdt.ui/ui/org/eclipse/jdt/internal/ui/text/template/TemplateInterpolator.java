@@ -31,8 +31,10 @@ public class TemplateInterpolator {
 	 */
 	public String interpolate(String string, VariableEvaluator evaluator) {
 		StringBuffer buffer= new StringBuffer(string.length());
-		StringBuffer identifier= new StringBuffer();
+		StringBuffer text= new StringBuffer();
 		int state= TEXT;
+		
+		evaluator.reset();
 				
 		for (int i= 0; i != string.length(); i++) {
 			char ch= string.charAt(i);
@@ -45,7 +47,7 @@ public class TemplateInterpolator {
 					break;
 					
 				default:
-					buffer.append(ch);
+					text.append(ch);
 					break;
 				}
 				break;
@@ -53,19 +55,24 @@ public class TemplateInterpolator {
 			case ESCAPE:
 				switch (ch) {
 				case ESCAPE_CHARACTER:
-					buffer.append(ch);
+					text.append(ch);
 					state= TEXT;
 					break;
 				
-				case IDENTIFIER_BEGIN:	
-					identifier.setLength(0);
+				case IDENTIFIER_BEGIN:
+					// flush text
+					evaluator.acceptText(text.toString(), buffer.length());
+					buffer.append(text);
+
+					// transition to variable identifier				
+					text.setLength(0);
 					state= IDENTIFIER;
 					break;
 					
 				default:
 					// XXX grammar would not allow occurence of single escape characters
-					buffer.append(ESCAPE_CHARACTER);
-					buffer.append(ch);
+					text.append(ESCAPE_CHARACTER);
+					text.append(ch);
 					state= TEXT;
 					break;
 				}
@@ -75,27 +82,54 @@ public class TemplateInterpolator {
 				switch (ch) {
 				case IDENTIFIER_END:
 					{
-						String value= evaluator.evaluate(identifier.toString(), buffer.length());
+						// flush variable
+						String value= evaluator.evaluateVariable(text.toString(), buffer.length());
 					
 						if (value == null) {
 							// leave variable untouched
 							buffer.append(ESCAPE_CHARACTER);
 							buffer.append(IDENTIFIER_BEGIN);
-							buffer.append(identifier);
+							buffer.append(text);
 							buffer.append(IDENTIFIER_END);
 						} else {							
 							buffer.append(value);
 						}
+						
 					}
+
+					// transition to text
+					text.setLength(0);						
 					state= TEXT;
 					break;
 				
 				default:
-					identifier.append(ch);
+					text.append(ch);
 					break;
 				}
 				break;
 			}			
+		}
+		
+		switch (state) {
+		case TEXT:
+			evaluator.acceptText(text.toString(), buffer.length());
+			buffer.append(text);
+			break;
+		
+		// illegal, but be tolerant
+		case ESCAPE:
+			text.append(ESCAPE_CHARACTER);
+			evaluator.acceptText(text.toString(), buffer.length());
+			buffer.append(text);			
+			break;
+				
+		// illegal, but be tolerant
+		case IDENTIFIER:
+			text.append(ESCAPE_CHARACTER);
+			buffer.append(IDENTIFIER_BEGIN);			
+			evaluator.acceptText(text.toString(), buffer.length());
+			buffer.append(text);			
+			break;		
 		}
 		
 		return buffer.toString();

@@ -10,18 +10,28 @@ package org.eclipse.jdt.internal.ui.text.template;
 public interface VariableEvaluator {
 
 	/**
+	 * Resets the evaluator.
+	 */
+	void reset();
+
+	/**
 	 * Returns the value of a variable.
 	 * 
 	 * @param variable the variable to evaluate.
 	 * @param offset   the offset at which the variable is evaluated.
 	 * @return        returns the value of the variable, <code>null</code> if the variable is not recognized.
 	 */
-	String evaluate(String variable, int offset);
+	void acceptText(String text, int offset);
 
 	/**
-	 * Returns the names of the variables the evaluator recognizes.
+	 * Returns the value of a variable, <code>null</code> if the variable
+	 * cannot be evaluated.
+	 * 
+	 * @param variable the variable to evaluate.
+	 * @param offset   the offset at which the variable is evaluated.
+	 * @return         returns the value of the variable, <code>null</code> if the variable is not recognized.
 	 */
-	String[] getRecognizedVariables();
+	String evaluateVariable(String variable, int offset);
 	
 }
 

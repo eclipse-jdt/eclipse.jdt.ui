@@ -6,8 +6,8 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 public class CursorSelectionEvaluator implements VariableEvaluator {
 
-	private static final String CURSOR= "cursor"; // $NON-NLS-1$
-	private static final String CURSOR_END= "cursor-end"; // $NON-NLS-1$
+	private static final String CURSOR= "cursor"; // $NON-NLS-1$ //$NON-NLS-1$
+	private static final String CURSOR_END= "cursor-end"; // $NON-NLS-1$ //$NON-NLS-1$
 
 	private int fStart;
 	private int fEnd;
@@ -19,9 +19,9 @@ public class CursorSelectionEvaluator implements VariableEvaluator {
 		reset();
 	}
 	
-	/**
-	 * Resets the <code>CursorSelectionEvaluator</code>.
-	 */ 
+	/*
+	 * @see VariableEvaluator#reset()
+	 */
 	public void reset() {
 		fStart= -1;
 		fEnd= 0;
@@ -41,27 +41,28 @@ public class CursorSelectionEvaluator implements VariableEvaluator {
 	public int getEnd() {
 		return fEnd;
 	}
-	 	 
+
 	/*
-	 * @see VariableEvaluator#evaluate(String)
+	 * @see VariableEvaluator#acceptText(String, int)
 	 */
-	public String evaluate(String variable, int offset) {
+	public void acceptText(String variable, int offset) {
+	}
+		 	 
+	/*
+	 * @see VariableEvaluator#evaluateVariable(String, int)
+	 */
+	public String evaluateVariable(String variable, int offset) {
 		if (variable.equals(CURSOR)) {
 			fStart= offset;
 			fEnd= fStart;
+			return ""; // $NON-NLS-1$ //$NON-NLS-1$
 
 		} else if (variable.equals(CURSOR_END)) {
 			fEnd= offset;
+			return ""; // $NON-NLS-1$ //$NON-NLS-1$
 		}
 		
-		return ""; // $NON-NLS-1$
-	}
-
-	/*
-	 * @see VariableEvaluator#getRecognizedVariables()
-	 */
-	public String[] getRecognizedVariables() {
-		return new String[] {CURSOR, CURSOR_END};
+		return null;
 	}
 
 }

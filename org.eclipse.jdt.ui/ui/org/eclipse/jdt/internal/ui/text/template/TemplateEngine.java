@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.ITextViewer;
 
 public class TemplateEngine {
 
@@ -24,10 +25,13 @@ public class TemplateEngine {
 	/**
 	 * Partition types.
 	 */
-	public static String JAVA= "java"; // $NON-NLS-1$
-	public static String JAVADOC= "javadoc"; // $NON-NLS-1$
+	public static String JAVA= "java"; // $NON-NLS-1$ //$NON-NLS-1$
+	public static String JAVADOC= "javadoc"; // $NON-NLS-1$ //$NON-NLS-1$
 
 	private String fPartitionType;
+	
+	private ITextViewer fViewer;
+	
 	private ArrayList fExactProposals= new ArrayList();
 	private ArrayList fNotExactProposals= new ArrayList();
 
@@ -39,7 +43,8 @@ public class TemplateEngine {
 	/**
 	 * Empties the collector.
 	 */
-	public void reset() {
+	public void reset(ITextViewer viewer) {
+		fViewer= viewer;
 		fExactProposals.clear();
 		fNotExactProposals.clear();		
 	}
@@ -73,7 +78,7 @@ public class TemplateEngine {
 		// inspect context
 		int end = completionPosition;
 		int start= guessStart(source, end, fPartitionType);
-
+				
 		// handle optional argument
 		String request= source.substring(start, end);
 		int index= request.indexOf(ARGUMENTS_BEGIN);
@@ -88,7 +93,7 @@ public class TemplateEngine {
 			
 			String allArguments= request.substring(index + 1, request.length() - 1);			
 			List list= new ArrayList();
-			StringTokenizer tokenizer= new StringTokenizer(allArguments, ","); // $NON-NLS-1$
+			StringTokenizer tokenizer= new StringTokenizer(allArguments, ","); // $NON-NLS-1$ //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String token= tokenizer.nextToken().trim();
 				list.add(token);
@@ -96,11 +101,11 @@ public class TemplateEngine {
 			arguments= (String[]) list.toArray(new String[list.size()]);			
 		}
 
-		// match context with template
 		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(key, fPartitionType);
+		TemplateContext context= new TemplateContext(sourceUnit, start, end, fViewer);
 
 		for (int i= 0; i != templates.length; i++) {
-			TemplateProposal proposal= new TemplateProposal(templates[i], arguments, start, end);			
+			TemplateProposal proposal= new TemplateProposal(templates[i], arguments, context);
 
 			if (templates[i].getName().equals(key)) {
 				fExactProposals.add(proposal);
