@@ -381,7 +381,15 @@ public class JavaDocCompletionEvaluator {
 			try {
 				IJavaElement[] elements= preparedCU.codeSelect(wordStart, wordEnd - wordStart);
 				if (elements != null && elements.length == 1 && elements[0] instanceof IType) {
-					return (IType) elements[0];
+					IType type= (IType) elements[0];
+					if (preparedCU.equals(type.getCompilationUnit())) {
+						IJavaElement[] res= elem.getCompilationUnit().findElements(type);
+						if (res.length > 0) {
+							return (IType) res[0];
+						}
+					} else {
+						return type;
+					}
 				}
 			} finally {
 				preparedCU.getBuffer().setContents(fCompilationUnit.getBuffer().getCharacters());
