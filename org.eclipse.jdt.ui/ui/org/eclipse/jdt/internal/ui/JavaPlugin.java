@@ -94,9 +94,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/** temporarily */
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
-	/** temporarily */
-	private static final boolean _USE_FILE_BUFFERS= true;
-	
 	
 	private static JavaPlugin fgJavaPlugin;
 
