@@ -17,6 +17,7 @@ import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.internal.Utilities;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 
 class JavaStructureDiffViewer extends StructureDiffViewer {
@@ -33,6 +34,43 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		setStructureCreator(fStructureCreator);
 	}
 	
+	/**
+	 * Overridden to find and expand the first class.
+	 */
+	protected void initialSelection() {
+		Object firstClass= null;
+		Object o= getRoot();
+		if (o != null) {
+			Object[] children= getSortedChildren(o);
+			if (children != null && children.length > 0) {
+				for (int i= 0; i < children.length; i++) {
+					o= children[i];
+					children= getSortedChildren(o);
+					if (children != null && children.length > 0) {
+						for (int j= 0; j < children.length; j++) {
+							o= children[j];
+							if (o instanceof DiffNode) {
+								DiffNode dn= (DiffNode) o;
+								ITypedElement e= dn.getId();
+								if (e instanceof JavaNode) {
+									JavaNode jn= (JavaNode) e;
+									int tc= jn.getTypeCode();
+									if (tc == JavaNode.CLASS || tc == JavaNode.INTERFACE) {
+										firstClass= dn;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (firstClass != null)
+			expandToLevel(firstClass, 1);
+		else
+			expandToLevel(2);
+	}
+
 	protected void compareInputChanged(ICompareInput input) {
 		
 		fThreeWay= input != null ? input.getAncestor() != null
