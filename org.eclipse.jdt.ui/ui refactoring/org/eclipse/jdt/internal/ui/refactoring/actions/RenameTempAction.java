@@ -50,7 +50,9 @@ public class RenameTempAction extends SelectionDispatchAction {
 		selectionChanged(selection);
 		if (! isEnabled())
 			return false;
-
+		
+		if (getCompilationUnit() == null)
+			return false;	
 		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
 		try {
 			return (renameTempRefactoring.checkActivation(new NullProgressMonitor()).isOK());
