@@ -1660,7 +1660,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	private SelectionHistory fSelectionHistory;
 	/** The preference property change listener for java core. */
 	private org.eclipse.core.runtime.Preferences.IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
-	
+	/**
+	 * Indicates whether this editor is about to update any annotation views.
+	 * @since 3.0
+	 */
+	private boolean fIsUpdatingAnnotationViews= false;
+	/**
+	 * The marker that served as last target for a goto marker request.
+	 * @since 3.0
+	 */
+	private IMarker fLastMarkerTarget= null;
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
 
@@ -2508,7 +2517,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#gotoMarker(org.eclipse.core.resources.IMarker)
 	 */
 	public void gotoMarker(IMarker marker) {
-		if (!isActivePart())
+		fLastMarkerTarget= marker;
+		if (!fIsUpdatingAnnotationViews)
 			super.gotoMarker(marker);
 	}
 	
@@ -2559,7 +2569,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 		}
 			
-		if (marker != null) {
+		if (marker != null && !marker.equals(fLastMarkerTarget)) {
 			try {
 				boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
 				IWorkbenchPage page= getSite().getPage();
@@ -2580,7 +2590,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		Annotation annotation= getAnnotation(selection.getOffset(), selection.getLength());
 		setStatusLineErrorMessage(null);
 		if (annotation != null) {
-			updateAnnotationViews(annotation);
+			try {
+				fIsUpdatingAnnotationViews= true;
+				updateAnnotationViews(annotation);
+			} finally {
+				fIsUpdatingAnnotationViews= false;
+			}
 			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
 				setStatusLineErrorMessage(((IJavaAnnotation)annotation).getMessage());
 		}
