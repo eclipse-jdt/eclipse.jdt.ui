@@ -207,15 +207,18 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 				remove(toRemove, toUpdate, updatedElements[i]);
 		}
 		
-	for (Iterator iter= toAdd.keySet().iterator(); iter.hasNext();) {
+		for (Iterator iter= toAdd.keySet().iterator(); iter.hasNext();) {
 			Object parent= iter.next();
 			HashSet children= (HashSet) toAdd.get(parent);
 			viewer.add(parent, children.toArray());
 		}
 		viewer.remove(toRemove.toArray());
-		viewer.refresh(toUpdate.toArray());
+		for (Iterator elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {
+			viewer.refresh(elementsToUpdate.next());
+		}
+		
 	}
-
+	
 	public void clear() {
 		initialize(fResult);
 		getPage().getViewer().refresh();
