@@ -5,11 +5,11 @@ import java.util.Iterator;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceNode;
@@ -36,8 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import org.eclipse.jdt.junit.eclipse.util.DialogCheck;
+import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 public class PreferencesTest extends TestCase {
 

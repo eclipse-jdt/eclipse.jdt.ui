@@ -249,10 +249,10 @@ public class JavaProjectHelper {
 	 * Try to find rt.jar
 	 */
 	public static IPath[] findRtJar() {
-		File jclMaxArchive= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS);
-		if (jclMaxArchive != null && jclMaxArchive.exists()) {
+		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS);
+		if (rtStubs != null && rtStubs.exists()) {
 			return new IPath[] {
-				new Path(jclMaxArchive.getPath()),
+				new Path(rtStubs.getPath()),
 				null,
 				null
 			};

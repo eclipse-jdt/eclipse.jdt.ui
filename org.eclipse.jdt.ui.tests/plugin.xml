@@ -15,7 +15,6 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
 	  <import plugin="org.eclipse.jdt.launching"/>
-	  <import plugin="org.eclipse.jdt.junit.eclipse"/>
    </requires>
 
 <runtime>

@@ -3,8 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.tests.core;
-
-import junit.framework.Test;
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 

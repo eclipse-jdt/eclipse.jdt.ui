@@ -7,11 +7,12 @@ package org.eclipse.jdt.testplugin;
 import java.lang.reflect.Method;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.internal.Workbench;
 
@@ -57,9 +58,8 @@ public class TestWorkbench extends Workbench {
 		try {
 			Method suiteMethod= testClass.getMethod(TestRunner.SUITE_METHODNAME, new Class[0]);
 			return (Test) suiteMethod.invoke(null, new Class[0]); // static method
-		} catch (NoSuchMethodException e) {
-			Object obj= testClass.newInstance();
-			return (Test) obj;
+		} catch (Exception e) {
+			return new TestSuite(testClass);
 		}
 
 	}

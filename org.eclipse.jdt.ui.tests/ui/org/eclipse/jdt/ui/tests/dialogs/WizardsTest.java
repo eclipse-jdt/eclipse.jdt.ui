@@ -18,16 +18,15 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
-import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard;
-
-import org.eclipse.jdt.junit.eclipse.util.DialogCheck;
+import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 
 public class WizardsTest extends TestCase {
 	private static final int SIZING_WIZARD_WIDTH    = 470;
