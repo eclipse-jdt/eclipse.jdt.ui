@@ -242,12 +242,17 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 	public void testFail9() throws Exception{
+		//test for 16737
 		helper2(3, 9, 3, 13);
 	}
 
 	public void testFail10() throws Exception{
+		//test for 16737
 		helper2(3, 5, 3, 17);
 	}
-	
-}
 
+	public void testFail11() throws Exception{
+		//test for 17253
+		helper2(8, 14, 8, 18);
+	}
+}
