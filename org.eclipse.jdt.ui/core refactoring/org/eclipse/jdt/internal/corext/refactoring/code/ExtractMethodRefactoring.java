@@ -368,7 +368,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		final int methodStart= method.getStartPosition();
 		MethodBlock methodBlock= new MethodBlock(getSignature(), createMethodBody(buffer));
-		final int spacing= methodBlock.probeSpacing(buffer, method);
+		final int spacing= MethodBlock.probeSpacing(buffer, method);
 		// +1 (e.g <=) for an extra newline since we insert the new code at
 		// the end of a method declaration (e.g. right after the closing }
 		CodeBlockEdit result= CodeBlockEdit.createInsert(methodStart + method.getLength(), methodBlock, spacing + 1);
