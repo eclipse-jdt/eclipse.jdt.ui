@@ -664,6 +664,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			button.setText(fSearchForText[i]);
 			fSearchFor[i]= button;
 		}
+		fSearchFor[0].setSelection(true);
 
 		// Fill with dummy radio buttons
 		Button filler= new Button(result, SWT.RADIO);
@@ -694,6 +695,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			fLimitTo[i]= button;
 			button.addSelectionListener(listener);
 		}
+		fLimitTo[0].setSelection(true);
 		createSearchJRE(result);
 		return result;		
 	}	
