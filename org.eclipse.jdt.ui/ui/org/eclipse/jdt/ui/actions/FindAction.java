@@ -271,16 +271,17 @@ public abstract class FindAction extends SelectionDispatchAction {
 		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		
 		
 		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
 			try {
 			performNewSearch(element);
 		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		} else {
 			SearchUI.activateSearchResultView();
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			JavaSearchOperation op= null;
 			try {
 				op= makeOperation(element);
