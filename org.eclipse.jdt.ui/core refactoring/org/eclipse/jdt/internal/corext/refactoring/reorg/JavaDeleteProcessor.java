@@ -45,19 +45,18 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
 
 public class JavaDeleteProcessor extends DeleteProcessor {
 	
@@ -183,12 +182,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return fStyle;
 	}
 	
-	public Object[] getDerivedElements() throws CoreException {
-		// TODO Auto-generated method stub
-		return super.getDerivedElements();
-	}
-	
-	protected IRefactoringParticipant[] getMappedParticipants(SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
 		ResourceModifications modifications= new ResourceModifications();
 		for (int p= 0; p < fJavaElements.length; p++) {
 			IJavaElement element= fJavaElements[p];
@@ -202,7 +196,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 				}
 			}
 		}
-		return modifications.getParticipants(this, shared);
+		return modifications.getParticipants(this, getSharedParticipants());
 	}
 	
 	

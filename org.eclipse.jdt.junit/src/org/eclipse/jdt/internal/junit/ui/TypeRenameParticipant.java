@@ -27,13 +27,13 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
 public class TypeRenameParticipant extends RenameParticipant {
 
@@ -102,15 +102,11 @@ public class TypeRenameParticipant extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
 	 */
-	public void initialize(IRefactoringProcessor processor, Object element) {
-		super.initialize(processor);
+	public void initialize(RefactoringProcessor processor, Object element) {
+		setProcessor(processor);
 		fType= (IType)element;
 	}
 
-	public boolean operatesOn(Object element) {
-		return fType.equals(element);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#canParticipate()
 	 */
@@ -140,7 +136,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		if (!getUpdateReferences()) 
+		if (!getArguments().getUpdateReferences()) 
 			return null;	
 		
 		ILaunchManager manager= DebugPlugin.getDefault().getLaunchManager();
@@ -151,7 +147,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 		for (int i= 0; i < configs.length; i++) {
 			String mainType= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 			if (typeName.equals(mainType)) {
-				changes.add(new LaunchConfigChange(fType, configs[i], getNewName()));
+				changes.add(new LaunchConfigChange(fType, configs[i], getArguments().getNewName()));
 			}
 		}
 		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (Change[]) changes.toArray(new Change[changes.size()]));

@@ -26,16 +26,15 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
 
-public class RenameJavaProjectProcessor extends RenameProcessor implements IReferenceUpdating {
+public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private IJavaProject fProject;
 	private boolean fUpdateReferences;
@@ -84,9 +83,13 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 		return new Object[] {fProject};
 	}
 
-	public IResourceModifications getResourceModifications() throws CoreException {
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		return createSecondaryParticipants(null, null, computeResourceModifications());
+	}
+	
+	private ResourceModifications computeResourceModifications() throws CoreException {
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(fProject.getProject(), getNewElementName());
+		result.setRename(fProject.getProject(), getArguments());
 		return result;		
 	}
 		 
@@ -159,7 +162,7 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new ValidationStateChange(
-				new RenameJavaProjectChange(fProject, fNewElementName, fUpdateReferences));
+				new RenameJavaProjectChange(fProject, getNewElementName(), fUpdateReferences));
 		} finally{
 			pm.done();
 		}	

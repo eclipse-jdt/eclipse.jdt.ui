@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.ltk.core.refactoring;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 /**
  * A listener which is notified when a change's validation state
  * changes.

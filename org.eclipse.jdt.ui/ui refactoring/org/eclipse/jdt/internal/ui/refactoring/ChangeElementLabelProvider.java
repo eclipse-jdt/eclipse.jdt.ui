@@ -24,13 +24,13 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 class ChangeElementLabelProvider extends LabelProvider {
 

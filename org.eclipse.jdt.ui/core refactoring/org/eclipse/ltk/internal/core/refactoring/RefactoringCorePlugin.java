@@ -17,6 +17,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.ltk.core.refactoring.IRefactoringCoreStatusCodes;
+
 
 public class RefactoringCorePlugin {
 	
@@ -24,10 +26,14 @@ public class RefactoringCorePlugin {
 		return JavaPlugin.getPluginId();
 	}
 	
+	public static void log(IStatus status) {
+		JavaPlugin.getDefault().getLog().log(status);
+	}
+	
 	public static void log(Throwable t) {
 		IStatus status= new Status(
 			IStatus.ERROR, getPluginId(), 
-			StatusConstants.INTERNAL_ERROR, 
+			IRefactoringCoreStatusCodes.INTERNAL_ERROR, 
 			RefactoringCoreMessages.getString("RefactoringCorePlugin.internal_error"),  //$NON-NLS-1$
 			t);
 		ResourcesPlugin.getPlugin().getLog().log(status);
@@ -36,7 +42,7 @@ public class RefactoringCorePlugin {
 	public static void logRemovedListener(Throwable t) {
 		IStatus status= new Status(
 			IStatus.ERROR, getPluginId(), 
-			StatusConstants.INTERNAL_ERROR, 
+			IRefactoringCoreStatusCodes.INTERNAL_ERROR, 
 			RefactoringCoreMessages.getString("RefactoringCorePlugin.listener_removed"),  //$NON-NLS-1$
 			t);
 		ResourcesPlugin.getPlugin().getLog().log(status);

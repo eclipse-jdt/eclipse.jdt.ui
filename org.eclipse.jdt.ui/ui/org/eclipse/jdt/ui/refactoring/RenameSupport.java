@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
 /**
  * Central access point to execute rename refactorings.
@@ -169,7 +169,7 @@ public class RenameSupport {
 	/** Flag indicating that the setter method is to be updated as well. */
 	public static final int UPDATE_SETTER_METHOD= 1 << 5;
 
-	private RenameSupport(IRenameProcessor processor, String newName, int flags) throws CoreException {
+	private RenameSupport(RenameProcessor processor, String newName, int flags) throws CoreException {
 		fRefactoring= new RenameRefactoring(processor);
 		initialize(fRefactoring, newName, flags);
 	}
@@ -187,7 +187,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
-		IRenameProcessor processor= new RenameJavaProjectProcessor(project);
+		RenameProcessor processor= new RenameJavaProjectProcessor(project);
 		return new RenameSupport(processor, newName, flags);
 	}
 	
@@ -202,7 +202,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
-		IRenameProcessor processor= new RenameSourceFolderProcessor(root);
+		RenameProcessor processor= new RenameSourceFolderProcessor(root);
 		return new RenameSupport(processor, newName, 0);
 	}
 	
@@ -220,7 +220,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IPackageFragment fragment, String newName, int flags) throws CoreException {
-		IRenameProcessor processor= new RenamePackageProcessor(fragment);
+		RenameProcessor processor= new RenamePackageProcessor(fragment);
 		return new RenameSupport(processor, newName, flags);
 	}
 	
@@ -238,7 +238,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(ICompilationUnit unit, String newName, int flags) throws CoreException {
-		IRenameProcessor processor= new RenameCompilationUnitProcessor(unit);
+		RenameProcessor processor= new RenameCompilationUnitProcessor(unit);
 		return new RenameSupport(processor, newName, flags);
 	}
 	
@@ -257,7 +257,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IType type, String newName, int flags) throws CoreException {
-		IRenameProcessor processor= new RenameTypeProcessor(type);
+		RenameProcessor processor= new RenameTypeProcessor(type);
 		return new RenameSupport(processor, newName, flags);
 	}
 	
@@ -274,7 +274,7 @@ public class RenameSupport {
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IMethod method, String newName, int flags) throws CoreException {
-		IRenameProcessor processor;
+		RenameProcessor processor;
 		if (MethodChecks.isVirtual(method)) {
 			processor= new RenameVirtualMethodProcessor(method);
 		} else {

@@ -16,37 +16,43 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
+import org.eclipse.ltk.core.refactoring.participants.CopyParticipant;
+import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
+import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
+import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 /**
  * A default implementation of <code>IResourceModifications</code>.
  * 
  * @since 3.0
  */
-public class ResourceModifications implements IResourceModifications {
+public class ResourceModifications {
 	
 	private List fCreate;
 	private List fDelete;
 	
 	private List fMove;
-	private IContainer fMoveTarget;
+	private MoveArguments fMoveArguments;
 	
 	private List fCopy;
-	private IContainer fCopyTarget;
+	private CopyArguments fCopyArguments;
 	
 	private IResource fRename;
-	private String fNewName;
+	private RenameArguments fRenameArguments;
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCreate()
-	 */
-	public List getCreate() {
-		return fCreate;
-	}
-
 	/**
-	 * Adds the given resource to the list of resorces 
+	 * Adds the given resource to the list of resources 
 	 * to be created.
 	 * 
 	 * @param add the list of resource to be created
@@ -57,15 +63,8 @@ public class ResourceModifications implements IResourceModifications {
 		fCreate.add(create);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getDelete()
-	 */
-	public List getDelete() {
-		return fDelete;
-	}
-
 	/**
-	 * Adds the given resource to the list of resorces 
+	 * Adds the given resource to the list of resources 
 	 * to be deleted.
 	 * 
 	 * @param delete the resource to be deleted
@@ -76,20 +75,6 @@ public class ResourceModifications implements IResourceModifications {
 		fDelete.add(delete);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCopy()
-	 */
-	public List getCopy() {
-		return fCopy;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCopyTarget()
-	 */
-	public IContainer getCopyTarget() {
-		return fCopyTarget;
-	}
-
 	/**
 	 * Adds the given resource to the list of resources
 	 * to be copied.
@@ -103,28 +88,15 @@ public class ResourceModifications implements IResourceModifications {
 	}
 
 	/**
-	 * Sets the copy target.
+	 * Sets the copy arguments.
 	 * 
-	 * @param target the copy target
+	 * @param arguments the copy arguments
 	 */
-	public void setCopyTarget(IContainer target) {
-		fCopyTarget= target;
+	public void setCopyArguments(CopyArguments arguments) {
+		Assert.isNotNull(arguments);
+		fCopyArguments= arguments;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getMove()
-	 */
-	public List getMove() {
-		return fMove;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getMoveTarget()
-	 */
-	public IContainer getMoveTarget() {
-		return fMoveTarget;
-	}
-
 	/**
 	 * Adds the given resource to the list of resources
 	 * to be moved.
@@ -138,67 +110,63 @@ public class ResourceModifications implements IResourceModifications {
 	}
 
 	/**
-	 * Sets the move target.
+	 * Sets the move arguments.
 	 * 
-	 * @param target the move target
+	 * @param target the move arguments
 	 */
-	public void setMoveTarget(IContainer target) {
-		fMoveTarget= target;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getRename()
-	 */
-	public IResource getRename() {
-		return fRename;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getNewName()
-	 */
-	public String getNewName() {
-		return fNewName;
+	public void setMoveArguments(MoveArguments arguments) {
+		Assert.isNotNull(arguments);
+		fMoveArguments= arguments;
 	}
 	
 	/**
 	 * Sets the resource to be rename together with its
-	 * new name.
+	 * new arguments.
 	 * 
 	 * @param rename the resource to be renamed
-	 * @param newName the new name of the resource
+	 * @param arguments the arguments of the rename
 	 */
-	public void setRename(IResource rename, String newName) {
+	public void setRename(IResource rename, RenameArguments arguments) {
+		Assert.isNotNull(rename);
+		Assert.isNotNull(arguments);
 		fRename= rename;
-		fNewName= newName;
+		fRenameArguments= arguments;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
 	 */
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] getParticipants(RefactoringProcessor processor, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList(5);
 		if (fDelete != null) {
-			IDeleteParticipant[] deletes= DeleteExtensionManager.getParticipants(processor, fDelete.toArray(), shared);
+			DeleteParticipant[] deletes= ExtensionManagers.getDeleteParticipants(processor, fDelete.toArray(), shared);
 			result.addAll(Arrays.asList(deletes));
 		}
 		if (fCreate != null) {
-			ICreateParticipant[] creates= CreateExtensionManager.getParticipants(processor, fCreate.toArray());
+			CreateParticipant[] creates= ExtensionManagers.getCreateParticipants(processor, fCreate.toArray(), shared);
 			result.addAll(Arrays.asList(creates));
 		}
 		if (fMove != null) {
-			IMoveParticipant[] moves= MoveExtensionManager.getParticipants(processor, fMove.toArray());
+			MoveParticipant[] moves= ExtensionManagers.getMoveParticipants(processor, fMove.toArray(), shared);
 			for (int i= 0; i < moves.length; i++) {
-				moves[i].setTarget(fMoveTarget);
+				moves[i].setArguments(fMoveArguments);
 			}
 			result.addAll(Arrays.asList(moves));
 		}
 		if (fCopy != null) {
-			ICopyParticipant[] copies= CopyExtensionManager.getParticipants(processor, fCopy.toArray());
+			CopyParticipant[] copies= ExtensionManagers.getCopyParticipants(processor, fCopy.toArray(), shared);
 			for (int i= 0; i < copies.length; i++) {
-				copies[i].setTarget(fCopyTarget);
+				copies[i].setArguments(fCopyArguments);
 			}
 			result.addAll(Arrays.asList(copies));
 		}
-		return (IRefactoringParticipant[])result.toArray(new IRefactoringParticipant[result.size()]);
+		if (fRename != null) {
+			RenameParticipant[] renames= ExtensionManagers.getRenameParticipants(processor, new Object[] {fRename}, shared);
+			for (int i= 0; i < renames.length; i++) {
+				renames[i].setArguments(fRenameArguments);
+			}
+			result.addAll(Arrays.asList(renames));
+		}
+		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 }

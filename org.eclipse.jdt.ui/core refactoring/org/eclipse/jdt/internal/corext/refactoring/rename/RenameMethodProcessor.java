@@ -42,12 +42,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -56,8 +53,10 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
-public abstract class RenameMethodProcessor extends RenameProcessor implements IReferenceUpdating {
+public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
@@ -71,7 +70,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	
 	protected void setData(RenameMethodProcessor other) {
 		fUpdateReferences= other.fUpdateReferences;
-		fNewElementName= other.fNewElementName;
+		setNewElementName(other.getNewElementName());
 	}
 	
 	//---- IRefactoringProcessor --------------------------------
@@ -116,13 +115,9 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		return new Object[] {fMethod};
 	}
 
-	public Object[] getDerivedElements() throws CoreException {
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
 		// TODO must caclulate ripple ??
-		return new Object[0];
-	}
-	
-	public IResourceModifications getResourceModifications() {
-		return null;
+		return new RefactoringParticipant[0];
 	}
 	
 	//---- IRenameProcessor -------------------------------------
@@ -140,7 +135,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	public Object getNewElement() {
-		return fMethod.getDeclaringType().getMethod(fNewElementName, fMethod.getParameterTypes());
+		return fMethod.getDeclaringType().getMethod(getNewElementName(), fMethod.getParameterTypes());
 	}
 	
 	public final IMethod getMethod() {
@@ -197,7 +192,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			if (result.hasFatalError())
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
-			result.merge(checkNewElementName(fNewElementName));
+			result.merge(checkNewElementName(getNewElementName()));
 			pm.worked(1);
 			
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
@@ -289,7 +284,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		for (Iterator iter= getMethodsToRename(fMethod, pm, null).iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
 			
-			result.merge(checkIfConstructorName(method, fNewElementName));
+			result.merge(checkIfConstructorName(method, getNewElementName()));
 			
 			String[] msgData= new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())};
 			if (! method.exists()){
@@ -376,7 +371,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		String[] paramTypeSignatures= fMethod.getParameterTypes();
 		for (int i= 0; i < allNewTypes.length; i++) {
 			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getMethod(fNewElementName, paramTypeSignatures);
+				return allNewTypes[i].getMethod(getNewElementName(), paramTypeSignatures);
 		}
 		return null;
 	}
@@ -472,10 +467,10 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), getNewElementName()));
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {
-		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
+		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewElementName());
 	}
 }	

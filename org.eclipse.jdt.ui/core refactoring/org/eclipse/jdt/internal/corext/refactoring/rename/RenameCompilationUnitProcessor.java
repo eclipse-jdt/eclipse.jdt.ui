@@ -31,9 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -42,9 +40,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 
-public class RenameCompilationUnitProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
+public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 
 	private RenameTypeProcessor fRenameTypeProcessor;
 	private boolean fWillRenameType;
@@ -102,18 +102,24 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		return new Object[] {fCu};
 	}
 
-	public Object[] getDerivedElements() {
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		String newTypeName= removeFileNameExtension(getNewElementName());
+		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences());
+		return createSecondaryParticipants(computeDerivedElements(), arguments, computeResourceModifications());
+	}
+	
+	private Object[] computeDerivedElements() {
 		if (fRenameTypeProcessor == null)
 			return new Object[0];
 		return fRenameTypeProcessor.getElements();
 	}
 	
-	public IResourceModifications getResourceModifications() {
+	private ResourceModifications computeResourceModifications() {
 		IResource resource= fCu.getResource();
 		if (resource == null)
 			return null;
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(resource, getNewElementName());
+		result.setRename(resource, getArguments());
 		return result;
 	}
 	
@@ -247,7 +253,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 				RefactoringStatus result1= new RefactoringStatus();
 				
 				RefactoringStatus result2= new RefactoringStatus();
-				result2.merge(Checks.checkCompilationUnitNewName(fCu, fNewElementName));
+				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewElementName()));
 				if (result2.hasFatalError())
 					result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed_1", fCu.getElementName())); //$NON-NLS-1$
 				else 
@@ -258,7 +264,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 			if (fWillRenameType)
 				return fRenameTypeProcessor.checkInput(pm);
 			else
-				return Checks.checkCompilationUnitNewName(fCu, fNewElementName);
+				return Checks.checkCompilationUnitNewName(fCu, getNewElementName());
 		} finally{
 			pm.done();
 		}		

@@ -18,8 +18,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 public class QualifiedNameSearchResult {
 

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.ltk.internal.core.refactoring;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 /**
  * Local copy of org.eclipse.jface.ListenerList
  */

@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
  * A <code>TextChangeManager</code> manages associations between <code>ICompilationUnit</code>

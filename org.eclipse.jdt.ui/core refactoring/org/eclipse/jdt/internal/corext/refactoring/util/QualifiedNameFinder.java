@@ -27,13 +27,15 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 import org.eclipse.search.internal.core.text.TextSearchScope;
+
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.text.edits.ReplaceEdit;
 
 public class QualifiedNameFinder {

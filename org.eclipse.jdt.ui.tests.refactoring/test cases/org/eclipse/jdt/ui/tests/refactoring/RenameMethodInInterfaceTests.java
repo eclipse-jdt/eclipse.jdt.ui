@@ -19,12 +19,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
 	
@@ -47,14 +47,14 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
 		
-		IRenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
+		RenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		assertTrue(! ref.isAvailable());
 	}
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		IRenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
+		RenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);

@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.ltk.core.refactoring.*;
 import org.eclipse.ltk.core.refactoring.Change;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {

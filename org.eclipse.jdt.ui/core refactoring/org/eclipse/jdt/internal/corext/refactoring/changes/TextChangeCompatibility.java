@@ -15,6 +15,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.*;
 
 /**
  * A utility class to provide compatibility with the old

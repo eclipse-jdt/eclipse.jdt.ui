@@ -19,20 +19,20 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 public class TrackPositionTest extends TestCase {
 
 	private static final Class THIS= TrackPositionTest.class;
 	private static final String NN= "N.N";
 	
-	private TextBuffer fBuffer;
-	private TextBufferChange fChange;
+	private IDocument fDocument;
+	private DocumentChange fChange;
 	
 	public TrackPositionTest(String name) {
 		super(name);
@@ -43,8 +43,8 @@ public class TrackPositionTest extends TestCase {
 	}
 	
 	protected void setUp() throws Exception {
-		fBuffer= TextBuffer.create("0123456789");
-		fChange= new TextBufferChange(NN, fBuffer);
+		fDocument= new Document("0123456789");
+		fChange= new DocumentChange(NN, fDocument);
 		fChange.setKeepPreviewEdits(true);
 		fChange.initializeValidationData(new NullProgressMonitor());
 	}
@@ -64,7 +64,7 @@ public class TrackPositionTest extends TestCase {
 		TextEdit edit= new ReplaceEdit(5, 3, "xy");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
 		IDocument preview= fChange.getPreviewDocument();
-		assertEquals(fBuffer.getContent(), "0123456789");
+		assertEquals(fDocument.get(), "0123456789");
 		assertEquals(preview.get(), "01234xy89");
 		assertEquals(fChange.getPreviewEdit(edit).getRegion(), 5, 2);
 	}

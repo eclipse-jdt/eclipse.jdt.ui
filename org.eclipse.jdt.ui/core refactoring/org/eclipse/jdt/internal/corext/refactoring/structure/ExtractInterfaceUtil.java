@@ -75,8 +75,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
@@ -98,7 +96,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -106,8 +103,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 class ExtractInterfaceUtil {
 
@@ -239,10 +238,9 @@ class ExtractInterfaceUtil {
 		//XXX workaround for bug 39630 CompilationUnitChange cannot handle in-memory-only compilation units 
 		if (manager.containsChangesIn(cu) || cu.getResource().exists())
 			return manager.get(cu);
-		TextBuffer textBuffer= TextBuffer.create(cu.getSource()); 
-		TextChange textChange= new TextBufferChange(cu.getElementName(), textBuffer);
-		manager.manage(cu, textChange);
-		return textChange;
+		DocumentChange result= new DocumentChange(cu.getElementName(), new Document(cu.getSource()));
+		manager.manage(cu, result);
+		return result;
 	}
 
 	//TODO to be deleted

@@ -20,7 +20,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -32,6 +31,8 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 public class DeleteAction extends SelectionDispatchAction {
 

@@ -13,17 +13,31 @@ package org.eclipse.ltk.core.refactoring;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.internal.core.refactoring.Assert;
 import org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages;
 
+/**
+ * A refactoring change that does nothing. The reverse change of a
+ * <code>NullChange</code> is a <code>NullChange</code>.
+ * 
+ * @since 3.0
+ */
 public class NullChange extends Change {
 
 	private String fName;
 	
+	/**
+	 * Creates a new <code>NullChange</code> with a default name.
+	 */
 	public NullChange() {
 		this(RefactoringCoreMessages.getString("NullChange.name")); //$NON-NLS-1$
 	}
 
+	/**
+	 * Creates a new <code>NullChange</code> with the given name.
+	 * 
+	 * @param name the human readable name of this change
+	 */
 	public NullChange(String name) {
 		Assert.isNotNull(name);
 		fName= name;

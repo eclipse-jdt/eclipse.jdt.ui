@@ -36,10 +36,10 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 
 public class DeleteTest extends RefactoringTest{

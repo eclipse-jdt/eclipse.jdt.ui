@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
 public class UserInterfaceManager {
 	
@@ -35,7 +35,7 @@ public class UserInterfaceManager {
 
 	
 	public UserInterfaceStarter getStarter(Refactoring refactoring) {
-		IRefactoringProcessor processor= (IRefactoringProcessor)refactoring.getAdapter(IRefactoringProcessor.class);
+		RefactoringProcessor processor= (RefactoringProcessor)refactoring.getAdapter(RefactoringProcessor.class);
 		if (processor == null)
 			return null;
 		Tuple tuple= (Tuple)fMap.get(processor.getClass());

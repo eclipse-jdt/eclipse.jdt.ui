@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -33,6 +31,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
 
 public class DeleteWizard extends RefactoringWizard {
 

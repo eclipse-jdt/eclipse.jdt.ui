@@ -16,6 +16,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.*;
 
 /**
  * This class is a wrapper around a {@link TextEditGroup TextEditGroup}

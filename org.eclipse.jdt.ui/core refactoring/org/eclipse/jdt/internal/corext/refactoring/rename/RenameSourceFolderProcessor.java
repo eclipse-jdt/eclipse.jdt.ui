@@ -27,15 +27,14 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
 
-public class RenameSourceFolderProcessor extends RenameProcessor {
+public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	private IPackageFragmentRoot fSourceFolder;
 	
@@ -82,7 +81,7 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 	public String getProcessorName() {
 		return RefactoringCoreMessages.getFormattedString(
 			"RenameSourceFolderRefactoring.rename", //$NON-NLS-1$
-			new String[]{fSourceFolder.getElementName(), fNewElementName});
+			new String[]{fSourceFolder.getElementName(), getNewElementName()});
 	}
 	
 	public IProject[] getAffectedProjects() throws CoreException {
@@ -93,16 +92,20 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 		return new Object[] {fSourceFolder};
 	}
 
-	public IResourceModifications getResourceModifications() throws CoreException {
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		return createSecondaryParticipants(null, null, computeResourceModifications());
+	}
+	
+	private ResourceModifications computeResourceModifications() throws CoreException {
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(fSourceFolder.getResource(), getNewElementName());
+		result.setRename(fSourceFolder.getResource(), getArguments());
 		return result;		
 	}
 		 
 	public Object getNewElement() throws CoreException {
 		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
-			if (roots[i].getElementName().equals(fNewElementName))
+			if (roots[i].getElementName().equals(getNewElementName()))
 				return roots[i];	
 		}
 		return null;
@@ -161,6 +164,10 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 		}		
 	}
 	
+	public boolean getUpdateReferences() {
+		return true;
+	}
+	
 	//-- changes
 
 	/* non java-doc
@@ -170,7 +177,7 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new ValidationStateChange(
-				new RenameSourceFolderChange(fSourceFolder, fNewElementName));
+				new RenameSourceFolderChange(fSourceFolder, getNewElementName()));
 		} finally{
 			pm.done();
 		}	

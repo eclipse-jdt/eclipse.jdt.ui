@@ -28,12 +28,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {
@@ -107,7 +107,7 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 	}
 	
 	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
-		IRenameProcessor processor= (IRenameProcessor)refactoring.getAdapter(IRenameProcessor.class);
+		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		SelectionState state= new SelectionState(processor.getElements());
 		super.activate(refactoring, parent, save);
 		state.restore(processor.getNewElement());

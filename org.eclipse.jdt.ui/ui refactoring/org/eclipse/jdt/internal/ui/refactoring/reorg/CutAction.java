@@ -29,8 +29,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteExtensionManager;
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -43,6 +41,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 public class CutAction extends SelectionDispatchAction{
 
@@ -84,7 +84,8 @@ public class CutAction extends SelectionDispatchAction{
 
 	private boolean isDeleteEnabled(IStructuredSelection selection) throws CoreException {
 		Object[] elements= selection.toArray();
-		return DeleteExtensionManager.hasProcessor(elements);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		return processor.isAvailable();
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {

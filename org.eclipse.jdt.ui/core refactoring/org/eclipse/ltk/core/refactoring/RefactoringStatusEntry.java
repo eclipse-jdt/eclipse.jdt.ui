@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.ltk.core.refactoring;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.internal.core.refactoring.Assert;
 
 /**
  * An immutable object representing an entry in the list in <code>RefactoringStatus</code>.

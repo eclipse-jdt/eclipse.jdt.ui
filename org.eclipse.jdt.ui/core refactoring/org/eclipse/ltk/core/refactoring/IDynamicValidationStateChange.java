@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.ltk.core.refactoring;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 
 /**
  * This is a tagging interface to indicate that the validation

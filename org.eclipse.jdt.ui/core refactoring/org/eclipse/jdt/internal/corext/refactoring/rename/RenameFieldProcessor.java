@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -42,10 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -56,8 +54,12 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
-public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating {
+public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
 	
 	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.getString("RenameFieldRefactoring.declared_in_supertype"); //$NON-NLS-1$
 	private IField fField;
@@ -114,44 +116,33 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	public Object[] getElements() {
 		return new Object[] {fField};
 	}
-
-	public Object[] getDerivedElements() throws CoreException {
-		List result= new ArrayList(2);
-		IMethod method= getGetter();
-		if (fRenameGetter && method != null)
-			result.add(method);
-		method= getSetter();
-		if (fRenameSetter && method != null)
-			result.add(method);
-		return result.toArray();
-	}
 	
-	public IResourceModifications getResourceModifications() {
-		return null;
-	}
-	
-	public void propagateDataTo(IRenameParticipant participant) throws CoreException {
-		if (participant.operatesOn(fField)) {
-			participant.setNewElementName(getNewElementName());
-			participant.setUpdateReferences(getUpdateReferences());
-			return;
-		}
+	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		List result= new ArrayList();
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
-			if (participant.operatesOn(getter)) {
-				participant.setNewElementName(getNewGetterName());
-				participant.setUpdateReferences(getUpdateReferences());
+			if (getter != null) {
+				addParticipants(result, getter, getNewGetterName());
 			}
 		}
 		if (fRenameSetter) {
 			IMethod setter= getSetter();
-			if (participant.operatesOn(setter)) {
-				participant.setNewElementName(getNewSetterName());
-				participant.setUpdateReferences(getUpdateReferences());
+			if (setter != null) {
+				addParticipants(result, setter, getNewSetterName());
 			}
 		}
+		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
-	
+
+	private void addParticipants(List result, IMethod method, String methodName) throws CoreException {
+		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
+		RenameParticipant[] participants= ExtensionManagers.getRenameParticipants(this, new Object[] {method}, getSharedParticipants());
+		for (int i= 0; i < participants.length; i++) {
+			participants[i].setArguments(args);
+		}
+		result.addAll(Arrays.asList(participants));
+	}
+
 	//---- IRenameProcessor -------------------------------------
 	
 	public final String getCurrentElementName(){
@@ -173,7 +164,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 	
 	public Object getNewElement() {
-		return fField.getDeclaringType().getField(fNewElementName);
+		return fField.getDeclaringType().getField(getNewElementName());
 	}
 	
 	//---- ITextUpdating2 ---------------------------------------------
@@ -267,13 +258,13 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	public String getNewGetterName() throws CoreException {
 		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
-			return GetterSetterUtil.getGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+			return GetterSetterUtil.getGetterName(fField.getJavaProject(), getNewElementName(), fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 		//bug 30906 describes why we need to look for other alternatives here	
-		return GetterSetterUtil.getGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), false, null);
+		return GetterSetterUtil.getGetterName(fField.getJavaProject(), getNewElementName(), fField.getFlags(), false, null);
 	}
 
 	public String getNewSetterName() throws CoreException {
-		return GetterSetterUtil.getSetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+		return GetterSetterUtil.getSetterName(fField.getJavaProject(), getNewElementName(), fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
 
 	// -------------- Preconditions -----------------------
@@ -298,7 +289,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			result.merge(Checks.checkIfCuBroken(fField));
 			if (result.hasFatalError())
 				return result;
-			result.merge(checkNewElementName(fNewElementName));
+			result.merge(checkNewElementName(getNewElementName()));
 			pm.worked(1);
 			result.merge(checkEnclosingHierarchy());
 			pm.worked(1);
@@ -513,7 +504,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 
 	private void addDeclarationUpdate() throws CoreException { 
-		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
+		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), getNewElementName());
 		ICompilationUnit cu= fField.getCompilationUnit();
 		String groupName= RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"); //$NON-NLS-1$
 		TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), groupName, textEdit);
@@ -537,7 +528,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	private TextEdit createTextChange(SearchResult searchResult) {
 		String oldName= fField.getElementName();
 		int offset= searchResult.getEnd() - oldName.length();
-		return new ReplaceEdit(offset, oldName.length(), fNewElementName);
+		return new ReplaceEdit(offset, oldName.length(), getNewElementName());
 	}
 	
 	private void addGetterOccurrences(IProgressMonitor pm) throws CoreException {
@@ -619,7 +610,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		String fullyTypeName= fField.getDeclaringType().getFullyQualifiedName();
 		for (int i= 0; i < allNewTypes.length; i++) {
 			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getField(fNewElementName);
+				return allNewTypes[i].getField(getNewElementName());
 		}
 		return null;
 	}

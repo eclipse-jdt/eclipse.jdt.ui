@@ -28,11 +28,11 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
 
 public class RenameTypeParticipant extends RenameParticipant {
@@ -42,15 +42,11 @@ public class RenameTypeParticipant extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor, java.lang.Object)
 	 */
-	public void initialize(IRefactoringProcessor processor, Object element) throws CoreException {
-		super.initialize(processor);
+	public void initialize(RefactoringProcessor processor, Object element) throws CoreException {
+		setProcessor(processor);
 		fType= (IType)element;
 	}
 
-	public boolean operatesOn(Object element) {
-		return fType.equals(element);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#isAvailable()
 	 */
@@ -100,11 +96,12 @@ public class RenameTypeParticipant extends RenameParticipant {
 	}
 	
 	private String computeNewName() {
+		String newName= getArguments().getNewName();
 		String currentName= fType.getFullyQualifiedName();
 		int pos= currentName.lastIndexOf('.');
 		if (pos == -1)
-			return getNewName();
-		return currentName.substring(0, pos + 1) + getNewName();
+			return newName;
+		return currentName.substring(0, pos + 1) + newName;
 	}
 
 }

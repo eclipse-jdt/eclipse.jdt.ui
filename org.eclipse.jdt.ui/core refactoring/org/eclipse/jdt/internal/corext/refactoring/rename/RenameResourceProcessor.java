@@ -25,12 +25,11 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
 public class RenameResourceProcessor extends RenameProcessor {
 
@@ -72,7 +71,7 @@ public class RenameResourceProcessor extends RenameProcessor {
 	
 	public String getProcessorName() {
 		String message= RefactoringCoreMessages.getFormattedString("RenameResourceProcessor.name", //$NON-NLS-1$
-				new String[]{getCurrentElementName(), fNewElementName});
+				new String[]{getCurrentElementName(), getNewElementName()});
 		return message;
 	}
 	
@@ -84,18 +83,18 @@ public class RenameResourceProcessor extends RenameProcessor {
 		return fResource.getName();
 	}
 	
-	public IResourceModifications getResourceModifications() throws CoreException {
-		return null;	
-	}
-		
 	public IProject[] getAffectedProjects() {
 		return ResourceProcessors.computeScope(fResource);
 	}
 
 	public Object getNewElement() {
-		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(fNewElementName));
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(getNewElementName()));
 	}
 
+	public boolean getUpdateReferences() {
+		return true;
+	}
+	
 	//--- Condition checking --------------------------------------------
 
 	public RefactoringStatus checkActivation() throws CoreException {
@@ -148,7 +147,7 @@ public class RenameResourceProcessor extends RenameProcessor {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new ValidationStateChange(
-			  new RenameResourceChange(fResource, fNewElementName));
+			  new RenameResourceChange(fResource, getNewElementName()));
 		} finally{
 			pm.done();
 		}	
