@@ -1,8 +1,8 @@
 package p;
 class A{
 	private final class Inner extends A {
-		private final int u;
 		int k;
+		private final int u;
 		private Inner(int x, int u) {
 			super(x);
 			this.u= u;
