@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -35,6 +34,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
@@ -199,7 +199,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		IEditorPart[] unsavedEditorArray= (IEditorPart[]) unsavedEditors.toArray(new IEditorPart[unsavedEditors.size()]);
 		IRunnableWithProgress r= createSaveEditorOperation(dialog.getResult(), unsavedEditorArray);
 		try {
-			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, false, r);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, r);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, actionName, ReorgMessages.getString("ReorgAction.exception.saving")); //$NON-NLS-1$
 			return false;

@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -43,6 +42,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMember;
@@ -320,13 +320,15 @@ public class PullUpInputPage extends UserInputWizardPage {
 			IRunnableWithProgress op= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						createHierarchyTreeComposite0(composite, pm);
+						createHierarchyTreeComposite0(composite, pm);						
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
 					}
 				}
 			};
-			new ProgressMonitorDialog(getShell()).run(false, false, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(InterruptedException e) {

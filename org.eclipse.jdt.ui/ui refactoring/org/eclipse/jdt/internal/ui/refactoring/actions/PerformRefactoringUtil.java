@@ -6,8 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
@@ -15,7 +14,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
@@ -36,7 +34,7 @@ class PerformRefactoringUtil {
 		try{
 			op.setChangeContext(context);
 			undoManager.aboutToPerformRefactoring();
-			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, false, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 			if (op.changeExecuted()) {
 				if (! op.getChange().isUndoable()){
 					success= false;
@@ -91,7 +89,7 @@ class PerformRefactoringUtil {
 		};
 		
 		try {
-			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, false, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch (InvocationTargetException e) {
 			handleUnexpectedException(e);
 			return false;

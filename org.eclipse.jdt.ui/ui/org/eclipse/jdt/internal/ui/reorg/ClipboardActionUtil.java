@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -142,7 +143,7 @@ class ClipboardActionUtil {
 		op.setChangeContext(new ChangeContext(handler));		
 		try {
 			//cannot fork - must run in the ui thread
-			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, true, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, op);
 		} catch (InvocationTargetException e) {
 			Throwable target= e.getTargetException();
 			if (target instanceof CoreException)

@@ -30,7 +30,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -38,6 +37,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.GlobalBuildAction;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -167,7 +167,7 @@ public class RefactoringStarter {
 			description.setAutoBuilding(false);
 			workspace.setDescription(description);
 			try {
-				new ProgressMonitorDialog(shell).run(false, false, createRunnable());
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, createRunnable());
 				fSavedFiles= true;
 			} finally {
 				description.setAutoBuilding(autoBuild);

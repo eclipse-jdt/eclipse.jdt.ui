@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IEditorInput;
@@ -28,6 +27,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -116,9 +116,8 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 		ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler(), getUnsavedFiles());
 		IRunnableWithProgress op= createOperation(context);
 		try {
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(parent);
 			// Don't execute in separate thread since it updates the UI.
-			dialog.run(false, false, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch (InvocationTargetException e) {
 			Refactoring.getUndoManager().flush();
 			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.error"), RefactoringMessages.getString("UndoManagerAction.internal_error")); //$NON-NLS-2$ //$NON-NLS-1$

@@ -11,11 +11,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -486,7 +486,7 @@ public class RefactoringWizard extends Wizard {
 	public IWizardPage getStartingPage() {
 		if (fHasUserInputPages)
 			return super.getStartingPage();
-		return computeUserInputSuccessorPage(null, new ProgressMonitorDialog(getShell()));
+		return computeUserInputSuccessorPage(null, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 	}
 	
 	public void addPages() {

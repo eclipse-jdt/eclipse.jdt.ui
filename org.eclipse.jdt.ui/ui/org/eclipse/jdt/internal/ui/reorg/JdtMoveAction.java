@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -135,7 +136,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	
         CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
         try {
-			new ProgressMonitorDialog(getShell()).run(false, false, runnable);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, runnable);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;

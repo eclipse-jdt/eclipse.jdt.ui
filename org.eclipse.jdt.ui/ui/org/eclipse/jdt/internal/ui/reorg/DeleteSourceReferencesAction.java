@@ -25,6 +25,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -73,7 +74,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			return;
 			
 		try {
-            new ProgressMonitorDialog(getShell()).run(false, true, createDeleteOperation(selection));
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, createDeleteOperation(selection));
         } catch (InvocationTargetException e) {
         	ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("DeleteSourceReferenceAction.error.title"), ReorgMessages.getString("DeleteSourceReferenceAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (InterruptedException e) {

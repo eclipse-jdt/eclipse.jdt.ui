@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -41,6 +40,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -122,7 +122,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 */
 	protected void run(final IStructuredSelection selection) {
 		try {
-			new ProgressMonitorDialog(getShell()).run(true, true, createRunnable(selection));
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, createRunnable(selection));
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
