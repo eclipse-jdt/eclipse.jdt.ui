@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**

@@ -40,7 +40,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -52,6 +51,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.core.IJavaModel;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
