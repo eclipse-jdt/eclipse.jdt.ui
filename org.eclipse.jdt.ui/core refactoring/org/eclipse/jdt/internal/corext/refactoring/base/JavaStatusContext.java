@@ -99,6 +99,9 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 		public ISourceRange getSourceRange() {
 			return fSourceRange;
 		}
+		public String toString() {
+			return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
+		}
 	}
 
 	/**
