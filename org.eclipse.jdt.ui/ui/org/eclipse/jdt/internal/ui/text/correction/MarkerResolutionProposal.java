@@ -52,6 +52,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
+		if (fResolution instanceof IJavaMarkerResolutionExtension) {
+			return ((IJavaMarkerResolutionExtension) fResolution).getDescription();
+		}				
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
 			return CorrectionMessages.getFormattedString("MarkerResolutionProposal.additionaldesc", problemDesc); //$NON-NLS-1$
@@ -79,6 +82,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
+		if (fResolution instanceof IJavaMarkerResolutionExtension) {
+			return ((IJavaMarkerResolutionExtension) fResolution).getImage();
+		}		
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
 
@@ -86,6 +92,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
+		if (fResolution instanceof IJavaMarkerResolutionExtension) {
+			return ((IJavaMarkerResolutionExtension) fResolution).getRelevance();
+		}
 		return 10;
 	}
 
