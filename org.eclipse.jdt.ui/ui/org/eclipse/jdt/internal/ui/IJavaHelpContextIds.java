@@ -102,6 +102,14 @@ public interface IJavaHelpContextIds {
 	public static final String EXTRACT_METHOD_ERROR_WIZARD_PAGE= PREFIX + "extract_method_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= PREFIX + "rename_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_ERROR_WIZARD_PAGE= PREFIX + "rename_package_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_SRCFLDR_WIZARD_PAGE= PREFIX + "rename_source_folder_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_SRCFLDR_ERROR_WIZARD_PAGE= PREFIX + "rename_source_folder_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_JPRJ_WIZARD_PAGE= PREFIX + "rename_java_project_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_JPRJ_ERROR_WIZARD_PAGE= PREFIX + "rename_java_project_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_RESOURCE_WIZARD_PAGE=  PREFIX + "rename_resource_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_RESOURCE_ERROR_WIZARD_PAGE=  PREFIX + "rename_resource_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_TEMP_WIZARD_PAGE=  PREFIX + "rename_local_variable_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_TEMP_ERROR_WIZARD_PAGE=  PREFIX + "rename_local_variable_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_CU_WIZARD_PAGE= PREFIX + "rename_cu_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_CU_ERROR_WIZARD_PAGE= PREFIX + "rename_cu_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_METHOD_WIZARD_PAGE= PREFIX + "rename_method_wizard_page_context"; //$NON-NLS-1$

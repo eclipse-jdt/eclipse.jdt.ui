@@ -124,9 +124,9 @@ public class RefactoringSupportFactory {
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Source Folder";
 				String message= "Enter the new name for this source folder.";
-				//FIX ME: wrong help and icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
+				//FIX ME: wrong icon
+				String wizardPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_WIZARD_PAGE; 
+				String errorPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR;
 				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
@@ -144,9 +144,9 @@ public class RefactoringSupportFactory {
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Java Project";
 				String message= "Enter the new name for this Java project.";
-				//FIX ME: wrong help and icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
+				//FIX ME: wrong icon
+				String wizardPageHelp= IJavaHelpContextIds.RENAME_JPRJ_WIZARD_PAGE; 
+				String errorPageHelp= IJavaHelpContextIds.RENAME_JPRJ_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWJPRJ;
 				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
@@ -164,9 +164,9 @@ public class RefactoringSupportFactory {
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 					String title= "Rename Resource";
 					String message= "Enter the new name for this resource.";
-					//FIX ME: wrong help and icon
-					String wizardPageHelp= IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE; 
-					String errorPageHelp= IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE;
+					//FIX ME: wrong icon
+					String wizardPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE; 
+					String errorPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_ERROR_WIZARD_PAGE;
 					ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
 					return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
