@@ -198,15 +198,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return super.canDoOperation(operation);
 		}
 		
-		/*
-		 * @see TextViewer#handleDispose()
+		/**
+		 * @inheritDoc
+		 * @since 3.0
 		 */
-		protected void handleDispose() {
+		public void unconfigure() {
 			if (fCorrectionAssistant != null) {
 				fCorrectionAssistant.uninstall();
 				fCorrectionAssistant= null;
 			}
-			super.handleDispose();
+			super.unconfigure();
 		}
 		
 		public void insertTextConverter(ITextConverter textConverter, int index) {

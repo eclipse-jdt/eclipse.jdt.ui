@@ -221,10 +221,10 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
         return null;
     }
 
-	/*
-	 * @see TextViewer#handleDispose()
+	/**
+	 * @inheritDoc
 	 */
-	protected void handleDispose() {
+	public void unconfigure() {
 		if (fOutlinePresenter != null) {
 			fOutlinePresenter.uninstall();	
 			fOutlinePresenter= null;
@@ -249,7 +249,8 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 			fPreferenceStore.removePropertyChangeListener(this);
 			fPreferenceStore= null;
 		}
-		super.handleDispose();
+		
+		super.unconfigure();
 	}
 	
 	/*
