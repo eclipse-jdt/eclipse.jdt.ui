@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
@@ -38,6 +39,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -215,25 +218,18 @@ public final class ASTProvider {
 		private boolean isActiveEditor(IWorkbenchPart part) {
 			return part != null && (part == fActiveEditor);
 		}
-		
-		private boolean isJavaEditor(IWorkbenchPartReference ref) {
-			if (ref == null)
-				return false;
-			
-			String id= ref.getId();
-			return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
-		}
 	}
 	
 	public static final int AST_LEVEL= AST.JLS3;
 	
-	private static final String AST_DISPOSED= "org.eclipse.jdt.internal.ui.astDisposed"; //$NON-NLS-1$
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 	
 	
 	private IJavaElement fReconcilingJavaElement;
 	private IJavaElement fActiveJavaElement;
 	private CompilationUnit fAST;
+	private IJavaElement fPreviousJavaElement;
+	private CompilationUnit fPreviousAST;
 	private ActivationListener fActivationListener;
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
@@ -332,7 +328,6 @@ public final class ASTProvider {
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "disposing AST: " + toString(fAST)); //$NON-NLS-1$
 		
-		fAST.setProperty(AST_DISPOSED, Boolean.TRUE);
 		fAST= null;
 		
 		cache(null, null);
@@ -380,7 +375,31 @@ public final class ASTProvider {
 		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
 			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
-		if (fAST != null)
+		boolean lastJavaEditorClosed= false;
+		if (fActiveEditor == null) {
+			IEditorPart editors[]= JavaPlugin.getInstanciatedEditors();
+			int i= 0, length= editors.length;
+			lastJavaEditorClosed= true;
+			while (lastJavaEditorClosed && i < length)
+				lastJavaEditorClosed= !isJavaEditor(editors[i++].getEditorSite().getId());
+		}
+			
+		if (ast == null && !lastJavaEditorClosed) {
+			if (fPreviousJavaElement != null && fPreviousJavaElement.equals(javaElement)) {
+				ast= fPreviousAST;
+				fPreviousAST= null;
+				fPreviousJavaElement= null;
+			} else if (fPreviousAST == null && fAST != null) {
+				fPreviousJavaElement= fActiveJavaElement;
+				fPreviousAST= fAST;
+				fAST= null;
+			}
+		} else {
+			fPreviousAST= null;
+			fPreviousJavaElement= null;
+		}
+		
+		if (fAST != null && fAST != ast)
 			disposeAST();
 
 		fAST= ast;
@@ -391,8 +410,11 @@ public final class ASTProvider {
 		synchronized (fWaitLock) {
 			fWaitLock.notifyAll();
 		}
+		
+		Assert.isTrue(fAST == null || fPreviousAST == null);
+		Assert.isTrue(!lastJavaEditorClosed || fPreviousAST == null);
 	}
-
+	
 	/**
 	 * Returns a shared compilation unit AST for the given
 	 * Java element.
@@ -412,8 +434,10 @@ public final class ASTProvider {
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 		
+		boolean isActiveElement;
 		synchronized (this) {
-			if (je.equals(fActiveJavaElement)) {
+			isActiveElement= je.equals(fActiveJavaElement);
+			if (isActiveElement) {
 				if (fAST != null || waitFlag == WAIT_NO)
 					return fAST;
 			}
@@ -445,15 +469,20 @@ public final class ASTProvider {
 		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(je.equals(fActiveJavaElement) && fAST == null)))
 			return null;
 		
-		CompilationUnit ast= createAST(je, progressMonitor);
-		if (progressMonitor != null && progressMonitor.isCanceled())
-			return null;
+		if (isActiveElement)
+			aboutToBeReconciled(je);
 		
-		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
-
-		if (ast != null && je.equals(fActiveJavaElement))
-			cache(ast, je);
+		CompilationUnit ast= null;
+		try {
+			ast= createAST(je, progressMonitor);
+			if (progressMonitor != null && progressMonitor.isCanceled())
+				ast= null;
+			else if (DEBUG)
+				System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
+		} finally {
+			if (isActiveElement)
+				reconciled(ast, je);
+		}
 		
 		return ast;
 	}
@@ -536,10 +565,14 @@ public final class ASTProvider {
 		fActivationListener= null;
 		
 		disposeAST();
+		fAST= fPreviousAST;
+		fPreviousAST= null;
+		disposeAST();
 		
 		synchronized (fWaitLock) {
 			fWaitLock.notify();
 		}
+		
 	}
 	
 	/*
@@ -569,4 +602,16 @@ public final class ASTProvider {
 			cache(ast, javaElement);
 		}
 	}
+	
+	private boolean isJavaEditor(IWorkbenchPartReference ref) {
+		if (ref == null)
+			return false;
+		
+		return isJavaEditor(ref.getId()); 
+	}
+	
+	private boolean isJavaEditor(String id) {
+		return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
+	}
 }
+
