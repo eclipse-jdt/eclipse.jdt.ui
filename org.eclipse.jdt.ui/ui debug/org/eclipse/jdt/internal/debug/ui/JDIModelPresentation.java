@@ -5,32 +5,35 @@
 package org.eclipse.jdt.internal.debug.ui;
 
 import java.text.MessageFormat;
-import java.util.HashMap;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IMarker;
+import java.util.*;
+
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.ITerminate;
-import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugTarget;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.debug.core.IJavaVariable;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.*;
+import org.eclipse.debug.ui.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.debug.core.*;
+import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;
 import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorDescriptor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.*;
 
 /**
  * @see IDebugModelPresentation
  */
-public class JDIModelPresentation extends LabelProvider implements IDebugModelPresentation {
+public class JDIModelPresentation extends LabelProvider implements IDebugModelPresentation, IPropertyChangeListener {
 
-	public static final String DISPLAY_HEX_VALUES= "org.eclipse.jdt.ui.displayHexValues";
 	protected HashMap fAttributes= new HashMap(3);
 
 	static final Point BIG_SIZE= new Point(22, 16);
@@ -71,6 +74,12 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected static final String fgStringName= "java.lang.String";
 
 	protected JavaElementLabelProvider fJavaLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+
+	public JDIModelPresentation() {
+		super();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.addPropertyChangeListener(this);
+	}
 
 	/**
 	 * Returns a label for the item
@@ -185,6 +194,11 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * Build the text for an IJavaValue.
 	 */
 	protected String getValueText(IJavaValue value) throws DebugException {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		boolean showHexValues= store.getBoolean(IPreferencesConstants.SHOW_HEX_VALUES);		
+		boolean showCharValues= store.getBoolean(IPreferencesConstants.SHOW_CHAR_VALUES);
+		boolean showUnsignedValues= store.getBoolean(IPreferencesConstants.SHOW_UNSIGNED_VALUES);
+		
 		String refTypeName= value.getReferenceTypeName();
 		String valueString= value.getValueString();
 		boolean isString= refTypeName.equals(fgStringName);
@@ -205,19 +219,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			buffer.append(' ');
 		}
 		
-		// show hex value first, if applicable
-		String hexText = null;
-		if (isShowHexValues()) {
-			hexText= getValueHexText(value);
-		}
-		if (hexText != null) {
-			buffer.append(hexText);
-		}
 		// Put double quotes around Strings
 		if (valueString != null && (isString || valueString.length() > 0)) {
-			if (hexText != null) {
-				buffer.append(" (");
-			}
 			if (isString) {
 				buffer.append('"');
 			}
@@ -225,12 +228,80 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			if (isString) {
 				buffer.append('"');
 			}
-			if (hexText != null) {
-				buffer.append(')');
-			}
 		}
+		
+		// show unsigned value second, if applicable
+		if (showUnsignedValues) {
+			buffer= appendUnsignedText(value, buffer);
+		}
+		// show hex value third, if applicable
+		if (showHexValues) {
+			buffer= appendHexText(value, buffer);
+		}
+		// show byte character value last, if applicable
+		if (showCharValues) {
+			buffer= appendCharText(value, buffer);
+		}
+		
 		return buffer.toString();
 	}
+	
+
+	private StringBuffer appendUnsignedText(IJavaValue value, StringBuffer buffer) throws DebugException {
+		String unsignedText= getValueUnsignedText(value);
+		if (unsignedText != null) {
+			buffer.append(" [");
+			buffer.append(unsignedText);
+			buffer.append("]");
+		}
+		return buffer;	
+	}
+		
+	private StringBuffer appendHexText(IJavaValue value, StringBuffer buffer) throws DebugException {
+		String hexText = getValueHexText(value);
+		if (hexText != null) {
+			buffer.append(" [");
+			buffer.append(hexText);
+			buffer.append("]");
+		}		
+		return buffer;
+	}
+	
+	private StringBuffer appendCharText(IJavaValue value, StringBuffer buffer) throws DebugException {
+		String charText= getValueCharText(value);
+		if (charText != null) {
+			buffer.append(" [");
+			buffer.append(charText);
+			buffer.append("]");
+		}		
+		return buffer;
+	}
+	
+	/**
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty() != IPreferencesConstants.VARIABLE_RENDERING) {
+			return;
+		}
+		IDebugTarget[] targets= DebugPlugin.getDefault().getLaunchManager().getDebugTargets();
+		if (targets == null || targets.length == 0) {
+			return;
+		}
+		for (int i=0; i<targets.length; i++) {
+			if (targets[i] instanceof IJavaDebugTarget && !targets[i].isTerminated()) {
+				 fireEvent(new DebugEvent(targets[i], DebugEvent.CHANGE));
+				 break;
+			}
+		}
+	}
+	
+	/**
+	 * Fire a debug event
+	 */
+	public void fireEvent(DebugEvent event) {
+		DebugPlugin.getDefault().fireDebugEvent(event);
+	}	
 
 	/**
 	 * Given a JNI-style signature String for a IJavaValue, return true
@@ -252,6 +323,77 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Given a JNI-style signature String for a IJavaValue, return true
+	 * if the signature represents a ByteValue
+	 */
+	protected boolean isByteValue(String signature) {
+		if (signature == null) {
+			return false;
+		}
+		return signature.equals("B");
+	}
+	
+	/**
+	 * Returns the character string of a byte or <code>null</code if
+	 * the value is not a byte.
+	 */
+	protected String getValueCharText(IJavaValue value) throws DebugException {
+		String sig= value.getSignature();
+		if (sig == null || sig.length() > 1) {
+			return null;
+		}
+		
+		String valueString= value.getValueString();
+		int intValue= 0;	
+		switch (sig.charAt(0)) {
+			case 'B' : // byte
+				intValue= Integer.parseInt(valueString);
+				intValue= intValue & 0xFF; // Only lower 8 bits
+				break;
+			case 'I' : // int
+				intValue= Integer.parseInt(valueString);
+				if (intValue > 255 || intValue < 0) {
+					return null;
+				}
+				break;
+			case 'S' : // short
+				intValue= Integer.parseInt(valueString);
+				if (intValue > 255 || intValue < 0) {
+					return null;
+				}
+				break;
+			case 'J' :
+				long longValue= Long.parseLong(valueString);
+				if (longValue > 255 || longValue < 0) {
+					// Out of character range
+					return null;
+				}
+				intValue= (int) longValue;
+				break;
+			default :
+				return null;
+		};
+		String c = "";
+		if (Character.getType((char) intValue) == Character.CONTROL) {
+			Character ctrl = new Character((char) (intValue + 64));
+			c = "^" + ctrl;
+			switch (intValue) { // common use
+				case 0: c += " (NUL)"; break;
+				case 8: c += " (BS)"; break;
+				case 9: c += " (TAB)"; break;
+				case 10: c += " (LF)"; break;
+				case 13: c += " (CR)"; break;
+				case 21: c += " (NL)"; break;
+				case 27: c += " (ESC)"; break;
+				case 127: c += " (DEL)"; break;
+			}
+		} else {
+			c += new Character((char)intValue);
+		}
+		return c;
 	}
 
 	protected String getMarkerTypeName(IMarker marker, boolean qualified) {
@@ -381,12 +523,6 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return show.booleanValue();
 	}
 
-	protected boolean isShowHexValues() {
-		Boolean show= (Boolean) fAttributes.get(DISPLAY_HEX_VALUES);
-		show= show == null ? Boolean.FALSE : show;
-		return show.booleanValue();
-	}
-
 	protected String getVariableText(IJavaVariable var) throws DebugException {
 		String varLabel= var.getName();
 		if (varLabel != null) {
@@ -448,6 +584,24 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		StringBuffer buffer= new StringBuffer(typeName);
 		buffer.insert(firstBracket + 1, Integer.toString(arrayIndex));
 		return buffer.toString();
+	}
+	
+	protected String getValueUnsignedText(IJavaValue value) throws DebugException {
+		String sig= value.getSignature();
+		if (sig == null || sig.length() > 1) {
+			return null;
+		}
+
+		switch (sig.charAt(0)) {
+			case 'B' : // byte
+				int byteVal= Integer.parseInt(value.getValueString());
+				if (byteVal < 0) {
+					byteVal = byteVal & 0xFF;
+					return Integer.toString(byteVal);					
+				}
+			default :
+				return null;
+		}
 	}
 
 	protected String getValueHexText(IJavaValue value) throws DebugException {
