@@ -62,6 +62,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.BodyForNativeMethod:
 			case IProblem.OuterLocalMustBeFinal:
 			case IProblem.UninitializedLocalVariable:
+			case IProblem.UndefinedConstructorInDefaultConstructor:
 				return true;
 			default:
 				return false;
@@ -176,7 +177,10 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 				break;
 			case IProblem.UninitializedLocalVariable:
 				LocalCorrectionsSubProcessor.addUninitializedLocalVariableProposal(context, proposals);
-				break;						
+				break;
+			case IProblem.UndefinedConstructorInDefaultConstructor:
+				LocalCorrectionsSubProcessor.addUndefinedConstructorProposal(context, proposals);
+				break;			
 			default:
 		}
 	}
