@@ -309,15 +309,14 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	}
 	
-	private RefactoringStatus checkAccessor(IMethod accessor, String newAccessorName) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		IMethod m= JavaModelUtil.findMethod(newAccessorName, accessor.getParameterTypes(), false, fField.getDeclaringType());
-		if (m != null && m.exists()){
-			String msg= "Method \'" + JavaElementUtil.createMethodSignature(m) + "\' already exists in \'" 
-						+ fField.getDeclaringType().getFullyQualifiedName() + "\'";
-			result.addError(msg, JavaSourceContext.create(m));
-		}
-		return result;
+	private RefactoringStatus checkAccessor(IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, existingAccessor.getParameterTypes(), false, fField.getDeclaringType());
+		if (accessor == null || !accessor.exists())
+			return null;
+			
+		String msg= "Method \'" + JavaElementUtil.createMethodSignature(accessor) + "\' already exists in \'" 
+					+ fField.getDeclaringType().getFullyQualifiedName() + "\'";
+		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(accessor));
 	}
 	
 	private static boolean isInstaceField(IField field) throws JavaModelException{
