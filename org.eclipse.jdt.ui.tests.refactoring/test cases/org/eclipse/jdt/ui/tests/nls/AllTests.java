@@ -23,7 +23,6 @@ public class AllTests {
         suite.addTest(NLSElementTester.suite());
 		suite.addTest(NLSScannerTester.suite());
 		suite.addTest(CellEditorTester.suite());
-		suite.addTest(OrderedMapTester.suite());
 
 		// new
         suite.addTest(NlsRefactoringCheckInitialConditionsTest.allTests());
