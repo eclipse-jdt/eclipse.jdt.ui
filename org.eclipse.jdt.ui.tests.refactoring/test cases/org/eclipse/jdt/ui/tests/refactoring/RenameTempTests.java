@@ -14,7 +14,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;public class RenameTempTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class RenameTempTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
@@ -63,10 +65,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 		return new SourceRange(offset, end - offset);
 	}
 
-	private void helper1(String newName, boolean updateReferences) throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		IType classA= getType(cu, "A");
-		ISourceRange selection= getSelection(cu);
+	private void helper1(String newName, boolean updateReferences, ISourceRange selection, ICompilationUnit cu) throws Exception{
+//		IType classA= getType(cu, "A");
 		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
@@ -79,14 +79,26 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("incorrect renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+	
+	private void helper1(String newName, boolean updateReferences) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		helper1(newName, updateReferences, getSelection(cu), cu);
 	}	
+	
+	private void helper1(String newName, boolean updateReferences, int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		helper1(newName, updateReferences, selection, cu);
+	}	
+	
 	private void helper1(String newName) throws Exception{
 		helper1(newName, true);
 	}
 
 	private void helper2(String newName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
-		IType classA= getType(cu, "A");
+//		IType classA= getType(cu, "A");
 		ISourceRange selection= getSelection(cu);
 		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
@@ -253,10 +265,14 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	
 	public void test36() throws Exception{
 //		printTestDisabledMessage("regression test for bug#7630");
-		helper1("j");
+		helper1("j", true, 5, 13, 5, 14);
+	}
+
+	public void test37() throws Exception{
+//		printTestDisabledMessage("regression test for bug#7630");
+		helper1("j", true, 5, 16, 5, 17);
 	}
 	
-
 // -----
 	public void testFail0() throws Exception{
 		helper2("j");
