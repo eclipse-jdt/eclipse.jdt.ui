@@ -1155,15 +1155,6 @@
       </wizard>
    </extension>
    <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            name="%JavaDoc.preferencePageName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.JavadocPreferencePage">
-      </page>
-   </extension>
-   <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"

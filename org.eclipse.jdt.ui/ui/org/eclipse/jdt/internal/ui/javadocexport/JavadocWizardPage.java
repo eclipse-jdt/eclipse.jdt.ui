@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -80,6 +81,14 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			text.setText(message);
 		text.setLayoutData(gd);
 		return text;
+	}
+	
+	protected Combo createCombo(Composite composite, int style, String message, GridData gd) {
+		Combo combo= new Combo(composite, style);
+		if (message != null)
+			combo.setText(message);
+		combo.setLayoutData(gd);
+		return combo;
 	}
 
 	protected void handleFileBrowseButtonPressed(Text text, String[] extensions, String title) {

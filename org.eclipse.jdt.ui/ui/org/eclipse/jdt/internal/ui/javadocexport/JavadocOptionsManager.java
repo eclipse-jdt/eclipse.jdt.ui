@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.jdt.launching.ExecutionArguments;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -40,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -49,10 +53,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 
 public class JavadocOptionsManager {
 
@@ -60,8 +65,10 @@ public class JavadocOptionsManager {
 
 	private StatusInfo fWizardStatus;
 
+	private String[] fJavadocCommandHistory;
+	
+	
 	private IJavaElement[] fSelectedElements;
-
 	private IJavaElement[] fInitialElements;
 
 	private String fAccess;
@@ -139,13 +146,22 @@ public class JavadocOptionsManager {
 	
 	private final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
 
-
+	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
 	
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
 
 		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC); //$NON-NLS-1$
+		
+		String commandHistory= null; //$NON-NLS-1$
+		if (javadocSection != null) {
+			commandHistory= javadocSection.get(JAVADOC_COMMAND_HISTORY);
+		}
+		if (commandHistory == null || commandHistory.length() == 0) {
+			commandHistory= initJavadocCommandDefault(); 
+		}
+		fJavadocCommandHistory= arrayFromFlatString(commandHistory);
 		
 		fRecentSettings= new RecentSettingsStore(javadocSection);
 		
@@ -174,6 +190,7 @@ public class JavadocOptionsManager {
 			loadDefaults(currSelection);
 		}
 	}
+
 
 	/*
 	 * Returns the the Java project that is parent top all selected elements or null if
@@ -502,6 +519,14 @@ public class JavadocOptionsManager {
 		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
 	}
 
+	/**
+	 * @return Returns the javadocCommandHistory.
+	 */
+	public String[] getJavadocCommandHistory() {
+		return fJavadocCommandHistory;
+	}
+
+	
 	//it is possible that the package list is empty
 	public StatusInfo getWizardStatus() {
 		return fWizardStatus;
@@ -622,11 +647,31 @@ public class JavadocOptionsManager {
 		return buf.toString();
 	}
 	
+	private String flatStringList(String[] paths) {
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < paths.length; i++) {
+			if (i > 0) {
+				buf.append(File.pathSeparatorChar);
+			}
+			buf.append(paths[i]);
+		}
+		return buf.toString();
+	}
+	
+	private String[] arrayFromFlatString(String str) {
+		StringTokenizer tok= new StringTokenizer(str, File.pathSeparator);
+		String[] res= new String[tok.countTokens()];
+		for (int i= 0; i < res.length; i++) {
+			res[i]= tok.nextToken();
+		}
+		return res;
+	}
+	
 
 	public void getArgumentArray(List vmArgs, List toolArgs) {
 		
 		//bug 38692
-		vmArgs.add(JavadocPreferencePage.getJavaDocCommand());
+		vmArgs.add(getJavadocCommandHistory()[0]);
 		if (fFromStandard) {
 			toolArgs.add("-d"); //$NON-NLS-1$
 			toolArgs.add(fDestination);
@@ -773,6 +818,13 @@ public class JavadocOptionsManager {
 	public void updateDialogSettings(IDialogSettings dialogSettings, IJavaProject[] checkedProjects) {
 		IDialogSettings settings= dialogSettings.addNewSection(SECTION_JAVADOC);
 
+		settings.put(JAVADOC_COMMAND_HISTORY, flatStringList(fJavadocCommandHistory));
+		if (fJavadocCommandHistory.length > 0) {
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			store.setValue(PreferenceConstants.JAVADOC_COMMAND, fJavadocCommandHistory[0]);
+		}
+		
+		
 		settings.put(FROMSTANDARD, fFromStandard);
 
 		settings.put(DOCLETNAME, fDocletname);
@@ -811,6 +863,10 @@ public class JavadocOptionsManager {
 			updateRecentSettings(checkedProjects[0]);
 		}
 		getRecentSettings().store(settings);
+	}
+		
+	public void setJavadocCommandHistory(String[] javadocCommandHistory) {
+		fJavadocCommandHistory= javadocCommandHistory;
 	}
 
 	public void setAccess(String access) {
@@ -1000,5 +1056,59 @@ public class JavadocOptionsManager {
 		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);
 	}
 
+	
+	private static String initJavadocCommandDefault() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		String cmd= store.getString(PreferenceConstants.JAVADOC_COMMAND);	// old location
+		if (cmd != null && cmd.length() > 0) {
+			store.setToDefault(PreferenceConstants.JAVADOC_COMMAND);
+			return cmd;
+		}
+		
+		File file= findJavaDocCommand();
+		if (file != null) {
+			return file.getPath();
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+
+	private static File findJavaDocCommand() {
+		IVMInstall install= JavaRuntime.getDefaultVMInstall();
+		if (install != null) {
+			File res= getCommand(install);
+			if (res != null) {
+				return res;
+			}
+		}
+		
+		IVMInstallType[] jreTypes= JavaRuntime.getVMInstallTypes();
+		for (int i= 0; i < jreTypes.length; i++) {
+			IVMInstallType jreType= jreTypes[i];
+			IVMInstall[] installs= jreType.getVMInstalls();
+			for (int k= 0; k < installs.length; k++) {
+				File res= getCommand(installs[i]);
+				if (res != null) {
+					return res;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static File getCommand(IVMInstall install) {
+		File installLocation= install.getInstallLocation();
+		if (installLocation != null) {
+			File javaDocCommand= new File(installLocation, "bin/javadoc"); //$NON-NLS-1$
+			if (javaDocCommand.isFile()) {
+				return javaDocCommand;
+			}
+			javaDocCommand= new File(installLocation, "bin/javadoc.exe"); //$NON-NLS-1$
+			if (javaDocCommand.isFile()) {
+				return javaDocCommand;
+			}
+		}
+		return null;
+	}
 
 }

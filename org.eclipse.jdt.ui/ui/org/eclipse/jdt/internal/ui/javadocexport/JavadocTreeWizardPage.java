@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,10 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
@@ -64,8 +66,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
@@ -73,7 +73,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private CheckboxTreeAndListGroup fInputGroup;
 
 	private Text fDestinationText;
-	private Text fJavadocCommandText;
+	private Combo fJavadocCommandText;
 	private Text fDocletText;
 	private Text fDocletTypeText;
 	private Button fStandardButton;
@@ -157,7 +157,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		group.setLayout(layout);
 
 		createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, numColumns, 0)); //$NON-NLS-1$
-		fJavadocCommandText= createText(group, SWT.READ_ONLY | SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
+		fJavadocCommandText= createCombo(group, SWT.NONE, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
 
 		fJavadocCommandText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -170,9 +170,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				JavadocPreferencePage page= new JavadocPreferencePage();
-				PreferencePageSupport.showPreferencePage(getShell(), JavadocPreferencePage.ID, page); //$NON-NLS-1$
-				fJavadocCommandText.setText(JavadocPreferencePage.getJavaDocCommand());
+				browseForJavadocCommand();
 			}
 		});
 	}
@@ -390,9 +388,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDocletTypeText.setEnabled(false);
 			fDocletTypeLabel.setEnabled(false);
 		}
-		String javadocCommand = JavadocPreferencePage.getJavaDocCommand();
-		fJavadocCommandText.setText(javadocCommand);
-		fJavadocCommandText.setToolTipText(javadocCommand);
+		
+		fJavadocCommandText.setItems(fStore.getJavadocCommandHistory());
+		fJavadocCommandText.select(0);
 	}
 
 	/**
@@ -552,6 +550,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setClasspath(getClassPath(checkedProjects));
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSelectedElements(getSourceElements(checkedProjects));
+		
+		fStore.setJavadocCommandHistory(fJavadocCommandText.getItems());
+		
 	}
 
 	public IJavaProject[] getCheckedProjects() {
@@ -570,6 +571,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	
 	protected void doValidation(int validate) {
 
+		
 		switch (validate) {
 			case PREFERENCESTATUS :
 				fPreferenceStatus= new StatusInfo();
@@ -625,14 +627,43 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				
 			case JAVADOCSTATUS:
 				fJavadocStatus= new StatusInfo();
-				IPath path= new Path(fJavadocCommandText.getText());
-				if (!path.toFile().isFile()) {
-					fJavadocStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommandfile.error"));  //$NON-NLS-1$
+				String text= fJavadocCommandText.getText();
+				if (text.length() == 0) {
+					fJavadocStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccmd.error.enterpath"));  //$NON-NLS-1$
+				} else {
+					File file= new File(text);
+					if (!file.isFile()) {
+						fJavadocStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccmd.error.notexists"));  //$NON-NLS-1$
+					}
 				}
 				updateStatus(findMostSevereStatus());
 				break;
 		} //end switch
+		
+		
 	}
+	
+	protected void browseForJavadocCommand() {
+		FileDialog dialog= new FileDialog(getShell());
+		dialog.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccmd.dialog.title")); //$NON-NLS-1$
+		String dirName= fJavadocCommandText.getText();
+		dialog.setFileName(dirName);
+		String selectedDirectory= dialog.open();
+		if (selectedDirectory != null) {
+			ArrayList newItems= new ArrayList();
+			String[] items= fJavadocCommandText.getItems();
+			newItems.add(selectedDirectory);
+			for (int i= 0; i < items.length && newItems.size() < 5; i++) { // only keep the last 5 entries
+				String curr= items[i];
+				if (!newItems.contains(curr)) {
+					newItems.add(curr);
+				}
+			}
+			fJavadocCommandText.setItems((String[]) newItems.toArray(new String[newItems.size()]));
+			fJavadocCommandText.select(0);
+		}
+	}
+	
 
 	private boolean validDocletPath(String docletPath) {
 		StringTokenizer tokens= new StringTokenizer(docletPath, ";"); //$NON-NLS-1$
