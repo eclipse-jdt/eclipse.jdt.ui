@@ -8,6 +8,7 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -30,6 +31,9 @@ public class EmptyInnerPackageFilter extends PackageFilter {
 				return false;
 			}
 		}
+		// XXX: revisit, temporary fix to filter package declaration
+		if (element instanceof IPackageDeclaration)
+			return false;
 		return true;
 	}
 }
