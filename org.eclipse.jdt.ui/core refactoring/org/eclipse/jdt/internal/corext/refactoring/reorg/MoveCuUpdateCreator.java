@@ -118,12 +118,26 @@ class MoveCuUpdateCreator {
 			pm.beginTask("", 3);  //$NON-NLS-1$
 		  	pm.subTask(RefactoringCoreMessages.getString("MoveCuUpdateCreator.searching") + movedUnit.getElementName()); //$NON-NLS-1$
 		  	
+			if (isDestinationAnotherFragmentOfSamePackage(movedUnit)){
+				pm.worked(3);
+				return;
+			}
+
 		  	addImportToSourcePackageTypes(movedUnit, new SubProgressMonitor(pm, 1));
-			removedImportsToDestinationPackageTypes(movedUnit);
+			removeImportsToDestinationPackageTypes(movedUnit);
 			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
 		}
+	}
+
+	private boolean isDestinationAnotherFragmentOfSamePackage(ICompilationUnit movedUnit) {
+		if (! (movedUnit.getParent() instanceof IPackageFragment))
+			return false;
+		IPackageFragment sourcePackage= (IPackageFragment)movedUnit.getParent();
+		return ! fDestination.equals(sourcePackage) &&
+				fDestination.getJavaProject().equals(sourcePackage.getJavaProject()) &&
+				fDestination.getElementName().equals(sourcePackage.getElementName());
 	}
 
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
@@ -152,7 +166,7 @@ class MoveCuUpdateCreator {
         return new StringBuffer(importDecl.getElementName()).replace(0, movedUnit.getParent().getElementName().length(), fDestination.getElementName()).toString();
     }
 	
-	private void removedImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws JavaModelException{
+	private void removeImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws JavaModelException{
 		ImportEdit importEdit= getImportEdit(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
 		for (int i= 0; i < destinationTypes.length; i++) {
@@ -229,7 +243,7 @@ class MoveCuUpdateCreator {
 	}
 	
 	private Set collectCusThatWillImportDestinationPackage(ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] references = getReferences(movedUnit, pm);
+		SearchResultGroup[] references= getReferences(movedUnit, pm);
 		Set result= new HashSet();
 		List cuList= Arrays.asList(fCus);
 		for (int i= 0; i < references.length; i++) {
@@ -250,7 +264,9 @@ class MoveCuUpdateCreator {
 			return false;
 		if (cuList.contains(referencingCu))	
 			return false;
-			
+		if (isDestinationAnotherFragmentOfSamePackage(movedUnit))
+			return false;
+
 		//heuristic	
 		if (referencingCu.getImport(movedUnit.getParent().getElementName() + ".*").exists()) //$NON-NLS-1$
 			return true;
