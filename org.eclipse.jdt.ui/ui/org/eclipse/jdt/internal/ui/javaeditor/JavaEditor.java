@@ -2758,6 +2758,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fEncodingSupport.reset();
 		
 		setOutlinePageInput(fOutlinePage, input);
+				
 		if (fProjectionModelUpdater != null)
 			fProjectionModelUpdater.initialize();
 		
