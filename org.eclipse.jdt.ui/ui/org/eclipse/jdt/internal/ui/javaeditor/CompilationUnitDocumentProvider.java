@@ -395,6 +395,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private List fPreviouslyOverlaid= null; 
 			private List fCurrentlyOverlaid= new ArrayList();
 			private CompilationUnitAnnotationModelEvent fCurrentEvent;
+			private boolean fIncludesProblemAnnotationChanges= false;
 
 			public CompilationUnitAnnotationModel(IFileEditorInput input) {
 				super(input.getFile());
@@ -422,9 +423,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	
 				super.update(markerDeltas);
 
-				if (markerDeltas != null && markerDeltas.length > 0) {
+				if (fIncludesProblemAnnotationChanges) {
 					try {
-						ICompilationUnit workingCopy = getWorkingCopy(fInput);
+						ICompilationUnit workingCopy= getWorkingCopy(fInput);
 						if (workingCopy != null)
 							workingCopy.reconcile(true, null);
 					} catch (JavaModelException ex) {
@@ -581,6 +582,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			protected void fireModelChanged() {
 				fireModelChanged(fCurrentEvent);
+				fIncludesProblemAnnotationChanges= fCurrentEvent.includesProblemMarkerAnnotationChanges();
 				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
