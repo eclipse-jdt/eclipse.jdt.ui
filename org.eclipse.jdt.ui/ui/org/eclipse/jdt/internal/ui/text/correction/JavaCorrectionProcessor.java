@@ -44,6 +44,29 @@ import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
+	public static boolean hasCorrections(int problemId) {
+		switch (problemId) {
+			case IProblem.UnterminatedString:
+			case IProblem.UnterminatedComment:
+			case IProblem.UndefinedMethod:
+			case IProblem.UndefinedField:
+			case IProblem.UndefinedName:
+			case IProblem.PublicClassMustMatchFileName:
+			case IProblem.PackageIsNotExpectedPackage:
+			case IProblem.UndefinedType:
+			case IProblem.FieldTypeNotFound:
+			case IProblem.ArgumentTypeNotFound:
+			case IProblem.ReturnTypeNotFound:
+			case IProblem.SuperclassNotFound:
+			case IProblem.ExceptionTypeNotFound:
+			case IProblem.InterfaceNotFound: 
+			case IProblem.TypeMismatch:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	private static class CorrectionsComparator implements Comparator {
 		
 		private static Collator fgCollator= Collator.getInstance();
@@ -145,7 +168,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					VariousEvaluations.addCastProposal(problemPos, proposals);
 					break;
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
+					//proposals.add(new NoCorrectionProposal(problemPos));
 				
 			}
 		} catch (CoreException e) {
@@ -187,5 +210,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	public String getErrorMessage() {
 		return null;
 	}
+	
+
+	
+	
 
 }
