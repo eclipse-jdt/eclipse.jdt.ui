@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
@@ -287,7 +289,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		createSelectionDependency(master, slave);
 
 		layout= new GridLayout();
-		layout.numColumns= 3;
+		layout.numColumns= 4;
 
 		final Composite engine= new Composite(folder, SWT.NULL);
 		engine.setLayout(layout);
@@ -297,13 +299,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
 		combo.setEnabled(locales.size() > 1);
+		
+		new Label(engine, SWT.NONE); // placeholder
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
 
-		data= (GridData)fDictionaryPath.getLayoutData();
-		data.horizontalSpan= 1;
-
+		
 		Button button= new Button(engine, SWT.PUSH);
 		button.setText(PreferencesMessages.getString("SpellingPreferencePage.browse.label")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter() {
@@ -312,6 +314,8 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 				handleBrowseButtonSelected();
 			}
 		});
+		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		SWTUtil.setButtonDimensionHint(button);
 		
 		layout= new GridLayout();
 		layout.numColumns= 3;
