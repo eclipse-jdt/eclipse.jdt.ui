@@ -48,7 +48,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		fClassFiles= new ArrayList(100);
 		fProject= project;
 			
-		project.accept(this, 0);
+		project.accept(this, IResource.NONE);
 			
 		fResultClasspath= null;
 		fResultOutputFolder= null;
