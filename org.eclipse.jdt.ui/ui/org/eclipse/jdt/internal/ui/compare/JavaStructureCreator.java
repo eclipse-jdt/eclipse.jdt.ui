@@ -16,25 +16,12 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 
-import org.eclipse.compare.IEditableContent;
-import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.compare.structuremergeviewer.Differencer;
-import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
-import org.eclipse.compare.structuremergeviewer.ICompareInput;
-import org.eclipse.compare.structuremergeviewer.IDiffContainer;
-import org.eclipse.compare.structuremergeviewer.IDiffElement;
-import org.eclipse.compare.structuremergeviewer.IStructureComparator;
-import org.eclipse.compare.structuremergeviewer.IStructureCreator;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
-
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -43,6 +30,12 @@ import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.compare.IEditableContent;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.structuremergeviewer.*;
+import org.eclipse.compare.internal.DocumentManager;
 
 
 public class JavaStructureCreator implements IStructureCreator {
@@ -142,30 +135,37 @@ public class JavaStructureCreator implements IStructureCreator {
 	 * In case of error null is returned.
 	 */
 	public IStructureComparator getStructure(final Object input) {
-		
 		String contents= null;
-		if (input instanceof IStreamContentAccessor) {
-			IStreamContentAccessor sca= (IStreamContentAccessor) input;			
-			try {
-				contents= JavaCompareUtilities.readString(sca.getContents());
-			} catch (CoreException ex) {
-				JavaPlugin.log(ex);
-				return null;
-			}			
-		}
-		
-		if (contents != null) {
-			int n= contents.length();
-			char[] buffer= new char[n];
-			contents.getChars(0, n, buffer, 0);
-			
-			Document doc= new Document(contents);
-			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
-			if (dp != null) {
-				doc.setDocumentPartitioner(dp);
-				dp.connect(doc);
+		char[] buffer= null;
+		IDocument doc= DocumentManager.get(input);
+		if (doc == null) {
+			if (input instanceof IStreamContentAccessor) {
+				IStreamContentAccessor sca= (IStreamContentAccessor) input;			
+				try {
+					contents= JavaCompareUtilities.readString(sca.getContents());
+				} catch (CoreException ex) {
+					JavaPlugin.log(ex);
+					return null;
+				}			
 			}
 			
+			if (contents != null) {
+				int n= contents.length();
+				buffer= new char[n];
+				contents.getChars(0, n, buffer, 0);
+				
+				doc= new Document(contents);
+				DocumentManager.put(input, doc);
+				IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
+				if (dp != null) {
+					doc.setDocumentPartitioner(dp);
+					dp.connect(doc);
+				}
+				
+			}
+		}
+		
+		if (doc != null) {
 			boolean isEditable= false;
 			if (input instanceof IEditableContent)
 				isEditable= ((IEditableContent) input).isEditable();
@@ -176,6 +176,13 @@ public class JavaStructureCreator implements IStructureCreator {
 					save(this, input);
 				}
 			};
+			
+			if (buffer == null) {
+				contents= doc.get();
+				int n= contents.length();
+				buffer= new char[n];
+				contents.getChars(0, n, buffer, 0);
+			}
 			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
 			SourceElementParser parser= new SourceElementParser(builder,
 						new ProblemFactory(), new CompilerOptions(JavaCore.getOptions()));
@@ -186,7 +193,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				return null;
 			}
 			return root;
-		} 
+		}
 		return null;
 	}
 		
