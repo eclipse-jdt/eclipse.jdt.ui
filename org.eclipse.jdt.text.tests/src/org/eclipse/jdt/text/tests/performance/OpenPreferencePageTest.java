@@ -42,7 +42,6 @@ import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
  */
 public class OpenPreferencePageTest extends TestCase {
 	private PerformanceMeter fMeter;
-	private IEvaluator fEvaluator;
 
 	public void testOpenPreferencePage() {
 		Display display= SWTEventHelper.getActiveDisplay();
@@ -98,13 +97,11 @@ public class OpenPreferencePageTest extends TestCase {
 		
 		d.close();
 		
-		fEvaluator.evaluate(fMeter.getSessionData());
-		
+		Performance.getDefault().assertPerformance(fMeter);
 	}
 
 	protected void setUp() throws Exception {
 		fMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "cold");
-		fEvaluator= Evaluator.getDefaultEvaluator();
 		EditorTestHelper.calmDown(1000, 10000, 100);
 	}
 	

@@ -50,8 +50,5 @@ public abstract class PerformanceMeter {
 	 */
 	public abstract void commit();
 
-	public abstract MeteringSession getSessionData();
-	
-	public abstract String getScenarioName();
-
+	protected abstract MeteringSession getSessionData();
 }

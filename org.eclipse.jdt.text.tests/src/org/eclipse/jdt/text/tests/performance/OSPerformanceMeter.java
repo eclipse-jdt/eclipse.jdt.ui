@@ -26,11 +26,9 @@ import org.eclipse.jdt.text.tests.performance.data.PerformanceFileParser;
 public class OSPerformanceMeter extends PerformanceMeter {
 
 	private IPerformanceMonitor fPerformanceMonitor;
-	private final String fScenario;
 	private String fLogFile;
 	
 	public OSPerformanceMeter(String scenario) {
-		fScenario= scenario;
 		fPerformanceMonitor= PerfMsrCorePlugin.getPerformanceMonitor(false);
 		fLogFile= getLogFile(scenario);
 		fPerformanceMonitor.setLogFile(fLogFile);
@@ -79,8 +77,4 @@ public class OSPerformanceMeter extends PerformanceMeter {
 		else
 			return null;
 	}
-
-	public String getScenarioName() {
-		return fScenario;
-	}	
 }

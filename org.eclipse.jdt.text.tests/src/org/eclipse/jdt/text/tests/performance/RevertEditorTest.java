@@ -33,12 +33,9 @@ public abstract class RevertEditorTest extends TestCase {
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 	private PerformanceMeter fPerformanceMeter;
-	private IEvaluator fEvaluator;
-	
 	
 	protected void setUp() throws Exception {
 		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		fEvaluator= Evaluator.getDefaultEvaluator();
 	}
 	
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
@@ -53,7 +50,7 @@ public abstract class RevertEditorTest extends TestCase {
 		}
 		
 		fPerformanceMeter.commit();
-		fEvaluator.evaluate(fPerformanceMeter.getSessionData());
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
 	
 	protected void tearDown() throws Exception {

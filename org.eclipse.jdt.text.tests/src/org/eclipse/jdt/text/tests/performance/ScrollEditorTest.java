@@ -79,7 +79,6 @@ public abstract class ScrollEditorTest extends TestCase {
 	protected IEditorPart fEditor;
 	private ScrollingMode fMode;
 	private boolean fPreloadEvents= false;
-	private IEvaluator fEvaluator;
 	
 	protected ScrollEditorTest() {
 		setScrollingMode(PAGE_WISE);
@@ -100,14 +99,9 @@ public abstract class ScrollEditorTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		fPerformanceMeter= createPerformanceMeter();
-		fEvaluator= createEvaluator();
 		EditorTestHelper.bringToTop();
 		fEditor= EditorTestHelper.openInEditor(getFile(), true);
 		EditorTestHelper.calmDown(3000, 10000, 100);
-	}
-
-	protected IEvaluator createEvaluator() {
-		return Evaluator.getDefaultEvaluator();
 	}
 
 	protected PerformanceMeter createPerformanceMeter() {
@@ -152,6 +146,6 @@ public abstract class ScrollEditorTest extends TestCase {
 			assertEquals(0, text.getTopIndex());
 		}
 		fPerformanceMeter.commit();
-		fEvaluator.evaluate(fPerformanceMeter.getSessionData());
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
 }

@@ -131,7 +131,7 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 		return new DataPoint(kind, scalars);
 	}
 
-	public String getScenarioName() {
+	private String getScenarioName() {
 		return fScenario;
 	}
 }

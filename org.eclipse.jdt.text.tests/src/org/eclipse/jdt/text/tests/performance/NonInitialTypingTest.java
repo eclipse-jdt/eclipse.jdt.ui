@@ -49,8 +49,6 @@ public class NonInitialTypingTest extends TestCase {
 
 	private KeyboardProbe fKeyboardProbe;
 
-	private IEvaluator fEvaluator;
-
 	protected void setUp() throws PartInitException, BadLocationException {
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -58,7 +56,6 @@ public class NonInitialTypingTest extends TestCase {
 		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
 		fMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		fEvaluator= Evaluator.getDefaultEvaluator();
 
 		int offset= getInsertPosition();
 		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
@@ -94,7 +91,7 @@ public class NonInitialTypingTest extends TestCase {
 		}
 		fMeter.stop();
 		fMeter.commit();
-		fEvaluator.evaluate(fMeter.getSessionData());
+		Performance.getDefault().assertPerformance(fMeter);
 	}
 
 	private synchronized void sleep(int time) {

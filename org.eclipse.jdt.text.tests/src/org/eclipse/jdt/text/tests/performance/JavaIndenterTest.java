@@ -43,15 +43,12 @@ public class JavaIndenterTest extends TestCase {
 
 	private ITextEditor fEditor;
 
-	private IEvaluator fEvaluator;
-
 	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 		
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
-		fEvaluator= Evaluator.getDefaultEvaluator();
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
 		SWTEventHelper.pressKeyCodeCombination(SWTEventHelper.getActiveDisplay(), CTRL_END);
@@ -87,7 +84,7 @@ public class JavaIndenterTest extends TestCase {
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
 		fPerformanceMeter.commit();
-		fEvaluator.evaluate(fPerformanceMeter.getSessionData());
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
 
 	private void runAction(IAction action) {
