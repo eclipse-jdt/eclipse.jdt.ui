@@ -61,8 +61,8 @@ public class DialogsTest2 extends TestCase {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.setTitle("Title"); //$NON-NLS-1$
+		dialog.setMessage("Select the elements"); //$NON-NLS-1$
 		
 		dialog.setInput(jproject.getJavaModel());
 		dialog.setInitialSelection(initSelection);
