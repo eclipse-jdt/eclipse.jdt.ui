@@ -26,10 +26,14 @@ import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 
@@ -87,8 +91,23 @@ public class JavaProjectHelper {
 	 * Removes a IJavaProject.
 	 */		
 	public static void delete(IJavaProject jproject) throws CoreException {
+		performDummySearch();
 		jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
 		jproject.getProject().delete(true, true, null);
+	}
+
+	public static void performDummySearch() throws JavaModelException {
+		new SearchEngine().searchAllTypeNames(
+		 	ResourcesPlugin.getWorkspace(),
+			null,
+			null,
+			IJavaSearchConstants.EXACT_MATCH,
+			IJavaSearchConstants.CASE_SENSITIVE,
+			IJavaSearchConstants.CLASS,
+			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
+			new Requestor(),
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
 	}
 
 
@@ -313,6 +332,14 @@ public class JavaProjectHelper {
 		}	
 	}		
 	
+	private static class Requestor implements ITypeNameRequestor{
+		
+		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
+
+		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
+	}
 	
 }
 
