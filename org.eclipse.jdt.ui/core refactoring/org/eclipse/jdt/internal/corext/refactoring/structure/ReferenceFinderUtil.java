@@ -1,7 +1,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,7 +29,7 @@ public class ReferenceFinderUtil {
 	
 	public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getTypeReferencesIn(elements, pm);
-		List referencedTypes= extractElements(results, IJavaElement.TYPE);
+		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
 		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
 	}
 	
@@ -51,7 +53,7 @@ public class ReferenceFinderUtil {
 	
 	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getFieldReferencesIn(elements, pm);
-		List referencedFields= extractElements(results, IJavaElement.FIELD);
+		Set referencedFields= extractElements(results, IJavaElement.FIELD);
 		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
 	}
 
@@ -75,7 +77,7 @@ public class ReferenceFinderUtil {
 	
 	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getMethodReferencesIn(elements, pm);
-		List referencedMethods= extractElements(results, IJavaElement.METHOD);
+		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
 	
@@ -97,8 +99,8 @@ public class ReferenceFinderUtil {
 	
 
 	/// private helpers 	
-	private static List extractElements(SearchResult[] searchResults, int elementType){
-		List elements= new ArrayList();
+	private static Set extractElements(SearchResult[] searchResults, int elementType){
+		Set elements= new HashSet();
 		for (int i= 0; i < searchResults.length; i++) {
 			IJavaElement el= searchResults[i].getEnclosingElement();
 			if (el.exists() && el.getElementType() == elementType)
