@@ -188,7 +188,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			while(true) {
 				ISourceReference ref= (ISourceReference)result;
 				IRegion sRange= new Region(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
-				if (result.getParent() == null || edit.coveredBy(sRange))
+				if (result.getElementType() == IJavaElement.COMPILATION_UNIT || result.getParent() == null || edit.coveredBy(sRange))
 					break;
 				result= result.getParent();
 			}
