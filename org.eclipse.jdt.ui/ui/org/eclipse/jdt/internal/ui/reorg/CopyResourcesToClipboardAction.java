@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
-public class CopyResourcesToClipboardAction extends Action implements IRefactoringAction {
+class CopyResourcesToClipboardAction extends Action implements IRefactoringAction {
 	
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
 	private final StructuredSelectionProvider fProvider;
@@ -43,7 +43,7 @@ public class CopyResourcesToClipboardAction extends Action implements IRefactori
 	}
 
 	public void update() {
-		setEnabled(canEnableOn(getStructuredSelection()));
+		setEnabled(canOperateOn(getStructuredSelection()));
 	}
 
 	public void run() {
@@ -64,7 +64,7 @@ public class CopyResourcesToClipboardAction extends Action implements IRefactori
 					TextTransfer.getInstance()});
 	}
 	
-	private static boolean canEnableOn(IStructuredSelection selection){
+	public static boolean canOperateOn(IStructuredSelection selection){
 		if (StructuredSelectionUtil.hasNonResources(selection)) 
 			return false;
 		
