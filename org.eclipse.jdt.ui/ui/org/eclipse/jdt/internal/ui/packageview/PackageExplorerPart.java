@@ -1797,7 +1797,9 @@ public class PackageExplorerPart extends ViewPart
 		}
 		ISelection selection= fViewer.getSelection();
 		Object input= fViewer.getInput();
-		boolean isRootInputChange= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(input) || (fWorkingSetModel != null && fWorkingSetModel.equals(input));
+		boolean isRootInputChange= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(input) 
+			|| (fWorkingSetModel != null && fWorkingSetModel.equals(input))
+			|| input instanceof IWorkingSet;
 		try {
 			fViewer.getControl().setRedraw(false);
 			if (isRootInputChange) {
