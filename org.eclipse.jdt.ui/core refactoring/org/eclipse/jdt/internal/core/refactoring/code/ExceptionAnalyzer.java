@@ -106,9 +106,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void visit(TryStatement statement, BlockScope scope, int mode) {
-		if (skipNode(mode))
-			return;
-			
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
 	}
@@ -143,11 +140,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	}
 	
 	public void endVisit(TryStatement statement, BlockScope scope, int mode) {
-		if (skipNode(mode))
-			return;
-			
-		List current= fCurrentExceptions;
-		fCurrentExceptions= (List)fTryStack.pop();
+		List current= (List)fTryStack.pop();
+		fCurrentExceptions= (List)fTryStack.peek();
 		for (Iterator iter= current.iterator(); iter.hasNext();) {
 			Object exception= iter.next();
 			if (!fCurrentExceptions.contains(exception)) {
