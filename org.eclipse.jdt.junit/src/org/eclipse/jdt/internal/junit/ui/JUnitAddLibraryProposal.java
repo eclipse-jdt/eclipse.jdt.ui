@@ -39,7 +39,7 @@ final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	public void apply(IDocument document) {   
 		IJavaProject project= fContext.getCompilationUnit().getJavaProject();
 		try {
-			NewTestCaseCreationWizardPage.addJUnitToBuildPath(project);
+			NewTestCaseCreationWizardPage.addJUnitToBuildPath(JUnitPlugin.getActiveWorkbenchShell(), project);
 			// force a reconcile
 			int offset= fContext.getSelectionOffset();
 			int length= fContext.getSelectionLength();
