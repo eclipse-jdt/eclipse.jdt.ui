@@ -55,6 +55,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -808,10 +809,18 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	 */
 	public void saveDocument(IProgressMonitor monitor, Object element, IDocument ignore, boolean overwrite) throws CoreException {
 		
-		FileInfo fileInfo= getFileInfo(element);		
+		FileInfo fileInfo= getFileInfo(element);
+		
 		if (fileInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
-			
+
+			// Workaround for bug 41583: [misc] Eclipse cannot save or compile files in non-Java project anymore
+			IJavaProject jProject= info.fCopy.getJavaProject();
+			if (jProject == null || !jProject.getProject().hasNature(JavaCore.NATURE_ID)) {
+				super.saveDocument(monitor, element, ignore, overwrite);
+				return;
+			}
+
 			synchronized (info.fCopy) {
 				info.fCopy.reconcile();
 			}
@@ -831,7 +840,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			try {
 				
 				fIsAboutToSave= true;
-				
+
 				// commit working copy
 				if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
 					info.fCopy.commitWorkingCopy(overwrite, monitor);
@@ -840,7 +849,6 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					// next call required as commiting working copies changed to no longer walk through the right buffer
 					saveDocumentContent(monitor, element, ignore, overwrite);
 				}
-					
 					
 			} catch (CoreException x) {
 				// inform about the failure

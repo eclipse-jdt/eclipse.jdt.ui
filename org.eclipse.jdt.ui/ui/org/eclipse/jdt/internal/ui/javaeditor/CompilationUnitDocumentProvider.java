@@ -52,8 +52,9 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
+
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.IAnnotationExtension;
@@ -62,6 +63,7 @@ import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -848,7 +850,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		ElementInfo elementInfo= getElementInfo(element);		
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			
+
+			// Workaround for bug 41583: [misc] Eclipse cannot save or compile files in non-Java project anymore
+			IJavaProject jProject= info.fCopy.getJavaProject();
+			if (jProject == null || !jProject.getProject().hasNature(JavaCore.NATURE_ID)) {
+				super.doSaveDocument(monitor, element, document, overwrite);
+				return;
+			}
+
 			synchronized (info.fCopy) {
 				info.fCopy.reconcile();
 			}
