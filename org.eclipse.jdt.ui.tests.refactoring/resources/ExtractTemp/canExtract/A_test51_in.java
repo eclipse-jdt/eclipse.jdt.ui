@@ -1,5 +1,5 @@
 package p;
-public class A{
+class A{
 	void f(boolean flag){
 		if (flag){
 			f(3+5==8); 
