@@ -97,9 +97,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 */
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
-		String helpId= IJavaHelpContextIds.INLINE_TEMP_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
-		RefactoringWizard result= new InlineTempWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
+		RefactoringWizard result= new InlineTempWizard((InlineTempRefactoring)refactoring);
 		result.setExpandFirstNode(true);
 		return result;
 	}

@@ -18,12 +18,14 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 public class InlineTempWizard extends RefactoringWizard {
 
-	public InlineTempWizard(InlineTempRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public InlineTempWizard(InlineTempRefactoring ref) {
+		super(ref, "Inline Local Variable", IJavaHelpContextIds.INLINE_TEMP_ERROR_WIZARD_PAGE);
 	}
 
 	protected void addUserInputPages() {
