@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -653,4 +654,33 @@ public class JavaModelUtil {
 			pm.done();
 		}	
 	}
+	
+	
+	public static boolean isExcludedPath(IPath resourcePath, IPath[] exclusionPatterns) {
+		char[] path = resourcePath.toString().toCharArray();
+		for (int i = 0, length = exclusionPatterns.length; i < length; i++) {
+			char[] pattern= exclusionPatterns[i].toString().toCharArray();
+			if (CharOperation.pathMatch(pattern, path, true, '/')) {
+				return true;
+			}
+		}
+		return false;	
+	}
+
+
+	/*
+	 * Returns whether the given resource path matches one of the exclusion
+	 * patterns.
+	 * 
+	 * @see IClasspathEntry#getExclusionPatterns
+	 */
+	public final static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
+		if (exclusionPatterns == null) return false;
+		char[] path = resourcePath.toString().toCharArray();
+		for (int i = 0, length = exclusionPatterns.length; i < length; i++)
+			if (CharOperation.pathMatch(exclusionPatterns[i], path, true, '/'))
+				return true;
+		return false;
+	}	
+	
 }
