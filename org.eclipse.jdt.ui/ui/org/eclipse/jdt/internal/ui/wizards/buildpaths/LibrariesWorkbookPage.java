@@ -410,10 +410,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String res= dialog.open();
 		if (res != null) {
 			String[] fileNames= dialog.getFileNames();
-			String[] filterNames= dialog.getFilterNames();
+			String filterPath= dialog.getFilterPath();
 			IPath[] paths= new IPath[fileNames.length];
 			for (int i= 0; i < paths.length; i++) {
-				paths[i]= new Path(filterNames[i]).append(fileNames[i]);
+				paths[i]= new Path(filterPath).append(fileNames[i]);
 			}
 			return paths;
 		}
