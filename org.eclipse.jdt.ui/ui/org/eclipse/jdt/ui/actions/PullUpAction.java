@@ -153,8 +153,8 @@ public class PullUpAction extends SelectionDispatchAction{
 		}
 	}
 
-	private PullUpRefactoring createNewRefactoringInstance(Object[] obj){
-		return new PullUpRefactoring(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
+	private PullUpRefactoring createNewRefactoringInstance(Object[] obj) throws JavaModelException{
+		return PullUpRefactoring.create(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private IMember[] convertToMemberArray(Object[] obj) {
@@ -166,7 +166,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	private boolean shouldAcceptElements(Object[] elements) {
 		try{
 			fRefactoring= createNewRefactoringInstance(elements);
-			return fRefactoring.checkPreactivation().isOK();
+			return fRefactoring != null;
 		} catch (JavaModelException e){
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

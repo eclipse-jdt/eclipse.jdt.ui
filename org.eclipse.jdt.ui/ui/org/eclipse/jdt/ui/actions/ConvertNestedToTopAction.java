@@ -155,8 +155,8 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		if (type == null)
 			return false;
 		try{
-			fRefactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings());
-			return fRefactoring.checkPreactivation().isOK();
+			fRefactoring= MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings());
+			return fRefactoring != null;
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

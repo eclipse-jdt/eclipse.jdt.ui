@@ -130,7 +130,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}
 	
 	private static Refactoring createNewRefactoringInstance(ICompilationUnit cu) {
-		return new NLSRefactoring(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+		return NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
 	/* package */ static void openExternalizeStringsWizard(ICompilationUnit unit) throws JavaModelException {
@@ -138,6 +138,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return;
 		
 		Refactoring refactoring= createNewRefactoringInstance(unit);
+		if (refactoring == null)
+			return;
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 		new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), true); 
 	}	

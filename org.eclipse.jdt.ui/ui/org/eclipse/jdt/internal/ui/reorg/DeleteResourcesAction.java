@@ -59,15 +59,17 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 			return;
 		}	
 
-		DeleteRefactoring refactoring= new DeleteRefactoring(selection.toList(), createRootManipulationQuery());
+		DeleteRefactoring refactoring= DeleteRefactoring.create(selection.toList(), createRootManipulationQuery());
+		if (refactoring == null)
+			return;
 
 		try{
 					
-		if (!confirmDelete(selection))
-			return;
-
-		if (hasReadOnlyResources(selection) && !isOkToDeleteReadOnly()) 
-			return;
+			if (!confirmDelete(selection))
+				return;
+	
+			if (hasReadOnlyResources(selection) && !isOkToDeleteReadOnly()) 
+				return;
 
 			if (! confirmDeleteSourceFolderAsSubresource(selection))	
 				return;
@@ -150,8 +152,10 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	protected void selectionChanged(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			setEnabled(false);
-		else	
-			setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList(), null)));
+		else{
+			DeleteRefactoring ref= DeleteRefactoring.create(selection.toList(), null);
+			setEnabled(ref != null && ClipboardActionUtil.canActivate(ref));
+		}
 	}
 	
 	private static boolean confirmDelete(IStructuredSelection selection) throws JavaModelException {

@@ -43,11 +43,11 @@ public class RenameTempAction extends SelectionDispatchAction {
 		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}
 	
-	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return new RenameTempRefactoring(cunit, selection.getOffset(), selection.getLength());
+	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+		return RenameTempRefactoring.create(cunit, selection.getOffset(), selection.getLength());
 	}
 	
-	protected RefactoringWizard createWizard(Refactoring refactoring) {
+	private RefactoringWizard createWizard(Refactoring refactoring) {
 		String message= RefactoringMessages.getString("RenameTempAction.choose_new_name"); //$NON-NLS-1$
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
@@ -65,6 +65,8 @@ public class RenameTempAction extends SelectionDispatchAction {
 		if (getCompilationUnit() == null)
 			return false;	
 		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
+		if (renameTempRefactoring == null)
+			return false;
 		try {
 			return (renameTempRefactoring.checkActivation(new NullProgressMonitor()).isOK());
 		} catch(JavaModelException e) {
@@ -79,6 +81,8 @@ public class RenameTempAction extends SelectionDispatchAction {
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;
 			Refactoring refactoring= createRefactoring(input, selection);
+			if (refactoring == null)
+				return;		
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$

@@ -126,17 +126,17 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
-	private MoveStaticMembersRefactoring createNewRefactoringInstance(Object[] elements){
+	private MoveStaticMembersRefactoring createNewRefactoringInstance(Object[] elements) throws JavaModelException{
 		Set memberSet= new HashSet();
 		memberSet.addAll(Arrays.asList(elements));
 		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-		return new MoveStaticMembersRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
+		return MoveStaticMembersRefactoring.create(methods, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private boolean shouldAcceptElements(Object[] elements) {
 		try{
 			fRefactoring= createNewRefactoringInstance(elements);
-			return fRefactoring.checkPreactivation().isOK();
+			return fRefactoring != null;
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

@@ -235,7 +235,10 @@ public class LocalCorrectionsSubProcessor {
 		}
 			
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
+		if (refactoring == null)
+			return;
+		
 		refactoring.setSaveChanges(false);
 		if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
@@ -361,7 +364,9 @@ public class LocalCorrectionsSubProcessor {
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
 			public void apply(IDocument document) {
 				try {
-					NLSRefactoring refactoring= new NLSRefactoring(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+					NLSRefactoring refactoring= NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+					if (refactoring == null)
+						return;
 					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 					String dialogTitle= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.dialog.title"); //$NON-NLS-1$
 					new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), dialogTitle, true);

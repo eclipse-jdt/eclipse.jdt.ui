@@ -58,10 +58,14 @@ public class DeleteRefactoring extends Refactoring {
 	private boolean fCheckIfUsed;
 	private final IPackageFragmentRootManipulationQuery fRootManipulationQuery;
 	
-	public DeleteRefactoring(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
+	private DeleteRefactoring(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
 		Assert.isNotNull(elements);
 		fElements= convertToInputElements(elements);
 		fRootManipulationQuery= rootManipulationQuery;
+	}
+	
+	public static DeleteRefactoring create(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
+		return new DeleteRefactoring(elements, rootManipulationQuery);
 	}
 	
 	private static List convertToInputElements(List elements){

@@ -152,8 +152,8 @@ public class PushDownAction extends SelectionDispatchAction{
 		}
 	}
 
-	private PushDownRefactoring createNewRefactoringInstance(Object[] obj){
-		return new PushDownRefactoring(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
+	private PushDownRefactoring createNewRefactoringInstance(Object[] obj) throws JavaModelException{
+		return PushDownRefactoring.create(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private IMember[] convertToMemberArray(Object[] obj) {
@@ -165,7 +165,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	private boolean shouldAcceptElements(Object[] elements) {
 		try{
 			fRefactoring= createNewRefactoringInstance(elements);
-			return fRefactoring.checkPreactivation().isOK();
+			return fRefactoring != null;
 		} catch (JavaModelException e){
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

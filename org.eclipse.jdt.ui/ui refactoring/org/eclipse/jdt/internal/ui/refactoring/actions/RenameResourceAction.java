@@ -46,10 +46,10 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
-		IRefactoringRenameSupport support= new RefactoringSupport.Resource(element);
-		if (! canRename(support, element))
-			return;
 		try{
+			IRefactoringRenameSupport support= new RefactoringSupport.Resource(element);
+			if (! canRename(support, element))
+				return;
 			support.rename(getShell(), element);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
@@ -57,11 +57,18 @@ public class RenameResourceAction extends SelectionDispatchAction {
 	}
 	
 	protected void selectionChanged(IStructuredSelection selection) {
-		IResource element= getResource(selection);
-		if (element == null)
+		try {
+			IResource element= getResource(selection);
+			if (element == null)
+				setEnabled(false);
+			else
+				setEnabled(canRename(element) );
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			setEnabled(false);
-		else
-			setEnabled(canRename(element) );
+		}
 	}
 
 	private static IResource getResource(IStructuredSelection selection) {
@@ -73,7 +80,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		return (IResource)first;
 	}
 
-	private static boolean canRename(IResource element) {
+	private static boolean canRename(IResource element) throws JavaModelException {
 		return canRename(new RefactoringSupport.Resource(element), element);	
 	}
 

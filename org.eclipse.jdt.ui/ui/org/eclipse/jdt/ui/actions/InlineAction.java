@@ -116,8 +116,8 @@ public class InlineAction extends SelectionDispatchAction {
 	}
 	
 	private boolean tryInlineTemp(ICompilationUnit cu, ITextSelection selection){
-		InlineTempRefactoring inlineTemp= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
-		if (inlineTemp.checkIfTempSelectedSelected().hasFatalError())
+		InlineTempRefactoring inlineTemp= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		if (inlineTemp == null)
 			return false;
 		fInlineTemp.run(selection);
 		return true;
@@ -137,7 +137,7 @@ public class InlineAction extends SelectionDispatchAction {
 		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(
 			cu, selection.getOffset(), selection.getLength(),
 			JavaPreferencesSettings.getCodeGenerationSettings());
-		if (inlineConstantRef == null || inlineConstantRef.checkStaticFinalConstantNameSelected().hasFatalError())	
+		if (inlineConstantRef == null)	
 			return false;
 		fInlineConstant.run(selection);
 		return true;

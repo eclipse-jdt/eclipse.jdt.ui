@@ -139,8 +139,9 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 		
 		try  {	
-			SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, JavaPreferencesSettings.getCodeGenerationSettings());
-		
+			SelfEncapsulateFieldRefactoring refactoring= createRefactoring(field);
+			if (refactoring == null)
+				return;
 			new RefactoringStarter().activate(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring), getShell(), getDialogTitle(), true);
@@ -148,6 +149,10 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getDialogTitle(),
 				ActionMessages.getString("SelfEncapsulateFieldAction.dialog.cannot_perform")); //$NON-NLS-1$
 		}
+	}
+
+	private SelfEncapsulateFieldRefactoring createRefactoring(IField field) throws JavaModelException {
+		return SelfEncapsulateFieldRefactoring.create(field, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 		
 	private String getDialogTitle() {

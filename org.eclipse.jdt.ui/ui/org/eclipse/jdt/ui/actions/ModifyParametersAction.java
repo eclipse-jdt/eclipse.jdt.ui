@@ -153,8 +153,8 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	
 	private boolean shouldAcceptElement(IMethod method) {
 		try{
-			fRefactoring= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
-			return fRefactoring.checkPreactivation().isOK();
+			fRefactoring= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+			return fRefactoring != null;
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

@@ -78,6 +78,8 @@ public class InlineTempAction extends SelectionDispatchAction {
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;
 			Refactoring refactoring= createRefactoring(input, selection);
+			if (refactoring == null)
+				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
@@ -88,7 +90,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 */
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return new InlineTempRefactoring(cunit, selection.getOffset(), selection.getLength());
+		return InlineTempRefactoring.create(cunit, selection.getOffset(), selection.getLength());
 	}
 
 	/**

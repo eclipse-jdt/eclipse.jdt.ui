@@ -154,8 +154,8 @@ public class MoveAction extends SelectionDispatchAction{
 			if (!(element instanceof IMember))
 				return false;
 
-			MoveStaticMembersRefactoring refactoring= new MoveStaticMembersRefactoring(new IMember[]{(IMember)element}, JavaPreferencesSettings.getCodeGenerationSettings());
-			if (! refactoring.checkPreactivation().isOK())
+			MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(new IMember[]{(IMember)element}, JavaPreferencesSettings.getCodeGenerationSettings());
+			if (refactoring == null)
 				return false;
 			fMoveStaticMembersAction.run(selection);
 			return true;			
@@ -168,19 +168,13 @@ public class MoveAction extends SelectionDispatchAction{
 	}
 	
 	private boolean tryMoveInstanceMethod(ITextSelection selection) {
-		try {
 			MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(
 				getCompilationUnitForTextSelection(), selection.getOffset(), selection.getLength(),
 				JavaPreferencesSettings.getCodeGenerationSettings());
 			if (refactoring == null)
 				return false;
-			if (refactoring.checkActivation(new NullProgressMonitor()).hasFatalError())
-				return false;
 			fMoveInstanceMethodAction.run(selection);	
 			return true;
-		} catch (JavaModelException e) {
-			return false;
-		}
 	}
 
 	private ICompilationUnit getCompilationUnitForTextSelection() {

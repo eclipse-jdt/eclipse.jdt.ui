@@ -58,7 +58,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return new ExtractConstantRefactoring(cunit, selection.getOffset(), selection.getLength(), 
+		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
 																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
@@ -76,6 +76,8 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 			return;
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			if (refactoring == null)
+				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$

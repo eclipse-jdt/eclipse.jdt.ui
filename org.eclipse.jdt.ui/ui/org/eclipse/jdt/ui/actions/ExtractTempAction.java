@@ -59,7 +59,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return new ExtractTempRefactoring(cunit, selection.getOffset(), selection.getLength(), 
+		return ExtractTempRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
 																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
@@ -77,6 +77,8 @@ public class ExtractTempAction extends SelectionDispatchAction {
 			return;
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			if (refactoring == null)
+				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
