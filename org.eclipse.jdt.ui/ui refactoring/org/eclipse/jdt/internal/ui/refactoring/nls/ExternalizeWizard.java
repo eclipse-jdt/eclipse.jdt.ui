@@ -5,7 +5,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.nls.model.NLSRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.NewPreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 

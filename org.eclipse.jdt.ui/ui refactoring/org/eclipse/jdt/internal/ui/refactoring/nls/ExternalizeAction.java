@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.nls.model.NLSRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.nls.search.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 

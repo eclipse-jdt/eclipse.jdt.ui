@@ -5,8 +5,8 @@
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.internal.core.nls.model.NLSHolder;
-import org.eclipse.jdt.internal.core.nls.model.NLSLine;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSHolder;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSLine;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 

@@ -4,7 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-import org.eclipse.jdt.internal.ui.nls.OrderedMap;
+import org.eclipse.jdt.internal.ui.refactoring.nls.OrderedMap;
 
 public class OrderedMapTester extends TestCase {
 

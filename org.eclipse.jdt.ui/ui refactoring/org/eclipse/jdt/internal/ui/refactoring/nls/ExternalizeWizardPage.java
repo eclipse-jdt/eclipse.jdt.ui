@@ -57,8 +57,8 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
-import org.eclipse.jdt.internal.core.nls.model.NLSRefactoring;
-import org.eclipse.jdt.internal.core.nls.model.NLSSubstitution;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
