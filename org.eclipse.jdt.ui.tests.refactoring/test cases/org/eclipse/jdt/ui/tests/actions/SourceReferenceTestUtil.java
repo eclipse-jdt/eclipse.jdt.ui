@@ -22,6 +22,9 @@ class SourceReferenceTestUtil {
 			protected boolean isOkToDeleteCus(ICompilationUnit[] cusToDelete) {
 				return false;
 			}
+			protected boolean confirmDelete() {
+				return true;
+			}
 		};
 		return deleteAction;
 	}
