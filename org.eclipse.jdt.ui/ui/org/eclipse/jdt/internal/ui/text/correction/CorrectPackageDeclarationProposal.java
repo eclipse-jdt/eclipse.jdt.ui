@@ -79,7 +79,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 				return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.add.description",  parentPack.getElementName())); //$NON-NLS-1$
 			}
 		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.change.description", parentPack.getElementName())); //$NON-NLS-1$
 	}

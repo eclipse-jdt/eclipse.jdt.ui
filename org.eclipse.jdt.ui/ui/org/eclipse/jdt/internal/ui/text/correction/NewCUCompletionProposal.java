@@ -50,7 +50,7 @@ public class NewCUCompletionProposal extends ChangeCorrectionProposal {
 		} catch (PartInitException e) {
 			JavaPlugin.log(e);
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 	}
 }

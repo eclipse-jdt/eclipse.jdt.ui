@@ -271,7 +271,7 @@ public class JavaContext extends CompilationUnitContext {
 				return localCollections[localCollections.length - 1].name;
 
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 
 		return null;

@@ -72,7 +72,7 @@ public class AddMethodStubAction extends Action {
 						setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailed.override", parentType.getElementName())); //$NON-NLS-1$
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 				}
 			} else {
 				setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$

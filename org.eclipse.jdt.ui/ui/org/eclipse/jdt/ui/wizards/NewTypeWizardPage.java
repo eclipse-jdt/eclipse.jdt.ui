@@ -335,7 +335,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 				// ignore this exception now
 			}
 		}			
@@ -826,7 +826,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						}
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 					// let pass			
 				}
 			}
@@ -1079,7 +1079,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						}
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 					// let pass, checking is an extra
 				}					
 			}				
@@ -1112,7 +1112,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				packages= froot.getChildren();
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		if (packages == null) {
 			packages= new IJavaElement[0];
@@ -1439,7 +1439,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				return JavaContext.evaluateTemplate(templates[0], parentCU, pos);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return null;
 	}	

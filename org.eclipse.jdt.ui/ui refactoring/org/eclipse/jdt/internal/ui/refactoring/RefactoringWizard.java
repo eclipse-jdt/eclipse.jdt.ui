@@ -429,7 +429,6 @@ public class RefactoringWizard extends Wizard {
 			JavaPlugin.log(exception);
 			status= new RefactoringStatus();
 			status.addFatalError(RefactoringMessages.getString("RefactoringWizard.internal_error_1")); //$NON-NLS-1$
-			JavaPlugin.log(exception);
 		} else {
 			status= op.getStatus();
 		}

@@ -422,7 +422,7 @@ public class JavadocOptionsManager {
 
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		
@@ -667,7 +667,7 @@ public class JavadocOptionsManager {
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		} finally {
 			if (objectStreamOutput != null) {
 				try { objectStreamOutput.close(); } catch (IOException e) {}
@@ -908,7 +908,7 @@ public class JavadocOptionsManager {
 					}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		IJavaProject project= je.getJavaProject();
 		if (getValidProject(project))
@@ -928,7 +928,7 @@ public class JavadocOptionsManager {
 				}
 
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		return false;

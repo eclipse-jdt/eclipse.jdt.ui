@@ -74,7 +74,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			try {
 				fIsProblemMarker= marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 			} catch(CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 			super.initialize();
 		

@@ -35,7 +35,7 @@ public class PullUpWizard extends RefactoringWizard {
 				setChangeCreationCancelable(false);
 		} catch (JavaModelException e){
 			//log and try anyway
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			addPage(new PullUpInputPage()); 
 		}		
 	}

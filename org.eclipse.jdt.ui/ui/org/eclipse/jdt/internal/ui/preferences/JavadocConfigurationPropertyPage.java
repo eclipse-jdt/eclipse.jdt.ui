@@ -85,7 +85,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 					}
 				}
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		return elem;

@@ -156,7 +156,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 				results= evaluator.computeProposals();
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 
 		if (fTemplateEngine != null) {

@@ -88,7 +88,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try{	
 			return refactoringSupport.canRename(element);
 		} catch (JavaModelException e){
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			return false;
 		}	
 	}

@@ -85,7 +85,7 @@ public class JavaTextViewer extends Viewer {
 			try {
 				return JavaCompareUtilities.readString(sca.getContents());
 			} catch (CoreException ex) {
-				JavaPlugin.log(ex);
+				JavaPlugin.logIgnoringNotPresentException(ex);
 			}
 		}
 		return ""; //$NON-NLS-1$

@@ -353,8 +353,7 @@ public class EditTemplateDialog extends StatusDialog {
 			    try {
 					fTranslator.translate(event.getDocumentEvent().getDocument().get());
 			    } catch (CoreException e) {
-			     	JavaPlugin.log(e);
-			     	// XXX dialog   
+			     	JavaPlugin.logIgnoringNotPresentException(e);
 			    }
 				
 				updateUndoAction();

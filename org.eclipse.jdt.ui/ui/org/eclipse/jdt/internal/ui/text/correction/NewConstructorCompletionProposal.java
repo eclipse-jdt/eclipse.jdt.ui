@@ -196,7 +196,7 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 		} catch (PartInitException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}		
 	}
 

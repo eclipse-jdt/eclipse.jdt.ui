@@ -79,7 +79,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}

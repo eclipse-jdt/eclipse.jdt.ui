@@ -239,7 +239,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 							}
 						}
 					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+						JavaPlugin.logIgnoringNotPresentException(e);
 					}
 				} else {
 					processChildrenDelta(delta, changedTypes);
@@ -251,7 +251,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 						IType type= ((IClassFile) element).getType();
 						processTypeDelta(type, changedTypes);
 					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+						JavaPlugin.logIgnoringNotPresentException(e);
 					}
 				} else {
 					processChildrenDelta(delta, changedTypes);

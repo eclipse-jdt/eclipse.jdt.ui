@@ -121,7 +121,7 @@ public class JavadocConfigurationBlock {
 				if (fJavaDocLocation != null)
 					initialValue = fJavaDocLocation.toExternalForm();
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		fJavaDocField.setText(initialValue);

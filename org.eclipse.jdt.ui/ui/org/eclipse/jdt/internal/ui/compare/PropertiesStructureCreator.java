@@ -111,7 +111,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			try {
 				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input).getContents());
 			} catch(CoreException ex) {
-				JavaPlugin.log(ex);
+				JavaPlugin.logIgnoringNotPresentException(ex);
 			}
 		}
 			
@@ -169,7 +169,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			try {
 				return JavaCompareUtilities.readString(sca.getContents());
 			} catch (CoreException ex) {
-				JavaPlugin.log(ex);
+				JavaPlugin.logIgnoringNotPresentException(ex);
 			}
 		}
 		return null;

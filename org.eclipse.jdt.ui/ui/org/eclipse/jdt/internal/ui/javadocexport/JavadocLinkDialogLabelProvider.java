@@ -34,7 +34,7 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		return text;

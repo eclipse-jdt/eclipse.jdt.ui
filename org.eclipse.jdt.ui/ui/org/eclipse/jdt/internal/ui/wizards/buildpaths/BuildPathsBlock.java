@@ -290,7 +290,7 @@ public class BuildPathsBlock {
 				newClassPath= getExistingEntries(classpathEntries);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		if (newClassPath == null) {
 			newClassPath= getDefaultClassPath(jproject);
@@ -572,7 +572,7 @@ public class BuildPathsBlock {
 					}
 				}
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 				

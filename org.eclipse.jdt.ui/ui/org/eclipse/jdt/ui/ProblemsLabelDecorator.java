@@ -155,7 +155,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return 0;
 	}

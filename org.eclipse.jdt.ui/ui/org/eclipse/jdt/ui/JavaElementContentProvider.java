@@ -66,7 +66,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		try {
 			processDelta(event.getDelta());
 		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 	}
 	

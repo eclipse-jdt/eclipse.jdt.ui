@@ -239,7 +239,7 @@ public class OpenTypeHierarchyUtil {
 				default:
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return null;	
 	}	

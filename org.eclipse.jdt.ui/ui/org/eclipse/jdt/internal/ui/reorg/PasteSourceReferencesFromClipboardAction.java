@@ -88,7 +88,7 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 			
 			return canPaste((ISourceReference)selected, getContentsToPaste());
 		} catch (JavaModelException e){
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			return false;
 		}		
 	}

@@ -105,7 +105,7 @@ public class PullUpAction extends SelectionDispatchAction{
 			fRefactoring= createNewRefactoringInstance(elements);
 			return fRefactoring.checkPreactivation().isOK();
 		} catch (JavaModelException e){
-			JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+			JavaPlugin.logIgnoringNotPresentException(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
 		}	
 	}

@@ -313,7 +313,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						return;
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 					return;
 				}
 			}
@@ -405,7 +405,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 				clearInput();
 				return;
 			}
@@ -1012,7 +1012,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				EditorUtility.revealInEditor(editorPart, (IJavaElement) elem);
 				getSite().getPage().addPartListener(fPartListener);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 	}

@@ -189,7 +189,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		try {
 			setTreeChecked(fStore.getSelectedElements(), fStore.getJavaProject());
 		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		
 		fInputGroup.aboutToOpen();
@@ -435,7 +435,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return buf.toString();
 	}
@@ -459,7 +459,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				nAdded++;
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		} 
 		return buf.toString();
 	}

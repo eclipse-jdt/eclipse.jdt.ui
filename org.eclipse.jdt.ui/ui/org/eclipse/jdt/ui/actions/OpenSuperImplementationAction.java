@@ -183,7 +183,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return null;
 	}

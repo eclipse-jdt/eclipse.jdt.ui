@@ -266,7 +266,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				try {
 					url= JavaDocLocations.getJavadocBaseLocation(element);
 				} catch(JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 					continue;
 				}
 				StringTokenizer tokenizer = new  StringTokenizer(hrefs, ";"); //$NON-NLS-1$
@@ -404,7 +404,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				IJavaElement element = (IJavaElement) iterator.next();
 				url = JavaDocLocations.getJavadocBaseLocation(element);
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 				continue;
 			}
 			if (url != null) {
@@ -448,7 +448,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				checkListDialogFieldElements(referencedClasses);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 	}
 	

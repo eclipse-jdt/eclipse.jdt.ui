@@ -160,7 +160,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			if (!executeJavadocGeneration(args))
 				return false;
 		} catch(CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			return false;
 		}
 		
@@ -197,7 +197,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
 				} catch (CoreException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 				}
 
 				return true;
@@ -220,7 +220,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					resources.add(elements[i].getCorrespondingResource());
 				}
 			} catch(JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		
@@ -378,7 +378,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			try {
 				fRoot.refreshLocal(fJTWPage.fRoot.DEPTH_INFINITE, null);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 	}

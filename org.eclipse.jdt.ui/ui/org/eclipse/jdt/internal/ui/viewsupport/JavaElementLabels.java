@@ -400,7 +400,7 @@ public class JavaElementLabels {
 			}			
 			
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e); // NotExistsException will not reach this point
+			JavaPlugin.logIgnoringNotPresentException(e); // NotExistsException will not reach this point
 		}
 	}
 	
@@ -433,7 +433,7 @@ public class JavaElementLabels {
 			}
 			
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e); // NotExistsException will not reach this point
+			JavaPlugin.logIgnoringNotPresentException(e); // NotExistsException will not reach this point
 		}			
 	}
 
@@ -592,7 +592,7 @@ public class JavaElementLabels {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e); // problems with class path
+				JavaPlugin.logIgnoringNotPresentException(e); // problems with class path
 			}
 		}
 		if (root.isExternal()) {

@@ -94,7 +94,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		try {
 			setEnabled(getResource(selection) != null); 
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			setEnabled(false);
 		}
 	}
@@ -112,7 +112,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		} catch(JavaModelException e) {
 			// This shouldn't happen. If we can't convert the selection the
 			// action is disabled.
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 	}
 	
@@ -125,7 +125,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			// This shouldn't happen. If we can't convert the selection the
 			// action is disabled.
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 	}
 	

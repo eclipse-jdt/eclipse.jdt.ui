@@ -40,6 +40,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -151,6 +152,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 		MultiStatus multi= new MultiStatus(getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, null);
 		multi.add(status);
 		log(multi);
+	}
+	
+	public static void logIgnoringNotPresentException(Throwable e) {
+		if (e instanceof JavaModelException && ((JavaModelException)e).isDoesNotExist())
+			return;
+		log(e);
 	}
 	
 	public static void log(Throwable e) {

@@ -115,7 +115,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		try {
 			return proj.hasNature(JavaCore.NATURE_ID);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		}
 		return false;
 	}	

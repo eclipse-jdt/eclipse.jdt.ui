@@ -50,7 +50,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 				selectAndReveal(resource);
 				openResource(resource);
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 				// let pass, only reveal and open will fail
 			}
 			return true;

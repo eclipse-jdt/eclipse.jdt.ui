@@ -367,7 +367,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 			else
 				return null;	
 		} catch (JavaModelException e){
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			return null;
 		}		
 	}

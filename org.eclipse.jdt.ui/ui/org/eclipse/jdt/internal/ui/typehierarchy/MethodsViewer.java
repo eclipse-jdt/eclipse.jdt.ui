@@ -223,7 +223,7 @@ public class MethodsViewer extends ProblemTableViewer {
 					newSelection= new StructuredSelection(currElements[0]);
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 		setSelection(newSelection);

@@ -60,7 +60,7 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 		} catch(ChangeAbortException e) {
 			JavaPlugin.log(e);
 		} catch(CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 		} finally {
 			if (change != null) {
 				change.performed();
@@ -82,7 +82,7 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 				return null;
 			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			buf.append(getDisplayString());
 		}
 		buf.append("</p>"); //$NON-NLS-1$

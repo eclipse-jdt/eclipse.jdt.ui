@@ -106,7 +106,7 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 				if ((refs[i] instanceof IType) && JavaElementUtil.isMainType((IType)refs[i]))
 					mainTypes.add(refs[i]);
 			} catch(JavaModelException e) {
-				JavaPlugin.log(e);//cannot show dialog
+				JavaPlugin.logIgnoringNotPresentException(e);//cannot show dialog
 			}
 		}
 		return (IType[]) mainTypes.toArray(new IType[mainTypes.size()]);
@@ -116,7 +116,7 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 		try {
 			return ResourceUtil.getResource(type);
 		} catch(JavaModelException e) {
-			JavaPlugin.log(e);//cannot show a dialog here
+			JavaPlugin.logIgnoringNotPresentException(e);//cannot show a dialog here
 			return null;
 		}
 	}

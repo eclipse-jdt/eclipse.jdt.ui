@@ -74,7 +74,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 			}
 			return true;
 		} catch (JavaModelException e){
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			return false;
 		}	
 	}
@@ -154,7 +154,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 					if (wcElement != null && wcElement.exists())
 						wcList.add(wcElement);
 				} catch(JavaModelException e) {
-					JavaPlugin.log(e); //cannot show dialog here
+					JavaPlugin.logIgnoringNotPresentException(e); //cannot show dialog here
 					//do nothing - do not add to selection (?)
 				}
 			}	

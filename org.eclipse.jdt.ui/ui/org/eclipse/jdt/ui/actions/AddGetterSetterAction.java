@@ -125,7 +125,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.logIgnoringNotPresentException(e);
 			setEnabled(false);
 		}
 	}
@@ -482,7 +482,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 							return null;
 						}
 					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+						JavaPlugin.logIgnoringNotPresentException(e);
 						return null;
 					}
 					
@@ -540,7 +540,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				try {
 					flags= ((GetterSetterEntry) element).field.getFlags();
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					JavaPlugin.logIgnoringNotPresentException(e);
 				}
 				ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
 				int adornmentFlags= Flags.isStatic(flags) ? JavaElementImageDescriptor.STATIC : 0;

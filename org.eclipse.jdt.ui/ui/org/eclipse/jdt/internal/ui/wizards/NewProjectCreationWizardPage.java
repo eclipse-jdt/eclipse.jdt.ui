@@ -260,7 +260,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 			try {
 				fMainPage.getProjectHandle().delete(false, false, null);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.logIgnoringNotPresentException(e);
 			}
 		}
 	}
