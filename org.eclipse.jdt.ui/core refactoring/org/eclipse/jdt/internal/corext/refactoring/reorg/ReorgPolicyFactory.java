@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -616,7 +617,7 @@ class ReorgPolicyFactory {
 
 		private void copyFieldToDestination(IField field, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			//cannot copy the whole field declaration - it can contain more than 1 field
-			FieldDeclaration copiedNode= createNewFieldDeclarationNode(field, getAST(targetRewrite), sourceCuNode);
+			FieldDeclaration copiedNode= createNewFieldDeclarationNode(field, targetRewrite.getAST(), sourceCuNode);
 			copyMemberToDestination(targetRewrite, destinationCuNode, copiedNode);
 		}
 
@@ -647,7 +648,7 @@ class ReorgPolicyFactory {
 
 		private void copyImportToDestination(IImportDeclaration declaration, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
-			ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(getAST(targetRewrite), sourceNode);
+			ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(targetRewrite.getAST(), sourceNode);
 			targetRewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY).insertLast(copiedNode, null);
 		}
 
@@ -655,7 +656,7 @@ class ReorgPolicyFactory {
 			if (destinationCuNode.getPackage() != null)
 				return;
 			PackageDeclaration sourceNode= ASTNodeSearchUtil.getPackageDeclarationNode(declaration, sourceCuNode);
-			PackageDeclaration copiedNode= (PackageDeclaration) ASTNode.copySubtree(getAST(targetRewrite), sourceNode);
+			PackageDeclaration copiedNode= (PackageDeclaration) ASTNode.copySubtree(targetRewrite.getAST(), sourceNode);
 			targetRewrite.set(destinationCuNode, CompilationUnit.PACKAGE_PROPERTY, copiedNode, null);
 		}
 
@@ -665,7 +666,7 @@ class ReorgPolicyFactory {
 		}
 
 		private void copyTypeToDestination(IType type, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
+			AbstractTypeDeclaration newType= (AbstractTypeDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
 			IType enclosingType= getEnclosingType(getJavaElementDestination());
 			if (enclosingType != null) {
 				copyMemberToDestination(targetRewrite, destinationCuNode, newType);
@@ -711,8 +712,8 @@ class ReorgPolicyFactory {
 			}
 			if (destinationContainer != null) {
 				ListRewrite listRewrite;
-				if (destinationContainer instanceof TypeDeclaration)
-					listRewrite= targetRewrite.getListRewrite(destinationContainer, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+				if (destinationContainer instanceof AbstractTypeDeclaration)
+					listRewrite= targetRewrite.getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
 				else
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				
@@ -726,7 +727,7 @@ class ReorgPolicyFactory {
 				return; //could insert into/after destination
 			}
 			// fall-back / default:
-			targetRewrite.getListRewrite(getTargetType(destinationCuNode), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertLast(newMember, null);
+			targetRewrite.getListRewrite(ASTNodeSearchUtil.getTypeDeclarationNode(getDestinationAsType(), destinationCuNode), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertLast(newMember, null);
 		}
 
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
@@ -734,14 +735,6 @@ class ReorgPolicyFactory {
 			String[] lines= Strings.convertIntoLines(sourceReference.getSource());
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 			return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed((IJavaElement) sourceReference));
-		}
-
-		private static AST getAST(ASTRewrite rewrite){
-			return rewrite.getAST();
-		}
-		
-		private TypeDeclaration getTargetType(CompilationUnit destinationCuNode) throws JavaModelException {
-			return ASTNodeSearchUtil.getTypeDeclarationNode(getDestinationAsType(), destinationCuNode);
 		}
 
 		private IType getDestinationAsType() throws JavaModelException {
