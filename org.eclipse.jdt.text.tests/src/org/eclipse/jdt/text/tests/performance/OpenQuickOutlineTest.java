@@ -42,6 +42,8 @@ public class OpenQuickOutlineTest extends TestCase {
 
 	private static final int N_OF_RUNS= 20;
 
+	private static final int N_OF_COLD_RUNS= 10;
+
 	private PerformanceMeter fFirstMeter;
 
 	private PerformanceMeter fSecondMeter;
@@ -81,8 +83,8 @@ public class OpenQuickOutlineTest extends TestCase {
 			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
 			EditorTestHelper.joinJobs(5000, 10000, 100);
 			
-			measureOpenQuickOutline(editor, fFirstMeter);
-			measureOpenQuickOutline(editor, fSecondMeter);
+			measureOpenQuickOutline(editor, i < N_OF_COLD_RUNS ? null : fFirstMeter);
+			measureOpenQuickOutline(editor, i < N_OF_COLD_RUNS ? null : fSecondMeter);
 			
 			EditorTestHelper.closeAllEditors();
 		}
@@ -95,9 +97,11 @@ public class OpenQuickOutlineTest extends TestCase {
 	private void measureOpenQuickOutline(ITextEditor editor, PerformanceMeter performanceMeter) {
 		IAction showOutline= editor.getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		EditorTestHelper.joinJobs(500, 1000, 100);
-		performanceMeter.start();
+		if (performanceMeter != null)
+			performanceMeter.start();
 		runAction(showOutline);
-		performanceMeter.stop();
+		if (performanceMeter != null)
+			performanceMeter.stop();
 		Shell shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertEquals("", shell.getText());
 		shell.close();
