@@ -689,6 +689,9 @@ public class ResultCollector extends CompletionRequestor {
 				case CompletionProposal.METHOD_REF:
 					internalAcceptMethod(proposal);
 					break;
+				case CompletionProposal.METHOD_NAME_REFERENCE:
+					internalAcceptMethod(proposal);
+					break;
 				case CompletionProposal.METHOD_DECLARATION:
 					internalAcceptMethodDeclaration(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), proposal
 							.getName(), getParameterPackages(proposal.getSignature()), getParameterTypes(proposal.getSignature()),
