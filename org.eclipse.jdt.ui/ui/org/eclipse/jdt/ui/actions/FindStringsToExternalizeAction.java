@@ -103,7 +103,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	}
 	
 	private boolean computeEnablementState(IStructuredSelection selection) {
-		if (selection.size() == 0)
+		if (selection.isEmpty())
 			return false;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object)iter.next();
