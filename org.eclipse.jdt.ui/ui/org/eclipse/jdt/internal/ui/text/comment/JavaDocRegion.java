@@ -164,7 +164,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 			String content= null;
 			IRegion range= null;
 
-			for (int line= tracker.getNumberOfLines() - 3; line >= 1; line--) {
+			for (int line= tracker.getNumberOfLines() - 2; line >= 1; line--) {
 
 				range= tracker.getLineInformation(line);
 				index= range.getOffset();
