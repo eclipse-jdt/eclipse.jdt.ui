@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
-import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.DialogPageContextComputer;
@@ -828,7 +827,22 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
 				packages.add(fragment);
 		}
-		ListSelectionDialog dialog= new ListSelectionDialog(getContainer().getShell(), packages, new org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider(), new JavaElementLabelProvider(flags), null);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), new JavaElementContentProvider(), true, false);
+		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
+		dialog.addFilter(new EmptyInnerPackageFilter());		
+		dialog.addFilter(new LibraryFilter());
+		dialog.addFilter(new SealPackagesFilter(packages));
+		dialog.setValidator(new ISelectionValidator() {
+			public void isValid(Object[] selection, StatusInfo res) {
+				for (int i= 0; i < selection.length; i++) {
+					if (!(selection[i] instanceof IPackageFragment)) {
+						res.setError(JarPackagerMessages.getString("JarManifestWizardPage.error.mustContainPackages"));
+						return;
+					}
+				}
+				res.setOK();
+			}
+		});
 		return dialog;		
 	}
 	/**
