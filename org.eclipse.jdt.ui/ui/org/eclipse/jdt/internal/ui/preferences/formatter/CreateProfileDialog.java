@@ -156,6 +156,8 @@ public class CreateProfileDialog extends StatusDialog {
 		
 		applyDialogFont(composite);
 		
+		fNameText.setFocus();
+		
 		return composite;
 	}
 
