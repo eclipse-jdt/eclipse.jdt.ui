@@ -345,7 +345,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		else {
 			fIsActive= false;
-			JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI deactivated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
+			//JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI deactivated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
 		}
 		
 
