@@ -175,10 +175,14 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	}
 	
 	private int findInsertIndex(List decls, int currPos) {
-		for (int i= decls.size() - 1; i >= 0; i--) {
+		for (int i= 0; i < decls.size(); i++) {
 			ASTNode curr= (ASTNode) decls.get(i);
-			if (curr instanceof FieldDeclaration && currPos > curr.getStartPosition() + curr.getLength()) {
-				return i + 1;
+			if (curr instanceof FieldDeclaration) {
+				if (currPos > curr.getStartPosition() + curr.getLength()) {
+					return i;
+				} else {
+					return 0;
+				}
 			}
 		}
 		return 0;
