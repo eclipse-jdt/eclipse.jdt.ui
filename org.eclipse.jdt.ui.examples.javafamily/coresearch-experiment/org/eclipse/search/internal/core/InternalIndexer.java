@@ -28,12 +28,12 @@ public class InternalIndexer {
 	 * <code>shouldIndex()</code> first to determine whether this indexer handles 
 	 * the given type of file, and only call this method if so. 
 	 */
-	public void index(Document document, IPath indexPath) throws IOException {
+	public void index(Document document, Index targetIndex) throws IOException {
 		try {
-			this.setTargetIndex(indexPath);
+			this.index = targetIndex;
 			index(document);
 		} finally {
-			this.setTargetIndex(null);
+			this.index = null;
 		}
 	}
 
