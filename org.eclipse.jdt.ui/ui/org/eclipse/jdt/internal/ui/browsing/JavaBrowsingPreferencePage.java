@@ -34,7 +34,7 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	public static final String STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
 	public static final String EDITOR_THRESHOLD= "org.eclipse.jdt.ui.browsing.editorThreshold"; //$NON-NLS-1$
 
-	IntegerFieldEditor integerEditor;
+	private IntegerFieldEditor fIntegerEditor;
 	
 	public JavaBrowsingPreferencePage() {
 		super(GRID);
@@ -44,8 +44,8 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(LINK_VIEW_TO_EDITOR, false);
-		store.setDefault(OPEN_EDITOR_ON_SINGLE_CLICK, false);
+		store.setDefault(LINK_VIEW_TO_EDITOR, true);
+		store.setDefault(OPEN_EDITOR_ON_SINGLE_CLICK, true);
 		store.setDefault(STACK_VERTICALLY, false);
 		store.setDefault(EDITOR_THRESHOLD, 1);
 	}
@@ -103,18 +103,16 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
         );
 		addField(boolEditor);
 		
-//		IntegerFieldEditor
- integerEditor= new IntegerFieldEditor(
+		fIntegerEditor= new IntegerFieldEditor(
 			EDITOR_THRESHOLD,
 			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.reuseEditors"), //$NON-NLS-1$
 			parent);
-
-		integerEditor.setPreferencePage(this);
-		integerEditor.setTextLimit(2);
-		integerEditor.setErrorMessage(JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.reuseEditorsError")); //$NON-NLS-1$
-		integerEditor.setValidateStrategy(StringFieldEditor.VALIDATE_ON_KEY_STROKE);
-		integerEditor.setValidRange(1, 99);
-		addField(integerEditor);
+		fIntegerEditor.setPreferencePage(this);
+		fIntegerEditor.setTextLimit(2);
+		fIntegerEditor.setErrorMessage(JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.reuseEditorsError")); //$NON-NLS-1$
+		fIntegerEditor.setValidateStrategy(StringFieldEditor.VALIDATE_ON_KEY_STROKE);
+		fIntegerEditor.setValidRange(1, 99);
+		addField(fIntegerEditor);
 	}
 
 	/*
@@ -127,25 +125,25 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	 * Method declared on IPreferencePage.
 	 */
 	public boolean okToLeave() {
-		return integerEditor.isValid();
+		return fIntegerEditor.isValid();
 	}
 
 	/*
 	 * Method declared on IPropertyChangeListener.
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (integerEditor.isValid())
+		if (fIntegerEditor.isValid())
 			super.setErrorMessage(null);
 		else
-			super.setErrorMessage(integerEditor.getErrorMessage());
-		setValid(integerEditor.isValid());
+			super.setErrorMessage(fIntegerEditor.getErrorMessage());
+		setValid(fIntegerEditor.isValid());
 	}
 
 	/*
 	 * Prevent clearing of error message if integer field loses focus
 	 */
 	public void setErrorMessage(String message) {
-		if (message == null && !integerEditor.isValid())
+		if (message == null && !fIntegerEditor.isValid())
 			return;
 		else
 			super.setErrorMessage(message);
