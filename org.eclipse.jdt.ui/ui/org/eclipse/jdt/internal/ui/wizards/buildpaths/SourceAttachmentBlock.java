@@ -216,11 +216,13 @@ public class SourceAttachmentBlock {
 	
 	public IClasspathEntry getNewEntry() {
 		boolean isExported= fEntry.isExported();
+		IPath[] inclusionPatterns= fEntry.getInclusionPatterns();
+		IPath[] exclusionPatterns= fEntry.getExclusionPatterns();
 		IClasspathEntry newEntry;
 		if (fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-			newEntry= JavaCore.newVariableEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
+			newEntry= JavaCore.newVariableEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), inclusionPatterns, exclusionPatterns, isExported);
 		} else {
-			newEntry= JavaCore.newLibraryEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
+			newEntry= JavaCore.newLibraryEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), inclusionPatterns, exclusionPatterns, isExported);
 		}
 		return newEntry;
 	}
