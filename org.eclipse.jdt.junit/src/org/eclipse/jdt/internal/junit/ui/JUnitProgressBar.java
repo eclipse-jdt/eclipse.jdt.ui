@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -51,6 +53,12 @@ public class JUnitProgressBar extends Canvas {
 				paint(e);
 			}
 		});
+		addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				fFailureColor.dispose();
+				fOKColor.dispose();
+			}
+		});
 		Display display= parent.getDisplay();
 		fFailureColor= new Color(display, 223, 63, 63);
 		fOKColor= new Color(display, 63, 127, 63);
@@ -77,12 +85,6 @@ public class JUnitProgressBar extends Canvas {
 		gc.dispose();		
 	}
 
-	public void dispose() {
-		super.dispose();
-		fFailureColor.dispose();
-		fOKColor.dispose();
-	}
-	
 	private void setStatusColor(GC gc) {
 		if (fError)
 			gc.setBackground(fFailureColor);
