@@ -204,11 +204,13 @@ public class AllTypesCache {
 	 */
 	public static TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException {
 		
+		forceDeltaComplete();
+		
 		synchronized(fgLock) {
 			
 			fgInitialized= true;
 			
-			if (!isCacheUpToDate()) {
+			if (fgTypeCache == null) {
 				// cache is empty
 				
 				if (fgTypeCacherThread == null) {
@@ -262,14 +264,12 @@ public class AllTypesCache {
 		}		
 	}
 	
-	
 	/**
 	 * Returns a hint for the number of all types in the workspace.
 	 */
 	public static int getNumberOfAllTypesHint() {
 		return fgSizeHint;
 	}
-	
 	
 	private static class TypeCacheDeltaListener implements IElementChangedListener {
 		
@@ -470,6 +470,8 @@ public class AllTypesCache {
 		if (fgInitialized)
 			return;
 		
+		forceDeltaComplete();
+		
 		synchronized(fgLock) {
 			if (fgTypeCacherThread != null) {
 				// there is already a thread
@@ -483,7 +485,7 @@ public class AllTypesCache {
 				if (fgTerminated) {
 					// already terminated: do nothing
 				} else {
-					if (isCacheUpToDate()) {
+					if (fgTypeCache != null) {
 						// the cache is already uptodate
 					} else {
 						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
