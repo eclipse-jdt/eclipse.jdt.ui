@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 
+import org.eclipse.jdt.internal.core.ant.AntPrintWriter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
@@ -71,6 +72,10 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private JavadocOptionsManager fStore;
 	private String fDialogSectionName;
 	private JavadocTreeWizardPage fPredecessor;
+	
+	private final int STYLESHEETSTATUS= 0;
+	private final int OVERVIEWSTATUS=1;
+	private final int ANTSTATUS= 2;
 
 	/**
 	 * Constructor for JavadocWizardPage.
@@ -156,7 +161,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fTagsGroup.setText("Document these tags");
 
 		fAuthorCheck= new FlaggedButton(fTagsGroup, "@&author", new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true);
-		fVersionCheck= new FlaggedButton(fTagsGroup, "@v&ersion", new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true);
+		fVersionCheck= new FlaggedButton(fTagsGroup, "@&version", new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true);
 		fDeprecatedCheck= new FlaggedButton(fTagsGroup, "@&deprecated", new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false);
 		fDeprecatedList= new FlaggedButton(fTagsGroup, "depre&cated list", createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.NODEPRECATEDLIST, false);
 		fDeprecatedList.getButton().setEnabled(fDeprecatedCheck.getButton().getSelection());
@@ -175,7 +180,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fStyleSheetButton= createButton(c, SWT.CHECK, "St&yle sheet:", createGridData(1));
 		fStyleSheetText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, "Bro&wse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, "Brow&se...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fStyleSheetBrowseButton);
 
 		String str= fStore.getStyleSheet();
@@ -191,13 +196,13 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		//Listeners
 		fStyleSheetButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fStyleSheetText, fStyleSheetBrowseButton }) {
 			public void validate() {
-				doValidation();
+				doValidation(STYLESHEETSTATUS);
 			}
 		});
 
 		fStyleSheetText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				doValidation();
+				doValidation(STYLESHEETSTATUS);
 			}
 		});
 
@@ -211,9 +216,9 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private void createExtraOptionsGroup(Composite composite) {
 
-		fOverViewButton= createButton(composite, SWT.CHECK, "O&verview:", createGridData(1));
+		fOverViewButton= createButton(composite, SWT.CHECK, "&Overview:", createGridData(1));
 		fOverViewText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fOverViewBrowseButton= createButton(composite, SWT.PUSH, "Br&owse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fOverViewBrowseButton= createButton(composite, SWT.PUSH, "Bro&wse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fOverViewBrowseButton);
 
 		String str= fStore.getOverview();
@@ -237,7 +242,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fAntText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		fAntText.setText(fStore.getAntpath());
 		fAntText.setEnabled(false);
-		fAntBrowseButton= createButton(composite, SWT.PUSH, "Br&owse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fAntBrowseButton= createButton(composite, SWT.PUSH, "&Browse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
 		fAntBrowseButton.setEnabled(false);
 
@@ -246,13 +251,13 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
 			public void validate() {
-				doValidation();
+				doValidation(OVERVIEWSTATUS);
 			}
 		});
 
 		fOverViewText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				doValidation();
+				doValidation(OVERVIEWSTATUS);
 			}
 		});
 
@@ -264,13 +269,13 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
 			public void validate() {
-				doValidation();
+				doValidation(ANTSTATUS);
 			}
 		});
 
 		fAntText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				doValidation();
+				doValidation(ANTSTATUS);
 			}
 		});
 
@@ -292,33 +297,49 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 	} //end method createExtraOptionsGroup
 
-	private void doValidation() {
+	private void doValidation(int VALIDATE) {
+		File file= null;
+		String ext= null;
+		Path path= null;
 
-		fStyleSheetStatus= new StatusInfo();
-		fOverviewStatus= new StatusInfo();
-		fAntStatus= new StatusInfo();
-		if (fStyleSheetButton.getSelection()) {
-			Path stylePath= new Path(fStyleSheetText.getText());
-			File file= new File(fStyleSheetText.getText());
-			if (!stylePath.toFile().exists() || !stylePath.getFileExtension().equalsIgnoreCase("css")) {
-				fStyleSheetStatus.setError("Not a valid stylesheet.");
-			}
-		}
-		if (fOverViewButton.getSelection()) {
-			Path overviewPath= new Path(fOverViewText.getText());
-			if (!overviewPath.toFile().exists() || !overviewPath.getFileExtension().equalsIgnoreCase("html")) {
-				fOverviewStatus.setError("Not a valid html document.");
-			}
-		}
-		if (fAntButton.getSelection()) {
-			IPath antPath= new Path(fAntText.getText());
-			String ext= antPath.getFileExtension();
-			IPath antSeg= antPath.removeLastSegments(1);
-			
-			if ((!antSeg.isValidPath(antSeg.toOSString())) || (ext == null) || !(ext.equalsIgnoreCase("xml")))
-				fAntStatus.setError("Not a valid Ant file name.");
-			else if (antPath.toFile().exists())
-				fAntStatus.setWarning("The generated ant file will overwrite the existing ant file.");
+		switch (VALIDATE) {
+			case STYLESHEETSTATUS :
+				fStyleSheetStatus = new StatusInfo();
+				path = new Path(fStyleSheetText.getText());
+				file = new File(fStyleSheetText.getText());
+				ext = path.getFileExtension();
+				if ((file == null) || !file.exists()) {
+					fStyleSheetStatus.setError("Stylesheet path not found.");
+				} else if ((ext == null) || !ext.equalsIgnoreCase("css")) {
+					fStyleSheetStatus.setError("Stylesheet must be a css document.");
+				}
+				break;
+
+			case OVERVIEWSTATUS :
+				fOverviewStatus = new StatusInfo();
+				path = new Path(fOverViewText.getText());
+				file = path.toFile();
+				ext = path.getFileExtension();
+				if ((file == null) || !file.exists()) {
+					fOverviewStatus.setError("Overview path not found.");
+				} else if ((ext == null) || !ext.equalsIgnoreCase("html")) {
+					fOverviewStatus.setError("Overview must be an html document.");
+				}
+				break;
+			case ANTSTATUS :
+				fAntStatus = new StatusInfo();
+				path = new Path(fAntText.getText());
+				ext = path.getFileExtension();
+				IPath antSeg = path.removeLastSegments(1);
+
+				if ((!antSeg.isValidPath(antSeg.toOSString()))
+					|| (ext == null)
+					|| !(ext.equalsIgnoreCase("xml")))
+					fAntStatus.setError("Not a valid Ant file name.");
+				else if (path.toFile().exists())
+					fAntStatus.setWarning(
+						"The generated ant file will overwrite the existing ant file.");
+				break;
 		}
 
 		updateStatus(findMostSevereStatus());

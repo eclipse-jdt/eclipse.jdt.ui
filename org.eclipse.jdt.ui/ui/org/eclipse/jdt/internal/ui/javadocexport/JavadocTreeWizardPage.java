@@ -93,6 +93,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	protected StatusInfo fDocletStatus;
 	protected StatusInfo fTreeStatus;
 	protected StatusInfo fPreferenceStatus;
+	protected StatusInfo fWizardStatus;
 	
 	private final int PREFERENCESTATUS= 0;
 	private final int CUSTOMSTATUS= 1;
@@ -114,6 +115,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fDocletStatus= new StatusInfo();
 		fTreeStatus= new StatusInfo();
 		fPreferenceStatus= new StatusInfo();
+		fWizardStatus= store.getWizardStatus();
 	}
 
 	/*
@@ -281,7 +283,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fCustomButton= createButton(optionSetGroup, SWT.RADIO, "Use &Custom Doclet", createGridData(3));
 
 		//For Entering location of custom doclet
-		fDocletTypeLabel= createLabel(optionSetGroup, SWT.NONE, "&Doclet name: ", createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3)));
+		fDocletTypeLabel= createLabel(optionSetGroup, SWT.NONE, "Doc&let name: ", createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3)));
 		fDocletTypeText= createText(optionSetGroup, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 2, 0));
 		fDocletTypeText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -355,6 +357,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				fCustomButton.setSelection(true);
 				fDocletText.setText(fStore.getDocletPath());
 				fDocletTypeText.setText(fStore.getDocletName());
+				fDestinationText.setText(fStore.getDestination());
 				fDestinationText.setEnabled(false);
 				fDestinationBrowserButton.setEnabled(false);
 				fDestinationLabel.setEnabled(false);
@@ -488,73 +491,77 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private void doValidation(int validate) {
-		
-		switch(validate) {
-			case PREFERENCESTATUS:
-				fPreferenceStatus= new StatusInfo();
+
+		switch (validate) {
+			case PREFERENCESTATUS :
+				fPreferenceStatus = new StatusInfo();
+				fDocletStatus= new StatusInfo();
 				if (JavadocPreferencePage.getJavaDocCommand().length() == 0) {
-					fPreferenceStatus.setError("Javadoc command location not specified on the Javadoc preference page.");	
+					fPreferenceStatus.setError(
+						"Javadoc command location not specified on the Javadoc preference page.");
 				}
-				updateStatus(fPreferenceStatus);
+				updateStatus(findMostSevereStatus());
 				break;
 			case CUSTOMSTATUS :
-					
-					if (fCustomButton.getSelection()) {
-						fDocletStatus= new StatusInfo();
-						String doclet= fDocletTypeText.getText();
-						String docletPath= fDocletText.getText();
-						if (doclet.length() == 0) {
-							fDocletStatus.setError("Enter a doclet name.");
-				
-						} else if (JavaConventions.validateJavaTypeName(doclet).matches(IStatus.ERROR)) {
-							fDocletStatus.setError("Invalid doclet name.");
-						} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
-							fDocletStatus.setError("Not a valid doclet class path.");
-						} 
-						updateStatus(fDocletStatus);
+
+				if (fCustomButton.getSelection()) {
+					fDestinationStatus = new StatusInfo();
+					fDocletStatus = new StatusInfo();
+					String doclet = fDocletTypeText.getText();
+					String docletPath = fDocletText.getText();
+					if (doclet.length() == 0) {
+						fDocletStatus.setError("Enter a doclet name.");
+
+					} else if (
+						JavaConventions.validateJavaTypeName(doclet).matches(IStatus.ERROR)) {
+						fDocletStatus.setError("Invalid doclet name.");
+					} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
+						fDocletStatus.setError("Not a valid doclet class path.");
 					}
-					break;
-					
-			case STANDARDSTATUS :
-				if (fStandardButton.getSelection()) {
-					fDestinationStatus= new StatusInfo();
-					IPath path= new Path(fDestinationText.getText());
-					if (Path.ROOT.equals(path) || Path.EMPTY.equals(path)) {
-						fDestinationStatus= new StatusInfo();
-						fDestinationStatus.setError("Enter the destination folder.");
-					}
-					File file= new File(path.toOSString());
-					if (!path.isValidPath(path.toOSString()) || file.isFile()) {
-						fDestinationStatus.setError("Not a valid folder.");
-						updateStatus(fDestinationStatus);
-					}
-					updateStatus(fDestinationStatus);
+					updateStatus(findMostSevereStatus());
 				}
 				break;
-			
-			case TREESTATUS :	
-	
-				fTreeStatus= new StatusInfo();
-				boolean empty= fInputGroup.getAllCheckedTreeItems().isEmpty();
+
+			case STANDARDSTATUS :
+				if (fStandardButton.getSelection()) {
+					fDestinationStatus = new StatusInfo();
+					fDocletStatus= new StatusInfo();
+					IPath path = new Path(fDestinationText.getText());
+					if (Path.ROOT.equals(path) || Path.EMPTY.equals(path)) {
+						fDestinationStatus.setError("Enter the destination folder.");
+					}
+					File file = new File(path.toOSString());
+					if (!path.isValidPath(path.toOSString()) || file.isFile()) {
+						fDestinationStatus.setError("Not a valid folder.");
+					}
+					updateStatus(findMostSevereStatus());
+				}
+				break;
+
+			case TREESTATUS :
+
+				fTreeStatus = new StatusInfo();
+				boolean empty = fInputGroup.getAllCheckedTreeItems().isEmpty();
 				if (empty)
 					fTreeStatus.setError("Select elements from tree.");
 				else {
-					int projCount= 0;
-					Object[] items= fInputGroup.getAllCheckedTreeItems().toArray();
+					int projCount = 0;
+					Object[] items = fInputGroup.getAllCheckedTreeItems().toArray();
 					for (int i = 0; i < items.length; i++) {
-						IJavaElement element = (IJavaElement)items[i];
-						if(element instanceof IJavaProject) {
+						IJavaElement element = (IJavaElement) items[i];
+						if (element instanceof IJavaProject) {
 							projCount++;
-							if(projCount > 1)
-								fTreeStatus.setError("Cannot generate Javadoc for elements in multiple projects.");
+							if (projCount > 1)
+								fTreeStatus.setError(
+									"Cannot generate Javadoc for elements in multiple projects.");
 						}
 					}
-				}						
-				updateStatus(fTreeStatus);
-				break;
-			}//end switch
-	}
+				}
+				updateStatus(findMostSevereStatus());
 
+				break;
+		} //end switch
+	}
 	/**
 	 * looks at the currently selected projects and returns the current project
 	 * returns null if more than one project is checked
@@ -588,7 +595,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * Finds the most severe error (if there is one)
 	 */
 	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMostSevere(new IStatus[] { fPreferenceStatus, fDestinationStatus, fDocletStatus, fTreeStatus });
+		return StatusUtil.getMostSevere(new IStatus[] {fPreferenceStatus, fDestinationStatus, fDocletStatus, fTreeStatus, fWizardStatus });
 	}
 
 	public void init() {
