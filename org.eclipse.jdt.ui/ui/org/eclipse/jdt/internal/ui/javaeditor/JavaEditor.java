@@ -245,7 +245,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	public void synchronizeOutlinePageSelection() {
 		
 		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer == null)
+		if (sourceViewer == null || fOutlinePage == null)
 			return;
 			
 		StyledText styledText= sourceViewer.getTextWidget();
