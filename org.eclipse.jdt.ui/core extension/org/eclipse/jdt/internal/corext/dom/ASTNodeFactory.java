@@ -24,6 +24,9 @@ public class ASTNodeFactory {
 	private static final String TYPE_HEADER= "class __X__ { abstract "; //$NON-NLS-1$
 	private static final String TYPE_FOOTER= " __f__(); }}"; //$NON-NLS-1$
 	
+	private static final String TYPEPARAM_HEADER= "class __X__ { abstract <"; //$NON-NLS-1$
+	private static final String TYPEPARAM_FOOTER= "> void __f__(); }}"; //$NON-NLS-1$
+	
 	private static class PositionClearer extends GenericVisitor {
 		
 		public PositionClearer() {
@@ -65,6 +68,23 @@ public class ASTNodeFactory {
 		}
 		return res;
 	}
+	
+	public static TypeParameter newTypeParameter(AST ast, String content) {
+		StringBuffer buffer= new StringBuffer(TYPEPARAM_HEADER);
+		buffer.append(content);
+		buffer.append(TYPEPARAM_FOOTER);
+		ASTParser p= ASTParser.newParser(ast.apiLevel());
+		p.setSource(buffer.toString().toCharArray());
+		CompilationUnit root= (CompilationUnit) p.createAST(null);
+		List list= root.types();
+		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
+		MethodDeclaration methodDecl= typeDecl.getMethods()[0];
+		TypeParameter tp= (TypeParameter) methodDecl.typeParameters().get(0);
+		ASTNode result= ASTNode.copySubtree(ast, tp);
+		result.accept(new PositionClearer());
+		return (TypeParameter) result;
+	}
+	
 		
 	public static Type newType(AST ast, String content) {
 		StringBuffer buffer= new StringBuffer(TYPE_HEADER);

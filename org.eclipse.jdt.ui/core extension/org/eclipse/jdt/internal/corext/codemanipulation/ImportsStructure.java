@@ -425,6 +425,10 @@ public final class ImportsStructure implements IImportsStructure {
 		if (normalizedBinding == null || normalizedBinding.isTypeVariable() || normalizedBinding.isWildcardType()) {
 			return binding.getName();
 		}
+		if (normalizedBinding.isArray() && normalizedBinding.getElementType().isTypeVariable()) {
+			return binding.getName();
+		}
+		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
 			StringBuffer buf= new StringBuffer();

@@ -487,7 +487,7 @@ public class Bindings {
 		if (methodParameters.length != parameters.length)
 			return false;
 		for (int i= 0; i < parameters.length; i++) {
-			if (parameters[i] != methodParameters[i])
+			if (parameters[i].getErasure() != methodParameters[i].getErasure())
 				return false;
 		}
 		return true;
