@@ -239,6 +239,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Extract Interface global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractInterface"</code>).
+	 */
+	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.actions.ExtractInterface"; //$NON-NLS-1$
 	
 	// Search Menu
 	

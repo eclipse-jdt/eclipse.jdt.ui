@@ -53,6 +53,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fInlineTempAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractMethodAction;
+	private SelectionDispatchAction fExtractInterfaceAction;
 
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -125,6 +126,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 		initAction(fExtractMethodAction, provider, selection);
 		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
+
+		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
+		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
+		fExtractInterfaceAction.update(selection);
+		editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
@@ -147,6 +153,9 @@ public class RefactorActionGroup extends ActionGroup {
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
 		initAction(fSelfEncapsulateField, provider, selection);
+
+		fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
+		initAction(fExtractInterfaceAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
@@ -171,6 +180,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_TEMP, fInlineTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 	}
 	
 	/* (non-Javadoc)
@@ -194,6 +204,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fInlineTempAction, provider);
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractMethodAction, provider);
+		disposeAction(fExtractInterfaceAction, provider);
 		super.dispose();
 	}
 	
@@ -208,6 +219,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fMoveAction);
 		addAction(refactorSubmenu, fPullUpAction);
 		addAction(refactorSubmenu, fModifyParametersAction);
+		addAction(refactorSubmenu, fExtractInterfaceAction);
 		if (! refactorSubmenu.isEmpty())
 			refactorSubmenu.add(new Separator());
 		addAction(refactorSubmenu, fExtractMethodAction);

@@ -956,6 +956,11 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.pullUpAction.label"
 			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.ExtractInterface"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="Extract Interface..."
+			retarget="true" />
 		
 		<action id="org.eclipse.jdt.ui.actions.Move"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
@@ -1375,6 +1380,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 
 	<!-- navigate -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1450,6 +1456,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 	
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1520,6 +1527,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 	
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />

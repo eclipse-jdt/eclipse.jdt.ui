@@ -195,6 +195,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.edit.text.java.extract.method"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the refactor -> extract interface action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.extract.interface"</code>).
+	 */
+	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.edit.text.java.extract.interface"; //$NON-NLS-1$
+
 	// navigate
 	
 	/**

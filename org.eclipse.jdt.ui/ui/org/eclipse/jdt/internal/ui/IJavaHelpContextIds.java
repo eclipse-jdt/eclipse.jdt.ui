@@ -65,6 +65,7 @@ public interface IJavaHelpContextIds {
 	public static final String EXTERNALIZE_STRINGS_ACTION= PREFIX + "externalize_strings_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_METHOD_ACTION= PREFIX + "extract_method_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_TEMP_ACTION= PREFIX + "extract_temp_action"; //$NON-NLS-1$	
+	public static final String EXTRACT_INTERFACE_ACTION= PREFIX + "extract_interface_action"; //$NON-NLS-1$	
 	public static final String FIND_DECLARATIONS_IN_HIERARCHY_ACTION= PREFIX + "find_declarations_in_hierarchy_action"; //$NON-NLS-1$	
 	public static final String FIND_DECLARATIONS_IN_WORKING_SET_ACTION= PREFIX + "find_declarations_in_working_set_action"; //$NON-NLS-1$	
 	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION= PREFIX + "find_implementors_in_working_set_action"; //$NON-NLS-1$			
