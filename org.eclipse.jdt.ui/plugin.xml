@@ -104,6 +104,7 @@
             class="org.eclipse.jdt.internal.ui.LogicalPackageAdapterFactory" 
             adaptableType="org.eclipse.jdt.internal.ui.browsing.LogicalPackage">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+            <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
 		</factory>
 		
 		<factory 

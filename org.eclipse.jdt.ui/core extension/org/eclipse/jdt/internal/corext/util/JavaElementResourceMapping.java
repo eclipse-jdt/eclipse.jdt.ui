@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 /**
  * An abstract super class to describe mappings from a Java element to a
@@ -258,6 +261,37 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 	}
 	
+	private static final class LogicalPackageResourceMapping extends ResourceMapping {
+		private final IPackageFragment[] fFragments;
+		private LogicalPackageResourceMapping(IPackageFragment[] fragments) {
+			fFragments= fragments;
+		}
+		public Object getModelObject() {
+			return fFragments;
+		}
+		public IProject[] getProjects() {
+			Set result= new HashSet();
+			for (int i= 0; i < fFragments.length; i++) {
+				result.add(fFragments[i].getJavaProject().getProject());
+			}
+			return (IProject[])result.toArray(new IProject[result.size()]);
+		}
+		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
+			List result= new ArrayList();
+			if (context instanceof RemoteResourceMappingContext) {
+				for (int i= 0; i < fFragments.length; i++) {
+					result.add(new ResourceTraversal(
+						new IResource[] {fFragments[i].getCorrespondingResource()}, IResource.DEPTH_ONE, 0));
+				}
+			} else {
+				for (int i= 0; i < fFragments.length; i++) {
+					result.add(new LocalPackageFragementTraversal(fFragments[i]));
+				}
+			}
+			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
+		}
+	}
+	
 	public static ResourceMapping create(IJavaElement element) {
 		switch (element.getElementType()) {
 			case IJavaElement.TYPE:
@@ -326,5 +360,20 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			return create((ICompilationUnit)parent);
 		}
 		return null;
+	}
+	
+	public static ResourceMapping create(LogicalPackage logicalPackage) {
+		IPackageFragment[] fragments= logicalPackage.getFragments();
+		List toProcess= new ArrayList(fragments.length);
+		for (int i= 0; i < fragments.length; i++) {
+			// only add if not part of an archive
+			IPackageFragmentRoot root= (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (!root.isArchive()) {
+				toProcess.add(fragments[i]);
+			}
+		}
+		if (toProcess.size() == 0)
+			return null;
+		return new LogicalPackageResourceMapping((IPackageFragment[])toProcess.toArray(new IPackageFragment[toProcess.size()]));
 	}
 }

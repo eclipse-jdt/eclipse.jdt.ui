@@ -12,8 +12,13 @@ package org.eclipse.jdt.internal.ui;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import org.eclipse.core.resources.mapping.ResourceMapping;
+
 import org.eclipse.search.ui.ISearchPageScoreComputer;
 
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -23,6 +28,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 public class LogicalPackageAdapterFactory implements IAdapterFactory {
 	
 	private static Class[] PROPERTIES= new Class[] {
+		ResourceMapping.class
 	};
 
 	// Must be Object to allow lazy loading	
@@ -36,9 +42,13 @@ public class LogicalPackageAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object element, Class key) {
 		updateLazyLoadedAdapters();
 		
-		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key))
+		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
-
+		} else if (ResourceMapping.class.equals(key)) {
+			if (!(element instanceof LogicalPackage))
+				return null;
+			return JavaElementResourceMapping.create((LogicalPackage)element);
+		}
 		return null; 
 	}
 	
@@ -51,6 +61,7 @@ public class LogicalPackageAdapterFactory implements IAdapterFactory {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 		PROPERTIES= new Class[] {
 			ISearchPageScoreComputer.class,
+			ResourceMapping.class
 		};
 	}
 }
