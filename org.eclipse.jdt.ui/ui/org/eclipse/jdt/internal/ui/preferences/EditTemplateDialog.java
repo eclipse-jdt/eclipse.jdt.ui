@@ -19,7 +19,11 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -35,6 +39,20 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
  * Dialog to edit a template.
  */
 public class EditTemplateDialog extends StatusDialog {
+
+	// disable content assist
+	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
+		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
+			super(tools, editor);			
+		}
+		
+		/*
+		 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
+		 */
+		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+			return null;
+		}	
+	}
 
 	private Template fTemplate;
 
@@ -123,7 +141,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private SourceViewer createEditor(Composite parent) {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(true);
 		viewer.setDocument(new Document());
 	
