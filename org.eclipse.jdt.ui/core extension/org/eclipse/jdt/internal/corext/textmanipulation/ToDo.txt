@@ -1,0 +1,3 @@
+- copy process is current complicated. As soon as somebody forget to copy the text range
+  correctly the whole text buffer might be messed up. We should think about a more
+  closed world. May be we can make the SimpleTextEdit final.

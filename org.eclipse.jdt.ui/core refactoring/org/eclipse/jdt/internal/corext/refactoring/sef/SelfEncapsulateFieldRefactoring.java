@@ -16,20 +16,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -44,7 +50,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ChangeVisibilityEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
@@ -64,7 +69,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
@@ -376,7 +383,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
 		if (!JdtFlags.isPrivate(fField))
-			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, Modifier.PRIVATE)); //$NON-NLS-1$
+			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), createVisibilityEdit()); //$NON-NLS-1$
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
@@ -385,6 +392,39 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter"), createGetterMethod(insertionKind, sibling, modifiers, type));	 //$NON-NLS-1$
 	}
 
+	private SimpleTextEdit createVisibilityEdit() throws CoreException {
+		TextRange range= getVisibilityRange();
+		String text= getVisibilityString(range.getLength());
+		return SimpleTextEdit.createReplace(range.getOffset(), range.getLength(), text);
+	}
+
+	private TextRange getVisibilityRange() throws CoreException {
+		int offset= fField.getSourceRange().getOffset();
+		int length= 0;
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(fField.getSource().toCharArray());
+		int token= 0;
+		try {
+			while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+				if (token == ITerminalSymbols.TokenNamepublic || token == ITerminalSymbols.TokenNameprotected || token == ITerminalSymbols.TokenNameprivate) {
+					offset+= scanner.getCurrentTokenStartPosition();
+					length= scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenStartPosition() + 1;
+					break;
+				}
+			}
+		} catch (InvalidInputException e) {
+			throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
+		}
+		return new TextRange(offset, length);
+	}
+	
+	private String getVisibilityString(int tokenLength) {
+		String text= JdtFlags.getVisibilityString(Modifier.PRIVATE);
+		if (tokenLength == 0)
+			text+= " "; //$NON-NLS-1$
+		return text;
+	}
+		
 	private TextEdit createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
 		String returnType= createSetterReturnType();
 		String returnStatement= fSetterMustReturnValue ? "return " : ""; //$NON-NLS-1$ //$NON-NLS-2$

@@ -381,7 +381,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * 
 	 * @return the executed edit
 	 */
-	public TextEdit getExecutedTextEdit(TextEdit original) {
+	private TextEdit getExecutedTextEdit(TextEdit original) {
 		if (!fKeepExecutedTextEdits || fCopier == null)
 			return null;
 		return fCopier.getCopy(original);
