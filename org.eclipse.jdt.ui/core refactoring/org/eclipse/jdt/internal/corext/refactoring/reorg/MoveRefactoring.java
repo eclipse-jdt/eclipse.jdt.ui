@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -34,10 +35,14 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
 public class MoveRefactoring extends ReorgRefactoring {
 	
 	private boolean fUpdateReferences;
+	private TextChangeManager fChangeManager;
+	
 	private final CodeGenerationSettings fSettings;
 	
 	public MoveRefactoring(List elements, CodeGenerationSettings settings){
@@ -60,21 +65,22 @@ public class MoveRefactoring extends ReorgRefactoring {
 		pm.beginTask("", 1);
 		try{
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkReadOnlyStatus());
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	private RefactoringStatus checkReadOnlyStatus() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
-			Object each= iter.next();
-			if (Checks.isReadOnly(each))
-				result.addError("Selected element " + ReorgUtils.getName(each) + "(or one or its sub-elements) is marked as read-only.");
-		}
-		return result;
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	/* non java-doc
@@ -211,16 +217,14 @@ public class MoveRefactoring extends ReorgRefactoring {
 		
 		pm.beginTask("", 2);
 		try{
-			CompositeChange composite= new CompositeChange("reorganize elements", 2){
+			CompositeChange composite= new CompositeChange("Reorganize elements", 2){
 				public boolean isUndoable(){ //XX this can be undoable in some cases. should enable it at some point.
 					return false; 
 				}
 			};
-			Object dest= getDestinationForCusAndFiles(getDestination());
-			if (dest instanceof IPackageFragment){			
-				MoveCuUpdateCreator creator= new MoveCuUpdateCreator(collectCus(), (IPackageFragment)dest, fSettings);
-				addAllChildren(composite, creator.createUpdateChange(new SubProgressMonitor(pm, 1)));
-			}
+			
+			addAllChildren(composite, new CompositeChange("Reorganize elements", fChangeManager.getAllChanges()));
+			
 			IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
 			if (fileMove instanceof ICompositeChange){
 				addAllChildren(composite, (ICompositeChange)fileMove);		
@@ -231,6 +235,18 @@ public class MoveRefactoring extends ReorgRefactoring {
 		} finally{
 			pm.done();
 		}
+	}
+	
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException {
+		if (! fUpdateReferences)
+			return new TextChangeManager();
+			
+		Object dest= getDestinationForCusAndFiles(getDestination());
+		if (dest instanceof IPackageFragment){			
+			MoveCuUpdateCreator creator= new MoveCuUpdateCreator(collectCus(), (IPackageFragment)dest, fSettings);
+			return creator.createChangeManager(new SubProgressMonitor(pm, 1));
+		} else 
+			return new TextChangeManager();
 	}
 	
 	private static void addAllChildren(CompositeChange collector, ICompositeChange composite){
