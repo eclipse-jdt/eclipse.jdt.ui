@@ -52,58 +52,58 @@ public class JarPackageWriter extends Object {
  		try {   	
 	    	docBuilder= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
-			throw new IOException("Could not get XML builder");
+			throw new IOException(JarPackagerMessages.getString("JarWriter.error.couldNotGetXmlBuilder")); //$NON-NLS-1$
  		}
 		Document document= docBuilder.newDocument();
 		
 		// Document and root node
-		Element xmlJarDesc= document.createElement("jardesc");
+		Element xmlJarDesc= document.createElement(JarPackage.DESCRIPTION_EXTENSION);
 		document.appendChild(xmlJarDesc);
 
 		// JAR location
-		Element jar= document.createElement("jar");
+		Element jar= document.createElement(JarPackage.EXTENSION);
 		xmlJarDesc.appendChild(jar);
-		jar.setAttribute("path", jarPackage.getJarLocation().toString());
+		jar.setAttribute("path", jarPackage.getJarLocation().toString()); //$NON-NLS-1$
 		
 		// Options
-		Element options= document.createElement("options");
+		Element options= document.createElement("options"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(options);
-		options.setAttribute("overwrite", "" + jarPackage.allowOverwrite());
-		options.setAttribute("compress", "" + jarPackage.isCompressed());
-		options.setAttribute("exportErrors", "" + jarPackage.exportWarnings());
-		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings());
-		options.setAttribute("logErrors", "" + jarPackage.logErrors());
-		options.setAttribute("logWarnings", "" + jarPackage.logWarnings());
-		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved());
-		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString());
+		options.setAttribute("overwrite", "" + jarPackage.allowOverwrite()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("compress", "" + jarPackage.isCompressed()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("exportErrors", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("logErrors", "" + jarPackage.logErrors()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("logWarnings", "" + jarPackage.logWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString()); //$NON-NLS-1$
 
 		// Manifest
-		Element manifest= document.createElement("manifest");
+		Element manifest= document.createElement("manifest"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(manifest);
-		manifest.setAttribute("manifestVersion", jarPackage.getManifestVersion());
-		manifest.setAttribute("usesManifest", "" + jarPackage.usesManifest());
-		manifest.setAttribute("reuseManifest", "" + jarPackage.isManifestReused());
-		manifest.setAttribute("saveManifest", "" + jarPackage.isManifestSaved());
-		manifest.setAttribute("generateManifest", "" + jarPackage.isManifestGenerated());
-		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toString());
+		manifest.setAttribute("manifestVersion", jarPackage.getManifestVersion()); //$NON-NLS-1$
+		manifest.setAttribute("usesManifest", "" + jarPackage.usesManifest()); //$NON-NLS-2$ //$NON-NLS-1$
+		manifest.setAttribute("reuseManifest", "" + jarPackage.isManifestReused()); //$NON-NLS-2$ //$NON-NLS-1$
+		manifest.setAttribute("saveManifest", "" + jarPackage.isManifestSaved()); //$NON-NLS-2$ //$NON-NLS-1$
+		manifest.setAttribute("generateManifest", "" + jarPackage.isManifestGenerated()); //$NON-NLS-2$ //$NON-NLS-1$
+		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toString()); //$NON-NLS-1$
 		if (jarPackage.getMainClass() != null)
-			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getMainClass().getHandleIdentifier());
+			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getMainClass().getHandleIdentifier()); //$NON-NLS-1$
 		// Sealing
-		Element sealing= document.createElement("sealing");
+		Element sealing= document.createElement("sealing"); //$NON-NLS-1$
 		manifest.appendChild(sealing);
-		sealing.setAttribute("sealJar", "" + jarPackage.isJarSealed());
-		Element packagesToSeal= document.createElement("packagesToSeal");
+		sealing.setAttribute("sealJar", "" + jarPackage.isJarSealed()); //$NON-NLS-2$ //$NON-NLS-1$
+		Element packagesToSeal= document.createElement("packagesToSeal"); //$NON-NLS-1$
 		sealing.appendChild(packagesToSeal);
 		add(jarPackage.getPackagesToSeal(), packagesToSeal, document);
-		Element packagesToUnSeal= document.createElement("packagesToUnSeal");
+		Element packagesToUnSeal= document.createElement("packagesToUnSeal"); //$NON-NLS-1$
 		sealing.appendChild(packagesToUnSeal);
 		add(jarPackage.getPackagesToUnseal(), packagesToUnSeal, document);
 
 		// Selected elements
-		Element selectedElements= document.createElement("selectedElements");
+		Element selectedElements= document.createElement("selectedElements"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
-		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported());
-		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported());
+		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
+		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		Iterator iter= jarPackage.getSelectedElements().iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();
@@ -130,39 +130,39 @@ public class JarPackageWriter extends Object {
     	Assert.isNotNull(jarPackage);
 		OutputStreamWriter streamWriter= new OutputStreamWriter(fOutputStream);
 		BufferedWriter writer= new BufferedWriter(streamWriter);
-		writer.write("--- JAR package def: ---");
+		writer.write(JarPackagerMessages.getString("JarWriter.output.title")); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("use to init:" + jarPackage.isUsedToInitialize());		
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.usedToInit", jarPackage.isUsedToInitialize())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("export bin: " + jarPackage.areClassFilesExported());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportBin", jarPackage.areClassFilesExported())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("export java:" + jarPackage.areJavaFilesExported());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportJava", jarPackage.areJavaFilesExported())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("JAR file:   " + jarPackage.getJarLocation().toOSString());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.jarFileName", jarPackage.getJarLocation().toOSString())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("compressed: " + jarPackage.isCompressed());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.compressed", jarPackage.isCompressed())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("overwrite:  " + jarPackage.allowOverwrite());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.overwrite", jarPackage.allowOverwrite())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("save desc:  " + jarPackage.isDescriptionSaved());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.saveDescription", jarPackage.isDescriptionSaved())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("desc file:  " + jarPackage.getDescriptionLocation().toString());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.descriptionFile", jarPackage.getDescriptionLocation())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("--");
+		writer.write(JarPackagerMessages.getString("JarWriter.output.lineSeparator")); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("generate MF " + jarPackage.isManifestGenerated());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.generateManifest", jarPackage.isManifestGenerated())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("save MF:    " + jarPackage.isManifestSaved());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.saveManifest", jarPackage.isManifestSaved())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("reuse MF:   " + jarPackage.isManifestReused());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.reuseManifest", jarPackage.isManifestReused())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("Manifest:   " + jarPackage.getManifestLocation().toString());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.manifestName", jarPackage.getManifestLocation())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("JAR sealed: " + jarPackage.isJarSealed());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.jarSealed", jarPackage.isJarSealed())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("Main-Class: " + jarPackage.getMainClassName());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.mainClass", jarPackage.getMainClassName())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write("Class-Path: " + jarPackage.getDownloadExtensionsPath());
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.downloadExtensionPath", jarPackage.getDownloadExtensionsPath())); //$NON-NLS-1$
 		writer.flush();
     }
 	/**
@@ -180,30 +180,30 @@ public class JarPackageWriter extends Object {
 	private void add(IResource resource, Element parent, Document document) {
 		Element element= null;
 		if (resource.getType() == IResource.PROJECT) {
-			element= document.createElement("project");
+			element= document.createElement("project"); //$NON-NLS-1$
 			parent.appendChild(element);
-			element.setAttribute("name", resource.getName());
+			element.setAttribute("name", resource.getName()); //$NON-NLS-1$
 			return;
 		}
 		if (resource.getType() == IResource.FILE)
-			element= document.createElement("file");
+			element= document.createElement("file"); //$NON-NLS-1$
 		else if (resource.getType() == IResource.FOLDER)
-			element= document.createElement("folder");
+			element= document.createElement("folder"); //$NON-NLS-1$
 		parent.appendChild(element);
-		element.setAttribute("path", resource.getFullPath().toString());
+		element.setAttribute("path", resource.getFullPath().toString()); //$NON-NLS-1$
 	}
 	
 	private void add(IJavaElement javaElement, Element parent, Document document) {
-		Element element= document.createElement("javaElement");
+		Element element= document.createElement("javaElement"); //$NON-NLS-1$
 		parent.appendChild(element);
-		element.setAttribute("handleIdentifier", javaElement.getHandleIdentifier());
+		element.setAttribute("handleIdentifier", javaElement.getHandleIdentifier()); //$NON-NLS-1$
 	}
 
 	private void add(IPackageFragment[] packages, Element parent, Document document) {
 		for (int i= 0; i < packages.length; i++) {
-			Element pkg= document.createElement("package");
+			Element pkg= document.createElement("package"); //$NON-NLS-1$
 			parent.appendChild(pkg);
-			pkg.setAttribute("handleIdentifier", packages[i].getHandleIdentifier());
+			pkg.setAttribute("handleIdentifier", packages[i].getHandleIdentifier()); //$NON-NLS-1$
 		}
 	}
 }

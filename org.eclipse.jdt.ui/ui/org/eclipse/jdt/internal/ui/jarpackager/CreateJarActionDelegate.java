@@ -18,7 +18,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(true, true, op);
 		} catch (InvocationTargetException ex) {
-			if (ExceptionHandler.handle(ex, shell, "JAR Export Error", "Creation of JAR failed"))
+			if (ExceptionHandler.handle(ex, shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.title"), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.message"))) //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 		} catch (InterruptedException e) {
 			// do nothing on cancel
@@ -26,6 +26,6 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK())
-			ProblemDialog.open(shell, "JAR Export Problems", null, status);
+			ProblemDialog.open(shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportProblems"), null, status); //$NON-NLS-1$
 	}
 }

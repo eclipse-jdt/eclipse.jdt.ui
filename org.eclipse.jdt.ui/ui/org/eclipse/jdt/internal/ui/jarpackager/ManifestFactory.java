@@ -12,8 +12,8 @@ public class ManifestFactory {
 	private static final ManifestFactory fgSingleton= new ManifestFactory();
 
 	// Constants
-	private static final String SEALED_VALUE= "true";
-	private static final String UNSEALED_VALUE= "false";
+	private static final String SEALED_VALUE= "true"; //$NON-NLS-1$
+	private static final String UNSEALED_VALUE= "false"; //$NON-NLS-1$
 	
 	private ManifestFactory() {
 	}

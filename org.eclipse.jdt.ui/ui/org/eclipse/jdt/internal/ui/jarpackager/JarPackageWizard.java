@@ -28,6 +28,9 @@ import java.lang.reflect.InvocationTargetException;import java.net.MalformedURL
  * </p>
  */
 public class JarPackageWizard extends Wizard implements IExportWizard {
+	
+	private static String DIALOG_SETTINGS_KEY= "JarPackageWizard"; //$NON-NLS-1$
+	
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
 	private JarPackage fJarPackage;
@@ -39,7 +42,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public JarPackageWizard() {
 		IDialogSettings workbenchSettings= JavaPlugin.getDefault().getDialogSettings();
-		IDialogSettings section= workbenchSettings.getSection("JarPackageWizard");
+		IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY); //$NON-NLS-1$
 		if (section == null)
 			fHasNewDialogSettings= true;
 		else {
@@ -64,7 +67,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	private ImageDescriptor getImageDescriptor(String relativePath) {
 		try {
 			URL installURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/full/" + relativePath);
+			URL url= new URL(installURL, "icons/full/" + relativePath); //$NON-NLS-1$
 			return ImageDescriptor.createFromURL(url);
 		} catch (MalformedURLException e) {
 			// Should not happen
@@ -91,7 +94,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fSelection= getValidSelection();
 		fJarPackage= new JarPackage();
 		fJarPackage.setIsUsedToInitialize(false);
-		setWindowTitle("JAR Packager");
+		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
@@ -108,7 +111,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fJarPackage= jarPackage;
 		fJarPackage.setIsUsedToInitialize(true);
 		fSelection= new StructuredSelection(fJarPackage.getSelectedElements());
-		setWindowTitle("JAR Packager");
+		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
@@ -123,8 +126,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		// Save the dialog settings
 		if (fHasNewDialogSettings) {
 			IDialogSettings workbenchSettings= JavaPlugin.getDefault().getDialogSettings();
-			IDialogSettings section= workbenchSettings.getSection("JarPackageWizard");
-			section= workbenchSettings.addNewSection("JarPackageWizard");
+			IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY);
+			section= workbenchSettings.addNewSection(DIALOG_SETTINGS_KEY);
 			setDialogSettings(section);
 		}		
 		IWizardPage[] pages= getPages();
@@ -146,12 +149,12 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException ex) {
-			if (ExceptionHandler.handle(ex, getShell(), "JAR Export Error", "Creation of JAR failed"))
+			if (ExceptionHandler.handle(ex, getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportError.title"), JarPackagerMessages.getString("JarPackageWizard.jarExportError.message"))) //$NON-NLS-2$ //$NON-NLS-1$
 				return false;
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {
-			ProblemDialog.open(getShell(), "JAR Export Problems", null, status);
+			ProblemDialog.open(getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportProblems.title"), null, status); //$NON-NLS-1$
 			return !(status.matches(IStatus.ERROR));
 		}
 		return true;

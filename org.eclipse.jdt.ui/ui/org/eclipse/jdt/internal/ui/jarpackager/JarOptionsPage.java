@@ -28,22 +28,22 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	private Button		fDescriptionFileBrowseButton;
 
 	// dialog store id constants
-	private final static String PAGE_NAME= "JarPackageWizardPage";
+	private final static String PAGE_NAME= "jarOptionsWizardPage"; //$NON-NLS-1$
 	
-	private final static String STORE_SHOW_WARNINGS= PAGE_NAME + ".SHOW_WARNINGS";
-	private final static String STORE_SHOW_ERRORS= PAGE_NAME + ".SHOW_ERRORS";
-	private final static String STORE_EXPORT_WARNINGS= PAGE_NAME + ".EXPORT_WARNINGS";
-	private final static String STORE_EXPORT_ERRORS= PAGE_NAME + ".EXPORT_ERRORS";
-	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION";
-	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION";
+	private final static String STORE_SHOW_WARNINGS= PAGE_NAME + ".SHOW_WARNINGS"; //$NON-NLS-1$
+	private final static String STORE_SHOW_ERRORS= PAGE_NAME + ".SHOW_ERRORS"; //$NON-NLS-1$
+	private final static String STORE_EXPORT_WARNINGS= PAGE_NAME + ".EXPORT_WARNINGS"; //$NON-NLS-1$
+	private final static String STORE_EXPORT_ERRORS= PAGE_NAME + ".EXPORT_ERRORS"; //$NON-NLS-1$
+	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
+	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION"; //$NON-NLS-1$
 
 	/**
 	 *	Create an instance of this class
 	 */
 	public JarOptionsPage(JarPackage jarPackage) {
-		super("jarOptionsWizardPage");
-		setTitle("JAR Packaging Options");
-		setDescription("Define the options for the JAR export");
+		super(PAGE_NAME);
+		setTitle(JarPackagerMessages.getString("JarOptionsPage.title")); //$NON-NLS-1$
+		setDescription(JarPackagerMessages.getString("JarOptionsPage.description")); //$NON-NLS-1$
 		fJarPackage= jarPackage;
 	}
 	/*
@@ -82,31 +82,31 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		layout.marginHeight= 0;
 		optionsGroup.setLayout(layout);
 
-		createLabel(optionsGroup, "How should problems be reported?", false);
+		createLabel(optionsGroup, JarPackagerMessages.getString("JarOptionsPage.howReportProblems.label"), false); //$NON-NLS-1$
 		fShowWarningsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fShowWarningsCheckbox.setText("Show warnings when export is done");
+		fShowWarningsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.showWarnings.text")); //$NON-NLS-1$
 		fShowWarningsCheckbox.addListener(SWT.Selection, this);
 
 		fShowErrorsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fShowErrorsCheckbox.setText("Show errors when export is done");
+		fShowErrorsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.showErrors.text")); //$NON-NLS-1$
 		fShowErrorsCheckbox.addListener(SWT.Selection, this);
 
 		createSpacer(optionsGroup);
-		createLabel(optionsGroup, "How should class files with problems be treated?", false);
+		createLabel(optionsGroup, JarPackagerMessages.getString("JarOptionsPage.howTreatProblems.label"), false); //$NON-NLS-1$
 
 		fExportErrorsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fExportErrorsCheckbox.setText("Export class files with compile errors");
+		fExportErrorsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportErrors.text")); //$NON-NLS-1$
 		fExportErrorsCheckbox.addListener(SWT.Selection, this);
 
 		fExportWarningsCheckbox	= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fExportWarningsCheckbox.setText("Export class files with compile warnings");
+		fExportWarningsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportWarnings.text")); //$NON-NLS-1$
 		fExportWarningsCheckbox.addListener(SWT.Selection, this);
 
 		createSpacer(optionsGroup);
 //		createLabel(optionsGroup, "What do you want to export?", false);
 
 		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fSaveDescriptionCheckbox.setText("Save the description of this JAR in the workspace");
+		fSaveDescriptionCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.saveDescription.text")); //$NON-NLS-1$
 		fSaveDescriptionCheckbox.addListener(SWT.Selection, this);
 
 		createDescriptionFileGroup(parent);
@@ -185,12 +185,12 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	protected void handleDescriptionFileBrowseButtonPressed() {
 		SaveAsDialog dialog= new SaveAsDialog(getContainer().getShell());
 		dialog.create();
-		dialog.getShell().setText("Save As");
-		dialog.setMessage("Select location and name for the descripton");
+		dialog.getShell().setText(JarPackagerMessages.getString("JarOptionsPage.saveAsDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JarPackagerMessages.getString("JarOptionsPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getResult();
-			path= path.removeFileExtension().addFileExtension("jardesc");
+			path= path.removeFileExtension().addFileExtension(JarPackage.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());
 		}
 	}
@@ -214,23 +214,23 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 				return false;
 			}
 			IPath location= fJarPackage.getDescriptionLocation();
-			if (!location.toString().startsWith("/")) {
-				setErrorMessage("Description file path must be absolute (start with /)");
+			if (!location.toString().startsWith("/")) { //$NON-NLS-1$
+				setErrorMessage(JarPackagerMessages.getString("JarOptionsPage.error.descriptionMustBeAbsolute")); //$NON-NLS-1$
 				return false;
 			}			
 			IResource resource= findResource(location);
 			if (resource != null && resource.getType() != IResource.FILE) {
-				setErrorMessage("The description file location must not be an existing container");
+				setErrorMessage(JarPackagerMessages.getString("JarOptionsPage.error.descriptionMustNotBeExistingContainer")); //$NON-NLS-1$
 				return false;
 			}
 			resource= findResource(location.removeLastSegments(1));
 			if (resource == null || resource.getType() == IResource.FILE) {
-				setErrorMessage("Container for description file does not exist");
+				setErrorMessage(JarPackagerMessages.getString("JarOptionsPage.error.descriptionContainerDoesNotExist")); //$NON-NLS-1$
 				return false;
 			}
 			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
 			if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
-				setErrorMessage("Description file extension must be '.jardesc'");
+				setErrorMessage(JarPackagerMessages.getFormattedString("JarOptionsPage.error.invalidDescriptionExtension", JarPackage.DESCRIPTION_EXTENSION)); //$NON-NLS-1$
 				return false;
 			}
 		}
@@ -259,7 +259,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fDescriptionFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
 
 		fDescriptionFileLabel= new Label(fDescriptionFileGroup, SWT.NONE);
-		fDescriptionFileLabel.setText("Description file:");
+		fDescriptionFileLabel.setText(JarPackagerMessages.getString("JarOptionsPage.descriptionFile.label")); //$NON-NLS-1$
 
 		// destination name entry field
 		fDescriptionFileText= new Text(fDescriptionFileGroup, SWT.SINGLE | SWT.BORDER);
@@ -270,7 +270,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 
 		// destination browse button
 		fDescriptionFileBrowseButton= new Button(fDescriptionFileGroup, SWT.PUSH);
-		fDescriptionFileBrowseButton.setText("Browse...");
+		fDescriptionFileBrowseButton.setText(JarPackagerMessages.getString("JarOptionsPage.browseButton.text")); //$NON-NLS-1$
 		fDescriptionFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fDescriptionFileBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

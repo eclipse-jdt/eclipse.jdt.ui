@@ -29,15 +29,15 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 		} catch (CoreException ex) {
 			errorDetail= ex.getMessage();
 		} catch (SAXException ex) {
-			errorDetail= "Bad XML format: " + ex.getMessage();
+			errorDetail= JarPackagerMessages.getString("OpenJarPackageWizardDelegate.badXmlFormat") + ex.getMessage(); //$NON-NLS-1$
 		}
 		// Handle exceptions
 		if (jarPackage == null) {
-			MessageDialog.openError(parent, "Open JAR Packager Error", "Reading JAR package description from file failed.\n" + errorDetail);
+			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
 		if (jarPackage.logWarnings() && getReader() != null && !getReader().getWarnings().isOK())
-			ProblemDialog.open(parent, "JAR Description Reader Warnings", null, getReader().getWarnings());
+			ProblemDialog.open(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.jarDescriptionReaderWarnings.title"), null, getReader().getWarnings()); //$NON-NLS-1$
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

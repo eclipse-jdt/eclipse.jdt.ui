@@ -47,33 +47,33 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	private Text		fDownloadExtensionText;
 	
 	// Dialog store id constants
-	private final static String PAGE_NAME= "JarManifestWizardPage";
+	private final static String PAGE_NAME= "JarManifestWizardPage"; //$NON-NLS-1$
 	
 	// Manifest creation
-	private final static String STORE_GENERATE_MANIFEST= PAGE_NAME + ".GENERATE_MANIFEST";
-	private final static String STORE_SAVE_MANIFEST= PAGE_NAME + ".SAVE_MANIFEST";
-	private final static String STORE_REUSE_MANIFEST= PAGE_NAME + ".REUSE_MANIFEST";
-	private final static String STORE_MANIFEST_LOCATION= PAGE_NAME + ".MANIFEST_LOCATION";
+	private final static String STORE_GENERATE_MANIFEST= PAGE_NAME + ".GENERATE_MANIFEST"; //$NON-NLS-1$
+	private final static String STORE_SAVE_MANIFEST= PAGE_NAME + ".SAVE_MANIFEST"; //$NON-NLS-1$
+	private final static String STORE_REUSE_MANIFEST= PAGE_NAME + ".REUSE_MANIFEST"; //$NON-NLS-1$
+	private final static String STORE_MANIFEST_LOCATION= PAGE_NAME + ".MANIFEST_LOCATION"; //$NON-NLS-1$
 	
 	// Sealing
-	private final static String STORE_SEAL_JAR= PAGE_NAME + ".SEAL_JAR";
-	private final static String STORE_SEALED_PACKAGES= PAGE_NAME + ".SEALED_PACKAGES";
-	private final static String STORE_UNSEALED_PACKAGES= PAGE_NAME + ".UNSEALED_PACKAGES";
+	private final static String STORE_SEAL_JAR= PAGE_NAME + ".SEAL_JAR"; //$NON-NLS-1$
+	private final static String STORE_SEALED_PACKAGES= PAGE_NAME + ".SEALED_PACKAGES"; //$NON-NLS-1$
+	private final static String STORE_UNSEALED_PACKAGES= PAGE_NAME + ".UNSEALED_PACKAGES"; //$NON-NLS-1$
 	
 	// Main class
-	private final static String STORE_MAIN_CLASS_NAME= PAGE_NAME + ".MAIN_CLASS_NAME";
+	private final static String STORE_MAIN_CLASS_NAME= PAGE_NAME + ".MAIN_CLASS_NAME"; //$NON-NLS-1$
 	
 	// Download extension path
 
-	private final static String STORE_DOWNLOAD_EXTENSIONS= PAGE_NAME + ".DOWNLOAD_EXTENSIONS";
+	private final static String STORE_DOWNLOAD_EXTENSIONS= PAGE_NAME + ".DOWNLOAD_EXTENSIONS"; //$NON-NLS-1$
 
 	/**
 	 *	Create an instance of this class
 	 */
 	public JarManifestWizardPage(JarPackage jarPackage) {
-		super("jarPackageWizardPage");
-		setTitle("JAR Manifest Specification");
-		setDescription("Customize the manifest file for the JAR package");
+		super(PAGE_NAME);
+		setTitle(JarPackagerMessages.getString("JarManifestWizardPage.title")); //$NON-NLS-1$
+		setDescription(JarPackagerMessages.getString("JarManifestWizardPage.description")); //$NON-NLS-1$
 		fJarPackage= jarPackage;
 	}
 
@@ -91,18 +91,18 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		createLabel(composite, "Where does the manifest come from?", false);
+		createLabel(composite, JarPackagerMessages.getString("JarManifestWizardPage.manifestSource.label"), false); //$NON-NLS-1$
 		createManifestGroup(composite);
 
 		createSpacer(composite);
 
-		fSealingHeaderLabel= createLabel(composite, "Which packages must be sealed?", false);
+		fSealingHeaderLabel= createLabel(composite, JarPackagerMessages.getString("JarManifestWizardPage.sealingHeader.label"), false); //$NON-NLS-1$
 		createSealingGroup(composite);
 
 //		createSpacer(composite);
 		new Label(composite, SWT.NONE); // vertical spacer
 
-		fMainClassHeaderLabel= createLabel(composite, "Which class is the application's entry point?", false);
+		fMainClassHeaderLabel= createLabel(composite, JarPackagerMessages.getString("JarManifestWizardPage.mainClassHeader.label"), false); //$NON-NLS-1$
 		createMainClassGroup(composite);
 
 //		fDownloadHeaderLabel= createLabel(composite, "What are your download extensions?", false);
@@ -131,7 +131,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fManifestGroup.setLayout(layout);
 
 		fGenerateManifestRadioButton= new Button(fManifestGroup, SWT.RADIO | SWT.LEFT);
-		fGenerateManifestRadioButton.setText("Generate the manifest file");
+		fGenerateManifestRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.genetateManifest.text")); //$NON-NLS-1$
 		fGenerateManifestRadioButton.addListener(SWT.Selection, this);
 
 			Composite saveOptions= new Composite(fManifestGroup, SWT.NONE);
@@ -141,16 +141,16 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			saveOptions.setLayout(saveOptionsLayout);
 	
 			fSaveManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
-			fSaveManifestCheckbox.setText("Save the manifest in the workspace");
+			fSaveManifestCheckbox.setText(JarPackagerMessages.getString("JarManifestWizardPage.saveManifest.text")); //$NON-NLS-1$
 			fSaveManifestCheckbox.addListener(SWT.MouseUp, this);
 	
 			fReuseManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
-			fReuseManifestCheckbox.setText("Reuse and save the manifest in the workspace");
+			fReuseManifestCheckbox.setText(JarPackagerMessages.getString("JarManifestWizardPage.reuseManifest.text")); //$NON-NLS-1$
 			
 			createNewManifestFileGroup(saveOptions);
 
 		fUseManifestRadioButton= new Button(fManifestGroup, SWT.RADIO | SWT.LEFT);
-		fUseManifestRadioButton.setText("Use existing manifest from workspace");
+		fUseManifestRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.useManifest.text")); //$NON-NLS-1$
 			Composite existingManifestGroup= new Composite(fManifestGroup, SWT.NONE);
 			GridLayout existingManifestLayout= new GridLayout();
 			existingManifestLayout.marginHeight= 0;
@@ -168,7 +168,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		manifestFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
 
 		fNewManifestFileLabel= new Label(manifestFileGroup, SWT.NONE);
-		fNewManifestFileLabel.setText("Manifest file:");
+		fNewManifestFileLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.newManifestFile.text")); //$NON-NLS-1$
 
 		// entry field
 		fNewManifestFileText = new Text(manifestFileGroup, SWT.SINGLE | SWT.BORDER);
@@ -179,7 +179,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// browse button
 		fNewManifestFileBrowseButton= new Button(manifestFileGroup, SWT.PUSH);
-		fNewManifestFileBrowseButton.setText("Browse...");
+		fNewManifestFileBrowseButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.newManifestFileBrowseButton.text")); //$NON-NLS-1$
 		fNewManifestFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fNewManifestFileBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -197,7 +197,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		manifestFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
 
 		fManifestFileLabel= new Label(manifestFileGroup, SWT.NONE);
-		fManifestFileLabel.setText("Manifest file:");
+		fManifestFileLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.manifestFile.text")); //$NON-NLS-1$
 
 		// entry field
 		fManifestFileText = new Text(manifestFileGroup, SWT.SINGLE | SWT.BORDER);
@@ -208,7 +208,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// browse button
 		fManifestFileBrowseButton= new Button(manifestFileGroup, SWT.PUSH);
-		fManifestFileBrowseButton.setText("Browse...");
+		fManifestFileBrowseButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.manifestFileBrowse.text")); //$NON-NLS-1$
 		fManifestFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fManifestFileBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -239,11 +239,11 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 */
 	protected void createSealJarGroup(Composite sealGroup) {
 		fSealJarRadioButton= new Button(sealGroup, SWT.RADIO);
-		fSealJarRadioButton.setText("Seal the JAR");
+		fSealJarRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.sealJar.text")); //$NON-NLS-1$
 		fSealJarRadioButton.addListener(SWT.Selection, this);
 
 		fUnSealedPackagesDetailsButton= new Button(sealGroup, SWT.PUSH);
-		fUnSealedPackagesDetailsButton.setText("Details...");
+		fUnSealedPackagesDetailsButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.unsealPackagesButton.text")); //$NON-NLS-1$
 		fUnSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleUnSealPackagesDetailsButtonPressed();
@@ -258,10 +258,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 */
 	protected void createSealPackagesGroup(Composite sealGroup) {
 		fSealPackagesRadioButton= new Button(sealGroup, SWT.RADIO);
-		fSealPackagesRadioButton.setText("Seal some packages");
+		fSealPackagesRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.sealPackagesButton.text")); //$NON-NLS-1$
 
 		fSealedPackagesDetailsButton= new Button(sealGroup, SWT.PUSH);
-		fSealedPackagesDetailsButton.setText("Details...");
+		fSealedPackagesDetailsButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackesDetailsButton.text")); //$NON-NLS-1$
 		fSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleSealPackagesDetailsButtonPressed();
@@ -278,7 +278,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		mainClassGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
 
 		fMainClassLabel= new Label(mainClassGroup, SWT.NONE);
-		fMainClassLabel.setText("Main-Class:");
+		fMainClassLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.mainClass.label")); //$NON-NLS-1$
 
 		// entry field
 		fMainClassText= new Text(mainClassGroup, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
@@ -289,7 +289,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// browse button
 		fMainClassBrowseButton= new Button(mainClassGroup, SWT.PUSH);
-		fMainClassBrowseButton.setText("Browse...");
+		fMainClassBrowseButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.mainClassBrowseButton.text")); //$NON-NLS-1$
 		fMainClassBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fMainClassBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -307,7 +307,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		downloadExtensionGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
 
 		fDownloadExtensionLabel= new Label(downloadExtensionGroup, SWT.NONE);
-		fDownloadExtensionLabel.setText("Class-Path:");
+		fDownloadExtensionLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.downloadExtension.label")); //$NON-NLS-1$
 
 		// entry field
 		fDownloadExtensionText= new Text(downloadExtensionGroup, SWT.SINGLE | SWT.BORDER);
@@ -337,8 +337,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		// Use Save As dialog to select a new file inside the workspace
 		SaveAsDialog dialog= new SaveAsDialog(getContainer().getShell());
 		dialog.create();
-		dialog.getShell().setText("Save As");
-		dialog.setMessage("Select location and name for the manifest");
+		dialog.getShell().setText(JarPackagerMessages.getString("JarManifestWizardPage.saveAsDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getManifestLocation()));
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setManifestLocation(dialog.getResult());
@@ -347,15 +347,15 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	}
 
 	protected void handleManifestFileBrowseButtonPressed() {
-		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog("Manifest Selection", "Select the manifest file which should be added to the JAR");
+		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.title"), JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		if (fJarPackage.doesManifestExist())
 			dialog.setInitialSelections(new IResource[] {fJarPackage.getManifestFile()});
 		if (dialog.open() ==  dialog.OK) {
 			Object[] resources= dialog.getResult();
 			if (resources.length != 1)
-				setErrorMessage("Only one manifest must be selected");
+				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.onlyOneManifestMustBeSelected")); //$NON-NLS-1$
 			else {
-				setErrorMessage("");
+				setErrorMessage(""); //$NON-NLS-1$
 				fJarPackage.setManifestLocation(((IResource)resources[0]).getFullPath());
 				fManifestFileText.setText(fJarPackage.getManifestLocation().toString());
 			}
@@ -365,13 +365,13 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	protected void handleMainClassBrowseButtonPressed() {
 		List resources= fJarPackage.getSelectedResources();
 		if (resources == null) {
-			setErrorMessage("No resources selected");
+			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noResourceSelected")); //$NON-NLS-1$
 			return;
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
 		SelectionStatusDialog dialog= (SelectionStatusDialog)JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false);
-		dialog.setTitle("Select Main Class");
-		dialog.setMessage("Select the class which is the application's entry point");
+		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.message")); //$NON-NLS-1$
 		IType mainClass= fJarPackage.getMainClass();
 		if (mainClass != null)
 			dialog.setInitialSelections(new String[] {mainClass.getElementName()});
@@ -389,8 +389,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 	protected void handleSealPackagesDetailsButtonPressed() {
 		SelectionDialog dialog= createPackageDialog(fJarPackage.getPackagesForSelectedResources());
-		dialog.setTitle("Seal Packages");
-		dialog.setMessage("Select the packages which should be sealed in the JAR");
+		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToSeal());
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setPackagesToSeal(getPackagesFromDialog(dialog));
@@ -400,8 +400,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 	protected void handleUnSealPackagesDetailsButtonPressed() {
 		SelectionDialog dialog= createPackageDialog(fJarPackage.getPackagesForSelectedResources());
-		dialog.setTitle("Unseal Packages");
-		dialog.setMessage("Select the packages which should be unsealed in the JAR");
+		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToUnseal());
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setPackagesToUnseal(getPackagesFromDialog(dialog));
@@ -449,25 +449,24 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	}
 		
 	protected void updateSealingInfo() {
-		String additionalSpace= "                                             ";
 		if (fJarPackage.isJarSealed()) {
 			int i= fJarPackage.getPackagesToUnseal().length;
 			if (i == 0)
-				fSealingInfoLabel.setText("JAR sealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.jarSealed")); //$NON-NLS-1$
 			else if (i == 1)
-				fSealingInfoLabel.setText("JAR sealed, but 1 package unsealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.jarSealedExceptOne")); //$NON-NLS-1$
 			else
-				fSealingInfoLabel.setText("JAR sealed, but " + i + "packages unsealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getFormattedString("JarManifestWizardPage.jarSealedExceptSome", new Integer(i))); //$NON-NLS-1$
 				
 		}
 		else {
 			int i= fJarPackage.getPackagesToSeal().length;
 			if (i == 0)
-				fSealingInfoLabel.setText("Nothing sealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.nothingSealed")); //$NON-NLS-1$
 			else if (i == 1)
-				fSealingInfoLabel.setText("1 package sealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.onePackageSealed")); //$NON-NLS-1$
 			else
-				fSealingInfoLabel.setText(i + " packages sealed" + additionalSpace);
+				fSealingInfoLabel.setText(JarPackagerMessages.getFormattedString("JarManifestWizardPage.somePackagesSealed", new Integer(i))); //$NON-NLS-1$
 		}
 	}
 	/*
@@ -480,18 +479,18 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 					incompleteButNotAnError= true;
 			else {
 				IPath location= fJarPackage.getManifestLocation();
-				if (!location.toString().startsWith("/")) {
-					setErrorMessage("Manifest file path must be absolute (start with /)");
+				if (!location.toString().startsWith("/")) { //$NON-NLS-1$
+					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.manifestPathMustBeAbsolute")); //$NON-NLS-1$
 					return false;
 				}			
 				IResource resource= findResource(location);
 				if (resource != null && resource.getType() != IResource.FILE) {
-					setErrorMessage("The manifest file location must not be an existing container");
+					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.manifestMustNotBeExistingContainer")); //$NON-NLS-1$
 					return false;
 				}
 				resource= findResource(location.removeLastSegments(1));
 				if (resource == null || resource.getType() == IResource.FILE) {
-					setErrorMessage("Container for manifest file does not exist");
+					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.manifestContainerDoesNotExist")); //$NON-NLS-1$
 					return false;
 				}
 			}
@@ -500,18 +499,18 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			if (fJarPackage.getManifestLocation().toString().length() == 0)
 					incompleteButNotAnError= true;
 			else {			
-				setErrorMessage("Invalid manifest file specified");
+				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidManifestFile")); //$NON-NLS-1$
 				return false;
 			}
 		}
 		if (fJarPackage.isJarSealed()
 				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
-			setErrorMessage("Some of the unsealed packages are no longer within the selection");
+			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.unsealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
 		if (!fJarPackage.isJarSealed()
 				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToSeal()))) {
-			setErrorMessage("Some of the sealed packages are no longer within the selection");
+			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.sealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
 		if (incompleteButNotAnError) {
@@ -650,7 +649,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		else
 			path= fManifestFileText.getText();
 		if (path == null)
-			path= "";
+			path= ""; //$NON-NLS-1$
 		fJarPackage.setManifestLocation(new Path(path));
 
 		// Sealing
@@ -765,7 +764,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 				kind= fragment.getKind();
 				containsJavaElements= fragment.getChildren().length > 0;
 			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, getContainer().getShell(), "JAR Package Wizard Error", "The package " + fragment.getElementName() + " seems to be corrupt. It will be ignored");
+				ExceptionHandler.handle(ex, getContainer().getShell(), JarPackagerMessages.getString("JarManifestWizardPage.error.jarPackageWizardError.title"), JarPackagerMessages.getFormattedString("JarManifestWizardPage.error.jarPackageWizardError.message", fragment.getElementName())); //$NON-NLS-2$ //$NON-NLS-1$
 				continue;
 			}
 			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
@@ -801,7 +800,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 				if (selection.length == 1 && (selection[0] instanceof IFile))
 					res.setOK();
 				else
-					res.setError("");
+					res.setError(""); //$NON-NLS-1$
 			}
 		});
 		dialog.addFilter(new EmptyInnerPackageFilter());

@@ -46,8 +46,8 @@ public class JarWriter {
 	 * 				if user selected not to overwrite the existing JAR
 	 */
 	public JarWriter(JarPackage jarPackage, Shell parent) throws IOException, CoreException, OperationCanceledException {
-		Assert.isNotNull(jarPackage, "The JAR specification is null");
-		Assert.isTrue(jarPackage.isValid(), "The JAR package specification is invalid");
+		Assert.isNotNull(jarPackage, JarPackagerMessages.getString("JarWriter.error.jarSpecificationIsNull")); //$NON-NLS-1$
+		Assert.isTrue(jarPackage.isValid(), JarPackagerMessages.getString("JarWriter.error.invalidJarSpecification")); //$NON-NLS-1$
 		if (!jarPackage.canCreateJar(parent))
 			throw new OperationCanceledException();
 		if (jarPackage.usesManifest() && jarPackage.areClassFilesExported()) {
@@ -91,7 +91,7 @@ public class JarWriter {
 		try {
 			output= new ByteArrayOutputStream();
 			if (!resource.isLocal(IResource.DEPTH_ZERO))
-				throw new IOException("File not accessible: " + resource.getFullPath().toString());
+				throw new IOException(JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath())); //$NON-NLS-1$
 			contentStream= new BufferedInputStream(resource.getContents(false));
 			int chunkSize= contentStream.available();
 			byte[] readBuffer= new byte[chunkSize];

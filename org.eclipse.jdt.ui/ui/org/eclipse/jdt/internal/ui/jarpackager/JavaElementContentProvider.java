@@ -171,7 +171,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		try {
 			processDelta(delta);
 		} catch(JavaModelException e) {
-			JavaPlugin.getDefault().logErrorStatus("Child non present", e.getStatus());
+			JavaPlugin.getDefault().logErrorStatus(JarPackagerMessages.getString("JavaElementContentProvider.error.childNotPresent.message"), e.getStatus()); //$NON-NLS-1$
 		}
 	}
 	

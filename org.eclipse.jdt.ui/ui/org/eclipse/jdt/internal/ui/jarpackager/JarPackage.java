@@ -37,8 +37,8 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt
 public class JarPackage implements java.io.Serializable {
 
 	// Constants
-	public static final String EXTENSION= "jar";
-	public static final String DESCRIPTION_EXTENSION= "jardesc";
+	public static final String EXTENSION= "jar"; //$NON-NLS-1$
+	public static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
 
 	private String	fManifestVersion;
 	private transient boolean fIsUsedToInitialize;
@@ -47,8 +47,8 @@ public class JarPackage implements java.io.Serializable {
 	 * What to export - internal locations
 	 * The list fExportedX is null if fExportX is false)
 	 */	
-	private boolean fExportClassFiles;				// export generated class files and resources
-	private boolean	fExportJavaFiles;				// export java files and resources
+	private boolean fExportClassFiles;		// export generated class files and resources
+	private boolean	fExportJavaFiles;		// export java files and resources
 	private List	fSelectedElements;		// internal locations
 
 	private IPath	fJarLocation;			// external location
@@ -93,14 +93,14 @@ public class JarPackage implements java.io.Serializable {
 		setExportClassFiles(true);
 		setCompress(true);
 		setSaveDescription(false);
-		setJarLocation(new Path(""));
-		setDescriptionLocation(new Path(""));
+		setJarLocation(new Path("")); //$NON-NLS-1$
+		setDescriptionLocation(new Path("")); //$NON-NLS-1$
 		setUsesManifest(true);
 		setGenerateManifest(true);
 		setReuseManifest(false);
 		setSaveManifest(false);
-		setManifestLocation(new Path(""));
-		setDownloadExtensionsPath("");		setExportErrors(true);		setExportWarnings(true);		
+		setManifestLocation(new Path("")); //$NON-NLS-1$
+		setDownloadExtensionsPath(""); //$NON-NLS-1$		setExportErrors(true);		setExportWarnings(true);		
 		setLogErrors(true);		setLogWarnings(true);			}
 	// ----------- Accessors -----------
 		/**	 * Tells whether the JAR is compressed or not.	 * 	 * @return	<code>true</code> if the JAR is compressed	 */
@@ -320,7 +320,7 @@ public class JarPackage implements java.io.Serializable {
 	 */
 	public String getMainClassName() {
 		if (fMainClass == null)
-			return "";
+			return ""; //$NON-NLS-1$
 		else
 			return fMainClass.getFullyQualifiedName();
 	}
@@ -357,7 +357,7 @@ public class JarPackage implements java.io.Serializable {
 	 */
 	public String getManifestVersion() {
 		if (fManifestVersion == null)
-			return "1.0";
+			return "1.0"; //$NON-NLS-1$
 		return fManifestVersion;
 	}
 	/**
@@ -469,7 +469,7 @@ public class JarPackage implements java.io.Serializable {
 		try {
 			writer.writeString(this);
 		} catch (IOException ex) {
-			return "";
+			return ""; //$NON-NLS-1$
 		} finally {
 			try {
 				if (writer != null)
@@ -480,7 +480,7 @@ public class JarPackage implements java.io.Serializable {
 		}
 		return out.toString();
 	}
-	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, "Confirm Create", "The location for the JAR file does not exist. Would you like to create it?");	}	private boolean askForOverwritePermission(final Shell parent, String filePath) {		if (parent == null)			return false;		return queryDialog(parent, "Confirm Replace", "The file '" + filePath + "' already exists.\nDo you want to overwrite it?");	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
+	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmCreate.title"), JarPackagerMessages.getString("JarPackage.confirmCreate.message")); //$NON-NLS-2$ //$NON-NLS-1$	}	private boolean askForOverwritePermission(final Shell parent, String filePath) {		if (parent == null)			return false;		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmReplace.title"), JarPackagerMessages.getFormattedString("JarPackage.confirmReplace.message", filePath)); //$NON-NLS-2$ //$NON-NLS-1$	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
 		
 		class DialogReturnValue {
 			boolean value;
