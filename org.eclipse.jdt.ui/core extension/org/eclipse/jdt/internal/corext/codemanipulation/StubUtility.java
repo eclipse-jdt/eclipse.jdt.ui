@@ -50,7 +50,7 @@ public class StubUtility {
 		}
 			
 	}
-	
+
 
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
@@ -63,7 +63,23 @@ public class StubUtility {
 	 * @throws JavaModelException
 	 */
 	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
-		IType declaringtype= method.getDeclaringType();	
+		return genStub(destTypeName, method, method.getDeclaringType(), settings, imports);
+	}
+	
+
+	/**
+	 * Generates a stub. Given a template method, a stub with the same signature
+	 * will be constructed so it can be added to a type.
+	 * @param definingType The name of the type to which the method will be added to (Used for the constructor)
+	 * @param method A method template (method belongs to different type than the parent)
+	 * @param declaringType The type that declares the method.
+	 * @param options Options as defined above (<code>GenStubSettings</code>)
+	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
+	 * all type names are qualified.
+	 * @throws JavaModelException
+	 */
+	public static String genStub(String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
+		IType parentType= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
@@ -84,7 +100,7 @@ public class StubUtility {
 				// java doc
 				if (settings.methodOverwrites) {
 					boolean isDeprecated= Flags.isDeprecated(flags);
-					genJavaDocSeeTag(declaringtype, methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
+					genJavaDocSeeTag(definingType, methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + methodName; //$NON-NLS-1$
@@ -94,7 +110,7 @@ public class StubUtility {
 			buf.append('\n');
 		}
 		
-		if (Flags.isPublic(flags) || isConstructor || (declaringtype.isInterface() && !settings.noBody)) {
+		if (Flags.isPublic(flags) || isConstructor || (parentType.isInterface() && !settings.noBody)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -119,7 +135,7 @@ public class StubUtility {
 		} else {
 			String retTypeFrm;
 			if (!isPrimitiveType(retTypeSig)) {
-				retTypeFrm= resolveAndAdd(retTypeSig, declaringtype, imports);
+				retTypeFrm= resolveAndAdd(retTypeSig, parentType, imports);
 			} else {
 				retTypeFrm= Signature.toString(retTypeSig);
 			}
@@ -133,7 +149,7 @@ public class StubUtility {
 			String paramTypeFrm;
 			
 			if (!isPrimitiveType(paramTypeSig)) {
-				paramTypeFrm= resolveAndAdd(paramTypeSig, declaringtype, imports);
+				paramTypeFrm= resolveAndAdd(paramTypeSig, parentType, imports);
 			} else {
 				paramTypeFrm= Signature.toString(paramTypeSig);
 			}
@@ -151,7 +167,7 @@ public class StubUtility {
 			buf.append(" throws "); //$NON-NLS-1$
 			for (int i= 0; i <= lastExc; i++) {
 				String excTypeSig= excTypes[i];
-				String excTypeFrm= resolveAndAdd(excTypeSig, declaringtype, imports);
+				String excTypeFrm= resolveAndAdd(excTypeSig, parentType, imports);
 				buf.append(excTypeFrm);
 				if (i < lastExc) {
 					buf.append(", "); //$NON-NLS-1$
@@ -329,7 +345,7 @@ public class StubUtility {
 			IMethod curr= superMethods[i];
 			if (curr.isConstructor() && (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags()))) {
 				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
-					String newStub= genStub(typeName, superMethods[i], genStubSettings, imports);
+					String newStub= genStub(typeName, curr, genStubSettings, imports);
 					newMethods.add(newStub);
 				}
 			}
@@ -428,13 +444,15 @@ public class StubUtility {
 		for (int i= 0; i < toImplementArray.length; i++) {
 			IMethod curr= toImplementArray[i];
 			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			genStubSettings.callSuper= (overrides != null);
-						
-			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			if (desc != null) {
-				curr= desc;
+			if (overrides != null) {
+				genStubSettings.callSuper= true;
+				curr= overrides;
 			}
-			result[i]= genStub(type.getElementName(), curr, genStubSettings, imports);
+			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+			if (desc == null) {
+				desc= curr;
+			}
+			result[i]= genStub(type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
 		}
 		return result;
 	}

@@ -73,7 +73,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				settings.callSuper= declaringType.isClass() && !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags());
 				settings.methodOverwrites= !Flags.isStatic(method.getFlags());
 
-				String stub= StubUtility.genStub(fTypeName, method, settings, impStructure);
+				String stub= StubUtility.genStub(fTypeName, method, definingType, settings, impStructure);
 
 				// use the code formatter
 				String lineDelim= StubUtility.getLineDelimiterFor(document);

@@ -139,7 +139,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						genStubSetting.methodOverwrites= true;
 					
 						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, fType, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-						content= StubUtility.genStub(fType.getElementName(), declaration, genStubSetting, imports);	
+						content= StubUtility.genStub(fType.getElementName(), overwrittenMethod, declaration.getDeclaringType(), genStubSetting, imports);	
 					}
 					IJavaElement sibling= null;
 					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);
