@@ -280,7 +280,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		if (!event.doit)
 			return;
 
-		int offset= event.start;
+		IRegion region= fViewer.getVisibleRegion();
+
+		int offset= event.start + region.getOffset();
 		int length= event.end - event.start;
 
 		// allow changes only within linked positions when coming through UI
