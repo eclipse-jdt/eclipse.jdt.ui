@@ -83,6 +83,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
+	private static final String PREF_PB_INCOMPATIBLE_JDK_LEVEL= JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL;
 	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
 	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD;
@@ -140,7 +141,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
 		PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 		PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
-		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD
+		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL
 	};	
 	
 	protected String[] getAllKeys() {
@@ -305,6 +306,16 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
+
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+		};
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_check_prereq_binary_level.label");  //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
