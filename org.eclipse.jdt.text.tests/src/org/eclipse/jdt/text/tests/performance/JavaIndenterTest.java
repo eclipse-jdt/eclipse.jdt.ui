@@ -76,22 +76,16 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
-		System.out.println("before loop");
 		for (int i= 0; i < runs; i++) {
 			performanceMeter.start();
-			System.out.println("before pressKeyCode");
 			SWTEventHelper.pressKeyCode(display, SWT.CR, false);
-			System.out.println("before event loop");
 			long timeout= System.currentTimeMillis() + 5000;			
 			while (originalNumberOfLines + 1 != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
 				EditorTestHelper.runEventQueue();
-			System.out.println("before stop");
 			performanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
-			System.out.println("before undo");
 			runAction(undo);
 			timeout= System.currentTimeMillis() + 1000;
-			System.out.println("before event loop 2");
 			while (originalNumberOfLines != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
 				EditorTestHelper.runEventQueue();
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());

@@ -230,24 +230,14 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		});
 		performanceMeter.setTimeout(30000);
 		int offset= EditorTestHelper.getDocument(fEditor).getLineOffset(line) + column;
-		System.out.println("\tafter getDocument");
 		fEditor.selectAndReveal(offset, 0);
-		System.out.println("\tafter selectAndReveal");
 		Display display= EditorTestHelper.getActiveDisplay();
-		System.out.println("\tafter getActiveDisplay");
 		EditorTestHelper.runEventQueue(200);
-		System.out.println("\tafter runEventQueue2");
 		performanceMeter.start();
-		System.out.println("\tafter start");
 		SWTEventHelper.pressKeyChar(display, ch);
-		System.out.println("\tafter pressKeyChar");
 		EditorTestHelper.joinBackgroundActivities(fEditor);
-		System.out.println("\tafter joinBackgroundActivities");
 		EditorTestHelper.runEventQueue(200);
-		System.out.println("\tafter runEventQueue2");
 		performanceMeter.stop();
-		System.out.println("\tafter stop");
 		performanceMeter.commit();
-		System.out.println("\tafter commit");
 	}
 }
