@@ -128,7 +128,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		for (final Iterator iterator= locales.iterator(); iterator.hasNext();) {
 
 			locale= (Locale)iterator.next();
-			labels[index++]= locale.getDisplayName(SpellCheckEngine.getDefaultLocale());
+			labels[index++]= locale.getDisplayName();
 		}
 		return labels;
 	}
@@ -207,9 +207,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 	/** The status for the workspace dictionary file */
 	private IStatus fFileStatus= new StatusInfo();
-
-	/** The status for the platform locale */
-	private IStatus fLocaleStatus= new StatusInfo();
 
 	/** The status for the proposal threshold */
 	private IStatus fThresholdStatus= new StatusInfo();
@@ -316,7 +313,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
-		combo.setEnabled(locales.size() > 1);
+		combo.setEnabled(locales.size() > 0);
 		
 		new Label(engine, SWT.NONE); // placeholder
 
@@ -437,9 +434,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		if (key == null || PREF_SPELLING_USER_DICTIONARY.equals(key))
 			fFileStatus= validateAbsoluteFilePath((String)fWorkingValues.get(PREF_SPELLING_USER_DICTIONARY));
 
-		if (key == null || PREF_SPELLING_LOCALE.equals(key))
-			fLocaleStatus= validateLocale((String)fWorkingValues.get(PREF_SPELLING_LOCALE));
-
-		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus, fLocaleStatus }));
+		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus }));
 	}
 }

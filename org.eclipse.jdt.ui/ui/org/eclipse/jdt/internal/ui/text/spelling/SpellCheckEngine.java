@@ -26,15 +26,13 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.PersistentSpellDictionary;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Spell check engine for Java source spell checking.
@@ -46,11 +44,8 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/** The dictionary location */
 	public static final String DICTIONARY_LOCATION= "dictionaries/"; //$NON-NLS-1$
 
-	/** The singleton spell checker instance */
-	private static ISpellChecker fChecker= null;
-
 	/** The singleton engine instance */
-	private static ISpellCheckEngine fEngine= null;
+	private static ISpellCheckEngine fgEngine= null;
 
 	/**
 	 * Returns the available locales for this spell check engine.
@@ -72,7 +67,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			for (int index= 0; index < locales.length; index++) {
 
 				locale= locales[index];
-				url= new URL(location, locale.toString().toLowerCase() + "." + JavaUIMessages.getString("Spelling.dictionary.file.extension")); //$NON-NLS-1$ //$NON-NLS-2$
+				url= new URL(location, locale.toString().toLowerCase() + ".dictionary"); //$NON-NLS-1$
 
 				try {
 					stream= url.openStream();
@@ -90,7 +85,6 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		} catch (MalformedURLException exception) {
 			// Do nothing
 		}
-		result.add(getDefaultLocale());
 
 		return result;
 	}
@@ -101,7 +95,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @return The default locale
 	 */
 	public static Locale getDefaultLocale() {
-		return Locale.US;
+		return Locale.getDefault();
 	}
 
 	/**
@@ -128,10 +122,10 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 */
 	public static final synchronized ISpellCheckEngine getInstance() {
 
-		if (fEngine == null)
-			fEngine= new SpellCheckEngine();
+		if (fgEngine == null)
+			fgEngine= new SpellCheckEngine();
 
-		return fEngine;
+		return fgEngine;
 	}
 
 	/** The registered locale insenitive dictionaries */
@@ -139,6 +133,9 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/** The current locale */
 	private Locale fLocale= null;
+
+	/** The spell checker for fLocale */
+	private ISpellChecker fChecker= null;
 
 	/** The registered locale sensitive dictionaries */
 	private final Map fLocaleDictionaries= new HashMap();
