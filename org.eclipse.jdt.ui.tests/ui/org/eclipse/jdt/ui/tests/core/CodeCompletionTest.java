@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
@@ -67,6 +68,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		JavaProjectHelper.addRTJar(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
 		Hashtable options= TestOptions.getFormatterOptions();  
@@ -408,6 +410,83 @@ public class CodeCompletionTest extends CoreTests {
 			buf.append("    public void close() throws IOException {\n");
 			buf.append("        //TODO\n");
 			buf.append("        super.close();\n");
+			buf.append("    }//here\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString()); 
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}		
+	}
+	
+	public void testOverrideCompletion4() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    public void foo();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class B extends A implements Inter {\n");
+		buf.append("    foo//here\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		String contents= buf.toString();
+		
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+			JavaModelUtil.reconcile(cu);
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal closeProposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("foo()")) {
+					closeProposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for foo()", closeProposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			closeProposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("public class B extends A implements Inter {\n");
+			buf.append("    /* (non-Javadoc)\n");
+			buf.append("     * @see test1.A#foo()\n");
+			buf.append("     */\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        //TODO\n");
+			buf.append("        super.foo();\n");			
 			buf.append("    }//here\n");
 			buf.append("}\n");
 			assertEqualString(doc.get(), buf.toString()); 
