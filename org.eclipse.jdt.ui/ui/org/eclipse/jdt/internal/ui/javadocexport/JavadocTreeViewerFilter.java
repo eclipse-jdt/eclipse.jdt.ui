@@ -19,7 +19,7 @@ public class JavadocTreeViewerFilter extends ViewerFilter {
 
 	public JavadocTreeViewerFilter() {
 		//by default the veiwer will show everything
-		fVisibilitySelection= JavadocWizard.PRIVATE;
+		fVisibilitySelection= 0;
 	}
 
 	public boolean select(Viewer viewer, Object parent, Object element) {
@@ -27,13 +27,13 @@ public class JavadocTreeViewerFilter extends ViewerFilter {
 			IType type= (IType) element;
 			try {
 				switch (fVisibilitySelection) {
-					case JavadocWizard.PRIVATE :
+					case 0 :
 						return true;
-					case JavadocWizard.PACKAGE :
+					case 1 :
 						return !Flags.isPrivate(type.getFlags());
-					case JavadocWizard.PROTECTED :
+					case 2 :
 						return Flags.isProtected(type.getFlags()) || Flags.isPublic(type.getFlags());
-					case JavadocWizard.PUBLIC :
+					case 3 :
 						return Flags.isPublic(type.getFlags());
 
 					default :
@@ -46,8 +46,18 @@ public class JavadocTreeViewerFilter extends ViewerFilter {
 		return true;
 	}
 
-	public void setVisibility(int visibility) {
-		fVisibilitySelection= visibility;
+	public void setVisibility(String visibility) {
+		
+		if(visibility.equalsIgnoreCase("private"))
+			fVisibilitySelection= 0;
+		else if(visibility.equalsIgnoreCase("package"))
+			fVisibilitySelection= 1;
+		else if(visibility.equalsIgnoreCase("protected"))
+			fVisibilitySelection= 2;
+		else if(visibility.equalsIgnoreCase("public"))
+			fVisibilitySelection= 3;
+		else fVisibilitySelection= 0;	
+		
 	}
 
 } //end class

@@ -81,7 +81,15 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
 	public Object getParent(Object element) {
-		return ((IJavaElement) element).getParent();
+		
+		IJavaElement parent= ((IJavaElement)element).getParent();
+		if (parent instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
+			if (root.getPath().equals(root.getJavaProject().getProject().getFullPath())) {
+				return root.getJavaProject();
+			}
+		}
+		return parent;
 	}
 
 	/*

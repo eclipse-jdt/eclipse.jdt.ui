@@ -748,6 +748,19 @@ JavaStructureDiffViewerCreator
 	</page>
 </extension>
 
+<extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
+		objectClass="org.eclipse.core.resources.IFile"
+		nameFilter="*.xml"> 
+		<action id="LaunchJavadocWizard"
+			label="Run Javadoc Wizard..."
+			tooltip="Run Javadoc Wizard"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.javadocexport.CreateJavadocActionDelegate"/> 
+	</objectContribution> 
+</extension>
+
 <!-- =========================================================================== -->
 <!-- NLS tool 																	 -->
 <!-- =========================================================================== -->

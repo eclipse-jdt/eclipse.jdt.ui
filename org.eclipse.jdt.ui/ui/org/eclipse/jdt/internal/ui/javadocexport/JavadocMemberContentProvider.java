@@ -34,7 +34,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
 	public Object getParent(Object element) {
-		System.out.println(element.getClass().toString());
+		//System.out.println(element.getClass().toString());
 		if (element instanceof IPackageFragment)
 			return ((IPackageFragment) element).getParent();
 		return null;
