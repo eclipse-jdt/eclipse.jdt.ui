@@ -93,5 +93,53 @@ public class CoreTests extends TestCase {
 		} while (true);
 	}	
 	
+	public static void assertEqualStringsIgnoreOrder(String[] str1, String[] str2) {
+		int nUnmatched= 0;
+		
+		loop1: for (int i= 0; i < str1.length; i++) {
+			String s1= str1[i];
+			for (int k= 0; k < str2.length; k++) {
+				String s2= str2[k];
+				if (s2 != null && s2.equals(s1)) {
+					str2[k]= null;
+					str1[i]= null;
+					continue loop1;
+				}
+			}
+			nUnmatched++;
+		}
+		if (nUnmatched > 0) {
+			if (nUnmatched == 1) {
+				for (int i= 0; i < str1.length; i++) {
+					if (str1[i] != null) {
+						for (int k= 0; k < str2.length; k++) {
+							if (str2[k] != null) {
+								assertEqualString(str1[i], str2[k]);
+							}
+						}
+					}
+				}
+			}
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("Content not as expected: Content is: \n");
+			for (int i= 0; i < str1.length; i++) {
+				String s1= str1[i];
+				if (s1 != null) {
+					buf.append(s1);
+					buf.append("\n");
+				}
+			}
+			buf.append("Expected contents: \n");
+			for (int i= 0; i < str2.length; i++) {
+				String s2= str2[i];
+				if (s2 != null) {
+					buf.append(s2);
+					buf.append("\n");
+				}
+			}
+			assertTrue(buf.toString(), false);
+		}				
+	}
 	
 }
