@@ -475,7 +475,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				if (isActive()) {
+				if (fIsActive) {
 					ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
 					if (state != null)
 						state.fReportedProblems.add(problem);
@@ -508,7 +508,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					fProblemRequestorState.set(null);
 				}
 				
-				if (stateCount == 0 && isActive())
+				if (stateCount == 0 && fIsActive)
 					reportProblems(state.fReportedProblems);
 			}
 			
@@ -629,7 +629,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#isActive()
 			 */
 			public boolean isActive() {
-				return fIsActive;
+				return true;
 			}
 			
 			/*
