@@ -77,6 +77,14 @@ public class MethodExitsFinder extends ASTVisitor {
 
 	public List perform() {
 		fResult= new ArrayList();
+		markReferences();
+		if (fResult.size() > 0) {
+			fResult.add(fMethodDeclaration.getReturnType());
+		}
+		return fResult;
+	}
+	
+	private void markReferences() {
 		fCatchedExceptions= new ArrayList();
 		fMethodDeclaration.accept(this);
 		Block block= fMethodDeclaration.getBody();
@@ -92,16 +100,15 @@ public class MethodExitsFinder extends ASTVisitor {
 				FlowInfo info= flowAnalyzer.perform(new ASTNode[] {last});
 				if (!info.isNoReturn()) {
 					if (!info.isPartialReturn())
-						return fResult;
+						return;
 				}
 			}
 			SimpleName name= fAST.newSimpleName("x"); //$NON-NLS-1$
 			name.setSourceRange(fMethodDeclaration.getStartPosition() + fMethodDeclaration.getLength() - 1, 1);
 			fResult.add(name);
 		}
-		return fResult;
 	}
-	
+
 	public boolean visit(TypeDeclaration node) {
 		// Don't dive into a local type.
 		return false;
