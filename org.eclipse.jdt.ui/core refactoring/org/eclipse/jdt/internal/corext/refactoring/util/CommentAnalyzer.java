@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -68,5 +69,27 @@ public class CommentAnalyzer {
 
 	private boolean checkEnd(IScanner scanner, int position) {
 		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition();
+	}
+	
+	/**
+	 * Removes comments and whitespace
+	 * @param reference the type reference
+	 * @return the reference only consisting of dots and java identifier characters
+	 */
+	public static String normalizeReference(String reference) {
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(reference.toCharArray());
+		StringBuffer sb= new StringBuffer();
+		try {
+			int tokenType= scanner.getNextToken();
+			while (tokenType != ITerminalSymbols.TokenNameEOF) {
+				sb.append(scanner.getRawTokenSource());
+				tokenType= scanner.getNextToken();
+			}
+		} catch (InvalidInputException e) {
+			Assert.isTrue(false, reference);
+		}
+		reference= sb.toString();
+		return reference;
 	}
 }

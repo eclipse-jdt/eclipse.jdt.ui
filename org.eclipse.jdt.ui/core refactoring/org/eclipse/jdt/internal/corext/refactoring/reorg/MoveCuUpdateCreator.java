@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -365,8 +366,8 @@ public class MoveCuUpdateCreator {
 						IBuffer buffer= unit.getBuffer();
 						String currectPackageName= fSource.getElementName();
 						String match= buffer.getText(start, end - start);
+						match= CommentAnalyzer.normalizeReference(match);
 						if (match.startsWith(currectPackageName)) {
-							end= start + currectPackageName.length();
 							getResults().add(new TypeReference(res, start, end, element, accuracy, true));
 						} else {
 							getResults().add(new TypeReference(res, start, end, element, accuracy, false));

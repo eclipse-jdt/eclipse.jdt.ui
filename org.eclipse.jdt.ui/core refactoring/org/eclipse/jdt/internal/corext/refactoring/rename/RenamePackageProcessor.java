@@ -40,10 +40,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -66,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -711,9 +708,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				String reference= getNormalizedTypeReference(result);
 				if (! reference.startsWith(fPackage.getElementName())) {
 					// is unqualified
-					int dotPos= reference.indexOf('.'); // cut off inner types
-					if (dotPos != -1)
-						reference= reference.substring(0, dotPos);
+					reference= cutOffInnerTypes(reference);
 					if (importRewrite == null)
 						importRewrite= newImportRewrite(typeReferences.getCompilationUnit());
 					importRewrite.addImport(fPackage.getElementName() + '.' + reference);
@@ -742,9 +737,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			} else {
 				String reference= getNormalizedTypeReference(result);
 				if (! reference.startsWith(fPackage.getElementName())) {
-					int dotPos= reference.indexOf('.'); // inner types
-					if (dotPos != -1)
-						reference= reference.substring(0, dotPos);
+					reference= cutOffInnerTypes(reference);
 					if (importRewrite == null)
 						importRewrite= newImportRewrite(typeReferences.getCompilationUnit());
 					importRewrite.removeImport(fPackage.getElementName() + '.' + reference);
@@ -758,24 +751,17 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private static String getNormalizedTypeReference(SearchResult searchResult) throws JavaModelException {
 		ICompilationUnit cu= searchResult.getCompilationUnit();
 		String reference= cu.getBuffer().getText(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
-
 		//reference may be package-qualified -> normalize (remove comments, etc.):
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-		scanner.setSource(reference.toCharArray());
-		StringBuffer sb= new StringBuffer();
-		try {
-			int tokenType= scanner.getNextToken();
-			while (tokenType != ITerminalSymbols.TokenNameEOF) {
-				sb.append(scanner.getRawTokenSource());
-				tokenType= scanner.getNextToken();
-			}
-		} catch (InvalidInputException e) {
-			Assert.isTrue(false, reference);
-		}
-		reference= sb.toString();
+		return CommentAnalyzer.normalizeReference(reference);
+	}
+	
+	private static String cutOffInnerTypes(String reference) {
+		int dotPos= reference.indexOf('.'); // cut off inner types
+		if (dotPos != -1)
+			reference= reference.substring(0, dotPos);
 		return reference;
 	}
-
+	
 	private String getUpdatedImport(IImportDeclaration importDeclaration) {
 		String fullyQualifiedImportType= importDeclaration.getElementName();
 		int offsetOfDotBeforeTypeName= fPackage.getElementName().length();
