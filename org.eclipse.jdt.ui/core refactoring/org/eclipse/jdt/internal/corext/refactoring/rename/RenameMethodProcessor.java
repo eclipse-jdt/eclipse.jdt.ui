@@ -349,27 +349,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return new SearchResultGroup[0];
 			
 			ISearchPattern newPattern= createSearchPatternWithOwner(new SubProgressMonitor(pm, 1), method);
-			//TODO:
-			// - refactoring scope built with primary wc of method
 			return RefactoringSearchEngine.search(fWorkingCopyOwner, createRefactoringScope(method), newPattern,
 					new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()));
-//			}
-			
-			// TODO: remove:
-//			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-//			fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
-//			
-//			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fMethod.getCompilationUnit());
-//			if (declaringCuWorkingCopy == null)
-//				return new SearchResultGroup[0];
-//			
-//			IMethod method= getNewMethod(declaringCuWorkingCopy);
-//			if (method == null || ! method.exists())
-//				return new SearchResultGroup[0];
-//			
-//			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method, fNewWorkingCopies);
-//			return RefactoringSearchEngine.search(createRefactoringScope(), newPattern, //TODO: refactoring scope built with primary wc of method
-//				new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()),  fNewWorkingCopies);
 		} finally{
 			pm.done();
 		}	
@@ -444,12 +425,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
 		TextChangeManager manager= new TextChangeManager(true);
 		
-		/* - don't really want to add declaration and references separetely in this refactoring 
+		/* don't really want to add declaration and references separetely in this refactoring 
 		* (declarations of methods are different than declarations of anything else)
-		* - TODO: only one declaration updated, not all of them
 		*/
 		if (! fUpdateReferences)
-			addDeclarationUpdate(manager);
+			addDeclarationUpdate(manager); // TODO: only one declaration updated, not all of them
 		else
 			addOccurrences(manager, pm);	
 		return manager;
