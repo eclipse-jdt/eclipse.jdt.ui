@@ -16,6 +16,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
@@ -27,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.core.Util;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 
 
 
@@ -82,8 +84,8 @@ public class ReconcilingProblemRequestor implements IProblemRequestor {
 	 */
 	public void init() {
 		fProblems.clear();
-		if (fEditor != null)
-			addMarkerProblems();
+		if (fEditor != null && JavaEditorPreferencePage.showProblems() && JavaEditorPreferencePage.showCompileTimeProblems())
+				addMarkerProblems();
 	}
 	
 	private void addMarkerProblems() {

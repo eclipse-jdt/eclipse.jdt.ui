@@ -370,6 +370,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String SPACES_FOR_TABS= "spacesForTabs";
 	/** Preference key for problem indication */
 	public final static String PROBLEM_INDICATION= "problemIndication";
+	/** Preference key for compile time problem indication */
+	public final static String COMPILE_TIME_PROBLEM_INDICATION= "compileTimeProblemIndication";
 	/** Preference key for problem highlight color */
 	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor";
 	/** Preference key for shwoing the overview ruler */
