@@ -18,15 +18,19 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatter;
+import org.eclipse.jdt.internal.corext.text.comment.CommentRegion;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
+import org.eclipse.jdt.internal.corext.text.comment.JavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Formatting strategy for general source code comments.
@@ -67,7 +71,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (document != null && position != null) {
 			CommentFormattingContext.mapOptions(getPreferences());
 			CommentFormatter commentFormatter= new CommentFormatter(fTextMeasurement, getPreferences());
-			TextEdit edit= commentFormatter.format(document, position);
+			// TODO: pass minimal string, pass inferred indentation
+			TextEdit edit= commentFormatter.format(getPartitionKind(position.getType()), document.get(), position.getOffset(), position.getLength(), CommentRegion.INFER_INDENTATION, TextUtilities.getDefaultLineDelimiter(document));
 			try {
 				
 				if (edit != null)
@@ -99,5 +104,15 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		fDocuments.clear();
 		
 		super.formatterStops();
+	}
+
+	private static int getPartitionKind(String type) {
+		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type))
+				return JavaPartitions.K_SINGLE_LINE_COMMENT;
+		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
+				return JavaPartitions.K_MULTI_LINE_COMMENT;
+		if (IJavaPartitions.JAVA_DOC.equals(type))
+				return JavaPartitions.K_JAVA_DOC;
+		return -1;
 	}
 }

@@ -19,7 +19,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -73,18 +72,6 @@ public class CommentFormatter extends CodeFormatter {
 		if (type != null)
 			return format(new Document(source), new TypedPosition(offset, length, type), indentationLevel, lineSeparator);
 		return null;
-	}
-
-	/**
-	 * Compute a text edit for formatting the given partition in the given document.
-	 * 
-	 * @param document the document
-	 * @param position the partition
-	 * 
-	 * @return the text edit for formatting
-	 */
-	public TextEdit format(final IDocument document, final TypedPosition position) {
-		return format(document, position, CommentRegion.INFER_INDENTATION, TextUtilities.getDefaultLineDelimiter(document));
 	}
 
 	/**
