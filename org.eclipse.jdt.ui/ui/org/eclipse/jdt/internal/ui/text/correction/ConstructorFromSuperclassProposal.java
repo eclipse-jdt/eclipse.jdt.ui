@@ -133,9 +133,8 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {
-				String paramTypeName= getImportRewrite().addImport(params[i]);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(ASTNodeFactory.newType(ast, paramTypeName));				
+				var.setType(getImportRewrite().addImport(params[i], ast));				
 				var.setName(ast.newSimpleName(paramNames[i]));
 				parameters.add(var);
 			}		
@@ -178,11 +177,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
-		
-		String paramTypeName= getImportRewrite().addImport(enclosingInstance);
-		
+				
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-		var.setType(ASTNodeFactory.newType(ast, paramTypeName));
+		var.setType(getImportRewrite().addImport(enclosingInstance, ast));
 		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));

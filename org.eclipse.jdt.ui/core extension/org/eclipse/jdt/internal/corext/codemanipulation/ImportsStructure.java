@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
@@ -51,8 +52,12 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -89,10 +94,12 @@ public final class ImportsStructure implements IImportsStructure {
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
 	 * are added next to the existing import that is matching best. 
+	 * @param cu The compilation unit
 	 * @param preferenceOrder Defines the preferred order of imports.
 	 * @param importThreshold Defines the number of imports in a package needed to introduce a
 	 * import on demand instead (e.g. java.util.*).
 	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
+	 * @throws CoreException
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
@@ -246,7 +253,7 @@ public final class ImportsStructure implements IImportsStructure {
 	}		
 		
 	/**
-	 * Returns the compilation unit of this import structure.
+	 * @return Returns the compilation unit of this import structure.
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
@@ -267,6 +274,7 @@ public final class ImportsStructure implements IImportsStructure {
 	/**
 	 * When set searches for imports that can not be folded into on-demand
 	 * imports but must be specified explicitly
+	 * @param findAmbiguousImports The new value
 	 */
 	public void setFindAmbiguousImports(boolean findAmbiguousImports) {
 		fFindAmbiguousImports= findAmbiguousImports;
@@ -408,7 +416,65 @@ public final class ImportsStructure implements IImportsStructure {
 		return qualifier.equals(mainTypeName);
 	}
 	
-	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param binding The type binding of the type to be added
+	 * @param ast The ast to create the type for
+	 * @return Returns the a new AST node that is either simple if the import was successful or 
+	 * fully qualified type name if the import could not be added due to a conflict. 
+	 */
+	public Type addImport(ITypeBinding binding, AST ast) {
+		if (binding.isPrimitive()) {
+			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
+		}
+		
+		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
+		if (normalizedBinding == null) {
+			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
+		}
+		
+		if (normalizedBinding.isTypeVariable()) {
+			// no import
+			return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
+		}
+		if (normalizedBinding.isWildcardType()) {
+			WildcardType wcType= ast.newWildcardType();
+			ITypeBinding bound= normalizedBinding.getBound();
+			if (bound != null) {
+				Type boundType= addImport(bound, ast);
+				wcType.setBound(boundType, normalizedBinding.isUpperbound());
+			}
+			return wcType;
+		}
+		
+		if (normalizedBinding.isArray()) {
+			Type elementType= addImport(normalizedBinding.getElementType(), ast);
+			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
+		}
+		
+		if (normalizedBinding.isParameterizedType()) {
+			ITypeBinding erasure= normalizedBinding.getErasure();
+			
+			Type erasureType= addImport(erasure, ast);
+			ParameterizedType paramType= ast.newParameterizedType(erasureType);
+			List arguments= paramType.typeArguments();
+			
+			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
+			for (int i= 0; i < typeArguments.length; i++) {
+				arguments.add(addImport(typeArguments[i], ast));
+			}
+			return paramType;
+		}
+		
+		String qualifiedName= normalizedBinding.getQualifiedName();
+		if (qualifiedName.length() > 0) {
+			String res= internalAddImport(qualifiedName);
+			return ast.newSimpleType(ast.newSimpleName(res));
+		}
+		return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
+	}
 	
 
 	/**
@@ -421,33 +487,54 @@ public final class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
-		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
-		if (normalizedBinding == null || normalizedBinding.isTypeVariable() || normalizedBinding.isWildcardType()) {
+		
+		if (binding.isPrimitive() || binding.isTypeVariable()) {
 			return binding.getName();
 		}
-		if (normalizedBinding.isArray() && normalizedBinding.getElementType().isTypeVariable()) {
-			return binding.getName();
+		
+		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
+		if (normalizedBinding == null) {
+			return "invalid"; //$NON-NLS-1$
+		}
+		if (normalizedBinding.isWildcardType()) {
+			StringBuffer res= new StringBuffer("?"); //$NON-NLS-1$
+			ITypeBinding bound= normalizedBinding.getBound();
+			if (bound != null) {
+				if (normalizedBinding.isUpperbound()) {
+					res.append(" extends "); //$NON-NLS-1$
+				} else {
+					res.append(" super "); //$NON-NLS-1$
+				}
+				res.append(addImport(bound));
+			}
+			return res.toString();
+		}
+		
+		if (normalizedBinding.isArray()) {
+			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType()));
+			for (int i= normalizedBinding.getDimensions(); i > 0; i--) {
+				res.append("[]"); //$NON-NLS-1$
+			}
+			return res.toString();
 		}
 		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
-			StringBuffer buf= new StringBuffer();
-			buf.append(addImport(erasure)); // recursive
-			buf.append('<');
+			StringBuffer res= new StringBuffer(addImport(erasure));
+			res.append('<');
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
 				if (i > 0) {
-					buf.append(", "); //$NON-NLS-1$
+					res.append(','); //$NON-NLS-1$
 				}
-				buf.append(addImport(typeArguments[i])); // recursive
+				res.append(addImport(typeArguments[i]));
 			}
-			buf.append('>');
-			return buf.toString();
+			return res.toString();
 		}
 		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			return addImport(qualifiedName);
+			return internalAddImport(qualifiedName);
 		}
 		return normalizedBinding.getName();
 	}
@@ -458,6 +545,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * not added.
 	 * @param typeContainerName The type container name (package name / outer type name) of the type to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
+	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
 	 */			
 	public String addImport(String typeContainerName, String typeName) {
 		return addImport(JavaModelUtil.concatenateName(typeContainerName, typeName));
@@ -468,6 +556,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
+	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
 	 */
 	public String addImport(String qualifiedTypeName) {
 		int bracketOffset= qualifiedTypeName.indexOf('[');
@@ -541,6 +630,8 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Removes an import from the structure.
+	 * @param qualifiedTypeName The qualified type name to remove from the imports
+	 * @return Returns <code>true</code> if the import was found and removed
 	 */
 	public boolean removeImport(String qualifiedTypeName) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
@@ -564,6 +655,8 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Removes an import from the structure.
+	 * @param binding The type to remove from the imports
+	 * @return Returns <code>true</code> if the import was found and removed
 	 */
 	public boolean removeImport(ITypeBinding binding) {
 		binding= Bindings.normalizeTypeBinding(binding);
@@ -579,6 +672,8 @@ public final class ImportsStructure implements IImportsStructure {
 
 	/**
 	 * Looks if there already is single import for the given type name.
+	 * @param simpleName The simple name to find
+	 * @return Returns the qualified import name or <code>null</code>.
 	 */	
 	public String findImport(String simpleName) {
 		int nPackages= fPackageEntries.size();
@@ -594,6 +689,9 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Creates all new elements in the import structure.
+	 * @param save Save the CU after the import have been changed
+	 * @param monitor The progress monitor to use
+	 * @throws CoreException Thrown when the access to the CU failed
 	 */	
 	public void create(boolean save, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null) {
@@ -804,8 +902,7 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	
 	/**
-	 * Probes if the formatter allows
-	 * @return
+	 * @return  Probes if the formatter allows spaces between imports
 	 */
 	private boolean useSpaceBetweenGroups() {
 		try {
@@ -970,6 +1067,8 @@ public final class ImportsStructure implements IImportsStructure {
 
 		/**
 		 * Comment group place holder entry (name equals group)
+		 * @param name Name of the package entry. e.g. org.eclipse.jdt.ui, containing imports like
+		 * org.eclipse.jdt.ui.JavaUI.
 		 */
 		public PackageEntry(String name) {
 			this(name, name); //$NON-NLS-1$

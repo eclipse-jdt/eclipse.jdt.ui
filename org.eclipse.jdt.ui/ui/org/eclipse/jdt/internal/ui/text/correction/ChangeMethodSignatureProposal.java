@@ -54,7 +54,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		SingleVariableDeclaration resultingNode;
 		SimpleName resultingTagArg;
 		
-		public ModifyDescription(ITypeBinding type, String name) {
+		public ModifyDescription(ITypeBinding type, String name) { 
 			this.type= type;
 			this.name= name;
 		}
@@ -144,8 +144,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				String type= imports.addImport(desc.type);
-				newNode.setType(ASTNodeFactory.newType(ast, type));
+				newNode.setType(imports.addImport(desc.type, ast));
 				
 				// remember to set name later
 				desc.resultingNode= newNode;
@@ -180,8 +179,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
 
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				String type= imports.addImport(desc.type);
-				newNode.setType(ASTNodeFactory.newType(ast, type));
+				newNode.setType(imports.addImport(desc.type, ast));
 				
 				// remember to set name later
 				desc.resultingNode= newNode;

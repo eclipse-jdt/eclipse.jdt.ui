@@ -79,8 +79,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 			
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
 			
-			String typeName= importRewrite.addImport(curr);
-			newParam.setType(ASTNodeFactory.newType(ast, typeName));
+			newParam.setType(importRewrite.addImport(curr, ast));
 			newParam.setName(ast.newSimpleName(paramNames[i]));
 			
 			params.add(newParam);
@@ -119,8 +118,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
-		String typeName= getImportRewrite().addImport(fMethod.getReturnType());
-		Type newTypeNode= ASTNodeFactory.newType(rewrite.getAST(), typeName);
+		Type newTypeNode= getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
 		
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		return newTypeNode;

@@ -66,8 +66,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 
-					String typeName= getImportRewrite().addImport(first);
-					Type newTypeNode= ASTNodeFactory.newType(ast, typeName);
+					Type newTypeNode= getImportRewrite().addImport(first, ast);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal("casttype", bindings[i]); //$NON-NLS-1$

@@ -118,11 +118,9 @@ public class LocalCorrectionsSubProcessor {
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
 				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
-				String imp= imports.addImport(excBinding);
-				Name name= ASTNodeFactory.newName(ast, imp);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 				var.setName(ast.newSimpleName(varName));
-				var.setType(ast.newSimpleType(name));
+				var.setType(imports.addImport(excBinding, ast));
 				CatchClause newClause= ast.newCatchClause();
 				newClause.setException(var);
 				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, String.valueOf('\n'));

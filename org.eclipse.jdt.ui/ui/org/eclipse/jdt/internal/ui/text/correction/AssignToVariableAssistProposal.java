@@ -215,8 +215,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedPositionProposal(KEY_TYPE, proposals[i]);
 		}
-		String typeName= getImportRewrite().addImport(fTypeBinding);
-		return ASTNodeFactory.newType(ast, typeName);
+		return getImportRewrite().addImport(fTypeBinding, ast);
 	}
 	
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {

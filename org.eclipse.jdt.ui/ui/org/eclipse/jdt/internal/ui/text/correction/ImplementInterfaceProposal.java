@@ -20,12 +20,11 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -65,8 +64,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			String typeString= getImportRewrite().addImport(fNewInterface);
-			Name newInterface= ASTNodeFactory.newName(ast, typeString);
+			Type newInterface= getImportRewrite().addImport(fNewInterface, ast);
 			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 			listRewrite.insertLast(newInterface, null);
 

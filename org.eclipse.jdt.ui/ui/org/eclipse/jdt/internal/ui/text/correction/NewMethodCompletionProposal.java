@@ -227,8 +227,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedPositionProposal(key, typeProposals[i]);
 			}		
-			String typeName= getImportRewrite().addImport(binding);
-			return ASTNodeFactory.newType(ast, typeName);
+			return getImportRewrite().addImport(binding, ast);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

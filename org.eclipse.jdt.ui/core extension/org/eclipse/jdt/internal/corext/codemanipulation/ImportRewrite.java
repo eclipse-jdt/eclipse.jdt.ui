@@ -21,7 +21,9 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -106,7 +108,23 @@ public final class ImportRewrite {
 	 */
 	public String addImport(ITypeBinding binding) {
 		return fImportsStructure.addImport(binding);
-	}	
+	}
+	
+	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.  The type binding can be an array binding. No import is added for unnamed
+	 * types (local or anonymous types)
+	 * @param binding The type binding of the type to be added
+	 * @param ast The ast to create the node for
+	 * @return Returns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 */
+	public Type addImport(ITypeBinding binding, AST ast) {
+		return fImportsStructure.addImport(binding, ast);
+	}
+	
 
 	/**
 	 * Removes an import declaration if it exists. Does not touch on-demand imports.

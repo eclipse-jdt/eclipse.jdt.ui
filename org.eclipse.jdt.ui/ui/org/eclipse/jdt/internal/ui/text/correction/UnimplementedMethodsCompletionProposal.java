@@ -98,20 +98,17 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		ITypeBinding[] typeParams= binding.getTypeParameters();
 		List typeParameters= decl.typeParameters();
 		for (int i= 0; i < typeParams.length; i++) {
-			String typeParamName= imports.addImport(typeParams[i]);
-			typeParameters.add(ASTNodeFactory.newTypeParameter(ast, typeParamName));
+			typeParameters.add(imports.addImport(typeParams[i], ast));
 		}		
 		
-		String returnTypeName= imports.addImport(binding.getReturnType());
-		decl.setReturnType2(ASTNodeFactory.newType(ast, returnTypeName));
+		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast));
 		
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= getArgumentNames(binding);
 		for (int i= 0; i < params.length; i++) {
-			String paramTypeName= imports.addImport(params[i]);
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(ASTNodeFactory.newType(ast, paramTypeName));
+			var.setType(imports.addImport(params[i], ast));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}		
