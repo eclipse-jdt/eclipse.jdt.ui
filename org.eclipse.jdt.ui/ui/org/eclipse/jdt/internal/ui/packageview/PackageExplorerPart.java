@@ -515,7 +515,6 @@ public class PackageExplorerPart extends ViewPart
 		restoreRootMode(fMemento);
 		Platform.run(new ISafeRunnable() {
 			public void handleException(Throwable exception) {
-				JavaPlugin.log(exception);
 				fWorkingSetModel= new WorkingSetModel();
 			}
 			public void run() throws Exception {
