@@ -92,7 +92,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
 		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		if (selection instanceof ITextSelection && doc != null) {
-			AddImportsOperation op= new AddImportsOperation(cu, doc, (ITextSelection) selection, new SelectTypeQuery(getShell()));
+			ITextSelection textSelection= (ITextSelection) selection;
+			AddImportsOperation op= new AddImportsOperation(cu, doc, textSelection.getOffset(), textSelection.getLength(), new SelectTypeQuery(getShell()));
 			try {
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 				progressService.runInUI(fEditor.getSite().getWorkbenchWindow(), new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());

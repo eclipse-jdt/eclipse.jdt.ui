@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -24,20 +27,32 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Add imports to a compilation unit.
@@ -60,7 +75,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	
 	private ICompilationUnit fCompilationUnit;
 	private final IDocument fDocument;
-	private final ITextSelection fSelection;
+	private final int fSelectionOffset;
+	private final int fSelectionLength;
 	private final IChooseImportQuery fQuery;
 	private IStatus fStatus;
 	
@@ -71,19 +87,20 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * (on-demand-import). Other JavaElements are ignored
 	 * @param cu The compilation unit
 	 * @param document Document corrsponding to the compilation unit
-	 * @param selection Current test selection
-	 * @param query Query element to be used fo UI interaction
+	 * @param selectionOffset Start of the current text selection
+	 * 	@param selectionLength End of the current text selection
+	 * @param query Query element to be used fo UI interaction or <code>null</code> to not select anything
+	 * when multiple possibilities are available
 	 */
-	public AddImportsOperation(ICompilationUnit cu, IDocument document, ITextSelection selection, IChooseImportQuery query) {
+	public AddImportsOperation(ICompilationUnit cu, IDocument document, int selectionOffset, int selectionLength, IChooseImportQuery query) {
 		super();
 		Assert.isNotNull(cu);
 		Assert.isNotNull(document);
-		Assert.isNotNull(selection);
-		Assert.isNotNull(query);
 		
 		fCompilationUnit= cu;
 		fDocument= document;
-		fSelection= selection;
+		fSelectionOffset= selectionOffset;
+		fSelectionLength= selectionLength;
 		fQuery= query;
 		fStatus= Status.OK_STATUS;
 	}
@@ -106,65 +123,126 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}
-			
-			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 15); //$NON-NLS-1$
 
+			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit);
+			importRewrite.setFindAmbiguosImports(true);
 			
-			int nameStart= getNameStart(fDocument, fSelection.getOffset());
-			int nameEnd= getNameEnd(fDocument, fSelection.getOffset() + fSelection.getLength());
-			int len= nameEnd - nameStart;
-			
-			String name= fDocument.get(nameStart, len).trim();
-			
-			String simpleName= Signature.getSimpleName(name);
-			String containerName= Signature.getQualifier(name);
-			
-			IImportDeclaration existingImport= JavaModelUtil.findImport(fCompilationUnit, simpleName);
-			if (existingImport != null) {
-				if (containerName.length() == 0) {
-					return;
-				}
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 5));
+			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 5));
+			if (edit != null) {
+				edit.apply(fDocument, 0);
 				
-				if (!existingImport.getElementName().equals(name)) {
-					fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.importclash", existingImport.getElementName()), null); //$NON-NLS-1$
-					return;
-				} else {
-					removeQualification(fDocument, nameStart, containerName);
-				}
-				return;
-			}			
-			
-			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
-			
-			TypeInfo[] types= findAllTypes(simpleName, searchScope, new SubProgressMonitor(monitor, 1));
-			if (types.length== 0) {
-				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.notresolved.message", simpleName), null); //$NON-NLS-1$
-				return;
+				TextEdit importsEdit= importRewrite.createEdit(fDocument, new SubProgressMonitor(monitor, 5));
+				importsEdit.apply(fDocument, 0);
 			}
-			
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			TypeInfo chosen= fQuery.chooseImport(types, containerName);
-			if (chosen == null) {
-				throw new OperationCanceledException();
-			}
-
-			removeQualification(fDocument, nameStart, chosen.getTypeContainerName());
-		
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, settings.importOrder, settings.importThreshold, true);
-			impStructure.setFindAmbiguousImports(true);
-			impStructure.addImport(chosen.getFullyQualifiedName(), false);
-			impStructure.create(false, new SubProgressMonitor(monitor, 1));
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			monitor.done();
 		}
 	}
+	
+	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws BadLocationException, JavaModelException {
+		SimpleName nameNode= null;
+		if (root != null) { // got an AST
+			ASTNode node= NodeFinder.perform(root, offset, length);
+			if (node instanceof QualifiedName) {
+				nameNode= ((QualifiedName) node).getName();
+			} else if (node instanceof SimpleName) {
+				nameNode= (SimpleName) node;
+			}
+			
+		}
+		
+		String name, simpleName, containerName;
+		int qualifierStart;
+		int simpleNameStart;
+		if (nameNode != null) {
+			simpleName= nameNode.getIdentifier();
+			simpleNameStart= nameNode.getStartPosition();
+			if (nameNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				Name qualifier= ((QualifiedName) nameNode.getParent()).getQualifier();
+				containerName= qualifier.getFullyQualifiedName();
+				name= JavaModelUtil.concatenateName(containerName, simpleName);
+				qualifierStart= qualifier.getStartPosition();
+			} else if (nameNode.getParent().getLocationInParent() == QualifiedType.NAME_PROPERTY) {
+				Type qualifier= ((QualifiedType) nameNode.getParent().getParent()).getQualifier();
+				containerName= ASTNodes.asString(qualifier);
+				name= JavaModelUtil.concatenateName(containerName, simpleName);
+				qualifierStart= qualifier.getStartPosition();
+			} else {
+				containerName= ""; //$NON-NLS-1$
+				name= simpleName;
+				qualifierStart= simpleNameStart;
+			}
+			
+			IBinding binding= nameNode.resolveBinding();
+			if (binding instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				String qualifiedBindingName= typeBinding.getQualifiedName();
+				if (containerName.length() > 0 && !qualifiedBindingName.equals(name)) {
+					return null;
+				}
+				
+				String res= importRewrite.addImport(typeBinding);
+				if (containerName.length() > 0 && !res.equals(simpleName)) {
+					// adding import failed
+					return null;
+				}
+				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+			} else if (binding != null) {
+				return null; // no static imports
+			}
+			
+		} else {
+			qualifierStart= getNameStart(fDocument, offset);
+			int nameEnd= getNameEnd(fDocument, offset + length);
+			int len= nameEnd - qualifierStart;
+			
+			name= fDocument.get(qualifierStart, len).trim();
+			simpleName= Signature.getSimpleName(name);
+			containerName= Signature.getQualifier(name);
+			
+			simpleNameStart= getSimpleNameStart(fDocument, qualifierStart, containerName);
+			
+			String existingImport= importRewrite.findImport(null, simpleName, false);
+			if (existingImport != null) {
+				if (containerName.length() == 0) {
+					return null;
+				}
+				if (!existingImport.equals(name)) {
+					fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.importclash", existingImport), null); //$NON-NLS-1$
+					return null;
+				}
+
+				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+			}
+		}
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
+		
+		TypeInfo[] types= findAllTypes(simpleName, searchScope, new SubProgressMonitor(monitor, 1));
+		if (types.length== 0) {
+			fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.notresolved.message", simpleName), null); //$NON-NLS-1$
+			return null;
+		}
+		
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		TypeInfo chosen;
+		if (types.length > 1 && fQuery != null) {
+			chosen= fQuery.chooseImport(types, containerName);
+			if (chosen == null) {
+				throw new OperationCanceledException();
+			}
+		} else {
+			chosen= types[0];
+		}
+		importRewrite.addImport(chosen.getFullyQualifiedName());
+		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+	}
+
 	
 	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
 		while (pos > 0) {
@@ -194,20 +272,22 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return pos;
 	}
 	
-	private void removeQualification(IDocument doc, int nameStart, String containerName) throws BadLocationException {
+	private int getSimpleNameStart(IDocument doc, int nameStart, String containerName) throws BadLocationException {
 		int containerLen= containerName.length();
 		int docLen= doc.getLength();
 		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
 			for (int k= 0; k < containerLen; k++) {
 				if (doc.getChar(nameStart + k) != containerName.charAt(k)) {
-					return;
+					return nameStart;
 				}
 			}
 			if (doc.getChar(nameStart + containerLen) == '.') {
-				doc.replace(nameStart, containerLen + 1, ""); //$NON-NLS-1$
+				return nameStart + containerLen;
 			}
 		}
+		return nameStart;
 	}
+	
 	
 	/*
 	 * Finds a type by the simple name.

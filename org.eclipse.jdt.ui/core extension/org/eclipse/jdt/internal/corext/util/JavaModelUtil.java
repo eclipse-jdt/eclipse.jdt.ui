@@ -583,26 +583,9 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isEditable(ICompilationUnit cu)  {
 		IResource resource= toOriginal(cu).getResource();
-		return (resource.exists() && !resource.isReadOnly());
+		return (resource.exists() && !resource.getResourceAttributes().isReadOnly());
 	}
 
-	/**
-	 * Finds a qualified import for a type name.
-	 */	
-	public static IImportDeclaration findImport(ICompilationUnit cu, String simpleName) throws JavaModelException {
-		IImportDeclaration[] existing= cu.getImports();
-		for (int i= 0; i < existing.length; i++) {
-			String curr= existing[i].getElementName();
-			if (curr.endsWith(simpleName)) {
-				int dotPos= curr.length() - simpleName.length() - 1;
-				if ((dotPos == -1) || (dotPos > 0 && curr.charAt(dotPos) == '.')) {
-					return existing[i];
-				}
-			}
-		}	
-		return null;
-	}
-	
 	/**
 	 * Returns the original if the given member. If the member is already
 	 * an original the input is returned. The returned member might not exist

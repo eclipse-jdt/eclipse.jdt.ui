@@ -137,6 +137,16 @@ public final class ImportRewrite {
 		return fImportsStructure.addImport(binding, ast, false);
 	}
 	
+	/**
+	 * Looks if there already is single import for the given name.
+	 * @param containerName The container name or <code>null</code>
+	 * @param simpleName The simple name to find
+	 * @return Returns the qualified import name or <code>null</code>.
+	 */	
+	public String findImport(String containerName, String simpleName, boolean isStatic) {
+		return fImportsStructure.findImport(containerName, simpleName, isStatic);
+	}
+	
 
 	/**
 	 * Removes an import declaration if it exists. Does not touch on-demand imports.

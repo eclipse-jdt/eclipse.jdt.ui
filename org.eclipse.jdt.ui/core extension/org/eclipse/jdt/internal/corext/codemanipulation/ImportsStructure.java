@@ -700,7 +700,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @param simpleName The simple name to find
 	 * @return Returns the qualified import name or <code>null</code>.
 	 */	
-	private String findImport(String containerName, String simpleName, boolean isStatic) {
+	public String findImport(String containerName, String simpleName, boolean isStatic) {
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
