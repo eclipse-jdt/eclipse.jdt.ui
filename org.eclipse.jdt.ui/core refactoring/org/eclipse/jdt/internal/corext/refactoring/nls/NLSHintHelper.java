@@ -105,12 +105,18 @@ public class NLSHintHelper {
 	private static boolean isAccessorCandidate(ITypeBinding binding) {
 		IVariableBinding[] fields= binding.getDeclaredFields();
 		for (int i= 0; i < fields.length; i++) {
-			String name= fields[i].getName();
-			if (name.equals("BUNDLE_NAME") || name.equals("RESOURCE_BUNDLE")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (isBundleField(fields[i]))
 				return true;
-			}
 		}
 		return false;
+	}
+	
+	private static boolean isBundleField(IVariableBinding field) {
+		if (field == null)
+			return false;
+		
+		String name= field.getName();
+		return name.equals("BUNDLE_NAME") || name.equals("RESOURCE_BUNDLE") || name.equals("bundleName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public static IPackageFragment getPackageOfAccessorClass(IJavaProject javaProject, ITypeBinding accessorBinding) throws JavaModelException {
@@ -141,8 +147,7 @@ public class NLSHintHelper {
 		
 		IVariableBinding[] fields= accessorClassBinding.getDeclaredFields();
 		for (int i= 0; i < fields.length; i++) {
-			String name= fields[i].getName();
-			if (name.equals("BUNDLE_NAME") || name.equals("RESOURCE_BUNDLE")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (isBundleField(fields[i])) {
 				VariableDeclarationFragment node= (VariableDeclarationFragment) astRoot.findDeclaringNode(fields[i].getKey());
 				if (node != null) {
 					Expression initializer= node.getInitializer();
