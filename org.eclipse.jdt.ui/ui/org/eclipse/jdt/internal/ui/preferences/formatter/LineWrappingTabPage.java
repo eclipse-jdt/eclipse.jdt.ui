@@ -126,7 +126,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 			} else {
 				fOptionsGroup.setText(""); //$NON-NLS-1$
 			}
-			fPreview.setPreviewText(category.previewText);
+			setPreviewText(category.previewText);
 
 			final String value= (String)fWorkingValues.get(category.key);
 			final boolean enabled= value != null;
@@ -532,6 +532,13 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
 		fPreview.update();
+		fWorkingValues.put(LINE_SPLIT, normalSetting);
+	}
+	
+	protected void setPreviewText(String text) {
+		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
+		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
+		fPreview.setPreviewText(text);
 		fWorkingValues.put(LINE_SPLIT, normalSetting);
 	}
 
