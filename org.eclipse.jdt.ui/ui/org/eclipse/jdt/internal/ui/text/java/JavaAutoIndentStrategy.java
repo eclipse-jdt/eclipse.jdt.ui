@@ -253,6 +253,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (notSelected.trim().length() == 0 && selected.trim().length() != 0) {
 				pastedText= notSelected + pastedText;
 				command.length += notSelected.length();
+				command.offset= region.getOffset();
 			}
 			
 			// choose smaller indent of block and preceeding non-empty line 
