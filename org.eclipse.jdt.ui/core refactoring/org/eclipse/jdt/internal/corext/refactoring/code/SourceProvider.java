@@ -293,7 +293,7 @@ public class SourceProvider {
 		try {
 			TextEditProcessor processor= new TextEditProcessor(fDocument, root, TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
 			UndoEdit undo= processor.performEdits();
-			String[] result= getBlocks(markers);
+			String[] result= getBlocks(fCUnit, markers);
 			// It is faster to undo the changes than coping the buffer over and over again.
 			processor= new TextEditProcessor(fDocument, undo, TextEdit.UPDATE_REGIONS);
 			processor.performEdits();
@@ -477,13 +477,13 @@ public class SourceProvider {
 		return range;
 	}
 	
-	private String[] getBlocks(RangeMarker[] markers) throws BadLocationException {
+	private String[] getBlocks(ICompilationUnit unit, RangeMarker[] markers) throws BadLocationException {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
 			RangeMarker marker= markers[i];
 			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(unit.getJavaProject()), false);
 			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}
 		return result;

@@ -626,7 +626,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(method.getJavaProject()), false);
 			content= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
 			newMethod.setBody((Block) targetRewrite.createStringPlaceholder(content, ASTNode.BLOCK));
 		} catch (MalformedTreeException exception) {

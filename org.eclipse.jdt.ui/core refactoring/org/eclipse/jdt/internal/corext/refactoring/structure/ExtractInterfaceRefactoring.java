@@ -653,7 +653,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (rawContent == null)
 			return ""; //$NON-NLS-1$
 		String[] lines= Strings.convertIntoLines(rawContent);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(iMethod.getJavaProject()), false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(iMethod));
 	}
 	

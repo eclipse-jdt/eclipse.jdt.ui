@@ -174,13 +174,8 @@ public class TypedSource {
 			int length= cuNode.getExtendedLength(node);
 			if (length == 0)
 				length= node.getLength();
-			return trimIndent(cu.getBuffer().getText(start, length));
-			// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66880
+			return Strings.trimIndentation(cu.getBuffer().getText(start, length), CodeFormatterUtil.getTabWidth(cu.getJavaProject()), false);
 		} else 
 			return ""; //$NON-NLS-1$
-	}
-
-	private static String trimIndent(String source) {
-		return Strings.trimIndentation(source, CodeFormatterUtil.getTabWidth(), false);
 	}
 }

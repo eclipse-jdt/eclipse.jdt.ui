@@ -173,7 +173,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument buffer= new Document(member.getCompilationUnit().getBuffer().getContents());
 			try {
 				final String[] lines= Strings.convertIntoLines(buffer.get(predecessor.getStartPosition(), predecessor.getLength()));
-				Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+				Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(member.getJavaProject()), false);
 				final Javadoc successor= (Javadoc) rewrite.createStringPlaceholder(Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(buffer)), ASTNode.JAVADOC);
 				newDeclaration.setJavadoc(successor);
 			} catch (BadLocationException exception) {
@@ -444,7 +444,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
 		final String[] lines= Strings.convertIntoLines(text);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(declaringCu.getJavaProject()), false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
 	}
 

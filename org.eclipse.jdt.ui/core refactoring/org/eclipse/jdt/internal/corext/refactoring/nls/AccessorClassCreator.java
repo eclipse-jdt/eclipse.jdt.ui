@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,12 +27,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -99,9 +98,8 @@ class AccessorClassCreator {
 	}
 
 	private void addImportsToAccessorCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		String[] order= JavaPreferencesSettings.getImportOrderPreference(store);
-		int importThreshold= JavaPreferencesSettings.getImportNumberThreshold(store);
+		String[] order= JavaPreferencesSettings.getImportOrderPreference(newCu.getJavaProject());
+		int importThreshold= JavaPreferencesSettings.getImportNumberThreshold(newCu.getJavaProject());
 		ImportsStructure is= new ImportsStructure(newCu, order, importThreshold, true);
 		is.addImport("java.util.MissingResourceException"); //$NON-NLS-1$
 		is.addImport("java.util.ResourceBundle"); //$NON-NLS-1$

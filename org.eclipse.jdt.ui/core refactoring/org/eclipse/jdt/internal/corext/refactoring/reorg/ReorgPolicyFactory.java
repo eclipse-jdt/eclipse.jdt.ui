@@ -739,7 +739,7 @@ class ReorgPolicyFactory {
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
 			Assert.isTrue(sourceReference instanceof IJavaElement);
 			String[] lines= Strings.convertIntoLines(sourceReference.getSource());
-			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(((IJavaElement) sourceReference).getJavaProject()), false);
 			return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed((IJavaElement) sourceReference));
 		}
 

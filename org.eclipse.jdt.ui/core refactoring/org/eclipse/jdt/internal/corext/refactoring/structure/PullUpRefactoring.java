@@ -922,7 +922,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			rewrite.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			final String[] lines= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(method.getJavaProject()), false);
 			content= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
 			newMethod.setBody((Block) targetRewrite.getASTRewrite().createStringPlaceholder(content, ASTNode.BLOCK));
 		} catch (MalformedTreeException exception) {

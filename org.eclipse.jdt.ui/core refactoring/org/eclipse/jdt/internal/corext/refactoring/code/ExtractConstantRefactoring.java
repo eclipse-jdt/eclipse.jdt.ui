@@ -524,7 +524,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private TextEdit createInsertDeclarationFirstEdit(String delimiter) throws JavaModelException, CoreException {
 		BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
 		int insertOffset = first.getStartPosition();
-		String text= createConstantDeclarationSource(delimiter) + delimiter + getIndent(first);
+		String text= createConstantDeclarationSource(delimiter) + delimiter + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(first, getFile()), fCu.getJavaProject());
 		return new InsertEdit(insertOffset, text);		
 	}
 	
@@ -575,7 +575,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		Assert.isNotNull(toInsertAfter);
 			
 		int insertOffset= getStartOfFollowingLine(toInsertAfter);
-		String text= getIndent(toInsertAfter) + createConstantDeclarationSource(delimiter) + delimiter;
+		String text= CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(toInsertAfter, getFile()), fCu.getJavaProject()) + createConstantDeclarationSource(delimiter) + delimiter;
 		return new InsertEdit(insertOffset, text);		
 	}
 	
@@ -808,10 +808,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (!arg.endsWith(";")) //$NON-NLS-1$
 			return arg;
 		return removeTrailingSemicolons(arg.substring(0, arg.length() - 1));
-	}
-
-	private String getIndent(ASTNode insertBefore) throws CoreException {
-		return CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, getFile()));
 	}
 
 	private static boolean isStaticFieldOrStaticInitializer(BodyDeclaration node) {
