@@ -159,7 +159,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		MoveStaticMembersRefactoring refactoring= createNewRefactoringInstance(members);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getMovedMembers()[0]))
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getMembersToMove()[0]))
 			return;
 		
 		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$

@@ -78,7 +78,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		public void setVisible(boolean visible){
 			if (visible){
 				String message= RefactoringMessages.getFormattedString("MoveMembersInputPage.descriptionKey", //$NON-NLS-1$
-					new String[]{new Integer(getMoveRefactoring().getMovedMembers().length).toString(),
+					new String[]{new Integer(getMoveRefactoring().getMembersToMove().length).toString(),
 								 JavaModelUtil.getFullyQualifiedName(getMoveRefactoring().getDeclaringType())});
 				setDescription(message);
 			}	
