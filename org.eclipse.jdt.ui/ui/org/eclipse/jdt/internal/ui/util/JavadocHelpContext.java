@@ -86,15 +86,6 @@ public class JavadocHelpContext implements IContext2 {
 
 		List helpResources= new ArrayList();
 
-		if (context != null) {
-			IHelpResource[] resources= context.getRelatedTopics();
-			if (resources != null) {
-				for (int j= 0; j < resources.length; j++) {
-					helpResources.add(resources[j]);
-				}
-			}
-		}
-
 //		String javadocSummary= null;
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IJavaElement) {
@@ -131,6 +122,17 @@ public class JavadocHelpContext implements IContext2 {
 				}
 			}
 		}
+
+		// Add static help topics
+		if (context != null) {
+			IHelpResource[] resources= context.getRelatedTopics();
+			if (resources != null) {
+				for (int j= 0; j < resources.length; j++) {
+					helpResources.add(resources[j]);
+				}
+			}
+		}
+		
 		fHelpResources= (IHelpResource[]) helpResources.toArray(new IHelpResource[helpResources.size()]);
 
 		if (context != null)
