@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
-import org.eclipse.jdt.internal.ui.reorg.MockUnifiedSite;
+import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -272,7 +272,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
 		public DragNDropMoveAction(ISelectionProvider provider, Object target){
-			super(new MockUnifiedSite(provider));
+			super(new MockWorkbenchSite(provider));
 			Assert.isNotNull(target);
 			fTarget= target;
 		}

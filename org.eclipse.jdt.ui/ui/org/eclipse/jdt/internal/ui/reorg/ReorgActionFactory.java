@@ -57,7 +57,7 @@ public class ReorgActionFactory {
 	}
 	
 	public static SelectionDispatchAction createPasteAction(final ISourceReference[] elements, Object target){
-		return new PasteSourceReferencesFromClipboardAction(new MockUnifiedSite(new Object[]{target})){
+		return new PasteSourceReferencesFromClipboardAction(new MockWorkbenchSite(new Object[]{target})){
 			protected TypedSource[] getContentsToPaste(){
 				List result= new ArrayList(elements.length);
 				for(int i= 0; i < elements.length; i++){
@@ -73,11 +73,11 @@ public class ReorgActionFactory {
 	}
 	
 	public static DeleteSourceReferencesAction createDeleteSourceReferencesAction(ISourceReference[] elements){
-		return new DeleteSourceReferencesAction(new MockUnifiedSite(elements));
+		return new DeleteSourceReferencesAction(new MockWorkbenchSite(elements));
 	}	
 	
 	public static JdtCopyAction createDnDCopyAction(List elems, final IResource destination){
-		JdtCopyAction action= new JdtCopyAction(new MockUnifiedSite(elems)){
+		JdtCopyAction action= new JdtCopyAction(new MockWorkbenchSite(elems)){
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return ClipboardActionUtil.tryConvertingToJava(destination);			
 			}

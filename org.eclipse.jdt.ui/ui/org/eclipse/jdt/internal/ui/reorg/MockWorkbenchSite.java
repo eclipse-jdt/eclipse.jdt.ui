@@ -13,19 +13,19 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class MockUnifiedSite implements IWorkbenchSite {
+public class MockWorkbenchSite implements IWorkbenchSite {
 	
 	private ISelectionProvider fProvider;
 	
-	public MockUnifiedSite(ISelectionProvider provider){
+	public MockWorkbenchSite(ISelectionProvider provider){
 		setSelectionProvider(provider);
 	}
 	
-	public MockUnifiedSite(Object[] elements){
+	public MockWorkbenchSite(Object[] elements){
 		this(new SimpleSelectionProvider(elements));
 	}
 	
-	public MockUnifiedSite(List elements){
+	public MockWorkbenchSite(List elements){
 		this(new SimpleSelectionProvider(elements));
 	}
 	
