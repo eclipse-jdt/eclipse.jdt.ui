@@ -38,11 +38,11 @@ public class Bindings {
 	 * @return boolean
 	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
-		Assert.isTrue(b1 != null);
+		Assert.isNotNull(b1);
 		if (b1 == b2)
 			return true;
 		if (b2 == null)
-				return false;		
+			return false;		
 		String k1= b1.getKey();
 		String k2= b2.getKey();
 		if (k1 == null || k2 == null)
@@ -51,6 +51,14 @@ public class Bindings {
 			return k1.equals(k2);
 		else
 			return k2.equals(k1);
+	}
+	
+	public static int hashCode(IBinding binding){
+		Assert.isNotNull(binding);
+		String key= binding.getKey();
+		if (key == null)
+			return binding.hashCode();
+		return key.hashCode();
 	}
 		
 	public static String asString(IBinding binding){
