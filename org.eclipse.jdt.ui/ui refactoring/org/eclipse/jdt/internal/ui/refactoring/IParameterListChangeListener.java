@@ -15,7 +15,9 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 public interface IParameterListChangeListener {
 
 	/**
-	 * Gets fired when the given parameter has changed	 * @param parameter the parameter that has changed.	 */
+	 * Gets fired when the given parameter has changed
+	 * @param parameter the parameter that has changed.
+	 */
 	public void parameterChanged(ParameterInfo parameter);
 
 	/**
@@ -27,6 +29,7 @@ public interface IParameterListChangeListener {
 	
 	/**
 	 * Gets fired if the parameter list got modified by reordering or removing 
-	 * parameters (note that adding is handled by <code>parameterAdded</code>))	 */
+	 * parameters (note that adding is handled by <code>parameterAdded</code>))
+	 */
 	public void parameterListChanged();
 }

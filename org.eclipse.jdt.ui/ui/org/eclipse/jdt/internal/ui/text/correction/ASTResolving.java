@@ -264,7 +264,10 @@ public class ASTResolving {
 	}
 	
 	/**
-	 * Returns either a TypeDeclaration or an AnonymousTypeDeclaration	 * @param node	 * @return CompilationUnit	 */
+	 * Returns either a TypeDeclaration or an AnonymousTypeDeclaration
+	 * @param node
+	 * @return CompilationUnit
+	 */
 	public static ASTNode findParentType(ASTNode node) {
 		while ((node != null) && (node.getNodeType() != ASTNode.TYPE_DECLARATION) && (node.getNodeType() != ASTNode.ANONYMOUS_CLASS_DECLARATION)) {
 			node= node.getParent();

@@ -138,7 +138,8 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
 				setPageComplete(true);
 			}	
 		} catch (JavaModelException e){
-			setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$			setPageComplete(false);
+			setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$
+			setPageComplete(false);
 			JavaPlugin.log(e);
 		};
 	}

@@ -107,7 +107,9 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	/**
 	 * Provides hover information for the given Java elements.
 	 * 
-	 * @return the hover information string	 * @since 2.1	 */
+	 * @return the hover information string
+	 * @since 2.1
+	 */
 	protected String getHoverInfo(IJavaElement[] javaElements) {
 		return null;
 	}

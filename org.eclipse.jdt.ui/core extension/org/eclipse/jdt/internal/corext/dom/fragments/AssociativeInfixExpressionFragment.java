@@ -133,7 +133,8 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	}
 	
 	/**
-	 * Returns List of Lists of <code>ASTNode</code>s	 */
+	 * Returns List of Lists of <code>ASTNode</code>s
+	 */
 	private static List getMatchingContiguousNodeSubsequences(List source, List toMatch) {
 		//naive implementation:
 		
@@ -271,7 +272,8 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	/**
 	 * Note that this fragment does not directly
 	 * represent this expression node, but rather
-	 * a part of it.	 */
+	 * a part of it.
+	 */
 	public Expression getAssociatedExpression() {
 		return getGroupRoot();
 	}

@@ -308,7 +308,8 @@ public class Strings {
 	/**
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
-	 * the middle of a line)	 */
+	 * the middle of a line)
+	 */
 	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent, String lineDelim) {
 		try {
 			ILineTracker tracker= new DefaultLineTracker();

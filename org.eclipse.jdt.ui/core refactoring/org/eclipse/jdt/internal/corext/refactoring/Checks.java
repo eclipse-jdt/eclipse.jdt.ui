@@ -622,10 +622,13 @@ public class Checks {
 	}
 	
 	
-	/**	 * @param e	 * @return int
+	/**
+	 * @param e
+	 * @return int
 	 *          Checks.IS_RVALUE		if e is an rvalue
 	 *          Checks.NOT_RVALUE_VOID  if e is not an rvalue because its type is void
-	 *          Checks.NOT_RVALUE_MISC  if e is not an rvalue for some other reason	 */
+	 *          Checks.NOT_RVALUE_MISC  if e is not an rvalue for some other reason
+	 */
 	public static int checkExpressionIsRValue(Expression e) {
 		if(e instanceof Name) {
 			if(!(((Name) e).resolveBinding() instanceof IVariableBinding)) {

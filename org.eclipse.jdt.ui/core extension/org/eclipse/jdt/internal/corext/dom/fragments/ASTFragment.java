@@ -3,7 +3,8 @@ package org.eclipse.jdt.internal.corext.dom.fragments;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
- * @see IASTFragment, ASTFragmentFactory */
+ * @see IASTFragment, ASTFragmentFactory
+ */
 abstract class ASTFragment implements IASTFragment {
 
 	/**

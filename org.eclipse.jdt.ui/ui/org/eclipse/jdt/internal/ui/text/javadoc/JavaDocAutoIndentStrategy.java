@@ -604,7 +604,8 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	/**
 	 * Returns the displayed width of a string, taking in account the displayed tab width.
-	 * The result can be compared against the print margin.	 */
+	 * The result can be compared against the print margin.
+	 */
 	private static int calculateDisplayedWidth(String string) {
 
 		final int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH); 

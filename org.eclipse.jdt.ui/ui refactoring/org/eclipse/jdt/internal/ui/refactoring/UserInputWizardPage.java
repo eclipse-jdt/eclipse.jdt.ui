@@ -36,7 +36,9 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	/**
 	 * Sets the page's complete status depending on the given <tt>
 	 * ReactoringStatus</tt>.
-	 * 	 * @param status the <tt>RefactoringStatus</tt>	 */
+	 * 
+	 * @param status the <tt>RefactoringStatus</tt>
+	 */
 	public void setPageComplete(RefactoringStatus status) {
 		getRefactoringWizard().setStatus(status);
 

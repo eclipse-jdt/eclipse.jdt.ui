@@ -62,7 +62,8 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	
 	/**
 	 * Subclasses should override to perform the actions of the wizard.
-	 * This method is run in the wizard container's context as a workspace runnable.	 */
+	 * This method is run in the wizard container's context as a workspace runnable.
+	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 	}
 	

@@ -25,7 +25,8 @@ import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 /**
  * Adds view menus to switch between flat and hierarchical layout.
  * 
- * @since 2.1 */
+ * @since 2.1
+ */
 class LayoutActionGroup extends MultiActionGroup {
 
 	LayoutActionGroup(PackageExplorerPart packageExplorer) {

@@ -262,7 +262,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * Returns the parameter infos.	 * @return a list of parameter infos.	 */
+	 * Returns the parameter infos.
+	 * @return a list of parameter infos.
+	 */
 	public List getParameterInfos() {
 		return fParameterInfos;
 	}
@@ -316,7 +318,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/**
 	 * Returns the names already in use in the selected statements/expressions.
 	 * 
-	 * @return names already in use.	 */
+	 * @return names already in use.
+	 */
 	public Set getUsedNames() {
 		return fUsedNames;
 	}

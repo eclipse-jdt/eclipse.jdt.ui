@@ -55,7 +55,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private boolean fFirstInvocation= true;
 	
 	/**
-	 * @deprecated Use NewVariableEntryDialog(Shell) and setTitle instead	 */
+	 * @deprecated Use NewVariableEntryDialog(Shell) and setTitle instead
+	 */
 	public NewVariableEntryDialog(Shell parent, String title, Object exsting) {
 		this(parent);
 		setTitle(title);

@@ -21,7 +21,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
  * sub-fragments (fragments contained within a 
  * parent fragment, including the parent itself)
  * which 'match' another given fragment.
- *  */
+ * 
+ */
 public interface IASTFragment {
 		
 	/**
@@ -32,28 +33,35 @@ public interface IASTFragment {
 	 * 
 	 * That two node match does not imply that their source ranges
 	 * are the same, or that they map (via getAssociatedNode()) to the
-	 * same node.	 */
+	 * same node.
+	 */
 	public boolean matches(IASTFragment other);
 	
 	/**
 	 * Returns (at least some approximation of) a maximal set of
-	 * sub-fragments of this fragment which match <code> toMatch </code>	 */
+	 * sub-fragments of this fragment which match <code> toMatch </code>
+	 */
 	public IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch);
 
 	/**
 	 * Every fragment maps to a node.
 	 * Multiple fragments can map to the same node.
 	 * 
-	 * @return ASTNode The node to which this fragment maps.	 */
+	 * @return ASTNode The node to which this fragment maps.
+	 */
 	public ASTNode getAssociatedNode();
 	
 	/**
 	 * Every fragment has a source start position.
-	 * 	 * @return int		The source start position.	 */
+	 * 
+	 * @return int		The source start position.
+	 */
 	public int getStartPosition();
 	
 	/**
 	 * Every fragment has a source length.
-	 * 	 * @return int		The source length.	 */
+	 * 
+	 * @return int		The source length.
+	 */
 	public int getLength();
 }

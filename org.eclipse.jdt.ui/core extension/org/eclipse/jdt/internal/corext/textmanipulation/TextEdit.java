@@ -182,7 +182,9 @@ public abstract class TextEdit {
 	/**
 	 * Returns <code>true</code> if this edit has children. Otherwise
 	 * <code>false</code> is returned.
-	 * 	 * @return <code>true</code> if this edit has children	 */
+	 * 
+	 * @return <code>true</code> if this edit has children
+	 */
 	public boolean hasChildren() {
 		return fChildren != null && ! fChildren.isEmpty();
 	}

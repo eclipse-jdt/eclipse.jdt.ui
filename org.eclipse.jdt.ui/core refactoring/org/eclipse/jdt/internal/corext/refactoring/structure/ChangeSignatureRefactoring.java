@@ -202,7 +202,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * 	 * @return List of <code>ParameterInfo</code> objects.	 */
+	 * 
+	 * @return List of <code>ParameterInfo</code> objects.
+	 */
 	public List getParameterInfos(){
 		return fParameterInfos;
 	}

@@ -44,20 +44,26 @@ public abstract class TemplateContext {
 	}
 	
 	/**
-	 * Returns <code>true</code> if context is read-only, <code>false</code> otherwise.	 */
+	 * Returns <code>true</code> if context is read-only, <code>false</code> otherwise.
+	 */
 	public boolean isReadOnly() {
 		return fReadOnly;	
 	}
 	
 	/**
-	 * Defines the value of a variable.	 * @param name the name of the variable	 * @param value the value of the variable, <code>null</code> to undefine a variable	 */
+	 * Defines the value of a variable.
+	 * @param name the name of the variable
+	 * @param value the value of the variable, <code>null</code> to undefine a variable
+	 */
 	public void setVariable(String name, String value) {
 		fVariables.put(name, value);
 	}
 	
 	/**
-	 * Returns the value of a defined variable.	 * @param name the name of the variable
-	 * @return returns the value of the variable, <code>null</code> if the variable was not defined	 */
+	 * Returns the value of a defined variable.
+	 * @param name the name of the variable
+	 * @return returns the value of the variable, <code>null</code> if the variable was not defined
+	 */
 	public String getVariable(String name) {
 		return (String) fVariables.get(name);
 	}

@@ -321,7 +321,8 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	}
 	
 	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
-		String messagePattern= ReorgMessages.getString("JdtMoveAction.referenced") + //$NON-NLS-1$			ReorgMessages.getString("JdtMoveAction.update_classpath"); //$NON-NLS-1$
+		String messagePattern= ReorgMessages.getString("JdtMoveAction.referenced") + //$NON-NLS-1$
+			ReorgMessages.getString("JdtMoveAction.update_classpath"); //$NON-NLS-1$
 		return new PackageFragmentRootManipulationQuery(shell, ReorgMessages.getString("JdtMoveAction.Move"), messagePattern); //$NON-NLS-1$
 	}
 }

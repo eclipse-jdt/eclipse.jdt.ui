@@ -134,7 +134,8 @@ abstract class TextInputWizardPage extends UserInputWizardPage{
 	/**
 	 * Subclasses can override if they want to restore the message differently.
 	 * This implementation calls <code>setMessage(null)</code>, which clears the message 
-	 * thus exposing the description.	 */
+	 * thus exposing the description.
+	 */
 	protected void restoreMessage(){
 		setMessage(null);
 	}

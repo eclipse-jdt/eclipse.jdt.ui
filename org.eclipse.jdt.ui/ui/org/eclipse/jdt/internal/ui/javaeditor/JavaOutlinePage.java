@@ -190,13 +190,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
          
 			static class NoClassElement extends WorkbenchAdapter implements IAdaptable {
 				/*
-				 * @see java.lang.Object#toString()				 */
+				 * @see java.lang.Object#toString()
+				 */
 				public String toString() {
 					return JavaEditorMessages.getString("JavaOutlinePage.error.NoTopLevelType"); //$NON-NLS-1$
 				}
 		
 				/*
-				 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)				 */
+				 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)
+				 */
 				public Object getAdapter(Class clas) {
 					if (clas == IWorkbenchAdapter.class)
 						return this;

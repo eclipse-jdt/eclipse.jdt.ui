@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class JavaElementProvider implements IInformationProvider, IInformationProviderExtension {
 
 	private JavaEditor fEditor;
-	private String fCurrentPerspective;
 	private boolean fUseCodeResolve;
 
 	public JavaElementProvider(IEditorPart editor) {

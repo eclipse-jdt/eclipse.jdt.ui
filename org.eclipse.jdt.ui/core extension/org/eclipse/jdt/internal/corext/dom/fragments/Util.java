@@ -9,7 +9,8 @@ import org.eclipse.jdt.internal.corext.SourceRange;
  * or otherwise depend on, other classes in this package.  Each 
  * package-visible method is called by more than one other class in this
  * package.  Since they do not depend on other classes in this package, 
- * they could be moved to some less specialized package. */
+ * they could be moved to some less specialized package.
+ */
 class Util {
 	static boolean rangeIncludesNonWhitespaceOutsideRange(SourceRange first, SourceRange second, IBuffer buffer) {
 		if(!first.covers(second))

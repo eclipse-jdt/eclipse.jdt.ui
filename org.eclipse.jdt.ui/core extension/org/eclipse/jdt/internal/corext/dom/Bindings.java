@@ -24,8 +24,12 @@ public class Bindings {
 	
 	/**
 	 * Checks if the two bindings are equals. First an identity check is
-	 * made an then the key of the bindings are compared. 	 * @param b1 first binding treated as <code>this</code>. So it must
-	 *  not be <code>null</code>	 * @param b2 the second binding.	 * @return boolean	 */
+	 * made an then the key of the bindings are compared. 
+	 * @param b1 first binding treated as <code>this</code>. So it must
+	 *  not be <code>null</code>
+	 * @param b2 the second binding.
+	 * @return boolean
+	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
 		Assert.isTrue(b1 != null);
 		if (b1 == b2)

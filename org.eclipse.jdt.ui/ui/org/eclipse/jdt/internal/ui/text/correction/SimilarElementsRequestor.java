@@ -88,10 +88,6 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		fResult.add(elem);
 	}
 	
-	private void addOther(SimilarElement elem) {
-		fOthers.add(elem);
-	}	
-	
 	private SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
 		try {
 			cu.codeComplete(pos, this);

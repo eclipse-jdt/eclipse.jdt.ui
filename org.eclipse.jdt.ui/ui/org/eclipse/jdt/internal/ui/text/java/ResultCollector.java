@@ -493,7 +493,8 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 	
 	/**
-	 * Sets the text viewer.	 */
+	 * Sets the text viewer.
+	 */
 	public void setViewer(ITextViewer viewer) {
 		fTextViewer= viewer;
 	}

@@ -90,7 +90,9 @@ public final class ASTRewrite {
 	private boolean fHasInserts;
 	
 	/**
-	 * Creates the <code>ASTRewrite</code> object.	 * @param node A node which is parent to all modified or changed nodes.	 */
+	 * Creates the <code>ASTRewrite</code> object.
+	 * @param node A node which is parent to all modified or changed nodes.
+	 */
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 		fChangedProperties= new HashMap();
@@ -122,7 +124,8 @@ public final class ASTRewrite {
 	}
 	
 	/**
-	 * Removes all modifications applied to the given AST.	 */
+	 * Removes all modifications applied to the given AST.
+	 */
 	public void removeModifications() {
 		if (fHasInserts) {
 			fRootNode.accept(new ASTRewriteClear(this));
@@ -293,7 +296,10 @@ public final class ASTRewrite {
 	/**
 	 * Returns the node type that should be used to create a place holder for the given node
 	 * <code>existingNode</code>.
-	 * 	 * @param existingNode an existing node for which a place holder is to be created	 * @return the node type of a potential place holder	 */
+	 * 
+	 * @param existingNode an existing node for which a place holder is to be created
+	 * @return the node type of a potential place holder
+	 */
 	public static int getPlaceholderType(ASTNode existingNode) {
 		if (existingNode instanceof Expression) {
 			return EXPRESSION;
