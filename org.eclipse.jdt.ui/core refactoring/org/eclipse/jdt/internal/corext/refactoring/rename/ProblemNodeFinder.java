@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -24,7 +24,7 @@ public class ProblemNodeFinder {
 
 	private ProblemNodeFinder(){}
 	
-	public static SimpleName[] getProblemNodes(MethodDeclaration methodNode, TextEdit[] edits, TextChange change, String key){
+	public static SimpleName[] getProblemNodes(ASTNode methodNode, TextEdit[] edits, TextChange change, String key){
 		NameNodeVisitor visitor= new NameNodeVisitor(edits, change, key);
 		methodNode.accept(visitor);
 		return visitor.getProblemNodes();
