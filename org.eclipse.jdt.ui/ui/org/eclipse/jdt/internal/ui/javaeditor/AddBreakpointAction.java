@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.debug.core.IJavaDebugConstants;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -84,7 +83,7 @@ public class AddBreakpointAction extends AddMarkerAction {
 						}
 					}
 					if (type != null) {
-						if (!EditorUtility.isDuplicateLineBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
+						if (!JDIDebugModel.isDuplicateLineBreakpoint(type, lineNumber)) {
 							return JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 						}
 					}

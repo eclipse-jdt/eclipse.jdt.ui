@@ -224,24 +224,5 @@ public class EditorUtility {
 		}
 		return null;
 	}	
-	
-	public static boolean isDuplicateLineBreakpoint(String modelId, String markerType, IType containingType, int lineNumber) throws CoreException {
-		IBreakpointManager manager= DebugPlugin.getDefault().getBreakpointManager();
-		IBreakpoint[] breakpoints= manager.getBreakpoints(modelId);
-		for (int i = 0; i < breakpoints.length; i++) {
-			if (!(breakpoints[i] instanceof IJavaLineBreakpoint)) {
-				continue;
-			}
-			IJavaLineBreakpoint breakpoint = (IJavaLineBreakpoint) breakpoints[i];
-			if (breakpoint.getMarker().getType().equals(markerType)) {
-				if (breakpoint.getMarker().getType().equals(containingType)) {
-					if (breakpoint.getLineNumber() == lineNumber) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
 
 }
