@@ -167,14 +167,14 @@ public class VariableCreationDialog extends StatusDialog {
 		} else if (field == fPathField) {
 			fPathStatus= pathUpdated();
 		}		
-		updateStatus(StatusTool.getMoreSevere(fNameStatus, fPathStatus));
+		updateStatus(StatusTool.getMoreSevere(fPathStatus, fNameStatus));
 	}		
 	
 	protected StatusInfo nameUpdated() {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
 		if (name.length() == 0) {
-			status.setError(""); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.entername")); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateIdentifier(name);
@@ -205,7 +205,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		String path= fPathField.getText();
 		if (path.length() == 0) {
-			status.setError(""); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.enterpath")); //$NON-NLS-1$
 			return status;
 		}
 		return status;

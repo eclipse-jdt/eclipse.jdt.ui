@@ -48,7 +48,7 @@ public class StringInputDialog extends StatusDialog {
 	}
 	
 	protected Control createDialogArea(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= (Composite)super.createDialogArea(parent);
 		MGridLayout layout= new MGridLayout();
 		layout.minimumWidth= 300;
 		layout.numColumns= 1;

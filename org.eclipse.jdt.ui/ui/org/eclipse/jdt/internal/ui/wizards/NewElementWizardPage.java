@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.text.MessageFormat;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import java.text.MessageFormat;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
 
 public abstract class NewElementWizardPage extends WizardPage {
 
@@ -74,6 +75,12 @@ public abstract class NewElementWizardPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		fPageVisible= visible;
+		// policy: wizards are not allowed to come up with an error message
+		if (visible && fCurrStatus.matches(IStatus.ERROR)) {
+			StatusInfo status= new StatusInfo();
+			status.setError("");  //$NON-NLS-1$
+			fCurrStatus= status;
+		} 
 		updateStatus(fCurrStatus);
 	}			
 	

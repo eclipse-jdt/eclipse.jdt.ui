@@ -151,7 +151,7 @@ public class VariableSelectionBlock {
 		String name= fVariableField.getText();
 		if (name.length() == 0) {
 			if (!fIsEmptyAllowed) {
-				status.setError(""); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getString("VariableSelectionBlock.error.entername")); //$NON-NLS-1$
 			} else {
 				fVariable= ""; //$NON-NLS-1$
 			}
@@ -232,7 +232,7 @@ public class VariableSelectionBlock {
 		String selecteVariable= (fVariable != null) ? fVariable : fLastVariableSelection;
 		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), selecteVariable);
 		if (dialog.open() == dialog.OK) {
-			return 	dialog.getSelectedVariable();
+			return dialog.getSelectedVariable();
 		}
 		
 		return null;

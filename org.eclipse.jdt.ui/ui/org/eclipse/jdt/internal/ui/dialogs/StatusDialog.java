@@ -92,6 +92,12 @@ public abstract class StatusDialog extends Dialog {
 	public void create() {
 		super.create();
 		if (fLastStatus != null) {
+			// policy: dialogs are not allowed to come up with an error message
+			if (fLastStatus.matches(IStatus.ERROR)) {
+				StatusInfo status= new StatusInfo();
+				status.setError(""); //$NON-NLS-1$
+				fLastStatus= status;
+			}
 			updateStatus(fLastStatus);
 		}
 	}
