@@ -37,6 +37,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(UnifiedSite.create(editor.getEditorSite()));
+		setText(TITLE);
 		fEditor= editor;
 	}
 
