@@ -6,8 +6,9 @@
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
- *   Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
- * 	 Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
+ *     IBM Corporation - initial API and implementation
+ *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
+ *     Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
