@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -58,6 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 
 
 /**
@@ -67,15 +70,17 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class DefaultJavaFoldingStructureProvider implements IProjectionListener, IJavaFoldingStructureProvider {
 	
-	private static class JavaProjectionAnnotation extends ProjectionAnnotation {
+	private static final class JavaProjectionAnnotation extends ProjectionAnnotation {
 		
 		private IJavaElement fJavaElement;
 		private boolean fIsComment;
+		private int fCaptionOffset;
 		
-		public JavaProjectionAnnotation(IJavaElement element, boolean isCollapsed, boolean isComment) {
+		public JavaProjectionAnnotation(IJavaElement element, boolean isCollapsed, boolean isComment, int captionOffset) {
 			super(isCollapsed);
 			fJavaElement= element;
 			fIsComment= isComment;
+			fCaptionOffset= captionOffset;
 		}
 		
 		public IJavaElement getElement() {
@@ -92,6 +97,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		
 		public void setIsComment(boolean isComment) {
 			fIsComment= isComment;
+		}
+		
+		protected int getCaptionOffset() {
+			return fCaptionOffset;
+		}
+		
+		void setCaptionOffset(int offset) {
+			fCaptionOffset= offset;
 		}
 	}
 	
@@ -133,7 +146,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		}		
 	}
 	
-	
 	private IDocument fCachedDocument;
 	
 	private ITextEditor fEditor;
@@ -146,6 +158,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private boolean fCollapseImportContainer= true;
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMethods= false;
+	private boolean fCollapseHeaderComments= false;
 	
 	public DefaultJavaFoldingStructureProvider() {
 	}
@@ -253,6 +266,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		fCollapseImportContainer= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
 		fCollapseJavadoc= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
 		fCollapseMethods= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
+		fCollapseHeaderComments= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
 	}
 
 	private Map computeAdditions(IParent parent) {
@@ -296,6 +310,10 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				collapse= fAllowCollapsing && fCollapseMethods;
 				createProjection= true;
 				break;
+			case IJavaElement.PACKAGE_DECLARATION:
+				collapse= fAllowCollapsing && fCollapseHeaderComments;
+				createProjection= true;
+				break;
 		}
 		
 		if (createProjection) {
@@ -305,12 +323,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				for (int i= 0; i < regions.length - 1; i++) {
 					Position position= createProjectionPosition(regions[i]);
 					if (position != null)
-						map.put(new JavaProjectionAnnotation(element, fAllowCollapsing && fCollapseJavadoc, true), position);
+						map.put(new JavaProjectionAnnotation(element, fAllowCollapsing && fCollapseJavadoc, true, computeCaptionOffset(position, null)), position);
 				}
 				// code
 				Position position= createProjectionPosition(regions[regions.length - 1]);
 				if (position != null)
-					map.put(new JavaProjectionAnnotation(element, collapse, false), position);
+					map.put(new JavaProjectionAnnotation(element, collapse, false, computeCaptionOffset(position, element)), position);
 			}
 		}
 	}
@@ -330,12 +348,31 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		return false;		
 	}
 
+	/**
+	 * Computes the projection ranges for a given <code>IJavaElement</code>.
+	 * More than one range may be returned if the element has a leading comment
+	 * which gets folded separately. If there are no foldable regions,
+	 * <code>null</code> is returned.
+	 * 
+	 * @param element the java element that can be folded
+	 * @return the regions to be folded, or <code>null</code> if there are
+	 *         none
+	 */
 	private IRegion[] computeProjectionRanges(IJavaElement element) {
 		
 		try {
 			if (element instanceof ISourceReference) {
 				ISourceReference reference= (ISourceReference) element;
 				ISourceRange range= reference.getSourceRange();
+				
+				int offset= range.getOffset();
+				if (element instanceof IPackageDeclaration) {
+					int line= fCachedDocument.getLineOfOffset(offset);
+					if (line > 0)
+						return new IRegion[] {new Region(0, fCachedDocument.getLineOffset(line - 1))};
+					return null;
+				}
+
 				String contents= reference.getSource();
 				if (contents == null)
 					return null;
@@ -343,7 +380,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 				scanner.setSource(contents.toCharArray());
 				List regions= new ArrayList();
-				int shift= range.getOffset();
+				int shift= offset;
 				int start= shift;
 				while (true) {
 					
@@ -363,7 +400,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					break;
 				}
 				
-				regions.add(new Region(start, range.getOffset() + range.getLength() - start));
+				regions.add(new Region(start, offset + range.getLength() - start));
 				
 				if (regions.size() > 0) {
 					IRegion[] result= new IRegion[regions.size()];
@@ -373,11 +410,52 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			}
 		} catch (JavaModelException e) {
 		} catch (InvalidInputException e) {
+		} catch (BadLocationException e) {
 		}
 		
 		return null;
 	}
 	
+	/**
+	 * Computes the offset of the caption text start relative to
+	 * <code>position</code>.
+	 * 
+	 * @param position the position of the folded region
+	 * @param element the java element belonging to the folded region, or <code>null</code>
+	 * @return the caption offset relative to the position offset
+	 */
+	private int computeCaptionOffset(Position position, IJavaElement element) {
+		if (element instanceof IMember) {
+			try {
+				ISourceRange nameRange= ((IMember) element).getNameRange();
+				if (nameRange != null)
+					return nameRange.getOffset() - position.getOffset();
+			} catch (JavaModelException e) {
+				// ignore and return 0
+			}
+		}
+		
+		return findFirstContent(new DocumentCharacterIterator(fCachedDocument, position.getOffset(), position.getOffset() + position.getLength()));
+	}
+	
+	/**
+	 * Finds the offset of the first identifier part within <code>content</code>.
+	 * Returns 0 if none is found.
+	 * 
+	 * @param content the content to search
+	 * @return the first index of a unicode identifier part, or zero if none can
+	 *         be found
+	 */
+	private int findFirstContent(final CharSequence content) {
+		int lenght= content.length();
+		for (int i= 0; i < lenght; i++) {
+			if (Character.isUnicodeIdentifierPart(content.charAt(i)))
+				return i;
+			i++;
+		}
+		return 0;
+	}
+
 	private Position createProjectionPosition(IRegion region) {
 		
 		if (fCachedDocument == null)
@@ -503,6 +581,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						
 						deletedPosition.setLength(changedPosition.getLength());
 						deleted.setElement(changed.getElement());
+						deleted.setCaptionOffset(changed.getCaptionOffset());
 						
 						deletionIterator.remove();
 						newChanges.add(deleted);
@@ -525,6 +604,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						
 						deletedPosition.setLength(addedPosition.getLength());
 						deleted.setElement(added.getElement());
+						deleted.setCaptionOffset(added.getCaptionOffset());
 						
 						deletionIterator.remove();
 						newChanges.add(deleted);

@@ -2660,6 +2660,16 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_FOLDING_IMPORTS= "editor_folding_default_imports"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that stores the value for header comment folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String EDITOR_FOLDING_HEADERS= "editor_folding_default_headers"; //$NON-NLS-1$
+
 
 	//---------- Properties File Editor ----------
 	
@@ -3082,6 +3092,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, true);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, false);
 		
 		// properties file editor
 		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0));

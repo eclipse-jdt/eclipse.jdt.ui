@@ -69,6 +69,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_INNERTYPES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_METHODS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_IMPORTS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_HEADERS));
 		
 		return (OverlayKey[]) overlayKeys.toArray(new OverlayKey[overlayKeys.size()]);
 	}
@@ -93,6 +94,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.innerTypes"), PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0); //$NON-NLS-1$
 		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.methods"), PreferenceConstants.EDITOR_FOLDING_METHODS, 0); //$NON-NLS-1$
 		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.imports"), PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0); //$NON-NLS-1$
+		addCheckBox(inner, FoldingMessages.getString("DefaultJavaFoldingPreferenceBlock.headers"), PreferenceConstants.EDITOR_FOLDING_HEADERS, 0); //$NON-NLS-1$
 		
 		return inner;
 	}
