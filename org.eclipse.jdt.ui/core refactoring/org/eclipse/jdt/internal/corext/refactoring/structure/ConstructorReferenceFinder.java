@@ -55,11 +55,15 @@ class ConstructorReferenceFinder {
 	private final IType fType;
 	private final IMethod[] fConstructors;
 	private ASTNodeMappingManager fASTManager;
-	
+
 	private ConstructorReferenceFinder(IType type, ASTNodeMappingManager astManager) throws JavaModelException{
 		fConstructors= JavaElementUtil.getAllConstructors(type);
 		fASTManager= astManager;
 		fType= type;
+	}
+
+	private ConstructorReferenceFinder(IType type) throws JavaModelException{
+		this(type, null);
 	}
 	
 	private ConstructorReferenceFinder(IMethod constructor, ASTNodeMappingManager astManager){
@@ -69,12 +73,15 @@ class ConstructorReferenceFinder {
 	}
 
 	private ConstructorReferenceFinder(IMethod constructor){
-		fConstructors= new IMethod[]{constructor};
-		fType= constructor.getDeclaringType();
+		this(constructor, null);
 	}
 	
 	public static ASTNode[] getConstructorReferenceNodes(IType type, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		return new ConstructorReferenceFinder(type, astManager).getConstructorReferenceNodes(pm, IJavaSearchConstants.REFERENCES);
+	}
+
+	public static SearchResultGroup[] getConstructorReferences(IType type, IProgressMonitor pm) throws JavaModelException{
+		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, IJavaSearchConstants.REFERENCES);
 	}
 
 	public static SearchResultGroup[] getConstructorOccurrences(IMethod constructor, IProgressMonitor pm) throws JavaModelException{
