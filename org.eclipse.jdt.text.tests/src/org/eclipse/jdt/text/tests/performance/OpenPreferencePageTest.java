@@ -28,8 +28,8 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.preference.PreferenceDialog;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
 
 
@@ -49,8 +49,8 @@ public class OpenPreferencePageTest extends TestCase {
 	public void testOpenPreferencePage() {
 		Display display= EditorTestHelper.getActiveDisplay();
 		
-		PreferenceDialog d= PreferencesUtil.createPreferenceDialogOn(null, null, null);
-		WorkbenchHelp.setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
+		PreferenceDialog d= PreferencesUtil.createPreferenceDialogOn(null, null, null, null);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
 		// HACK to get control back instantly
 		d.setBlockOnOpen(false);
 		d.open();
