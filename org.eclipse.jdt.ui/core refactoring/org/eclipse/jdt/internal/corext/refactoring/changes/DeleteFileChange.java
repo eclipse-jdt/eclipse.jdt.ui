@@ -9,8 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
@@ -19,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
 
@@ -39,8 +38,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		String pattern= "Delete file ''{0}''";
-		return MessageFormat.format(pattern, new String[]{fPath.lastSegment()});
+		return RefactoringCoreMessages.getFormattedString("DeleteFileChange.1", fPath.lastSegment()); //$NON-NLS-1$
 	}
 
 	/* non java-doc

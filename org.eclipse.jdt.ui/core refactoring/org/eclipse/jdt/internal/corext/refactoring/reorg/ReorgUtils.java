@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 public class ReorgUtils {
@@ -127,11 +128,11 @@ public class ReorgUtils {
 	private static String createNamePattern(IResource resource) {
 		switch(resource.getType()){
 			case IResource.FILE:
-				return "file ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.0"); //$NON-NLS-1$
 			case IResource.FOLDER:
-				return "folder ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.1"); //$NON-NLS-1$
 			case IResource.PROJECT:
-				return "project ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.2"); //$NON-NLS-1$
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -186,39 +187,39 @@ public class ReorgUtils {
 	private static String createNamePattern(IJavaElement element) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.CLASS_FILE:
-				return "class file ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.3"); //$NON-NLS-1$
 			case IJavaElement.COMPILATION_UNIT:
-				return "file ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.4"); //$NON-NLS-1$
 			case IJavaElement.FIELD:
-				return "field ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.5"); //$NON-NLS-1$
 			case IJavaElement.IMPORT_CONTAINER:
-				return "the import container";
+				return RefactoringCoreMessages.getString("ReorgUtils.6"); //$NON-NLS-1$
 			case IJavaElement.IMPORT_DECLARATION:
-				return "import declaration ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.7"); //$NON-NLS-1$
 			case IJavaElement.INITIALIZER:
-				return "the initializer";
+				return RefactoringCoreMessages.getString("ReorgUtils.8"); //$NON-NLS-1$
 			case IJavaElement.JAVA_PROJECT:
-				return "Java project ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.9"); //$NON-NLS-1$
 			case IJavaElement.METHOD:
 				if (((IMethod)element).isConstructor())
-					return "constructor ''{0}''";
+					return RefactoringCoreMessages.getString("ReorgUtils.10"); //$NON-NLS-1$
 				else
-					return "method ''{0}''";
+					return RefactoringCoreMessages.getString("ReorgUtils.11"); //$NON-NLS-1$
 			case IJavaElement.PACKAGE_DECLARATION:
-				return "package declaration ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.12"); //$NON-NLS-1$
 			case IJavaElement.PACKAGE_FRAGMENT:
 				if (JavaElementUtil.isDefaultPackage(element))
-					return "the default package";
+					return RefactoringCoreMessages.getString("ReorgUtils.13"); //$NON-NLS-1$
 				else
-					return "package ''{0}''";
+					return RefactoringCoreMessages.getString("ReorgUtils.14"); //$NON-NLS-1$
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				if (isSourceFolder(element))
-					return "source folder ''{0}''";
+					return RefactoringCoreMessages.getString("ReorgUtils.15"); //$NON-NLS-1$
 				if (isClassFolder(element))
-					return "class folder ''{0}''";
-				return "package fragment root ''{0}''";
+					return RefactoringCoreMessages.getString("ReorgUtils.16"); //$NON-NLS-1$
+				return RefactoringCoreMessages.getString("ReorgUtils.17"); //$NON-NLS-1$
 			case IJavaElement.TYPE:
-				return "type ''{0}''";
+				return RefactoringCoreMessages.getString("ReorgUtils.18"); //$NON-NLS-1$
 			default:
 				Assert.isTrue(false);
 				return null;

@@ -1309,7 +1309,7 @@ public class PullUpRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportEditManager.hasImportEditFor(cu))
 			resultingEdits.add(fImportEditManager.getImportEdit(cu));
-		textChange.addTextEdit("Pull up", resultingEdits);
+		textChange.addTextEdit(RefactoringCoreMessages.getString("PullUpRefactoring.42"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 

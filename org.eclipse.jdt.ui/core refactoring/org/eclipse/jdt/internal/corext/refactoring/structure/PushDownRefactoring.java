@@ -825,7 +825,7 @@ public class PushDownRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportEditManager.hasImportEditFor(cu))
 			resultingEdits.add(fImportEditManager.getImportEdit(cu));
-		textChange.addTextEdit("Push down", resultingEdits);
+		textChange.addTextEdit(RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 

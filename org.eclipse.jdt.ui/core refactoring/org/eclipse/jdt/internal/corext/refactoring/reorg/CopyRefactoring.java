@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public final class CopyRefactoring extends Refactoring{
 
@@ -62,7 +63,7 @@ public final class CopyRefactoring extends Refactoring{
 	}
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
@@ -87,8 +88,8 @@ public final class CopyRefactoring extends Refactoring{
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fNewNameQueries, "Missing new name queries");
-		Assert.isNotNull(fReorgQueries, "Missing reorg queries");
+		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
+		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
 		return fCopyPolicy.checkInput(pm, fReorgQueries);
 	}
 
@@ -119,6 +120,6 @@ public final class CopyRefactoring extends Refactoring{
 	}
 
 	public String getName() {
-		return "Copy";
+		return RefactoringCoreMessages.getString("CopyRefactoring.0"); //$NON-NLS-1$
 	}
 }

@@ -96,7 +96,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		Assert.isNotNull(declaration);
 		fMover= InstanceMethodMover.create(declaration, fCU, fCodeGenerationSettings);
 		if (fMover == null)
-			return RefactoringStatus.createFatalErrorStatus("The selected method cannot be moved");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.2")); //$NON-NLS-1$
 		return new RefactoringStatus();
 	}
 	

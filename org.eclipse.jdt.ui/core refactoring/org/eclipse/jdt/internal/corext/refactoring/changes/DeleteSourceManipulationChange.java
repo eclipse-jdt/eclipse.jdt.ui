@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,6 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -41,14 +40,13 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		String pattern= "Delete ''{0}''";
-		return MessageFormat.format(pattern, new String[]{getElementName()});
+		return RefactoringCoreMessages.getFormattedString("DeleteSourceManipulationChange.0", getElementName()); //$NON-NLS-1$
 	}
 
 	private String getElementName() {
 		IJavaElement javaElement= getJavaElement(getSourceModification());
 		if (JavaElementUtil.isDefaultPackage(javaElement))
-			return "(default package)";
+			return RefactoringCoreMessages.getString("DeleteSourceManipulationChange.1"); //$NON-NLS-1$
 		return javaElement.getElementName();
 	}
 

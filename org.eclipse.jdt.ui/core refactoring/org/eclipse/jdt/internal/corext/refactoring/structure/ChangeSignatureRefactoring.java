@@ -307,8 +307,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return;
 		if (info.getNewTypeName().trim().equals("")){ //$NON-NLS-1$
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
-			if (info.isAdded() && info.getNewName().trim().equals(""))
-				msg= "Enter the type for the new parameter";
+			if (info.isAdded() && info.getNewName().trim().equals("")) //$NON-NLS-1$
+				msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.new_parameter"); //$NON-NLS-1$
 			result.addFatalError(msg);
 			return;
 		}	

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 class ReadOnlyResourceFinder{
@@ -28,14 +29,14 @@ class ReadOnlyResourceFinder{
 	}
 
 	static boolean confirmDeleteOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= "Confirm Delete of Read Only Elements";
-		String question= "The selected elements contain read-only resources. Do you still want to delete them?";
+		String queryTitle= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.0"); //$NON-NLS-1$
+		String question= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.1"); //$NON-NLS-1$
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 
 	static boolean confirmMoveOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= "Confirm Move of Read Only Elements";
-		String question= "The selected elements contain read-only resources. Do you still want to move them?";
+		String queryTitle= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.2"); //$NON-NLS-1$
+		String question= RefactoringCoreMessages.getString("ReadOnlyResourceFinder.3"); //$NON-NLS-1$
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 

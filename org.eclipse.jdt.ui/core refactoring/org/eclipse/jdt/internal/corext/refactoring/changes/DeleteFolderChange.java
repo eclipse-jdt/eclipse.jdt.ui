@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -20,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
@@ -46,8 +45,7 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		String pattern= "Delete folder ''{0}''";
-		return MessageFormat.format(pattern, new String[]{fPath.lastSegment()});
+		return RefactoringCoreMessages.getFormattedString("DeleteFolderChange.0", fPath.lastSegment()); //$NON-NLS-1$
 	}
 	
 	/* non java-doc

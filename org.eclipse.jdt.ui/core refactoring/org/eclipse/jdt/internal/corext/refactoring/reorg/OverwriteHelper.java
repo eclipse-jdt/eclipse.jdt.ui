@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +24,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 class OverwriteHelper {
@@ -94,7 +94,7 @@ class OverwriteHelper {
 	}
 	
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
-		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery("Confirm overwritting", true, IReorgQueries.CONFIRM_OVERWRITTING);
+		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.getString("OverwriteHelper.0"), true, IReorgQueries.CONFIRM_OVERWRITTING); //$NON-NLS-1$
 		confirmFileOverwritting(overwriteQuery);
 		confirmFolderOverwritting(overwriteQuery);
 		confirmCuOverwritting(overwriteQuery);	
@@ -200,8 +200,7 @@ class OverwriteHelper {
 	}
 
 	private static boolean overwrite(String name, IConfirmQuery overwriteQuery){
-		String pattern= "''{0}'' exists in the selected destination. Do you want to overwrite?";
-		String question= MessageFormat.format(pattern, new String[]{name});
+		String question= RefactoringCoreMessages.getFormattedString("OverwriteHelper.1", name); //$NON-NLS-1$
 		return overwriteQuery.confirm(question);
 	}
 }

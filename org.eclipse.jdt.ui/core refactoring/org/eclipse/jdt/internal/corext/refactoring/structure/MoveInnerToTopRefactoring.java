@@ -339,10 +339,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
-		pm.beginTask("Creating preview", 2);
+		pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.29"), 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
-		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1));
-		Map constructorReferences;
+		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1));	//Map<ICompilationUnit, SearchResult[]>
+		Map constructorReferences;	//Map<ICompilationUnit, SearchResult[]>
 		if (isInputTypeStatic()){
 			constructorReferences= new HashMap(0);
 			pm.worked(1);
@@ -515,6 +515,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return result;
 	}
 	
+	//Map<ICompilationUnit, SearchResult[]>
 	private Map createTypeReferencesMapping(IProgressMonitor pm) throws JavaModelException {
 		ISearchPattern pattern= SearchEngine.createSearchPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
@@ -522,11 +523,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return createSearchResultMapping(groups);
 	}
 
+	//Map<ICompilationUnit, SearchResult[]>
 	private Map createConstructorReferencesMapping(IProgressMonitor pm) throws JavaModelException {
 		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm);
 		return createSearchResultMapping(groups);
 	}
 
+	//Map<ICompilationUnit, SearchResult[]>
 	private static Map createSearchResultMapping(SearchResultGroup[] groups) throws JavaModelException {
 		Map result= new HashMap();
 		for (int i= 0; i < groups.length; i++) {
@@ -549,7 +552,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextChange textChange= manager.get(cu);
 		TextEdit resultingEdit= getRewriteTextEdit(cu, rewrite);
-		textChange.addTextEdit("convert nested type to top level", resultingEdit);
+		textChange.addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 
@@ -731,7 +734,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String createNewConstructorBodyStatement(boolean addRefToEnclosing) throws JavaModelException {
 		if (addRefToEnclosing)
 			return createEnclosingInstanceInitialization();
-		else return "";
+		else return ""; //$NON-NLS-1$
 	}
 
 	private String getNewConstructorComment() throws CoreException {

@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdatingRefactoring{
 
@@ -61,7 +62,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fMovePolicy.getResources()))));
@@ -133,7 +134,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Move";
+		return RefactoringCoreMessages.getString("MoveRefactoring.0"); //$NON-NLS-1$
 	}
 	
 	public boolean canUpdateReferences(){

@@ -317,51 +317,51 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.doesnotexist0")); //$NON-NLS-1$
 			if (javaElement instanceof IJavaModel)
-				return RefactoringStatus.createFatalErrorStatus("The Java Model cannot be the destination of this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.jmodel")); //$NON-NLS-1$
 	
 			if (javaElement.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus("The selected destination is read-only");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.readonly")); //$NON-NLS-1$
 	
 			if (! javaElement.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus("The structure of the selected destination is not known");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.structure")); //$NON-NLS-1$
 	
 			if (javaElement instanceof IOpenable){
 				IOpenable openable= (IOpenable)javaElement;
 				if (! openable.isConsistent())
-					return RefactoringStatus.createFatalErrorStatus("The selected destination is not consistent with its underlying resource or buffer");
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.inconsistent")); //$NON-NLS-1$
 			}				
 	
 			if (javaElement instanceof IPackageFragmentRoot){
 				IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
 				if (root.isArchive())
-					return RefactoringStatus.createFatalErrorStatus("The selected destination is an archive");
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.archive")); //$NON-NLS-1$
 				if (root.isExternal())
-					return RefactoringStatus.createFatalErrorStatus("The selected destination is external to the workbench");
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.external")); //$NON-NLS-1$
 			}
 	
 			if (ReorgUtils.isInsideCompilationUnit(javaElement))
-				return RefactoringStatus.createFatalErrorStatus("Elements inside compilation units cannot be used as destinations for copying files, folders or compilation units");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.subCu")); //$NON-NLS-1$
 	
 			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(javaElement))
-				return RefactoringStatus.createFatalErrorStatus("Linked resources can only be copied to projects");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.linked")); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			Assert.isNotNull(resource);
 			if (! resource.exists() || resource.isPhantom())
-				return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist or is a phantom resource");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.phantom"));			 //$NON-NLS-1$
 			if (!resource.isAccessible())
-				return RefactoringStatus.createFatalErrorStatus("The selected destination is not accessible");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.inaccessible")); //$NON-NLS-1$
 			Assert.isTrue(resource.getType() != IResource.ROOT);
 					
 			if (isChildOfOrEqualToAnyFolder(resource))
-				return RefactoringStatus.createFatalErrorStatus("The selected resource cannot be used as a destination");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.not_this_resource")); //$NON-NLS-1$
 						
 			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(resource))
-				return RefactoringStatus.createFatalErrorStatus("Linked resources can only be copied to projects");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.linked")); //$NON-NLS-1$
 	
 			return new RefactoringStatus();
 		}
@@ -392,7 +392,16 @@ class ReorgPolicyFactory {
 			Assert.isNotNull(jelDest);				
 			return getAsContainer(ReorgUtils.getResource(jelDest));
 		}
-				
+		
+		protected IJavaElement getDestinationContainerAsJavaElement() {
+			if (getJavaElementDestination() != null)
+				return getJavaElementDestination();
+			IJavaElement je= JavaCore.create(getDestinationAsContainer());
+			if (je != null && je.exists())
+				return je;
+			return null;
+		}
+		
 		protected IPackageFragment getDestinationAsPackageFragment() {
 			IPackageFragment javaAsPackage= getJavaDestinationAsPackageFragment(getJavaElementDestination());
 			if (javaAsPackage != null)
@@ -406,7 +415,7 @@ class ReorgPolicyFactory {
 			if (javaDest instanceof IPackageFragment)
 				return (IPackageFragment) javaDest;
 			if (javaDest instanceof IPackageFragmentRoot)
-				return ((IPackageFragmentRoot) javaDest).getPackageFragment("");
+				return ((IPackageFragmentRoot) javaDest).getPackageFragment(""); //$NON-NLS-1$
 			if (javaDest instanceof ICompilationUnit)
 				return (IPackageFragment)javaDest.getParent();				
 			return null;
@@ -471,7 +480,7 @@ class ReorgPolicyFactory {
 		}
 
 		protected final RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus("A resource cannot be the destination for the selected elements.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.no_resource")); //$NON-NLS-1$
 		}
 
 		protected final ICompilationUnit getSourceCu() {
@@ -507,7 +516,7 @@ class ReorgPolicyFactory {
 				TextFileChange tfc= (TextFileChange)textChange;
 				tfc.setSave(! cu.isWorkingCopy());
 			}
-			String message= "Copy";
+			String message= RefactoringCoreMessages.getString("ReorgPolicyFactory.copy"); //$NON-NLS-1$
 			textChange.addTextEdit(message, resultingEdits);
 			rewrite.removeModifications();
 			return textChange;
@@ -663,32 +672,34 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			Assert.isNotNull(destination);
 			if (!destination.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.doesnotexist1")); //$NON-NLS-1$
+			if (destination instanceof IJavaModel)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.jmodel")); //$NON-NLS-1$
 			if (! (destination instanceof ICompilationUnit) && ! ReorgUtils.isInsideCompilationUnit(destination))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot")); //$NON-NLS-1$
 
 			ICompilationUnit destinationCu= getDestinationCu(destination);
 			Assert.isNotNull(destinationCu);
 			if (destinationCu.isReadOnly())//the resource read-onliness is handled by validateEdit
-				return RefactoringStatus.createFatalErrorStatus("The selected destination element cannot be modified");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot_modify")); //$NON-NLS-1$
 				
 			switch(destination.getElementType()){
 				case IJavaElement.COMPILATION_UNIT:
 					int[] types0= new int[]{IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD};
 					if (ReorgUtils.hasElementsOfType(getJavaElements(), types0))
-						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");				
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot"));				 //$NON-NLS-1$
 					break;
 				case IJavaElement.PACKAGE_DECLARATION:
-					return RefactoringStatus.createFatalErrorStatus("Package declarations are not available as destinations");
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.package_decl")); //$NON-NLS-1$
 				
 				case IJavaElement.IMPORT_CONTAINER:
 					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
-						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot")); //$NON-NLS-1$
 					break;
 					
 				case IJavaElement.IMPORT_DECLARATION:
 					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
-						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot")); //$NON-NLS-1$
 					break;
 				
 				case IJavaElement.FIELD://fall thru
@@ -735,19 +746,21 @@ class ReorgPolicyFactory {
 		}
 	
 		protected RefactoringStatus verifyDestination(IResource resource) {
-			return RefactoringStatus.createFatalErrorStatus("Source folders can only be copied to Java projects");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2proj")); //$NON-NLS-1$
 		}
 			
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot1")); //$NON-NLS-1$
+			if (javaElement instanceof IJavaModel)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.jmodel")); //$NON-NLS-1$
 			if (! (javaElement instanceof IJavaProject))
-				return RefactoringStatus.createFatalErrorStatus("Source folders can only be copied to Java projects");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2proj")); //$NON-NLS-1$
 			if (javaElement.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus("Source folders cannot be copied to read-only elements");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2writable")); //$NON-NLS-1$
 			if (ReorgUtils.isPackageFragmentRoot((IJavaProject)javaElement))
-				return RefactoringStatus.createFatalErrorStatus("Source folders cannot be copied or moved to projects that contain no source folders");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2nosrc")); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 	
@@ -805,7 +818,7 @@ class ReorgPolicyFactory {
 		}
 
 		protected RefactoringStatus verifyDestination(IResource resource) {
-			return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.packages")); //$NON-NLS-1$
 		}
 		
 		protected IPackageFragmentRoot getDestinationAsPackageFragmentRoot() throws JavaModelException {
@@ -833,10 +846,12 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot1")); //$NON-NLS-1$
+			if (javaElement instanceof IJavaModel)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.jmodel")); //$NON-NLS-1$
 			IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
 			if (! ReorgUtils.isSourceFolder(destRoot))
-				return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.packages")); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 		
@@ -912,7 +927,7 @@ class ReorgPolicyFactory {
 			IFile[] file= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
-			pm.beginTask("", cus.length + file.length + folders.length);
+			pm.beginTask("", cus.length + file.length + folders.length); //$NON-NLS-1$
 			NewNameProposer nameProposer= new NewNameProposer();
 			CompositeChange composite= new CompositeChange();
 			for (int i= 0; i < cus.length; i++) {
@@ -990,7 +1005,7 @@ class ReorgPolicyFactory {
 		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-			pm.beginTask("", roots.length);
+			pm.beginTask("", roots.length); //$NON-NLS-1$
 			CompositeChange composite= new CompositeChange();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
@@ -1025,7 +1040,7 @@ class ReorgPolicyFactory {
 		public IChange createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
-			pm.beginTask("", fragments.length);
+			pm.beginTask("", fragments.length); //$NON-NLS-1$
 			CompositeChange composite= new CompositeChange();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
@@ -1061,10 +1076,10 @@ class ReorgPolicyFactory {
 			return false;
 		}
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus("Copying is not available");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noCopying")); //$NON-NLS-1$
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus("Copying is not available");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noCopying")); //$NON-NLS-1$
 		}
 		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			return new NullChange();
@@ -1167,7 +1182,7 @@ class ReorgPolicyFactory {
 		}
 		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-			pm.beginTask("", roots.length);
+			pm.beginTask("", roots.length); //$NON-NLS-1$
 			CompositeChange composite= new CompositeChange();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
@@ -1190,7 +1205,7 @@ class ReorgPolicyFactory {
 				return superStatus;
 			IJavaProject javaProject= getDestinationJavaProject();
 			if (isParentOfAny(javaProject, getPackageFragmentRoots()))
-				return RefactoringStatus.createFatalErrorStatus("The selected project cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.element2parent")); //$NON-NLS-1$
 			return superStatus;
 		}
 
@@ -1240,7 +1255,7 @@ class ReorgPolicyFactory {
 			
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			if (isParentOfAny(root, getPackages()))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.package2parent")); //$NON-NLS-1$
 			return superStatus;
 		}
 		
@@ -1254,7 +1269,7 @@ class ReorgPolicyFactory {
 
 		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragment[] fragments= getPackages();
-			pm.beginTask("", fragments.length);
+			pm.beginTask("", fragments.length); //$NON-NLS-1$
 			CompositeChange result= new CompositeChange();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
@@ -1312,13 +1327,13 @@ class ReorgPolicyFactory {
 
 			Object commonParent= new ParentChecker(getResources(), getJavaElements()).getCommonParent();
 			if (destination.equals(commonParent)) 
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
 			IContainer destinationAsContainer= getDestinationAsContainer();
 			if (destinationAsContainer != null && destinationAsContainer.equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
 			IPackageFragment destinationAsPackage= getDestinationAsPackageFragment();
 			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
 				
 			return superStatus;
 		}
@@ -1330,14 +1345,14 @@ class ReorgPolicyFactory {
 
 			Object commonParent= getCommonParent();
 			if (destination.equals(commonParent)) 
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
 			IContainer destinationAsContainer= getDestinationAsContainer();
 			if (destinationAsContainer != null && destinationAsContainer.equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
-			IPackageFragment destinationAsPackage= getDestinationAsPackageFragment();
-			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
-
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
+			IJavaElement destinationContainerAsPackage= getDestinationContainerAsJavaElement();
+			if (destinationContainerAsPackage != null && destinationContainerAsPackage.equals(commonParent))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.parent")); //$NON-NLS-1$
+			
 			return superStatus;
 		}
 		
@@ -1405,7 +1420,7 @@ class ReorgPolicyFactory {
 		}
 
 		private IChange createMoveAndUpdateQualifiedNameChange(IProgressMonitor pm) throws JavaModelException {
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			IChange simpleCopyChange= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
 			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2) { //$NON-NLS-1$
 				public boolean isUndoable(){
@@ -1427,7 +1442,7 @@ class ReorgPolicyFactory {
 			IFile[] files= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
-			pm.beginTask("", files.length + folders.length + cus.length);
+			pm.beginTask("", files.length + folders.length + cus.length); //$NON-NLS-1$
 			for (int i= 0; i < files.length; i++) {
 				result.add(createChange(files[i]));
 				pm.worked(1);
@@ -1503,7 +1518,7 @@ class ReorgPolicyFactory {
 		
 		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
-				pm.beginTask("", 2);
+				pm.beginTask("", 2); //$NON-NLS-1$
 				confirmMovingReadOnly(reorgQueries);
 				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 				RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1), reorgQueries);
@@ -1589,7 +1604,7 @@ class ReorgPolicyFactory {
 				
 			Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
 			if (destination.equals(commonParent) || destination.getParent().equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be the destination of this move operation.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.element2parent")); //$NON-NLS-1$
 			return superStatus;
 		}
 
@@ -1639,10 +1654,10 @@ class ReorgPolicyFactory {
 		
 	private static class NoMovePolicy extends ReorgPolicy implements IMovePolicy{
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus("Moving is not available");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus("Moving is not available");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$
 		}
 		public IChange createChange(IProgressMonitor pm) {
 			return new NullChange();
