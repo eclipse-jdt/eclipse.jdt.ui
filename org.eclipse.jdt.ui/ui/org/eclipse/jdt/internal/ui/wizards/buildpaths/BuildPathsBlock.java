@@ -618,15 +618,18 @@ public class BuildPathsBlock {
 	private void createJavaProject(List classPathEntries, IPath outputLocation, IRemoveOldBinariesQuery reorgQuery, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		// 10 monitor steps to go
 
-		// reomve old .class files
+		// remove old .class files
 		if (reorgQuery != null) {
 			IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-			if (fWorkspaceRoot.exists(oldOutputLocation) && !outputLocation.equals(oldOutputLocation)) {
-				int result= reorgQuery.doQuery(oldOutputLocation);
-				if (result == reorgQuery.CANCEL) {
-					throw new InterruptedException();
-				} else if (result == reorgQuery.YES) {
-					removeOldClassfiles(fWorkspaceRoot.findMember(oldOutputLocation));
+			if (!outputLocation.equals(oldOutputLocation)) {
+				IResource res= fWorkspaceRoot.findMember(oldOutputLocation);
+				if (res instanceof IContainer && hasClassfiles(res)) {
+					int result= reorgQuery.doQuery(oldOutputLocation);
+					if (result == reorgQuery.CANCEL) {
+						throw new InterruptedException();
+					} else if (result == reorgQuery.YES) {
+						removeOldClassfiles(res);
+					}
 				}
 			}		
 		}
@@ -668,6 +671,22 @@ public class BuildPathsBlock {
 				
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
 	}
+	
+	private boolean hasClassfiles(IResource resource) throws CoreException {
+		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
+			return true;
+		}		
+		if (resource instanceof IContainer) {
+			IResource[] members= ((IContainer) resource).members();
+			for (int i= 0; i < members.length; i++) {
+				if (hasClassfiles(members[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 
 	private void removeOldClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
