@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
@@ -27,7 +25,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -43,12 +40,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -233,7 +231,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
 	
-		Label listlabel= createLabel(c, SWT.NONE, JavadocExportMessages.getString("JavadcoStandardWizardPage.referencedclasses.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0)); //$NON-NLS-1$
+		createLabel(c, SWT.NONE, JavadocExportMessages.getString("JavadcoStandardWizardPage.referencedclasses.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0)); //$NON-NLS-1$
 		fListDialogField.doFillIntoGrid(c, 3);
 		
 		LayoutUtil.setHorizontalGrabbing(fListDialogField.getListControl(null));
@@ -514,7 +512,6 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	private void doEditButtonPressed() {
 
 		StructuredSelection selection =	(StructuredSelection) fListDialogField.getTableViewer().getSelection();
-		Iterator iter = selection.iterator();
 
 		Object obj = selection.getFirstElement();
 		if (obj instanceof IAdaptable) {

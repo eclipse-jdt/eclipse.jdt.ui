@@ -737,7 +737,6 @@ public class JavadocOptionsManager {
 		IDialogSettings links = new DialogSettings("projects"); //$NON-NLS-1$
 		
 		Set keys = fLinks.keySet();
-		List contains = new ArrayList();
 		IProject[] projects = fRoot.getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			IProject iProject = projects[i];
