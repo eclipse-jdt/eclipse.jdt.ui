@@ -149,7 +149,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			return;
 		Object input= selection.getFirstElement();
 
-		if (input instanceof IJavaElement) {
+		if (!(input instanceof IJavaElement)) {
 			IStatus status= createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.getString("OpenTypeHierarchyAction.messages.title"), status); //$NON-NLS-1$
 			return;
