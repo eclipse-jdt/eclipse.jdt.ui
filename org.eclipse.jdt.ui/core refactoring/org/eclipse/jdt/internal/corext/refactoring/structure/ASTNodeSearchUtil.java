@@ -107,7 +107,7 @@ public class ASTNodeSearchUtil {
 	}
 
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
-		return (MethodDeclaration)getDeclarationNode(iMethod, cuNode);
+		return (MethodDeclaration)ASTNodes.getParent(getNameNode(iMethod, cuNode), MethodDeclaration.class);
 	}
 
 	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
@@ -118,25 +118,34 @@ public class ASTNodeSearchUtil {
 	}
 		
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
-		return (FieldDeclaration)getDeclarationNode(iField, cuNode);
+		return (FieldDeclaration)ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (TypeDeclaration)getDeclarationNode(iType, cuNode);
+		return (TypeDeclaration)ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
 	}
-
-	public static ASTNode getDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
-		Assert.isTrue(! (iMember instanceof IInitializer));
-		ASTNode node= getNameNode(iMember, cuNode);
-		Assert.isNotNull(node);
-		if (iMember instanceof IField)
-			return (FieldDeclaration)ASTNodes.getParent(node, FieldDeclaration.class);
-		if (iMember instanceof IType)
-			return (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
-		if (iMember instanceof IMethod)
-			return (MethodDeclaration)ASTNodes.getParent(node, MethodDeclaration.class);
-		Assert.isTrue(false);	
-		return node;
+	
+	//returns an array becaus of the import container, which does not represent 1 node but many
+	public static ASTNode[] getDeclarationNode(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
+		switch(element.getElementType()){
+			case IJavaElement.FIELD:
+				return new ASTNode[]{getFieldDeclarationNode((IField) element, cuNode)};
+			case IJavaElement.IMPORT_CONTAINER:
+				return ASTNodeSearchUtil.getImportNodes((IImportContainer)element, cuNode);
+			case IJavaElement.IMPORT_DECLARATION:
+				return new ASTNode[]{ASTNodeSearchUtil.getImportDeclarationNode((IImportDeclaration)element, cuNode)};
+			case IJavaElement.INITIALIZER:
+				return new ASTNode[]{ASTNodeSearchUtil.getInitializerNode((IInitializer)element, cuNode)};
+			case IJavaElement.METHOD:
+				return new ASTNode[]{getMethodDeclarationNode((IMethod) element, cuNode)};
+			case IJavaElement.PACKAGE_DECLARATION:
+				return new ASTNode[]{ASTNodeSearchUtil.getPackageDeclarationNode((IPackageDeclaration)element, cuNode)};
+			case IJavaElement.TYPE:
+				return new ASTNode[]{getTypeDeclarationNode((IType) element, cuNode)};
+			default:
+				Assert.isTrue(false, String.valueOf(element.getElementType()));
+				return null;
+		}
 	}
 
 	private static ASTNode getNameNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
