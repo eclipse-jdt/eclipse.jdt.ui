@@ -635,8 +635,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf.append("import java.util.Iterator;\n");		
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Iterator iter) {\n");
-		buf.append("        String str2;\n");
 		buf.append("        Object str;\n");
+		buf.append("        String str2;\n");
 		buf.append("        str= iter.next();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -655,7 +655,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf.append("    A, B;\n");
 		buf.append("    String str, str2;\n");
 		buf.append("    public void foo(Iterator iter) {\n");
-		buf.append("        str= iter.next();\n");
+		buf.append("        str2= iter.next();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -675,7 +675,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf.append("    A, B;\n");
 		buf.append("    String str, str2;\n");
 		buf.append("    public void foo(Iterator iter) {\n");
-		buf.append("        str= (String) iter.next();\n");
+		buf.append("        str2= (String) iter.next();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -688,10 +688,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf.append("import java.util.Iterator;\n");		
 		buf.append("public enum E {\n");
 		buf.append("    A, B;\n");
-		buf.append("    String str2;\n");
-		buf.append("    Object str;\n");
+		buf.append("    String str;\n");
+		buf.append("    Object str2;\n");
 		buf.append("    public void foo(Iterator iter) {\n");
-		buf.append("        str= iter.next();\n");
+		buf.append("        str2= iter.next();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();

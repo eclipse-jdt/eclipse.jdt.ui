@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -82,7 +83,13 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 						FieldDeclaration newField= ast.newFieldDeclaration(placeholder);
 						newField.setType(type);
 						AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fieldDecl.getParent();
-						rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty()).insertAfter(newField, parent, null);
+						
+						ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty());
+						if (fieldDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
+							listRewrite.insertBefore(newField, parent, null);
+						} else {
+							listRewrite.insertAfter(newField, parent, null);
+						}
 					} else {
 						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
 						rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
@@ -93,7 +100,13 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
 						VariableDeclarationStatement newStat= ast.newVariableDeclarationStatement(placeholder);
 						newStat.setType(type);
-						rewrite.getListRewrite(varDecl.getParent(), Block.STATEMENTS_PROPERTY).insertAfter(newStat, parent, null);
+						
+						ListRewrite listRewrite= rewrite.getListRewrite(varDecl.getParent(), Block.STATEMENTS_PROPERTY);
+						if (varDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
+							listRewrite.insertBefore(newStat, parent, null);
+						} else {
+							listRewrite.insertAfter(newStat, parent, null);
+						}
 					} else {
 						rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
 						rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
