@@ -439,12 +439,17 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		if (!fShowOnErrorOnly && fExecutedTests == 1) 
 			postShowTestResultsView();
 			
-		postInfo(JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", testName)); //$NON-NLS-1$
 		TestRunInfo testInfo= getTestInfo(testId);
-		if (testInfo == null) 
-			fTestInfos.put(testId, new TestRunInfo(testId, testName));
+		if (testInfo == null) {
+			testInfo= new TestRunInfo(testId, testName);
+			fTestInfos.put(testId, testInfo);
+		}
+		String className= testInfo.getClassName();
+		String method= testInfo.getTestMethodName();		
+		String status= JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", new String[] { className, method }); //$NON-NLS-1$
+		postInfo(status); 
 	}
-
+	
 	/*
 	 * @see ITestRunListener#testEnded
 	 */
