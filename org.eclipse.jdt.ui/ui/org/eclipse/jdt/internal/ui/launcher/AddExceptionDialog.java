@@ -1,12 +1,12 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.SelectionList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;import org.eclipse.jdt.internal.ui.util.TypeInfo;import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.FilteredList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;import org.eclipse.jdt.internal.ui.util.TypeInfo;import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 /**
  * Lots of stuff commented out because pending API change in 
  * Debugger
  */
 public class AddExceptionDialog extends StatusDialog {		private static final String DIALOG_SETTINGS= "AddExceptionDialog"; //$NON-NLS-1$	private static final String SETTING_CAUGHT_CHECKED= "caughtChecked"; //$NON-NLS-1$
-	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked"; //$NON-NLS-1$
-	private SelectionList fTypeList;
+	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked"; //$NON-NLS-1$	private Text fFilterText;
+	private FilteredList fTypeList;
 	private boolean fTypeListInitialized= false;
 	
 	private Button fCaughtBox;
@@ -47,14 +47,13 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		Label l= new Label(parent, SWT.NULL);
 		l.setLayoutData(new GridData());
 		l.setText(LauncherMessages.getString("AddExceptionDialog.message")); //$NON-NLS-1$
-		
-		fTypeList= new SelectionList(parent, SWT.BORDER | SWT.SINGLE, 
-				new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX), true);
-		GridData gd= new GridData(GridData.FILL_BOTH);
+		fFilterText = new Text(parent, SWT.BORDER);				GridData data= new GridData();		data.grabExcessVerticalSpace= false;		data.grabExcessHorizontalSpace= true;		data.horizontalAlignment= GridData.FILL;		data.verticalAlignment= GridData.BEGINNING;		fFilterText.setLayoutData(data);						Listener listener= new Listener() {			public void handleEvent(Event e) {				fTypeList.setFilter(fFilterText.getText());			}		};				fFilterText.addListener(SWT.Modify, listener);										
+		fTypeList= new FilteredList(parent, SWT.BORDER | SWT.SINGLE, 
+				new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX),				true, true, true);		GridData gd= new GridData(GridData.FILL_BOTH);
 		//gd.horizontalIndent= convertWidthInCharsToPixels(4);
 		gd.widthHint= convertWidthInCharsToPixels(65);
 		gd.heightHint= convertHeightInCharsToPixels(20);
-		fTypeList.setLayoutData(gd);
+		fTypeList.setLayoutData(gd);				
 		
 		fCaughtBox= new Button(parent, SWT.CHECK);
 		fCaughtBox.setLayoutData(new GridData());
@@ -154,8 +153,8 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 					IJavaElementSearchConstants.CONSIDER_CLASSES |
 					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;
 		List result= searchEngine.searchTypes(new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope(), flags);
-		fTypeList.setElements(result, false);
-		fTypeList.setFilter("*Exception*", true); //$NON-NLS-1$
+		fTypeList.setElements(result);
+		fFilterText.setText("*Exception*"); //$NON-NLS-1$
 		fTypeListInitialized= true;
 	}
 	
@@ -163,5 +162,5 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		if (fTypeList.getSelection().size() != 1) {
 			status.setError(LauncherMessages.getString("AddExceptionDialog.error.noSelection"));  //$NON-NLS-1$		}		updateStatus(status);
 	}
-		private void initFromDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		if (section == null) {			section= allSetttings.addNewSection(DIALOG_SETTINGS);			section.put(SETTING_CAUGHT_CHECKED, true);			section.put(SETTING_UNCAUGHT_CHECKED, true);		}		fIsCaughtSelected= section.getBoolean(SETTING_CAUGHT_CHECKED);		fIsUncaughtSelected= section.getBoolean(SETTING_UNCAUGHT_CHECKED);	}		private void saveDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		// won't be null since we initialize it in the method above.		section.put(SETTING_CAUGHT_CHECKED, fIsCaughtSelected);		section.put(SETTING_UNCAUGHT_CHECKED, fIsUncaughtSelected);	}		public void create() {		super.create();		fTypeList.selectFilterText();		fTypeList.setFocus();	}
+		private void initFromDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		if (section == null) {			section= allSetttings.addNewSection(DIALOG_SETTINGS);			section.put(SETTING_CAUGHT_CHECKED, true);			section.put(SETTING_UNCAUGHT_CHECKED, true);		}		fIsCaughtSelected= section.getBoolean(SETTING_CAUGHT_CHECKED);		fIsUncaughtSelected= section.getBoolean(SETTING_UNCAUGHT_CHECKED);	}		private void saveDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		// won't be null since we initialize it in the method above.		section.put(SETTING_CAUGHT_CHECKED, fIsCaughtSelected);		section.put(SETTING_UNCAUGHT_CHECKED, fIsUncaughtSelected);	}		public void create() {		super.create();		fFilterText.selectAll();		fFilterText.setFocus();	}
 }

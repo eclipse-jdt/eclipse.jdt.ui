@@ -181,7 +181,7 @@ public class FilteredList extends Composite {
 	 * returned in the list are the same as the ones passed to the selection list
 	 * via <code>setElements</code>. The list doesn't contain the rendered strings.
 	 */
-	public List getSelectionAsList() {
+	public List getSelection() {
 		if (fList.isDisposed() || (fList.getSelectionCount() == 0))
 			return new ArrayList(0);
 			

@@ -11,15 +11,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -30,6 +27,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -113,6 +112,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
 			fFilters= new ArrayList(4);
+			
 		fFilters.add(filter);
 	}
 	
@@ -210,9 +210,11 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	 */	 
 	public void create() {
 		super.create();
+
 		List initialSelections= getInitialSelections();
 		if (initialSelections != null)
 			fViewer.setSelection(new StructuredSelection(initialSelections), true);
+
 		updateOKStatus();
 	}		
 	
@@ -223,13 +225,12 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
 		Label messageLabel= createMessageArea(composite);
-		
 		Control treeWidget= createTreeViewer(composite);
 
-		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(fInitialCharWidth);
-		gd.heightHint= convertHeightInCharsToPixels(fInitialCharHeight);
-		treeWidget.setLayoutData(gd);
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.widthHint= convertWidthInCharsToPixels(fInitialCharWidth);
+		data.heightHint= convertHeightInCharsToPixels(fInitialCharHeight);
+		treeWidget.setLayoutData(data);
 		
 		if (fIsEmpty) {
 			messageLabel.setEnabled(false);
@@ -240,8 +241,9 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}
 	
 	private Tree createTreeViewer(Composite parent) {
-		int selectionBehaviour= fAllowMultiple ? SWT.MULTI : SWT.SINGLE;
-		fViewer= new TreeViewer(new Tree(parent, selectionBehaviour | SWT.BORDER));
+		int style= SWT.BORDER | (fAllowMultiple ? SWT.MULTI : SWT.SINGLE);
+
+		fViewer= new TreeViewer(new Tree(parent, style));
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -250,11 +252,11 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 				updateOKStatus();
 			}	
 		});
+		
 		fViewer.setSorter(fSorter);
 		if (fFilters != null) {
-			for (int i= 0; i < fFilters.size(); i++) {
+			for (int i= 0; i != fFilters.size(); i++)
 				fViewer.addFilter((ViewerFilter)fFilters.get(i));
-			}
 		}
 		
 		if (fDoubleClickSelects) {
@@ -262,9 +264,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 			tree.addSelectionListener(new SelectionAdapter() {
 				public void widgetDefaultSelected(SelectionEvent e) {
 					updateOKStatus();
-					if (fCurrStatus.isOK()) {
+					if (fCurrStatus.isOK())
 						access$superButtonPressed(IDialogConstants.OK_ID);
-					}
 				}
 			});
 		}
@@ -293,5 +294,5 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	
 	protected void access$setResult(List result) {
 		super.setResult(result);
-	}		
+	}
 }

@@ -171,7 +171,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	protected List getWidgetSelection() {
 		if (fFilteredList == null || fFilteredList.isDisposed())
 			return new ArrayList(0);
-		return fFilteredList.getSelectionAsList();	
+		return fFilteredList.getSelection();	
 	}
 	
 	/*
