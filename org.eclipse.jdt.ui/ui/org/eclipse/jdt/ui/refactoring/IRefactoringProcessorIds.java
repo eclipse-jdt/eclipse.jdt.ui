@@ -220,7 +220,10 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IPackageFragmentRoot</code>: participants registered for copying 
 	 *       <code>IPackageFragmentRoot</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IPackageFragment</code>: participants registered for copying 
-	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>.</li>
+	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>. Use the
+	 *       method {@link org.eclipse.core.resources.mapping.ResourceTraversal#accept(org.eclipse.core.resources.IResourceVisitor)} 
+	 *       to enumerate the resources which form the package; <code>null</code> should be
+	 *       use as the <code>ResourceMappingContext</code>.</li>
 	 *   <li><code>ICompilationUnit</code>: participants registered for copying 
 	 *       <code>ICompilationUnit</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IType</code>: like ICompilationUnit if the primary top level type is copied.
@@ -229,7 +232,10 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IFolder</code>: participants registered for copying folders.</li>
 	 *   <li><code>IFile</code>: participants registered for copying files.</li>
 	 * </ul>
-	 * 
+	 * <p>
+	 * NOTE: the support for resource mappings is still experimental and will 
+	 * likely change before the final API freeze.
+	 * </p>
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.1
 	 */

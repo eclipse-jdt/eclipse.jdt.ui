@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 abstract class PackageFragmentRootReorgChange extends JDTChange {
 
@@ -54,7 +54,7 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		try {
 			String newName= getNewResourceName();
 			IPackageFragmentRoot root= getRoot();
-			ResourceMapping mapping= JavaResourceMappings.create(root);
+			ResourceMapping mapping= JavaElementResourceMapping.create(root);
 			final Change result= doPerformReorg(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
 			markAsExecuted(root, mapping);
 			return result;

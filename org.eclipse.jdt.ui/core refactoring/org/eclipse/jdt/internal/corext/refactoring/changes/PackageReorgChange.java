@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 abstract class PackageReorgChange extends JDTChange {
 
@@ -48,7 +48,7 @@ abstract class PackageReorgChange extends JDTChange {
 		pm.beginTask(getName(), 1);
 		try {
 			IPackageFragment pack= getPackage();
-			ResourceMapping mapping= JavaResourceMappings.create(pack);
+			ResourceMapping mapping= JavaElementResourceMapping.create(pack);
 			final Change result= doPerformReorg(pm);
 			markAsExecuted(pack, mapping);
 			return result;

@@ -15,11 +15,14 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.ui.IContainmentAdapter;
 import org.eclipse.ui.IContributorResourceAdapter;
+import org.eclipse.ui.IContributorResourceAdapter2;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.views.properties.FilePropertySource;
@@ -33,6 +36,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -43,7 +47,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  * Implements basic UI support for Java elements.
  * Implements handle to persistent support for Java elements.
  */
-public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter{
+public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter, IContributorResourceAdapter2 {
 	
 	private static Class[] PROPERTIES= new Class[] {
 		IPropertySource.class,
@@ -52,6 +56,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IResourceLocator.class,
 		IPersistableElement.class,
 		IContributorResourceAdapter.class,
+		IContributorResourceAdapter2.class,
 		ITaskListResourceAdapter.class,
 		IContainmentAdapter.class
 	};
@@ -88,6 +93,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		} if (IPersistableElement.class.equals(key)) {
 			return new PersistableJavaElementFactory(java);
 		} if (IContributorResourceAdapter.class.equals(key)) {
+			return this;
+		} if (IContributorResourceAdapter2.class.equals(key)) {
 			return this;
 		} if (ITaskListResourceAdapter.class.equals(key)) {
 			return getTaskListAdapter();
@@ -127,13 +134,18 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		}		
     }
 
-    /*
-     * @see org.eclipse.ui.IContributorResourceAdapter#getAdaptedResource(org.eclipse.core.runtime.IAdaptable)
-     */
     public IResource getAdaptedResource(IAdaptable adaptable) {
     	IJavaElement je= getJavaElement(adaptable);
     	if (je != null)
     		return getResource(je);
+
+    	return null;
+    }
+    
+    public ResourceMapping getAdaptedResourceMapping(IAdaptable adaptable) {
+    	IJavaElement je= getJavaElement(adaptable);
+    	if (je != null)
+    		return JavaElementResourceMapping.create(je);
 
     	return null;
     }
@@ -172,6 +184,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			IPersistableElement.class,
 			IProject.class,
 			IContributorResourceAdapter.class,
+			IContributorResourceAdapter2.class,
 			ITaskListResourceAdapter.class,
 			IContainmentAdapter.class
 		};

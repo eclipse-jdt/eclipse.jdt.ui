@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -64,7 +64,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit unit= fOldCu;
-		ResourceMapping mapping= JavaResourceMappings.create(unit);
+		ResourceMapping mapping= JavaElementResourceMapping.create(unit);
 		final Change result= super.perform(pm);
 		markAsExecuted(unit, mapping);
 		return result;

@@ -117,7 +117,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 class ReorgPolicyFactory {
@@ -1145,7 +1145,7 @@ class ReorgPolicyFactory {
 				ICompilationUnit cu= cus[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 					status, processor, cu, jArgs, natures, sharedParticipants)));
-				ResourceMapping mapping= JavaResourceMappings.create(cu);
+				ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 				if (mapping != null) {
 					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 						status, processor, mapping, rArgs, natures, sharedParticipants)));
@@ -1264,7 +1264,7 @@ class ReorgPolicyFactory {
 				IPackageFragmentRoot root= roots[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 					status, processor, root, javaArgs, natures, sharedParticipants)));
-				ResourceMapping mapping= JavaResourceMappings.create(root);
+				ResourceMapping mapping= JavaElementResourceMapping.create(root);
 				if (mapping != null) {
 					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 						status, processor, mapping, resourceArgs, natures, sharedParticipants)));
@@ -1323,7 +1323,7 @@ class ReorgPolicyFactory {
 				IPackageFragment pack= packages[i];
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 					status, processor, pack, javaArgs, natures, sharedParticipants)));
-				ResourceMapping mapping= JavaResourceMappings.create(pack);
+				ResourceMapping mapping= JavaElementResourceMapping.create(pack);
 				if (mapping != null) {
 					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
 						status, processor, mapping, mappingArgs, natures, sharedParticipants)));

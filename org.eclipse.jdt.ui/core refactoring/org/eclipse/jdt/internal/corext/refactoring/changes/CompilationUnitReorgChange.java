@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 abstract class CompilationUnitReorgChange extends JDTChange {
 
@@ -58,7 +58,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		pm.beginTask(getName(), 1);
 		try{
 			ICompilationUnit unit= getCu();
-			ResourceMapping mapping= JavaResourceMappings.create(unit);
+			ResourceMapping mapping= JavaElementResourceMapping.create(unit);
 			Change result= doPerformReorg(new SubProgressMonitor(pm, 1));
 			markAsExecuted(unit, mapping);
 			return result;

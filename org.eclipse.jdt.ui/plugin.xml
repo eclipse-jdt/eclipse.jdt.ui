@@ -99,6 +99,7 @@
             
             <adapter type="org.eclipse.ui.IPersistableElement"/>
             <adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
+            <adapter type="org.eclipse.ui.IContributorResourceAdapter2"/>
             <adapter type="org.eclipse.ui.IContainmentAdapter"/>
             
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>

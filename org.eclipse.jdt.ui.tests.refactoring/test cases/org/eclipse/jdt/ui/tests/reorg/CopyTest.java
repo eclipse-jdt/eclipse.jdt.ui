@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.util.JavaResourceMappings;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -1574,7 +1574,7 @@ public class CopyTest extends RefactoringTest {
 			IType type= cu.getType("A");
 			IJavaElement[] javaElements= { type };
 			IResource[] resources=  {};
-			ResourceMapping mapping= JavaResourceMappings.create(type.getCompilationUnit());
+			ResourceMapping mapping= JavaElementResourceMapping.create(type.getCompilationUnit());
 			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), mapping);
 			IPackageFragment destination= getPackageP();
 			INewNameQueries queries= new MockNewNameQueries();
@@ -1611,7 +1611,7 @@ public class CopyTest extends RefactoringTest {
 			IType type= cu.getType("A");
 			IJavaElement[] javaElements= { type };
 			IResource[] resources=  {};
-			ResourceMapping mapping= JavaResourceMappings.create(type.getCompilationUnit());
+			ResourceMapping mapping= JavaElementResourceMapping.create(type.getCompilationUnit());
 			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), mapping);
 			IPackageFragment destination= getPackageP();
 			INewNameQueries queries= new MockCancelNameQueries();
@@ -1647,7 +1647,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { type };
 			IResource[] resources=  {};
 			IPackageFragment destination= otherPackage;
-			ResourceMapping mapping= JavaResourceMappings.create(type.getCompilationUnit());
+			ResourceMapping mapping= JavaElementResourceMapping.create(type.getCompilationUnit());
 			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), mapping);
 			
 			INewNameQueries queries= new MockNewNameQueries();
@@ -2259,7 +2259,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(cu);
+			ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 			String[] handles= ParticipantTesting.createHandles(cu, mapping);
 			
 			IPackageFragment destination= getPackageP();
@@ -2304,7 +2304,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(cu);
+			ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 			String[] handles= ParticipantTesting.createHandles(cu, mapping);
 			
 			IPackageFragment destination= getPackageP();
@@ -2411,7 +2411,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(cu);
+			ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 			String[] handles= ParticipantTesting.createHandles(cu, mapping);
 
 			IPackageFragment destination= otherPackage;
@@ -2453,7 +2453,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(cu);
+			ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 			String[] handles= ParticipantTesting.createHandles(cu, mapping);
 
 			IPackageFragment destination= defaultPackage;
@@ -2665,7 +2665,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getPackageP());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getPackageP());
 			String[] handles= ParticipantTesting.createHandles(getPackageP(), mapping);
 
 			IPackageFragmentRoot destination= getRoot();
@@ -2702,7 +2702,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getPackageP());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getPackageP());
 			String[] handles= ParticipantTesting.createHandles(getPackageP(), mapping);
 
 			IPackageFragmentRoot destination= getRoot();
@@ -2734,7 +2734,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getPackageP());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getPackageP());
 			String[] handles= ParticipantTesting.createHandles(getPackageP(), mapping);
 
 			IPackageFragment destination= getPackageP();
@@ -3115,7 +3115,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {			};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getRoot());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getRoot());
 			String[] handles= ParticipantTesting.createHandles(getRoot(), mapping);
 
 			IJavaProject destination= getRoot().getJavaProject();
@@ -3151,7 +3151,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockCancelNameQueries(), createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getRoot());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getRoot());
 			String[] handles= ParticipantTesting.createHandles(getRoot(), mapping);
 
 			IJavaProject destination= getRoot().getJavaProject();
@@ -3180,7 +3180,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
-			ResourceMapping mapping= JavaResourceMappings.create(getRoot());
+			ResourceMapping mapping= JavaElementResourceMapping.create(getRoot());
 			String[] handles= ParticipantTesting.createHandles(getRoot(), mapping);
 
 			IJavaProject destination= otherJavaProject;
