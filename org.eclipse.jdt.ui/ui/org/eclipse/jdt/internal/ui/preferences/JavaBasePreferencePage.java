@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -50,10 +49,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String DOUBLE_CLICK= PreferenceConstants.DOUBLE_CLICK;
 	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
 	private static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
-
-	private static final String UPDATE_JAVA_VIEWS= PreferenceConstants.UPDATE_JAVA_VIEWS;
-	private static final String UPDATE_ON_SAVE= PreferenceConstants.UPDATE_ON_SAVE;
-	private static final String UPDATE_WHILE_EDITING= PreferenceConstants.UPDATE_WHILE_EDITING;
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
@@ -116,21 +111,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
 		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
 		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
-
-		// new Label(result, SWT.NONE); // spacer
-
-		Group updateGroup= new Group(result, SWT.NONE);
-		updateGroup.setLayout(new GridLayout());
-		updateGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		updateGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
-		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
-		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
-		
-		String noteTitle= PreferencesMessages.getString("JavaBasePreferencePage.note"); //$NON-NLS-1$
-		String noteMessage= PreferencesMessages.getString("JavaBasePreferencePage.notice.outliner"); //$NON-NLS-1$
-		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), updateGroup, noteTitle, noteMessage);
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		noteControl.setLayoutData(gd);		
 
 		// new Label(result, SWT.NONE); // spacer
 

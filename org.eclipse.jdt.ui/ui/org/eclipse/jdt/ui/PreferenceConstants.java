@@ -500,6 +500,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #UPDATE_ON_SAVE
 	 * @see #UPDATE_WHILE_EDITING
+	 * @deprecated Since 3.0, views now always update while editing
 	 */
 	public static final String UPDATE_JAVA_VIEWS= "JavaUI.update"; //$NON-NLS-1$
 
@@ -507,6 +508,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>UPDATE_JAVA_VIEWS</code>
 	 * 
 	 * @see #UPDATE_JAVA_VIEWS
+	 * @deprecated Since 3.0, views now always update while editing
 	 */
 	public static final String UPDATE_ON_SAVE= "JavaUI.update.onSave"; //$NON-NLS-1$
 
@@ -514,6 +516,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>UPDATE_JAVA_VIEWS</code>
 	 * 
 	 * @see #UPDATE_JAVA_VIEWS
+	 * @deprecated Since 3.0, views now always update while editing
 	 */
 	public static final String UPDATE_WHILE_EDITING= "JavaUI.update.whileEditing"; //$NON-NLS-1$
 
@@ -2191,6 +2194,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.OPEN_TYPE_HIERARCHY, PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(PreferenceConstants.DOUBLE_CLICK, PreferenceConstants.DOUBLE_CLICK_EXPANDS);
 		store.setDefault(PreferenceConstants.UPDATE_JAVA_VIEWS, PreferenceConstants.UPDATE_WHILE_EDITING);	
+		store.setToDefault(PreferenceConstants.UPDATE_JAVA_VIEWS); // clear preference, update on save not supported anymore
 		
 		store.setDefault(PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR, true);
 		store.setDefault(PreferenceConstants.LINK_BROWSING_PACKAGES_TO_EDITOR, true);
