@@ -107,7 +107,9 @@ public class NameProposer {
 			if (arrIndex != -1)
 				buffer.append('s');
 
-			names.add(buffer.toString());				
+			String variableName= buffer.toString();
+			if (JavaConventions.validateIdentifier(variableName).isOK())
+				names.add(variableName);
 		}
 		
 		if (names.size() == 0)

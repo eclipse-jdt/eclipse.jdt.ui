@@ -4,7 +4,11 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
@@ -35,7 +39,8 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 
 	private ICompilationUnit fUnit;
 
-	private Vector fLocalVariables;
+	private List fLocalVariables= new ArrayList();
+	private Map fTypes= new HashMap();
 
 
 	private boolean fError;
@@ -57,7 +62,8 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 	public void reset(ICompilationUnit unit) {
 		fUnit= unit;
 		
-		fLocalVariables= new Vector();
+		fLocalVariables.clear();
+		fTypes.clear();
 		
 		fError= false;
 	}
@@ -133,6 +139,10 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 		return (LocalVariable[]) vector.toArray(new LocalVariable[vector.size()]);
 	}
 
+	String simplifyTypeName(String qualifiedName) {
+		return (String) fTypes.get(qualifiedName);	
+	}
+
 	private LocalVariable[] findLocalIntegers() {
 		Vector vector= new Vector();
 
@@ -206,6 +216,38 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 				return true;			
 		
 		return false;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int, int)
+	 */
+	public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers,
+		int completionStart, int completionEnd, int relevance)
+	{
+		final String qualifiedName= createQualifiedTypeName(packageName, className);
+		fTypes.put(qualifiedName, String.valueOf(completionName));
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int, int)
+	 */
+	public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName,
+		int modifiers, int completionStart, int completionEnd, int relevance)
+	{
+		final String qualifiedName= createQualifiedTypeName(packageName, interfaceName);
+		fTypes.put(qualifiedName, String.valueOf(completionName));
+	}
+
+	private static String createQualifiedTypeName(char[] packageName, char[] className) {
+		StringBuffer buffer= new StringBuffer();
+
+		if (packageName.length != 0) {
+			buffer.append(packageName);
+			buffer.append('.');
+		}
+		buffer.append(className);
+		
+		return buffer.toString();
 	}
 
 }

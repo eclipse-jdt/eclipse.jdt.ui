@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
@@ -227,11 +228,58 @@ public class JavaContext extends CompilationUnitContext {
 		LocalVariable[] localArrays= completion.findLocalArrays();
 				
 		if (localArrays.length > 0) {
-			String typeName= localArrays[localArrays.length - 1].typeName;
-			return typeName.substring(0, typeName.lastIndexOf('['));
+			LocalVariable localArray= localArrays[localArrays.length - 1];			
+
+			String arrayTypeName= localArray.typeName;
+			String typeName= getScalarType(arrayTypeName);
+			int dimension= getArrayDimension(arrayTypeName) - 1;
+			Assert.isTrue(dimension >= 0);
+			
+			String qualifiedName= createQualifiedTypeName(localArray.typePackageName, typeName);
+			String innerTypeName= completion.simplifyTypeName(qualifiedName);
+			
+			return innerTypeName == null
+				? createArray(typeName, dimension)
+				: createArray(innerTypeName, dimension);
 		}
 		
 		return null;
+	}
+	
+	private static String createArray(String type, int dimension) {
+		StringBuffer buffer= new StringBuffer(type);
+		for (int i= 0; i < dimension; i++)
+			buffer.append("[]");
+		return buffer.toString();
+	}
+
+	private static String getScalarType(String type) {
+		return type.substring(0, type.indexOf('['));
+	}
+	
+	private static int getArrayDimension(String type) {
+
+		int dimension= 0;		
+		int index= type.indexOf('[');
+
+		while (index != -1) {
+			dimension++;
+			index= type.indexOf('[', index + 1);	
+		}
+		
+		return dimension;		
+	}
+
+	private static String createQualifiedTypeName(String packageName, String className) {
+		StringBuffer buffer= new StringBuffer();
+
+		if (packageName.length() != 0) {
+			buffer.append(packageName);
+			buffer.append('.');
+		}
+		buffer.append(className);
+		
+		return buffer.toString();
 	}
 	
 	/**
