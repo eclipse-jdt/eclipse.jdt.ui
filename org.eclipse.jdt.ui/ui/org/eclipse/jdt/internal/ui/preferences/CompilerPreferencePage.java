@@ -373,7 +373,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			hasChanges= hasChanges | !val.equals(oldVal);
 			
 			actualOptions.put(key, val);
-			store.putValue(key, val);
+			store.setValue(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
 		
