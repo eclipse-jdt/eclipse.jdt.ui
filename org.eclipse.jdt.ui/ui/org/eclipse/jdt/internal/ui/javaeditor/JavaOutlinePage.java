@@ -955,10 +955,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			
 		fEditor.outlinePageClosed();
 		fEditor= null;
-		
-		Object[] listeners= fSelectionChangedListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++)
-			fSelectionChangedListeners.remove(listeners[i]);
+
+		fSelectionChangedListeners.clear();
 		fSelectionChangedListeners= null;
 
 		if (fPropertyChangeListener != null) {
