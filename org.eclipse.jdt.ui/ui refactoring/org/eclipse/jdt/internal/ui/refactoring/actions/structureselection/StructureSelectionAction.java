@@ -66,21 +66,18 @@ public class StructureSelectionAction extends TextSelectionAction {
 	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
 	 */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException{
-		ASTNode first= selAnalyzer.getFirstSelectedNode();
-		if (first == null) {
-			if (selAnalyzer.getLastCoveringNode() != null)
-				return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
-			else
-				return oldSourceRange;		
-		}	
-		ASTNode parent= first.getParent();
-		if (parent == null){
-			if (selAnalyzer.getLastCoveringNode() != null)
-				return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
-			else
-				return oldSourceRange;		
-		}	
-		return getSelectedNodeSourceRange(cu, parent);
+		ASTNode first= selAnalyzer.getFirstSelectedNode();	
+		if (first == null || first.getParent() == null) 
+			return getLastCoveringNodeRange(oldSourceRange, cu, selAnalyzer);
+			
+		return getSelectedNodeSourceRange(cu, first.getParent());
+	}
+
+	private static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException {
+		if (selAnalyzer.getLastCoveringNode() == null)
+			return oldSourceRange;		
+		else	
+			return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
 	}
 	
 	//-- private helper methods
