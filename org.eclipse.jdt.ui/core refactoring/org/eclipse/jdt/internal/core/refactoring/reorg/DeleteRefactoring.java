@@ -266,8 +266,11 @@ public class DeleteRefactoring extends Refactoring {
 		CompositeChange composite= new CompositeChange("Delete package fragment root", 2);
 		if (ReorgUtils.isClasspathDelete(root))
 			composite.addChange(new DeleteFromClasspathChange(root));
-		else 
+		else {
+			if (root.isArchive())
+				composite.addChange(new DeleteFromClasspathChange(root));
 			composite.addChange(createDeleteChange(getResourceToDelete(root)));
+		}	
 		return composite;
 	}
 	
