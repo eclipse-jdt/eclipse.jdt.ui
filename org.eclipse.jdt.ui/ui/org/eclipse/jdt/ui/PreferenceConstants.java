@@ -1327,6 +1327,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
+	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
 	public final static String EDITOR_JAVA_METHOD_NAME_COLOR= IJavaColorConstants.JAVA_METHOD_NAME;
 	
@@ -1337,6 +1338,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.0
+	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
 	public final static String EDITOR_JAVA_METHOD_NAME_BOLD= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_BOLD_SUFFIX;
 	
@@ -1347,6 +1349,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.0
+	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
 	public final static String EDITOR_JAVA_METHOD_NAME_ITALIC= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_ITALIC_SUFFIX;
 	

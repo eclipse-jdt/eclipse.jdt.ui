@@ -4,7 +4,7 @@
  * @author author
  * @deprecated use <code>OtherClass</code>
  */
-public class ClassName<E> extends SuperClass<E> {
+public class ClassName<E> extends SuperClass {
 	private static final int CONSTANT= 0;
 	/* This comment may span multiple lines. */
 	private static int staticField= 0;

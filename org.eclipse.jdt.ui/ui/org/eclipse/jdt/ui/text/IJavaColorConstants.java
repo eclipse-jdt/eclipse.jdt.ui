@@ -56,6 +56,7 @@ public interface IJavaColorConstants {
 	 * (value <code>"java_method_name"</code>).
 	 * 
 	 * @since 3.0
+	 * @deprecated replaced as of 3.1 by an equivalent semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
 	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
 

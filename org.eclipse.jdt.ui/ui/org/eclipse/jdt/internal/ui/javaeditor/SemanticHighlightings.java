@@ -28,9 +28,13 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -114,6 +118,14 @@ public class SemanticHighlightings {
 	public static final String TYPE_VARIABLE="typeParameter"; //$NON-NLS-1$
 
 	/**
+	 * A named preference part that controls the highlighting of methods
+	 * (invocations and declarations).
+	 * 
+	 * @since 3.1
+	 */
+	public static final String METHOD="method"; //$NON-NLS-1$
+
+	/**
 	 * Semantic highlightings
 	 */
 	private static SemanticHighlighting[] fgSemanticHighlightings;
@@ -121,7 +133,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for static final fields.
 	 */
-	private static class StaticFinalFieldHighlighting extends SemanticHighlighting {
+	private static final class StaticFinalFieldHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -177,7 +189,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for static fields.
 	 */
-	private static class StaticFieldHighlighting extends SemanticHighlighting {
+	private static final class StaticFieldHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -233,7 +245,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for fields.
 	 */
-	private static class FieldHighlighting extends SemanticHighlighting {
+	private static final class FieldHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -289,7 +301,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for method declarations.
 	 */
-	private static class MethodDeclarationHighlighting extends SemanticHighlighting {
+	private static final class MethodDeclarationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -345,7 +357,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for static method invocations.
 	 */
-	private static class StaticMethodInvocationHighlighting extends SemanticHighlighting {
+	private static final class StaticMethodInvocationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -406,7 +418,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for annotation element references.
 	 * @since 3.1
 	 */
-	private static class AnnotationElementReferenceHighlighting extends SemanticHighlighting {
+	private static final class AnnotationElementReferenceHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -469,7 +481,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for abstract method invocations.
 	 */
-	private static class AbstractMethodInvocationHighlighting extends SemanticHighlighting {
+	private static final class AbstractMethodInvocationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -538,7 +550,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for inherited method invocations.
 	 */
-	private static class InheritedMethodInvocationHighlighting extends SemanticHighlighting {
+	private static final class InheritedMethodInvocationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -604,9 +616,110 @@ public class SemanticHighlightings {
 	}
 	
 	/**
+	 * Semantic highlighting for inherited method invocations.
+	 */
+	private static final class MethodHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return METHOD;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 0, 0);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.method"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		public boolean consumes(SemanticToken token) {
+			IBinding binding= getMethodBinding(token);
+			return binding != null && binding.getKind() == IBinding.METHOD;
+		}
+
+		/**
+		 * Extracts the method binding from the token's simple name. The method
+		 * binding is either the token's binding (if the parent of token is a
+		 * method call or declaration) or the constructor binding of a class
+		 * instance creation if the node is the type name of a class instance
+		 * creation.
+		 * 
+		 * @param token the token to extract the method binding from
+		 * @return the corresponding method binding, or <code>null</code>
+		 */
+		private IBinding getMethodBinding(SemanticToken token) {
+			IBinding binding= null;
+			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
+			ASTNode node= token.getNode();
+			ASTNode parent= node.getParent();
+			while (isTypePath(node, parent)) {
+				node= parent;
+				parent= parent.getParent();
+			}
+			
+			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
+				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
+			else
+				binding= token.getBinding();
+			return binding;
+		}
+
+		/**
+		 * Returns <code>true</code> if the given child/parent nodes are valid
+		 * sub nodes of a <code>Type</code> ASTNode.
+		 * @param child the child node
+		 * @param parent the parent node
+		 * @return <code>true</code> if the nodes may be the sub nodes of a type node, false otherwise
+		 */
+		private boolean isTypePath(ASTNode child, ASTNode parent) {
+			if (parent instanceof Type) {
+				StructuralPropertyDescriptor location= child.getLocationInParent();
+				return location == ParameterizedType.TYPE_PROPERTY || location == SimpleType.NAME_PROPERTY;
+			} else if (parent instanceof QualifiedName) {
+				StructuralPropertyDescriptor location= child.getLocationInParent();
+				return location == QualifiedName.NAME_PROPERTY;
+			}
+			return false;
+		}
+	}
+	
+	/**
 	 * Semantic highlighting for local variable declarations.
 	 */
-	private static class LocalVariableDeclarationHighlighting extends SemanticHighlighting {
+	private static final class LocalVariableDeclarationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -670,7 +783,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for local variables.
 	 */
-	private static class LocalVariableHighlighting extends SemanticHighlighting {
+	private static final class LocalVariableHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -730,7 +843,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for parameter variables.
 	 */
-	private static class ParameterVariableHighlighting extends SemanticHighlighting {
+	private static final class ParameterVariableHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -790,7 +903,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for deprecated members.
 	 */
-	private static class DeprecatedMemberHighlighting extends SemanticHighlighting {
+	private static final class DeprecatedMemberHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -838,14 +951,53 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			IBinding binding;
+			IBinding binding= getMethodBinding(token);
+			return binding != null ? binding.isDeprecated() : false;
+		}
+		
+		/**
+		 * Extracts the method binding from the token's simple name. The method
+		 * binding is either the token's binding (if the parent of token is a
+		 * method call or declaration) or the constructor binding of a class
+		 * instance creation if the node is the type name of a class instance
+		 * creation.
+		 * 
+		 * @param token the token to extract the method binding from
+		 * @return the corresponding method binding, or <code>null</code>
+		 */
+		private IBinding getMethodBinding(SemanticToken token) {
+			IBinding binding= null;
 			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
-			ASTNode parent= token.getNode().getParent();
-			if (parent != null && parent.getLocationInParent() ==  ClassInstanceCreation.TYPE_PROPERTY)
-				binding= ((ClassInstanceCreation) parent.getParent()).resolveConstructorBinding();
+			ASTNode node= token.getNode();
+			ASTNode parent= node.getParent();
+			while (isTypePath(node, parent)) {
+				node= parent;
+				parent= parent.getParent();
+			}
+			
+			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
+				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
 			else
 				binding= token.getBinding();
-			return binding != null ? binding.isDeprecated() : false;
+			return binding;
+		}
+
+		/**
+		 * Returns <code>true</code> if the given child/parent nodes are valid
+		 * sub nodes of a <code>Type</code> ASTNode.
+		 * @param child the child node
+		 * @param parent the parent node
+		 * @return <code>true</code> if the nodes may be the sub nodes of a type node, false otherwise
+		 */
+		private boolean isTypePath(ASTNode child, ASTNode parent) {
+			if (parent instanceof Type) {
+				StructuralPropertyDescriptor location= child.getLocationInParent();
+				return location == ParameterizedType.TYPE_PROPERTY || location == SimpleType.NAME_PROPERTY;
+			} else if (parent instanceof QualifiedName) {
+				StructuralPropertyDescriptor location= child.getLocationInParent();
+				return location == QualifiedName.NAME_PROPERTY;
+			}
+			return false;
 		}
 	}
 
@@ -853,7 +1005,7 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for generic type parameters.
 	 * @since 3.1
 	 */
-	private static class TypeVariableHighlighting extends SemanticHighlighting {
+	private static final class TypeVariableHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
@@ -973,6 +1125,7 @@ public class SemanticHighlightings {
 				new LocalVariableDeclarationHighlighting(),
 				new LocalVariableHighlighting(),
 				new TypeVariableHighlighting(),
+				new MethodHighlighting(),
 			};
 		return fgSemanticHighlightings;
 	}
@@ -990,6 +1143,8 @@ public class SemanticHighlightings {
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
 			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), semanticHighlighting.isEnabledByDefault());
 		}
+		
+		convertMethodHighlightingPreferences(store);
 	}
 	
 	/**
@@ -1046,6 +1201,65 @@ public class SemanticHighlightings {
 		}
 		
 		return enable;
+	}
+
+	/**
+	 * In 3.0, methods were highlighted by a rule-based word matcher that
+	 * matched any identifier that was followed by possibly white space and a
+	 * left parenthesis.
+	 * <p>
+	 * With generics, this does not work any longer for constructors of generic
+	 * types, and the highlighting has been moved to be a semantic highlighting.
+	 * Because different preference key naming schemes are used, we have to
+	 * migrate the old settings to the new ones, which is done here. Nothing
+	 * needs to be done if the old settings were set to the default values.
+	 * </p>
+	 * 
+	 * @param store the preference store to migrate
+	 * @since 3.1
+	 */
+	private static void convertMethodHighlightingPreferences(IPreferenceStore store) {
+		// migrate the preferences for method highlighting
+		String colorkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
+		String boldkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
+		String italickey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
+		String enabledkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+		
+		String oldColorkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR;
+		String oldBoldkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD;
+		String oldItalickey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC;
+		
+		if (conditionalReset(store, oldColorkey, colorkey)
+				|| conditionalReset(store, oldBoldkey, boldkey)
+				|| conditionalReset(store, oldItalickey, italickey)) {
+			store.setValue(enabledkey, true);
+		}
+		
+	}
+
+	/**
+	 * If the setting pointed to by <code>oldKey</code> is not the default
+	 * setting, store that setting under <code>newKey</code> and reset
+	 * <code>oldKey</code> to its default setting.
+	 * <p>
+	 * Returns <code>true</code> if any changes were made.
+	 * </p>
+	 * 
+	 * @param store the preference store to read from and write to
+	 * @param oldKey the old preference key
+	 * @param newKey the new preference key
+	 * @return <code>true</code> if <code>store</code> was modified,
+	 *         <code>false</code> if not
+	 * @since 3.1
+	 */
+	private static boolean conditionalReset(IPreferenceStore store, String oldKey, String newKey) {
+		if (!store.isDefault(oldKey)) {
+			if (store.isDefault(newKey))
+				store.setValue(newKey, store.getString(oldKey));
+			store.setToDefault(oldKey);
+			return true;
+		}
+		return false;
 	}
 
 	/**

@@ -100,66 +100,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 
-	/**
-	 * Word matcher to detect java method names.
-	 * 
-	 * @since 3.0
-	 */
-	protected class MethodNameMatcher extends CombinedWordRule.WordMatcher {
-		
-		/** Token to return for this matcher */
-		private final IToken fToken;
-
-		/**
-		 * Creates a new method name matcher.
-		 * 
-		 * @param token Token to use for this matcher
-		 */
-		public MethodNameMatcher(IToken token) {
-			fToken= token;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
-		 */
-		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
-
-			int count= 1;
-			IToken token= Token.UNDEFINED;
-			int character= scanner.read();
-
-			// Ignore trailing whitespace
-			while (Character.isWhitespace((char) character)) {
-				character= scanner.read();
-				++count;
-			}
-			
-			// Check for matching parenthesis
-			if (character == '(') {
-				boolean isKeyword= false;
-				
-				// Check for keywords
-				for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
-					if (word.equals(JavaCodeScanner.fgKeywords[index])) {
-						isKeyword= true;
-						break;
-					}
-				}
-				
-				if (!isKeyword) {
-					scanner.unread();
-					return fToken;
-				}
-			}
-
-			// Unwind scanner in case of detection failure
-			for (int index= 0; index < count; index++)
-				scanner.unread();
-
-			return token;
-		}
-	}
-
 	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements ISourceVersionDependent {
 
 		private final IToken fDefaultToken;
@@ -417,7 +357,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_KEYWORD,
 		IJavaColorConstants.JAVA_STRING,
 		IJavaColorConstants.JAVA_DEFAULT,
-		IJavaColorConstants.JAVA_METHOD_NAME,
 		IJavaColorConstants.JAVA_KEYWORD_RETURN,
 		IJavaColorConstants.JAVA_OPERATOR,
 		IJavaColorConstants.JAVA_ANNOTATION,
@@ -499,10 +438,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		returnWordRule.addWord(RETURN, token);  //$NON-NLS-1$
 		combinedWordRule.addWordMatcher(returnWordRule);
 
-		// Add word rule for method names.
-		token= getToken(IJavaColorConstants.JAVA_METHOD_NAME);
-		combinedWordRule.addWordMatcher(new MethodNameMatcher(token));
-		
 		// Add word rule for keywords, types, and constants.
 		CombinedWordRule.WordMatcher wordRule= new CombinedWordRule.WordMatcher();
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
