@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import org.eclipse.core.runtime.Plugin;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -173,7 +177,7 @@ public class JavaIndenter {
 	 *         by <code>start</code> and <code>indent</code>
 	 */
 	private StringBuffer createIndent(int start, int indent) {
-		int tabLen= prefTabLength();		
+		final int tabLen= prefTabLength();		
 		StringBuffer ret= new StringBuffer();
 		try {
 			int spaces= 0;
@@ -183,6 +187,8 @@ public class JavaIndenter {
 				if (ch == '\t') {
 					ret.append('\t');
 					spaces= 0;
+				} else if (tabLen == -1){
+					ret.append(' ');
 				} else {
 					spaces++;
 					if (spaces == tabLen) {
@@ -216,15 +222,31 @@ public class JavaIndenter {
 	 */
 	private CharSequence createIndent(int indent) {
 		// get a sensible default when running without the infrastructure for testing
-		if (JavaPlugin.getDefault() == null) {
+		JavaCore plugin= JavaCore.getJavaCore();
+		if (plugin == null) {
 			StringBuffer ret= new StringBuffer();
 			while (indent-- > 0)
 				ret.append('\t');
 			
 			return ret;
-		}
+		} else {
+			StringBuffer oneIndent= new StringBuffer();
+			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR))) {
+				int tabLen= Integer.parseInt(JavaCore.getOption(JavaCore.FORMATTER_TAB_SIZE));
+				for (int i= 0; i < tabLen; i++)
+					oneIndent.append(' ');
+			} else if (JavaCore.TAB.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR)))
+				oneIndent.append('\t');
+			else
+				oneIndent.append('\t'); // default
 			
-		return CodeFormatterUtil.createIndentString(indent);
+			StringBuffer ret= new StringBuffer();
+			for (int i= 0; i < indent; i++)
+				ret.append(oneIndent);
+			
+			return ret;
+		}
+		
 	}
 	
 	/**
@@ -683,11 +705,19 @@ public class JavaIndenter {
 				if (looksLikeMethodDecl()) {
 					if (prefMethodDeclDeepIndent())
 						return setFirstElementAlignment(pos, bound);
+					else {
+						fIndent= prefMethodDeclIndent();
+						return pos;
+					}
 				} else {
 					fPosition= pos;
 					if (looksLikeMethodCall()) {
 						if (prefMethodCallDeepIndent())
 							return setFirstElementAlignment(pos, bound);
+						else {
+							fIndent= prefMethodCallIndent();
+							return pos;
+						}
 					} else if (prefParenthesisDeepIndent())
 						return setFirstElementAlignment(pos, bound);
 				}
@@ -942,11 +972,15 @@ public class JavaIndenter {
 	private int prefTabLength() {
 		int tabLen;
 		// TODO adjust once this is a per-project setting
+		JavaCore core= JavaCore.getJavaCore();
 		JavaPlugin plugin= JavaPlugin.getDefault();
-		if (plugin != null)
-			if (plugin.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS))
+		if (core != null)
+			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR)))
+				// if the formatter uses chars to mark indentation, then don't substitute any chars
 				tabLen= -1; // results in no tabs being substituted for space runs
 			else
+				// if the formatter uses tabs to mark indentations, use the visual setting from the editor 
+				// to get nicely aligned indentations
 				tabLen= plugin.getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
 		else
 			tabLen= 4; // sensible default for testing
@@ -957,15 +991,41 @@ public class JavaIndenter {
 	// TODO add preference lookup or probing
 
 	private boolean prefArrayDimensionsDeepIndent() {
-		return true; // no real pref - real option at all?
+		return true; // sensible default
 	}
 
 	private int prefArrayIndent() {
-		return 2; // default: double indent arrays
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return prefContinuationIndent(); // default
 	}
 
 	private boolean prefArrayDeepIndent() {
-		return true; // sensible default
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
+					return true;
+				else
+					return false;
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return true;
 	}
 
 	private boolean prefTernaryDeepAlign() {
@@ -977,7 +1037,15 @@ public class JavaIndenter {
 	}
 
 	private int prefCaseIndent() {
-		return 0; // default: sun default is not to indent cases
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			if (DefaultCodeFormatterConstants.TRUE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH)))
+				return 0;
+			else
+				return prefBlockIndent();
+		}
+		
+		return 0; // sun standard
 	}
 
 	private int prefAssignmentIndent() {
@@ -985,7 +1053,18 @@ public class JavaIndenter {
 	}
 
 	private int prefCaseBlockIndent() {
-		return prefBlockIndent();
+		if (true)
+			return prefBlockIndent();
+		
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			if (DefaultCodeFormatterConstants.TRUE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES)))
+				return 0;
+			else
+				return prefBlockIndent();
+		}
+		
+		return prefBlockIndent(); // sun standard
 	}
 
 	private int prefSimpleIndent() {
@@ -997,14 +1076,91 @@ public class JavaIndenter {
 	}
 
 	private boolean prefMethodDeclDeepIndent() {
-		return true; // sensible default
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
+					return true;
+				else
+					return false;
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return true;
+	}
+
+	private int prefMethodDeclIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return 1;
 	}
 
 	private boolean prefMethodCallDeepIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
+					return true;
+				else
+					return false;
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
 		return false; // sensible default
 	}
 
+	private int prefMethodCallIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return 1; // sensible default
+	}
+
 	private boolean prefParenthesisDeepIndent() {
+		
+		if (true)
+			return false;
+		
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
+					return true;
+				else
+					return false;
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
 		return false; // sensible default
 	}
 
@@ -1017,7 +1173,17 @@ public class JavaIndenter {
 	}
 	
 	private int prefContinuationIndent() {
-		return 1; // sensible default
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
+			try {
+				return Integer.parseInt(option);
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return 2; // sensible default
 	}
 
 }
