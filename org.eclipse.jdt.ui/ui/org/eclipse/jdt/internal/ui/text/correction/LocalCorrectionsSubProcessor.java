@@ -138,7 +138,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			castTarget= castTarget.substring(0, arrStart);
 			bindingToCast= bindingToCast.getElementType();
-			if (bindingToCast.isPrimitive()) {
+			if (bindingToCast.isPrimitive() && !castTarget.equals(bindingToCast.getName())) {
 				return false; // can't cast arrays of primitive types into each other
 			}
 		}
