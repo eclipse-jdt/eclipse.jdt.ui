@@ -107,6 +107,15 @@ public class TextFileChange extends TextChange  {
 	public void setSave(boolean save) {
 		fSave= save;
 	}
+	
+	/**
+	 * Returns the <code>IFile</code> this change is working on.
+	 * 
+	 * @return the file this change is working on
+	 */
+	public IFile getFile() {
+		return fFile;
+	}
 		
 	/* non java-doc
 	 * Method declared in TextChange
