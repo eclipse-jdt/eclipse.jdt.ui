@@ -8,12 +8,6 @@ import java.util.Collection;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 
 public class TypeInfoRequestor implements ITypeNameRequestor {
@@ -28,18 +22,7 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 	public TypeInfoRequestor(Collection typesFound) {
 		Assert.isNotNull(typesFound);
 		fTypesFound= typesFound;
-		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-		String[] projectNames;
-		try {
-			IJavaProject[] projects= model.getJavaProjects();
-			projectNames= new String[projects.length];
-			for (int i= 0; i < projects.length; i++) {
-				projectNames[i]= projects[i].getElementName();
-			}
-		} catch (JavaModelException e) {
-			projectNames= new String[0];
-		}
-		fFactory= new TypeInfoFactory(projectNames);
+		fFactory= new TypeInfoFactory();
 	}
 
 	/* non java-doc

@@ -10,6 +10,15 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 
@@ -22,9 +31,9 @@ public class TypeInfoFactory {
 	private static final String CLASS= "class";
 	private static final String JAVA= "java";
 	
-	public TypeInfoFactory(String[] projects) {
+	public TypeInfoFactory() {
 		super();
-		fProjects= projects;
+		fProjects= getProjectList();
 		fLast= null;
 		fBuffer= new char[512];
 	}
@@ -167,5 +176,37 @@ public class TypeInfoFactory {
 			fBuffer= new char[length];
 		s.getChars(0, length, fBuffer, 0);
 		return new String(fBuffer, 0, length);
-	}	
+	}
+	
+	private static String[] getProjectList() {
+		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		String[] result;
+		try {
+			IJavaProject[] projects= model.getJavaProjects();
+			result= new String[projects.length];
+			for (int i= 0; i < projects.length; i++) {
+				result[i]= projects[i].getElementName();
+			}
+		} catch (JavaModelException e) {
+			result= new String[0];
+		}
+		// We have to sort the list of project names to make sure that we cut of the longest
+		// project from the path, if two projects with the same prefix exist. For example
+		// org.eclipse.jdt.ui and org.eclipse.jdt.ui.tests.
+		Arrays.sort(result, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				int l1= ((String)o1).length();
+				int l2= ((String)o2).length();
+				if (l1 < l2)
+					return 1;
+				if (l2 < l1)
+					return -1; 
+				return  0;
+			}
+			public boolean equals(Object obj) {
+				return super.equals(obj);
+			}
+		});
+		return result;
+	}		
 }
