@@ -216,6 +216,9 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			member.getElementType() != IJavaElement.TYPE)
 				return false;
 
+		if (member.getDeclaringType() == null)
+			return false;
+		
 		if (! Checks.isAvailable(member))
 			return false;
 			
