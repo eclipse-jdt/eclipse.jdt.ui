@@ -281,6 +281,8 @@ public class PackageExplorerPart extends ViewPart
 		public boolean isExpandable(Object parent) {
 			if (isFlatLayout())
 				return super.isExpandable(parent);
+			if (parent instanceof IJavaProject) // workaround for bug 78053: Package Explorer shouldn't fetch any children on startup
+				return super.isExpandable(parent);
 			
 			ViewerFilter[] filters= fViewer.getFilters();
 			Object[] children= ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
