@@ -28,8 +28,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jdt.internal.core.refactoring.resources.*;
-
 
 
 public class RefactoringSupportFactory {
