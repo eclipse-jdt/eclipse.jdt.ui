@@ -39,11 +39,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUnitializedVariable"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUncaughtExceptionOnThis"));
 			return suite;
 		}
 	}
@@ -767,6 +767,93 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
+	
+	public void testUncaughtExceptionOnSuper() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");		
+		buf.append("public class E extends FileInputStream {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(\"x\");\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.FileInputStream;\n");		
+		buf.append("import java.io.FileNotFoundException;\n");	
+		buf.append("public class E extends FileInputStream {\n");
+		buf.append("    public E() throws FileNotFoundException {\n");
+		buf.append("        super(\"x\");\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUncaughtExceptionOnThis() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        this(null);\n");		
+		buf.append("    }\n");
+		buf.append("    public E(Object x) throws IOException {\n");
+		buf.append("    }\n");				
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public E() throws IOException {\n");
+		buf.append("        this(null);\n");		
+		buf.append("    }\n");
+		buf.append("    public E(Object x) throws IOException {\n");
+		buf.append("    }\n");				
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
+	
 	
 	boolean BUG_25417= true;
 	
