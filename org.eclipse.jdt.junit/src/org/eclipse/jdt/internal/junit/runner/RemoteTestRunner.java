@@ -21,6 +21,7 @@ import java.util.List;
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestFailure;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
@@ -384,11 +385,20 @@ public class RemoteTestRunner implements TestListener {
 		try {
 			Class reloadedTestClass= getClassLoader().loadClass(className);
 			Class[] classArgs= { String.class };
-			Constructor constructor= reloadedTestClass.getConstructor(classArgs);
-			Object[] args= new Object[]{testName};
-			reloadedTest=(Test)constructor.newInstance(args);
+			Constructor constructor= null;
+			try {
+				constructor= reloadedTestClass.getConstructor(classArgs);
+				reloadedTest= (Test)constructor.newInstance(new Object[]{testName});
+			} catch (NoSuchMethodException e) {
+				// try the no arg constructor supported in 3.8.1
+				constructor= reloadedTestClass.getConstructor(new Class[0]);
+				reloadedTest= (Test)constructor.newInstance(new Object[0]);
+				if (reloadedTest instanceof TestCase)
+					((TestCase) reloadedTest).setName(testName);
+			}
 		} catch(Exception e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.load", reloadedTest )); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.load", testName )); //$NON-NLS-1$
+			e.printStackTrace();
 			return;
 		}
 		TestResult result= new TestResult();
