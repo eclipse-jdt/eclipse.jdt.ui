@@ -84,19 +84,6 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
-	 * Computes the initial type estimate for the specified constraint variable.
-	 * 
-	 * @param variable the constraint variable
-	 * @return the initial type estimate
-	 */
-	private ITypeSet computeInitialTypeEstimate(final ConstraintVariable2 variable) {
-		final TType type= variable.getType();
-		if (variable instanceof ImmutableTypeVariable2 || !type.equals(fModel.getSubType()))
-			return SuperTypeSet.createTypeSet(type);
-		return SuperTypeSet.createTypeSet(type, fModel.getSuperType());
-	}
-
-	/**
 	 * Computes the necessary equality constraints for non-covariant return types.
 	 * 
 	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
@@ -139,6 +126,19 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
+	 * Computes the initial type estimate for the specified constraint variable.
+	 * 
+	 * @param variable the constraint variable
+	 * @return the initial type estimate
+	 */
+	private ITypeSet computeTypeEstimate(final ConstraintVariable2 variable) {
+		final TType type= variable.getType();
+		if (variable instanceof ImmutableTypeVariable2 || !type.getErasure().equals(fModel.getSubType().getErasure()))
+			return SuperTypeSet.createTypeSet(type);
+		return SuperTypeSet.createTypeSet(type, fModel.getSuperType());
+	}
+
+	/**
 	 * Computes the initial type estimates for the specified variables.
 	 * 
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
@@ -150,7 +150,7 @@ public final class SuperTypeConstraintsSolver {
 			TypeEquivalenceSet set= variable.getTypeEquivalenceSet();
 			if (set == null) {
 				set= new TypeEquivalenceSet(variable);
-				set.setTypeEstimate(computeInitialTypeEstimate(variable));
+				set.setTypeEstimate(computeTypeEstimate(variable));
 				variable.setTypeEquivalenceSet(set);
 			} else {
 				ITypeSet estimate= variable.getTypeEstimate();
@@ -158,7 +158,7 @@ public final class SuperTypeConstraintsSolver {
 					final ConstraintVariable2[] contributing= set.getContributingVariables();
 					estimate= SuperTypeSet.getUniverse();
 					for (int index= 0; index < contributing.length; index++)
-						estimate= estimate.restrictedTo(computeInitialTypeEstimate(contributing[index]));
+						estimate= estimate.restrictedTo(computeTypeEstimate(contributing[index]));
 					set.setTypeEstimate(estimate);
 				}
 			}
