@@ -3,6 +3,8 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.swt.graphics.Point;
 
 import junit.framework.Test;
@@ -60,8 +62,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
-		store.setValue(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX, "f");
-		store.setValue(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX, "_m");
+		
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+	
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
@@ -76,10 +82,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	
 	public void testAssignToLocal() throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, true);
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, false);		
-		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -146,10 +148,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testAssignToLocal2() throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, true);
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, false);			
-		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -228,9 +226,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testAssignToLocal2CursorAtEnd() throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, false);
-		store.setValue(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, true);	
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "_m");
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
