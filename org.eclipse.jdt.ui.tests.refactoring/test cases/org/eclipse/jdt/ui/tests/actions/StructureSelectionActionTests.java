@@ -304,13 +304,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 	}
 
 	public void test39() throws Exception{
-		printTestDisabledMessage("regression test for bug#23464");
-//		helperSelectPrevious(6, 13, 6, 20);
+//		printTestDisabledMessage("regression test for bug#23464");
+		helperSelectPrevious(6, 13, 6, 20);
 	}
 
 	public void test40() throws Exception{
-		printTestDisabledMessage("regression test for bug#23464 ");
-//		helperSelectPrevious(7, 13, 7, 20);
+//		printTestDisabledMessage("regression test for bug#23464 ");
+		helperSelectPrevious(7, 13, 7, 20);
 	}
 	
 	public void testZeroLength0() throws Exception{
