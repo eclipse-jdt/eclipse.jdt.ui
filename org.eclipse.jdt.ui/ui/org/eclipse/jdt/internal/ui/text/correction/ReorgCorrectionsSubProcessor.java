@@ -91,30 +91,5 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void addCastProposal(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		String[] args= problemPos.getArguments();
-		if (args.length == 2) {
-			String cast= '(' + Signature.getSimpleName(args[1]) + ")"; //$NON-NLS-1$
-			int pos= problemPos.getOffset();
-			try {
-				IScanner scanner= ASTResolving.createScanner(problemPos.getCompilationUnit(), problemPos.getOffset() + problemPos.getLength());
-				if (scanner.getNextToken() == ITerminalSymbols.TokenNameEQUAL) {
-					pos= scanner.getCurrentTokenEndPosition() + 1;
-					cast= " " + cast; //$NON-NLS-1$
-				} else {
-					cast= cast + " "; //$NON-NLS-1$
-				}
-			} catch (InvalidInputException e) {
-			}
-			
-			String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcast.description", args[1]); //$NON-NLS-1$
-			InsertCorrectionProposal proposal= new InsertCorrectionProposal(problemPos, label, pos, cast, 1);
-			proposals.add(proposal);
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportEdit edit= new ImportEdit(problemPos.getCompilationUnit(), settings);
-			edit.addImport(args[1]);
-			proposal.getCompilationUnitChange().addTextEdit("Import", edit); //$NON-NLS-1$
-		}	
-	}
 
 }

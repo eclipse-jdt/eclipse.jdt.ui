@@ -29,8 +29,8 @@ public class InsertCorrectionProposal extends CUCorrectionProposal {
 	private String fInsertionString;
 	private int  fOffset;
 
-	public InsertCorrectionProposal(ProblemPosition problemPos, String label, int offset, String insertString, int relevance) throws CoreException {
-		super(label, problemPos.getCompilationUnit(), relevance);
+	public InsertCorrectionProposal(String label, ICompilationUnit cu, int offset, String insertString, int relevance) throws CoreException {
+		super(label, cu, relevance);
 		fInsertionString= insertString;
 		fOffset= offset;
 	}

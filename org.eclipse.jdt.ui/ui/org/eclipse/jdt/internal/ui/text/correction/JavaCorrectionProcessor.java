@@ -133,13 +133,17 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	private void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
 		try {
 			int id= problemPos.getId();
+			
+			
 			switch (id) {
 				case IProblem.UnterminatedString:
+					String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
 					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit()); //$NON-NLS-1$
-					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"), pos, "\"", 0)); //$NON-NLS-1$ //$NON-NLS-2$
+					proposals.add(new InsertCorrectionProposal(quoteLabel, problemPos.getCompilationUnit(), pos, "\"", 0)); //$NON-NLS-1$ 
 					break;
 				case IProblem.UnterminatedComment:
-					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$ //$NON-NLS-2$
+					String commentLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"); //$NON-NLS-1$
+					proposals.add(new InsertCorrectionProposal(commentLabel, problemPos.getCompilationUnit(), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$
 					break;
 				case IProblem.UndefinedMethod:
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, false, proposals);
@@ -173,10 +177,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
 					break;	
 				case IProblem.TypeMismatch:
-					ReorgCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
+					LocalCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
+					break;
+				case IProblem.UnhandledException:
+					LocalCorrectionsSubProcessor.addUncaughtExceptionProposal(problemPos, proposals);
 					break;
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
+					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

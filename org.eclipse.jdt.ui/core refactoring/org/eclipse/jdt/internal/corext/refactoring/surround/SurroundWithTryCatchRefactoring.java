@@ -46,12 +46,13 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
-	private ICompilationUnit fCUnit;
 	private Selection fSelection;
 	private int fTabWidth;
 	private CodeGenerationSettings fSettings;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fSaveChanges;
+
+	private ICompilationUnit fCUnit;
 
 	private static final class LocalDeclarationEdit extends MultiTextEdit {
 		private int fOffset;
@@ -86,6 +87,15 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fSettings= settings;
 	}
 	
+	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings) {
+		fCUnit= cu;
+		fSelection= Selection.createFromStartLength(offset, length);
+		fTabWidth= settings.tabWidth;
+		fSettings= settings;
+	}
+
+	
+	
 	public void setSaveChanges(boolean saveChanges) {
 		fSaveChanges= saveChanges;
 	}
@@ -96,6 +106,17 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public String getName() {
 		return RefactoringCoreMessages.getString("SurroundWithTryCatchRefactoring.name"); //$NON-NLS-1$
 	}
+
+	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode, IProgressMonitor pm) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+			
+		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
+		rootNode.accept(fAnalyzer);
+		result.merge(fAnalyzer.getStatus());
+		return result;
+	}
+
+
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
@@ -107,13 +128,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				return result;
 			
 			CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
-			fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
-			rootNode.accept(fAnalyzer);
-			result.merge(fAnalyzer.getStatus());
-			return result;
-		} catch(CoreException e) {
+			return checkActivationBasics(rootNode, pm);
+		} catch (CoreException e) {
 			throw new JavaModelException(e);
-		}
+		}	
 	}
 
 	/*

@@ -59,7 +59,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	private MemberEdit fMemberEdit;
 
 	public NewMethodCompletionProposal(String label, MethodInvocation node, ICompilationUnit currCU, IType destType, int relevance) throws CoreException {
-		super(label, destType.getCompilationUnit(), false, relevance);
+		super(label, destType.getCompilationUnit(), relevance);
 		
 		fDestType= destType;
 		fCurrCU= currCU;
@@ -224,6 +224,9 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
 			if (!baseType.isPrimitive()) {
 				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			if (binding.getName().equals("null")) { //$NON-NLS-1$
+				binding= expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
 		}
 		return binding;

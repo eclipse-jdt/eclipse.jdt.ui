@@ -31,14 +31,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 
 	private boolean fIsInitialized;
 
-	public CUCorrectionProposal(String name, ICompilationUnit cu, boolean doSave, int relevance) throws CoreException {
-		super(name, createCompilationUnitChange(name, cu, doSave), relevance);
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
+		super(name, createCompilationUnitChange(name, cu, false), relevance);
 		fIsInitialized= false;
 	}
-
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
-		this(name, cu, false, relevance);
-	}
+	
+	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance) throws CoreException {
+		super(name, change, relevance);
+		change.setTrackPositionChanges(true);
+		fIsInitialized= true;
+	}	
 	
 	private static Change createCompilationUnitChange(String name, ICompilationUnit cu, boolean doSave) throws CoreException {
 		CompilationUnitChange change= new CompilationUnitChange(name, cu);
