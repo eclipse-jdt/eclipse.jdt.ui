@@ -1597,12 +1597,14 @@ JavaStructureDiffViewerCreator
 	<!-- Package Explorer -->
 	<filter
 		name= "%HideSystemFiles.label"
+		description= "%HideSystemFiles.description"
 		pattern= ".*"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		selected = "true">
 	</filter>
 	<filter
 		name= "%HideAnonymousInnerClasses.label"
+		description= "%HideAnonymousInnerClasses.description"
 		pattern= "*$*.class"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		enabled = "false">
@@ -1610,6 +1612,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackageExplorer.EmptyPackageFilter"
 		name= "%HideEmptyPackages.label"
+		description= "%HideEmptyPackages.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
 		enabled= "false">
@@ -1617,6 +1620,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackageExplorer.EmptyInnerPackageFilter"
 		name= "%HideEmptyInnerPackages.label"
+		description= "%HideEmptyInnerPackages.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
 		enabled= "true">
@@ -1624,6 +1628,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaElementFilter"
 		name= "%HideNonJavaElements.label"
+		description= "%HideNonJavaElements.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter"
 		enabled= "false">
@@ -1631,6 +1636,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.LibraryFilter"
 		name= "%HideReferencedLibraries.label"
+		description= "%HideReferencedLibraries.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
 		enabled= "false">
@@ -1639,6 +1645,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter"
 		name= "%HideJavaFiles.label"
+		description= "%HideJavaFiles.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
 		enabled= "false">
@@ -1648,6 +1655,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyPackageFilter"
 		name= "%HideEmptyPackages.label"
+		description= "%HideEmptyPackages.description"
 		viewId= "org.eclipse.jdt.ui.PackagesView"
 		class= "org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
 		enabled= "false">
@@ -1655,6 +1663,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyInnerPackageFilter"
 		name= "%HideEmptyInnerPackages.label"
+		description= "%HideEmptyInnerPackages.description"
 		viewId= "org.eclipse.jdt.ui.PackagesView"
 		class= "org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
 		enabled= "true">
@@ -1664,6 +1673,7 @@ JavaStructureDiffViewerCreator
 	<filter
 		id= "org.eclipse.jdt.ui.PackagesView.LibraryFilter"
 		name= "%HideReferencedLibraries.label"
+		description= "%HideReferencedLibraries.description"
 		viewId= "org.eclipse.jdt.ui.ProjectsView"
 		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
 		enabled= "false">
