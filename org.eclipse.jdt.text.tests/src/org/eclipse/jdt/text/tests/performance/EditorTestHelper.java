@@ -18,9 +18,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
@@ -109,38 +106,5 @@ public class EditorTestHelper {
 			return window.getActivePage();
 		else
 			return null;
-	}
-
-	public static Display getActiveDisplay() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getDisplay();
-	}
-
-	public static void pressKey(Display display, int keyCode) {
-		keyDown(display, keyCode);
-		keyUp(display, keyCode);
-	}
-
-	public static void pressKeyCombination(Display display, int[] keys) {
-		for (int i= 0; i < keys.length; i++)
-			keyDown(display, keys[i]);
-		for (int i= keys.length - 1; i >= 0; i--)
-			keyUp(display, keys[i]);
-	}
-
-	private static void keyDown(Display display, int keyCode) {
-		keyEvent(display, SWT.KeyDown, keyCode);
-	}
-
-	private static void keyUp(Display display, int keyCode) {
-		keyEvent(display, SWT.KeyUp, keyCode);
-	}
-
-	private static Event sfKeyCodeEvent= new Event();
-	private static void keyEvent(Display display, int type, int keyCode) {
-		sfKeyCodeEvent.type= type;
-		sfKeyCodeEvent.keyCode= keyCode;
-		
-		display.post(sfKeyCodeEvent);
-		EditorTestHelper.runEventQueue();
 	}
 }

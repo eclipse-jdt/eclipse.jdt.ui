@@ -47,7 +47,7 @@ public class ScrollJavaEditorTest extends TestCase {
 	}
 
 	private void measureScrolling() throws PartInitException {
-		Display display= EditorTestHelper.getActiveDisplay();
+		Display display= SWTEventHelper.getActiveDisplay();
 		
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
@@ -57,10 +57,10 @@ public class ScrollJavaEditorTest extends TestCase {
 			for (int i= 0; i < N_OF_RUNS; i++) {
 				performanceMeter.start();
 				while (viewer.getBottomIndex() < maxLine)
-					EditorTestHelper.pressKey(display, SWT.PAGE_DOWN);
+					SWTEventHelper.pressKeyCode(display, SWT.PAGE_DOWN);
 				performanceMeter.stop();
 				
-				EditorTestHelper.pressKeyCombination(display, CTRL_HOME);
+				SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
 			}
 		} finally {
 			EditorTestHelper.closeAllEditors();
