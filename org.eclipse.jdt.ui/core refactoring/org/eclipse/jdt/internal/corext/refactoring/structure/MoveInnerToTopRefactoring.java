@@ -464,7 +464,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void modifyEnclosingClassModifiers(final RefactoringStatus status, final ITypeBinding binding, final TextEditGroup group) {
 		final ITypeBinding declaring= binding.getDeclaringClass();
-		if (declaring != null && !declaring.isInterface() && Modifier.isStatic(binding.getModifiers())) {
+		if (declaring != null && !declaring.isInterface() && Modifier.isStatic(binding.getModifiers()) && Modifier.isPrivate(binding.getModifiers())) {
 			final ASTNode node= ASTNodes.findDeclaration(binding, fSourceRewrite.getRoot());
 			if (node instanceof TypeDeclaration) {
 				final TypeDeclaration declaration= (TypeDeclaration) node;
@@ -1025,7 +1025,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		IType type= null;
 		for (int index= 0; index < references.length; index++) {
 			type= references[index];
-			if (type.isBinary() || !type.getCompilationUnit().equals(fSourceRewrite.getCu())) {
+			if (isParent(fType, type))
+				continue;
+			else if (type.isBinary() || !type.getCompilationUnit().equals(fSourceRewrite.getCu())) {
 				IType declaring= type.getDeclaringType();
 				while (declaring != null) {
 					type= declaring;
@@ -1035,6 +1037,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			structure.addImport(JavaModelUtil.getFullyQualifiedName(type));
 		}
 		structure.create(false, monitor);
+	}
+
+	private boolean isParent(IType parent, IType child) {
+		Assert.isNotNull(parent);
+		Assert.isNotNull(child);
+		if (parent.equals(child))
+			return true;
+		final IType declaring= child.getDeclaringType();
+		if (declaring != null)
+			return isParent(parent, declaring);
+		return false;
 	}
 
 	private String getAlignedSourceBlock(final String block) {
