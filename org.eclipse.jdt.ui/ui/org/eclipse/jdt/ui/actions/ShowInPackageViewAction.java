@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -32,8 +32,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 /**
  * This action reveals the currently selected Java element in the 
  * package explorer. 
@@ -121,7 +119,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	private void run(IJavaElement element) {
 		if (element == null)
 			return;
-		boolean showMembers= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
+
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		if (view != null) {
 			if (reveal(view, element))
