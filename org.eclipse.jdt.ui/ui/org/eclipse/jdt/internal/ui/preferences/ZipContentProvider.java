@@ -27,7 +27,7 @@ public class ZipContentProvider implements ITreeContentProvider {
 			node= fTree.findNode(initialSelection);
 		}
 		if (node == null) {
-			node= fTree.findNode("");
+			node= fTree.findNode(""); //$NON-NLS-1$
 		}
 		return node;
 	}

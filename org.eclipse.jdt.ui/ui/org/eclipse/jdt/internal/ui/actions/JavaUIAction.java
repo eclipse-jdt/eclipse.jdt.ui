@@ -16,9 +16,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public abstract class JavaUIAction extends Action {
 	
-	private static final String LABEL_KEY= "label";
-	private static final String DESCRIPTION_KEY= "description";
-	private static final String TOOLTIP_KEY= "tooltip";	
+	private static final String LABEL_KEY= "label"; //$NON-NLS-1$
+	private static final String DESCRIPTION_KEY= "description"; //$NON-NLS-1$
+	private static final String TOOLTIP_KEY= "tooltip";	 //$NON-NLS-1$
 
 	/**
 	 * Creates a new action with the given label.

@@ -23,8 +23,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt"; //$NON-NLS-1$
 	private static final String ERROR_MESSAGE_EMPTY= JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"); //$NON-NLS-1$
 	private static final String ERROR_MESSAGE_INVALID= JavaUIMessages.getString("CodeFormatterPreferencePage.invalid_input"); //$NON-NLS-1$
-	private static final String PREFERENCE_NAME= "CodeFormatterPreferencePage";
-	private static final String WIDGET_DATA_KEY= "OPTION";
+	private static final String PREFERENCE_NAME= "CodeFormatterPreferencePage"; //$NON-NLS-1$
+	private static final String WIDGET_DATA_KEY= "OPTION"; //$NON-NLS-1$
 
 	private String fPreviewText;
 	private Document fPreviewDocument;
