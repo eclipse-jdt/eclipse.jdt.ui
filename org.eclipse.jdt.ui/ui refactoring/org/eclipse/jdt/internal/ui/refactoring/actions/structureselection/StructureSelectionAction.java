@@ -27,7 +27,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 	
 	protected StructureSelectionAction(String text) {
 		super(text);
-		setText("Enclosing Element@Alt+ARROW_UP");
+		setText("&Enclosing Element@Alt+ARROW_UP");
 	}
 	
 	public StructureSelectionAction() {

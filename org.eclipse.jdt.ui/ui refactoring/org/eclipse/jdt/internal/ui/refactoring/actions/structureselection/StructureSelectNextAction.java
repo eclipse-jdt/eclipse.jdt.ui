@@ -13,7 +13,7 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 	
 	public StructureSelectNextAction() {
 		super("Structure Select Next"); 
-		setText("Next Element@Alt+ARROW_RIGHT");
+		setText("&Next Element@Alt+ARROW_RIGHT");
 	}
 	
 	/* non java doc
