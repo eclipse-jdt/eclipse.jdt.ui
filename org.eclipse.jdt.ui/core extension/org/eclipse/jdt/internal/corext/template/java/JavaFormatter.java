@@ -17,7 +17,6 @@ import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -131,20 +130,20 @@ public class JavaFormatter implements ITemplateEditor {
    		String indentation= CodeFormatterUtil.createIndentString(indentationLevel);   		
 
 		List positions= variablesToPositions(variables);
-		MultiTextEdit multiEdit= new MultiTextEdit();
+		List edits= new ArrayList(5);
 		
 		TextBuffer textBuffer= TextBuffer.create(string);
 	    int lineCount= textBuffer.getNumberOfLines();
 	    for (int i= 0; i < lineCount; i++) {
 	    	TextRegion region= textBuffer.getLineInformation(i);
-			multiEdit.add(SimpleTextEdit.createInsert(region.getOffset(), indentation));
+			edits.add(SimpleTextEdit.createInsert(region.getOffset(), indentation));
 
 			String lineDelimiter= textBuffer.getLineDelimiter(i);
 			if (lineDelimiter != null)
-				multiEdit.add(SimpleTextEdit.createReplace(region.getOffset() + region.getLength(), lineDelimiter.length(), fLineDelimiter));
+				edits.add(SimpleTextEdit.createReplace(region.getOffset() + region.getLength(), lineDelimiter.length(), fLineDelimiter));
 	    }
 
-		string= edit(string, positions, multiEdit);
+		string= edit(string, positions, edits);
 		positionsToVariables(positions, variables);
 		
 		templateBuffer.setContent(string, variables);
@@ -171,6 +170,17 @@ public class JavaFormatter implements ITemplateEditor {
 		TextBufferEditor editor= new TextBufferEditor(textBuffer);
 		addEdits(editor, positions);
 		editor.add(edit);
+		editor.performEdits(null);
+		
+		return textBuffer.getContent();
+	}
+
+	private static String edit(String string, List positions, List edits) throws CoreException {
+	    TextBuffer textBuffer= TextBuffer.create(string);
+		TextBufferEditor editor= new TextBufferEditor(textBuffer);
+		addEdits(editor, positions);
+		addEdits(editor, edits);
+//		editor.add(edit);
 		editor.performEdits(null);
 		
 		return textBuffer.getContent();
