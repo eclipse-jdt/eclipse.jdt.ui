@@ -16,19 +16,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractTempTests extends RefactoringTest {
 
@@ -108,6 +104,33 @@ public class ExtractTempTests extends RefactoringTest {
 		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
 	}
 	
+	private void warningHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName, int expectedStatus) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
+															   JavaPreferencesSettings.getCodeGenerationSettings());
+																
+		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+																									
+		ref.setReplaceAllOccurrences(replaceAll);
+		ref.setDeclareFinal(makeFinal);
+		ref.setTempName(tempName);
+
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+
+		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		assertEquals("status", expectedStatus, checkInputResult.getSeverity());
+	
+		performChange(ref.createChange(new NullProgressMonitor()));
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
+	}
+
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, int expectedStatus) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -444,6 +467,43 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(5, 24, 5, 26, true, false, "temp", "string2");
 	}	
 
+	public void test70() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(7, 28, 7, 42, true, true, "temp", "j");
+	}	
+
+	public void test71() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(8, 24, 8, 34, true, false, "temp", "string");
+	}	
+
+	public void test72() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(8, 32, 8, 33, true, false, "temp", "j");
+	}	
+
+	public void test73() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		warningHelper1(6, 39, 6, 40, true, false, "temp", "j", RefactoringStatus.WARNING);
+		// (warning is superfluous, but detection would need flow analysis)
+	}	
+
+	public void test74() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(7, 36, 7, 49, true, false, "temp", "string");
+	}	
+
+	public void test75() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(7, 36, 7, 39, true, false, "temp", "j");
+	}	
+
+	public void test76() throws Exception{
+//		printTestDisabledMessage("test for bug 40353");
+		helper1(7, 48, 7, 49, true, false, "temp", "j");
+	}	
+
+
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp", RefactoringStatus.ERROR);
@@ -526,7 +586,8 @@ public class ExtractTempTests extends RefactoringTest {
 	public void testFail18() throws Exception{
 //		printTestDisabledMessage("regression test for bug#8149");
 //		printTestDisabledMessage("regression test for bug#37547");
-		failHelper1(4, 27, 4, 28, false, false, "temp", RefactoringStatus.ERROR);
+		// test for bug 40353: is now FATAL"
+		failHelper1(4, 27, 4, 28, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail19() throws Exception{
@@ -576,4 +637,25 @@ public class ExtractTempTests extends RefactoringTest {
 //		printTestDisabledMessage("test for bug 29513");
 		failHelper1(7, 17, 7, 28, true, false, "temp", RefactoringStatus.WARNING);
 	}	
+
+	public void testFail29() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_updater referring to loop variable");
+		failHelper1(5, 32, 5, 35, true, false, "temp", RefactoringStatus.FATAL);
+	}	
+
+	public void testFail30() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_test referring to loop variable");
+		failHelper1(5, 25, 5, 30, true, false, "temp", RefactoringStatus.FATAL);
+	}	
+
+	public void testFail31() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_test referring to loop variable");
+		failHelper1(5, 31, 5, 32, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	public void testFail32() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_test referring to loop variable");
+		failHelper1(6, 35, 6, 36, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
 }
