@@ -328,7 +328,7 @@ public class NewASTRewrite {
 	
 		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
 		if (placeholder == null) {
-			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type " + node.getClass().getName()); //$NON-NLS-1$
 		}
 		
 		fNodeStore.markAsCopyTarget(placeholder, node);

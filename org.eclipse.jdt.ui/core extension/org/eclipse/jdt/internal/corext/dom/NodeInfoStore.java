@@ -43,6 +43,7 @@ public final class NodeInfoStore {
 	public static final int INITIALIZER= 13;
 	public static final int PACKAGE_DECLARATION= 14;
 	public static final int IMPORT_DECLARATION= 15;
+	public static final int METHOD_REF_PARAMETER= 16;
 	
 	private AST fAst;
 	
@@ -86,6 +87,8 @@ public final class NodeInfoStore {
 				return SINGLEVAR_DECLARATION;			
 			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 				return VAR_DECLARATION_FRAGMENT;
+			case ASTNode.METHOD_REF_PARAMETER:
+				return METHOD_REF_PARAMETER;
 			case ASTNode.JAVADOC:
 				return JAVADOC;
 			case ASTNode.PACKAGE_DECLARATION:
@@ -168,6 +171,8 @@ public final class NodeInfoStore {
 				return ast.newSingleVariableDeclaration();
 			case VAR_DECLARATION_FRAGMENT:
 				return ast.newVariableDeclarationFragment();
+			case METHOD_REF_PARAMETER:
+				return ast.newMethodRefParameter();
 			case JAVADOC:
 				return ast.newJavadoc();
 			case TYPE_DECLARATION:
