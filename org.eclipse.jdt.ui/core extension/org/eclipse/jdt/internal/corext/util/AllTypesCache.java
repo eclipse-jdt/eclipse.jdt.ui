@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,7 +24,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
@@ -234,4 +237,39 @@ public class AllTypesCache {
 		}
 		return (TypeInfo[]) result.toArray(new TypeInfo[result.size()]);		
 	}
+	
+	/**
+	 * Checks if the search index is up to date.
+	 */
+	public static boolean isIndexUpToDate() {
+		class TypeFoundException extends Error {
+		}
+		ITypeNameRequestor requestor= new ITypeNameRequestor() {
+			public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+				throw new TypeFoundException();
+			}
+			public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+				throw new TypeFoundException();
+			}
+		};
+		try {
+			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
+				null,
+				null,
+				IJavaSearchConstants.PATTERN_MATCH,
+				IJavaSearchConstants.CASE_INSENSITIVE,
+				IJavaSearchConstants.TYPE,
+				SearchEngine.createWorkspaceScope(),
+				requestor,
+				IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH,
+				null);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return false;
+		} catch (OperationCanceledException e) {
+			return false;			
+		} catch (TypeFoundException e) {
+		}
+		return true;
+	}		
 }

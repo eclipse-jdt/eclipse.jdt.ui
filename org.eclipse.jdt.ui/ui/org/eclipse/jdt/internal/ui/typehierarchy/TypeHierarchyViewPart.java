@@ -88,6 +88,7 @@ import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -1345,6 +1346,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (input != null && !input.exists()) {
 				input= null;
 			}
+			if (!AllTypesCache.isIndexUpToDate()) {
+				input= null;
+			}
+			
 		}
 		setInputElement(input);
 
