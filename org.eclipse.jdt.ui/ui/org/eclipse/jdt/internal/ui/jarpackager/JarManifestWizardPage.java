@@ -475,10 +475,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 */
 	public boolean computePageCompletion() {
 		boolean incompleteButNotAnError= false;
-		if (fJarPackage.getManifestLocation().toString().length() == 0)
-			incompleteButNotAnError= true;
-		else {
-			if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
+		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
+			if (fJarPackage.getManifestLocation().toString().length() == 0)
+					incompleteButNotAnError= true;
+			else {
 				IPath location= fJarPackage.getManifestLocation();
 				if (!location.toString().startsWith("/")) {
 					setErrorMessage("Manifest file path must be absolute (start with /)");
@@ -495,7 +495,11 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 					return false;
 				}
 			}
-			if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
+		}
+		if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
+			if (fJarPackage.getManifestLocation().toString().length() == 0)
+					incompleteButNotAnError= true;
+			else {			
 				setErrorMessage("Invalid manifest file specified");
 				return false;
 			}
