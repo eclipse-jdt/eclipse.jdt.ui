@@ -49,7 +49,7 @@ public class MethodBlock extends AbstractCodeBlock {
 		String formattedCode= formatter.format(dummy, 0, positions, lineSeparator);
 		TextBuffer textBuffer= TextBuffer.create(formattedCode);
 		String placeHolderLine= textBuffer.getLineContentOfOffset(positions[0]);
-		String bodyIndent= indent + CodeFormatterUtil.createIndentString(placeHolderLine.substring(0, placeHolderLine.indexOf(placeHolder)));
+		String bodyIndent= indent + CodeFormatterUtil.createIndentString(placeHolderLine);
 
 		fill(buffer, formattedCode.substring(0, positions[0]), firstLineIndent, indent, lineSeparator);
 		fBody.fill(buffer, "", bodyIndent, lineSeparator); //$NON-NLS-1$
