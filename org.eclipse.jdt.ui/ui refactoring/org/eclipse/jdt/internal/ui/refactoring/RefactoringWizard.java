@@ -106,6 +106,10 @@ public class RefactoringWizard extends Wizard {
 		return false;
 	}
 	
+	protected int getMessageLineWidthInChars() {
+		return 80;
+	}
+	
 	//---- Setter and Getters ------------------------------------------------------------
 	
 	/**

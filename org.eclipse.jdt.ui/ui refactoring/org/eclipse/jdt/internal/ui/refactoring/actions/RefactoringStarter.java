@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
@@ -53,7 +52,7 @@ public class RefactoringStarter {
 		if (! activationStatus.hasFatalError()){
 			wizard.setActivationStatus(activationStatus);
 			Dialog dialog;
-			if (RefactoringPreferences.useWizardUI() || mustUseWizardUI(wizard))
+			if (wizard.hasMultiPageUserInput())
 				dialog= new RefactoringWizardDialog(parent, wizard);
 			else 
 				dialog= new RefactoringWizardDialog2(parent, wizard);
@@ -132,9 +131,5 @@ public class RefactoringStarter {
 	
 	private boolean canActivate(boolean mustSaveEditors) {
 		return ! mustSaveEditors || fSaveHelper.saveEditors();
-	}
-	
-	private boolean mustUseWizardUI(RefactoringWizard wizard) {
-		return wizard.hasMultiPageUserInput();
 	}
 }

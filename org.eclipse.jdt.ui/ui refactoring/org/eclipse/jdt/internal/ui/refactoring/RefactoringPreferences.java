@@ -46,13 +46,5 @@ public class RefactoringPreferences {
 	public static void setSaveAllEditors(boolean save) {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(RefactoringPreferences.PREF_SAVE_ALL_EDITORS, save);
-	}
-	
-	public static boolean useWizardUI() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		String value= store.getString("RefactoringUI");
-		if (value == null || value.equals("wizard"))
-			return true;
-		return false;
-	}
+	}	
 }

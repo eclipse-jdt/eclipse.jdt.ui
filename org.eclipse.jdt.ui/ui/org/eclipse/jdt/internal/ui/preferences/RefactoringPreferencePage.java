@@ -45,7 +45,6 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public void createFieldEditors() {
     	addField(createSeverityLevelField(getFieldEditorParent()));
     	addField(createSaveAllField(getFieldEditorParent()));
-    	addField(createUIField(getFieldEditorParent()));
     }
 	
 	private FieldEditor createSeverityLevelField(Composite parent) {
@@ -71,20 +70,6 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 			BooleanFieldEditor.DEFAULT,
 			parent);
 		return editor;
-	}
-	
-	private FieldEditor createUIField(Composite parent) {
-		RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
-			"RefactoringUI",
-			"User Interface mode",
-			1,
-			new String[] [] {
-				{ "Wizard based user interface", "wizard" }, 
-				{ "Dialog based user interface (new)", "dialog" }, 
-			},
-			parent, true
-			);
-		return editor;	
 	}
 	
 	public void init(IWorkbench workbench) {

@@ -94,7 +94,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			gd.widthHint= bounds.width; gd.heightHint= bounds.height;
 			fImage.setLayoutData(gd);
 			fMessage= new Label(this, SWT.LEFT | SWT.WRAP);
-			fMessage.setText(" \n ");
+			fMessage.setText(" \n "); //$NON-NLS-1$
 			gd= new GridData(GridData.FILL_BOTH);
 			gd.widthHint= width;
 			fMessage.setLayoutData(gd);
@@ -121,7 +121,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 					break;
 			}
 			if (msg == null)
-				msg= "";
+				msg= ""; //$NON-NLS-1$
 			fMessage.setText(msg);
 			fImage.setImage(image);
 		}
@@ -199,14 +199,22 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		boolean ok= fWizard.canFinish();
 		boolean canFlip= fCurrentPage.canFlipToNextPage();
 		Button previewButton= getButton(PREVIEW_ID);
+		Button defaultButton= null;
 		if (previewButton != null && !previewButton.isDisposed()) {
 			previewButton.setEnabled(!previewPage);
 			if (!previewPage)
 				previewButton.setEnabled(canFlip);
+			if (previewButton.isEnabled())
+				defaultButton= previewButton;
 		}
 		Button okButton= getButton(IDialogConstants.OK_ID);
 		if (okButton != null && !okButton.isDisposed()) {
 			okButton.setEnabled(ok);
+			if (ok)
+				defaultButton= okButton;
+		}
+		if (defaultButton != null) {
+			defaultButton.getShell().setDefaultButton(defaultButton);
 		}
 	}
 
@@ -502,12 +510,12 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	}
 	
 	private void createMessageBox() {
-		fMessageBox= new MessageBox(fStatusContainer, SWT.NONE, convertWidthInCharsToPixels(80));
+		fMessageBox= new MessageBox(fStatusContainer, SWT.NONE, convertWidthInCharsToPixels(fWizard.getMessageLineWidthInChars()));
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (! (fCurrentPage instanceof PreviewWizardPage)) {
-			Button preview= createButton(parent, PREVIEW_ID, "Previe&w >>", false);
+			Button preview= createButton(parent, PREVIEW_ID, RefactoringMessages.getString("RefactoringWizardDialog2.buttons.preview.label"), false); //$NON-NLS-1$
 			preview.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					previewPressed((Button)e.widget);
@@ -515,6 +523,8 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			});
 		}
 		super.createButtonsForButtonBar(parent);
+		Button okButton= getButton(IDialogConstants.OK_ID);
+		okButton.setFocus();
 	}
 	
 	private void makeVisible(IWizardPage page) {

@@ -33,11 +33,11 @@ public class RefactoringMessages {
 		return result;
 	}
 	
-	public static String getFormattedString(String key, String arg) {
-		return getFormattedString(key, new String[] { arg });
+	public static String getFormattedString(String key, Object arg) {
+		return getFormattedString(key, new Object[] { arg });
 	}
 	
-	public static String getFormattedString(String key, String[] args) {
+	public static String getFormattedString(String key, Object[] args) {
 		return MessageFormat.format(getString(key), args);	
 	}	
 }

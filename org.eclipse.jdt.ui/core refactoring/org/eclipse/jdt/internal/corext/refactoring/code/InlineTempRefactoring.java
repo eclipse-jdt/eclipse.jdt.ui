@@ -69,8 +69,16 @@ public class InlineTempRefactoring extends Refactoring {
 		return RefactoringCoreMessages.getString("InlineTempRefactoring.name"); //$NON-NLS-1$
 	}
 	
-	private String getTempName(){
+	public String getTempName(){
 		return fTempDeclaration.getName().getIdentifier();
+	}
+	
+	public int getOccurences() {
+		try {
+			return getOccurrenceOffsets().length;
+		} catch (JavaModelException e) {
+			return 1;
+		}
 	}
 	
 	/*
@@ -282,7 +290,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return fCu.getSource().substring(start, end);
 	}
 	
-	private Integer[] getOccurrenceOffsets() throws JavaModelException{
+	private Integer[] getOccurrenceOffsets() throws JavaModelException {
 		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
 	}	
 	

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.refactoring.InlineTempInputPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -92,7 +93,14 @@ public class InlineTempAction extends SelectionDispatchAction {
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		String helpId= IJavaHelpContextIds.INLINE_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
-		RefactoringWizard result= new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
+		RefactoringWizard result= new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId) {
+			protected void addUserInputPages() {
+				addPage(new InlineTempInputPage());
+			}
+			protected int getMessageLineWidthInChars() {
+				return 0;
+			}
+		};
 		result.setExpandFirstNode(true);
 		return result;
 	}
