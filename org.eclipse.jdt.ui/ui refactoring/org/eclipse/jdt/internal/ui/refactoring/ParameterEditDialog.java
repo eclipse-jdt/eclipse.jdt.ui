@@ -27,7 +27,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -144,13 +146,13 @@ public class ParameterEditDialog extends StatusDialog {
 		if (first == fType) {
 			result[0]= validateType();
 			result[1]= validateName();
-			result[2]= validateDefaltValue();
+			result[2]= validateDefaultValue();
 		} else if (first == fName) {
 			result[0]= validateName();
 			result[1]= validateType();
-			result[2]= validateDefaltValue();
+			result[2]= validateDefaultValue();
 		} else {
-			result[0]= validateDefaltValue();
+			result[0]= validateDefaultValue();
 			result[1]= validateName();
 			result[2]= validateType();
 		}
@@ -168,37 +170,50 @@ public class ParameterEditDialog extends StatusDialog {
 		if (fType == null)
 			return null;
 		String typeName= fType.getText();
+		if (typeName.length() == 0)
+			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.type.error"));//$NON-NLS-1$
 		if (ChangeSignatureRefactoring.isValidParameterTypeName(typeName))
 			return createOkStatus();
-		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.9", new String[]{typeName}); //$NON-NLS-1$
+		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.type.invalid", new String[]{typeName}); //$NON-NLS-1$
 		return createErrorStatus(msg); 
 	}
 	
-	private Status createErrorStatus(String message) {
-		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
-	}
-
 	private IStatus validateName() {
 		if (fName == null) 
 			return null;
 		String text= fName.getText();
 		if (text.length() == 0)
 			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.name.error"));//$NON-NLS-1$
-		return JavaConventions.validateFieldName(text);
+		IStatus status= JavaConventions.validateFieldName(text);
+		if (status.matches(IStatus.ERROR))
+			return status;
+		if (! Checks.startsWithLowerCase(text))
+			return createWarningStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
+		return createOkStatus();
 	}
 	
-	private IStatus validateDefaltValue() {
+	private IStatus validateDefaultValue() {
 		if (fDefaultValue == null)
 			return null;
-		String s= fDefaultValue.getText();
-		if (s.length() == 0) {
+		String defaultValue= fDefaultValue.getText();
+		if (defaultValue.length() == 0)
 			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.defaultValue.error"));//$NON-NLS-1$
-		} else {
-			return createOkStatus(); 
-		}
+		if (ChangeSignatureRefactoring.isValidExpression(defaultValue))
+			return createOkStatus();
+		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.defaultValue.invalid", new String[]{defaultValue}); //$NON-NLS-1$
+		return createErrorStatus(msg);
+		
 	}
 	
 	private Status createOkStatus() {
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+	}
+	
+	private Status createWarningStatus(String message) {
+		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.WARNING, message, null);
+	}
+	
+	private Status createErrorStatus(String message) {
+		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
 	}
 }

@@ -342,6 +342,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if ("".equals(fReturnTypeName.trim())) { //$NON-NLS-1$
 			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
 			result.addFatalError(msg);
+			return;
 		}
 		if (! isValidTypeName(fReturnTypeName, true)){
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeName}); //$NON-NLS-1$
@@ -352,11 +353,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void checkMethodName(RefactoringStatus result) {
 		if (isMethodNameSameAsInitial() || ! canChangeNameAndReturnType())
 			return;
-		result.merge(Checks.checkMethodName(fMethodName));
+		if ("".equals(fMethodName.trim())) { //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.method_name_not_empty"); //$NON-NLS-1$
+			result.addFatalError(msg);
+			return;
+		}
 		if (fMethodName.equals(fMethod.getDeclaringType().getElementName())) {
 			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.constructor_name"); //$NON-NLS-1$
-			result.addFatalError(msg);
+			result.addWarning(msg);
 		}
+		result.merge(Checks.checkMethodName(fMethodName));
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
@@ -435,7 +441,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
 	}
 	
-	private static boolean isValidExpression(String string){
+	public static boolean isValidExpression(String string){
 		String trimmed= string.trim();
 		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
 			return false;
@@ -454,7 +460,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		cu.accept(analyzer);
 		ASTNode selected= analyzer.getFirstSelectedNode();
 		return (selected instanceof Expression) && 
-				trimmed.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
+				trimmed.equals(cuBuff.substring(cu.getExtendedStartPosition(selected), cu.getExtendedStartPosition(selected) + cu.getExtendedLength(selected)));
 	}
 
 	/*
