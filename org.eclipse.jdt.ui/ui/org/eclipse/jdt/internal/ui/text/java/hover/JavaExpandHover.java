@@ -111,7 +111,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
 					continue;
 				
-// TODO need a new check this one is not OK
+// TODO need a new check the this one is not OK
 //
 //			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
 //				if (((IJavaAnnotation) annotation).getImage(display) == null)
