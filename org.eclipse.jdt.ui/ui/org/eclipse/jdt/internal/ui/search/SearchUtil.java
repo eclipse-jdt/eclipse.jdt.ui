@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
@@ -37,6 +38,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.ui.browsing.JavaElementTypeComparator;
 
 /**
  * This class contains some utility methods for J Search.
@@ -50,6 +53,8 @@ public class SearchUtil extends JavaModelUtil {
 	// Settings store
 	private static final String DIALOG_SETTINGS_KEY= "JavaElementSearchActions"; //$NON-NLS-1$
 	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
+	
+	private static final JavaElementTypeComparator fgJavaElementTypeComparator= new JavaElementTypeComparator();
 	private static IDialogSettings fgSettingsStore;
 
 	public static IJavaElement getJavaElement(IMarker marker) {
@@ -59,20 +64,18 @@ public class SearchUtil extends JavaModelUtil {
 			String handleId= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 			IJavaElement je= JavaCore.create(handleId);
 			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)) {
-				if (je != null&& je.exists())
+				if (je != null && je.exists())
 					return je;
-				else {
-					IJavaElement fixedJe= fixCUName(marker, handleId);
-					if (fixedJe != null)
-						return fixedJe;
-					else
-						return je;
-				}
 			}
 
+			if (isBinary(je) || fgJavaElementTypeComparator.compare(je, IJavaElement.COMPILATION_UNIT) > 0)
+				return je;
+			
 			ICompilationUnit cu= findCompilationUnit(je);
-			if (cu == null)
-				return null;
+			if (cu == null || !cu.exists()) {
+				cu= (ICompilationUnit)JavaCore.create(marker.getResource());
+			}
+
 			// Find working copy element
 			IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
 			int i= 0;
@@ -83,13 +86,29 @@ public class SearchUtil extends JavaModelUtil {
 				}
 				i++;
 			}
-			if (je != null && !je.exists())
-				je= cu.getElementAt(marker.getAttribute(IMarker.CHAR_START, 0));
+			if (je != null && !je.exists()) {
+				IJavaElement[] jElements= cu.findElements(je);
+				if (jElements == null || jElements.length == 0)
+					je= cu.getElementAt(marker.getAttribute(IMarker.CHAR_START, 0));
+				else
+					je= jElements[0];
+			}
 			return je;
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
+	}
+
+	private static boolean isBinary(IJavaElement jElement) {
+		if (jElement instanceof IMember)
+			return ((IMember)jElement).isBinary();
+
+		IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		if (pkgRoot.isArchive())
+			return true;
+
+		return false;
 	}
 
 	private static IJavaElement fixCUName(IMarker marker, String handle) {

@@ -8,7 +8,7 @@ import java.util.Comparator;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-class JavaElementTypeComparator implements Comparator {
+public class JavaElementTypeComparator implements Comparator {
 
 
 	/**
