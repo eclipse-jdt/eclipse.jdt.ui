@@ -54,6 +54,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -79,7 +80,7 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
  */
-public class JarFileExportOperation implements IJarExportRunnable {
+public class JarFileExportOperation extends WorkspaceModifyOperation implements IJarExportRunnable {
 
 	private static class MessageMultiStatus extends MultiStatus {
 		MessageMultiStatus(String pluginId, int code, String message, Throwable exception) {
@@ -713,12 +714,12 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 * @param	progressMonitor	the progress monitor that displays the progress
 	 * @see	#getStatus()
 	 */
-	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
+	protected void execute(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		int count= fJarPackages.length;
 		progressMonitor.beginTask("", count); //$NON-NLS-1$
 		try {
 			for (int i= 0; i < count; i++) {
-				SubProgressMonitor subProgressMonitor= new SubProgressMonitor(progressMonitor, 1);
+				SubProgressMonitor subProgressMonitor= new SubProgressMonitor(progressMonitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 				fJarPackage= fJarPackages[i];
 				if (fJarPackage != null)
 					singleRun(subProgressMonitor);
