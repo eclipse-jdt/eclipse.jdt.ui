@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -974,6 +975,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 				// continue
 			}
+		} else {
+			status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.DefaultPackageDiscouraged")); //$NON-NLS-1$
 		}
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
@@ -1541,7 +1544,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	private boolean removeUnused(ICompilationUnit cu, ImportsManager imports) {
-		CompilationUnit root= AST.parseCompilationUnit(cu, true, null, null);
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		IProblem[] problems= root.getProblems();
 		boolean importRemoved= false;
 		for (int i= 0; i < problems.length; i++) {
@@ -1571,7 +1577,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
-			CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
+			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			parser.setSource(content.toCharArray());
+			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {
 				return content;
 			}
