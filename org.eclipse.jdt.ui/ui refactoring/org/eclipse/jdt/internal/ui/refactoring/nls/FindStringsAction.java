@@ -18,10 +18,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -35,14 +37,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
-import org.eclipse.jdt.internal.ui.refactoring.actions.*;
 
 public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 
@@ -209,19 +212,26 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText("Show compilation units with no strings to externalize");
-			fCheckbox.setSelection(true);
+			fCheckbox.setText("Show only compilation units with not externalized strings");
+			fCheckbox.setSelection(false);
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					boolean show= NonNLSListDialog.this.fCheckbox.getSelection();
-					if  (show && NonNLSListDialog.this.hasFilters())
+					boolean showAll= ! NonNLSListDialog.this.fCheckbox.getSelection();
+					if  (showAll && NonNLSListDialog.this.hasFilters())
 						NonNLSListDialog.this.getTableViewer().resetFilters();
-					else if (! show && ! NonNLSListDialog.this.hasFilters())	
+					else if (! showAll && ! NonNLSListDialog.this.hasFilters())	
 						NonNLSListDialog.this.getTableViewer().addFilter(new ZeroStringsFilter());
+				}
+			});
+			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					ICompilationUnit selectedCu= (ICompilationUnit)(((NonNLSElement)e.item.getData()).cu);
+					ExternalizeAction.openExternalizeStringsWizard(selectedCu);
 				}
 			});
 			return result;
 		}
+		
 	}
 	
 	private static class NonNLSElement{
