@@ -226,8 +226,6 @@ class TestFormatterOptions {
 	public int number_of_empty_lines_to_preserve;
 	public boolean put_empty_statement_on_new_line;
 	public int tab_size;
-	public int indentation_size;
-	public boolean snap_to_tabs;
 	public final char filling_space = ' ';
 	public int page_width;
 	public boolean use_tab;
@@ -415,9 +413,7 @@ class TestFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, this.put_empty_statement_on_new_line ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, Integer.toString(this.page_width));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, this.use_tab ? JavaCore.TAB: JavaCore.SPACE);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, Integer.toString(this.indentation_size));
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, Integer.toString(this.tab_size));
-		options.put(DefaultCodeFormatterConstants.FORMATTER_SNAP_TO_TABS, this.snap_to_tabs ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, Integer.toString(this.tab_size));
 		return options;
 	}
 
@@ -591,8 +587,6 @@ class TestFormatterOptions {
 		this.number_of_empty_lines_to_preserve = 1;
 		this.put_empty_statement_on_new_line = false;
 		this.tab_size = 4;
-		this.indentation_size = 4;
-		this.snap_to_tabs= false;
 		this.page_width = 80;
 		this.use_tab = true; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=49081
 	}

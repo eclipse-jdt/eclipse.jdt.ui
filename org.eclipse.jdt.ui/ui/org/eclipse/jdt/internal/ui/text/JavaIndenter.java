@@ -1301,7 +1301,8 @@ public class JavaIndenter {
 	private int prefTabSize() {
 		int tabLen;
 		if (!isStandalone())
-			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
+//			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
+			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
 		else
 			tabLen= 4; // sensible default for testing
 
@@ -1311,7 +1312,8 @@ public class JavaIndenter {
 	private int prefIndentationSize() {
 		int indentationSize;
 		if (!isStandalone())
-			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
+//			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
+			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
 		else
 			indentationSize= 4; // sensible default for testing
 

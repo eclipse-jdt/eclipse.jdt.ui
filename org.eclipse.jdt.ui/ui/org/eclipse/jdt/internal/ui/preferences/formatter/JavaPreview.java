@@ -148,7 +148,7 @@ public abstract class JavaPreview {
 		fMarginPainter.setMarginRulerColumn(lineWidth);
 		
 		// update the tab size
-		final int tabSize= getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH), 0);
+		final int tabSize= getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0);
 		if (tabSize != fTabSize) fSourceViewer.getTextWidget().setTabs(tabSize);
 		fTabSize= tabSize;
 		

@@ -93,8 +93,9 @@ public class NewForLoopJavaContextTest extends TestCase {
 		if (JavaCore.getPlugin() != null) {
 			Hashtable options= JavaCore.getDefaultOptions();
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, "4");
-			options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "4");
+			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+//			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, "4");
+//			options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "4");
 			JavaCore.setOptions(options);
 		}
 		setUpProject(JavaCore.VERSION_1_5);

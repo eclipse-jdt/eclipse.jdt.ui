@@ -492,7 +492,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 		
 		IJavaProject project= getProject();
-		int tabWidth= CodeFormatterUtil.getIndentationSize(project);
+		int tabWidth= CodeFormatterUtil.getTabWidth(project);
 		boolean useSpaces;
 		if (project == null)
 			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
@@ -550,7 +550,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return CodeFormatterUtil.getTabLength(getProject());
+		return CodeFormatterUtil.getTabWidth(getProject());
 	}
 
 	/*

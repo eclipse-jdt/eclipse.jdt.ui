@@ -67,59 +67,17 @@ public class CodeFormatterUtil {
 	}
 	
 	/**
-	 * Gets the current indent width.
-	 * 
-	 * @param project The project where the source is used, used for project
-	 *        specific options or <code>null</code> if the project is unknown
-	 *        and the workspace default should be used
-	 * @return The indent width
-	 * @deprecated as of 3.1 use {@link #getIndentationSize(IJavaProject)} to
-	 *             get the indentation size or
-	 *             {@link #getTabLength(IJavaProject)} to get the visual
-	 *             tabulator length.
+	 * Gets the current tab width.
+	 * @param project The project where the source is used, used for project specific options or <code>null</code> if
+	 * 	the project is unknown and the workspace default should be used
+	 * 	@return The indent width
 	 */
 	public static int getTabWidth(IJavaProject project) {
-		return getIndentationSize(project);
-	}
-	
-	/**
-	 * Gets the current indentation size in space equivalents.
-	 * 
-	 * @param project The project where the source is used, used for project
-	 *        specific options or <code>null</code> if the project is unknown
-	 *        and the workspace default should be used
-	 * @return the indentation size in space equivalents
-	 * @since 3.1
-	 */
-	public static int getIndentationSize(IJavaProject project) {
 		String tabSize;
 		if (project != null) {
-			tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, true);
+			tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
 		} else {
-			tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
-		}
-		try {
-			return Integer.parseInt(tabSize);
-		} catch (NumberFormatException e) {
-			return 4;
-		}
-	}
-
-	/**
-	 * Gets the current visual length of a tab character in space equivalents.
-	 * 
-	 * @param project The project where the source is used, used for project
-	 *        specific options or <code>null</code> if the project is unknown
-	 *        and the workspace default should be used
-	 * @return The visual length of one tabulator in space equivalents
-	 * @since 3.1
-	 */
-	public static int getTabLength(IJavaProject project) {
-		String tabSize;
-		if (project != null) {
-			tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, true);
-		} else {
-			tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH);
+			tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 		}
 		try {
 			return Integer.parseInt(tabSize);
