@@ -226,16 +226,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
 
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
+			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
 		}
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 		if (navigateMenu != null) {
 			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
-		}
-		IMenuManager searchMenu= menu.findMenuUsingPath("org.eclipse.search.menu");
-		if (searchMenu != null) {
-			// TODO check whether the search menu provides an extension group slot
-			searchMenu.add(new Separator());
-			searchMenu.add(fShowReferencesAction);
 		}
 	}
 	

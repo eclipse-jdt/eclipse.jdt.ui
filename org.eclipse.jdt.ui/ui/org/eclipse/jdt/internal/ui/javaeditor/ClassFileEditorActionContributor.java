@@ -23,12 +23,14 @@ import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 public class ClassFileEditorActionContributor extends BasicTextEditorActionContributor {
 	
 	protected RetargetTextEditorAction fShowJavaDoc;
+	private RetargetTextEditorAction fShowReferencesAction;	
 	protected TogglePresentationAction fTogglePresentationAction;
 	
 	public ClassFileEditorActionContributor() {
@@ -37,6 +39,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		fTogglePresentationAction= new TogglePresentationAction();				
+		fShowReferencesAction= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowReferencesInFile."); //$NON-NLS-1$
+		fShowReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
 	}
 	
 	/*
@@ -54,6 +58,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 				
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowJavaDoc);
+
+			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
 		}
 	}
 	
@@ -82,6 +88,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		fTogglePresentationAction.setEditor(textEditor);		
+		fShowReferencesAction.setAction(getAction(textEditor, SearchUsagesInFileAction.SHOWREFERENCES));
 
 		if (classFileEditor != null) {
 			IActionBars bars= getActionBars();

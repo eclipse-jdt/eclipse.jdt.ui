@@ -29,20 +29,39 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
+import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
@@ -77,7 +96,18 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IViewPart;
@@ -96,43 +126,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
-import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
-import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
-import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
 
 
 
@@ -742,10 +735,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action= new StructureSelectPreviousAction(this, fSelectionHistory);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
 		setAction(StructureSelectionAction.PREVIOUS, action);
-
-		action= new SearchUsagesInFileAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
-		setAction(SearchUsagesInFileAction.SHOWREFERENCES, action);
 
 		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
 		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		

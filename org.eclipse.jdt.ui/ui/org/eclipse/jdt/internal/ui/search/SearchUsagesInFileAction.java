@@ -20,12 +20,15 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -47,7 +50,9 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
@@ -58,6 +63,8 @@ import org.eclipse.search.ui.IGroupByKeyComputer;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.MarkerUtilities;
  
 /**
@@ -174,15 +181,18 @@ public class SearchUsagesInFileAction extends Action {
 	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
 	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private IRunnableWithProgress fNullOperation= getNullOperation();
 	
-	public SearchUsagesInFileAction(CompilationUnitEditor editor) {
+	public SearchUsagesInFileAction(JavaEditor editor) {
 		super(SearchMessages.getString("Search.FindUsageInFile.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindUsageInFile.tooltip")); //$NON-NLS-1$
 		// TODO help context ID
 		fEditor= editor;
-		setEnabled(null != SelectionConverter.getInputAsCompilationUnit(fEditor));
+		boolean enabled= false;
+		if (getClassFile() != null || SelectionConverter.getInputAsCompilationUnit(fEditor) != null)
+			enabled= true;
+		setEnabled(enabled);
 	}
 		
 	/* (non-JavaDoc)
@@ -190,7 +200,9 @@ public class SearchUsagesInFileAction extends Action {
 	 */
 	public final  void run() {
 		ITextSelection ts= getTextSelection();
-		final CompilationUnit root= AST.parseCompilationUnit(getCompilationUnit(), true);
+		final CompilationUnit root= createAST();
+		if (root == null)
+			return;
 		ASTNode node= NodeFinder.perform(root, ts.getOffset(), ts.getLength());
 		
 		if (!(node instanceof Name))
@@ -204,18 +216,19 @@ public class SearchUsagesInFileAction extends Action {
 		
 		final IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				ISearchResultView view= startSearch(getCompilationUnit(), name);
+				IJavaElement element= getInput();
+				ISearchResultView view= startSearch(element.getElementName(), name);
 				NameUsagesFinder finder= new NameUsagesFinder(target);
 				root.accept(finder);
 				List matches= finder.getUsages();
 				List writeMatches= finder.getWriteUsages();
-				IFile file= getFile(getCompilationUnit());				
+				IResource file= getResource(element);				
 				for (Iterator each= matches.iterator(); each.hasNext();) {
-					ASTNode element= (ASTNode) each.next();
+					ASTNode node= (ASTNode) each.next();
 					addMatch(
 						view, 
 						file, 
-						createMarker(file, element, writeMatches.contains(element), 
+						createMarker(file, node, writeMatches.contains(node), 
 						target instanceof IVariableBinding)
 					);
 				}
@@ -223,6 +236,20 @@ public class SearchUsagesInFileAction extends Action {
 			}
 		};
 		run(runnable);
+	}
+	
+	public CompilationUnit createAST() {
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput) {
+			IClassFile classFile= ((IClassFileEditorInput)input).getClassFile();
+			try {
+				String source= classFile.getSource();
+				return AST.parseCompilationUnit(source.toCharArray(), classFile.getElementName(), classFile.getJavaProject());
+			} catch (JavaModelException e) {
+				return null;
+			}
+		}
+		return AST.parseCompilationUnit(getCompilationUnit(), true);
 	}
 	
 	public void run(final IWorkspaceRunnable runnable) {
@@ -239,11 +266,10 @@ public class SearchUsagesInFileAction extends Action {
 		);
 	}
 	
-	public ISearchResultView startSearch(final ICompilationUnit cu, final Name name) {
+	public ISearchResultView startSearch(String fileName, final Name name) {
 		SearchUI.activateSearchResultView();
 		ISearchResultView view= SearchUI.getSearchResultView();
 		String elementName= getName(name);
-		String fileName= cu.getElementName();
 		
 		if (view != null) 
 			view.searchStarted(
@@ -270,7 +296,7 @@ public class SearchUsagesInFileAction extends Action {
 		return SearchMessages.getFormattedString("JavaSearchInFile.singularPostfix", args); //$NON-NLS-1$
 	}
 
-	public void addMatch(final ISearchResultView view, IFile file, IMarker marker) {
+	public void addMatch(final ISearchResultView view, IResource file, IMarker marker) {
 		if (view != null)
 			view.addMatch("", getGroupByKey(marker), file, marker); //$NON-NLS-1$
 	}
@@ -305,21 +331,32 @@ public class SearchUsagesInFileAction extends Action {
 		return result;
 	}
 		
-	private IFile getFile(ICompilationUnit cu) throws JavaModelException {
-		if (cu.isWorkingCopy()) {
-			IJavaElement element= cu.getOriginalElement();
-			return (IFile)element.getUnderlyingResource();
+	private IResource getResource(IJavaElement element) throws JavaModelException {
+		if (element instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit)element;
+			if (cu.isWorkingCopy()) {
+				IJavaElement original= cu.getOriginalElement();
+				return original.getUnderlyingResource();
+			}
+			return cu.getUnderlyingResource();
 		}
-		return (IFile) cu.getUnderlyingResource();
+		return element.getJavaProject().getProject();
 	}
 	
-	private IMarker createMarker(IFile file, ASTNode element, boolean writeAccess, boolean isVariable) throws CoreException {
+	private IMarker createMarker(IResource file, ASTNode element, boolean writeAccess, boolean isVariable) throws CoreException {
 		Map attributes= new HashMap(10);
 		IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
 
 		int startPosition= element.getStartPosition();
 		MarkerUtilities.setCharStart(attributes, startPosition);
 		MarkerUtilities.setCharEnd(attributes, startPosition + element.getLength());
+		
+		// for class files
+		if (!(file instanceof IFile)) {
+			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CF_EDITOR);
+			JavaCore.addJavaElementMarkerAttributes(attributes, getClassFile().getType());
+			attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, getClassFile().getType().getHandleIdentifier());
+		}
 
 		if(writeAccess)
 			attributes.put(IS_WRITEACCESS, new Boolean(true));
@@ -340,8 +377,22 @@ public class SearchUsagesInFileAction extends Action {
 		return marker;
 	}
 
-	protected final ICompilationUnit getCompilationUnit() {
+	protected final IJavaElement getInput() {
+		IClassFile classFile= getClassFile();
+		if (classFile != null)
+			return classFile;
+		return getCompilationUnit();
+	}
+	
+	protected ICompilationUnit getCompilationUnit() {
 		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+	}
+	
+	protected final IClassFile getClassFile() {
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)input).getClassFile();
+		return null;
 	}
 	
 	protected final IDocument getDocument() {

@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -138,6 +139,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -1425,6 +1427,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		action= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) action); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
+	
+		Action searchAction= new SearchUsagesInFileAction(this);
+		searchAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
+		setAction(SearchUsagesInFileAction.SHOWREFERENCES, searchAction);
 	
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
