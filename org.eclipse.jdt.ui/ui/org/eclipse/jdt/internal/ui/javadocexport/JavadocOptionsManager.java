@@ -157,110 +157,102 @@ public class JavadocOptionsManager {
 	 * @param setting Dialog settings for the Javadoc exporter.
 	 */
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings settings, ISelection currSelection) {
-		Element element;
-		this.fRoot= ResourcesPlugin.getWorkspace().getRoot();
-		this.fXmlfile= xmlJavadocFile;
-		this.fWizardStatus= new StatusInfo();
-		this.fLinks= new HashMap();
+		fRoot= ResourcesPlugin.getWorkspace().getRoot();
+		fXmlfile= xmlJavadocFile;
+		fWizardStatus= new StatusInfo();
+		fLinks= new HashMap();
 		fProjects= new ArrayList();
-
 		if (xmlJavadocFile != null) {
 			try {
 				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
-				element= reader.readXML();
+				Element element= reader.readXML();
 				IJavaProject p= reader.getProject();
-
-				if (element == null || p == null) {
-					fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
-					loadStore(settings, currSelection);
-				} else {
+				if (element != null && p != null) {
 					fProjects.add(p);
-					loadStore(element, settings);
+					loadFromXML(element);
+					return;
 				}
+				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
-				loadStore(settings, currSelection);
 			} catch (IOException e) {
 				JavaPlugin.log(e);
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectIOE.warning")); //$NON-NLS-1$
-				loadStore(settings, currSelection);
 			} catch (SAXException e) {
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectSAXE.warning")); //$NON-NLS-1$
-				loadStore(settings, currSelection);
 			}
-		} else
-			loadStore(settings, currSelection);
+		}
+		if (settings != null) {
+			loadFromDialogStore(settings, currSelection);
+		} else {
+			loadDefaults(currSelection);
+		}
 	}
 
-	private void loadStore(IDialogSettings settings, ISelection sel) {
+	private void loadFromDialogStore(IDialogSettings settings, ISelection sel) {
+		//getValidSelection will also find the project
+		fSelectedElements= getValidSelection(sel);
 
-		if (settings != null) {
-			//getValidSelection will also find the project
-			fSelectedElements= getValidSelection(sel);
+		fAccess= settings.get(VISIBILITY);
+		if (fAccess == null)
+			fAccess= PROTECTED;
 
-			fAccess= settings.get(VISIBILITY);
-			if (fAccess == null)
-				fAccess= PROTECTED;
+		//this is defaulted to false.
+		fFromStandard= settings.getBoolean(FROMSTANDARD);
 
-			//this is defaulted to false.
-			fFromStandard= settings.getBoolean(FROMSTANDARD);
+		//doclet is loaded even if the standard doclet is being used
+		fDocletpath= settings.get(DOCLETPATH);
+		fDocletname= settings.get(DOCLETNAME);
+		if (fDocletpath == null || fDocletname == null) {
+			fFromStandard= true;
+			fDocletpath= ""; //$NON-NLS-1$
+			fDocletname= ""; //$NON-NLS-1$
+		}
 
-			//doclet is loaded even if the standard doclet is being used
-			fDocletpath= settings.get(DOCLETPATH);
-			fDocletname= settings.get(DOCLETNAME);
-			if (fDocletpath == null || fDocletname == null) {
-				fFromStandard= true;
-				fDocletpath= ""; //$NON-NLS-1$
-				fDocletname= ""; //$NON-NLS-1$
-			}
+		//load a default antpath
+		fAntpath= settings.get(ANTPATH);
+		if (fAntpath == null)
+			fAntpath= ""; //$NON-NLS-1$
+		//$NON-NLS-1$
 
-			//load a default antpath
-			fAntpath= settings.get(ANTPATH);
-			if (fAntpath == null)
-				fAntpath= ""; //$NON-NLS-1$
-			//$NON-NLS-1$
+		//load a default antpath
+		fDestination= settings.get(DESTINATION);
+		if (fDestination == null)
+			fDestination= ""; //$NON-NLS-1$
+		//$NON-NLS-1$
 
-			//load a default antpath
-			fDestination= settings.get(DESTINATION);
-			if (fDestination == null)
-				fDestination= ""; //$NON-NLS-1$
-			//$NON-NLS-1$
+		fTitle= settings.get(TITLE);
+		if (fTitle == null)
+			fTitle= ""; //$NON-NLS-1$
 
-			fTitle= settings.get(TITLE);
-			if (fTitle == null)
-				fTitle= ""; //$NON-NLS-1$
+		fStylesheet= settings.get(STYLESHEETFILE);
+		if (fStylesheet == null)
+			fStylesheet= ""; //$NON-NLS-1$
 
-			fStylesheet= settings.get(STYLESHEETFILE);
-			if (fStylesheet == null)
-				fStylesheet= ""; //$NON-NLS-1$
+		fAdditionalParams= settings.get(EXTRAOPTIONS);
+		if (fAdditionalParams == null)
+			fAdditionalParams= ""; //$NON-NLS-1$
 
-			fAdditionalParams= settings.get(EXTRAOPTIONS);
-			if (fAdditionalParams == null)
-				fAdditionalParams= ""; //$NON-NLS-1$
+		fOverview= settings.get(OVERVIEW);
+		if (fOverview == null)
+			fOverview= ""; //$NON-NLS-1$
 
-			fOverview= settings.get(OVERVIEW);
-			if (fOverview == null)
-				fOverview= ""; //$NON-NLS-1$
+		fUse= loadbutton(settings.get(USE));
+		fAuthor= loadbutton(settings.get(AUTHOR));
+		fVersion= loadbutton(settings.get(VERSION));
+		fNodeprecated= loadbutton(settings.get(NODEPRECATED));
+		fNoDeprecatedlist= loadbutton(settings.get(NODEPRECATEDLIST));
+		fNonavbar= loadbutton(settings.get(NONAVBAR));
+		fNoindex= loadbutton(settings.get(NOINDEX));
+		fNotree= loadbutton(settings.get(NOTREE));
+		fSplitindex= loadbutton(settings.get(SPLITINDEX));
+		fOpenInBrowser= loadbutton(settings.get(OPENINBROWSER));
+		
+		fJDK14Mode= loadbutton(settings.get(SOURCE));
 
-			fUse= loadbutton(settings.get(USE));
-			fAuthor= loadbutton(settings.get(AUTHOR));
-			fVersion= loadbutton(settings.get(VERSION));
-			fNodeprecated= loadbutton(settings.get(NODEPRECATED));
-			fNoDeprecatedlist= loadbutton(settings.get(NODEPRECATEDLIST));
-			fNonavbar= loadbutton(settings.get(NONAVBAR));
-			fNoindex= loadbutton(settings.get(NOINDEX));
-			fNotree= loadbutton(settings.get(NOTREE));
-			fSplitindex= loadbutton(settings.get(SPLITINDEX));
-			fOpenInBrowser= loadbutton(settings.get(OPENINBROWSER));
-			
-			fJDK14Mode= loadbutton(settings.get(SOURCE));
-
-			//get the set of project specific data
-			loadLinksFromDialogSettings(settings);
-
-		} else
-			loadDefaults(sel);
+		//get the set of project specific data
+		loadLinksFromDialogSettings(settings);
 	}
 
 	private String getDefaultAntPath(IJavaProject project) {
@@ -380,7 +372,7 @@ public class JavadocOptionsManager {
 		loadLinksFromDialogSettings(null);
 	}
 
-	private void loadStore(Element element, IDialogSettings settings) {
+	private void loadFromXML(Element element) {
 
 		fAccess= element.getAttribute(VISIBILITY);
 		if (!(fAccess.length() > 0))
@@ -968,10 +960,6 @@ public class JavadocOptionsManager {
 		this.fSourceElements= new ArrayList(Arrays.asList(elements));
 	}
 
-	public void setRoot(IWorkspaceRoot root) {
-		this.fRoot= root;
-	}
-
 	public void setProjects(IJavaProject[] projects, boolean clear) {
 		if (clear)
 			fProjects.clear();
@@ -1168,44 +1156,45 @@ public class JavadocOptionsManager {
 	private boolean containsCompilationUnits(IPackageFragment pack) throws JavaModelException {
 		return pack.getCompilationUnits().length > 0;
 	}
+		
 
-	private class ProjectData {
+	private static class ProjectData {
 
-		private String dataHrefs;
-		private String dataDestdir;
-		private String dataAntPath;
+		private String fHrefs;
+		private String fDestinationDir;
+		private String fAntPath;
 
 		public void setLinks(String hrefs) {
 			if (hrefs == null)
-				dataHrefs= ""; //$NON-NLS-1$
+				fHrefs= ""; //$NON-NLS-1$
 			else
-				dataHrefs= hrefs;
+				fHrefs= hrefs;
 		}
 
 		public void setDestination(String destination) {
 			if (destination == null)
-				dataDestdir= ""; //$NON-NLS-1$
+				fDestinationDir= ""; //$NON-NLS-1$
 			else
-				dataDestdir= destination;
+				fDestinationDir= destination;
 		}
 
 		public void setAntpath(String antpath) {
 			if (antpath == null)
-				dataAntPath= ""; //$NON-NLS-1$
+				fAntPath= ""; //$NON-NLS-1$
 			else
-				dataAntPath= antpath;
+				fAntPath= antpath;
 		}
 
 		public String getLinks() {
-			return dataHrefs;
+			return fHrefs;
 		}
 
 		public String getDestination() {
-			return dataDestdir;
+			return fDestinationDir;
 		}
 
 		public String getAntPath() {
-			return dataAntPath;
+			return fAntPath;
 		}
 
 	}
