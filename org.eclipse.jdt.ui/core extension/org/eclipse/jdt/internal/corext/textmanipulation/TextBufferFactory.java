@@ -173,7 +173,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 			document.set(buffer.toString());
 			return new TextBuffer(document);
 		} catch (IOException x) {
-			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, x.getMessage(), x);
+			String message= (x != null ? x.getMessage() : ""); //$NON-NLS-1$
+			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, x);
 			throw new CoreException(s);
 		} finally {
 			IOCloser.perform(in, stream);

@@ -110,11 +110,13 @@ public class TextBufferEditor extends TextEditProcessor {
 				return super.performEdits();
 			}
 		} catch (BadLocationException e) {
+			String message= (e != null ? e.getMessage() : ""); //$NON-NLS-1$
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IStatus.ERROR, e.getMessage(), e));
+				IStatus.ERROR, message, e));
 		} catch (MalformedTreeException e) {
+			String message= (e != null ? e.getMessage() : ""); //$NON-NLS-1$
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IStatus.ERROR, e.getMessage(), e));
+				IStatus.ERROR, message, e));
 		}
 	}	
 }

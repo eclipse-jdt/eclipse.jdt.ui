@@ -1013,7 +1013,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				IFile file= input.getFile();
 				file.setContents(stream, overwrite, true, monitor);
 			} catch (IOException x)  {
-				IStatus s= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, x.getMessage(), x);
+				String message= (x != null ? x.getMessage() : ""); //$NON-NLS-1$
+				IStatus s= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, x);
 				throw new CoreException(s);
 			}
 		}

@@ -74,9 +74,11 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		try {
 			readXML(jarPackage);
 		} catch (IOException ex) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			String message= (ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ""); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 		} catch (SAXException ex) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			String message= (ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ""); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 		}
 	}
 
@@ -92,7 +94,8 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
     		try {
 				fInputStream.close();
     		} catch (IOException ex) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+    			String message= (ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ""); //$NON-NLS-1$
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 			}
 	}
 
