@@ -5,11 +5,8 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
@@ -134,17 +131,20 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			return;
 		}
 		
+		boolean inEditor= JavaCompareUtilities.beingEdited(file);
+		
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire(file);
 		
 			// configure EditionSelectionDialog and let user select an edition
-			ITypedElement target= new JavaTextBufferNode(buffer, cu.getElementName());
+			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
 			
-			ITypedElement[] editions= new ITypedElement[states.length];
+			ITypedElement[] editions= new ITypedElement[states.length+1];
+			editions[0]= new ResourceNode(file);
 			for (int i= 0; i < states.length; i++)
-				editions[i]= new HistoryItem(target, states[i]);
+				editions[i+1]= new HistoryItem(target, states[i]);
 								
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);

@@ -22,32 +22,14 @@ import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.compare.*;
 import org.eclipse.compare.internal.Utilities;
 
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.ui.part.FileEditorInput;
 
 /**
  * Provides "Replace from local history" for Java elements.
  */
 public class JavaCompareWithEditionAction extends JavaHistoryAction {
 	
-	static class CompareWithEditionDialog extends EditionSelectionDialog {
-	
-		ResourceBundle fBundle;
-		
-		CompareWithEditionDialog(Shell parent, ResourceBundle bundle) {
-			super(parent, bundle);
-			fBundle= bundle;
-		}
-		
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.CANCEL_ID, Utilities.getString(fBundle, "closeButton.label"), false); //$NON-NLS-1$
-		}
-		
-		/**
-		 * Overidden to disable dismiss on double click (see PR 1GI3KUR).
-		 */
-		protected void okPressed() {
-		}
-	}
-				
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.CompareWithEditionAction"; //$NON-NLS-1$
 	
 	
@@ -118,15 +100,18 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 			for (int i= 0; i < states.length; i++)
 				editions[i+1]= new HistoryItem(editions[0], states[i]);
 						
+		boolean inEditor= JavaCompareUtilities.beingEdited(file);
+
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire(file);
 
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
-			EditionSelectionDialog d= new CompareWithEditionDialog(shell, bundle);
-			
-			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, cu.getElementName()), editions, input);
+			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			d.setCompareMode(true);
+
+			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, inEditor), editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				

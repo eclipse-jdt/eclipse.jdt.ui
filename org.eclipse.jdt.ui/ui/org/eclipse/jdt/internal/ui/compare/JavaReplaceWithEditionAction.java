@@ -97,6 +97,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			for (int i= 0; i < states.length; i++)
 				editions[i+1]= new HistoryItem(editions[0], states[i]);
 						
+		boolean inEditor= JavaCompareUtilities.beingEdited(file);
+
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
 		try {
@@ -105,7 +107,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			
-			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, cu.getElementName()), editions, input);
+			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, inEditor), editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				

@@ -8,6 +8,8 @@ import java.io.*;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 
 import org.eclipse.compare.*;
@@ -19,14 +21,17 @@ import org.eclipse.compare.*;
 class JavaTextBufferNode implements ITypedElement, IStreamContentAccessor {
 	
 	private TextBuffer fBuffer;
-	private String fName;
+	private boolean fInEditor;
 	
-	JavaTextBufferNode(TextBuffer buffer, String name) {
+	JavaTextBufferNode(TextBuffer buffer, boolean inEditor) {
 		fBuffer= buffer;
+		fInEditor= inEditor;
 	}
 	
 	public String getName() {
-		return fName;
+		if (fInEditor)
+			return "Editor Buffer";
+		return "Workspace File";
 	}
 	
 	public String getType() {
