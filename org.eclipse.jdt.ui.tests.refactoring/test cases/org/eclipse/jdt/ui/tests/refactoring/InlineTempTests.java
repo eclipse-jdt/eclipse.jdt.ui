@@ -110,6 +110,24 @@ public class InlineTempTests extends RefactoringTest {
 		helper1();
 	}
 
+	public void test6() throws Exception{
+		printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
+		//helper1();
+	}
+
+	public void test7() throws Exception{
+		helper1();
+	}
+	
+	public void test8() throws Exception{
+		printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
+		//helper1();
+	}
+	
+	public void test9() throws Exception{
+		helper1();
+	}
+
 	public void testFail0() throws Exception{
 		helper2();
 	}
