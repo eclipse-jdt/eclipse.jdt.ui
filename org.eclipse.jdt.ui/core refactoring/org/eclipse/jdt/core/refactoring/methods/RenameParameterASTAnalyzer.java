@@ -34,18 +34,13 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}
 	
 	private String[] getSortedCopy(String[] array){
-		//should we use arrayCopy?
 		String[] copy= (String[])array.clone();
 		Arrays.sort(copy);
 		return copy;
 	}
 			
 	private void addShadowingError(AstNode node, char[] name){
-		addError("Problem in line:" + getLineNumber(node) + " Reference " + new String(name) + " already visible.");
-	}
-	
-	private void addShadowingError(String flag, AstNode node, char[] name){
-		addError(flag + " Problem in line:" + getLineNumber(node) + " Reference " + new String(name) + " already visible.");
+		addError("Problem in line:" + getLineNumber(node) + ". Name " + new String(name) + " is already visible.");
 	}
 	
 	private boolean withinMethod(AstNode node){

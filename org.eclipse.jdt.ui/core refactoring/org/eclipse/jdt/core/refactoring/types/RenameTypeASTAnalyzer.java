@@ -106,7 +106,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		if (!typeImported(compilationUnitDeclaration))
 			return true;	
 		if (typeDeclared(compilationUnitDeclaration, fNewNameArray))
-			addError(cuFullPath() + " imports " + fType.getFullyQualifiedName() + " and declares a top-level type called " + fNewName);
+			addError(cuFullPath() + " imports " + fType.getFullyQualifiedName() + " and declares a top-level type named " + fNewName);
 		return true;
 	}
 
@@ -175,7 +175,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 	//-----------------------------------------------------------
 	private void addError(AstNode node){
-		addError("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fNewName + " is already used.");
+		addError("Name " + fNewName + " is already used in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + ")");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -276,8 +276,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 				addError("Name " + fNewName + " is in conflict with superinterfaces list for type " + new String(typeDeclaration.name));
 			}
 		} catch (JavaModelException e) {
-			HackFinder.fixMeSoon("should we log it or ignore it?");
-			//ExceptionHandler.handle(e, "JavaModelException", "Exception during program analysis for refactoring");
+			//ignore it
 		}
 	}
 	

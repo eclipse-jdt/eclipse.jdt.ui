@@ -97,7 +97,7 @@ public class Checks {
 		IPath newPath= RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName);
 		if (resourceExists(newPath)){
 			RefactoringStatus result= new RefactoringStatus();	
-			result.addFatalError("Cannot rename a compilation unit to \"" + newName + ".java\" - name already used by another file in this directory");
+			result.addFatalError("Cannot rename a compilation unit to \"" + newName + ".java\" - this name is already used by another file in this directory");
 			return result;
 		} else
 			return null;
@@ -172,7 +172,7 @@ public class Checks {
 			if (Flags.isNative(methods[i].getFlags()))
 				result.addError("Method " + methods[i].getDeclaringType().getFullyQualifiedName() 
 							+ "::" + methods[i].getElementName() 
-							+ " is native. This refactoring can cause UnsatisfiedLinkError on runtime.");
+							+ " is native. Running the modified program can cause UnsatisfiedLinkError on runtime.");
 		}
 		return result;
 	}

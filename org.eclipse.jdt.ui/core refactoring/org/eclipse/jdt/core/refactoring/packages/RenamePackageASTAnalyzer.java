@@ -67,7 +67,6 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 		/*
 		 * only get the first segment
 		 */
-		HackFinder.fixMeLater("how much too restrictive is it?"); 
 		if (newName.indexOf(".") != -1)
 			fFirstNameSegment= newName.substring(0, newName.indexOf("."));
 		else 	
@@ -129,13 +128,6 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 		return true;
 	}
 
-	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
-		//if (methodDeclaration.isNative() && typeUsedAsParameter(methodDeclaration))
-		//	addWarning(fType.getFullyQualifiedName() + " is used as a parameter type for a native method " + new String(methodDeclaration.selector) + " in " + cuFullPath()); 
-		return true;
-	}
-
-
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
@@ -152,7 +144,7 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 	//-----------------------------------------------------------
 	
 	private void addError(AstNode node){
-		addError("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fFirstNameSegment + " is already used.");
+		addError("Possible obscuring problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fFirstNameSegment + " is already used.");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
