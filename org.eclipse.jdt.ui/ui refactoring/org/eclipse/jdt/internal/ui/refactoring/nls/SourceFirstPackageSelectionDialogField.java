@@ -51,9 +51,8 @@ class SourceFirstPackageSelectionDialogField {
 
 	public SourceFirstPackageSelectionDialogField(String sourceLabel, String packageLabel, String browseLabel1,
 		String browseLabel2, String statusHint, String dialogTitle, String dialogMessage, String dialogEmptyMessage,
-		ICompilationUnit cu, IJavaProject root, IDialogFieldListener updateListener, IPackageFragment fragment) {
-		fSourceFolderSelection= new SourceFolderSelectionDialogButtonField(sourceLabel, browseLabel1, root,
-			new SFStringButtonAdapter());
+		ICompilationUnit cu, IDialogFieldListener updateListener, IPackageFragment fragment) {
+		fSourceFolderSelection= new SourceFolderSelectionDialogButtonField(sourceLabel, browseLabel1, 	new SFStringButtonAdapter());
 
 		fPackageSelection= new PackageFragmentSelection(this, packageLabel, browseLabel2, statusHint,
 			new PackageSelectionStringButtonAdapter(this, dialogTitle, dialogMessage, dialogEmptyMessage));

@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -18,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaSourcePackageFragmentRootCompletionProcessor;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -31,13 +37,10 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 	private IPackageFragmentRoot fRoot;
 	private SourceChangeListener fListener;
 	private IDialogFieldListener fUpdateListener;
-	private IJavaProject fProject;
 
-	public SourceFolderSelectionDialogButtonField(String descriptionLabel, String browseLabel, IJavaProject root,
-		final IStringButtonAdapter adapter) {
+	public SourceFolderSelectionDialogButtonField(String descriptionLabel, String browseLabel, IStringButtonAdapter adapter) {
 		super(adapter);
 		setContentAssistProcessor(new JavaSourcePackageFragmentRootCompletionProcessor());
-		fProject= root;
 		setLabelText(descriptionLabel);
 		setButtonLabel(browseLabel);
 		setDialogFieldListener(this);
@@ -48,11 +51,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 	 */
 	public void dialogFieldChanged(DialogField field) {
 		// propagate a textchange to the fragment root of this
-		String rootString= getRootString();
-		String newString= getText();
-		if (!rootString.equals(newString)) {
-			setRootFromString(newString);
-		}
+		setRoot(getRootFromString(getText()));
 	}
 
 	public void setUpdateListener(IDialogFieldListener updateListener) {
@@ -79,17 +78,29 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 	 * 
 	 * @param rootString
 	 */
-	private void setRootFromString(String rootString) {
-		String projectName= getProjectName(rootString);
-		String fragmentRootName= getFragmentRootName(rootString);
-
-		IPackageFragmentRoot root= null;
-		if ((projectName != null) && (fragmentRootName != null)) {
-			if (projectName.equals(fProject.getElementName())) {
-				root= findFragmentRoot(fProject, getFragmentRootName(rootString));
+	private IPackageFragmentRoot getRootFromString(String rootString) {
+		if (rootString.length() == 0) {
+			return null;
+		}
+		IPath path= new Path(rootString);
+		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+		IResource res= workspaceRoot.findMember(path);
+		if (res == null) {
+			return null;
+		}
+		int resType= res.getType();
+		if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
+			IProject proj= res.getProject();
+			if (!proj.isOpen()) {
+				return null;
+			}				
+			IJavaProject jproject= JavaCore.create(proj);
+			IPackageFragmentRoot root= jproject.getPackageFragmentRoot(res);
+			if (root.exists()) {
+				return root;
 			}
 		}
-		setRoot(root);
+		return null;
 	}
 
 	public void setRoot(IPackageFragmentRoot root) {
@@ -97,7 +108,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 
 		if (fRoot != null) {
 			String str= getRootString();
-			if (getText().equals(str) == false) {
+			if (!getText().equals(str)) {
 				setText(str);
 			}
 		} else {
@@ -112,41 +123,6 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 
 	public IPackageFragmentRoot getRoot() {
 		return fRoot;
-	}
-
-	private String getProjectName(String fragmentRootString) {
-		int idx= fragmentRootString.indexOf('/');
-		if (idx == -1) {
-			return fragmentRootString;
-		}
-		return fragmentRootString.substring(0, idx);
-	}
-
-	private String getFragmentRootName(String fragmentRootString) {
-		int idx= fragmentRootString.indexOf('/');
-		if (idx == -1) {
-			return null;
-		}
-		if (idx + 1 < fragmentRootString.length()) {
-			return fragmentRootString.substring(idx + 1);
-		} else {
-			return ""; //$NON-NLS-1$
-		}
-	}
-
-	private IPackageFragmentRoot findFragmentRoot(IJavaProject project, String rootString) {
-		try {
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				IPackageFragmentRoot root= roots[i];
-				if (root.getElementName().equals(rootString)) {
-					return root;
-				}
-			}
-		} catch (CoreException e) {
-			// nothing to do
-		}
-		return null;
 	}
 
 	private String getRootString() {

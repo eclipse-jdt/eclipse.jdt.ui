@@ -87,7 +87,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		};
 
 		ICompilationUnit cu= refactoring.getCu();
-		IJavaProject root= cu.getJavaProject();
 
 		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.path"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package"), //$NON-NLS-1$
@@ -97,7 +96,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.title"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.message"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
-				cu, root, updateListener, refactoring.getAccessorClassPackage());
+				cu, updateListener, refactoring.getAccessorClassPackage());
 
 		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.className"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
@@ -111,7 +110,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.title"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.message"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.emptyMessage"), //$NON-NLS-1$
-				cu, root, updateListener, fRefactoring.getResourceBundlePackage());
+				cu, updateListener, fRefactoring.getResourceBundlePackage());
 
 		fResourceBundleFile= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property_file_name"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
@@ -219,7 +218,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		IJavaSearchScope scope= root != null ? SearchEngine.createJavaSearchScope(new IJavaElement[] { root }) : SearchEngine.createWorkspaceScope();
 		
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), service, IJavaSearchConstants.CLASS, scope);
-		dialog.setIgnoreCase(false);
+		dialog.setIgnoreCase(true);
 		dialog.setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Accessor_Selection")); //$NON-NLS-1$
 		dialog.setMessage(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Choose_the_accessor_file")); //$NON-NLS-1$
 		dialog.setFilter("*Messages"); //$NON-NLS-1$
@@ -267,7 +266,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	 * update the refactoring
 	 */
 	private void validateAll() {
-		updateStatus(new StatusInfo(IStatus.INFO, "")); //$NON-NLS-1$
+		updateStatus(StatusInfo.OK_STATUS);
 		validateSubstitutionPattern();
 
 		validateAccessorClassName();
@@ -358,13 +357,13 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private boolean checkPackageFragment(SourceFirstPackageSelectionDialogField selector, String invalidRoot, String invalidFragment) {
 		IPackageFragmentRoot root= selector.getSelectedFragmentRoot();
-		if ((root == null) || (root.exists() == false)) {
+		if ((root == null) || !root.exists()) {
 			setInvalid(selector, invalidRoot);
 			return false;
 		}
 
 		IPackageFragment fragment= selector.getSelected();
-		if ((fragment == null) || (fragment.exists() == false)) {
+		if ((fragment == null) || !fragment.exists()) {
 			setInvalid(selector, invalidFragment);
 			return false;
 		} else {
