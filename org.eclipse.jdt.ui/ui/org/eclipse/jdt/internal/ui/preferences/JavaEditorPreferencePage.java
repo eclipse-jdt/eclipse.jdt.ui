@@ -182,6 +182,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.FORMAT_JAVADOCS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END)
 	};
@@ -401,6 +402,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.CLOSE_JAVADOCS, true);
 		store.setDefault(CompilationUnitEditor.WRAP_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.ADD_JAVADOC_TAGS, true);
+		store.setDefault(CompilationUnitEditor.FORMAT_JAVADOCS, true);
 		
 		store.setDefault(AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, true);
 	}
@@ -897,6 +899,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);
 		createDependency(button, fAddJavaDocTagsButton);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.FORMAT_JAVADOCS, 1);
 	
 		return composite;
 	}
