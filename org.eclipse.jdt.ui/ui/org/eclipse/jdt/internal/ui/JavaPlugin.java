@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -73,6 +75,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumen
 import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptorComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -366,8 +369,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 2.1
 	 */
 	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
-		if (fJavaEditorTextHoverDescriptors == null)
+		if (fJavaEditorTextHoverDescriptors == null) {
 			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
+			Arrays.sort(fJavaEditorTextHoverDescriptors, new JavaEditorTextHoverDescriptorComparator());
+		}
+		
 		return fJavaEditorTextHoverDescriptors;
 	} 
 
