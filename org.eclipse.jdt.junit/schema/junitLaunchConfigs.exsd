@@ -72,7 +72,7 @@
 &lt;p&gt;
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.junit.junitLaunchConfigs&quot;&gt;
-  &lt;launchConfigType configTypeID=&quot;com.example.JunitLaunchConfig&quot;&gt;
+  &lt;launchConfigType configTypeID=&quot;com.example.JunitLaunchConfig&quot;/&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
