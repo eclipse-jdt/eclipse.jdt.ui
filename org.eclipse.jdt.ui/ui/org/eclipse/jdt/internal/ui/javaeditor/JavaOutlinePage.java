@@ -54,6 +54,7 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -630,6 +631,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private GotoErrorAction fPreviousError;
 	private GotoErrorAction fNextError;
 	private TextOperationAction fShowJavadoc;
+	private TextOperationAction fUndo;
+	private TextOperationAction fRedo;
 	
 	private OpenAction fOpenAction;
 	private CompositeActionGroup fActionGroups;
@@ -650,6 +653,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
+		fUndo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.UNDO);
+		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
 		
 		fTogglePresentation.setEditor(editor);
 		fToggleTextHover.setEditor(editor);
@@ -769,6 +774,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
 		
 		fActionGroups.fillActionBars(bars);
 		bars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpenAction);
