@@ -121,6 +121,10 @@ public class NLSHolder {
 				return "\\\'";//$NON-NLS-1$
 			case '\\' :
 				return "\\\\";//$NON-NLS-1$
+			case '!':
+				return "\\!";//$NON-NLS-1$
+			case '#':
+				return "\\#";//$NON-NLS-1$
 			default: 
 				if (((c < 0x0020) || (c > 0x007e))){
 					return new StringBuffer()
