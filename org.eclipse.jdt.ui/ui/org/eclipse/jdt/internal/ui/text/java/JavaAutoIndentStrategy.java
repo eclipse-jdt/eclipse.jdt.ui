@@ -556,6 +556,23 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * @param document
+	 */
+	private static void installJavaStuff(Document document) {
+		String[] types= new String[] {
+									  IJavaPartitions.JAVA_DOC,
+									  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+									  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+									  IJavaPartitions.JAVA_STRING,
+									  IJavaPartitions.JAVA_CHARACTER,
+									  IDocument.DEFAULT_CONTENT_TYPE
+		};
+		DefaultPartitioner partitioner= new DefaultPartitioner(new FastJavaPartitionScanner(), types);
+		partitioner.connect(document);
+		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
+	}
 
 	private static void smartPaste(IDocument document, DocumentCommand command) {
 		try {
@@ -567,6 +584,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int refPos= indenter.findReferencePosition(offset);
 			if (refPos == JavaHeuristicScanner.NOT_FOUND)
 				return;
+			int peerPos= getPeerPosition(document, command);
+			peerPos= indenter.findReferencePosition(peerPos);
+			refPos= Math.min(refPos, peerPos);
+			
 			IRegion region= document.getLineInformationOfOffset(refPos);
 			int lineOffset= region.getOffset();
 			
@@ -617,17 +638,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner);
-			String[] types= new String[] {
-									   IJavaPartitions.JAVA_DOC,
-									   		IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
-									   		IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
-									   		IJavaPartitions.JAVA_STRING,
-									   		IJavaPartitions.JAVA_CHARACTER,
-									   		IDocument.DEFAULT_CONTENT_TYPE
-			};
-			DefaultPartitioner partitioner= new DefaultPartitioner(new FastJavaPartitionScanner(), types);
-			partitioner.connect(temp);
-			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
+			installJavaStuff(temp);
 			
 			int lines= temp.getNumberOfLines();
 			for (int l= document.computeNumberOfLines(prefix); l < lines; l++) { // we don't change the number of lines while adding indents
@@ -666,7 +677,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			}
 			
 			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
-			partitioner.disconnect();
 
 			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length() - afterContent.length());
 			
@@ -678,7 +688,133 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	}
 
-	private boolean isLineDelimiter(IDocument document, String text) {
+    private static int getPeerPosition(IDocument document, DocumentCommand command) {
+    	/*
+    	 * Search for scope closers in the pasted text and find their opening peers
+    	 * in the document. 
+    	 */
+    	Document pasted= new Document(command.text);
+    	installJavaStuff(pasted);
+    	int firstPeer= command.offset;
+    	
+    	JavaHeuristicScanner pScanner= new JavaHeuristicScanner(pasted);
+    	JavaHeuristicScanner dScanner= new JavaHeuristicScanner(document);
+    	
+    	// add scope relevant after context to peer search
+    	int afterToken= dScanner.nextToken(command.offset + command.length, JavaHeuristicScanner.UNBOUND);
+    	try {
+			switch (afterToken) {
+			case Symbols.TokenRBRACE:
+				pasted.replace(pasted.getLength(), 0, "}"); //$NON-NLS-1$
+				break;
+			case Symbols.TokenRPAREN:
+				pasted.replace(pasted.getLength(), 0, ")"); //$NON-NLS-1$
+				break;
+			case Symbols.TokenRBRACKET:
+				pasted.replace(pasted.getLength(), 0, "]"); //$NON-NLS-1$
+				break;
+			}
+		} catch (BadLocationException e) {
+			// cannot happen
+			Assert.isTrue(false);
+		}
+    	
+    	int pPos= 0; // paste text position (increasing from 0)
+    	int dPos= Math.max(0, command.offset - 1); // document position (decreasing from paste offset)
+    	while (true) {
+    		int token= pScanner.nextToken(pPos, JavaHeuristicScanner.UNBOUND);
+   			pPos= pScanner.getPosition();
+    		switch (token) {
+    			case Symbols.TokenLBRACE:
+    			case Symbols.TokenLBRACKET:
+    			case Symbols.TokenLPAREN:
+    				pPos= skipScope(pScanner, pPos, token);
+    				if (pPos == JavaHeuristicScanner.NOT_FOUND)
+    					return firstPeer;
+    				break; // closed scope -> keep searching
+    			case Symbols.TokenRBRACE:
+    				int peer= dScanner.findOpeningPeer(dPos, '{', '}');
+    				dPos= peer - 1; 
+    				if (peer == JavaHeuristicScanner.NOT_FOUND)
+    					return firstPeer;
+    				firstPeer= peer;
+    				break; // keep searching
+    			case Symbols.TokenRBRACKET:
+    				peer= dScanner.findOpeningPeer(dPos, '[', ']');
+    				dPos= peer - 1; 
+    				if (peer == JavaHeuristicScanner.NOT_FOUND)
+    					return firstPeer;
+    				firstPeer= peer;
+    				break; // keep searching
+    			case Symbols.TokenRPAREN:
+    				peer= dScanner.findOpeningPeer(dPos, '(', ')');
+    				dPos= peer - 1; 
+    				if (peer == JavaHeuristicScanner.NOT_FOUND)
+    					return firstPeer;
+    				firstPeer= peer;
+    				break; // keep searching
+    			case Symbols.TokenCASE:
+    			case Symbols.TokenDEFAULT:
+    				JavaIndenter indenter= new JavaIndenter(document, dScanner);
+    				peer= indenter.findReferencePosition(dPos, false, false, false, true);
+    				if (peer == JavaHeuristicScanner.NOT_FOUND)
+    					return firstPeer;
+    				firstPeer= peer;
+    				break; // keep searching
+    				
+    			case Symbols.TokenEOF:
+    				return firstPeer;
+    			default:
+    				// keep searching
+    		}
+    	}
+    }
+
+    /**
+     * Skips the scope opened by <code>token</code> in <code>document</code>,
+     * returns either the position of the 
+     * @param pos
+     * @param token
+     * @return
+     */
+    private static int skipScope(JavaHeuristicScanner scanner, int pos, int token) {
+    	int openToken= token;
+    	int closeToken;
+    	switch (token) {
+    		case Symbols.TokenLPAREN:
+    			closeToken= Symbols.TokenRPAREN;
+    			break;
+    		case Symbols.TokenLBRACKET:
+    			closeToken= Symbols.TokenRBRACKET;
+    			break;
+    		case Symbols.TokenLBRACE:
+    			closeToken= Symbols.TokenRBRACE;
+    			break;
+    		default:
+    			Assert.isTrue(false);
+    			return -1; // dummy
+    	}
+    	
+    	int depth= 1;
+    	int p= pos;
+
+    	while (true) {
+    		int tok= scanner.nextToken(p, JavaHeuristicScanner.UNBOUND);
+    		p= scanner.getPosition();
+    		
+    		if (tok == openToken) {
+    			depth++;
+    		} else if (tok == closeToken) {
+    			depth--;
+    			if (depth == 0)
+    				return p + 1;
+    		} else if (tok == Symbols.TokenEOF) {
+    			return JavaHeuristicScanner.NOT_FOUND;
+    		}
+    	}
+    }
+
+    private boolean isLineDelimiter(IDocument document, String text) {
 		String[] delimiters= document.getLegalLineDelimiters();
 		if (delimiters != null)
 			return TextUtilities.equals(delimiters, text) > -1;
