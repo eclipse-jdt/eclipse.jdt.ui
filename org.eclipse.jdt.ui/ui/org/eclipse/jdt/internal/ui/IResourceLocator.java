@@ -26,8 +26,9 @@ public interface IResourceLocator {
 	 * in an external archive).
 	 *
 	 * @param	element	the element for which the resource is located
+	 * @return the underlying resource
 	 * @exception JavaModelException if the element does not exist or if an
-	 *		exception occurrs while accessing its underlying resource
+	 *		exception occurs while accessing its underlying resource
 	 * @see org.eclipse.jdt.core.IJavaElement#getUnderlyingResource()
 	 */
 	IResource getUnderlyingResource(Object element) throws JavaModelException;
@@ -45,8 +46,9 @@ public interface IResourceLocator {
 	 * <code>IFields</code>, etc.
 	 *
 	 * @param	element	the element for which the resource is located
+	 * @return the corresponding resource
 	 * @exception JavaModelException if the element does not exist or if an
-	 *		exception occurrs while accessing its corresponding resource
+	 *		exception occurs while accessing its corresponding resource
 	 * @see org.eclipse.jdt.core.IJavaElement#getCorrespondingResource()
 	 */
 	IResource getCorrespondingResource(Object element) throws JavaModelException;
@@ -56,8 +58,9 @@ public interface IResourceLocator {
 	 * is returned. Clients define the helper resource as needed.
 	 *
 	 * @param	element	the element for which the resource is located
+	 * @return the containing resource
 	 * @exception JavaModelException if the element does not exist or if an
-	 *		exception occurrs while accessing its containing resource
+	 *		exception occurs while accessing its containing resource
 	 */
 	IResource getContainingResource(Object element) throws JavaModelException;
 }

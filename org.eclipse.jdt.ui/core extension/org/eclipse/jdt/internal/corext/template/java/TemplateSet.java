@@ -99,7 +99,9 @@ public class TemplateSet {
 			try {
 				if (stream != null)
 					stream.close();
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				// just exit
+			}
 		}		
 	}
 	
@@ -210,8 +212,8 @@ public class TemplateSet {
 			} catch (MissingResourceException e) {
 				return '!' + key + '!';
 			}
-		} else
-			return JavaTemplateMessages.getString(key); // default messages
+		}
+		return JavaTemplateMessages.getString(key); // default messages
 	}
 
 	protected String validateTemplate(Template template) {
@@ -238,6 +240,8 @@ public class TemplateSet {
 	/**
 	 * Convenience method for saving to a file.
 	 * 
+	 * @param file the file
+	 * @throws CoreException in case the save operation fails
 	 * @see #saveToStream(OutputStream)
 	 */
 	public void saveToFile(File file) throws CoreException {
@@ -254,12 +258,17 @@ public class TemplateSet {
 			try {
 				if (stream != null)
 					stream.close();
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				// just exit
+			}
 		}
 	}
 		
 	/**
 	 * Saves the template set as XML.
+	 * 
+	 * @param stream the stream
+	 * @throws CoreException in case the save operation fails
 	 */
 	public void saveToStream(OutputStream stream) throws CoreException {
 		try {
@@ -330,6 +339,8 @@ public class TemplateSet {
 
 	/**
 	 * Adds a template to the set.
+	 * 
+	 * @param template the template to add to the set
 	 */
 	public void add(Template template) {
 		if (exists(template))
@@ -351,6 +362,8 @@ public class TemplateSet {
 	
 	/**
 	 * Removes a template to the set.
+	 * 
+	 * @param template the template to remove from the set
 	 */	
 	public void remove(Template template) {
 		fTemplates.remove(template);
@@ -365,6 +378,8 @@ public class TemplateSet {
 	
 	/**
 	 * Returns all templates.
+	 * 
+	 * @return all templates
 	 */
 	public Template[] getTemplates() {
 		return (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
@@ -372,6 +387,9 @@ public class TemplateSet {
 	
 	/**
 	 * Returns all templates with a given name.
+	 * 
+	 * @param name the template name
+	 * @return the templates with the given name
 	 */
 	public Template[] getTemplates(String name) {
 		ArrayList res= new ArrayList();
@@ -386,6 +404,9 @@ public class TemplateSet {
 	
 	/**
 	 * Returns the first templates with the given name.
+	 * 
+	 * @param name the template name
+	 * @return the first template with the given name
 	 */
 	public Template getFirstTemplate(String name) {
 		for (Iterator iterator= fTemplates.iterator(); iterator.hasNext();) {

@@ -89,22 +89,22 @@ public class JavaDocContext extends CompilationUnitContext {
 		
 				return start;
 				
-			} else {
+			} 
 
-				int start= getCompletionOffset();
-				int end= getCompletionOffset() + getCompletionLength();
-
-				while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
-					start--;
-				
-				while (start != end && Character.isWhitespace(document.getChar(start)))
-					start++;
-				
-				if (start == end)
-					start= getCompletionOffset();	
-				
-				return start;					
-			}
+			int start= getCompletionOffset();
+			int end= getCompletionOffset() + getCompletionLength();
+			
+			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+				start--;
+			
+			while (start != end && Character.isWhitespace(document.getChar(start)))
+				start++;
+			
+			if (start == end)
+				start= getCompletionOffset();	
+			
+			return start;					
+			
 
 		} catch (BadLocationException e) {
 			return getCompletionOffset();	

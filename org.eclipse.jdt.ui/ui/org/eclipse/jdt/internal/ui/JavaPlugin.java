@@ -266,7 +266,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Returns an array of all instanciated editors. 
+	 * Returns an array of all instanciated editors.
+	 * @return the list of instantiated editors
 	 */
 	public static IEditorPart[] getInstanciatedEditors() {
 		List result= new ArrayList(0);
@@ -335,6 +336,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * ({@link org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#isNavigationTarget(Annotation)})
 	 * that still depends on it.
 	 * </p>
+	 * @param descriptor the plug-in descriptor
 	 * @deprecated
 	 */
 	public JavaPlugin(IPluginDescriptor descriptor) {
@@ -530,7 +532,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/** 
-	 * Returns the mockup preference store for firing events and registering listeners on project setting changes. Temporary solution.
+	 * Returns the mock-up preference store for firing events and registering listeners on project setting changes. Temporary solution.
+	 * 
+	 * @return the mock-up preference store
 	 */
 	public MockupPreferenceStore getMockupPreferenceStore() {
 		if (fMockupPreferenceStore == null)
@@ -554,6 +558,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the AST provider.
 	 * 
+	 * @return the AST provider
 	 * @since 3.0
 	 */
 	public synchronized ASTProvider getASTProvider() {
@@ -598,10 +603,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 				if (!fJavaEditorTextHoverDescriptors[i].getId().startsWith(JavaUI.ID_PLUGIN)) {
 					if (problemHoverIndex == -1 || annotationHoverIndex == -1)
 						continue;
-					else {
-						last= i - 1;
-						break;
-					}
+					last= i - 1;
+					break;
 				}
 				if (first == -1)
 					first= i;
@@ -667,6 +670,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Creates the Java plugin standard groups in a context menu.
+	 * 
+	 * @param menu the menu manager to be populated
 	 */
 	public static void createStandardGroups(IMenuManager menu) {
 		if (!menu.isEmpty())
@@ -776,7 +781,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fCodeTemplateStore;
 	}
 	
-	/**
+	/*
 	 * @see AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {

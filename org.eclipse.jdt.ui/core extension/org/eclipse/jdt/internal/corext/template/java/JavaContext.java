@@ -86,6 +86,8 @@ public class JavaContext extends CompilationUnitContext {
 	
 	/**
 	 * Returns the indentation level at the position of code completion.
+	 * 
+	 * @return the indentation leven at the position of the code completion
 	 */
 	private int getIndentation() {
 		int start= getStart();
@@ -607,7 +609,15 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	/**
-	 * Evaluates a 'java' template in thecontext of a compilation unit
+	 * Evaluates a 'java' template in the context of a compilation unit
+	 * 
+	 * @param template the template to be evaluated
+	 * @param compilationUnit the compilation unit in which to evaluate the template
+	 * @param position the position inside the compilation unit for which to evaluate the template
+	 * @return the evaluated template
+	 * @throws CoreException in case the template is of an unknown context type
+	 * @throws BadLocationException in case the position is invalid in the compilation unit
+	 * @throws TemplateException in case the evaluation fails
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 

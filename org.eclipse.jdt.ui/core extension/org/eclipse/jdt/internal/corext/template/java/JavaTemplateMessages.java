@@ -20,6 +20,7 @@ class JavaTemplateMessages {
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
 	private JavaTemplateMessages() {
+		// nothing to do
 	}
 
 	public static String getString(String key) {
@@ -33,7 +34,9 @@ class JavaTemplateMessages {
 	/**
 	 * Gets a string from the resource bundle and formats it with the argument
 	 * 
-	 * @param key	the string used to get the bundle value, must not be null
+	 * @param key the string used to get the bundle value, must not be null
+	 * @param arg the arguments for the format string
+	 * @return the formatted string
 	 */
 	public static String getFormattedString(String key, Object arg) {
 		return MessageFormat.format(getString(key), new Object[] { arg });
@@ -42,6 +45,10 @@ class JavaTemplateMessages {
 
 	/**
 	 * Gets a string from the resource bundle and formats it with arguments
+	 * 
+	 * @param key the string used to get the bundle value, must not be null
+	 * @param args the arguments for the format string
+	 * @return the formatted string
 	 */	
 	public static String getFormattedString(String key, Object[] args) {
 		return MessageFormat.format(getString(key), args);

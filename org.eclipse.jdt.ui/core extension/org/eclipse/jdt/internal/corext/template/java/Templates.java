@@ -36,7 +36,9 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	/**
 	 * Returns an instance of templates.
 	 * 
-	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()}
+	 * @return an instance of templates
+	 * @deprecated As of 3.0, replaced by
+	 *             {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()}
 	 */
 	public static Templates getInstance() {
 		if (fgTemplates == null)
@@ -68,6 +70,8 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	
 	/**
 	 * Resets the template set.
+	 * 
+	 * @throws CoreException in case the reset operation fails
 	 */
 	public void reset() throws CoreException {
 		clear();
@@ -76,6 +80,8 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Resets the template set with the default templates.
+	 * 
+	 * @throws CoreException in case the restore operation fails
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
@@ -84,6 +90,8 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Saves the template set.
+	 * 
+	 * @throws CoreException in case the save operation fails
 	 */
 	public void save() throws CoreException {					
 		saveToFile(getTemplateFile());

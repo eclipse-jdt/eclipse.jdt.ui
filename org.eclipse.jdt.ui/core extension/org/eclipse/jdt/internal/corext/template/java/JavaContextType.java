@@ -71,8 +71,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    	String[] arrayTypes= ((JavaContext) context).guessArrayTypes();
 	    	if (arrayTypes != null)
 	    		return arrayTypes;
-	    	else
-	    		return super.resolveAll(context);
+	    	return super.resolveAll(context);
 	    }
 	    
 		/*
@@ -147,8 +146,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    	String[] collections= ((JavaContext) context).guessCollections();
 	    	if (collections.length > 0)
 	    		return collections;
-	    	else
-	    		return super.resolveAll(context);
+	    	return super.resolveAll(context);
 		}
 	}
 
