@@ -18,27 +18,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -50,23 +47,20 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.JavaModel;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
-import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -158,6 +152,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			IType type= (IType)selection.getFirstElement();
 			if (type.getFields().length == 0)
 				return false;
+			if (type.getCompilationUnit() == null)
+				return false;
 			if (JavaModelUtil.isEditable(type.getCompilationUnit()))
 				return true;
 		}
@@ -168,19 +164,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
 	}
 	
-	private void run(IType type)throws CoreException{
+	private void run(IType type) throws CoreException{
 		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
 		ITreeContentProvider cp= new AddGetterSetterContentProvider(type);
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
-		String key= "&Select Methods to Create in Type \"{0}\":";
-		String message= MessageFormat.format(key, new Object[]{JavaElementUtil.createSignature(type)});
+		String message= ActionMessages.getFormattedString("AddGetterSetterAction.dialog.title", JavaElementUtil.createSignature(type));//$NON-NLS-1$
 		dialog.setMessage(message);
 		dialog.setValidator(createValidator());
 		dialog.setContainerMode(true);
 		dialog.setSize(60, 18);
 		dialog.setInput(type);
+		dialog.setExpandedElements(type.getFields());
 		dialog.open();
 		Object[] result= dialog.getResult();
 		if (result == null)
@@ -195,11 +191,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			public IStatus validate(Object[] selection) {
 				int count= countSelectedMethods(selection);
 				if (count == 0)
-					return new StatusInfo(IStatus.ERROR, "No methods selected"); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 				if (count == 1)	
-					return new StatusInfo(IStatus.INFO, "1 method selected");
-				else
-					return new StatusInfo(IStatus.INFO, count + " methods selected");
+					return new StatusInfo(IStatus.INFO, ActionMessages.getString("AddGetterSetterAction.one_selected")); //$NON-NLS-1$
+					
+				String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", String.valueOf(count));//$NON-NLS-1$
+				return new StatusInfo(IStatus.INFO, message);
+					
 			}
 		};
 	}
@@ -240,9 +238,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	private static NameProposer createNameProposer(){
-		String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
-		String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
-		return new NameProposer(prefixes, suffixes);
+		return new NameProposer(getGetterSetterPrefixes(), getGetterSetterSuffixes());
+	}
+	
+	private static String[] getGetterSetterPrefixes(){
+		return CodeGenerationPreferencePage.getGetterStetterPrefixes();
+	}
+	
+	private static String[] getGetterSetterSuffixes(){
+		return CodeGenerationPreferencePage.getGetterStetterSuffixes();
 	}
 	
 	private void run(IField[] getterFields, IField[] setterFields) throws CoreException{
@@ -488,11 +492,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					return super.getText(element);
 				GetterSetterEntry entry= (GetterSetterEntry)element;
 				if (entry.isGetterEntry)
-					return fNameProposer.proposeGetterName(entry.field);
+					return fNameProposer.proposeGetterSignature(entry.field);
 				else
-					return fNameProposer.proposeSetterName(entry.field.getElementName());
+					return fNameProposer.proposeSetterSignature(entry.field);
 			} catch (JavaModelException e) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		}
 
@@ -512,11 +516,18 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public AddGetterSetterContentProvider(IType type) throws JavaModelException {
 			IField[] fields= type.getFields();
 			fGetterSetterEntries= new HashMap();
+			String[] prefixes= AddGetterSetterAction.getGetterSetterPrefixes();
+			String[] suffixes= AddGetterSetterAction.getGetterSetterSuffixes();
 			for (int i= 0; i < fields.length; i++) {
-				GetterSetterEntry[] entries= new GetterSetterEntry[]{
-						new GetterSetterEntry(fields[i], true),
-						new GetterSetterEntry(fields[i], false)};
-				fGetterSetterEntries.put(fields[i], entries);
+				List l= new ArrayList(2);
+				if (GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
+					l.add(new GetterSetterEntry(fields[i], true));
+					
+				if (GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
+					l.add(new GetterSetterEntry(fields[i], false));	
+
+				if (! l.isEmpty())
+					fGetterSetterEntries.put(fields[i], (GetterSetterEntry[]) l.toArray(new GetterSetterEntry[l.size()]));
 			}
 		}
 		
@@ -552,9 +563,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 */
 		public Object[] getElements(Object inputElement) {
 			try {
-				if (inputElement instanceof IType)
-					return ((IType)inputElement).getFields();
-				else return EMPTY;
+				IType type= (IType)inputElement;
+				IField[] fields= type.getFields();
+				List fieldList= new ArrayList(fields.length);
+				for (int i = 0; i < fields.length; i++) {
+					if (fGetterSetterEntries.containsKey(fields[i]))
+						fieldList.add(fields[i]);
+				}
+				return (IField[]) fieldList.toArray(new IField[fieldList.size()]);
 			} catch (JavaModelException e) {
 				return EMPTY;
 			}
