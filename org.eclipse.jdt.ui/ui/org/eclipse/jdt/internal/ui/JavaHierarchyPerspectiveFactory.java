@@ -9,6 +9,7 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.IPlaceholderFolderLayout;
 
 import org.eclipse.search.ui.SearchUI;
 
@@ -28,6 +29,15 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY); 
+		folder.addPlaceholder(IPageLayout.ID_OUTLINE);
+		folder.addPlaceholder(JavaUI.ID_PACKAGES);
+		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
+		
+		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
+		outputfolder.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		outputfolder.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);

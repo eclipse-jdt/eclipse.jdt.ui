@@ -8,16 +8,17 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.ui.IPlaceholderFolderLayout;
 
 import org.eclipse.search.ui.SearchUI;
 
+import org.eclipse.debug.ui.IDebugUIConstants;
+
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	
@@ -69,6 +70,12 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		String relativePartId= IPageLayout.ID_EDITOR_AREA;
 		int relativePos= IPageLayout.LEFT;
 		
+		IPlaceholderFolderLayout placeHolderLeft= layout.createPlaceholderFolder("left", IPageLayout.LEFT, (float)0.25, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY); 
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
+		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
+		
 		if (shouldShowProjectsView()) {
 			layout.addView(JavaPlugin.ID_PROJECTS_VIEW, IPageLayout.LEFT, (float)0.25, IPageLayout.ID_EDITOR_AREA);
 			relativePartId= JavaPlugin.ID_PROJECTS_VIEW;
@@ -81,11 +88,23 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		}
 		layout.addView(JavaPlugin.ID_TYPES_VIEW, relativePos, (float)0.33, relativePartId);
 		layout.addView(JavaPlugin.ID_MEMBERS_VIEW, IPageLayout.BOTTOM, (float)0.50, JavaPlugin.ID_TYPES_VIEW);
+		
+		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		placeHolderBottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 	}
 
 	private void createHorizontalLayout(IPageLayout layout) {
 		String relativePartId= IPageLayout.ID_EDITOR_AREA;		
 		int relativePos= IPageLayout.TOP;
+		
+		IPlaceholderFolderLayout placeHolderLeft= layout.createPlaceholderFolder("left", IPageLayout.LEFT, (float)0.25, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY); 
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
+		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
+		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
 		
 		if (shouldShowProjectsView()) {
 			layout.addView(JavaPlugin.ID_PROJECTS_VIEW, IPageLayout.TOP, (float)0.25, IPageLayout.ID_EDITOR_AREA);
@@ -99,6 +118,12 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		}
 		layout.addView(JavaPlugin.ID_TYPES_VIEW, relativePos, (float)0.33, relativePartId);
 		layout.addView(JavaPlugin.ID_MEMBERS_VIEW, IPageLayout.RIGHT, (float)0.50, JavaPlugin.ID_TYPES_VIEW);
+		
+		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		placeHolderBottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 	}
 	
 	private boolean shouldShowProjectsView() {
