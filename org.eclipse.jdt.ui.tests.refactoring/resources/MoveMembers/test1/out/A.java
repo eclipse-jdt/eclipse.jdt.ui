@@ -1,4 +1,5 @@
 package p;
-import java.util.List;
-public class A{
+import java.util.Set;
+public class A {
+	public static Set set;
 }

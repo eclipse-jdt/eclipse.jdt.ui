@@ -766,7 +766,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			return;
 		}
 		
-		// First update references in moved members can extract the source.
+		// First update references in moved members, in order to extract the source.
 		String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
 		pm.worked(1);
 		if (status.hasFatalError())
@@ -840,10 +840,12 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private String[] getUpdatedMemberSource(RefactoringStatus status, BodyDeclaration[] members, ITypeBinding target) throws CoreException {
 		List typeRefs= new ArrayList();
 		boolean targetNeedsSourceImport= false;
+		boolean isSourceNotTarget= fSource != fTarget;
 		// update references in moved members
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			typeRefs.addAll(TypeReferenceFinder.perform(declaration));
+			if (isSourceNotTarget)
+				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
 			if (getDeclaringType().isInterface() && ! fDestinationType.isInterface()) {
@@ -867,11 +869,14 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			status.merge(analyzer.getStatus());
 		}
 		// Adjust imports
-		if (targetNeedsSourceImport && (fTarget != fSource))
+		if (targetNeedsSourceImport && isSourceNotTarget) {
 			fTarget.getImportRewrite().addImport(fSourceBinding);
-		for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
-			ITypeBinding binding= (ITypeBinding)iter.next();
-			fTarget.getImportRewrite().addImport(binding);
+		}
+		if (isSourceNotTarget) {
+			for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
+				ITypeBinding binding= (ITypeBinding) iter.next();
+				fTarget.getImportRewrite().addImport(binding);
+			}
 		}
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
@@ -903,6 +908,8 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			fSource.getASTRewrite().remove(declaration, delete);
+			if (fSource != fTarget)
+				fSource.getImportRemover().registerRemovedNode(declaration);
 			ASTNode node= fTarget.getASTRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
 			List container= containerRewrite.getRewrittenList();
 			int insertionIndex= ASTNodes.getInsertionIndex((BodyDeclaration) node, container);
