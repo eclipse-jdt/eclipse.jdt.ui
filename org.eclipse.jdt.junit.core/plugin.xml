@@ -210,8 +210,8 @@
 		point="org.eclipse.ui.actionDefinitions">
 		<actionDefinition
 			id="org.eclipse.jdt.junit.reruntest"
-			name= "Rerun Last Test"
-			description="Rerun the last JUnit test"
+			name= "%Action.rerun.label" 
+			description="%Action.rerun.description"
 		/>
 	</extension>
 </plugin>
