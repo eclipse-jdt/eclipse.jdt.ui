@@ -33,8 +33,11 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -118,33 +121,30 @@ public class ASTNodeSearchUtil {
 			node= analyzer.getLastCoveringNode().getParent();
 		else if (node == null && analyzer.getLastCoveringNode() instanceof ConstructorInvocation)
 			node= analyzer.getLastCoveringNode().getParent();
-			
-		if (node != null && node.getParent() instanceof MethodDeclaration){
-			MethodDeclaration md= (MethodDeclaration)node.getParent();
-			if (md.isConstructor() && 
-			    md.getBody() != null &&
-			    md.getBody().statements().size() > 0 &&
-			    md.getBody().statements().get(0) instanceof ConstructorInvocation &&
-			    ((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
+		
+		if (node == null)	
+			return null;
+		
+		ASTNode parentNode= node.getParent();
+
+		if (parentNode instanceof MethodDeclaration){
+			MethodDeclaration md= (MethodDeclaration)parentNode;
+			if (!(node instanceof SimpleName)
+				&& md.isConstructor()
+			    && md.getBody() != null
+			    && md.getBody().statements().size() > 0 
+			    &&(md.getBody().statements().get(0) instanceof ConstructorInvocation || md.getBody().statements().get(0) instanceof SuperConstructorInvocation)
+			    &&((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
 			return (ASTNode)md.getBody().statements().get(0);
 		}
-		if (node != null && node.getParent() instanceof MethodDeclaration){
-			MethodDeclaration md= (MethodDeclaration)node.getParent();
-			if (md.isConstructor() && 
-			    md.getBody() != null &&
-			    md.getBody().statements().size() > 0 &&
-			    md.getBody().statements().get(0) instanceof SuperConstructorInvocation &&
-			    ((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
-			    
-			return (ASTNode)md.getBody().statements().get(0);
+
+		if (parentNode instanceof SuperConstructorInvocation){
+			if (parentNode.getLength() == length + 1)
+				return parentNode;
 		}
-		if (node != null && node.getParent() instanceof SuperConstructorInvocation){
-			if (node.getParent().getLength() == length + 1)
-				return node.getParent();
-		}
-		if (node != null && node.getParent() instanceof ConstructorInvocation){
-			if (node.getParent().getLength() == length + 1)
-				return node.getParent();
+		if (parentNode instanceof ConstructorInvocation){
+			if (parentNode.getLength() == length + 1)
+				return parentNode;
 		}
 		return node;
 	}
@@ -214,12 +214,12 @@ public class ASTNodeSearchUtil {
 		return getNameNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
 	}
 
-	public static ASTNode getPackageDeclarationNode(IPackageDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
-		return findNode(reference.getSourceRange(), cuNode);
+	public static PackageDeclaration getPackageDeclarationNode(IPackageDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
+		return (PackageDeclaration) findNode(reference.getSourceRange(), cuNode);
 	}
 
-	public static ASTNode getImportDeclarationNode(IImportDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
-		return findNode(reference.getSourceRange(), cuNode);
+	public static ImportDeclaration getImportDeclarationNode(IImportDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
+		return (ImportDeclaration) findNode(reference.getSourceRange(), cuNode);
 	}
 
 	public static ASTNode[] getImportNodes(IImportContainer reference, CompilationUnit cuNode) throws JavaModelException {
@@ -231,12 +231,12 @@ public class ASTNodeSearchUtil {
 		return result;
 	}
 
-	public static ASTNode getInitializerNode(IInitializer reference, CompilationUnit cuNode) throws JavaModelException {
-		ASTNode node= findNode(reference.getSourceRange(), cuNode);
+	public static Initializer getInitializerNode(IInitializer initializer, CompilationUnit cuNode) throws JavaModelException {
+		ASTNode node= findNode(initializer.getSourceRange(), cuNode);
 		if (node instanceof Initializer)
-			return node;
+			return (Initializer) node;
 		if (node instanceof Block && node.getParent() instanceof Initializer)
-			return node.getParent();
+			return (Initializer) node.getParent();
 		return null;
 	}
 	
