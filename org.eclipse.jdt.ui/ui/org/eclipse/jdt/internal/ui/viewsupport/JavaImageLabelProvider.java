@@ -8,13 +8,13 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.ui.ISharedImages;
 
-import org.eclipse.jdt.core.Flags;
+import org.eclipse.ui.model.IWorkbenchAdapter;import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -157,18 +157,51 @@ public class JavaImageLabelProvider {
 					
 				case IJavaElement.JAVA_PROJECT: 
 					IJavaProject jp= (IJavaProject)element;
-					if (jp.getProject().isOpen())
+					if (jp.getProject().isOpen()) {
+						// fix: 1GF6CDH: ITPJUI:ALL - Packages view doesn't show the nature decoration
+						if (showOverlayIcons()) {
+							String imageId= getManagedId(jp);
+							if (imageId != null)
+								return imageId;
+						}
+						// end fix.
 						return ISharedImages.IMG_OBJ_PROJECT;
+					}
 					return ISharedImages.IMG_OBJ_PROJECT_CLOSED;
 			}
 			
 			Assert.isTrue(false, "not image for this JavaElement Type");
 			return "";
 		
-		} catch (JavaModelException x) {
+		} catch (CoreException x) {
 			return JavaPluginImages.IMG_OBJS_GHOST;
 		}
 	}
+	// 1GF6CDH: ITPJUI:ALL - Packages view doesn't show the nature decoration
+	public String createBaseImageId(IJavaProject javaProject) throws CoreException {
+		IProject project=javaProject.getProject();
+		String[] natures= project.getDescription().getNatureIds();
+		if (natures.length > 0)
+			return ISharedImages.IMG_OBJ_PROJECT+natures[0];
+		return ISharedImages.IMG_OBJ_PROJECT;
+	}
+	
+	public String getManagedId(IJavaProject javaProject) throws CoreException {
+		String id= createBaseImageId(javaProject);
+		if (fIconManager.isManaged(id))
+			return id;
+		IProject project=javaProject.getProject();
+		IWorkbenchAdapter adapter= (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
+		if (adapter != null) {
+			ImageDescriptor desc= adapter.getImageDescriptor(project);
+			if (desc != null) {
+				fIconManager.manage(id, desc);
+				return id;
+			}
+		}
+		return null;
+	}
+	// end fix.
 
 	/**
 	 * Returns the icon for a given Java elements. The icon depends on the element type

@@ -100,11 +100,16 @@ public class OverlayIconManager {
 		registry.put(key.getKey()+fSizeKey, icon);
 	}
 	
-	private ImageDescriptor getBaseImageDescriptor(String key) {
+	private static ImageDescriptor getBaseImageDescriptor(String key) {
 		return (ImageDescriptor)fgBaseImageDescriptors.get(key);
 	}
 	
-	private static void manage(String key, ImageDescriptor descriptor) {
+	// fix: 1GF6CDH: ITPJUI:ALL - Packages view doesn't show the nature decoration
+	public static void manage(String key, ImageDescriptor descriptor) {
 		fgBaseImageDescriptors.put(key, descriptor);
+	}
+	
+	public static boolean isManaged(String key) {
+		return fgBaseImageDescriptors.containsKey(key);
 	}
 }

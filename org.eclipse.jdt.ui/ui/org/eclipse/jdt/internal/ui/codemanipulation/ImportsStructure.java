@@ -249,9 +249,27 @@ public class ImportsStructure implements IImportsStructure {
 	
 	private void performCreate(ArrayList created, IDocument doc) throws JavaModelException {
 		int importsStart, importsLen;
-
-		String[] lineDelims= doc.getLegalLineDelimiters();
-		String lineDelim= lineDelims.length > 0 ? lineDelims[0] : System.getProperty("line.separator", "\n");
+		
+		// 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+		String lineDelim= null;
+		try {
+			lineDelim= doc.getLineDelimiter(0);
+		} catch (BadLocationException e) {
+		}
+		if (lineDelim == null) {
+			String systemDelimiter= System.getProperty("line.separator", "\n");
+			String[] lineDelims= doc.getLegalLineDelimiters();
+			for (int i= 0; i < lineDelims.length; i++) {
+				if (lineDelims[i].equals(systemDelimiter)) {
+					lineDelim= systemDelimiter;
+					break;
+				}
+			}
+			if (lineDelim == null) {
+				lineDelim= lineDelims.length > 0 ? lineDelims[0] : systemDelimiter;
+			}
+		}
+		// end fix.
 		
 		int lastPos;
 		StringBuffer buf= new StringBuffer();
