@@ -257,10 +257,19 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 	}
 	
 	public void test29() throws Exception{
-		printTestDisabledMessage("regression test for bug#16051");
-//		helperSelectUp(5, 13, 5, 17);
+//		printTestDisabledMessage("regression test for bug#16051");
+		helperSelectUp(5, 13, 5, 17);
+	}
+
+	public void test30() throws Exception{
+//		printTestDisabledMessage("regression test for bug#22082");
+		helperSelectUp(3, 10, 3, 10);
 	}
 	
+	public void test31() throws Exception{
+//		printTestDisabledMessage("regression test for bug#22082");
+		helperSelectUp(3, 10, 3, 10);
+	}
 	
 	public void testZeroLength0() throws Exception{
 		//printTestDisabledMessage("");

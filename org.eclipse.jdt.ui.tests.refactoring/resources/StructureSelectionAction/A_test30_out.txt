@@ -1,0 +1,2 @@
+void m(int t){
+	}
