@@ -17,7 +17,6 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -57,10 +56,8 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to comment/uncomment a large compilation unit.
-	 * 
-	 * @throws PartInitException
 	 */
-	public void testToggleComment2() throws PartInitException {
+	public void testToggleComment2() {
 		measureToggleComment(getNullPerformanceMeter(), getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter commentMeter= createPerformanceMeter(getDefaultScenarioId() + "-comment");
 		PerformanceMeter uncommentMeter= createPerformanceMeter(getDefaultScenarioId() + "-uncomment");
@@ -69,7 +66,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 		assertAllPerformance();
 	}
 
-	private void measureToggleComment(PerformanceMeter commentMeter, PerformanceMeter uncommentMeter, int runs) throws PartInitException {
+	private void measureToggleComment(PerformanceMeter commentMeter, PerformanceMeter uncommentMeter, int runs) {
 		IAction toggleComment= fEditor.getAction("ToggleComment");
 		for (int i= 0; i < runs; i++) {
 			commentMeter.start();
