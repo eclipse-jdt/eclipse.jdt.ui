@@ -137,6 +137,19 @@ public class JarStructureCreator implements IStructureCreator {
 		void setBytes(byte[] buffer) {
 			fContents= buffer;
 		}
+		
+		void appendBytes(byte[] buffer, int length) {
+	    	if (length > 0) {
+				int oldLen= 0;
+				if (fContents != null)
+					oldLen= fContents.length;
+				byte[] newBuf= new byte[oldLen + length];
+				if (oldLen > 0)
+		    		System.arraycopy(fContents, 0, newBuf, 0, oldLen);
+	    		System.arraycopy(buffer, 0, newBuf, oldLen, length);
+	    		fContents= newBuf;
+	    	}
+		}
 	}
 	
 	private String fTitle;
@@ -175,7 +188,6 @@ public class JarStructureCreator implements IStructureCreator {
 				ZipEntry entry= zip.getNextEntry();
 				if (entry == null)
 					break;
-				//System.out.println(entry.getName() + ": " + entry.getSize() + " " + entry.getCompressedSize());
 
 				JarFile ze= root.createContainer(entry.getName());
 				if (ze != null) {
@@ -191,7 +203,14 @@ public class JarStructureCreator implements IStructureCreator {
 						} while (length > 0);
 	
 						ze.setBytes(buffer);
-					}
+					} else {
+						byte[] buffer= new byte[1024];		
+						int n;
+						do {
+							n= zip.read(buffer, 0, 1024);
+							ze.appendBytes(buffer, n);
+						} while (n >= 0);
+					}				
 				}
 				zip.closeEntry();
 			}
