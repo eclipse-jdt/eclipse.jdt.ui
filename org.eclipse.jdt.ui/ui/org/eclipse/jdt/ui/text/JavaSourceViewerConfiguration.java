@@ -57,6 +57,7 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -517,11 +518,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		// backwards compatibility code
-		if (!fPreferenceStore.contains(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
-			return fPreferenceStore.getInt(PREFERENCE_TAB_WIDTH);
-		
-		return super.getTabWidth(sourceViewer);
+		return fPreferenceStore.getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 	}
 
 	/*

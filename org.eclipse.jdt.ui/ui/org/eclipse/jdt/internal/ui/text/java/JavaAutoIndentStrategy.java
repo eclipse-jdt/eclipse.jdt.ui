@@ -27,7 +27,6 @@ import org.eclipse.jface.text.rules.DefaultPartitioner;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -45,6 +44,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -870,7 +870,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
 	private static int getVisualTabLengthPreference() {
-		return getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+		return getPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 	}
 
 	private static int getPeerPosition(IDocument document, DocumentCommand command) {

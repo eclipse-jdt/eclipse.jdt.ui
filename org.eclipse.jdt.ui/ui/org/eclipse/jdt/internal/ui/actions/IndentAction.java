@@ -40,7 +40,6 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
@@ -261,7 +260,7 @@ public class IndentAction extends TextEditorAction {
 				wsStart= offset + slashes;
 				
 				StringBuffer computed= indenter.computeIndentation(offset);
-				int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+				int tabSize= getTabSize();
 				while (slashes > 0 && computed.length() > 0) {
 					char c= computed.charAt(0);
 					if (c == '\t')
@@ -362,7 +361,7 @@ public class IndentAction extends TextEditorAction {
 		else {
 			int size= 0;
 			int l= indent.length();
-			int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+			int tabSize= getTabSize();
 			
 			for (int i= 0; i < l; i++)
 				size += indent.charAt(i) == '\t' ? tabSize : 1;
@@ -388,6 +387,16 @@ public class IndentAction extends TextEditorAction {
 			tab= "\t"; //$NON-NLS-1$
 	
 		return tab;
+	}
+	
+	/**
+	 * Returns the tab size used by the java editor, which is deduced from the
+	 * formatter preferences.
+	 * 
+	 * @return the tab size as defined in the current formatter preferences
+	 */
+	private int getTabSize() {
+		return JavaPlugin.getDefault().getCombinedPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 	}
 
 	/**

@@ -129,6 +129,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -163,6 +164,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -2291,6 +2293,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		
+		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(event.getProperty())) {
+			// ignore tab setting since we rely on the formatter preferences
+			// do this outside the try-finally block to avoid walking the inheritance chain
+			return;
+		}
+		
 		try {			
 
 			ISourceViewer sourceViewer= getSourceViewer();
@@ -2404,6 +2412,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						fProjectionModelUpdater.install(this, projectionViewer);
 					}
 				}
+				return;
+			}
+			
+			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)) {
+				sourceViewer.getTextWidget().setTabs(getPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
 				return;
 			}
 			
