@@ -5,14 +5,7 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -20,6 +13,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,18 +31,13 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -54,7 +46,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -532,25 +523,6 @@ public class Checks {
 	
 	//-------- validateEdit checks ----
 	
-	private static IFile[] getReadOnly(IFile[] files){
-		List readOnlyFiles= new ArrayList();
-		for (int i= 0; i < files.length; i++) {
-			if (files[i].isReadOnly())
-				readOnlyFiles.add(files[i]);
-		}
-		return (IFile[]) readOnlyFiles.toArray(new IFile[readOnlyFiles.size()]);
-	}
-	
-		//IFile -> Long
-	private static Map createModificationStampMap(IFile[] files){
-		Map map= new HashMap();
-		for (int i= 0; i < files.length; i++) {
-			IFile file= files[i];
-			map.put(file, new Long(file.getModificationStamp()));
-		}
-		return map;
-	}
-
 	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) {
 		RefactoringStatus result= new RefactoringStatus();
 		IStatus status= Resources.checkInSync(filesToModify);
@@ -665,16 +637,4 @@ public class Checks {
 
 		return IS_RVALUE;		
 	}
-
-    public static boolean isDeclaredInMethod(VariableDeclaration tempDeclaration) {
-        ASTNode methodDeclaration= ASTNodes.getParent(tempDeclaration, MethodDeclaration.class);
-        if (methodDeclaration == null)
-        	return false;
-        ASTNode anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);	
-        if (anonymous == null)
-        	return true;
-        if (ASTNodes.isParent(anonymous, methodDeclaration))
-        	return false;
-        return true;	
-    }
 }
