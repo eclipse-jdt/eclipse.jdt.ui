@@ -53,8 +53,6 @@ public class DeleteAction extends ReorgAction {
 			ExceptionHandler.handle(e, "Delete", "An exception occured while deleting elements");
 			return;
 		}
-		if (!confirmIfUnsaved(elements))
-			return;
 
 		String msg= "The selected elements contain read-only resources. Do you still wish to delete them?";
 		if (hasReadOnlyResources && !confirmReadOnly("Check Deletion", msg))
