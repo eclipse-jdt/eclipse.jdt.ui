@@ -1240,7 +1240,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (unit != null)
 			try {
 				synchronized (unit) {
-					unit.reconcile();
+					unit.reconcile(false, null);
 				}
 				return unit.getElementAt(offset);
 			} catch (JavaModelException ex) {
