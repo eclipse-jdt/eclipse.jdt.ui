@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -466,7 +465,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
 		change.addTextEdit(
 			RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), 
-			SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
+			new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {

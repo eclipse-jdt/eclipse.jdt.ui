@@ -16,11 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 
@@ -136,7 +137,7 @@ public abstract class ContextType implements ITemplateEditor {
 			variable.setResolved(evaluator.isResolved(context));
 
         	for (int k= 0; k != offsets.length; k++)
-				edits.add(SimpleTextEdit.createReplace(offsets[k], length, value));
+				edits.add(new ReplaceEdit(offsets[k], length, value));
         }
 
 		TextBufferEditor editor= new TextBufferEditor(textBuffer);

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -609,7 +608,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 	
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{ 
-		TextEdit textEdit= SimpleTextEdit.createReplace(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
+		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fField.getCompilationUnit());
 		manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"), textEdit); //$NON-NLS-1$
 	}
@@ -633,7 +632,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	private TextEdit createTextChange(SearchResult searchResult) {
 		String oldName= fField.getElementName();
 		int offset= searchResult.getEnd() - oldName.length();
-		return SimpleTextEdit.createReplace(offset, oldName.length(), fNewElementName);
+		return new ReplaceEdit(offset, oldName.length(), fNewElementName);
 	}
 		}
 		

@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -92,7 +92,7 @@ class TextMatchFinder {
 			Set results= (Set)matches.get(cu);
 			for (Iterator resultIter= results.iterator(); resultIter.hasNext();){
 				int match= ((Integer)resultIter.next()).intValue();
-				manager.get(cu).addTextEdit(matchName, SimpleTextEdit.createReplace(match, patternLength, newText));
+				manager.get(cu).addTextEdit(matchName, new ReplaceEdit(match, patternLength, newText));
 			}
 		}
 	}

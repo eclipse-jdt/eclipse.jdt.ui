@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -84,7 +84,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 					change= new TextFileChange(resource.getName(), (IFile)resource);
 					changes.put(resource, change);
 				}
-				change.addTextEdit("Update type reference", SimpleTextEdit.createReplace(start, length, newName)); //$NON-NLS-1$
+				change.addTextEdit("Update type reference", new ReplaceEdit(start, length, newName)); //$NON-NLS-1$
 			}
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);

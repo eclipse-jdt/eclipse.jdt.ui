@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -306,7 +306,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		int length= fCurrentName.length();
 		for(int i= 0; i < renamingOffsets.length; i++){
 			int offset= renamingOffsets[i].intValue();
-			result[i]= SimpleTextEdit.createReplace(offset, length, fNewName);
+			result[i]= new ReplaceEdit(offset, length, fNewName);
 		}
 		return result;
 	}

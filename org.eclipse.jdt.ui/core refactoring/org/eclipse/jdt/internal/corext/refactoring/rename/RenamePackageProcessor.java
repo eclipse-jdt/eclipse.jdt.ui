@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -473,7 +473,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	}
 	
 	private TextEdit createTextChange(SearchResult searchResult) {
-		return SimpleTextEdit.createReplace(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
+		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {

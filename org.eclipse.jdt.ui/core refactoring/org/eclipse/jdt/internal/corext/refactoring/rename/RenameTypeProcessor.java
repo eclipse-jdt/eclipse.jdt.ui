@@ -16,8 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.SimpleTextEdit;
-
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -720,7 +719,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update"); //$NON-NLS-1$
 		int typeNameLength= fType.getElementName().length();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
-		manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(fType.getNameRange().getOffset(), typeNameLength, fNewElementName));
+		manager.get(cu).addTextEdit(name, new ReplaceEdit(fType.getNameRange().getOffset(), typeNameLength, fNewElementName));
 	}
 	
 	private void addConstructorRenames(TextChangeManager manager) throws CoreException {
@@ -736,7 +735,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				 * (checked as a precondition)
 				 */				
 				String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor"); //$NON-NLS-1$
-				manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(methods[i].getNameRange().getOffset(), typeNameLength, fNewElementName));
+				manager.get(cu).addTextEdit(name, new ReplaceEdit(methods[i].getNameRange().getOffset(), typeNameLength, fNewElementName));
 			}
 		}
 	}
@@ -757,7 +756,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				String oldName= fType.getElementName();
 				int offset= searchResult.getEnd() - oldName.length();
 				manager.get(wc).addTextEdit(name, 
-					SimpleTextEdit.createReplace(offset, oldName.length(), fNewElementName));
+					new ReplaceEdit(offset, oldName.length(), fNewElementName));
 			}
 			pm.worked(1);
 		}

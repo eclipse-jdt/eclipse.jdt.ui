@@ -16,6 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICodeFormatter;
@@ -26,9 +32,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -124,7 +127,7 @@ public class JavaFormatter implements ITemplateEditor {
 		{
 			List positions= variablesToPositions(variables);
 
-		    TextEdit insert= SimpleTextEdit.createInsert(caretOffset, MARKER);
+		    TextEdit insert= new InsertEdit(caretOffset, MARKER);
 		    string= edit(string, positions, insert);
 			positionsToVariables(positions, variables);
 		    templateBuffer.setContent(string, variables);
@@ -136,7 +139,7 @@ public class JavaFormatter implements ITemplateEditor {
 			caretOffset= getCaretOffset(variables);
 
 			positions= variablesToPositions(variables);
-			TextEdit delete= SimpleTextEdit.createDelete(caretOffset, MARKER.length());
+			TextEdit delete= new DeleteEdit(caretOffset, MARKER.length());
 		    string= edit(string, positions, delete);
 			positionsToVariables(positions, variables);		    
 		    templateBuffer.setContent(string, variables);
@@ -173,11 +176,11 @@ public class JavaFormatter implements ITemplateEditor {
 	    int lineCount= textBuffer.getNumberOfLines();
 	    for (int i= 0; i < lineCount; i++) {
 	    	TextRegion region= textBuffer.getLineInformation(i);
-			edits.add(SimpleTextEdit.createInsert(region.getOffset(), CodeFormatterUtil.createIndentString(fInitialIndentLevel)));
+			edits.add(new InsertEdit(region.getOffset(), CodeFormatterUtil.createIndentString(fInitialIndentLevel)));
 
 			String lineDelimiter= textBuffer.getLineDelimiter(i);
 			if (lineDelimiter != null)
-				edits.add(SimpleTextEdit.createReplace(region.getOffset() + region.getLength(), lineDelimiter.length(), fLineDelimiter));
+				edits.add(new ReplaceEdit(region.getOffset() + region.getLength(), lineDelimiter.length(), fLineDelimiter));
 	    }
 
 		string= edit(string, positions, edits);
@@ -196,7 +199,7 @@ public class JavaFormatter implements ITemplateEditor {
 		while ((i != string.length()) && Character.isWhitespace(string.charAt(i)))
 			i++;
 
-		string= edit(string, positions, SimpleTextEdit.createDelete(0, i));
+		string= edit(string, positions, new DeleteEdit(0, i));
 		positionsToVariables(positions, variables);
 
 		templateBuffer.setContent(string, variables);
