@@ -972,7 +972,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testQualifiedName1() throws Exception {
-		IPackageFragment packageP1= getRoot().createPackageFragment("p", true, null);
+		getRoot().createPackageFragment("p", true, null);
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
