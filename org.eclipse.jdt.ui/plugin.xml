@@ -865,6 +865,7 @@ JavaStructureDiffViewerCreator
          label="%NLSsearchPageLabel"
          icon="icons/full/obj16/nls_search_obj.gif"
          extensions="java:89, properties:90"
+		 showScopeSection="true"         
          class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage"
          sizeHint="460,160">
    </page>
