@@ -16,8 +16,8 @@ public class JarPackage {
 	 * What to export - internal locations
 	 * The list fExportedX is null if fExportX is false)
 	 */	
-	private boolean fExportClassFiles;		// export generated class files and resources
-	private boolean	fExportJavaFiles;		// export java files and resources
+	private boolean fExportClassFiles;	// export generated class files and resources
+	private boolean fExportJavaFiles;		// export java files and resources
 	/*	 * Source folder hierarchy is created in the JAR if true	 */	private boolean fUseSourceFolderHierarchy;	/*	 * Projects of which files are expored will be built if true	 * and autobuild is off.	 */	private boolean fBuildIfNeeded;	/*	 * List which contains all the the elements (no containers) to export	 */	private List	fSelectedElements;		// internal locations	/*	 * Closure of elements and containers selected for export	 */	private Set fSelectedElementsClosure;
 
 	private IPath	fJarLocation;			// external location
