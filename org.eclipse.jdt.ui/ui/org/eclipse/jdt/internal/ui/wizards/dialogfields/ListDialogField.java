@@ -18,10 +18,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -29,7 +27,6 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -66,8 +63,6 @@ public class ListDialogField extends DialogField {
 	private Table fTableControl;
 	private Composite fButtonsControl;
 	private ISelection fSelectionWhenEnabled;
-	
-	private TableColumn fTableColumn;
 	
 	private IListAdapter fListAdapter;
 	
@@ -245,13 +240,6 @@ public class ListDialogField extends DialogField {
 			
 			fTableControl= (Table)fTable.getControl();
 			
-			// Add a table column.
-			TableLayout tableLayout= new TableLayout();
-			tableLayout.addColumnData(new ColumnWeightData(100));
-			fTableColumn= new TableColumn(fTableControl, SWT.NONE);
-			fTableColumn.setResizable(false);
-			fTableControl.setLayout(tableLayout);
-			
 			fTable.setInput(fParentElement);
 			
 			if (fViewerSorter != null) {
@@ -262,13 +250,6 @@ public class ListDialogField extends DialogField {
 			if (fSelectionWhenEnabled != null) {
 				postSetSelection(fSelectionWhenEnabled);
 			}
-			fTableColumn.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					if (fTableColumn != null && !fTableColumn.isDisposed()) {
-						fTableColumn.pack();
-					}
-				}
-			});
 		}
 		return fTableControl;
 	}
@@ -384,9 +365,6 @@ public class ListDialogField extends DialogField {
 	 */ 	
 	public void dialogFieldChanged() {
 		super.dialogFieldChanged();
-		if (fTableColumn != null && !fTableColumn.isDisposed()) {
-			fTableColumn.pack();
-		}
 		updateButtonState();
 	}
 	

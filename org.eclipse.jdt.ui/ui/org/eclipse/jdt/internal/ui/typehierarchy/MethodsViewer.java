@@ -94,8 +94,6 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	private MethodsViewerFilter fFilter;
 		
 	private OpenJavaElementAction fOpen;
-	
-	private TableColumn fTableColumn;
 
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
 
@@ -106,16 +104,9 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		fProblemItemMapper= new ProblemItemMapper();
 		
-		fTableColumn= new TableColumn(getTable(), SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
-		
-		getTable().addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				adjustTableColumnSize();
-			}
-		});
-
 		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
+		
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 
 		setLabelProvider(lprovider);
@@ -189,25 +180,17 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 				lprovider.turnOff(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 			}
 			refresh();
-			adjustTableColumnSize();
 			
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
-	
-	private void adjustTableColumnSize() {
-		if (fTableColumn != null && !fTableColumn.isDisposed()) {
-			fTableColumn.pack();
-		}		
-	}
-	
+		
 	/*
 	 * @see Viewer#inputChanged(Object, Object)
 	 */
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
-		adjustTableColumnSize();		
 	}
 	
 	/**

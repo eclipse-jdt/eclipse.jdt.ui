@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TableViewer;
 
 /**
- * A list with checkboxes and a button bat. Typical buttons are 'Check All' and 'Uncheck All'.
+ * A list with checkboxes and a button bar. Typical buttons are 'Check All' and 'Uncheck All'.
  * List model is independend of widget creation.
  * DialogFields controls are: Label, List and Composite containing buttons.
  */
