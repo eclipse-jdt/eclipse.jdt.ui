@@ -186,7 +186,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy();
 			if (wc != null) {
 				IJavaElement[] matches= wc.findElements(je);
-				if (matches.length > 0)
+				if (matches != null && matches.length > 0)
 					convertedJE= matches[0];
 			}
 		}
