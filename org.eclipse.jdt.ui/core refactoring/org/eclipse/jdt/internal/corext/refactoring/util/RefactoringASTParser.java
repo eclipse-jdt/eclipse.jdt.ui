@@ -56,7 +56,7 @@ public class RefactoringASTParser {
 			String key= (String)iter.next();
 			String value= (String)options.get(key);
 			if ("error".equals(value) || "warning".equals(value)) {  //$NON-NLS-1$//$NON-NLS-2$
-				System.out.println("Ignoring - " + key);
+				// System.out.println("Ignoring - " + key);
 				options.put(key, "ignore"); //$NON-NLS-1$
 			}
 		}
