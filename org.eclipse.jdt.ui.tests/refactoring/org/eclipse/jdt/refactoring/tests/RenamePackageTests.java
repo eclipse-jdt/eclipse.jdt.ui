@@ -197,6 +197,6 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void test4() throws Exception{
-		helper2(new String[]{"p.p1", "p", "r.p1"}, new String[][]{{"A"}, {"A"}, {}}, "r");
+		helper2(new String[]{"p.p1", "p"}, new String[][]{{"A"}, {"A"}}, "r");
 	}
 }

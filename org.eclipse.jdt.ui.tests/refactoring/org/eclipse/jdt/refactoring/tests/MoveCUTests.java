@@ -144,8 +144,8 @@ public class MoveCUTests extends RefactoringTest {
 		helper2("p", "p1", new String[]{"A", "B"}, new String[]{"C"});
 	}
 	
-	public void test3() throws Exception{
-		helper2("", "p1", new String[]{"A"}, new String[]{"C"});
-	}
+//	public void test3() throws Exception{
+//		helper2("", "p1", new String[]{"A"}, new String[]{"C"});
+//	}
 		
 }

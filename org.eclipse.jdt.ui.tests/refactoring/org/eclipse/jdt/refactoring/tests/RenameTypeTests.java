@@ -683,7 +683,7 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
-		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		ICompilationUnit newcu= packageA.getCompilationUnit("B.java");
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 	}
 	
