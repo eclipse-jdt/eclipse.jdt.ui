@@ -1118,8 +1118,12 @@ public class PackageExplorerPart extends ViewPart
 
 	public boolean show(ShowInContext context) {
 		Object input= context.getInput();
-		if (input instanceof IEditorInput)
-			return showInput(getElementOfInput((IEditorInput)context.getInput()));
+		if (input instanceof IEditorInput) {
+			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
+			if (elementOfInput == null) 
+				return false; 
+			return showInput(elementOfInput);
+		}
 
 		ISelection selection= context.getSelection();
 		if (selection != null) {
@@ -1177,6 +1181,6 @@ public class PackageExplorerPart extends ViewPart
 			// trigger a syntetic selection change so that action refresh their
 			// enable state.
 			fViewer.setSelection(fViewer.getSelection());
-		}
+}
 	}
 }
