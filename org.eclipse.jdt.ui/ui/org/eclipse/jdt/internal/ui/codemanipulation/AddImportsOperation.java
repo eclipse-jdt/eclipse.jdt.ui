@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -30,8 +29,6 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private IJavaElement[] fImports;
 	private boolean fDoSave;
 	
-	private IImportDeclaration[] fAddedImports;
-	
 	/**
 	 * Generate import statements for the passed java elements
 	 * Elements must be of type IType (-> single import) or IPackageFragment
@@ -41,7 +38,6 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		super();
 		fImports= imports;
 		fCompilationUnit= cu;
-		fAddedImports= null;
 		fDoSave= save;
 	}
 
@@ -71,15 +67,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				}
 			}
 			monitor.worked(1);
-			fAddedImports= impStructure.create(fDoSave, null);
+			impStructure.create(fDoSave, null);
 			monitor.worked(1);
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	public IImportDeclaration[] getAddedImports() {
-		return fAddedImports;
-	}
 		
 }

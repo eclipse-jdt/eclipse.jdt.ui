@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,10 +28,10 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.SourceElementRequestorAdapter;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
+import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.TypeReferenceRequestor.RefSourceRange;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 
@@ -257,7 +255,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 
 	private ICompilationUnit fCompilationUnit;	
-	private IImportDeclaration[] fCreatedImports;
 	private boolean fDoSave;
 	
 	private String[] fOrderPreference;
@@ -289,7 +286,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}			
-			fCreatedImports= null;
 			fParsingError= null;
 			
 			monitor.beginTask(CodeManipulationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
@@ -352,21 +348,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					impStructure.addImport(typeInfo.getPackageName(), typeInfo.getEnclosingName(), typeInfo.getTypeName());
 				}				
 			}
-						
-			fCreatedImports= impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
+			impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	/**
-	 * Can be called after executing to get the created imports
-	 * Return null if the compilation unit had a compilation error and
-	 * no imports were added
-	 */
-	public IImportDeclaration[] getCreatedImports() {
-		return fCreatedImports;
-	}
 	/**
 	 * After executing the operation, ask if a compilation error prevented
 	 * the resolving of types. Returns <code>null</code> if no error occured.

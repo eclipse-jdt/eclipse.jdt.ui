@@ -72,7 +72,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	protected void applyImport(IDocument document) {
 		if (fImportStructure != null) {
 			try {
-				fImportStructure.create(document, null);
+				fImportStructure.create(false, null);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

@@ -177,14 +177,14 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 				return null;
 			case IJavaElement.PACKAGE_FRAGMENT:
 				String packName= elem.getElementName();
-				IPath rootPath= getCorrespondingPath(elem.getParent());
+				IPath rootPath= getJavaElementPath(elem.getParent());
 				if (rootPath != null && packName.length() > 0) {
 					rootPath= rootPath.append(packName.replace('.', '/'));
 				}
 				return rootPath;
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
-				IPath packPath= getCorrespondingPath(elem.getParent());
+				IPath packPath= getJavaElementPath(elem.getParent());
 				if (packPath != null) {
 					packPath= packPath.append(elem.getElementName());
 				}
@@ -192,7 +192,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 			default:
 				IOpenable openable= JavaModelUtil.getOpenable(elem);
 				if (openable instanceof IJavaElement) {
-					return getCorrespondingPath((IJavaElement)openable);
+					return getJavaElementPath((IJavaElement)openable);
 				}
 				return null;
 		}

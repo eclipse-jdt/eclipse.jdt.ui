@@ -6,13 +6,11 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -22,8 +20,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.DocumentManager;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
@@ -38,7 +37,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	private int fImportOnDemandThreshold;
 	
-	private boolean fReplaceExistingImports;
+	private boolean fRestoreExistingImports;
 	private boolean fFilterImplicitImports;
 	
 	/**
@@ -49,7 +48,7 @@ public class ImportsStructure implements IImportsStructure {
 	public ImportsStructure(ICompilationUnit cu) throws JavaModelException {
 		fCompilationUnit= cu;
 		fImportOnDemandThreshold= Integer.MAX_VALUE;
-		fReplaceExistingImports= false;
+		fRestoreExistingImports= cu.getImportContainer().exists();
 		fFilterImplicitImports= true;		
 		
 		IImportDeclaration[] decls= cu.getImports();
@@ -76,7 +75,7 @@ public class ImportsStructure implements IImportsStructure {
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) {
 		fCompilationUnit= cu;
 		fImportOnDemandThreshold= importThreshold;
-		fReplaceExistingImports= true;
+		fRestoreExistingImports= false;
 		fFilterImplicitImports= true;		
 		
 		int nEntries= preferenceOrder.length;
@@ -245,79 +244,76 @@ public class ImportsStructure implements IImportsStructure {
 	 * Creates all new elements in the import structure.
 	 * Returns all created IImportDeclaration. Does not return null
 	 */	
-	public IImportDeclaration[] create(boolean save, IProgressMonitor monitor) throws CoreException {
-		DocumentManager docManager= new DocumentManager(fCompilationUnit);
-		docManager.connect();
+	public void create(boolean save, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		
+		TextBuffer buffer= null;
 		try {
-			IImportDeclaration[] res= create(docManager.getDocument(), monitor);			
-			if (save) {
-				docManager.save(null);
+			ICompilationUnit cu= fCompilationUnit;
+			if (cu.isWorkingCopy()) {
+				cu= (ICompilationUnit) cu.getOriginalElement();
 			}
-			return res;
+			
+			IFile file= (IFile) cu.getUnderlyingResource();
+			buffer= TextBuffer.acquire(file);
+			
+			TextPosition textPosition= getReplacePositions(buffer);
+
+			String replaceString= getReplaceString(buffer, textPosition);
+			if (replaceString != null) {
+				buffer.replace(textPosition.getOffset(), textPosition.getLength(), replaceString);
+			}		
+			if (save) {
+				TextBuffer.commitChanges(buffer, true, null);
+			}
 		} finally {
-			docManager.disconnect();
+			if (buffer != null) {
+				TextBuffer.release(buffer);
+			}
+			monitor.done();
 		}
 	}	
-
+		
+		
 	/**
-	 * Creates all new elements in the import structure.
-	 * Returns all created IImportDeclaration. Does not return null
-	 */	
-	public IImportDeclaration[] create(IDocument doc, IProgressMonitor monitor) throws CoreException {
-		ArrayList created= new ArrayList();
-		try {
-			performCreate(created, doc);
-		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
-		}
-		return (IImportDeclaration[]) created.toArray(new IImportDeclaration[created.size()]);	
-	}
-			
-		
-	private int getPackageStatementEndPos(IDocument doc) throws JavaModelException {
-		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
-		if (packDecls != null && packDecls.length > 0) {
-			try {
-				int line= doc.getLineOfOffset(packDecls[0].getSourceRange().getOffset());
-				IRegion range= doc.getLineInformation(line + 1);
-				return range.getOffset();
-			} catch (BadLocationException e) {
-				// can happen
-			}
-		}
-		return 0;
-	}
-	
-	
-	private void performCreate(ArrayList created, IDocument doc) throws JavaModelException {
-		int importsStart, importsLen;
-		
-		// 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		String lineDelim= StubUtility.getLineDelimiterFor(doc);
-		
-		int lastPos;
-		StringBuffer buf= new StringBuffer();
+	 * Get the replace positons .
+	 */
+	public TextPosition getReplacePositions(TextBuffer textBuffer) throws JavaModelException {
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();
-			importsStart= importSourceRange.getOffset();
-			importsLen= importSourceRange.getLength();
-			if (!fReplaceExistingImports) {
-				buf.append(container.getSource());
-			}
-			lastPos= buf.length();
+			return new TextPosition(importSourceRange.getOffset(), importSourceRange.getLength());
 		} else {
-			importsStart= getPackageStatementEndPos(doc);
-			importsLen= 0;
-			lastPos= 0;			
+			int start= getPackageStatementEndPos(textBuffer);
+			return new TextPosition(start, 0);
+		}		
+	}
+	
+	/**
+	 * Returns the replace string or <code>null</code> if no replace is needed.
+	 */
+	public String getReplaceString(TextBuffer textBuffer, TextPosition textPosition) throws JavaModelException {
+		int importsStart=  textPosition.getOffset();
+		int importsLen= textPosition.getLength();
+				
+		String lineDelim= textBuffer.getLineDelimiter();
+		
+		StringBuffer buf= new StringBuffer();
+		
+		IImportContainer container= fCompilationUnit.getImportContainer();
+		if (fRestoreExistingImports) {
+			buf.append(container.getSource());
 		}
+		
+		int lastPos= buf.length();
 		
 		// all (top level) types in this cu
 		IType[] topLevelTypes= fCompilationUnit.getTypes();
 	
 		int lastGroupID= -1;
+		int nCreated= 0;
 		
 		// create from last to first to not invalidate positions
 		for (int i= fPackageEntries.size() -1; i >= 0; i--) {
@@ -338,13 +334,13 @@ public class ImportsStructure implements IImportsStructure {
 						// assume no existing imports
 						String starimport= packName + ".*"; //$NON-NLS-1$
 						lastPos= insertImport(buf, lastPos, starimport, lineDelim);
-						created.add(fCompilationUnit.getImport(starimport));
+						nCreated++;
 					} else {
 						for (int j= nImports - 1; j >= 0; j--) {
 							IImportDeclaration currDecl= pack.getImportAt(j);
-							if (fReplaceExistingImports || !currDecl.exists()) {
+							if (!fRestoreExistingImports || !currDecl.exists()) {
 								lastPos= insertImport(buf, lastPos, currDecl.getElementName(), lineDelim);
-								created.add(currDecl);
+								nCreated++;
 							} else {
 								lastPos= currDecl.getSourceRange().getOffset() - importsStart;
 							}
@@ -354,36 +350,32 @@ public class ImportsStructure implements IImportsStructure {
 			}
 		}
 		
-		try {
-			if (!container.exists() && created.size() > 0) {
-				buf.append(lineDelim);	// nl after import (<nl+>)
-				if (importsStart > 0) { // package statement
-					buf.insert(0, lineDelim);  //<pack><nl><nl*><import><nl+><nl-pack><cl>
-				}
-				// check if a space between import and first type is needed
-				IType[] types= fCompilationUnit.getTypes();
-				if (types.length > 0) {
-					if (types[0].getSourceRange().getOffset() == importsStart) {
-						buf.append(lineDelim);
-					}
+		if (!container.exists() && nCreated > 0) {
+			buf.append(lineDelim);	// nl after import (<nl+>)
+			if (importsStart > 0) { // package statement
+				buf.insert(0, lineDelim);  //<pack><nl><nl*><import><nl+><nl-pack><cl>
+			}
+			// check if a space between import and first type is needed
+			IType[] types= fCompilationUnit.getTypes();
+			if (types.length > 0) {
+				if (types[0].getSourceRange().getOffset() == importsStart) {
+					buf.append(lineDelim);
 				}
 			}
-			String newContent= buf.toString();
-			if (hasChanged(doc, importsStart, importsLen, newContent)) {
-				doc.replace(importsStart, importsLen, newContent);
-			}
-		} catch (BadLocationException e) {
-			// can not happen
-			JavaPlugin.log(e);
 		}
+		String newContent= buf.toString();
+		if (hasChanged(textBuffer, importsStart, importsLen, newContent)) {
+			return newContent;
+		}
+		return null;
 	}
 	
-	private boolean hasChanged(IDocument doc, int offset, int length, String content) throws BadLocationException {
+	private boolean hasChanged(TextBuffer textBuffer, int offset, int length, String content) {
 		if (content.length() != length) {
 			return true;
 		}
 		for (int i= 0; i < length; i++) {
-			if (content.charAt(i) != doc.getChar(offset + i)) {
+			if (content.charAt(i) != textBuffer.getChar(offset + i)) {
 				return true;
 			}
 		}
@@ -423,7 +415,17 @@ public class ImportsStructure implements IImportsStructure {
 		return pos;
 	}
 	
-	
+	private int getPackageStatementEndPos(TextBuffer buffer) throws JavaModelException {
+		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
+		if (packDecls != null && packDecls.length > 0) {
+			int line= buffer.getLineOfOffset(packDecls[0].getSourceRange().getOffset());
+			TextRegion region= buffer.getLineInformation(line + 1);
+			if (region != null) {
+				return region.getOffset();
+			}
+		}
+		return 0;
+	}
 	
 	/*
 	 * Internal element for the import structure: A container for imports

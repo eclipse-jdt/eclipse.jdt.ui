@@ -125,15 +125,12 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 					// do not add import for code assist on import statements
 					return;
 				}
-
-				int oldLen= document.getLength();
-				
+			
 				ImportsStructure impStructure= new ImportsStructure(cu);
 				impStructure.addImport(fImportDeclaration.getElementName());
-				impStructure.create(document, null);
-				
-				fCursorPosition += document.getLength() - oldLen;
-				
+				// will modify the document as the CU works on the document
+				impStructure.create(false, null);
+
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -156,7 +153,9 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 			}
 			
 			if (fImportDeclaration != null) {
+				int oldLen= document.getLength();
 				applyImport(document);
+				fReplacementOffset += document.getLength() - oldLen;
 			}
 			
 		} catch (BadLocationException x) {
