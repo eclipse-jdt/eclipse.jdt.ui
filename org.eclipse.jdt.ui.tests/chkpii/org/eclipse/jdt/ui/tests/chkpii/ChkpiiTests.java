@@ -142,7 +142,7 @@ public class ChkpiiTests extends TestCase {
 		StringTokenizer tokenizer= new StringTokenizer(filePath, File.separator);
 		
 		String path= "";
-		if (filePath.charAt(0) != File.pathSeparatorChar)
+		if (filePath.charAt(0) != File.separatorChar)
 			path= tokenizer.nextToken();
 			
 		while (tokenizer.hasMoreTokens()) {
