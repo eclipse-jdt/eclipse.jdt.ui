@@ -979,7 +979,31 @@ public class RenameTypeTests extends RefactoringTest {
 //		printTestDisabledMessage("test for bug 66250");
 		helperWithTextual("A", "A", "B", "B", false, true);
 	}
+	
+	public void test63() throws Exception {
+//		printTestDisabledMessage("test for bug 79131");
+		IPackageFragment anotherP= getRoot().createPackageFragment("another.p", true, null);
+		String folder= "anotherp/";
+		String type= "A";
+		ICompilationUnit cu= createCUfromTestFile(anotherP, type, folder);
 		
+		helperWithTextual(type, type, "B", "B", true, true);
+
+		assertEqualLines("invalid renaming in another.p.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
+	}
+	
+	public void test64() throws Exception {
+//		printTestDisabledMessage("test for bug 79131");
+		IPackageFragment p2= getRoot().createPackageFragment("p2", true, null);
+		String folder= "p2/";
+		String type= "A";
+		ICompilationUnit cu= createCUfromTestFile(p2, type, folder);
+		
+		helperWithTextual(type, type, "B", "B", true, true);
+
+		assertEqualLines("invalid renaming in p2.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
+	}
+	
 	public void test5() throws Exception { 
 		helper2("A", "B");		
 	}

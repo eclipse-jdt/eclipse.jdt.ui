@@ -148,6 +148,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return fField.getElementName();
 	}
 	
+	public final String getCurrentElementQualifier(){
+		return JavaModelUtil.getFullyQualifiedName(fField.getDeclaringType());
+	}
+	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkFieldName(newName);

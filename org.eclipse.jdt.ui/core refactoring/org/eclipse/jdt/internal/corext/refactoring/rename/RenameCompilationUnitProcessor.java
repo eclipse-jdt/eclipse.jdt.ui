@@ -123,6 +123,11 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		return getSimpleCUName();
 	}
 	
+	public String getCurrentElementQualifier() {
+		IPackageFragment pack= (IPackageFragment) fCu.getParent();
+		return pack.getElementName();
+	}
+	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		String typeName= removeFileNameExtension(newName);

@@ -172,6 +172,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return fType.getElementName();
 	}
 	
+	public String getCurrentElementQualifier(){
+		return JavaModelUtil.getTypeContainerName(fType);
+	}
+	
 	public RefactoringStatus checkNewElementName(String newName){
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkTypeName(newName);

@@ -34,7 +34,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 	
 	protected void setUp() throws Exception {
 		//no need to call super.setUp();
-		fScanner= new RefactoringScanner("TestPattern");
+		fScanner= new RefactoringScanner("TestPattern", "");
 	}
 
 	protected void tearDown() throws Exception {

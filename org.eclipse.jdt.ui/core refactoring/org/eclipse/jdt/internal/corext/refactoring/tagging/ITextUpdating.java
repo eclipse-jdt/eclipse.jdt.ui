@@ -44,6 +44,13 @@ public interface ITextUpdating {
 	public String getCurrentElementName();
 	
 	/**
+	 * Returns the current qualifier of the element to be renamed.
+	 * 
+	 * @return the current qualifier of the element to be renamed
+	 */
+	public String getCurrentElementQualifier();
+	
+	/**
 	 * Returns the new name of the element
 	 * 
 	 * @return the new element name

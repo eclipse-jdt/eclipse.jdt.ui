@@ -66,7 +66,7 @@ class TextMatchUpdater {
 
 		fNewName= processor.getNewElementName();
 		fCurrentNameLength= processor.getCurrentElementName().length();
-		fScanner= new RefactoringScanner(processor.getCurrentElementName());
+		fScanner= new RefactoringScanner(processor.getCurrentElementName(), processor.getCurrentElementQualifier());
 	}
 
 	static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{

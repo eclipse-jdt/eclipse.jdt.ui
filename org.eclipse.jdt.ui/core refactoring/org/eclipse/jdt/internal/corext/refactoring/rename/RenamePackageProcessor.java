@@ -242,6 +242,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return fPackage.getElementName();
 	}
 	
+	public String getCurrentElementQualifier() {
+		return ""; //$NON-NLS-1$
+	}
+	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkPackageName(newName);
