@@ -15,10 +15,7 @@ import java.util.Map;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
@@ -87,19 +84,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		try {
 			//TODO rewrite using the edit API (CodeFormatterUtil.format2)
-			// reshape the partition to get around some peculiarities of the formatter
-			Position toFormat= new Position(partition.offset, partition.length);
-			stripLeadingWS(document, toFormat);
-			stripTrailingWS(document, toFormat, partition);
-			
-			IDocument formattedDoc= new Document(CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), toFormat.offset, toFormat.length, indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences));
-			
-			int leadingEmptyLines= document.getNumberOfLines(partition.offset, toFormat.offset - partition.offset) - 1; // getNumberOfLines is one-based
-			int trailingEmptyLines= document.getNumberOfLines(toFormat.offset + toFormat.length, partition.offset + partition.length - (toFormat.offset + toFormat.length)) - 1;
-			int from= getLeadingWSOffset(leadingEmptyLines, formattedDoc);
-			int to= getTrailingWSOffset(trailingEmptyLines, formattedDoc);
-			String formatted= formattedDoc.get(from, to - from);
-			
+			final String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences);
 			final String raw= document.get(partition.getOffset(), partition.getLength());
 			if (formatted != null && !formatted.equals(raw))
 				document.replace(partition.getOffset(), partition.getLength(), formatted);
@@ -107,103 +92,6 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 			// Can only happen on concurrent document modification - log and bail out
 			JavaPlugin.log(exception);
 		}
-	}
-		
-
-	/**
-	 * Strips leading white space off the region described by <code>toFormat</code>
-	 * 
-	 * @param document the doc
-	 * @param toFormat the position
-	 * @throws BadLocationException
-	 */
-	private void stripLeadingWS(final IDocument document, final Position toFormat) throws BadLocationException {
-		// get rid of leading white space:
-		// partition is an entire line selection (from start of a line)
-		// the formatter, however, expects an offset that points to the first
-		// non-ws of the line.
-		int offset= toFormat.getOffset();
-		int length= toFormat.getLength();
-		for (int i= 0; i < length; i++) {
-			if (!Character.isWhitespace(document.getChar(offset + i)))
-				break;
-			toFormat.offset++;
-			toFormat.length--;
-		}
-	}
-
-	/**
-	 * Strips any trailing white space off the region described by <code>toFormat</code>.
-	 * If the number of lines is reduced, <code>partition</code> is also trimmed off its last
-	 * (emtpy) line.
-	 * 
-	 * @param document the document to format
-	 * @param toFormat the position describing the range to be formatted
-	 * @param partition the position describing the original range
-	 * @throws BadLocationException
-	 */
-	private void stripTrailingWS(final IDocument document, Position toFormat, Position partition) throws BadLocationException {
-		// strip an empty selected line end so we don't get additional lines
-		int offset= toFormat.getOffset();
-		int length= toFormat.getLength();
-		int line= document.getLineOfOffset(offset + length);
-		for (int i= length; i > 0; i--) {
-			if (!Character.isWhitespace(document.getChar(offset + i - 1)))
-				break;
-			toFormat.length--;
-		}
-		if (document.getLineOfOffset(toFormat.length + toFormat.offset) != line) {
-			IRegion region= document.getLineInformation(line - 1);
-			int endOfLine= region.getOffset() + region.getLength();
-			partition.setLength(endOfLine - partition.offset);
-		}
-	}
-
-	/**
-	 * Returns the offset of the line in <code>document</code> that is the
-	 * <code>leadingEmptyLine</code>th empty line before any non-WS comes in
-	 * <code>document</code>.
-	 * 
-	 * @param leadingEmptyLines the number of empty lines to leave
-	 * @param document the document
-	 * @return the index such that if the document is cut up to the offset, it will have <code>leadingEmptyLines</code> empty lines upfront
-	 * @throws BadLocationException
-	 */
-	private int getLeadingWSOffset(int leadingEmptyLines, IDocument document) throws BadLocationException {
-		// discard all leading ws except leadingEmtyLines lines
-		int nLines= document.getNumberOfLines();
-		int line= 0;
-		for (; line < nLines; line++) {
-			IRegion region= document.getLineInformation(line);
-			if (document.get(region.getOffset(), region.getLength()).trim().length() != 0)
-				break;
-		}
-		int wsLine= Math.max(line - leadingEmptyLines, 0);
-		return document.getLineOffset(wsLine);
-	}
-
-	/**
-	 * Returns the offset of the end of the line in <code>document</code> that is the
-	 * <code>trailingEmptyLine</code>th empty line after the last non-WS character in
-	 * <code>document</code>.
-	 * 
-	 * @param trailingEmptyLine the number of empty lines to leave
-	 * @param document the document
-	 * @return the index such that if the document is cut from the offset, it will have <code>trailingEmptyLine</code> empty lines at the end
-	 * @throws BadLocationException
-	 */
-	private int getTrailingWSOffset(int trailingEmptyLines, IDocument document) throws BadLocationException {
-		// discard all trailing ws
-		int numberOfLines= document.getNumberOfLines();
-		int line = numberOfLines - 1;
-		for (; line >= 0; line--) {
-			IRegion region= document.getLineInformation(line);
-			if (document.get(region.getOffset(), region.getLength()).trim().length() != 0)
-				break;
-		}
-		int wsLine= Math.min(line + trailingEmptyLines, numberOfLines);
-		IRegion region= document.getLineInformation(wsLine);
-		return region.getOffset() + region.getLength();
 	}
 
 	/*
