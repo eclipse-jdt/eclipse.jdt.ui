@@ -192,4 +192,13 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 			}	
 		}
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible && fTableViewer != null)
+			fTableViewer.getTable().setFocus();
+	}
+
 }
