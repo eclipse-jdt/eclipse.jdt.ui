@@ -310,8 +310,7 @@ public class EditTemplateDialog extends StatusDialog {
 			fSuppressError= false;
 			updateButtons();			
 		} else if (w == fContextCombo) {
-			String name= fContextCombo.getText();
-			String contextId= getContextId(name);
+			String contextId= getContextId();
 			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
 			IDocument document= fPatternEditor.getDocument();
 			String prefix= getPrefix();
@@ -322,22 +321,23 @@ public class EditTemplateDialog extends StatusDialog {
 		}	
 	}
 	
-	private String getContextId(String name) {
-		if (name == null)
-			return name;
-		
-		for (int i= 0; i < fContextTypes.length; i++) {
-			if (name.equals(fContextTypes[i][1])) {
-				return fContextTypes[i][0];	
+	private String getContextId() {
+		if (fContextCombo != null && !fContextCombo.isDisposed()) {
+			String name= fContextCombo.getText();
+			for (int i= 0; i < fContextTypes.length; i++) {
+				if (name.equals(fContextTypes[i][1])) {
+					return fContextTypes[i][0];	
+				}
 			}
 		}
-		return name;
+		
+		return fTemplate.getContextTypeId();
 	}
 
 	protected void doSourceChanged(IDocument document) {
 		String text= document.get();
 		fValidationStatus.setOK();
-		TemplateContextType contextType= fContextTypeRegistry.getContextType(getContextId(fContextCombo.getText()));
+		TemplateContextType contextType= fContextTypeRegistry.getContextType(getContextId());
 		if (contextType != null) {
 			try {
 				contextType.validate(text);
@@ -422,20 +422,12 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 	
 	private String getPrefix() {
-		String prefix;
-		final String context= fContextCombo.getText();
-		String id;
-		if (context.trim().length() == 0)
-			id= fTemplate.getContextTypeId();
-		else
-			id= getContextId(context);
+		String id= getContextId();
 		int idx= getIndex(id);
 		if (idx != -1)
-			prefix= fContextTypes[idx][2];
+			return fContextTypes[idx][2];
 		else
-			prefix= ""; //$NON-NLS-1$
-
-		return prefix;
+			return ""; //$NON-NLS-1$
 	}
 
 	private void handleVerifyKeyPressed(VerifyEvent event) {
@@ -548,7 +540,8 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 	
 	protected void okPressed() {
-		fTemplate= new Template(fNameText.getText(), fDescriptionText.getText(), getContextId(fContextCombo.getText()), getPattern());
+		String name= fNameText == null ? fTemplate.getName() : fNameText.getText();
+		fTemplate= new Template(name, fDescriptionText.getText(), getContextId(), getPattern());
 		super.okPressed();
 	}
 	
