@@ -46,9 +46,11 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 	
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
 		IMethod[] methods= type.getMethods();
-		String constructorName= type.getElementName();
-		if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
-			result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance));
+		if (!type.isInterface()) {
+			String constructorName= type.getElementName();
+			if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
+				result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance));
+			}
 		}
 		
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
@@ -119,6 +121,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		String[] empty= new String[0];
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
 		String declTypeName= fType.getTypeQualifiedName('.');
+		boolean isInterface= fType.isInterface();
 
 		StringBuffer buf= new StringBuffer();
 		if (addComments) {
@@ -129,7 +132,9 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 			}					
 		}
 		if (fReturnTypeSig != null) {
-			buf.append("private "); //$NON-NLS-1$
+			if (!isInterface) {
+				buf.append("private "); //$NON-NLS-1$
+			}
 		} else {
 			buf.append("public "); //$NON-NLS-1$
 		}
@@ -139,14 +144,18 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		buf.append(' ');
 		buf.append(fMethodName);
-		buf.append("() {\n"); //$NON-NLS-1$
-	
-		String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", String.valueOf('\n')); //$NON-NLS-1$
-		if (body != null) {
-			buf.append(body);
-			buf.append('\n');
+		if (isInterface) {
+			buf.append("();\n"); //$NON-NLS-1$
+		} else {
+			buf.append("() {\n"); //$NON-NLS-1$
+		
+			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", String.valueOf('\n')); //$NON-NLS-1$
+			if (body != null) {
+				buf.append(body);
+				buf.append('\n');
+			}
+			buf.append("}\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n"); //$NON-NLS-1$
 		String stub=  buf.toString(); 
 		
 		// use the code formatter
