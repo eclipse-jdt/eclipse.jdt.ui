@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -26,7 +23,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypeParameterTests extends RefactoringTest {
@@ -82,17 +78,9 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		processor.setNewElementName(newParameterName);
 		processor.setUpdateReferences(references);
 
-		List elements= new ArrayList();
-		elements.add(typeParameter);
-		List args= new ArrayList();
-		args.add(new RenameArguments(newParameterName, references));
-		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
-
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-
-//		ParticipantTesting.testRename(renameHandles, (RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
@@ -118,17 +106,9 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		processor.setNewElementName(newParameterName);
 		processor.setUpdateReferences(references);
 
-		List elements= new ArrayList();
-		elements.add(typeParameter);
-		List args= new ArrayList();
-		args.add(new RenameArguments(newParameterName, references));
-		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
-
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-
-//		ParticipantTesting.testRename(renameHandles, (RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
