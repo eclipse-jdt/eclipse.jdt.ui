@@ -15,9 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
@@ -169,25 +166,21 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 
-			if (Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection")) {
-				final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
-				IAction dummy= new Action() {};
-				folding.add(dummy); // dummy, gets removed below
-				folding.addMenuListener(new IMenuListener() {
-
-					public void menuAboutToShow(IMenuManager manager) {
-						manager.removeAll();
-						IEditorPart part= getActiveEditorPart();
-						if (part instanceof JavaEditor) {
-							JavaEditor editor= (JavaEditor) part;
-							FoldingActionGroup foldingActions= editor.getFoldingActionGroup();
-							if (foldingActions != null)
-								foldingActions.fillMenu(manager);
-						}
-					}
-				});
-				editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
-			}
+//			final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
+//			folding.setRemoveAllWhenShown(true);
+//			folding.add(new Action("dummy") {}); //$NON-NLS-1$
+//			folding.addMenuListener(new IMenuListener() {
+//				public void menuAboutToShow(IMenuManager manager) {
+//					IEditorPart part= getActiveEditorPart();
+//					if (part instanceof JavaEditor) {
+//						JavaEditor javaEditor= (JavaEditor)part;
+//						FoldingActionGroup foldingActions= javaEditor.getFoldingActionGroup();
+//						if (foldingActions != null)
+//							foldingActions.fillMenu(manager);
+//					}
+//				}
+//			});
+//			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}

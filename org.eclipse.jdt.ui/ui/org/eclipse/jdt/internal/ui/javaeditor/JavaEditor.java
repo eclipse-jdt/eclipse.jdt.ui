@@ -2087,7 +2087,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected CompositeActionGroup fActionGroups;
 
 	/**
-	 * The actiong group for folding. 
+	 * The action group for folding.
+	 *  
 	 * @since 3.0
 	 */
 	private FoldingActionGroup fFoldingGroup;
@@ -2843,8 +2844,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		if (isFoldingEnabled())
-			fFoldingGroup= new FoldingActionGroup(this, getViewer());
+		fFoldingGroup= new FoldingActionGroup(this, getViewer());
 		
 		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		resAction= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
@@ -3246,7 +3246,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		synchronizeOutlinePageSelection();
 	}
 	
-	private boolean isFoldingEnabled() {
+	boolean isFoldingEnabled() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 	}
 
@@ -3255,9 +3255,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		
+
 		if (isFoldingEnabled()) {
-			
+
 			ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
 			
 			fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
@@ -3273,9 +3273,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
 			if (fProjectionModelUpdater != null)
 				fProjectionModelUpdater.install(this, projectionViewer);
-			
-			if (isFoldingEnabled())
-				projectionViewer.doOperation(ProjectionViewer.TOGGLE);
+				
+			projectionViewer.doOperation(ProjectionViewer.TOGGLE);
 		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
@@ -4215,8 +4214,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Returns the folding action group, or <code>null</code> if there is none.
-	 * @return the folding action group, or <code>null</code> if there is none
 	 * 
+	 * @return the folding action group, or <code>null</code> if there is none
 	 * @since 3.0
 	 */
 	protected FoldingActionGroup getFoldingActionGroup() {
