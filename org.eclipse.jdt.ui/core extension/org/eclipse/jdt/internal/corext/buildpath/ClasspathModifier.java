@@ -651,7 +651,7 @@ public class ClasspathModifier {
 			}
 			exclude(query.getOutputLocation(), entries, new ArrayList(), project, null);
 			element.setAttribute(CPListElement.OUTPUT, query.getOutputLocation());
-			CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, element.getAttribute(CPListElement.OUTPUT));
+			CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, element.getAttribute(CPListElement.OUTPUT), true);
 			updateClasspath(entries, project, new NullProgressMonitor());
 			return outputFolder;
 		}
@@ -677,7 +677,7 @@ public class ClasspathModifier {
 					continue;
 				IClasspathEntry entry= roots[i].getRawClasspathEntry();
 				CPListElement element= CPListElement.createFromExisting(entry, project);
-				CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, element.getAttribute(CPListElement.OUTPUT));
+				CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, element.getAttribute(CPListElement.OUTPUT), true);
 				entries.add(outputFolder);
 			}
 			reset(entries, project, new SubProgressMonitor(monitor, 10));
@@ -1406,7 +1406,7 @@ public class ClasspathModifier {
 	 */
 	private CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
 		entry.setAttribute(CPListElement.OUTPUT, null);
-		CPListElementAttribute outputFolder= new CPListElementAttribute(entry, CPListElement.OUTPUT, entry.getAttribute(CPListElement.OUTPUT));
+		CPListElementAttribute outputFolder= new CPListElementAttribute(entry, CPListElement.OUTPUT, entry.getAttribute(CPListElement.OUTPUT), true);
 		return outputFolder;
 	}
 

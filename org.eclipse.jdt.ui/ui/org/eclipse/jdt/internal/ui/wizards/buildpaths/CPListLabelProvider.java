@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -23,17 +22,20 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.IWorkbench;
+
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -102,19 +104,10 @@ public class CPListLabelProvider extends LabelProvider {
 			} else {
 				buf.append(notAvailable);
 			}
-		} else if (key.equals(CPListElement.SOURCEATTACHMENTROOT)) {
-			buf.append(NewWizardMessages.getString("CPListLabelProvider.source_attachment_root.label")); //$NON-NLS-1$
-			IPath path= (IPath) attrib.getValue();
-			if (path != null && !path.isEmpty()) {
-				buf.append(path.toString());
-			} else {
-				buf.append(notAvailable);
-			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			buf.append(NewWizardMessages.getString("CPListLabelProvider.javadoc_location.label")); //$NON-NLS-1$
-			URL path= (URL) attrib.getValue();
-			if (path != null) {
-				String str= path.toExternalForm();
+			String str= (String) attrib.getValue();
+			if (str != null) {
 				String prefix= JavaDocLocations.ARCHIVE_PREFIX;
 				if (str.startsWith(prefix)) {
 					int sepIndex= str.lastIndexOf('!');
@@ -168,6 +161,32 @@ public class CPListLabelProvider extends LabelProvider {
 				}
 			} else {
 				buf.append(NewWizardMessages.getString("CPListLabelProvider.all")); //$NON-NLS-1$
+			}
+		} else if (key.equals(CPListElement.ACCESSRULES)) {
+			IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
+			int nRules= rules != null ? rules.length : 0;
+
+			Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
+			if (combined != null) {
+				if (combined.booleanValue()) {
+					if (nRules > 0) {
+						buf.append(NewWizardMessages.getFormattedString("CPListLabelProvider.access_rules_enabled_combined", String.valueOf(nRules))); //$NON-NLS-1$
+					} else {
+						buf.append(NewWizardMessages.getFormattedString("CPListLabelProvider.access_rules_combined_only", String.valueOf(nRules))); //$NON-NLS-1$
+					}
+				} else {
+					if (nRules > 0) {
+						buf.append(NewWizardMessages.getFormattedString("CPListLabelProvider.access_rules_enabled_no_combined", String.valueOf(nRules))); //$NON-NLS-1$
+					} else {
+						buf.append(NewWizardMessages.getString("CPListLabelProvider.access_rules_disabled")); //$NON-NLS-1$
+					}
+				}
+			} else {
+				if (nRules > 0) {
+					buf.append(NewWizardMessages.getFormattedString("CPListLabelProvider.access_rules_enabled", String.valueOf(nRules))); //$NON-NLS-1$
+				} else {
+					buf.append(NewWizardMessages.getString("CPListLabelProvider.access_rules_disabled")); //$NON-NLS-1$
+				}
 			}
 		}
 		return buf.toString();
@@ -316,7 +335,10 @@ public class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
 			} else if (key.equals(CPListElement.INCLUSION)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
+			} else if (key.equals(CPListElement.ACCESSRULES)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_REFACTORING_WARNING);
 			}
+			
 			return  fRegistry.get(fVariableImage);
 		} else if (element instanceof CPUserLibraryElement) {
 			return fRegistry.get(JavaPluginImages.DESC_OBJS_LIBRARY);

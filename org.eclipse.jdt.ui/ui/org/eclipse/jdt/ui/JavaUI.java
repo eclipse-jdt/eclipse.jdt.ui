@@ -20,18 +20,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.jdt.core.IBufferFactory;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Shell;
 
@@ -43,6 +31,19 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import org.eclipse.jdt.core.IBufferFactory;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
@@ -700,11 +701,13 @@ public final class JavaUI {
 	 * @param url the Javadoc location to set. This location should contain index.html and
 	 * a file 'package-list'. <code>null</code> clears the current documentation
 	 * location.
+	 * @deprecated Javadoc is now attached to the classpath entry. 
+	 * Evaluate the libraries classpath entry and reconfigure the Javadoc location there.
 	 * 
 	 * @since 2.0
 	 */
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
-		JavaDocLocations.setLibraryJavadocLocation(archivePath, url);
+		// deprecated
 	}
 	
 	/**
@@ -716,13 +719,15 @@ public final class JavaUI {
 	 * a file 'package-list'. <code>null</code> is a valid location entry and clears the current documentation
 	 * location. The length of the location array must be equals to the number of archive paths passed.
 	 * 
+	 * 	@deprecated Javadoc is now attached to the classpath entry. 
+	 * Evaluate the libraries classpath entry and reconfigure the Javadoc location there.
+	 * 
 	 * @since 3.0
 	 */
 	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
-		Assert.isTrue(archivePaths != null && urls != null && urls.length == archivePaths.length);
-		JavaDocLocations.setLibraryJavadocLocations(archivePaths, urls);
+		// deprecated
 	}
-
+	
 	/**
 	 * Returns the Javadoc location for an archive or <code>null</code> if no
 	 * location is available.
@@ -731,10 +736,30 @@ public final class JavaUI {
 	 * or an external path in case of an external library.
 	 * @return the Javadoc location for an archive or <code>null</code>.
 	 * 
+	 * @deprecated Javadoc is now attached to the classpath entry. Use {@link #getJavadocBaseLocation(IJavaElement)}
+	 * with the archive's {@link IPackageFragmentRoot} or use {@link #getLibraryJavadocLocation(IClasspathEntry)}
+	 * with the archive's {@link IClasspathEntry}.
+	 * 
 	 * @since 2.0
 	 */	
 	public static URL getLibraryJavadocLocation(IPath archivePath) {
-		return JavaDocLocations.getLibraryJavadocLocation(archivePath);
+		return null;
+	}
+	
+	/**
+	 * Returns the Javadoc location for library's classpath entry or <code>null</code> if no
+	 * location is available. Note that only classpath entries of kind {@link IClasspathEntry#CPE_LIBRARY} and
+	 * {@link IClasspathEntry#CPE_VARIABLE} support Javadoc locations.
+	 * 
+	 * @param entry the classpath entry to get the Javadoc location for
+	 * @return the Javadoc location or<code>null</code> if no Javadoc location is available
+	 * @throws IllegalArgumentException Thrown when the entry is <code>null</code> or not of kind
+	 * {@link IClasspathEntry#CPE_LIBRARY} or {@link IClasspathEntry#CPE_VARIABLE}.
+	 * 
+	 * @since 3.1
+	 */	
+	public static URL getLibraryJavadocLocation(IClasspathEntry entry) {
+		return JavaDocLocations.getLibraryJavadocLocation(entry);
 	}
 	
 	/**

@@ -12,17 +12,17 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -47,14 +46,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import org.eclipse.jdt.core.ClasspathContainerInitializer;
-import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -75,34 +72,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  * variable entries and for normal (internal or external) jar.
  */
 public class SourceAttachmentBlock {
-	
-	private static class UpdatedClasspathContainer implements IClasspathContainer {
-
-		private IClasspathEntry[] fNewEntries;
-		private IClasspathContainer fOriginal;
-
-		public UpdatedClasspathContainer(IClasspathContainer original, IClasspathEntry[] newEntries) {
-			fNewEntries= newEntries;
-			fOriginal= original;
-		}
-
-		public IClasspathEntry[] getClasspathEntries() {
-			return fNewEntries;
-		}
-
-		public String getDescription() {
-			return fOriginal.getDescription();
-		}
-
-		public int getKind() {
-			return fOriginal.getKind();
-		}
-
-		public IPath getPath() {
-			return fOriginal.getPath();
-		}
-	}
-	
+		
 	private IStatusChangeListener fContext;
 	
 	private StringButtonDialogField fFileNameField;
@@ -215,18 +185,10 @@ public class SourceAttachmentBlock {
 	}
 	
 	public IClasspathEntry getNewEntry() {
-		boolean isExported= fEntry.isExported();
-		IPath[] inclusionPatterns= fEntry.getInclusionPatterns();
-		IPath[] exclusionPatterns= fEntry.getExclusionPatterns();
-		IClasspathEntry newEntry;
-		if (fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-			newEntry= JavaCore.newVariableEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), inclusionPatterns, exclusionPatterns, isExported);
-		} else {
-			newEntry= JavaCore.newLibraryEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), inclusionPatterns, exclusionPatterns, isExported);
-		}
-		return newEntry;
+		CPListElement elem= CPListElement.createFromExisting(fEntry, fProject);
+		elem.setAttribute(CPListElement.SOURCEATTACHMENT, getSourceAttachmentPath());
+		return elem.getClasspathEntry();
 	}
-	
 		
 	/**
 	 * Creates the control
@@ -611,7 +573,7 @@ public class SourceAttachmentBlock {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
 				try {
-					attachSource(shell, newEntry, jproject, containerPath, monitor);
+					BuildPathSupport.modifyClasspathEntry(shell, newEntry, jproject, containerPath, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -625,74 +587,6 @@ public class SourceAttachmentBlock {
 	public IRunnableWithProgress getRunnable(final Shell shell) {
 		return getRunnable(shell, getNewEntry(), fProject, fContainerPath);
 	}	
-	
-	
-	protected static void attachSource(Shell shell, IClasspathEntry newEntry, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
-		if (containerPath != null) {
-			updateContainerClasspath(jproject, containerPath, newEntry, monitor);
-		} else {
-			updateProjectClasspath(shell, jproject, newEntry, monitor);
-		}
-	}
-
-	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
-		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
-		IClasspathEntry[] entries= container.getClasspathEntries();
-		IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
-			if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
-				newEntries[i]= newEntry;
-			} else {
-				newEntries[i]= curr;
-			}
-		}
-		IClasspathContainer updatedContainer= new UpdatedClasspathContainer(container, newEntries);
-			
-		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
-		initializer.requestClasspathContainerUpdate(containerPath, jproject, updatedContainer);
-		monitor.worked(1);
-	}
-
-	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
-		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
-		int nEntries= oldClasspath.length;
-		ArrayList newEntries= new ArrayList(nEntries + 1);
-		int entryKind= newEntry.getEntryKind();
-		IPath jarPath= newEntry.getPath();
-		boolean found= false;
-		for (int i= 0; i < nEntries; i++) {
-			IClasspathEntry curr= oldClasspath[i];
-			if (curr.getEntryKind() == entryKind && curr.getPath().equals(jarPath)) {
-				// add modified entry
-				newEntries.add(newEntry);
-				found= true;
-			} else {
-				newEntries.add(curr);
-			}
-		}
-		if (!found) {
-			if (newEntry.getSourceAttachmentPath() == null || !putJarOnClasspathDialog(shell)) {
-				return;
-			}
-			// add new
-			newEntries.add(newEntry);			
-		}
-		IClasspathEntry[] newClasspath= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
-		jproject.setRawClasspath(newClasspath, monitor);
-	}
-	
-	private static boolean putJarOnClasspathDialog(Shell shell) {
-		final boolean[] result= new boolean[1];
-		shell.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				String title= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.message"); //$NON-NLS-1$
-				result[0]= MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, message);
-			}
-		});
-		return result[0];
-	}
 	
 	
 }

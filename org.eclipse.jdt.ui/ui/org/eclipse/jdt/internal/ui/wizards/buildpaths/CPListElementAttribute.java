@@ -10,28 +10,53 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.Assert;
+
 /**
   */
 public class CPListElementAttribute {
-	
+	/*
 	public static final String K_SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
 	public static final String K_SOURCEATTACHMENTROOT= "rootpath"; //$NON-NLS-1$
 	public static final String K_JAVADOC= "javadoc"; //$NON-NLS-1$
 	public static final String K_OUTPUT= "output"; //$NON-NLS-1$
 	public static final String K_EXCLUSION= "exclusion"; //$NON-NLS-1$
-	
+	*/
 	private CPListElement fParent;
 	private String fKey;
 	private Object fValue;
+	private final boolean fBuiltIn;
 	
-	public CPListElementAttribute(CPListElement parent, String key, Object value) {
+	public CPListElementAttribute(CPListElement parent, String key, Object value, boolean builtIn) {
 		fKey= key;
 		fValue= value;
 		fParent= parent;
+		fBuiltIn= builtIn;
+		if (!builtIn) {
+			Assert.isTrue(value instanceof String || value == null);
+		}	
+	}
+	
+	public IClasspathAttribute newClasspathAttribute() {
+		Assert.isTrue(!fBuiltIn);
+		if (fValue != null) {
+			return JavaCore.newClasspathAttribute(fKey, (String) fValue);
+		}
+		return null;
 	}
 	
 	public CPListElement getParent() {
 		return fParent;
+	}
+	
+	/**
+	 * @return Returns <code>true</code> if the attribute is a built in attribute.
+	 */
+	public boolean isBuiltIn() {
+		return fBuiltIn;
 	}
 
 	/**
@@ -55,7 +80,7 @@ public class CPListElementAttribute {
 	 */
 	public void setValue(Object value) {
 		fValue= value;
-	}	
+	}
 	
     public boolean equals(Object obj) {
         if (!(obj instanceof CPListElementAttribute))

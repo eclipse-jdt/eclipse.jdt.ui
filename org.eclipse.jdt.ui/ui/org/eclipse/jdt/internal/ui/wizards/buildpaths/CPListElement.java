@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,17 +28,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 public class CPListElement {
 	
 	public static final String SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
-	public static final String SOURCEATTACHMENTROOT= "rootpath"; //$NON-NLS-1$
-	public static final String JAVADOC= "javadoc"; //$NON-NLS-1$
 	public static final String OUTPUT= "output"; //$NON-NLS-1$
 	public static final String EXCLUSION= "exclusion"; //$NON-NLS-1$
 	public static final String INCLUSION= "inclusion"; //$NON-NLS-1$
+	
+	public static final String ACCESSRULES= "accessrules"; //$NON-NLS-1$
+	public static final String COMBINE_ACCESSRULES= "combineaccessrules"; //$NON-NLS-1$
+	
+	public static final String JAVADOC= JavaDocLocations.ATTRIB_ID;
 	
 	private IJavaProject fProject;
 	
@@ -70,24 +75,22 @@ public class CPListElement {
 		
 		switch (entryKind) {
 			case IClasspathEntry.CPE_SOURCE:
-				createAttributeElement(OUTPUT, null);
-				createAttributeElement(INCLUSION, new Path[0]);
-				createAttributeElement(EXCLUSION, new Path[0]);
+				createAttributeElement(OUTPUT, null, true);
+				createAttributeElement(INCLUSION, new Path[0], true);
+				createAttributeElement(EXCLUSION, new Path[0], true);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
-				createAttributeElement(SOURCEATTACHMENT, null);
-				createAttributeElement(JAVADOC, null);
-				createAttributeElement(INCLUSION, new Path[0]);
-				createAttributeElement(EXCLUSION, new Path[0]);
+				createAttributeElement(SOURCEATTACHMENT, null, true);
+				createAttributeElement(JAVADOC, null, false);
+				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
-				createAttributeElement(INCLUSION, new Path[0]);
-				createAttributeElement(EXCLUSION, new Path[0]);
+				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
+				createAttributeElement(COMBINE_ACCESSRULES, Boolean.FALSE, true); // not rendered
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
-				createAttributeElement(INCLUSION, new Path[0]);
-				createAttributeElement(EXCLUSION, new Path[0]);
+				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
@@ -102,6 +105,7 @@ public class CPListElement {
 				break;
 			default:
 		}
+		
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
@@ -111,24 +115,50 @@ public class CPListElement {
 		return fCachedEntry;
 	}
 	
+	
+	private IClasspathAttribute[] getClasspathAttributes() {
+		ArrayList res= new ArrayList();
+		for (int i= 0; i < fChildren.size(); i++) {
+			Object curr= fChildren.get(i);
+			if (curr instanceof CPListElementAttribute) {
+				CPListElementAttribute elem= (CPListElementAttribute) curr;
+				if (!elem.isBuiltIn() && elem.getValue() != null) {
+					res.add(elem.newClasspathAttribute());
+				}
+			}
+		}
+		return (IClasspathAttribute[]) res.toArray(new IClasspathAttribute[res.size()]);
+	}
+	
 
 	private IClasspathEntry newClasspathEntry() {
-		IPath[] inclusionPattern= (IPath[]) getAttribute(INCLUSION);
-		IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
+
+		IClasspathAttribute[] extraAttributes= getClasspathAttributes();
 		switch (fEntryKind) {
 			case IClasspathEntry.CPE_SOURCE:
+				IPath[] inclusionPattern= (IPath[]) getAttribute(INCLUSION);
+				IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
 				IPath outputLocation= (IPath) getAttribute(OUTPUT);
-				return JavaCore.newSourceEntry(fPath, inclusionPattern, exclusionPattern, outputLocation);
-			case IClasspathEntry.CPE_LIBRARY:
+				return JavaCore.newSourceEntry(fPath, inclusionPattern, exclusionPattern, outputLocation, extraAttributes);
+			case IClasspathEntry.CPE_LIBRARY: {
 				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
-				return JavaCore.newLibraryEntry(fPath, attach, null, inclusionPattern, exclusionPattern, isExported());
-			case IClasspathEntry.CPE_PROJECT:
-				return JavaCore.newProjectEntry(fPath, inclusionPattern, exclusionPattern, isExported());
-			case IClasspathEntry.CPE_CONTAINER:
-				return JavaCore.newContainerEntry(fPath, inclusionPattern, exclusionPattern, isExported());
-			case IClasspathEntry.CPE_VARIABLE:
+				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				return JavaCore.newLibraryEntry(fPath, attach, null, accesRules, extraAttributes, isExported());
+			}
+			case IClasspathEntry.CPE_PROJECT: {
+				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				boolean combineAccessRules= ((Boolean) getAttribute(COMBINE_ACCESSRULES)).booleanValue();
+				return JavaCore.newProjectEntry(fPath, accesRules, combineAccessRules, extraAttributes, isExported());
+			}
+			case IClasspathEntry.CPE_CONTAINER: {
+				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				return JavaCore.newContainerEntry(fPath, accesRules, extraAttributes, isExported());
+			}
+			case IClasspathEntry.CPE_VARIABLE: {
 				IPath varAttach= (IPath) getAttribute(SOURCEATTACHMENT);
-				return JavaCore.newVariableEntry(fPath, varAttach, null, inclusionPattern, exclusionPattern, isExported());
+				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				return JavaCore.newVariableEntry(fPath, varAttach, null, accesRules, extraAttributes, isExported());
+			}
 			default:
 				return null;
 		}
@@ -164,8 +194,16 @@ public class CPListElement {
 			return null;
 		}
 		if (key.equals(EXCLUSION) || key.equals(INCLUSION)) {
-			Assert.isNotNull(value);
+			Assert.isTrue(value != null || fEntryKind != IClasspathEntry.CPE_SOURCE);
 		}
+		
+		if (key.equals(ACCESSRULES)) {
+			Assert.isTrue(value != null || fEntryKind == IClasspathEntry.CPE_SOURCE);
+		}
+		if (key.equals(COMBINE_ACCESSRULES)) {
+			Assert.isTrue(value instanceof Boolean);
+		}
+		
 		attribute.setValue(value);
 		attributeChanged(key);
 		return attribute;
@@ -184,6 +222,7 @@ public class CPListElement {
 		return null;		
 	}
 	
+	
 	public Object getAttribute(String key) {
 		CPListElementAttribute attrib= findAttributeElement(key);
 		if (attrib != null) {
@@ -192,8 +231,8 @@ public class CPListElement {
 		return null;
 	}
 	
-	private void createAttributeElement(String key, Object value) {
-		fChildren.add(new CPListElementAttribute(this, key, value));
+	private void createAttributeElement(String key, Object value, boolean builtIn) {
+		fChildren.add(new CPListElementAttribute(this, key, value, builtIn));
 	}	
 	
 	private static boolean isFiltered(Object entry, String[] filteredKeys) {
@@ -225,8 +264,12 @@ public class CPListElement {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
-		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
-			return getFilteredChildren(new String[] { INCLUSION, EXCLUSION });
+		/*if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
+			// don't show access ruls for children of containers
+			return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES });
+		}*/
+		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
+			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
 		}
 		return fChildren.toArray();
 	}
@@ -245,40 +288,12 @@ public class CPListElement {
 	 */
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
-			CPListElement elem= (CPListElement)other;
-			if (!sameAttribute(getAttribute(CPListElement.INCLUSION), elem.getAttribute(CPListElement.INCLUSION)))
-                return false;
-            if (!sameAttribute(getAttribute(CPListElement.EXCLUSION), elem.getAttribute(CPListElement.EXCLUSION)))
-                return false;
-            if (!sameOutputAttribute(getAttribute(CPListElement.OUTPUT), elem.getAttribute(CPListElement.OUTPUT)))
-                return false;
-			return elem.fEntryKind == fEntryKind && elem.fPath.equals(fPath);
+			CPListElement elem= (CPListElement) other;
+			return getClasspathEntry().equals(elem.getClasspathEntry());
 		}
 		return false;
 	}
-    
-    private boolean sameAttribute(Object own, Object other) {
-        if (own == null || other == null)
-            return own == other;
-        IPath[] ownPaths= (IPath[]) own;
-        IPath[] otherPaths= (IPath[]) other;
-        if (ownPaths.length != otherPaths.length)
-            return false;
-        for(int i= 0; i < ownPaths.length; i++) {
-            if (!ownPaths[i].equals(otherPaths[i]))
-                return false;
-        }
-        return true;
-    }
-    
-    private boolean sameOutputAttribute(Object own, Object other) {
-        if (own == null || other == null)
-            return own == other;
-        IPath ownPath= (IPath) own;
-        IPath otherPath= (IPath) other;
-        return ownPath.equals(otherPath);
-    }
-	
+    	
 	/*
 	 * @see Object#hashCode()
 	 */
@@ -339,21 +354,19 @@ public class CPListElement {
 		return createFromExisting(null, curr, project);
 	}
 		
-	
 	public static CPListElement createFromExisting(Object parent, IClasspathEntry curr, IJavaProject project) {
 		IPath path= curr.getPath();
-		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
 		// get the resource
 		IResource res= null;
 		boolean isMissing= false;
-		URL javaDocLocation= null;
 
 		switch (curr.getEntryKind()) {
 			case IClasspathEntry.CPE_CONTAINER:
 				res= null;
 				try {
-					isMissing= (JavaCore.getClasspathContainer(path, project) == null);
+					isMissing= project != null && (JavaCore.getClasspathContainer(path, project) == null);
 				} catch (JavaModelException e) {
 					isMissing= true;
 				}
@@ -362,7 +375,6 @@ public class CPListElement {
 				IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
 				res= null;
 				isMissing=  root.findMember(resolvedPath) == null && !resolvedPath.toFile().isFile();
-				javaDocLocation= JavaUI.getLibraryJavadocLocation(resolvedPath);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 				res= root.findMember(path);
@@ -375,7 +387,6 @@ public class CPListElement {
 					}
 					isMissing= !path.toFile().isFile(); // look for external JARs
 				}
-				javaDocLocation= JavaUI.getLibraryJavadocLocation(path);
 				break;
 			case IClasspathEntry.CPE_SOURCE:
 				path= path.removeTrailingSeparator();
@@ -395,12 +406,19 @@ public class CPListElement {
 		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, res);
 		elem.setExported(curr.isExported());
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
-		elem.setAttribute(JAVADOC, javaDocLocation);
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
 		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns());
-		elem.setAttribute(INCLUSION, curr.getInclusionPatterns()); 
+		elem.setAttribute(INCLUSION, curr.getInclusionPatterns());
+		elem.setAttribute(ACCESSRULES, curr.getAccessRules());
+		elem.setAttribute(COMBINE_ACCESSRULES, new Boolean(curr.combineAccessRules())); 
+		
+		IClasspathAttribute[] extraAttributes= curr.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			IClasspathAttribute attrib= extraAttributes[i];
+			elem.setAttribute(attrib.getName(), attrib.getValue());
+		}
 
-		if (project.exists()) {
+		if (project != null && project.exists()) {
 			elem.setIsMissing(isMissing);
 		}
 		return elem;
@@ -416,9 +434,8 @@ public class CPListElement {
 		return buf;
 	}
 	
-	public static StringBuffer appendEncodedURL(URL url, StringBuffer buf) {
-		if (url != null) {
-			String str= url.toExternalForm();
+	public static StringBuffer appendEncodedString(String str, StringBuffer buf) {
+		if (str != null) {
 			buf.append('[').append(str.length()).append(']').append(str);
 		} else {
 			buf.append('[').append(']');
@@ -438,56 +455,58 @@ public class CPListElement {
 		return buf;
 	}
 	
+	public static StringBuffer appendEncodedAccessRules(IAccessRule[] rules, StringBuffer buf) {
+		if (rules != null) {
+			buf.append('[').append(rules.length).append(']');
+			for (int i= 0; i < rules.length; i++) {
+				appendEncodePath(rules[i].getPattern(), buf).append(';');
+				buf.append(rules[i].getKind()).append(';');
+			}
+		} else {
+			buf.append('[').append(']');
+		}
+		return buf;
+	}
+	
 
 	public StringBuffer appendEncodedSettings(StringBuffer buf) {
 		buf.append(fEntryKind).append(';');
 		appendEncodePath(fPath, buf).append(';');
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
 		switch (fEntryKind) {
-			case IClasspathEntry.CPE_SOURCE:
+			case IClasspathEntry.CPE_SOURCE: {
 				IPath output= (IPath) getAttribute(OUTPUT);
 				appendEncodePath(output, buf).append(';');
+				IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
+				appendEncodedFilter(exclusion, buf).append(';');
+				IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
+				appendEncodedFilter(inclusion, buf).append(';');
+			}
 			case IClasspathEntry.CPE_LIBRARY:
-			case IClasspathEntry.CPE_VARIABLE:
+			case IClasspathEntry.CPE_VARIABLE: {
 				IPath sourceAttach= (IPath) getAttribute(SOURCEATTACHMENT);
 				appendEncodePath(sourceAttach, buf).append(';');
-				URL javadoc= (URL) getAttribute(JAVADOC);
-				appendEncodedURL(javadoc, buf).append(';');				
+				String javadoc= (String) getAttribute(JAVADOC);
+				appendEncodedString(javadoc, buf).append(';');
+				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				appendEncodedAccessRules(accessRules, buf).append(';');	
 				break;
+			}
+			case IClasspathEntry.CPE_PROJECT: {
+				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				appendEncodedAccessRules(accessRules, buf).append(';');
+				Boolean combineRules= (Boolean) getAttribute(COMBINE_ACCESSRULES);
+				buf.append(combineRules.booleanValue()).append(';');
+				break;
+			}
+			case IClasspathEntry.CPE_CONTAINER: {
+				IAccessRule[] accessRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				appendEncodedAccessRules(accessRules, buf).append(';');	
+				break;
+			}
 			default:
 		}
-		IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
-		appendEncodedFilter(exclusion, buf);
-		IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
-		appendEncodedFilter(inclusion, buf);
 		return buf;
 	}
-
-
-	/**
-	 * Adds the javadoc location to the given arrays.
-	 */
-	public void collectJavaDocLocations(ArrayList paths, ArrayList urls) {
-		int entryKind= getEntryKind();
-		if (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE) {
-			URL javadocLocation= (URL) getAttribute(CPListElement.JAVADOC);
-			IPath path= getPath();
-			if (entryKind == IClasspathEntry.CPE_VARIABLE) {
-				path= JavaCore.getResolvedVariablePath(path);
-			}
-			if (path != null) {
-				paths.add(path);
-				urls.add(javadocLocation);
-			}			
-		} else if (entryKind == IClasspathEntry.CPE_CONTAINER) {
-			Object[] children= getChildren(false);
-			for (int i= 0; i < children.length; i++) {
-				Object curr= children[i];
-				if (curr instanceof CPListElement) {
-					((CPListElement) curr).collectJavaDocLocations(paths, urls);
-				}
-			}
-		}
-	}	
 
 }

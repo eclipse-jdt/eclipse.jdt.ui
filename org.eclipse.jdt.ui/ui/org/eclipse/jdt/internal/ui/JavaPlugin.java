@@ -384,7 +384,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 			});
 		}
 	
+
 		installPreferenceStoreBackwardsCompatibility();
+		
+		if (!getPreferenceStore().getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
+			JavaDocLocations.migrateToClasspathAttributes();
+		}
 		
 		AllTypesCache.initialize();
 		
@@ -506,8 +511,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fJavaTextTools.dispose();
 				fJavaTextTools= null;
 			}
-			
-			JavaDocLocations.shutdownJavadocLocations();
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
 			

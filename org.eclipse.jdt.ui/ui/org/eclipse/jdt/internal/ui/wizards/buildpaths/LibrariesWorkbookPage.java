@@ -11,13 +11,13 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -25,11 +25,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -44,6 +39,14 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -54,9 +57,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
@@ -237,7 +237,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
 					elementsToAdd.add(curr);
 					curr.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(curr));
-					curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
+					curr.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(curr));
 				}
 			}
 			if (!elementsToAdd.isEmpty() && (index == IDX_ADDFOL)) {
@@ -288,8 +288,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
 				Object value= null;
-				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
-					value= new Path[0];
+				if (key.equals(CPListElement.ACCESSRULES)) {
+					value= new IAccessRule[0];
 				}
 				
 				attrib.getParent().setAttribute(key, value);
@@ -311,7 +311,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		for (int i= 0; i < selElements.size(); i++) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
-				if (((CPListElementAttribute)elem).getValue() == null) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+					return ((IAccessRule[]) attrib.getValue()).length > 0;
+				}
+				if (attrib.getValue() == null) {
 					return false;
 				}
 			} else if (elem instanceof CPListElement) {
@@ -375,26 +379,28 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
-			URL initialLocation= (URL) selElement.getAttribute(CPListElement.JAVADOC);
-			String elementName= new CPListLabelProvider().getText(selElement);
+			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
 			
-			URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, initialLocation);
-			if (result != null) {
-				selElement.setAttribute(CPListElement.JAVADOC, result[0]);
-				fLibrariesList.refresh();
+			String elementName= new CPListLabelProvider().getText(selElement);
+			try {
+				URL url= initialLocation != null ? new URL(initialLocation) : null;
+				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, url);
+				if (result != null) {
+					selElement.setAttribute(CPListElement.JAVADOC, result[0].toExternalForm());
+					fLibrariesList.refresh();
+				}
+			} catch (MalformedURLException e) {
+				// ignore
 			}
-		} else if (key.equals(CPListElement.EXCLUSION)) {
-			showExclusionInclusionDialog(elem.getParent(), true);		
-		} else if (key.equals(CPListElement.INCLUSION)) {
-			showExclusionInclusionDialog(elem.getParent(), false);
+		} else if (key.equals(CPListElement.ACCESSRULES)) {
+			showTypeRestrictionDialog(elem.getParent());		
 		}
 	}
 
-	private void showExclusionInclusionDialog(CPListElement selElement, boolean focusOnExclusion) {
-		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement, focusOnExclusion);
+	private void showTypeRestrictionDialog(CPListElement selElement) {
+		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
 		if (dialog.open() == Window.OK) {
-			selElement.setAttribute(CPListElement.INCLUSION, dialog.getInclusionPattern());
-			selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+			selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
 			fLibrariesList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		}

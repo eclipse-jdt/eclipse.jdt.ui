@@ -114,7 +114,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                         entry= ClasspathModifier.getClasspathEntryFor(fCurrJProject.getPath(), fCurrJProject, IClasspathEntry.CPE_SOURCE);
                     CPListElement parent= CPListElement.createFromExisting(entry, fCurrJProject);                    
                     CPListElementAttribute outputFolder= new CPListElementAttribute(parent, CPListElement.OUTPUT, 
-                            parent.getAttribute(CPListElement.OUTPUT));
+                            parent.getAttribute(CPListElement.OUTPUT), true);
                     Object[] extendedChildren= new Object[children.length + 1];
                     System.arraycopy(children, 0, extendedChildren, 1, children.length);
                     extendedChildren[0]= outputFolder;

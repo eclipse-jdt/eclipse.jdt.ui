@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +71,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -707,9 +705,6 @@ public class BuildPathsBlock {
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
 		
-		ArrayList paths= new ArrayList();
-		ArrayList urls= new ArrayList();
-		
 		// create and set the class path
 		for (int i= 0; i < nEntries; i++) {
 			CPListElement entry= ((CPListElement)classPathEntries.get(i));
@@ -726,9 +721,7 @@ public class BuildPathsBlock {
 			}
 			
 			classpath[i]= entry.getClasspathEntry();
-			entry.collectJavaDocLocations(paths, urls);
 		}	
-		JavaUI.setLibraryJavadocLocations((IPath[]) paths.toArray(new IPath[paths.size()]), (URL[]) urls.toArray(new URL[paths.size()]));
 		
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();

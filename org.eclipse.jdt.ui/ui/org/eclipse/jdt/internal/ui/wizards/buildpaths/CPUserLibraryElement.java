@@ -18,9 +18,8 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 public class CPUserLibraryElement {
 	
@@ -65,7 +64,7 @@ public class CPUserLibraryElement {
 	private List fChildren;
 	private boolean fIsSystemLibrary;
 
-	public CPUserLibraryElement(String name, IClasspathContainer container) {
+	public CPUserLibraryElement(String name, IClasspathContainer container, IJavaProject project) {
 		fName= name;
 		fChildren= new ArrayList();
 		if (container != null) {
@@ -73,9 +72,9 @@ public class CPUserLibraryElement {
 			CPListElement[] res= new CPListElement[entries.length];
 			for (int i= 0; i < res.length; i++) {
 				IClasspathEntry curr= entries[i];
-				CPListElement elem= new CPListElement(this, null, IClasspathEntry.CPE_LIBRARY, curr.getPath(), null);
-				elem.setAttribute(CPListElement.SOURCEATTACHMENT, curr.getSourceAttachmentPath());
-				elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
+				CPListElement elem= CPListElement.createFromExisting(curr, project);
+				//elem.setAttribute(CPListElement.SOURCEATTACHMENT, curr.getSourceAttachmentPath());
+				//elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				fChildren.add(elem);
 			}
 			fIsSystemLibrary= container.getKind() == IClasspathContainer.K_SYSTEM;
@@ -131,13 +130,6 @@ public class CPUserLibraryElement {
 			} else {
 				fChildren.add(element);
 			}
-		}
-	}
-	
-	public void collectJavaDocLocations(ArrayList paths, ArrayList urls) {
-		for (int i= 0; i < fChildren.size(); i++) {
-			CPListElement curr= (CPListElement) fChildren.get(i);
-			curr.collectJavaDocLocations(paths, urls);
 		}
 	}
 	

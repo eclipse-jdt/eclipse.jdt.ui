@@ -112,7 +112,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(curr);
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, fProject);
-				CPUserLibraryElement elem= new CPUserLibraryElement(curr, container);
+				CPUserLibraryElement elem= new CPUserLibraryElement(curr, container, fProject);
 				elements.add(elem);
 				if (!oldCheckedNames.isEmpty()) {
 					if (oldCheckedNames.contains(curr)) {

@@ -58,6 +58,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	private SourceAttachmentBlock fSourceAttachmentBlock;
 	private IPackageFragmentRoot fRoot;
 	private IPath fContainerPath;
+	private IClasspathEntry fEntry;
 
 	public SourceAttachmentPropertyPage() {
 	}
@@ -82,6 +83,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	
 	private Control createPageContent(Composite composite) {
 		try {
+			fContainerPath= null;
+			fEntry= null;
 			fRoot= getJARPackageFragmentRoot();
 			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
 				return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
@@ -105,6 +108,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				}
 			}
 			fContainerPath= containerPath;
+			fEntry= entry;
 			
 			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
@@ -139,6 +143,10 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		if (fSourceAttachmentBlock != null) {
 			try {
 				IClasspathEntry entry= fSourceAttachmentBlock.getNewEntry();
+				if (entry.equals(fEntry)) {
+					return true; // no change
+				}
+				
 				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(getShell(), entry, fRoot.getJavaProject(), fContainerPath);		
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);						
 			} catch (InvocationTargetException e) {

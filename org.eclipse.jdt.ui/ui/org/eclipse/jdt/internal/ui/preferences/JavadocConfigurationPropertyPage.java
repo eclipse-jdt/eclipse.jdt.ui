@@ -10,37 +10,49 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PropertyPage;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 /**
  * Property page used to set the project's Javadoc location for sources
@@ -48,10 +60,13 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 public class JavadocConfigurationPropertyPage extends PropertyPage implements IStatusChangeListener {
 
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocConfigurationPropertyPage"; //$NON-NLS-1$
-
 	
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
 	private boolean fIsValidElement;
+	
+	private IPath fContainerPath;
+	private IClasspathEntry fEntry;
+	private URL fInitalLocation;
 
 	public JavadocConfigurationPropertyPage() {
 	}
@@ -63,7 +78,22 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		IJavaElement elem= getJavaElement();
 		try {
 			if (elem instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) elem).getKind() == IPackageFragmentRoot.K_BINARY) {
-				fIsValidElement= true;
+				IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
+				
+				IClasspathEntry entry= root.getRawClasspathEntry();
+				if (entry == null) {
+					fIsValidElement= false;
+				} else {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						fContainerPath= entry.getPath();
+						fEntry= JavaModelUtil.getClasspathEntryToEdit(elem.getJavaProject(), fContainerPath, root.getPath());
+						fIsValidElement= fEntry != null;
+					} else {
+						fContainerPath= null;
+						fEntry= entry;
+						fIsValidElement= true;
+					}
+				}
 				setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
 			} else if (elem instanceof IJavaProject) {
 				fIsValidElement= true;
@@ -90,18 +120,17 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		}
 		
 		IJavaElement elem= getJavaElement();
-		
-		URL initialLocation= null;
+		fInitalLocation= null;
 		if (elem != null) {
 			try {
-				initialLocation= JavaUI.getJavadocBaseLocation(elem);
+				fInitalLocation= JavaUI.getJavadocBaseLocation(elem);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 		}
 		
 		boolean isProject= (elem instanceof IJavaProject);
-		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation, isProject);
+		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, fInitalLocation, isProject);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
 		control.setVisible(elem != null);
 
@@ -144,14 +173,49 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 */
 	public boolean performOk() {
 		URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
-		IJavaElement elem= getJavaElement();
-		if (elem instanceof IJavaProject) {
-			JavaUI.setProjectJavadocLocation((IJavaProject) elem, javadocLocation);
-		} else if (elem instanceof IPackageFragmentRoot) {
-			JavaUI.setLibraryJavadocLocation(elem.getPath(), javadocLocation);
+		if (javadocLocation == null && fInitalLocation == null || javadocLocation != null && javadocLocation.equals(fInitalLocation)) {
+			return true; // no change
 		}
+		
+		
+		IJavaElement elem= getJavaElement();
+		try {
+			IRunnableWithProgress runnable= getRunnable(getShell(), elem, javadocLocation, fEntry, fContainerPath);
+			PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
+		} catch (InvocationTargetException e) {
+			String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
+			String message= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);
+			return false;
+		} catch (InterruptedException e) {
+			// cancelled
+			return false;
+		}	
 		return true;
 	}
+	
+	
+	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final URL javadocLocation, final IClasspathEntry entry, final IPath containerPath) {
+		return new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
+				try {
+					IJavaProject project= elem.getJavaProject();
+					if (elem instanceof IPackageFragmentRoot) {
+						CPListElement cpElem= CPListElement.createFromExisting(entry, project);
+						String loc= javadocLocation != null ? javadocLocation.toExternalForm() : null;
+						cpElem.setAttribute(CPListElement.JAVADOC, loc);
+						IClasspathEntry newEntry= cpElem.getClasspathEntry();
+						BuildPathSupport.modifyClasspathEntry(shell, newEntry, project, containerPath, monitor);
+					} else {
+						JavaUI.setProjectJavadocLocation(project, javadocLocation);
+					}
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				}
+			}
+		};
+	}
+
 
 	/**
 	 * @see IStatusChangeListener#statusChanged(IStatus)

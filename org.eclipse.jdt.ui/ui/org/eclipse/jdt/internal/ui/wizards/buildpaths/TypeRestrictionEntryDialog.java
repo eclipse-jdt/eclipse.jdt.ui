@@ -10,13 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.List;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -28,260 +21,149 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
+
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class TypeRestrictionEntryDialog extends StatusDialog {
 	
-	private StringDialogField fExclusionPatternDialog;
-	private StatusInfo fExclusionPatternStatus;
+	private StringDialogField fPatternDialog;
+	private StatusInfo fPatternStatus;
 	
-	private IContainer fCurrSourceFolder;
-	private String fExclusionPattern;
-	private List fExistingPatterns;
-	private boolean fIsExclusion;
+	private String fPattern;
+	private ComboDialogField fRuleKindCombo;
+	private int[] fRuleKinds;
 		
-	public TypeRestrictionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
+	public TypeRestrictionEntryDialog(Shell parent, IAccessRule ruleToEdit, CPListElement entryToEdit) {
 		super(parent);
-		fIsExclusion= isExclusion;
-		fExistingPatterns= existingPatterns;
+		setShellStyle(getShellStyle() | SWT.RESIZE);
+		
 		String title, message;
-		if (isExclusion) {
-			if (patternToEdit == null) {
-				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.add.title"); //$NON-NLS-1$
-			} else {
-				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.edit.title"); //$NON-NLS-1$
-			}
-			message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.exclude.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+		if (ruleToEdit == null) {
+			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.add.title"); //$NON-NLS-1$
 		} else {
-			if (patternToEdit == null) {
-				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.include.add.title"); //$NON-NLS-1$
-			} else {
-				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.include.edit.title"); //$NON-NLS-1$
-			}
-			message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.include.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.edit.title"); //$NON-NLS-1$
 		}
+		message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
 		setTitle(title);
-		if (patternToEdit != null) {
-			fExistingPatterns.remove(patternToEdit);
-		}
+		
+		fPatternStatus= new StatusInfo();
+		
+		TypeRulesAdapter adapter= new TypeRulesAdapter();
+		fPatternDialog= new StringDialogField();
+		fPatternDialog.setLabelText(message);
+		fPatternDialog.setDialogFieldListener(adapter);
+		
+		fRuleKindCombo= new ComboDialogField(SWT.READ_ONLY);
+		fRuleKindCombo.setLabelText(NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.label")); //$NON-NLS-1$
+		fRuleKindCombo.setDialogFieldListener(adapter);
+		String[] items= {
+				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.non_accessible"), //$NON-NLS-1$
+				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.discourraged"), //$NON-NLS-1$
+				NewWizardMessages.getString("TypeRestrictionEntryDialog.kind.accessible") //$NON-NLS-1$
+		};
+		fRuleKinds= new int[] {
+				IAccessRule.K_NON_ACCESSIBLE,
+				IAccessRule.K_DISCOURAGED,
+				IAccessRule.K_ACCESSIBLE
+		};
+		fRuleKindCombo.setItems(items);
 		
 		
-		IWorkspaceRoot root= entryToEdit.getJavaProject().getProject().getWorkspace().getRoot();
-		IResource res= root.findMember(entryToEdit.getPath());
-		if (res instanceof IContainer) {
-			fCurrSourceFolder= (IContainer) res;
-		}		
-		
-		fExclusionPatternStatus= new StatusInfo();
-		
-		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
-		fExclusionPatternDialog= new StringDialogField();
-		fExclusionPatternDialog.setLabelText(message);
-		//fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("TypeRestrictionEntryDialog.pattern.button")); //$NON-NLS-1$
-		fExclusionPatternDialog.setDialogFieldListener(adapter);
-		//fExclusionPatternDialog.enableButton(false /*fCurrSourceFolder != null*/);
-		
-		if (patternToEdit == null) {
-			fExclusionPatternDialog.setText(""); //$NON-NLS-1$
+		if (ruleToEdit == null) {
+			fPatternDialog.setText(""); //$NON-NLS-1$
+			fRuleKindCombo.selectItem(0);
 		} else {
-			fExclusionPatternDialog.setText(patternToEdit.toString());
+			fPatternDialog.setText(ruleToEdit.getPattern().toString());
+			for (int i= 0; i < fRuleKinds.length; i++) {
+				if (fRuleKinds[i] == ruleToEdit.getKind()) {
+					fRuleKindCombo.selectItem(i);
+					break;
+				}
+			}
 		}
 	}
 	
 	
 	protected Control createDialogArea(Composite parent) {
-		Composite composite= (Composite)super.createDialogArea(parent);
-		
-		int widthHint= convertWidthInCharsToPixels(60);
-		
+		Composite composite= (Composite) super.createDialogArea(parent);
+				
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		inner.setLayout(layout);
+		inner.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		
 		Label description= new Label(inner, SWT.WRAP);
-		
-		if (fIsExclusion) {
-			description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.description")); //$NON-NLS-1$
-		} else {
-			description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.include.description")); //$NON-NLS-1$
-		}
-		GridData gd= new GridData();
-		gd.horizontalSpan= 2;
-		gd.widthHint= convertWidthInCharsToPixels(80);
+		description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.description")); //$NON-NLS-1$
+
+		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
+		gd.widthHint= convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
 		
-		fExclusionPatternDialog.doFillIntoGrid(inner, 3);
-		
-		LayoutUtil.setWidthHint(fExclusionPatternDialog.getLabelControl(null), widthHint);
-		LayoutUtil.setHorizontalSpan(fExclusionPatternDialog.getLabelControl(null), 2);
-		
-		LayoutUtil.setWidthHint(fExclusionPatternDialog.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fExclusionPatternDialog.getTextControl(null));
+		fRuleKindCombo.doFillIntoGrid(inner, 2);
+		fPatternDialog.doFillIntoGrid(inner, 2);
 				
-		fExclusionPatternDialog.postSetFocusOnDialogField(parent.getDisplay());
+		fPatternDialog.postSetFocusOnDialogField(parent.getDisplay());
 		applyDialogFont(composite);		
 		return composite;
 	}
 
 		
-	// -------- ExclusionPatternAdapter --------
+	// -------- TypeRulesAdapter --------
 
-	private class ExclusionPatternAdapter implements IDialogFieldListener, IStringButtonAdapter {
-		
-		// -------- IDialogFieldListener
+	private class TypeRulesAdapter implements IDialogFieldListener {
 		
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}
-
-		public void changeControlPressed(DialogField field) {
-			doChangeControlPressed();
-		}
 	}
 	
-	protected void doChangeControlPressed() {
-		IPath pattern= chooseExclusionPattern();
-		if (pattern != null) {
-			fExclusionPatternDialog.setText(pattern.toString());
-		}
-	}
 
 	protected void doStatusLineUpdate() {
 		checkIfPatternValid();
-		updateStatus(fExclusionPatternStatus);
+		updateStatus(fPatternStatus);
 	}		
 	
 	protected void checkIfPatternValid() {
-		String pattern= fExclusionPatternDialog.getText().trim();
+		String pattern= fPatternDialog.getText().trim();
 		if (pattern.length() == 0) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.empty")); //$NON-NLS-1$
+			fPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.empty")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(pattern);
 		if (path.isAbsolute() || path.getDevice() != null) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.notrelative")); //$NON-NLS-1$
-			return;
-		}
-		if (fExistingPatterns.contains(pattern)) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.exists")); //$NON-NLS-1$
+			fPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.notrelative")); //$NON-NLS-1$
 			return;
 		}
 		
-		fExclusionPattern= pattern; 
-		fExclusionPatternStatus.setOK();
+		fPattern= pattern; 
+		fPatternStatus.setOK();
 	}
 	
-		
-	public String getExclusionPattern() {
-		return fExclusionPattern;
+	public IAccessRule getRule() {
+		IPath filePattern= new Path(fPattern);
+		int kind= fRuleKinds[fRuleKindCombo.getSelectionIndex()];
+		return JavaCore.newAccessRule(filePattern, kind);
 	}
-		
+	
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.EXCLUSION_PATTERN_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.ACCESS_RULES_DIALOG);
 	}
-	
-	// ---------- util method ------------
-
-	private IPath chooseExclusionPattern() {
-		String title, message;
-		if (fIsExclusion) {
-			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
-		} else {
-			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
-		}
-		IPath initialPath= new Path(fExclusionPatternDialog.getText());
-		
-		IPath[] res= chooseExclusionPattern(getShell(), fCurrSourceFolder, title, message, initialPath, false);
-		if (res == null) {
-			return null;
-		}
-		return res[0];
-	}
-	
-	public static IPath[] chooseExclusionPattern(Shell shell, IContainer currentSourceFolder, String title, String message, IPath initialPath, boolean multiSelection) {
-		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
-		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, multiSelection);
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses);
-
-		
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new WorkbenchContentProvider();
-		
-		IResource initialElement= null;
-		if (initialPath != null) {
-			IContainer curr= currentSourceFolder;
-			int nSegments= initialPath.segmentCount();
-			for (int i= 0; i < nSegments; i++) {
-				IResource elem= curr.findMember(initialPath.segment(i));
-				if (elem != null) {
-					initialElement= elem;
-				}
-				if (elem instanceof IContainer) {
-					curr= (IContainer) elem;
-				} else {
-					break;
-				}
-			}
-		}
-
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, lp, cp);
-		dialog.setTitle(title);
-		dialog.setValidator(validator);
-		dialog.setMessage(message);
-		dialog.addFilter(filter);
-		dialog.setInput(currentSourceFolder);
-		dialog.setInitialSelection(initialElement);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-		
-		if (dialog.open() == Window.OK) {
-			Object[] objects= dialog.getResult();
-			int existingSegments= currentSourceFolder.getFullPath().segmentCount();
-			
-			IPath[] resArr= new IPath[objects.length];
-			for (int i= 0; i < objects.length; i++) {
-				IResource currRes= (IResource) objects[i];
-				IPath path= currRes.getFullPath().removeFirstSegments(existingSegments).makeRelative();
-				if (currRes instanceof IContainer) {
-					path= path.addTrailingSeparator();
-				}
-				resArr[i]= path;
-			}
-			return resArr;
-		}
-		return null;
-	}	
-	
-
-
 }

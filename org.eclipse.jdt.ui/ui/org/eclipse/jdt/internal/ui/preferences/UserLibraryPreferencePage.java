@@ -533,9 +533,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 							childElement.setAttribute(TAG_SOURCEATTACHMENT, sourceAttachment.toPortableString());
 	
 						}
-						URL javadocLocation= (URL) child.getAttribute(CPListElement.JAVADOC);
+						String javadocLocation= (String) child.getAttribute(CPListElement.JAVADOC);
 						if (javadocLocation != null) {
-							childElement.setAttribute(TAG_JAVADOC, javadocLocation.toExternalForm());
+							childElement.setAttribute(TAG_JAVADOC, javadocLocation);
 						}					
 					}
 				}
@@ -616,12 +616,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						newArchive.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttach);
 					}
 					if (archiveElement.hasAttribute(TAG_JAVADOC)) {
-						try {
-							URL javadoc= new URL(archiveElement.getAttribute(TAG_JAVADOC));
-							newArchive.setAttribute(CPListElement.JAVADOC, javadoc);
-						} catch (MalformedURLException e) {
-							// ignore
-						}
+						String javadoc= archiveElement.getAttribute(TAG_JAVADOC);
+						newArchive.setAttribute(CPListElement.JAVADOC, javadoc);
 					}
 				}
 			}
@@ -679,7 +675,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(names[i]);
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, fDummyProject);
-				elements.add(new CPUserLibraryElement(names[i], container));
+				elements.add(new CPUserLibraryElement(names[i], container, fDummyProject));
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				// ignore
@@ -722,7 +718,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			}
 			if (createIfNotFound) {
-				CPUserLibraryElement elem= new CPUserLibraryElement(selectedLibrary, null);
+				CPUserLibraryElement elem= new CPUserLibraryElement(selectedLibrary, null, getPlaceholderProject());
 				fLibraryList.addElement(elem);
 				fLibraryList.selectElements(new StructuredSelection(elem));
 			}
@@ -816,10 +812,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		
 		IJavaProject[] projectInit= new IJavaProject[] { jproject };
 		IClasspathContainer[] containerInit= new IClasspathContainer[] { null };
-		
-		ArrayList paths= new ArrayList();
-		ArrayList urls= new ArrayList();
-		
+				
 		for (int i= 0; i < nExisting; i++) {
 			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
 			IPath path= element.getPath();
@@ -833,7 +826,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					multiStatus.add(e.getStatus());
 				}
 			}
-			element.collectJavaDocLocations(paths, urls);
 			monitor.worked(1);
 		}
 		
@@ -851,8 +843,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 			monitor.worked(1);
 		}
-		// save javadoc locations
-		JavaUI.setLibraryJavadocLocations((IPath[]) paths.toArray(new IPath[paths.size()]), (URL[]) urls.toArray(new URL[paths.size()]));
 		
 		if (!multiStatus.isOK()) {
 			throw new CoreException(multiStatus);
@@ -878,13 +868,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
-			URL initialLocation= (URL) selElement.getAttribute(CPListElement.JAVADOC);
+			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
 			String elementName= new CPListLabelProvider().getText(selElement);
-			
-			URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, initialLocation);
-			if (result != null) {
-				selElement.setAttribute(CPListElement.JAVADOC, result[0]);
-				fLibraryList.refresh();
+			try {
+				URL locationURL= initialLocation != null ? new URL(initialLocation) : null;
+				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, locationURL);
+				if (result != null) {
+					selElement.setAttribute(CPListElement.JAVADOC, result[0].toExternalForm());
+					fLibraryList.refresh();
+				}
+			} catch (MalformedURLException e) {
+				// todo
 			}
 		}
 	}
@@ -1089,7 +1083,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			IPath path= filterPath.append(fileNames[i]).makeAbsolute();	
 			CPListElement curr= new CPListElement(parent, null, IClasspathEntry.CPE_LIBRARY, path, null);
 			curr.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(curr));
-			curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
+			curr.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(curr));
 			elems[i]= curr;
 		}
 		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());

@@ -11,166 +11,268 @@
 package org.eclipse.jdt.internal.corext.javadoc;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Document;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.CorextMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIException;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
-
-import org.eclipse.jdt.core.*;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.corext.CorextMessages;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
 public class JavaDocLocations {
 	
 	public static final String ARCHIVE_PREFIX= "jar:file:/"; //$NON-NLS-1$
 	private static final String PREF_JAVADOCLOCATIONS= "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
+	public static final String PREF_JAVADOCLOCATIONS_MIGRATED= "org.eclipse.jdt.ui.javadoclocations.migrated"; //$NON-NLS-1$
+
 	
 	private static final String NODE_ROOT= "javadoclocation"; //$NON-NLS-1$
 	private static final String NODE_ENTRY= "location_01"; //$NON-NLS-1$
 	private static final String NODE_PATH= "path"; //$NON-NLS-1$
 	private static final String NODE_URL= "url"; //$NON-NLS-1$
 	
-	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaUI.ID_PLUGIN, "project_javadoc_location"); //$NON-NLS-1$
 	
-	private static Map fgJavadocLocations= null;
-	private static JavaDocVMInstallListener fgVMInstallListener= null;
+	public static final String ATTRIB_ID= "javadoc_location"; //$NON-NLS-1$
 	
-	
-	private static Map getJavaDocLocations() {
-		if (fgJavadocLocations == null) {
-			fgJavadocLocations= new HashMap();
-			try {
-				initJavadocLocations(); //delayed initialization
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+	public static void migrateToClasspathAttributes() {
+		final Map oldLocations= loadOldForCompatibility();
+		if (oldLocations.isEmpty()) {
+			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+			preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
+			preferenceStore.setValue(PREF_JAVADOCLOCATIONS_MIGRATED, true);
+			return;
+		}
+		
+		Job job= new Job(CorextMessages.getString("JavaDocLocations.migratejob.name")) { //$NON-NLS-1$
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+						public void run(IProgressMonitor pm) throws CoreException {
+							updateClasspathEntries(oldLocations, pm);
+							IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+							preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
+							preferenceStore.setValue(PREF_JAVADOCLOCATIONS_MIGRATED, true);
+						}
+					};
+					new WorkbenchRunnableAdapter(runnable).run(monitor);
+				} catch (InvocationTargetException e) {
+					JavaPlugin.log(e);
+				} catch (InterruptedException e) {
+					// should not happen, cannot cancel
+				}
+				return Status.OK_STATUS;
 			}
-		}
-		return fgJavadocLocations;	
+		};
+		job.schedule();
 	}
-
-	private static IPath canonicalizedPath(IPath externalPath) {
-		if (externalPath == null || IS_CASE_SENSITIVE)
-			return externalPath;
-
-		if (ResourcesPlugin.getWorkspace().getRoot().findMember(externalPath) != null) {
-			return externalPath;
-		}
-
+	
+	final static void updateClasspathEntries(Map oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
 		try {
-			return new Path(externalPath.toFile().getCanonicalPath());
-		} catch (IOException e) {
+			monitor.beginTask(CorextMessages.getString("JavaDocLocations.migrate.operation"), javaProjects.length); //$NON-NLS-1$
+			for (int i= 0; i < javaProjects.length; i++) {
+				IJavaProject project= javaProjects[i];
+				String projectJavadoc= (String) oldLocationMap.get(project.getPath());
+				if (projectJavadoc != null) {
+					try {
+						setProjectJavadocLocation(project, projectJavadoc);
+					} catch (CoreException e) {
+						// ignore
+					}
+				}
+				
+				IClasspathEntry[] rawClasspath= project.getRawClasspath();
+				boolean hasChange= false;
+				for (int k= 0; k < rawClasspath.length; k++) {
+					IClasspathEntry updated= getConvertedEntry(rawClasspath[k], project, oldLocationMap);
+					if (updated != null) {
+						rawClasspath[k]= updated;
+						hasChange= true;
+					}
+				}
+				if (hasChange) {
+					project.setRawClasspath(rawClasspath, new SubProgressMonitor(monitor, 1));
+				} else {
+					monitor.worked(1);
+				}
+			}
+		} finally {
+			monitor.done();
 		}
-		return externalPath;
 	}
 
-	private static boolean setJavadocBaseLocation(IPath path, URL url, boolean save) {
-		boolean isModified;
-		if (url == null) {
-			Object old= getJavaDocLocations().remove(path);
-			isModified= (old != null);
-		} else {
-			URL old= (URL) getJavaDocLocations().put(path, url);
-			isModified= (old == null || !url.toExternalForm().equals(old.toExternalForm()));
+	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+		IPath path= null;
+		switch (entry.getEntryKind()) {
+			case IClasspathEntry.CPE_SOURCE:
+			case IClasspathEntry.CPE_PROJECT:
+				return null;
+			case IClasspathEntry.CPE_CONTAINER:
+				convertContainer(entry, project, oldLocationMap);
+				return null;
+			case IClasspathEntry.CPE_LIBRARY:
+				path= entry.getPath();
+				break;
+			case IClasspathEntry.CPE_VARIABLE:
+				path= JavaCore.getResolvedVariablePath(entry.getPath());
+				break;
+			default:
+				return null;
 		}
-		if (save && isModified) {
-			try {
-				storeLocations();
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+		if (path == null) {
+			return null;
+		}
+		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			if (ATTRIB_ID.equals(extraAttributes[i].getName())) {
+				return null;
 			}
 		}
-		return isModified;
-	}
-	
-	/**
-	 * Gets the Javadoc location for an archive with the given path.
-	 */
-	private static URL getJavadocBaseLocation(IPath path) {
-		return (URL) getJavaDocLocations().get(path);
-	}		
-	
-	/**
-	 * Sets the Javadoc location for an archive with the given path.
-	 */
-	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
-		setJavadocBaseLocation(canonicalizedPath(archivePath), url, true);
+		String libraryJavadocLocation= (String) oldLocationMap.get(path);
+		if (libraryJavadocLocation != null) {
+			CPListElement element= CPListElement.createFromExisting(entry, project);
+			element.setAttribute(CPListElement.JAVADOC, libraryJavadocLocation);
+			return element.getClasspathEntry();
+		}
+		return null;
 	}
 
-	/**
-	 * Sets the Javadocs locations for archives with given paths.
-	 */
-	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
-		boolean needsSave= false;
-		for (int i= urls.length - 1; i >= 0 ; i--) {
-			if (setJavadocBaseLocation(canonicalizedPath(archivePaths[i]), urls[i], false)) {
-				needsSave= true;
+	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
+		try {
+			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
+			IClasspathEntry[] entries= container.getClasspathEntries();
+			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry curr= entries[i];
+				IClasspathEntry updatedEntry= getConvertedEntry(curr, project, oldLocationMap);
+				if (updatedEntry != null) {
+					entries[i]= updatedEntry;
+				}
 			}
-		}
-		if (needsSave) {
-			try {
-				storeLocations();
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
+			BuildPathSupport.requestContainerUpdate(project, container, newEntries);
+		} catch (CoreException e) {
+			// ignore
 		}
 	}
-	
+
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
 	 */
 	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
-		setJavadocBaseLocation(project.getProject().getFullPath(), url, true);
+		try {
+			setProjectJavadocLocation(project, url.toExternalForm());
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private static void setProjectJavadocLocation(IJavaProject project, String url) throws CoreException {
+		project.getProject().setPersistentProperty(PROJECT_JAVADOC, url);
 	}
 	
 	public static URL getProjectJavadocLocation(IJavaProject project) {
-		return getJavadocBaseLocation(project.getProject().getFullPath());
+		try {
+			String prop= project.getProject().getPersistentProperty(PROJECT_JAVADOC);
+			if (prop == null) {
+				return null;
+			}
+			return new URL(prop);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		} catch (MalformedURLException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
 	}
-
-	public static URL getLibraryJavadocLocation(IPath archivePath) {
-		return getJavadocBaseLocation(canonicalizedPath(archivePath));
+	
+	
+	public static URL getLibraryJavadocLocation(IClasspathEntry entry) {
+		if (entry == null) {
+			throw new IllegalArgumentException("Entry must not be null"); //$NON-NLS-1$
+		}
+		
+		int kind= entry.getEntryKind();
+		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
+			throw new IllegalArgumentException("Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); //$NON-NLS-1$
+		}
+		
+		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+		for (int i= 0; i < extraAttributes.length; i++) {
+			IClasspathAttribute attrib= extraAttributes[i];
+			if (ATTRIB_ID.equals(attrib.getName())) {
+				try {
+					return new URL(attrib.getValue());
+				} catch (MalformedURLException e) {
+					return null;
+				}
+			}
+		}
+		return null;
 	}
 
 	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {	
@@ -184,41 +286,56 @@ public class JavaDocLocations {
 		}
 
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
-			return getLibraryJavadocLocation(root.getPath());
+			IClasspathEntry entry= root.getRawClasspathEntry();
+			if (entry == null) {
+				return null;
+			}
+			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				entry= JavaModelUtil.getClasspathEntryToEdit(root.getJavaProject(), entry.getPath(), root.getPath());
+				if (entry == null) {
+					return null;
+				}
+			}
+			return getLibraryJavadocLocation(entry);
 		} else {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}	
 	}
 	
-	// loading & storing
+	// loading for compatibility
 	
 	private static JavaUIException createException(Throwable t, String message) {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}	
-
-	private static synchronized void storeLocations() throws CoreException {
-		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
-		try {
-			saveToStream(fgJavadocLocations, stream);
-			byte[] bytes= stream.toByteArray();
-			String val;
+	
+	private static Map/*<Path, String>*/ loadOldForCompatibility() {
+		HashMap resultingOldLocations= new HashMap();
+		
+		// in 3.0, the javadoc locations were stored as one big string in the preferences
+		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
+		if (string != null && string.length() > 0) {
+			byte[] bytes;
 			try {
-				val= new String(bytes, "UTF-8"); //$NON-NLS-1$
+				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
-				val= new String(bytes);
+				bytes= string.getBytes();
 			}
-			PreferenceConstants.getPreferenceStore().setValue(PREF_JAVADOCLOCATIONS, val);
-			JavaPlugin.getDefault().savePluginPreferences();
-		} finally {
+			InputStream is= new ByteArrayInputStream(bytes);
 			try {
-				stream.close();
-			} catch (IOException e) {
-				//	error closing reader: ignore
+				loadFromStream(new InputSource(is), resultingOldLocations);
+				PreferenceConstants.getPreferenceStore().setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
+				return resultingOldLocations;
+			} catch (CoreException e) {
+				JavaPlugin.log(e); // log but ignore
+			} finally {
+				try {
+					is.close();
+				} catch (IOException e) {
+					// ignore
+				}
 			}
 		}
-	}
-	
-	private static boolean loadOldForCompatibility() {
+
 		// in 2.1, the Javadoc locations were stored in a file in the meta data
 		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
 		try {
@@ -228,10 +345,9 @@ public class JavaDocLocations {
 				Reader reader= null;
 				try {
 					reader= new FileReader(file);
-					loadFromStream(new InputSource(reader));
-					storeLocations();
+					loadFromStream(new InputSource(reader), resultingOldLocations);
 					file.delete(); // remove file after successful store
-					return true;
+					return resultingOldLocations;
 				} catch (IOException e) {
 					JavaPlugin.log(e); // log but ignore
 				} finally {
@@ -256,10 +372,9 @@ public class JavaDocLocations {
 			if (xmlString != null) { // only set when workspace is old
 				Reader reader= new StringReader(xmlString);
 				try {
-					loadFromStream(new InputSource(reader));
-					storeLocations();
+					loadFromStream(new InputSource(reader), resultingOldLocations);
 					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
-					return true;
+					return resultingOldLocations;
 				} finally {
 
 					try {
@@ -272,74 +387,10 @@ public class JavaDocLocations {
 		} catch (CoreException e) {
 			JavaPlugin.log(e); // log but ignore
 		}
-		return false;
+		return resultingOldLocations;
 	}
 	
-	private static boolean loadFromPreferences() throws CoreException {
-		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
-		if (string != null && string.length() > 0) {
-			byte[] bytes;
-			try {
-				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				bytes= string.getBytes();
-			}
-			InputStream is= new ByteArrayInputStream(bytes);
-			try {
-				loadFromStream(new InputSource(is));
-				return true;
-			} finally {
-				try {
-					is.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-		return false;
-	}	
-	
-	
-	private static void saveToStream(Map locations, OutputStream stream) throws CoreException {
-		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder= factory.newDocumentBuilder();		
-			Document document= builder.newDocument();
-			
-			Element rootElement = document.createElement(NODE_ROOT);
-			document.appendChild(rootElement);
-	
-			Iterator iter= locations.keySet().iterator();
-			
-			while (iter.hasNext()) {
-				IPath path= (IPath) iter.next();
-				URL url= getJavadocBaseLocation(path);
-			
-				Element varElement= document.createElement(NODE_ENTRY);
-				varElement.setAttribute(NODE_PATH, path.toPortableString());
-				varElement.setAttribute(NODE_URL, url.toExternalForm());
-				rootElement.appendChild(varElement);
-			}
-			
-			JavaDocVMInstallListener.saveVMInstallJavadocLocations(document, rootElement);
-					
-
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(stream);
-
-			transformer.transform(source, result);
-		} catch (TransformerException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
-		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
-		}
-	}
-	
-	private static void loadFromStream(InputSource inputSource) throws CoreException {
+	private static void loadFromStream(InputSource inputSource, Map/*<Path, String>*/ oldLocations) throws CoreException {
 		Element cpElement;
 		try {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -366,53 +417,13 @@ public class JavaDocLocations {
 				if (element.getNodeName().equalsIgnoreCase(NODE_ENTRY)) {
 					String varPath = element.getAttribute(NODE_PATH);
 					String varURL = element.getAttribute(NODE_URL);
-					try {
-						setJavadocBaseLocation(Path.fromPortableString(varPath), new URL(varURL), false);
-					} catch (MalformedURLException e) {
-						throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
-					}
+					
+					oldLocations.put(Path.fromPortableString(varPath), varURL);
 				}
 			}
 		}
+	}
 		
-		updateVMInstallJavadocLocations(cpElement);
-	}
-
-	/**
-	 * Get the javadoc locations from vminstalls and update them if they are different to stored vm installs
-	 * @param cpElement The root node or null
-	 */
-	private static void updateVMInstallJavadocLocations(Element cpElement) {
-		// check for updates in the vm installs
-		ArrayList paths= new ArrayList(), urls= new ArrayList();
-		JavaDocVMInstallListener.collectChangedVMInstallJavadocLocations(cpElement, paths, urls);
-		for (int i= 0; i < paths.size(); i++) {
-			setJavadocBaseLocation(canonicalizedPath((IPath) paths.get(i)), (URL) urls.get(i), false);
-		}
-	}
-
-	public static void shutdownJavadocLocations() {
-		if (fgVMInstallListener == null) {
-			return;
-		}
-		fgVMInstallListener.remove();
-		fgVMInstallListener= null;
-		fgJavadocLocations= null;			
-	}
-	
-	private static synchronized void initJavadocLocations() throws CoreException {
-		try {
-			boolean res= loadFromPreferences();
-			if (!res) {
-				loadOldForCompatibility();
-				updateVMInstallJavadocLocations(null); // initialize all javadoc location from VM installs
-			}
-		} finally {
-			fgVMInstallListener= new JavaDocVMInstallListener();
-			fgVMInstallListener.init();	
-		}			
-	}
-	
 	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference) throws JavaModelException {
 		URL baseLocation= getJavadocBaseLocation(element);
 		if (baseLocation == null) {

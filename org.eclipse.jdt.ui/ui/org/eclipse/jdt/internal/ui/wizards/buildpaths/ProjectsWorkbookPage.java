@@ -332,18 +332,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
-		if (key.equals(CPListElement.EXCLUSION)) {
-			showExclusionInclusionDialog(elem.getParent(), true);		
-		} else if (key.equals(CPListElement.INCLUSION)) {
-			showExclusionInclusionDialog(elem.getParent(), false);		
+		if (key.equals(CPListElement.ACCESSRULES)) {
+			showAccessRestrictionDialog(elem.getParent());
 		}
 	}
 	
-	private void showExclusionInclusionDialog(CPListElement selElement, boolean focusOnExclusion) {
-		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement, focusOnExclusion);
+	private void showAccessRestrictionDialog(CPListElement selElement) {
+		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
 		if (dialog.open() == Window.OK) {
-			selElement.setAttribute(CPListElement.INCLUSION, dialog.getInclusionPattern());
-			selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+			selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
+			selElement.setAttribute(CPListElement.COMBINE_ACCESSRULES, new Boolean(dialog.doCombineAccessRules()));
 			fProjectsList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		}
