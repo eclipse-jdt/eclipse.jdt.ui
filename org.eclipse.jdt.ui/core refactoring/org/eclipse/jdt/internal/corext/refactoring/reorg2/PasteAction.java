@@ -109,16 +109,14 @@ public class PasteAction extends SelectionDispatchAction{
 	}
 
 	private IResource[] getClipboardResources(TransferData[] availableDataTypes) {
-		Transfer transfer= ResourceTransfer.getInstance(); 
-		if (isAvailable(transfer, availableDataTypes))
-			return (IResource[])fClipboard.getContents(transfer);
+		if (isAvailable(ResourceTransfer.getInstance(), availableDataTypes))
+			return (IResource[])fClipboard.getContents(ResourceTransfer.getInstance());
 		return null;
 	}
 
 	private IJavaElement[] getClipboardJavaElements(TransferData[] availableDataTypes) {
-		Transfer transfer= JavaElementTransfer.getInstance(); 
-		if (isAvailable(transfer, availableDataTypes))
-			return (IJavaElement[])fClipboard.getContents(transfer);
+		if (isAvailable(JavaElementTransfer.getInstance(), availableDataTypes))
+			return (IJavaElement[])fClipboard.getContents(JavaElementTransfer.getInstance());
 		return null;
 	}
 
@@ -260,9 +258,8 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 		
 		private String[] getClipboardFiles(TransferData[] availableDataTypes) {
-			Transfer transfer= FileTransfer.getInstance(); 
-			if (isAvailable(transfer, availableDataTypes))
-				return (String[])fClipboard.getContents(transfer);
+			if (isAvailable(FileTransfer.getInstance(), availableDataTypes))
+				return (String[])fClipboard.getContents(FileTransfer.getInstance());
 			return null;
 		}
 		private Object getCommonParent(IJavaElement[] javaElements, IResource[] resources) {
