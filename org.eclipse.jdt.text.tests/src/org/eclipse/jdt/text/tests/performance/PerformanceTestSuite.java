@@ -35,8 +35,8 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(JavaIndenterTest.class);
 		addTestSuite(NonInitialTypingTest.class);
 		addTestSuite(OpenPreferencePageTest.class);
+		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
 		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
-		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
 	}
 }
