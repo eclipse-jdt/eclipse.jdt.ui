@@ -342,7 +342,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (!fBindings.contains(type.getKey()) && (type.isTypeVariable() || type.isParameterizedType())) {
 					fResult.add(node);
-					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString(type.isTypeVariable() ? "MoveInstanceMethodProcessor.no_type_variables" : "MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$ //$NON-NLS-2$
 					return false;
 				}
 			}
@@ -356,7 +356,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (!fBindings.contains(type.getKey()) && (type.isTypeVariable() || type.isParameterizedType())) {
 					fResult.add(node);
-					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString(type.isTypeVariable() ? "MoveInstanceMethodProcessor.no_type_variables" : "MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$ //$NON-NLS-2$
 					return false;
 				}
 			}
