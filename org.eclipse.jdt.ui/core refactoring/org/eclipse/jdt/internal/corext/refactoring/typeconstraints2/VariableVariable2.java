@@ -21,33 +21,33 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * the type of a variable, namely a field or a local variable
  * Use {@link ParameterTypeVariable2} for method parameters).
  */
-public class VariableVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public final class VariableVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
-	private String fVariableBindingKey;
+	private final String fKey;
 	private ICompilationUnit fCompilationUnit;
 	
-	public VariableVariable2(TType type, IVariableBinding variableBinding) {
+	public VariableVariable2(TType type, IVariableBinding binding) {
 		super(type);
-		fVariableBindingKey= variableBinding.getKey();
+		fKey= binding.getKey();
 	}
 
-	public void setCompilationUnit(ICompilationUnit cu) {
-		fCompilationUnit= cu;
+	public void setCompilationUnit(ICompilationUnit unit) {
+		fCompilationUnit= unit;
 	}
 	
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
 
-	public String getVariableBindingKey() {
-		return fVariableBindingKey;
+	public String getKey() {
+		return fKey;
 	}
 
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return fVariableBindingKey.hashCode();
+		return fKey.hashCode();
 	}
 
 	/*
@@ -59,7 +59,6 @@ public class VariableVariable2 extends ConstraintVariable2 implements IDeclaredC
 		if (other.getClass() != VariableVariable2.class)
 			return false;
 		
-		return fVariableBindingKey.equals(((VariableVariable2) other).getVariableBindingKey());
+		return fKey.equals(((VariableVariable2) other).getKey());
 	}
-
 }

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A TypeVariable is a ConstraintVariable which stands for a
  * single type reference (in source).
  */
-public class TypeVariable2 extends ConstraintVariable2 implements ITypeConstraintVariable {
+public final class TypeVariable2 extends ConstraintVariable2 implements ITypeConstraintVariable {
 
 	private final CompilationUnitRange fRange;
 
@@ -55,7 +55,7 @@ public class TypeVariable2 extends ConstraintVariable2 implements ITypeConstrain
 				&& getType() == otherTypeVariable.getType();
 	}
 
-	public void setCompilationUnit(ICompilationUnit cu) {
+	public void setCompilationUnit(ICompilationUnit unit) {
 		throw new UnsupportedOperationException();
 	}
 

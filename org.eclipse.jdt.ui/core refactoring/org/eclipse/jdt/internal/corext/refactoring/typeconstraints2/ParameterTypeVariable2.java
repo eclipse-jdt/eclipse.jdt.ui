@@ -20,19 +20,19 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A ParameterTypeVariable is a ConstraintVariable which stands for
  * the type of a method parameter.
  */
-public class ParameterTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public final class ParameterTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final int fParameterIndex;
-	private final String fMethodBindingKey;
+	private final String fKey;
 	private ICompilationUnit fCompilationUnit;
 	
-	public ParameterTypeVariable2(TType parameterType, int parameterIndex, IMethodBinding methodBinding) {
-		super(parameterType);
-		Assert.isNotNull(methodBinding);
-		Assert.isTrue(0 <= parameterIndex);
-		Assert.isTrue(parameterIndex < methodBinding.getParameterTypes().length);
-		fParameterIndex= parameterIndex;
-		fMethodBindingKey= methodBinding.getKey();
+	public ParameterTypeVariable2(TType type, int index, IMethodBinding binding) {
+		super(type);
+		Assert.isNotNull(binding);
+		Assert.isTrue(0 <= index);
+		Assert.isTrue(index < binding.getParameterTypes().length);
+		fParameterIndex= index;
+		fKey= binding.getKey();
 	}
 	
 	public void setCompilationUnit(ICompilationUnit cu) {
@@ -47,15 +47,15 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 implements IDecl
 		return fParameterIndex;
 	}
 	
-	public String getMethodBindingKey() {
-		return fMethodBindingKey;
+	public String getKey() {
+		return fKey;
 	}
 
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return getParameterIndex() ^ getMethodBindingKey().hashCode();
+		return getParameterIndex() ^ getKey().hashCode();
 	}
 
 	/*
@@ -69,14 +69,11 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 implements IDecl
 		
 		ParameterTypeVariable2 other2= (ParameterTypeVariable2) other;
 		return getParameterIndex() == other2.getParameterIndex()
-				&& getMethodBindingKey().equals(other2.getMethodBindingKey());
-	}
-	
-	public String toString() {
-		String toString= (String) getData(TO_STRING);
-		return toString == null
-			? "[Parameter(" + fParameterIndex + "," + fMethodBindingKey + ")]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			: toString;
+				&& getKey().equals(other2.getKey());
 	}
 
+	public String toString() {
+		String toString= (String) getData(TO_STRING);
+		return toString == null ? "[Parameter(" + fParameterIndex + "," + fKey + ")]" : toString; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+	}
 }

@@ -16,10 +16,10 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
-public class CastVariable2 extends ConstraintVariable2 implements ITypeConstraintVariable {
+public final class CastVariable2 extends ConstraintVariable2 implements ITypeConstraintVariable {
 
 	private final CompilationUnitRange fRange;
-	private ConstraintVariable2 fExpressionVariable;
+	private final ConstraintVariable2 fExpressionVariable;
 
 	public CastVariable2(TType type, CompilationUnitRange range, ConstraintVariable2 expressionVariable) {
 		super(type);
@@ -46,5 +46,4 @@ public class CastVariable2 extends ConstraintVariable2 implements ITypeConstrain
 	}
 	
 	// hashCode() and equals(..) not necessary (unique per construction)
-
 }

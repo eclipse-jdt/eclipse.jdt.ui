@@ -20,26 +20,25 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A ReturnTypeVariable is a ConstraintVariable which stands for
  * the return type of a method.
  */
+public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
-public class ReturnTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
-
-	private String fMethodBindingKey;
+	private final String fKey;
 	private ICompilationUnit fCompilationUnit;
 
-	public ReturnTypeVariable2(TType returnType, IMethodBinding methodBinding) {
-		super(returnType);
-		fMethodBindingKey= methodBinding.getKey();
+	public ReturnTypeVariable2(TType type, IMethodBinding binding) {
+		super(type);
+		fKey= binding.getKey();
 	}
 
-	public String getMethodBindingKey() {
-		return fMethodBindingKey;
+	public String getKey() {
+		return fKey;
 	}
 
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return getMethodBindingKey().hashCode();
+		return getKey().hashCode();
 	}
 
 	/*
@@ -52,11 +51,11 @@ public class ReturnTypeVariable2 extends ConstraintVariable2 implements IDeclare
 			return false;
 		
 		ReturnTypeVariable2 other2= (ReturnTypeVariable2) other;
-		return getMethodBindingKey().equals(other2.getMethodBindingKey());
+		return getKey().equals(other2.getKey());
 	}
 
-	public void setCompilationUnit(ICompilationUnit cu) {
-		fCompilationUnit= cu;
+	public void setCompilationUnit(ICompilationUnit unit) {
+		fCompilationUnit= unit;
 	}
 
 	public ICompilationUnit getCompilationUnit() {

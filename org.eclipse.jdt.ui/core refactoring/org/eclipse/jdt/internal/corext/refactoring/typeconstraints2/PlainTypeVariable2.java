@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * plain type (without an updatable Source location)
  */
 
-public class PlainTypeVariable2 extends ConstraintVariable2 {
+public final class PlainTypeVariable2 extends ConstraintVariable2 {
 
 	public PlainTypeVariable2(TType type) {
 		super(type);
@@ -49,5 +49,4 @@ public class PlainTypeVariable2 extends ConstraintVariable2 {
 	public String toString() {
 		return getType().getPrettySignature();
 	}
-
 }

@@ -8,16 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
+public final class IndependentTypeVariable2 extends ConstraintVariable2 {
 
-public class IndependentTypeVariable2 extends ConstraintVariable2 {
-
-	public IndependentTypeVariable2(TType typeBinding) {
-		super(typeBinding);
+	public IndependentTypeVariable2(TType type) {
+		super(type);
 	}
 
 	// hashCode() and equals(..) not necessary (unique per construction)

@@ -13,46 +13,49 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public final class SubTypeConstraint2 implements ITypeConstraint2 {
-	
-	private final ConstraintVariable2 fLeft;
-	private final ConstraintVariable2 fRight;
 
-	public SubTypeConstraint2(ConstraintVariable2 left, ConstraintVariable2 right) {
-		Assert.isNotNull(left);
-		Assert.isNotNull(right);
-		fLeft= left;
-		fRight= right;
-	}
+	private final ConstraintVariable2 fAncestor;
 
-	public ConstraintVariable2 getLeft() {
-		return fLeft;
-	}
+	private final ConstraintVariable2 fDescendant;
 
-	public ConstraintVariable2 getRight() {
-		return fRight;
-	}
-
-	public String toString(){
-		return getLeft().toString() + " <= " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+	public SubTypeConstraint2(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
+		Assert.isNotNull(descendant);
+		Assert.isNotNull(ancestor);
+		fDescendant= descendant;
+		fAncestor= ancestor;
 	}
 
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
 		if (other.getClass() != SubTypeConstraint2.class)
 			return false;
-		
+
 		ITypeConstraint2 otherTC= (ITypeConstraint2) other;
-		return getLeft() == otherTC.getLeft()
-				&& getRight() == otherTC.getRight();
+		return getLeft() == otherTC.getLeft() && getRight() == otherTC.getRight();
 	}
-	
+
+	public final ConstraintVariable2 getLeft() {
+		return fDescendant;
+	}
+
+	public final ConstraintVariable2 getRight() {
+		return fAncestor;
+	}
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
-	public int hashCode() {
+	public final int hashCode() {
 		return getLeft().hashCode() ^ 37 * getRight().hashCode();
+	}
+
+	/*
+	 * @see java.lang.Object#toString()
+	 */
+	public final String toString() {
+		return getLeft().toString() + " <= " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
