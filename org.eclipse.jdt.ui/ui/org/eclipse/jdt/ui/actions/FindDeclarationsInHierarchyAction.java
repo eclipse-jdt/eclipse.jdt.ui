@@ -14,6 +14,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -44,7 +45,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsInHierarchyAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
+		super(site, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
@@ -53,7 +54,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
+		super(editor, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, ILocalVariable.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}

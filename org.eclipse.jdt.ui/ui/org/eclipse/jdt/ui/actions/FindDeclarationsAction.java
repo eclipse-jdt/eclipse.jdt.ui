@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -52,7 +53,7 @@ public class FindDeclarationsAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsAction(IWorkbenchSite site) {
-		this(site, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		this(site, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 	}
 
@@ -60,7 +61,7 @@ public class FindDeclarationsAction extends FindAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsAction(JavaEditor editor) {
-		this(editor, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		this(editor, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class}); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 	}
 

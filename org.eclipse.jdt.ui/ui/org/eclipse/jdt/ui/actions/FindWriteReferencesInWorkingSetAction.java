@@ -15,6 +15,7 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -43,7 +44,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 * @param site the site providing context information for this action
 	 */
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
+		super(site, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
@@ -57,7 +58,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 * @param workingSets	the working sets to be used in the search
 	 */
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		super(site, workingSets, new Class[] {IField.class});
+		super(site, workingSets, new Class[] {IField.class, ILocalVariable.class });
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
@@ -65,7 +66,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
+		super(editor, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
@@ -74,7 +75,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
-		super(editor, workingSets, new Class[] {IField.class});
+		super(editor, workingSets, new Class[] {IField.class, ILocalVariable.class });
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 

@@ -25,6 +25,7 @@ import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 
 
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
@@ -91,7 +92,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 
-		if (javaElement == null)
+		if (javaElement == null || javaElement instanceof ILocalVariable)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
 
 		Image image= fLabelProvider.getImage(javaElement);

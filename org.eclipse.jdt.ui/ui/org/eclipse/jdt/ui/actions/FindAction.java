@@ -34,6 +34,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -336,6 +337,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 			type= (IType)element;
 		else if (element instanceof IMember)
 			type= ((IMember)element).getDeclaringType();
+		else if (element instanceof ILocalVariable) {
+			type= (IType)element.getAncestor(IJavaElement.TYPE);
+		}
 		if (type != null) {
 			ICompilationUnit cu= type.getCompilationUnit();
 			if (cu == null)

@@ -15,6 +15,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -45,7 +46,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class}); //$NON-NLS-1$
+		super(site, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
@@ -54,7 +55,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInHierarchyAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class}); //$NON-NLS-1$
+		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
