@@ -41,24 +41,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 public class InferTypeArgumentsTCModel {
 	
-	private static class TypeConstraintComparer implements IElementComparer/*<ITypeConstraint2>*/ {
-		public boolean equals(Object a, Object b) {
-			return ((ITypeConstraint2) a).isSameAs((ITypeConstraint2) b);
-		}
-		public int hashCode(Object element) {
-			return ((ITypeConstraint2) element).getHash();
-		}
-	}
-	
-	private static class ConstraintVariableComparer implements IElementComparer/*<ConstraintVariable2>*/ {
-		public boolean equals(Object a, Object b) {
-			return ((ConstraintVariable2) a).isSameAs((ConstraintVariable2) b);
-		}
-		public int hashCode(Object element) {
-			return ((ConstraintVariable2) element).getHash();
-		}
-	}
-	
 	private static final Object NULL= new Object() {
 		public String toString() {
 			return ""; //$NON-NLS-1$
