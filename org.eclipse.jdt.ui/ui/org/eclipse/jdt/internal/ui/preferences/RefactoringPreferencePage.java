@@ -39,6 +39,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 
 	public RefactoringPreferencePage() {
 		super(GRID);
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 	
 	public static void initDefaults(IPreferenceStore store) {
