@@ -205,8 +205,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * 
 	 * @since 2.0
 	 */
-	protected IPreferenceStore getPreferenceStore() {
-		return JavaPlugin.getDefault().getPreferenceStore();
+	public IPreferenceStore getPreferenceStore() {
+		return fJavaTextTools.getPreferenceStore();
 	}
 	
 	/*
