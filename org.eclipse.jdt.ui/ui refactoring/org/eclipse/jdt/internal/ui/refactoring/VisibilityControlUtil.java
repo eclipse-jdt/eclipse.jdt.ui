@@ -101,8 +101,6 @@ public class VisibilityControlUtil {
 				checkboxButton.setEnabled(true);
 				checkboxButton.setSelection(false);
 				checkboxButton.addSelectionListener(new SelectionListener() {
-					private Object modifiers;
-	
 					public void widgetSelected(SelectionEvent event) {
 						visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
 					}
