@@ -177,11 +177,10 @@ public class MoveCuUpdateCreator {
 			return sr.getOffset() + sr.getLength() - 1;
 		}
 		
-		IPackageDeclaration packageDecl= cu.getPackageDeclaration(getPackage(cu).getElementName());
-		if (!packageDecl.exists())
+		IPackageDeclaration declars[]= cu.getPackageDeclarations();
+		if (declars.length == 0)
 			return 0;
-		
-		ISourceRange sr= packageDecl.getSourceRange();
+		ISourceRange sr= declars[declars.length - 1].getSourceRange();
 		return sr.getOffset() + sr.getLength() - 1;
 	}
 	
