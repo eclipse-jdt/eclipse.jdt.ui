@@ -21,12 +21,11 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
+import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 
@@ -58,7 +57,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public String[] getArguments() {
 		IMarker marker= getMarker();
 		if (marker != null && marker.exists() && isProblem())
-			return JavaModelUtil.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
+			return CorrectionEngine.getProblemArguments(marker); //$NON-NLS-1$
 		return null;
 	}
 
@@ -153,12 +152,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public ICompilationUnit getCompilationUnit() {
 		IJavaElement element= JavaCore.create(getMarker().getResource());
 		if (element instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)element;
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				return workingCopy;
-			}
-			return cu;
+			return (ICompilationUnit)element;
 		}
 		return null;
 	}
