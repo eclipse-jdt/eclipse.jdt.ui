@@ -626,7 +626,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fillTypesViewerContextMenu(typesViewer, menu);
 			}
 		}, cotextHelpId,	getSite());
-		typesViewer.addSelectionChangedListener(fSelectionChangedListener);
+		typesViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 		typesViewer.setQualifiedTypeName(isShowQualifiedTypeNames());
 	}
 	
@@ -637,7 +637,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fillMethodsViewerContextMenu(menu);
 			}
 		}, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
-		fMethodsViewer.addSelectionChangedListener(fSelectionChangedListener);
+		fMethodsViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 		
 		Control control= fMethodsViewer.getTable();
 		control.addKeyListener(createKeyListener());
@@ -932,9 +932,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void internalSelectType(IMember elem, boolean reveal) {	
 		TypeHierarchyViewer viewer= getCurrentViewer();
-		viewer.removeSelectionChangedListener(fSelectionChangedListener);
+		viewer.removePostSelectionChangedListener(fSelectionChangedListener);
 		viewer.setSelection(elem != null ? new StructuredSelection(elem) : StructuredSelection.EMPTY, reveal);
-		viewer.addSelectionChangedListener(fSelectionChangedListener);
+		viewer.addPostSelectionChangedListener(fSelectionChangedListener);
 	}
 		
 	/**
