@@ -220,12 +220,14 @@ public final class TextRange {
 		if (isUndefined() || isDeleted())
 			return;
 		fOffset+= delta;
+		Assert.isTrue(fOffset >= 0);
 	}
 	
 	/* package */ void adjustLength(int delta) {
 		if (isUndefined() || isDeleted())
 			return;
 		fLength+= delta;
+		Assert.isTrue(fLength >= 0);
 	}
 }
 
