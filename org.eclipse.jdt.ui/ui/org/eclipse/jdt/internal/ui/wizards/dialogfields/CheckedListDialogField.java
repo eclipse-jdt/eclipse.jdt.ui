@@ -207,6 +207,15 @@ public class CheckedListDialogField extends ListDialogField {
 		checkStateChanged();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField#replaceElement(java.lang.Object, java.lang.Object)
+	 */
+	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException {
+		boolean wasChecked= isChecked(oldElement);
+		super.replaceElement(oldElement, newElement);
+		setChecked(newElement, wasChecked);
+	}
+	
 	// ------ enable / disable management
 	
 	/*
