@@ -169,24 +169,51 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @return the inferred indentation level
 	 * @since 3.1
 	 */
-	private static int inferIndentationLevel(String reference, int tabSize) {
-		int level= 0;
-		for (int i= 0, n= reference.length(), spaces= 0; i < n; i++) {
-			char ch= reference.charAt(i);
-			if (ch == '\t') {
-				spaces= 0;
-				level++;
-			} else {
-				spaces++;
-				if (spaces >= tabSize) {
-					spaces= 0;
-					level++;
-				}
-			}
+	private int inferIndentationLevel(String reference, int tabSize) {
+		StringBuffer expanded= expandTabs(reference, tabSize);
+		
+		int spaceWidth, referenceWidth;
+		if (fTextMeasurement != null) {
+			spaceWidth= fTextMeasurement.computeWidth(" "); //$NON-NLS-1$
+			referenceWidth= fTextMeasurement.computeWidth(expanded.toString());
+		} else {
+			spaceWidth= 1;
+			referenceWidth= expanded.length();
 		}
+		
+		int level= referenceWidth / (tabSize * spaceWidth);
+		if (referenceWidth % (tabSize * spaceWidth) > 0)
+			level++;
 		return level;
 	}
 	
+	/**
+	 * Expands the given string's tabs according to the given tab size.
+	 * 
+	 * @param string the string
+	 * @param tabSize the tab size
+	 * @return the expanded string
+	 * @since 3.1
+	 */
+	private StringBuffer expandTabs(String string, int tabSize) {
+		StringBuffer expanded= new StringBuffer();
+		for (int i= 0, n= string.length(), chars= 0; i < n; i++) {
+			char ch= string.charAt(i);
+			if (ch == '\t') {
+				for (; chars < tabSize; chars++)
+					expanded.append(' ');
+				chars= 0;
+			} else {
+				expanded.append(ch);
+				chars++;
+				if (chars >= tabSize)
+					chars= 0;
+			}
+		
+		}
+		return expanded;
+	}
+
 	/**
 	 * Returns the value of {@link DefaultCodeFormatterConstants#FORMATTER_TAB_SIZE}
 	 * from the given preferences.

@@ -15,6 +15,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.text.comment.SingleCommentLine;
@@ -129,6 +132,17 @@ public class SingleLineTestCase extends CommentTestCase {
 	public void testCommentWrapping4() {
 		setUserOption(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "32"); //$NON-NLS-1$
 		assertEquals(PREFIX + "test test" + DELIMITER, testFormat("//test\ttest" + DELIMITER)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+	
+	public void testCommentWrapping5() {
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
+		String prefix= "public class Test {" + DELIMITER + "	int test; // test test test test test test test test test test test test";
+		String inputInfix= " ";
+		String expectedInfix= DELIMITER + "\t\t\t\t" + PREFIX;
+		String suffix= "test" + DELIMITER + "}" + DELIMITER;
+		String input= prefix + inputInfix + suffix;
+		int offset= input.indexOf("//");
+		assertEquals(prefix + expectedInfix + suffix, testFormat(input, offset, input.indexOf(DELIMITER, offset) + DELIMITER.length() - offset));
 	}
 
 	public void testHeaderComment1() {
