@@ -86,8 +86,6 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
@@ -660,7 +658,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (unit != null) {
 			try {
 				if (reconcile) {
-					JavaModelUtil.reconcile(unit);
+					synchronized (unit) {
+						unit.reconcile();
+					}
 					return unit.getElementAt(offset);
 				} else if (unit.isConsistent())
 					return unit.getElementAt(offset);
@@ -1173,7 +1173,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (unit != null) {
 			try {
 				
-				JavaModelUtil.reconcile(unit);
+				synchronized (unit) {
+					unit.reconcile();
+				}
 				IJavaElement[] findings= unit.findElements(element);
 				if (findings != null && findings.length > 0)
 					return findings[0];

@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
@@ -172,7 +170,10 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			return parameters;
 
 		} else {
-			JavaModelUtil.reconcile(fCompilationUnit);
+			
+			synchronized (fCompilationUnit) {
+				fCompilationUnit.reconcile();
+			}
 			
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {

@@ -66,7 +66,9 @@ public class ImportsStructure implements IImportsStructure {
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
-		JavaModelUtil.reconcile(fCompilationUnit);
+		synchronized (fCompilationUnit) {
+			fCompilationUnit.reconcile();
+		}
 	
 		IImportContainer container= cu.getImportContainer();
 		
@@ -291,7 +293,7 @@ public class ImportsStructure implements IImportsStructure {
 						return false; // keep curr and best together, new should be before both
 					} else {
 						return currChar < bestChar; // -> (c < b)
-					}
+				}
 				}
 			} else {
 				if (bestChar > newChar) {								// c < n < b
@@ -301,9 +303,9 @@ public class ImportsStructure implements IImportsStructure {
 						return true; // keep curr and best together, new should be ahead of both
 					} else {
 						return currChar > bestChar; // -> (c > b)
-					}
 				}
 			}
+		}
 		}
 			
 	}
@@ -561,7 +563,9 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param textBuffer The textBuffer
 	 */
 	public TextRange getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
-		JavaModelUtil.reconcile(fCompilationUnit);
+		synchronized (fCompilationUnit) {
+			fCompilationUnit.reconcile();
+		}
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();

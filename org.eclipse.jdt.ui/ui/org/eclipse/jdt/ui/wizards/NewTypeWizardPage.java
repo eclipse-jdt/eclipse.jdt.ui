@@ -1387,14 +1387,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			// add imports for superclass/interfaces, so types can be resolved correctly
 			imports.create(false, new SubProgressMonitor(monitor, 1));
 	
-			ICompilationUnit cu= createdType.getCompilationUnit();
-			JavaModelUtil.reconcile(cu);	
+			ICompilationUnit cu= createdType.getCompilationUnit();	
+			synchronized(cu) {
+				cu.reconcile();
+			}			
 			createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
 	
 			// add imports
 			imports.create(false, new SubProgressMonitor(monitor, 1));
 			
-			JavaModelUtil.reconcile(cu);
+			synchronized(cu) {
+				cu.reconcile();
+			}
 			ISourceRange range= createdType.getSourceRange();
 			
 			IBuffer buf= cu.getBuffer();

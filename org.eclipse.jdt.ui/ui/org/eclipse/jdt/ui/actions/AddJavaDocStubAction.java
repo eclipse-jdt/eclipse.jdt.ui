@@ -123,7 +123,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (cu.isWorkingCopy()) {
 				workingCopyCU= cu;
 				workingCopyMembers= members;
-				JavaModelUtil.reconcile(workingCopyCU);
+				synchronized (workingCopyCU) {
+					workingCopyCU.reconcile();
+				}
 			
 			} else {
 				// get the corresponding elements from the working copy
@@ -146,7 +148,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			
 			if (ElementValidator.check(workingCopyMembers, getShell(), getDialogTitle(), false))
 				run(workingCopyMembers);
-			JavaModelUtil.reconcile(workingCopyCU);
+			synchronized (workingCopyCU) {
+				workingCopyCU.reconcile();
+			}					
 			EditorUtility.revealInEditor(editor, members[0]);
 			
 		} catch (CoreException e) {

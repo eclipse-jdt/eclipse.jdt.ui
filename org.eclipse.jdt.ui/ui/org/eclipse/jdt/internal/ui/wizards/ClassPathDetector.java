@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
@@ -201,7 +199,9 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			ICompilationUnit workingCopy= null;
 			try {
 				workingCopy= (ICompilationUnit) cu.getWorkingCopy();
-				JavaModelUtil.reconcile(workingCopy);
+				synchronized(workingCopy) {
+					workingCopy.reconcile();
+				}
 				IPath packPath= file.getParent().getFullPath();
 				IPackageDeclaration[] decls= workingCopy.getPackageDeclarations();
 				String cuName= file.getName();

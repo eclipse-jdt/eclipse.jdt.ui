@@ -76,8 +76,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -389,7 +387,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 
 				if (markerDeltas != null && markerDeltas.length > 0) {
 					try {
-						JavaModelUtil.reconcile(getWorkingCopy(fInput), true, null);
+						getWorkingCopy(fInput).reconcile(true, null);
 					} catch (JavaModelException ex) {
 						handleCoreException(ex, ex.getMessage());
 					}
@@ -907,7 +905,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
 			// update structure, assumes lock on info.fCopy
-			JavaModelUtil.reconcile(info.fCopy);
+			info.fCopy.reconcile();
 			
 			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 			IResource resource= original.getResource();

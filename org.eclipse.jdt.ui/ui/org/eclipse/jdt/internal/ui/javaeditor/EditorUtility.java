@@ -290,10 +290,12 @@ public class EditorUtility {
 		ICompilationUnit workingCopy= getWorkingCopy(unit);
 		if (workingCopy != null) {
 			if (reconcile) {
-				JavaModelUtil.reconcile(workingCopy);
-				return JavaModelUtil.findInCompilationUnit(workingCopy, element);
+				synchronized (workingCopy) {
+					workingCopy.reconcile();
+					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
+				}
 			} else {
-				return JavaModelUtil.findInCompilationUnit(workingCopy, element);
+					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
 			}
 		}
 		
