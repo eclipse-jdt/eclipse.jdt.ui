@@ -61,10 +61,12 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -170,10 +172,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 						case IJavaElement.JAVA_PROJECT:
 							IPackageFragmentRoot[] roots= ((IJavaProject) elem).getPackageFragmentRoots();
 							for (int k= 0; k < roots.length; k++) {
-								collectCompilationUnits(roots[i], result);
+								collectCompilationUnits(roots[k], result);
 							}
 							break;			
 					}
+				} else if (selected[i] instanceof LogicalPackage) {
+					IPackageFragment[] packageFragments= ((LogicalPackage)selected[i]).getFragments();
+					for (int k= 0; k < packageFragments.length; k++)
+						collectCompilationUnits(packageFragments[k], result);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -275,12 +281,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// cancelled by user
 		}		
-	
 		
 	}
 	
 	static final class OrganizeImportError extends Error {
-	}
+		}
 	
 	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, boolean doResolve, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null) {
@@ -299,27 +304,26 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					throw new OrganizeImportError();
 				}
 			};
-			
+	
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
 				String cuLocation= cu.getPath().makeRelative().toString();
 				
-				cu= JavaModelUtil.toWorkingCopy(cu);
-				
-				monitor.subTask(cuLocation);
-				
-				OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
+					cu= JavaModelUtil.toWorkingCopy(cu);
+					
+					monitor.subTask(cuLocation);
+					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
 				runInSync(op, cuLocation, status, monitor);
 
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				
-				IProblem parseError= op.getParseError();
-				if (parseError != null) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
-					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-				} 
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					
+					IProblem parseError= op.getParseError();
+					if (parseError != null) {
+						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
+						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+					} 
 			}
 		} finally {
 			monitor.done();
@@ -344,8 +348,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		};
 		getShell().getDisplay().syncExec(runnable);
-	}
-	
+		}
 				
 
 	private void runOnSingle(ICompilationUnit cu, boolean doResolve, boolean inEditor) {
