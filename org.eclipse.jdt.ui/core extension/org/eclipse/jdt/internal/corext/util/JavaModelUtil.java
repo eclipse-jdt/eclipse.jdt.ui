@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -89,8 +88,7 @@ public final class JavaModelUtil {
 		ICompilationUnit[] cus= pack.getCompilationUnits();
 		for (int i= 0; i < cus.length; i++) {
 			ICompilationUnit unit= cus[i];
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(unit);
-			IType type= findType(wc, fullyQualifiedName);
+			IType type= findType(unit, fullyQualifiedName);
 			if (type != null && type.exists())
 				return type;
 		}
@@ -745,47 +743,7 @@ public final class JavaModelUtil {
 				return true;
 		return false;
 	}	
-	
-	
-	
-	private static final String ARGUMENTS_DELIMITER = "#"; //$NON-NLS-1$
-	private static final String EMPTY_ARGUMENT = "   "; //$NON-NLS-1$
-	
-	/**
-	 * Copied from org.eclipse.jdt.internal.core.Util;
-	 */
-	public static String[] getProblemArgumentsFromMarker(String argumentsString){
-		if (argumentsString == null) return null;
-		int index = argumentsString.indexOf(':');
-		if(index == -1)
-			return null;
 		
-		int length = argumentsString.length();
-		int numberOfArg;
-		try{
-			numberOfArg = Integer.parseInt(argumentsString.substring(0 , index));
-		} catch (NumberFormatException e) {
-			return null;
-		}
-		argumentsString = argumentsString.substring(index + 1, length);
-		
-		String[] args = new String[length];
-		int count = 0;
-		
-		StringTokenizer tokenizer = new StringTokenizer(argumentsString, ARGUMENTS_DELIMITER);
-		while(tokenizer.hasMoreTokens()) {
-			String argument = tokenizer.nextToken();
-			if(argument.equals(EMPTY_ARGUMENT))
-				argument = "";  //$NON-NLS-1$
-			args[count++] = argument;
-		}
-		
-		if(count != numberOfArg)
-			return null;
-		
-		System.arraycopy(args, 0, args = new String[count], 0, count);
-		return args;
-	}
 
 	/**
 	 * Force a reconcile of a compilation unit.
