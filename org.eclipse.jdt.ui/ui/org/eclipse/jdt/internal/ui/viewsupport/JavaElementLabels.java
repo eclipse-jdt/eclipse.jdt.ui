@@ -46,202 +46,202 @@ public class JavaElementLabels {
 	 * Method names contain parameter types.
 	 * e.g. <code>foo(int)</code>
 	 */
-	public final static long M_PARAMETER_TYPES= 1 << 0;
+	public final static long M_PARAMETER_TYPES= 1L << 0;
 	
 	/**
 	 * Method names contain parameter names.
 	 * e.g. <code>foo(index)</code>
 	 */
-	public final static long M_PARAMETER_NAMES= 1 << 1;	
+	public final static long M_PARAMETER_NAMES= 1L << 1;	
 	
 	/**
 	 * Method names contain type parameters prepended.
 	 * e.g. <code><A> foo(A index)</code>
 	 */
-	public final static long M_PRE_TYPE_PARAMETERS= 1 << 31;
+	public final static long M_PRE_TYPE_PARAMETERS= 1L << 31;
 	
 	/**
 	 * Method names contain type parameters prepended.
 	 * e.g. <code>foo(A index) <A></code>
 	 */
-	public final static long M_APP_TYPE_PARAMETERS= 1 << 32;	
+	public final static long M_APP_TYPE_PARAMETERS= 1L << 32;
 	
 	/**
 	 * Method names contain thrown exceptions.
 	 * e.g. <code>foo throws IOException</code>
 	 */
-	public final static long M_EXCEPTIONS= 1 << 2;
+	public final static long M_EXCEPTIONS= 1L << 2;
 	
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>foo : int</code>
 	 */
-	public final static long M_APP_RETURNTYPE= 1 << 3;
+	public final static long M_APP_RETURNTYPE= 1L << 3;
 	
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>int foo</code>
 	 */
-	public final static long M_PRE_RETURNTYPE= 1 << 4;	
+	public final static long M_PRE_RETURNTYPE= 1L << 4;	
 
 	/**
 	 * Method names are fully qualified.
 	 * e.g. <code>java.util.Vector.size</code>
 	 */
-	public final static long M_FULLY_QUALIFIED= 1 << 5;
+	public final static long M_FULLY_QUALIFIED= 1L << 5;
 	
 	/**
 	 * Method names are post qualified.
 	 * e.g. <code>size - java.util.Vector</code>
 	 */
-	public final static long M_POST_QUALIFIED= 1 << 6;
+	public final static long M_POST_QUALIFIED= 1L << 6;
 	
 	/**
 	 * Initializer names are fully qualified.
 	 * e.g. <code>java.util.Vector.{ ... }</code>
 	 */
-	public final static long I_FULLY_QUALIFIED= 1 << 7;
+	public final static long I_FULLY_QUALIFIED= 1L << 7;
 	
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>{ ... } - java.util.Map</code>
 	 */
-	public final static long I_POST_QUALIFIED= 1 << 8;		
+	public final static long I_POST_QUALIFIED= 1L << 8;		
 	
 	/**
 	 * Field names contain the declared type (appended)
 	 * e.g. <code>fHello : int</code>
 	 */
-	public final static long F_APP_TYPE_SIGNATURE= 1 << 9;
+	public final static long F_APP_TYPE_SIGNATURE= 1L << 9;
 	
 	/**
 	 * Field names contain the declared type (prepended)
 	 * e.g. <code>int fHello</code>
 	 */
-	public final static long F_PRE_TYPE_SIGNATURE= 1 << 10;	
+	public final static long F_PRE_TYPE_SIGNATURE= 1L << 10;	
 
 	/**
 	 * Fields names are fully qualified.
 	 * e.g. <code>java.lang.System.out</code>
 	 */
-	public final static long F_FULLY_QUALIFIED= 1 << 11;
+	public final static long F_FULLY_QUALIFIED= 1L << 11;
 	
 	/**
 	 * Fields names are post qualified.
 	 * e.g. <code>out - java.lang.System</code>
 	 */
-	public final static long F_POST_QUALIFIED= 1 << 12;	
+	public final static long F_POST_QUALIFIED= 1L << 12;	
 	
 	/**
 	 * Type names are fully qualified.
 	 * e.g. <code>java.util.Map.MapEntry</code>
 	 */
-	public final static long T_FULLY_QUALIFIED= 1 << 13;
+	public final static long T_FULLY_QUALIFIED= 1L << 13;
 	
 	/**
 	 * Type names are type container qualified.
 	 * e.g. <code>Map.MapEntry</code>
 	 */
-	public final static long T_CONTAINER_QUALIFIED= 1 << 14;
+	public final static long T_CONTAINER_QUALIFIED= 1L << 14;
 	
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>MapEntry - java.util.Map</code>
 	 */
-	public final static long T_POST_QUALIFIED= 1 << 15;
+	public final static long T_POST_QUALIFIED= 1L << 15;
 	
 	/**
 	 * Declarations (import container / declarartion, package declarartion) are qualified.
 	 * e.g. <code>java.util.Vector.class/import container</code>
 	 */	
-	public final static long D_QUALIFIED= 1 << 16;
+	public final static long D_QUALIFIED= 1L << 16;
 	
 	/**
 	 * Declarations (import container / declarartion, package declarartion) are post qualified.
 	 * e.g. <code>import container - java.util.Vector.class</code>
 	 */	
-	public final static long D_POST_QUALIFIED= 1 << 17;	
+	public final static long D_POST_QUALIFIED= 1L << 17;	
 
 	/**
 	 * Class file names are fully qualified.
 	 * e.g. <code>java.util.Vector.class</code>
 	 */	
-	public final static long CF_QUALIFIED= 1 << 18;
+	public final static long CF_QUALIFIED= 1L << 18;
 	
 	/**
 	 * Class file names are post qualified.
 	 * e.g. <code>Vector.class - java.util</code>
 	 */	
-	public final static long CF_POST_QUALIFIED= 1 << 19;
+	public final static long CF_POST_QUALIFIED= 1L << 19;
 	
 	/**
 	 * Compilation unit names are fully qualified.
 	 * e.g. <code>java.util.Vector.java</code>
 	 */	
-	public final static long CU_QUALIFIED= 1 << 20;
+	public final static long CU_QUALIFIED= 1L << 20;
 	
 	/**
 	 * Compilation unit names are post  qualified.
 	 * e.g. <code>Vector.java - java.util</code>
 	 */	
-	public final static long CU_POST_QUALIFIED= 1 << 21;
+	public final static long CU_POST_QUALIFIED= 1L << 21;
 
 	/**
 	 * Package names are qualified.
 	 * e.g. <code>MyProject/src/java.util</code>
 	 */	
-	public final static long P_QUALIFIED= 1 << 22;
+	public final static long P_QUALIFIED= 1L << 22;
 	
 	/**
 	 * Package names are post qualified.
 	 * e.g. <code>java.util - MyProject/src</code>
 	 */	
-	public final static long P_POST_QUALIFIED= 1 << 23;
+	public final static long P_POST_QUALIFIED= 1L << 23;
 
 	/**
 	 * Package Fragment Roots contain variable name if from a variable.
 	 * e.g. <code>JRE_LIB - c:\java\lib\rt.jar</code>
 	 */
-	public final static long ROOT_VARIABLE= 1 << 24;
+	public final static long ROOT_VARIABLE= 1L << 24;
 	
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (prepended).
 	 * e.g. <code>MyProject/src</code>
 	 */
-	public final static long ROOT_QUALIFIED= 1 << 25;
+	public final static long ROOT_QUALIFIED= 1L << 25;
 	
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (appended).
 	 * e.g. <code>src - MyProject</code>
 	 */
-	public final static long ROOT_POST_QUALIFIED= 1 << 26;	
+	public final static long ROOT_POST_QUALIFIED= 1L << 26;	
 	
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static long APPEND_ROOT_PATH= 1 << 27;
+	public final static long APPEND_ROOT_PATH= 1L << 27;
 
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static long PREPEND_ROOT_PATH= 1 << 28;
+	public final static long PREPEND_ROOT_PATH= 1L << 28;
 
 	/**
 	 * Package names are compressed.
 	 * e.g. <code>o*.e*.search</code>
 	 */	
-	public final static long P_COMPRESSED= 1 << 29;
+	public final static long P_COMPRESSED= 1L << 29;
 	
 	/**
 	 * Post qualify referenced package fragement roots. For example
 	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
 	 * from another project.
 	 */
-	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1 << 30; 
+	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1L << 30; 
 	
 	/**
 	 * Qualify all elements
@@ -421,8 +421,6 @@ public class JavaElementLabels {
 			// parameters
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
-			
-			
 				String[] types= getFlag(flags, M_PARAMETER_TYPES) ? method.getParameterTypes() : null;
 				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
 				int nParams= types != null ? types.length : names.length;

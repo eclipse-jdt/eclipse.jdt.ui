@@ -27,7 +27,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE  | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
 	public final static int DEFAULT_IMAGEFLAGS= JavaElementImageProvider.OVERLAY_ICONS;
 	
-	private int fTextFlagMask;
+	private long fTextFlagMask;
 	private int fImageFlagMask;
 
 	/**
