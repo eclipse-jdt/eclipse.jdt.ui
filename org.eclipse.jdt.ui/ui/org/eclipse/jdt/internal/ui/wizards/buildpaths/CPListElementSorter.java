@@ -21,7 +21,10 @@ public class CPListElementSorter extends ViewerSorter {
 	private static final int LIBRARY= 2;
 	private static final int VARIABLE= 3;
 	private static final int CONTAINER= 4;
-	private static final int OTHER= 5;
+	
+	private static final int INCLUSION= 5;
+	
+	private static final int OTHER= 7;
 	
 	/*
 	 * @see ViewerSorter#category(Object)
@@ -40,8 +43,14 @@ public class CPListElementSorter extends ViewerSorter {
 			case IClasspathEntry.CPE_CONTAINER:
 				return CONTAINER;
 			}
+		} else if (obj instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute)obj).getKey();
+			if (CPListElement.INCLUSION.equals(key)) {
+				return INCLUSION;
+			}
 		}
 		return OTHER;
 	}
+	
 
 }

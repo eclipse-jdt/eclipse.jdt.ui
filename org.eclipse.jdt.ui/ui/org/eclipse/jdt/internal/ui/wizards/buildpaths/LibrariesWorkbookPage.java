@@ -200,7 +200,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 
 		public boolean hasChildren(TreeListDialogField field, Object element) {
-			return (element instanceof CPListElement);
+			return getChildren(field, element).length > 0;
 		}		
 			
 		// ---------- IDialogFieldListener --------

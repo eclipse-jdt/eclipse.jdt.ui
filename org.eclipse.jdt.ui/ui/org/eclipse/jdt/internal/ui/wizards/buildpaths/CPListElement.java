@@ -69,8 +69,8 @@ public class CPListElement {
 		switch (entryKind) {
 			case IClasspathEntry.CPE_SOURCE:
 				createAttributeElement(OUTPUT, null);
-				createAttributeElement(EXCLUSION, new Path[0]);
 				createAttributeElement(INCLUSION, new Path[0]);
+				createAttributeElement(EXCLUSION, new Path[0]);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
@@ -189,7 +189,7 @@ public class CPListElement {
 	
 	public Object[] getChildren(boolean hideOutputFolder) {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
-			return new Object[] { findAttributeElement(EXCLUSION), findAttributeElement(INCLUSION) };
+			return new Object[] { findAttributeElement(INCLUSION), findAttributeElement(EXCLUSION) };
 		}
 		return fChildren.toArray();
 	}
