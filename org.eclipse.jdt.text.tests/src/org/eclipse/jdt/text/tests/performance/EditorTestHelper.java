@@ -174,10 +174,10 @@ public class EditorTestHelper {
 			runEventQueue(intervalTime);
 		
 		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
-		boolean calm= quietJobs();
+		boolean calm= allJobsQuiet();
 		while (!calm && System.currentTimeMillis() < endTime) {
 			runEventQueue(intervalTime);
-			calm= quietJobs();
+			calm= allJobsQuiet();
 		}
 //		System.out.println("--------------------------------------------------");
 		return calm;
@@ -191,7 +191,7 @@ public class EditorTestHelper {
 		}
 	}
 
-	public static boolean quietJobs() {
+	public static boolean allJobsQuiet() {
 		IJobManager jobManager= Platform.getJobManager();
 		Job[] jobs= jobManager.find(null);
 		for (int i= 0; i < jobs.length; i++) {
