@@ -5,7 +5,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 
-import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.Iterator;import org.eclipse.swt.SWT;import org.eclipse.swt.dnd.DND;import org.eclipse.swt.dnd.DragSource;import org.eclipse.swt.dnd.FileTransfer;import org.eclipse.swt.dnd.Transfer;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.ScrollBar;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Tree;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.jface.viewers.DecoratingLabelProvider;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ILabelDecorator;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.ui.IActionBars;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IMemento;import org.eclipse.ui.IPartListener;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IViewSite;import org.eclipse.ui.IWorkbenchActionConstants;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenPerspectiveMenu;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.actions.RefreshAction;import org.eclipse.ui.dialogs.PropertyDialogAction;import org.eclipse.ui.help.ViewContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.part.ISetSelectionTarget;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.reorg.DeleteAction;import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;import org.eclipse.jdt.internal.ui.wizards.NewGroup;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;
+import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.Iterator;import org.eclipse.swt.SWT;import org.eclipse.swt.dnd.DND;import org.eclipse.swt.dnd.DragSource;import org.eclipse.swt.dnd.FileTransfer;import org.eclipse.swt.dnd.Transfer;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.ScrollBar;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Tree;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.jface.viewers.DecoratingLabelProvider;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ILabelDecorator;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.ui.IActionBars;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IMemento;import org.eclipse.ui.IPartListener;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IViewSite;import org.eclipse.ui.IWorkbenchActionConstants;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenPerspectiveMenu;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.actions.RefreshAction;import org.eclipse.ui.dialogs.PropertyDialogAction;import org.eclipse.ui.help.ViewContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.part.ISetSelectionTarget;import org.eclipse.ui.part.ViewPart;import org.eclipse.ui.views.internal.framelist.BackAction;import org.eclipse.ui.views.internal.framelist.ForwardAction;import org.eclipse.ui.views.internal.framelist.FrameList;import org.eclipse.ui.views.internal.framelist.GoIntoAction;import org.eclipse.ui.views.internal.framelist.IFrameSource;import org.eclipse.ui.views.internal.framelist.UpAction;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.reorg.DeleteAction;import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;import org.eclipse.jdt.internal.ui.wizards.NewGroup;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;
 
 
 /**
@@ -51,7 +51,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public static final String PACKAGE_VIEW_HELP_ID= "org.eclipse.jdt.ui.general_help_context";
 
 	private PackageViewer fViewer; 
-	private IFrameSource fFrameSource;
+	private PackagesFrameSource fFrameSource;
 	private FrameList fFrameList;
 	private ContextMenuGroup[] fStandardGroups;
 	private Menu fContextMenu;		
@@ -62,10 +62,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Action fPropertyDialogAction;
  	private Action fDeleteAction;
  	private RefreshAction fRefreshAction;
- 	private FrameBackAction fBackAction;
-	private FrameForwardAction fForwardAction;
-	private ZoomInAction fZoomInAction;
-	private FrameUpAction fUpAction;
+ 	private BackAction fBackAction;
+	private ForwardAction fForwardAction;
+	private GoIntoAction fZoomInAction;
+	private UpAction fUpAction;
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
 
@@ -226,21 +226,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menu.add(fShowLibrariesAction);  
 	}
 		
-	void frameChanged(PackageFrame frame) { //&&&
-		TreeViewer viewer = getViewer();
-		viewer.getControl().setRedraw(false);
-		viewer.setInput(frame.getInput());
-		viewer.setExpandedElements(frame.getExpandedElements());
-		viewer.setSelection(frame.getSelection(), true);
-		viewer.getControl().setRedraw(true);
-		updateTitle();
-	}
-	
-	PackageFrame getCurrentFrame() { //&&&
-		TreeViewer viewer= getViewer();
-		return new PackageFrame(this, viewer.getInput(), viewer.getSelection(), viewer.getExpandedElements());
-	}
-	
 	private Object findInputElement() {
 		Object input= getSite().getPage().getInput();
 		if (input instanceof IWorkspace) { 
@@ -318,11 +303,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		boolean selectionHasElements= !selection.isEmpty();
-
+		Object element= selection.getFirstElement();
 		// updateActions(selection);
-		if (selection.size() == 1) {
+		if (selection.size() == 1 && fViewer.isExpandable(element)) 
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
-		}
 		addGotoMenu(menu);
 
 		fOpenCUAction.update();
@@ -380,19 +364,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, SHOW_LIBRARIES_LABEL);
 		
 		//&&&
-		fBackAction= new FrameBackAction(fFrameList);
-		fBackAction.setHoverImageDescriptor(getImageDescriptor("clcl16/bkward_nav.gif"));
-		fBackAction.setImageDescriptor(getImageDescriptor("elcl16/bkward_nav.gif"));
-		fBackAction.setDisabledImageDescriptor(getImageDescriptor("dlcl16/bkward_nav.gif"));
-		fForwardAction= new FrameForwardAction(fFrameList);
-		fForwardAction.setHoverImageDescriptor(getImageDescriptor("clcl16/forward_nav.gif"));
-		fForwardAction.setImageDescriptor(getImageDescriptor("elcl16/forward_nav.gif"));
-		fForwardAction.setDisabledImageDescriptor(getImageDescriptor("dlcl16/forward_nav.gif"));
-		fZoomInAction= new ZoomInAction(this, fFrameList);
-		fUpAction= new FrameUpAction(this, fFrameList);
-		fUpAction.setHoverImageDescriptor(getImageDescriptor("clcl16/up_nav.gif"));
-		fUpAction.setImageDescriptor(getImageDescriptor("elcl16/up_nav.gif"));
-		fUpAction.setDisabledImageDescriptor(getImageDescriptor("dlcl16/up_nav.gif"));
+		fBackAction= new BackAction(fFrameList);
+		fForwardAction= new ForwardAction(fFrameList);
+		fZoomInAction= new GoIntoAction(fFrameList);
+		fUpAction= new UpAction(fFrameList);
 
 		fGotoTypeAction= new GotoTypeAction(this);
 		fGotoPackageAction= new GotoPackageAction(this);
@@ -734,20 +709,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		});
 	}
 	
-	void initFrameList() {  //&&&
-		fFrameSource= new IFrameSource() {
-			public Frame getCurrentFrame() {
-				return PackageExplorerPart.this.getCurrentFrame();
-			}
-		};
+	void initFrameList() {
+		fFrameSource= new PackagesFrameSource(this);
 		fFrameList= new FrameList(fFrameSource);
-		fFrameList.addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				if (FrameList.P_CURRENT_FRAME.equals(event.getProperty())) {
-					frameChanged((PackageFrame) event.getNewValue());
-				}
-			}
-		});
+		fFrameSource.connectTo(fFrameList);
 	}
 
 
@@ -841,17 +806,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Updates the title text and title tool tip.
 	 * Called whenever the input of the viewer changes.
 	 */ 
-	void updateTitle() {
-		Object input= getSite().getPage().getInput();
+	void updateTitle() {		
+		Object input= getViewer().getInput();
 		String viewName= getConfigurationElement().getAttribute("name");
-		if (!(input instanceof IWorkspaceRoot)) {
-			ILabelProvider labelProvider = (ILabelProvider) getViewer().getLabelProvider();
-			setTitle(viewName + " : " + labelProvider.getText(input));
-			setTitleToolTip(getToolTipText(input));
- 		} else {
+		if (input == null
+			|| (input instanceof IJavaModel)) {
 			setTitle(viewName);
 			setTitleToolTip("");
-		}
+		} else {
+			ILabelProvider labelProvider = (ILabelProvider) getViewer().getLabelProvider();
+			setTitle(viewName + ": " + labelProvider.getText(input));
+			setTitleToolTip(getToolTipText(input));
+		} 
 	}
 	
 	/**
