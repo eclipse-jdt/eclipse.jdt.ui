@@ -752,7 +752,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			//XXX workaround for 38450 Delete: Removing default package removes source folder
 			if (JavaElementUtil.isDefaultPackage(element))
 				return false;
-												
+
 			return true;
 		}
 	
@@ -798,6 +798,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			return result;
 		}
 
+		//return Collection<IResource>
 		private static Collection getReadOnlyResourcesAndSubResources(IJavaElement javaElement) throws CoreException {
 			switch(javaElement.getElementType()){
 				case IJavaElement.CLASS_FILE:
@@ -826,13 +827,15 @@ public class DeleteRefactoring2 extends Refactoring{
 					result.addAll(getReadOnlyResourcesAndSubResources(pack.getChildren()));
 					return result;
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
+					if (root.isArchive())
+						return new ArrayList(0);							
 					List result1= new ArrayList();
 					IResource pfrResource= ReorgUtils2.getResource(javaElement);
 					if (pfrResource == null)
 						return result1;
 					if (pfrResource.isReadOnly())
 						result1.add(pfrResource);
-					IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
 					Object[] nonJava1= root.getNonJavaResources();
 					for (int i= 0; i < nonJava1.length; i++) {
 						Object object= nonJava1[i];
