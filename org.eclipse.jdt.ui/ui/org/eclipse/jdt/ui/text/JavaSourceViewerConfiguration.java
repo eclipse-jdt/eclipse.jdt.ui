@@ -553,11 +553,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		IPreferenceStore store= fNewPreferenceStore;
-		if (fNewPreferenceStore == null)
-			// backwards compatibility code
-			store= getPreferenceStore();
-
+		IPreferenceStore store= getNewPreferenceStore();
+		
 		if (store.contains(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
 			return store.getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 		else
