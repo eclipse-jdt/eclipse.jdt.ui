@@ -128,7 +128,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
