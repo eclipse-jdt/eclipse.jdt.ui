@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -285,7 +286,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				attrib.getParent().setAttribute(attrib.getKey(), null);
+				String key= attrib.getKey();
+				Object value= null;
+				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+					value= new Path[0];
+				}
+				
+				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);				
 			}
 		}

@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 public class CPListElement {
@@ -160,6 +162,9 @@ public class CPListElement {
 		CPListElementAttribute attribute= findAttributeElement(key);
 		if (attribute == null) {
 			return null;
+		}
+		if (key.equals(EXCLUSION) || key.equals(INCLUSION)) {
+			Assert.isNotNull(value);
 		}
 		attribute.setValue(value);
 		attributeChanged(key);
