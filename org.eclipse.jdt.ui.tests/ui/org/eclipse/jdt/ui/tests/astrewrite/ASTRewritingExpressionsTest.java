@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -56,8 +58,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
-		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			
 		
 		fJProject1= ProjectTestSetup.getProject();
@@ -83,7 +85,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -143,7 +145,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -265,7 +267,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -347,7 +349,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -409,7 +411,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -473,7 +475,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -530,7 +532,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -598,7 +600,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -682,7 +684,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -736,7 +738,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -790,7 +792,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -868,7 +870,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -920,7 +922,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -996,7 +998,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1075,7 +1077,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -1138,7 +1140,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1186,7 +1188,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1233,7 +1235,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1286,7 +1288,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1361,7 +1363,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 			
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1412,7 +1414,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1491,7 +1493,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
@@ -1545,7 +1547,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();

@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -68,8 +70,8 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 	
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
-		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			
 		
 		fJProject1= ProjectTestSetup.getProject();
@@ -96,7 +98,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
@@ -143,7 +145,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
@@ -195,7 +197,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -245,7 +247,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -293,7 +295,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
