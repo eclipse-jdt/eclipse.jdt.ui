@@ -77,7 +77,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	private void measureOpenHierarchy(IJavaElement element) throws Exception {
-		joinBackgroudJobs();
+		joinBackgroudActivities();
 		
 		startMeasuring();
 		

@@ -36,13 +36,11 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 	
 	protected void executeRefactoring(Refactoring refactoring, int maxSeverity) throws Exception {
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
-		joinBackgroudJobs();
+		joinBackgroudActivities();
 		System.gc();
 		startMeasuring();
 		ResourcesPlugin.getWorkspace().run(operation, null);
-		stopMeasuring();
-		commitMeasurements();
-		assertPerformance();
+		finishMeasurements();
 		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
 		assertEquals(true, operation.getValidationStatus().isOK());
 		assertNotNull(operation.getUndoChange());

@@ -74,7 +74,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testOpen() throws Exception {
-		joinBackgroudJobs();
+		joinBackgroudActivities();
 		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		startMeasuring();
 		page.showView(JavaUI.ID_PACKAGES);
@@ -82,7 +82,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testSelect() throws Exception {
-		joinBackgroudJobs();
+		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		StructuredSelection selection= new StructuredSelection(MyTestSetup.fJProject1);
 		startMeasuring();
@@ -91,7 +91,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testExpand() throws Exception {
-		joinBackgroudJobs();
+		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		startMeasuring();
 		viewer.expandToLevel(MyTestSetup.fJProject1, 1);
