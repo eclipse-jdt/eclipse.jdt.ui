@@ -112,10 +112,10 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	}
 
 	public void test3() throws Exception{
-		if (true){
-			printTestDisabledMessage("test for bug#19007");
-			return;
-		}	
+//		if (true){
+//			printTestDisabledMessage("test for bug#19007");
+//			return;
+//		}	
 		Object elem0= fCuA.getImport("java.lang.*");
 				
 		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
