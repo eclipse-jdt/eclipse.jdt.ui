@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
@@ -112,8 +113,8 @@ public class TypeInfoTest extends TestCase {
 			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'V'}, 
-			IJavaSearchConstants.PREFIX_MATCH, 
-			IJavaSearchConstants.CASE_INSENSITIVE, 
+			SearchPattern.R_PREFIX_MATCH, 
+			false, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
@@ -169,8 +170,8 @@ public class TypeInfoTest extends TestCase {
 			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'T'}, 
-			IJavaSearchConstants.PREFIX_MATCH, 
-			IJavaSearchConstants.CASE_INSENSITIVE, 
+			SearchPattern.R_PREFIX_MATCH, 
+			false, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
@@ -295,8 +296,8 @@ public class TypeInfoTest extends TestCase {
 			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			"Foo".toCharArray(),
-			IJavaSearchConstants.EXACT_MATCH, 
-			IJavaSearchConstants.CASE_SENSITIVE, 
+			SearchPattern.R_EXACT_MATCH, 
+			true, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 

@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -368,8 +369,8 @@ public abstract class RefactoringTest extends TestCase {
 			ResourcesPlugin.getWorkspace(),
 			null,
 			null,
-			IJavaSearchConstants.EXACT_MATCH,
-			IJavaSearchConstants.CASE_SENSITIVE,
+			SearchPattern.R_EXACT_MATCH,
+			true,
 			IJavaSearchConstants.CLASS,
 			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
 			new Requestor(),

@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -227,8 +228,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			JavaPlugin.getWorkspace(), 
 			null, 
 			simpleTypeName.toCharArray(), 
-			IJavaSearchConstants.EXACT_MATCH, 
-			IJavaSearchConstants.CASE_SENSITIVE, 
+			SearchPattern.R_EXACT_MATCH, 
+			true, 
 			IJavaSearchConstants.TYPE, 
 			searchScope, 
 			requestor, 
