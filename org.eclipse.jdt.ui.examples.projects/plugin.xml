@@ -39,5 +39,20 @@
     		<src path="" import="archive/junit/junit37src.jar"/>
     	</projectsetup>
       </wizard>	
+	<wizard 
+		id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard"
+		name="JUnit with Source Folders"
+		class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
+		category="org.eclipse.jdt.ui.examples.projects"
+		project="true"
+		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+		icon="icons/full/ctool16/newjprjex_wiz.gif">
+		<description>Create a new JUnit project with source folders</description>
+		<pagetitle>JUnit (with source folder)</pagetitle>
+		<pagedescription>Create a Java project containing the JUnit source</pagedescription>
+		<projectsetup output="bin" jre="true">
+    		<src path="src" import="archive/junit/junit37src.jar"/>
+    	</projectsetup>
+      </wizard>	
 </extension>  
 </plugin>
