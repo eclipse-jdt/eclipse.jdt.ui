@@ -496,7 +496,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
 			
-			assertMethods(res, new String[] { "goo", "foo", "E" }, true);
+			assertMethods(res, new String[] { "goo", "foo" }, true);
 		}			
 			
 	}
@@ -539,7 +539,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
 			
-			assertMethods(res, new String[] { "run", "goo", "E"}, true);
+			assertMethods(res, new String[] { "run", "goo"}, true);
 		}
 		
 		{
@@ -549,7 +549,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
 			
-			assertMethods(res, new String[] { "goo", "E"}, true);
+			assertMethods(res, new String[] { "goo"}, true);
 		}
 		
 		{
@@ -559,7 +559,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
 			
-			assertMethods(res, new String[] { "foo", "goo", "E", "A"}, true);
+			assertMethods(res, new String[] { "foo", "goo"}, true);
 		}		
 
 	}
@@ -567,7 +567,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	
 	private static final String[] OBJ_METHODS= new String[] { "getClass", 
 		"hashCode", "equals", "clone", "toString", "notify", "notifyAll", "wait", "wait",
-		"wait", "finalize", "Object" }; 
+		"wait", "finalize" }; 
 		
 	private void assertMethods(IBinding[] res, String[] expectedNames, boolean addObjectMethods) {
 		String[] names= new String[res.length];		

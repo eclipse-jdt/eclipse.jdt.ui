@@ -367,7 +367,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -397,23 +397,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("\n");
 		buf.append("public class ArrayListist extends ArrayList {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
-		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("ArrayListist.java");
-		assertTrue("Nothing created", newCU.exists());
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface ArrayListist {\n");
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
@@ -571,7 +554,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        Object object= new F.Inner();\n");
+		buf.append("        Object object= new F.Inner() {\n");
+		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -601,7 +585,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        Object object= new Object();\n");
+		buf.append("        Object object= new Object() {\n");
+		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());

@@ -166,7 +166,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			dim= arrayType.getDimensions();
 			type= arrayType.getElementType();
 		}
-		String typeName= ASTNodes.getTypeName(type);
+		String typeName= ASTNodes.asString(type);
 		String packName= Signature.getQualifier(typeName);
 		
 		IJavaProject project= getCompilationUnit().getJavaProject();

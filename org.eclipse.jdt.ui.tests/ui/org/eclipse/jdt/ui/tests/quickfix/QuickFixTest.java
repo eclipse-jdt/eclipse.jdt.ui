@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Test;
@@ -81,45 +83,35 @@ public class QuickFixTest extends TestCase {
 	
 	
 	public static void assertEqualStringsIgnoreOrder(String[] str1, String[] str2) {
-		int nUnmatched= 0;
+		ArrayList list1= new ArrayList(Arrays.asList(str1));
+		ArrayList list2= new ArrayList(Arrays.asList(str2));
 		
-		loop1: for (int i= 0; i < str1.length; i++) {
-			String s1= str1[i];
-			for (int k= 0; k < str2.length; k++) {
-				String s2= str2[k];
-				if (s2 != null && s2.equals(s1)) {
-					str2[k]= null;
-					str1[i]= null;
-					continue loop1;
-				}
+		for (int i= list1.size() - 1; i >= 0; i--) {
+			if (list2.remove(list1.get(i))) {
+				list1.remove(i);
 			}
-			nUnmatched++;
 		}
-		if (nUnmatched > 0) {
-			if (nUnmatched == 1) {
-				for (int i= 0; i < str1.length; i++) {
-					if (str1[i] != null) {
-						for (int k= 0; k < str2.length; k++) {
-							if (str2[k] != null) {
-								assertEqualString(str1[i], str2[k]);
-							}
-						}
-					}
-				}
+		
+		int n1= list1.size();
+		int n2= list2.size();
+		
+		if (n1 + n2 > 0) {
+			if (n1 == 1 && n2 == 1) {
+				assertEqualString((String) list1.get(0), (String) list2.get(0));
 			}
 			
 			StringBuffer buf= new StringBuffer();
 			buf.append("Content not as expected: Content is: \n");
-			for (int i= 0; i < str1.length; i++) {
-				String s1= str1[i];
+			for (int i= 0; i < n1; i++) {
+				String s1= (String) list1.get(i);
 				if (s1 != null) {
 					buf.append(s1);
 					buf.append("\n");
 				}
 			}
 			buf.append("Expected contents: \n");
-			for (int i= 0; i < str2.length; i++) {
-				String s2= str2[i];
+			for (int i= 0; i < n2; i++) {
+				String s2= (String) list2.get(i);
 				if (s2 != null) {
 					buf.append(s2);
 					buf.append("\n");
@@ -128,7 +120,7 @@ public class QuickFixTest extends TestCase {
 			assertTrue(buf.toString(), false);
 		}				
 	}
-	
+		
 	private static int getDiffPos(String str1, String str2) {
 		int len1= Math.min(str1.length(), str2.length());
 		
