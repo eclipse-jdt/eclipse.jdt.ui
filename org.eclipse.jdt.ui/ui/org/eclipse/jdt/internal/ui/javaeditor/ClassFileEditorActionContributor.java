@@ -24,6 +24,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 
 public class ClassFileEditorActionContributor extends BasicTextEditorActionContributor {
@@ -37,6 +38,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		super();
 		
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
+		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		fTogglePresentationAction= new TogglePresentationAction();				
 		fToggleTextHover= new ToggleTextHoverAction();
 	}

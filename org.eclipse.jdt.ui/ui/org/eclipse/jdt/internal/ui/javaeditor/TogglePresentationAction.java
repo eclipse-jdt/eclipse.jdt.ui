@@ -16,6 +16,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -38,6 +39,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("TogglePresentation.tooltip")); //$NON-NLS-1$
+		setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_PRESENTATION);
 		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);		
 		update();
 	}

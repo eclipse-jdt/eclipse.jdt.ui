@@ -36,6 +36,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -141,41 +142,54 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		// retarget actions usually fetched form the active part or editor
 		RetargetAction a= new RetargetToolbarAction(b, "TogglePresentation.", IJavaEditorActionConstants.TOGGLE_PRESENTATION, true); //$NON-NLS-1$
+		a.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_PRESENTATION);
 		JavaPluginImages.setToolImageDescriptors(a, "segment_edit.gif"); //$NON-NLS-1$
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
 		a= new RetargetToolbarAction(b, "ToggleTextHover.", IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, true); //$NON-NLS-1$
+		a.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_TEXT_HOVER);
 		JavaPluginImages.setToolImageDescriptors(a, "jdoc_hover_edit.gif"); //$NON-NLS-1$
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
+		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		a= new RetargetToolbarAction(b, "PreviousError.", IJavaEditorActionConstants.PREVIOUS_ERROR, false); //$NON-NLS-1$
+		a.setActionDefinitionId("org.eclipse.ui.navigate.previous");
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
 		fStructureSelectEnclosingAction= new RetargetTextEditorAction(b, "StructureSelectEnclosing."); //$NON-NLS-1$
+		fStructureSelectEnclosingAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);
 		fStructureSelectNextAction= new RetargetTextEditorAction(b, "StructureSelectNext."); //$NON-NLS-1$
+		fStructureSelectNextAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_NEXT);
 		fStructureSelectPreviousAction= new RetargetTextEditorAction(b, "StructureSelectPrevious."); //$NON-NLS-1$
+		fStructureSelectPreviousAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
 		fStructureSelectHistoryAction= new RetargetTextEditorAction(b, "StructureSelectHistory."); //$NON-NLS-1$
+		fStructureSelectHistoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);
 		fGotoNextMemberAction= new RetargetTextEditorAction(b, "GotoNextMember."); //$NON-NLS-1$
+		fGotoNextMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 		fGotoPreviousMemberAction= new RetargetTextEditorAction(b, "GotoPreviousMember."); //$NON-NLS-1$
+		fGotoPreviousMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
+		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		
 		// actions that are "contributed" to editors, they are consider belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
+		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous");
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
+		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next");
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 	}
 	
