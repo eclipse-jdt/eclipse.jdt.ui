@@ -48,6 +48,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -281,16 +282,19 @@ class JavaEditorHoverConfigurationBlock {
 				if (id == null)
 					return;
 				JavaEditorTextHoverDescriptor[] descriptors= getContributedHovers();
+				HoverConfig hoverConfig= null;
 				int i= 0, length= fHoverConfigs.length;
 				while (i < length) {
 					if (id.equals(descriptors[i].getId())) {
-						fHoverConfigs[i].fIsEnabled= event.getChecked();
+						hoverConfig= fHoverConfigs[i];
+						hoverConfig.fIsEnabled= event.getChecked();
 						fModifierEditor.setEnabled(event.getChecked());
-						break;
+						fHoverTableViewer.setSelection(new StructuredSelection(descriptors[i]));
 					}
 					i++;
 				}
-				updateStatus();
+				handleHoverListSelection();
+				updateStatus(hoverConfig);
 			}
 		});
 		
@@ -508,24 +512,23 @@ class JavaEditorHoverConfigurationBlock {
 
 	private void handleModifierModified() {
 		int i= fHoverTable.getSelectionIndex();
+		if (i == -1)
+			return;
+		
 		String modifiers= fModifierEditor.getText();
 		fHoverConfigs[i].fModifierString= modifiers;
 		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
-		if (fHoverConfigs[i].fIsEnabled && fHoverConfigs[i].fStateMask == -1)
-			fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
-		else
-			fStatus= new StatusInfo();
 		
 		// update table
 		fHoverTableViewer.refresh(getContributedHovers()[i]);
 		
-		updateStatus();
+		updateStatus(fHoverConfigs[i]);
 	}
 
 	private void handleHoverListSelection() {	
 		int i= fHoverTable.getSelectionIndex();
 		
-		if (i < 0) {
+		if (i == -1) {
 			if (fHoverTable.getSelectionCount() == 0)
 				fModifierEditor.setEnabled(false);
 			return;
@@ -546,7 +549,12 @@ class JavaEditorHoverConfigurationBlock {
 		return fStatus;
 	}
 
-	private void updateStatus() {
+	private void updateStatus(HoverConfig hoverConfig) {
+		if (hoverConfig != null && hoverConfig.fIsEnabled && hoverConfig.fStateMask == -1)
+			fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", hoverConfig.fModifierString)); //$NON-NLS-1$
+		else
+			fStatus= new StatusInfo();
+		
 		int i= 0;
 		HashMap stateMasks= new HashMap(fHoverConfigs.length);
 		while (fStatus.isOK() && i < fHoverConfigs.length) {
