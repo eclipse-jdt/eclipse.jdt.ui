@@ -77,4 +77,3 @@ public abstract class ChangeElement {
 	 */
 	public abstract ChangeElement[] getChildren();	
 }
-
