@@ -1414,6 +1414,12 @@
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
 				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInProject"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InProject.label"
+      			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.project"
+				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
       			label="%InWorkspace.label"
@@ -1439,6 +1445,12 @@
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInProject"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InProject.label"
+      			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.project"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
@@ -2780,6 +2792,19 @@
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.project"
+		name= "%ActionDefinition.readAccessInProject.name"
+		description="%ActionDefinition.readAccessInProject.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+
+	<command
+		category="org.eclipse.search.ui.category.search"
 		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
 		name= "%ActionDefinition.readAccessInHierarchy.name"
 		description="%ActionDefinition.readAccessInHierarchy.description"
@@ -2814,6 +2839,19 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.project"
+		name= "%ActionDefinition.writeAccessInProject.name"
+		description="%ActionDefinition.writeAccessInProject.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.project"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 	

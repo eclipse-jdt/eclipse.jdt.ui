@@ -425,6 +425,12 @@ public class JdtActionConstants {
 	public static final String FIND_READ_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"; //$NON-NLS-1$
 
 	/**
+	 * Search menu: name of standard Find Read Access in Project global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReadAccessInProject"</code>).
+	 */
+	public static final String FIND_READ_ACCESS_IN_PROJECT= "org.eclipse.jdt.ui.actions.ReadAccessInProject"; //$NON-NLS-1$
+
+	/**
 	 * Search menu: name of standard Find Read Access in Hierarchy global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"</code>).
 	 */
@@ -441,6 +447,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"</code>).
 	 */
 	public static final String FIND_WRITE_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Write Access in Project global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInProject"</code>).
+	 */
+	public static final String FIND_WRITE_ACCESS_IN_PROJECT= "org.eclipse.jdt.ui.actions.WriteAccessInProject"; //$NON-NLS-1$
 
 	/**
 	 * Search menu: name of standard Find Read Access in Hierarchy global action

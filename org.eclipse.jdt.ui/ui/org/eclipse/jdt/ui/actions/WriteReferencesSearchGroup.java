@@ -53,6 +53,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	private String fGroupId;
 
 	private FindWriteReferencesAction fFindWriteReferencesAction;
+	private FindWriteReferencesInProjectAction fFindWriteReferencesInProjectAction;
 	private FindWriteReferencesInHierarchyAction fFindWriteReferencesInHierarchyAction;
 	private FindWriteReferencesInWorkingSetAction fFindWriteReferencesInWorkingSetAction;
 	
@@ -68,6 +69,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindWriteReferencesAction= new FindWriteReferencesAction(site);
+		fFindWriteReferencesInProjectAction= new FindWriteReferencesInProjectAction(site);
 		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(site);
 		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(site);
 
@@ -75,6 +77,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		registerAction(fFindWriteReferencesAction, provider, selection);
+		registerAction(fFindWriteReferencesInProjectAction, provider, selection);
 		registerAction(fFindWriteReferencesInHierarchyAction, provider, selection);
 		registerAction(fFindWriteReferencesInWorkingSetAction, provider, selection);
 	}
@@ -90,6 +93,10 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		fFindWriteReferencesAction= new FindWriteReferencesAction(fEditor);
 		fFindWriteReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKSPACE);
 		fEditor.setAction("SearchWriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$
+
+		fFindWriteReferencesInProjectAction= new FindWriteReferencesInProjectAction(fEditor);
+		fFindWriteReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_PROJECT);
+		fEditor.setAction("SearchWriteAccessInProject", fFindWriteReferencesInProjectAction); //$NON-NLS-1$
 
 		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(fEditor);
 		fFindWriteReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_HIERARCHY);
@@ -108,6 +115,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	private FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(fFindWriteReferencesAction);
+		actions.add(fFindWriteReferencesInProjectAction);
 		actions.add(fFindWriteReferencesInHierarchyAction);
 		actions.add(fFindWriteReferencesInWorkingSetAction);
 			
@@ -159,10 +167,12 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {
 			disposeAction(fFindWriteReferencesAction, provider);
+			disposeAction(fFindWriteReferencesInProjectAction, provider);
 			disposeAction(fFindWriteReferencesInHierarchyAction, provider);
 			disposeAction(fFindWriteReferencesInWorkingSetAction, provider);
 		}
 		fFindWriteReferencesAction= null;
+		fFindWriteReferencesInProjectAction= null;
 		fFindWriteReferencesInHierarchyAction= null;
 		fFindWriteReferencesInWorkingSetAction= null;
 		updateGlobalActionHandlers();
@@ -172,6 +182,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	private void updateGlobalActionHandlers() {
 		if (fActionBars != null) {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKSPACE, fFindWriteReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_PROJECT, fFindWriteReferencesInProjectAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_HIERARCHY, fFindWriteReferencesInHierarchyAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindWriteReferencesInWorkingSetAction);
 		}

@@ -428,6 +428,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SEARCH_READ_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition ID of the search -> read access in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.read.access.in.project"</code>).
+	 */
+	public static final String SEARCH_READ_ACCESS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.search.read.access.in.project"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the search -> read access in hierarchy action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"</code>).
 	 */
@@ -444,6 +450,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"</code>).
 	 */
 	public static final String SEARCH_WRITE_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the search -> write access in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.write.access.in.project"</code>).
+	 */
+	public static final String SEARCH_WRITE_ACCESS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.search.write.access.in.project"; //$NON-NLS-1$
 	
 	/**
 	 * Action definition ID of the search -> write access in hierarchy action

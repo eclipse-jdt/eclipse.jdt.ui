@@ -53,6 +53,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	private String fGroupId;
 
 	private FindReadReferencesAction fFindReadReferencesAction;
+	private FindReadReferencesInProjectAction fFindReadReferencesInProjectAction;
 	private FindReadReferencesInHierarchyAction fFindReadReferencesInHierarchyAction;
 	private FindReadReferencesInWorkingSetAction fFindReadReferencesInWorkingSetAction;
 	
@@ -68,6 +69,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindReadReferencesAction= new FindReadReferencesAction(site);
+		fFindReadReferencesInProjectAction= new FindReadReferencesInProjectAction(site);
 		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(site);
 		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(site);
 
@@ -75,6 +77,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		registerAction(fFindReadReferencesAction, provider, selection);
+		registerAction(fFindReadReferencesInProjectAction, provider, selection);
 		registerAction(fFindReadReferencesInHierarchyAction, provider, selection);
 		registerAction(fFindReadReferencesInWorkingSetAction, provider, selection);
 	}
@@ -90,6 +93,10 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		fFindReadReferencesAction= new FindReadReferencesAction(fEditor);
 		fFindReadReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKSPACE);
 		fEditor.setAction("SearchReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$
+
+		fFindReadReferencesInProjectAction= new FindReadReferencesInProjectAction(fEditor);
+		fFindReadReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_PROJECT);
+		fEditor.setAction("SearchReadAccessInProject", fFindReadReferencesInProjectAction); //$NON-NLS-1$
 
 		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(fEditor);
 		fFindReadReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_HIERARCHY);
@@ -108,6 +115,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	private FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(fFindReadReferencesAction);
+		actions.add(fFindReadReferencesInProjectAction);
 		actions.add(fFindReadReferencesInHierarchyAction);
 		actions.add(fFindReadReferencesInWorkingSetAction);
 			
@@ -159,10 +167,12 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {
 			disposeAction(fFindReadReferencesAction, provider);
+			disposeAction(fFindReadReferencesInProjectAction, provider);
 			disposeAction(fFindReadReferencesInHierarchyAction, provider);
 			disposeAction(fFindReadReferencesInWorkingSetAction, provider);
 		}
 		fFindReadReferencesAction= null;
+		fFindReadReferencesInProjectAction= null;
 		fFindReadReferencesInHierarchyAction= null;
 		fFindReadReferencesInWorkingSetAction= null;
 		updateGlobalActionHandlers();
@@ -172,6 +182,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	private void updateGlobalActionHandlers() {
 		if (fActionBars != null) {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKSPACE, fFindReadReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_PROJECT, fFindReadReferencesInProjectAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_HIERARCHY, fFindReadReferencesInHierarchyAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKING_SET, fFindReadReferencesInWorkingSetAction);
 		}
