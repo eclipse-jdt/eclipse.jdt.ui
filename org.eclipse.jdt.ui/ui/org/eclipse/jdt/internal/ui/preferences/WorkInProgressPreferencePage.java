@@ -39,7 +39,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
 		store.setDefault(PREF_SHOW_TEMP_PROBLEMS, false);
 	}
@@ -56,13 +55,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	protected void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
 
-		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
-			ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL,
-			JavaUIMessages.getString("WorkInProgressPreferencePage.codeassist.experimental"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
-		 		
+		BooleanFieldEditor boolEditor;
 		boolEditor= new BooleanFieldEditor(
 			PREF_SYNC_OUTLINE_ON_CURSOR_MOVE,
 			"Synchronize &outline selection on cursor move", //$NON-NLS-1$
