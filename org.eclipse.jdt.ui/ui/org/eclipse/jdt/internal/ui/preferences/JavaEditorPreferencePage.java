@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -519,7 +520,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaTextTools= new JavaTextTools(fOverlayStore, coreStore, false);
 		
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null));
+		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null, IJavaPartitions.JAVA_PARTITIONING));
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, fJavaTextTools);
@@ -527,7 +528,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		fJavaTextTools.setupJavaDocumentPartitioner(document);
+		fJavaTextTools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.setDocument(document);
 
 		return fPreviewViewer.getControl();

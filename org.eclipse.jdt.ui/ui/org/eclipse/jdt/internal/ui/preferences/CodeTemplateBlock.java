@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.template.TemplateSet;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -263,8 +264,8 @@ public class CodeTemplateBlock {
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		tools.setupJavaDocumentPartitioner(document);
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		viewer.configure(new JavaSourceViewerConfiguration(tools, null, IJavaPartitions.JAVA_PARTITIONING));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	

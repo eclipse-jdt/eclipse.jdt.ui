@@ -108,7 +108,7 @@ public class EditTemplateDialog extends StatusDialog {
 		private final TemplateVariableProcessor fProcessor;
 
 		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, TemplateVariableProcessor processor) {
-			super(tools, editor);
+			super(tools, editor, IJavaPartitions.JAVA_PARTITIONING);
 			fProcessor= processor;
 		}
 		
@@ -438,7 +438,7 @@ public class EditTemplateDialog extends StatusDialog {
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document(fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		tools.setupJavaDocumentPartitioner(document);
+		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);

@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -395,9 +396,9 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocument document= new Document();
-		tools.setupJavaDocumentPartitioner(document);
+		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		viewer.configure(new JavaSourceViewerConfiguration(tools, null, IJavaPartitions.JAVA_PARTITIONING));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
