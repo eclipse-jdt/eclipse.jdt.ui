@@ -865,6 +865,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			checkDeclarationSelected();
 
 			result.merge(findInitializer());
+			if(result.hasFatalError())
+				return result;			
 		
 			result.merge(checkInitializer());
 			if(result.hasFatalError())
@@ -942,7 +944,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus findInitializer() throws JavaModelException {
 		VariableDeclarationFragment declaration= getDeclaration();
 		if(declaration == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Cannot inline this constant, since it is declared in class file for which source is not available", null, null, RefactoringStatusCodes.DECLARED_IN_CLASSFILE);
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Cannot inline this constant, since it is declared in a binary file.", null, null, RefactoringStatusCodes.DECLARED_IN_CLASSFILE);
 
 		fInitializer= declaration.getInitializer();
 		fInitializerFound= true;
@@ -952,7 +954,8 @@ public class InlineConstantRefactoring extends Refactoring {
 	/**
 	 * Returns the constant's initializer, or null
 	 * if the constant has no initializer at its declaration.
-	 * 	 */
+	 * 
+	 */
 	private Expression getInitializer() {
 		Assert.isTrue(fInitializerFound);
 		return fInitializer;
@@ -961,7 +964,8 @@ public class InlineConstantRefactoring extends Refactoring {
 	/**
 	 * Returns the  variable declaration fragment
 	 * corresponding to the selected static final field name,
-	 * or null if the constant is declared in a class file.	 */
+	 * or null if the constant is declared in a class file.
+	 */
 	private VariableDeclarationFragment getDeclaration() throws JavaModelException {
 		Assert.isNotNull(getConstantNameNode());
 		
