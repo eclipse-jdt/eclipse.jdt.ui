@@ -8,17 +8,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public class Bindings {
 	
 	private Bindings() {
 		// No instance
 	}
+	
+	/**
+	 * Checks if the two bindings are equals. First an identity check is
+	 * made an then the key of the bindings are compared. 	 * @param b1 first binding treated as <code>this</code>. So it must
+	 *  not be <code>null</code>	 * @param b2 the second binding.	 * @return boolean	 */
+	public static boolean equals(IBinding b1, IBinding b2) {
+		Assert.isTrue(b1 != null);
+		if (b1 == b2)
+			return true;
+		if (b2 == null)
+				return false;		
+		String k1= b1.getKey();
+		String k2= b2.getKey();
+		if (k1 == null || k2 == null)
+				return false;
+		if (k1 != null)
+			return k1.equals(k2);
+		else
+			return k2.equals(k1);
+	}	
 	
 	public static String asString(IMethodBinding method) {
 		StringBuffer result= new StringBuffer(method.getName());

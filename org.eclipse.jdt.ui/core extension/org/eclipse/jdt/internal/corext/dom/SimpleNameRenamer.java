@@ -66,7 +66,7 @@ public class SimpleNameRenamer extends ASTVisitor {
 		if (binding == null)
 			return null;
 		for (int i= 0; i < fBindings.length; i++) {
-			if (equals(fBindings[i], binding))
+			if (Bindings.equals(binding, fBindings[i]))
 				return fNewNames[i];
 		}
 		return null;
@@ -75,17 +75,5 @@ public class SimpleNameRenamer extends ASTVisitor {
 	private void rename(SimpleName node, String newName) {
 		ASTNode newNode= node.getAST().newSimpleName(newName);
 		fRewriter.markAsReplaced(node, newNode);
-	}
-
-	private boolean equals(IBinding b1, IBinding b2) {
-		if (b1 == b2)
-			return true;
-		if (b1 == null || b2 == null)
-				return false;		
-		String k1= b1.getKey();
-		String k2= b2.getKey();
-		if (k1 == null || k2 == null)
-				return false;
-		return k1.equals(k2);
 	}
 }
