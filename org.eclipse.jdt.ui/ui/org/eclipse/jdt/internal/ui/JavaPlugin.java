@@ -45,6 +45,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocVMInstallListener;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -79,6 +80,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ProblemMarkerManager fProblemMarkerManager;
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
 	
+	private JavaDocVMInstallListener fVMInstallListener;
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -179,6 +181,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		try {
 			JavaDocLocations.loadJavadocLocations();
+		
+			fVMInstallListener= new JavaDocVMInstallListener();
+			fVMInstallListener.init();
 		} catch (CoreException e) {
 			log(e);
 		}		
@@ -212,6 +217,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		
 		JavaDocLocations.saveJavadocLocations();
+		
+		if (fVMInstallListener != null) {
+			fVMInstallListener.remove();
+			fVMInstallListener= null;
+		}
+		
 	}
 	
 	private IWorkbenchPage internalGetActivePage() {
