@@ -102,9 +102,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (fSelectionStart < 0)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
 		
-		if (!fCu.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("Syntax errors");
-			
 		if (!(fCu instanceof CompilationUnit))
 			return RefactoringStatus.createFatalErrorStatus("Internal Error");
 	
