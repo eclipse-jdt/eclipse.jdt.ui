@@ -1023,9 +1023,6 @@ public class StubUtility {
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
-	 * @param elem
-	 * @return
-	 * @throws JavaModelException
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -1081,9 +1078,6 @@ public class StubUtility {
 
 	/**
 	 * Evaluates the indention used by a Java element. (in tabulators)
-	 * @param elem
-	 * @return
-	 * @throws JavaModelException
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
@@ -1104,9 +1098,6 @@ public class StubUtility {
 		
 	/**
 	 * Returns the element after the give element.
-	 * @param member
-	 * @return
-	 * @throws JavaModelException
 	 */
 	public static IJavaElement findNextSibling(IJavaElement member) throws JavaModelException {
 		IJavaElement parent= member.getParent();

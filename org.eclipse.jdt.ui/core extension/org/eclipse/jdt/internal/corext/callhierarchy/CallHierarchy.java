@@ -54,30 +54,18 @@ public class CallHierarchy {
         return fgInstance;
     }
 
-    /**
-     * @return
-     */
     public boolean isSearchUsingImplementorsEnabled() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
         return settings.getBoolean(PREF_USE_IMPLEMENTORS);
     }
 
-    /**
-     * @return
-     */
     public void setSearchUsingImplementorsEnabled(boolean enabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
         settings.setValue(PREF_USE_IMPLEMENTORS, enabled);
     }
 
-
-    /**
-     * @param method
-     *
-     * @return
-     */
     public Collection getImplementingMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForImplementors(new IJavaElement[] {
@@ -92,11 +80,6 @@ public class CallHierarchy {
         return new ArrayList(0);
     }
 
-    /**
-     * @param method
-     *
-     * @return
-     */
     public Collection getInterfaceMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForInterfaces(new IJavaElement[] {
@@ -169,17 +152,11 @@ public class CallHierarchy {
         return false;
     }
 
-    /**
-     * @return
-     */
     public boolean isFilterEnabled() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         return settings.getBoolean(PREF_USE_FILTERS);
     }
 
-    /**
-     * @param b
-     */
     public void setFilterEnabled(boolean filterEnabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         settings.setValue(PREF_USE_FILTERS, filterEnabled);
@@ -187,8 +164,6 @@ public class CallHierarchy {
     
     /**
      * Returns the current filters as a string.
-     *
-     * @return
      */
     public String getFilters() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();

@@ -50,8 +50,6 @@ class CalleeMethodWrapper extends MethodWrapper {
 
     /**
      * Constructor for CalleeMethodWrapper.
-     * @param parent
-     * @param method
      */
     public CalleeMethodWrapper(MethodWrapper parent, MethodCall methodCall) {
         super(parent, methodCall);

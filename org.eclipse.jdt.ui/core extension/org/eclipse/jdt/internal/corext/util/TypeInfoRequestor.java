@@ -32,10 +32,6 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 		fFactory= new TypeInfoFactory();
 	}
 	
-	/**
-	 * @param packageName
-	 * @return
-	 */
 	protected boolean inScope(char[] packageName) {
 		return !TypeFilter.isFiltered(new String(packageName));
 	}

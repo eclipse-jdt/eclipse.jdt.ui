@@ -69,8 +69,7 @@ public abstract class MethodWrapper implements IAdaptable {
     }
 
     /**
-     * Method getCallerElements.
-     * @return The child caller elements of this element
+     * @return the child caller elements of this element
      */
     public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
         if (fElements == null) {
@@ -88,31 +87,18 @@ public abstract class MethodWrapper implements IAdaptable {
         return result;
     }
 
-    /**
-     * @return int
-     */
     public int getLevel() {
         return fLevel;
     }
 
-    /**
-     * Method getMethod.
-     * @return Object
-     */
     public IMember getMember() {
         return getMethodCall().getMember();
     }
 
-    /**
-     * @return MethodCall
-     */
     public MethodCall getMethodCall() {
         return fMethodCall;
     }
 
-    /**
-     * Method getName.
-     */
     public String getName() {
         if (getMethodCall() != null) {
             return getMethodCall().getMember().getElementName();
@@ -121,10 +107,6 @@ public abstract class MethodWrapper implements IAdaptable {
         }
     }
 
-    /**
-     * Method getParent.
-     * @return
-     */
     public MethodWrapper getParent() {
         return fParent;
     }
@@ -193,11 +175,6 @@ public abstract class MethodWrapper implements IAdaptable {
         cachedCalls.put(methodCall.getKey(), methodCall);
     }
 
-    /**
-     * Method createMethodWrapper.
-     * @param method
-     * @return MethodWrapper
-     */
     protected abstract MethodWrapper createMethodWrapper(MethodCall methodCall);
 
     private void doFindChildren(IProgressMonitor progressMonitor) {
@@ -266,8 +243,7 @@ public abstract class MethodWrapper implements IAdaptable {
 
     /**
      * Looks up a previously created search result in the "global" cache.
-     * @param method
-     * @return List List of previously found search results
+     * @return the List of previously found search results
      */
     private Map lookupMethod(MethodCall methodCall) {
         return (Map) getMethodCache().get(methodCall.getKey());

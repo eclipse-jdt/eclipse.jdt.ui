@@ -139,11 +139,6 @@ public class Implementors {
         return (IType[]) implementingTypes.toArray(new IType[implementingTypes.size()]);
     }
 
-    /**
-     * @param type
-     *
-     * @return
-     */
     private IType[] findInterfaces(IType type, IProgressMonitor progressMonitor) {
         Collection interfaces = new ArrayList();
 

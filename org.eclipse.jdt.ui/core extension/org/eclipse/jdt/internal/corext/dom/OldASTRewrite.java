@@ -265,10 +265,10 @@ public final class OldASTRewrite extends ASTRewrite { // illegal subclassing
 	 * Succeeding nodes in a list are collapsed and represented by a new 'compound' node. The new compound node is inserted in the list
 	 * and replaces the collapsed node. The compound node can be used for rewriting, e.g. a copy can be created to move
 	 * a whole range of statements. This operation modifies the AST.
-	 * @param list
-	 * @param index
-	 * @param length
-	 * @return
+	 * @param list the list containing the nodes to collapse
+	 * @param index the start index
+	 * @param length the length
+	 * @return the collapsed node
 	 */	
 	public final ASTNode collapseNodes(List list, int index, int length) {
 		Assert.isTrue(index >= 0 && length > 0 && list.size() >= (index + length), "Index or length out of bound"); //$NON-NLS-1$

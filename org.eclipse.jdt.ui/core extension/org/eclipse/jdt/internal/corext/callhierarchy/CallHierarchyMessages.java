@@ -24,10 +24,6 @@ public class CallHierarchyMessages {
     private CallHierarchyMessages() {
     }
 
-    /**
-     * @param key
-     * @return
-     */
     public static String getString(String key) {
         try {
             return RESOURCE_BUNDLE.getString(key);

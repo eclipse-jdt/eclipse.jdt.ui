@@ -36,7 +36,7 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * Creates a new <code>TextBufferEditor</code> for the given 
 	 * <code>TextBuffer</code>.
 	 * 
-	 * @param the text buffer this editor is working on.
+	 * @param buffer the text buffer this editor is working on.
 	 */
 	public TextBufferEditor(TextBuffer buffer) {
 		super(buffer.getDocument(), new MultiTextEdit(0, buffer.getDocument().getLength()),
@@ -76,8 +76,6 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * modifying it.
 	 * 
 	 * @param undo the undo memento to add
-	 * @exception EditException if the undo memento can not be added
-	 * 	to this processor
 	 */
 	public void add(UndoEdit undo) {
 		Assert.isTrue(!getRoot().hasChildren());

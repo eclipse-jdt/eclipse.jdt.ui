@@ -256,11 +256,6 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
 		return null;
 	}
 
-    /**
-     * @param enclosingElement
-     *
-     * @return
-     */
     private boolean isIgnoredBySearchScope(IMethod enclosingElement) {
         if (enclosingElement != null) {
             return !getSearchScope().encloses(enclosingElement);
@@ -299,17 +294,10 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
         return false;
     }
     
-    /**
-     * @param node
-     * @return
-     */
     private boolean isFurtherTraversalNecessary(ASTNode node) {
         return isNodeWithinMethod(node) || isNodeEnclosingMethod(node);
     }
 
-    /**
-     * @param calledMethod
-     */
     private IMethod findImplementingMethods(IMethod calledMethod) {
         Collection implementingMethods = CallHierarchy.getDefault()
                                                         .getImplementingMethods(calledMethod);

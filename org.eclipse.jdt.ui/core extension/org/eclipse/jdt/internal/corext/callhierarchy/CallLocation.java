@@ -34,12 +34,6 @@ public class CallLocation implements IAdaptable {
     private String fCallText;
     private int fLineNumber;
 
-    /**
-     * @param method
-     * @param cu
-     * @param start
-     * @param end
-     */
     public CallLocation(IMember member, IMember calledMember, int start, int end, int lineNumber) {
         this.fMember = member;
         this.fCalledMember = calledMember;
