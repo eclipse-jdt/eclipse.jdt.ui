@@ -86,7 +86,8 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		document.appendChild(xmlJarDesc);
 		xmlWriteJarLocation(jarPackage, document, xmlJarDesc);
 		xmlWriteOptions(jarPackage, document, xmlJarDesc);
-		xmlWriteManifest(jarPackage, document, xmlJarDesc);
+		if (jarPackage.areClassFilesExported())
+			xmlWriteManifest(jarPackage, document, xmlJarDesc);
 		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
 
 		// Write the document to the stream

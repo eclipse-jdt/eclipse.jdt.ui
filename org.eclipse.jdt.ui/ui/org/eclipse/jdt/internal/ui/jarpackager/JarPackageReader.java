@@ -114,7 +114,8 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			Element element= (Element)node;
 			xmlReadJarLocation(jarPackage, element);
 			xmlReadOptions(jarPackage, element);
-			xmlReadManifest(jarPackage, element);
+			if (jarPackage.areClassFilesExported())
+				xmlReadManifest(jarPackage, element);
 			xmlReadSelectedElements(jarPackage, element);
 		}
 		return jarPackage;
