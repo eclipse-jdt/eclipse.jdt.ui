@@ -60,7 +60,7 @@ public class AddVMDialog extends StatusDialog {
 			}
 		});
 		fJDKRoot.setLabelText(LauncherMessages.getString("addVMDialog.jreHome")); //$NON-NLS-1$
-		fJDKRoot.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
+		fJDKRoot.setButtonLabel(LauncherMessages.getString("addVMDialog.browse1")); //$NON-NLS-1$
 		fJDKRoot.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[1]= validateJDKLocation();
@@ -86,7 +86,7 @@ public class AddVMDialog extends StatusDialog {
 			}
 		});
 		fSystemLibrary.setLabelText(LauncherMessages.getString("addVMDialog.jreJar")); //$NON-NLS-1$
-		fSystemLibrary.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
+		fSystemLibrary.setButtonLabel(LauncherMessages.getString("addVMDialog.browse2")); //$NON-NLS-1$
 		fSystemLibrary.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[3]= validateSystemLibrary();
@@ -101,7 +101,7 @@ public class AddVMDialog extends StatusDialog {
 		}); 
 		
 		fSystemLibrarySource.setLabelText(LauncherMessages.getString("addVMDialog.jreSource")); //$NON-NLS-1$
-		fSystemLibrarySource.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
+		fSystemLibrarySource.setButtonLabel(LauncherMessages.getString("addVMDialog.browse3")); //$NON-NLS-1$
 		fSystemLibrarySource.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[4]= validateSystemLibrarySource();
