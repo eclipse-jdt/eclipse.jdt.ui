@@ -45,6 +45,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
+	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
 	private int fCurrentSortOrder;
@@ -59,12 +60,15 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private int fCurrentGrouping;
 	
 	public JavaSearchResultPage() {
+		initSortActions();
+
+		initGroupingActions();
+	}
+
+	private void initSortActions() {
 		fSortByNameAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByName"), this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); //$NON-NLS-1$
 		fSortByPathAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByPath"), this, SortingLabelProvider.SHOW_PATH); //$NON-NLS-1$
 		fSortByParentName= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByParentName"), this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT); //$NON-NLS-1$
-		fCurrentSortOrder=  SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
-
-		initGroupingActions();
 	}
 
 	private void initGroupingActions() {
@@ -76,11 +80,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
 		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), SearchMessages.getString("JavaSearchResultPage.groupby_type.tooltip"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "class_obj.gif"); //$NON-NLS-1$
-		try {
-			fCurrentGrouping= getSettings().getInt(KEY_GROUPING);
-		} catch (NumberFormatException e) {
-			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
-		}
 	}
 
 	public void setViewPart(ISearchResultViewPart part) {
@@ -226,6 +225,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			viewer.setSorter(new PathSorter());
 		} else
 			viewer.setSorter(new ParentSorter());
+		getSettings().put(KEY_SORTING, fCurrentSortOrder);
 	}
 
 	public void init(IPageSite site) {
@@ -256,10 +256,23 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	 */
 	public void restoreState(IMemento memento) {
 		super.restoreState(memento);
+		try {
+			fCurrentSortOrder= getSettings().getInt(KEY_SORTING);
+		} catch (NumberFormatException e) {
+			fCurrentSortOrder=  SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
+		}
+		try {
+			fCurrentGrouping= getSettings().getInt(KEY_GROUPING);
+		} catch (NumberFormatException e) {
+			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
+		}
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
 				fCurrentGrouping= value.intValue();
+			value= memento.getInteger(KEY_SORTING);
+			if (value != null)
+				fCurrentSortOrder= value.intValue();
 		}
 	}
 	
@@ -269,5 +282,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
+		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
 	}
 }
