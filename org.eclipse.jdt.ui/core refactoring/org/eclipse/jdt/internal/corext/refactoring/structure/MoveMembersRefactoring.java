@@ -178,7 +178,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();				
 		
 		if (! canDeclareStaticMembers(fDestinationType))	
-			result.addError("Static members cannot be declared in the destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\'.");
+			result.addError("Static members can be declared only in top level or static types.");
 				
 		return result;	
 	}
