@@ -3,10 +3,15 @@
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="../../../plugin-export" />
-		<property name="dest"  value="${destdir}/org.eclipse.jdt.ui" />
+		<property name="plugin"  value="org.eclipse.jdt.ui" />
+		<property name="dest"  value="${destdir}/${plugin}" />
 	</target>
 
-	<target name="export" depends="init">
+	<target name="build" depends="init">
+    	<incremental project="${plugin}" kind="incr"/>
+	</target>
+
+	<target name="export" depends="build">
 		<mkdir dir="${destdir}" />
 		<delete dir="${dest}" />
 		<mkdir dir="${dest}" />
