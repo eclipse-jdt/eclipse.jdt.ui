@@ -211,7 +211,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private Font fStatusTextFont;
 	private KeySequence[] fInvokingCommandKeySequences;
 	/**
-	 * Remebers the bounds for this information control.
+	 * Remembers the bounds for this information control.
 	 * @since 3.0
 	 */
 	private Rectangle fBounds;
@@ -540,10 +540,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	
 	/**
 	 * The string matcher has been modified. The default implementation
-	 * refreshes the view and selects the first macthed element
+	 * refreshes the view and selects the first matched element
 	 */
 	protected void stringMatcherUpdated() {
-		// refresh viewer to refilter
+		// refresh viewer to re-filter
 		fTreeViewer.getControl().setRedraw(false);
 		fTreeViewer.refresh();
 		fTreeViewer.expandAll();
