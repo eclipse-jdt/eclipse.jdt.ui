@@ -279,7 +279,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		doubleClickRadioGroup.setLayout(layout);		
 		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
 		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
-		
+
+		new Label(composite, SWT.NONE); // spacer
 		Label label= new Label(composite, SWT.NONE);
 		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
 		
