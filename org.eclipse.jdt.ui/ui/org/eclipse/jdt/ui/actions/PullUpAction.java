@@ -120,8 +120,9 @@ public class PullUpAction extends SelectionDispatchAction{
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
 			IMember member= getSelectedMember();
-			if (canEnable(member)){
-				startRefactoring(new IMember[]{member});	
+			IMember[] array= new IMember[]{member};
+			if (member != null && canEnable(array)){
+				startRefactoring(array);	
 			} else {
 				String unavailable= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
@@ -142,10 +143,6 @@ public class PullUpAction extends SelectionDispatchAction{
 		return convertToMemberArray(selection.toArray());
 	}
 		
-	private static boolean canEnable(IMember member) throws JavaModelException{
-		return (member != null) && canEnable(new IMember[]{member});
-	}
-
 	private static boolean canEnable(IMember[] members) throws JavaModelException {
 		return PullUpRefactoring.isAvailable(members);
 	}
