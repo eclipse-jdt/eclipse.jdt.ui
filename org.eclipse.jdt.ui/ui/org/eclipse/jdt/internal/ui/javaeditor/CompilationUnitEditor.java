@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -387,6 +389,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	};
 	
+	private class PropertyChangeListener implements IPropertyChangeListener {		
+		/*
+		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+		 */
+		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
+			handlePreferencePropertyChanged(event);
+		}
+	}
 	
 	/* Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
@@ -439,6 +449,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private TabConverter fTabConverter;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
+	/** The preference property change listener for java core. */
+	private IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -474,7 +486,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true);	//$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 
@@ -492,6 +504,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
+		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
@@ -687,7 +700,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
 		
 		if (nextError != null) {
-						
+			
 			IMarker marker= null;
 			if (nextError instanceof MarkerAnnotation)
 				marker= ((MarkerAnnotation) nextError).getMarker();
@@ -1086,11 +1099,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
+	private int getTabSize() {
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		return preferences.getInt(CODE_FORMATTER_TAB_SIZE);	
+	}
+	
 	private void startTabConversion() {
 		if (fTabConverter == null) {
 			fTabConverter= new TabConverter();
 			configureTabConverter();
-			fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
+			fTabConverter.setNumberOfSpacesPerTab(getTabSize());
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 			asv.addTextConverter(fTabConverter);
 		}
@@ -1138,6 +1156,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see AbstractTextEditor#dispose()
 	 */
 	public void dispose() {
+
+		if (fPropertyChangeListener != null) {
+			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+			preferences.removePropertyChangeListener(fPropertyChangeListener);
+			fPropertyChangeListener= null;
+		}
+		
 		if (fJavaEditorErrorTickUpdater != null) {
 			fJavaEditorErrorTickUpdater.dispose();
 			fJavaEditorErrorTickUpdater= null;
@@ -1155,7 +1180,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 		
 		if (fActionGroups != null)
-			fActionGroups.dispose();
+			fActionGroups.dispose();		
 		
 		super.dispose();
 	}
@@ -1178,6 +1203,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startTabConversion();
 		if (isOverviewRulerVisible())
 			showOverviewRuler();
+
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 	}
 	
 	/*
@@ -1191,15 +1219,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			if (asv != null) {
 					
 				String p= event.getProperty();		
-				if (CODE_FORMATTER_TAB_SIZE.equals(p) || CODE_FORMATTER_TAB_CHAR.equals(p)) {
-				    SourceViewerConfiguration configuration= getSourceViewerConfiguration();
-					String[] types= configuration.getConfiguredContentTypes(asv);					
-					for (int i= 0; i < types.length; i++)
-					    asv.setIndentPrefixes(configuration.getIndentPrefixes(asv, types[i]), types[i]);
-					    
-					if (fTabConverter != null)
-						fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
-				}
 				
 				if (SPACES_FOR_TABS.equals(p)) {
 					if (isTabConversionEnabled())
@@ -1288,6 +1307,33 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 		} finally {
 			super.handlePreferenceStoreChanged(event);
+		}
+	}
+
+	/**
+	 * Handles a property change event describing a change
+	 * of the java core's preferences and updates the preference
+	 * related editor properties.
+	 * 
+	 * @param event the property change event
+	 */
+	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
+
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+
+		if (asv != null) {
+
+			String p= event.getProperty();					
+
+			if (CODE_FORMATTER_TAB_SIZE.equals(p) || CODE_FORMATTER_TAB_CHAR.equals(p)) {
+			    SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+				String[] types= configuration.getConfiguredContentTypes(asv);					
+				for (int i= 0; i < types.length; i++)
+				    asv.setIndentPrefixes(configuration.getIndentPrefixes(asv, types[i]), types[i]);
+				    
+				if (fTabConverter != null)
+					fTabConverter.setNumberOfSpacesPerTab(getTabSize());
+			}
 		}
 	}
 	
