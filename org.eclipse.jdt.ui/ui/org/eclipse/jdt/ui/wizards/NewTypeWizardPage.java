@@ -316,6 +316,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns);
 		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());	
+		LayoutUtil.setHorizontalGrabbing(fPackageDialogField.getTextControl(null));
 	}
 
 	/**

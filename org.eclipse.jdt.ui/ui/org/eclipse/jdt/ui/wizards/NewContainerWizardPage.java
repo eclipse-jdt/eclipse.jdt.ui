@@ -171,7 +171,6 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	protected void createContainerControls(Composite parent, int nColumns) {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
 		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), getMaxFieldWidth());
-		LayoutUtil.setHorizontalGrabbing(fContainerDialogField.getTextControl(null));
 	}
 	
 	protected void setFocusOnContainer() {
