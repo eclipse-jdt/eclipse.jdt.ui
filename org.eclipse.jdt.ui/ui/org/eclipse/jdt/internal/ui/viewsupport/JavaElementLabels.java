@@ -259,7 +259,7 @@ public class JavaElementLabels {
 	public final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", "; //$NON-NLS-1$
 	public final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type //$NON-NLS-1$
 	public final static String DEFAULT_PACKAGE= JavaUIMessages.getString("JavaElementLabels.default_package"); // "(default package)" //$NON-NLS-1$
-
+	
 	/*
 	 * Package name compression
 	 */
@@ -489,12 +489,31 @@ public class JavaElementLabels {
 				getPackageFragmentLabel(pack, (flags & P_COMPRESSED), buf);
 				buf.append('.');
 			}
-			buf.append(JavaModelUtil.getTypeQualifiedName(type));
+			IType declaringType= type.getDeclaringType();
+			if (declaringType != null) {
+				buf.append(JavaModelUtil.getTypeQualifiedName(declaringType));
+				buf.append('.');
+			}
 		} else if (getFlag(flags, T_CONTAINER_QUALIFIED)) {
-			buf.append(JavaModelUtil.getTypeQualifiedName(type));
-		} else {
+			IType declaringType= type.getDeclaringType();
+			if (declaringType != null) {
+				buf.append(JavaModelUtil.getTypeQualifiedName(declaringType));
+				buf.append('.');
+			}
+		}
+		
+		try {
+			if (!type.isAnonymous()) {
+				buf.append(type.getElementName());
+			} else {
+				String superclassName= Signature.getSimpleName(type.getSuperclassName());
+				buf.append(JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName)); //$NON-NLS-1$
+			}
+		} catch (JavaModelException e) {
+			//ignore
 			buf.append(type.getElementName());
 		}
+		
 		// post qualification
 		if (getFlag(flags, T_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
