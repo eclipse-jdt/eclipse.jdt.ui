@@ -86,9 +86,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					else
 						je= je.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (fInput.equals(je)) {
-						return fForegroundColor;
+						return null;
 					}
 				}
+				return fForegroundColor;
 			}
 			return null;
 		}
