@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -33,6 +34,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaDocAccess {
 	
+	
+
+	
 	/**
 	 * Gets a reader for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or
@@ -40,7 +44,7 @@ public class JavaDocAccess {
 	 * @param allowInherited For methods with no comment, the comment of the overriden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
 	 */
-	public static SingleCharReader getJavaDoc(IMember member, boolean allowInherited) throws JavaModelException {
+	public static JavaDocCommentReader getJavaDoc(IMember member, boolean allowInherited) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
 		if (buf == null) {
 			// no source attachment found
@@ -81,17 +85,17 @@ public class JavaDocAccess {
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
 	 */
-	public static SingleCharReader getJavaDoc(IMember member) throws JavaModelException {
+	public static JavaDocCommentReader getJavaDoc(IMember member) throws JavaModelException {
 		return getJavaDoc(member, false);
 	}
 
-	private static SingleCharReader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	private static JavaDocCommentReader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
 		IType[] superTypes= hierarchy.getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++) {
 			IMethod method= JavaModelUtil.findMethod(name, paramTypes, isConstructor, superTypes[i]);
 			if (method != null) {
-				SingleCharReader reader= getJavaDoc(method, false);
+				JavaDocCommentReader reader= getJavaDoc(method, false);
 				if (reader != null) {
 					return reader;
 				}
@@ -117,7 +121,32 @@ public class JavaDocAccess {
 		}
 		
 		return null;
-	}	
+	}
+	
+	/**
+	 * Returns a JavaDoc tags for a comment at the given location. <code>null</code> is returned if the openable
+	 * has no source attached.
+	 */
+	public static JavaDocTag[] getJavaDocTags(IOpenable openable, int offset, int length) throws JavaModelException {
+		IBuffer buffer= openable.getBuffer();
+		if (buffer != null) {
+			return JavaDocTag.createFromComment(new JavaDocCommentReader(buffer, offset, offset + length));
+		}
+		return null;
+	}
 		
+	
+	/**
+	 * Returns a IMember's JavaDoc tags. <code>null</code> is returned if the member 
+	 * does not contain a JavaDoc comment or if no source is available.
+	 */
+	public static JavaDocTag[] getJavaDocTags(IMember member, boolean allowInherited) throws JavaModelException {
+		JavaDocCommentReader rd= getJavaDoc(member, allowInherited);
+		if (rd != null)
+			return JavaDocTag.createFromComment(rd);
+		
+		return null;
+	}	
+	
 
 }

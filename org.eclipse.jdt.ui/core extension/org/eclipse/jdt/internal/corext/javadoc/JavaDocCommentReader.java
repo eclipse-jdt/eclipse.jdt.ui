@@ -79,7 +79,15 @@ public class JavaDocCommentReader extends SingleCharReader {
 	public void reset() {
 		fCurrPos= fStartPos;
 		fWasNewLine= true;
-	}	
+	}
+	
+	
+	/**
+	 * Returns the offset of the last read character in the passed buffer.
+	 */
+	public int getOffset() {
+		return fCurrPos;
+	}
 		
 		
 }
