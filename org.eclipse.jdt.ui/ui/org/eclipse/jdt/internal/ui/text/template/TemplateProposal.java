@@ -91,7 +91,6 @@ public class TemplateProposal implements ICompletionProposal {
 			}			
 		} else {
 			// resolve variables manually
-			fContext.setDocument(document);
 			TemplateEditorPopup popup= new TemplateEditorPopup(fContext, model);
 	        
 			if (!popup.open()) {

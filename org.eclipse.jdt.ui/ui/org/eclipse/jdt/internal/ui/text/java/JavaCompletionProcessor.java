@@ -6,11 +6,9 @@ package org.eclipse.jdt.internal.ui.text.java;
  */
 
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -18,9 +16,17 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IEditorPart;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
+import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
 
 /**
@@ -39,7 +45,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		fTemplateEngine= new TemplateEngine(TemplateEngine.JAVA); //$NON-NLS-1$
+		fTemplateEngine= new TemplateEngine(TemplateContext.JAVA);
 	}
 		
 	/**
@@ -104,10 +110,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		ICompletionProposal[] results= fCollector.getResults();
 
 		try {
-			if (unit != null) {			
-				fTemplateEngine.reset(viewer);
-				fTemplateEngine.complete(unit, offset);
-			}			
+			fTemplateEngine.reset();
+			fTemplateEngine.complete(viewer, offset, unit);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -116,7 +120,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		ICompletionProposal[] templateResults= fTemplateEngine.getResults();
 
 		// concatenate arrays
-		ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length ];
+		ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
 		System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 		System.arraycopy(results, 0, total, templateResults.length, results.length);
 		

@@ -5,14 +5,17 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.StringTokenizer;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.ITextViewer;
 
 public class TemplateEngine {
 
@@ -21,16 +24,8 @@ public class TemplateEngine {
 	private static final char HTML_TAG_BEGIN= '<';
 	private static final char HTML_TAG_END= '>';
 	private static final char JAVADOC_TAG_BEGIN= '@';
-	
-	/**
-	 * Partition types.
-	 */
-	public static String JAVA= "java"; // $NON-NLS-1$ //$NON-NLS-1$
-	public static String JAVADOC= "javadoc"; // $NON-NLS-1$ //$NON-NLS-1$
 
 	private String fPartitionType;
-	
-	private ITextViewer fViewer;
 	
 	private ArrayList fProposals= new ArrayList();
 
@@ -41,9 +36,11 @@ public class TemplateEngine {
 
 	/**
 	 * Empties the collector.
+	 * 
+	 * @param viewer the text viewer  
+	 * @param unit   the compilation unit (may be <code>null</code>)
 	 */
-	public void reset(ITextViewer viewer) {
-		fViewer= viewer;
+	public void reset() {
 		fProposals.clear();
 	}
 
@@ -57,14 +54,17 @@ public class TemplateEngine {
 	/**
 	 * Inspects the context of the compilation unit around <code>completionPosition</code>
 	 * and feeds the collector with proposals.
-	 * @param collector          the collector for template proposals.
-	 * @param sourceUnit         the compilation unit.
-	 * @param completionPosition the context position in the compilation unit.
+	 * @param viewer             the text viewer
+	 * @param completionPosition the context position in the document of the text viewer
+	 * @param unit               the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ICompilationUnit sourceUnit, int completionPosition)
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit)
 		throws JavaModelException
 	{
-		String source= sourceUnit.getSource();
+		Assert.isNotNull(viewer);
+
+		IDocument document= viewer.getDocument();
+		String source= document.get();
 
 		// inspect context
 		int end = completionPosition;
@@ -93,7 +93,7 @@ public class TemplateEngine {
 		}
 
 		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(key, fPartitionType);
-		TemplateContext context= new TemplateContext(sourceUnit, start, end, fViewer);
+		TemplateContext context= new TemplateContext(viewer, start, end, sourceUnit);
 
 		for (int i= 0; i != templates.length; i++) {
 			TemplateProposal proposal= new TemplateProposal(templates[i], arguments, context);
@@ -104,7 +104,7 @@ public class TemplateEngine {
 	private static final int guessStart(String source, int end, String partitionType) {
 		int start= end;
 
-		if (partitionType.equals(JAVA)) {
+		if (partitionType.equals(TemplateContext.JAVA)) {
 			
 			// optional arguments
 			if ((start != 0) && (source.charAt(start - 1) == ARGUMENTS_END)) {
@@ -124,7 +124,7 @@ public class TemplateEngine {
 			if ((start != 0) && Character.isUnicodeIdentifierStart(source.charAt(start - 1)))
 				start--;
 				
-		} else if (partitionType.equals(JAVADOC)) {
+		} else if (partitionType.equals(TemplateContext.JAVADOC)) {
 
 			// javadoc tag
 			if ((start != 0) && (source.charAt(start - 1) == HTML_TAG_END))

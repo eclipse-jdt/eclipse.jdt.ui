@@ -5,23 +5,25 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
+import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
 /**
  * Simple Java doc completion processor.
@@ -36,7 +38,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		fTemplateEngine= new TemplateEngine(TemplateEngine.JAVADOC); //$NON-NLS-1$
+		fTemplateEngine= new TemplateEngine(TemplateContext.JAVADOC);
 	}
 	
 
@@ -103,10 +105,8 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		}
 
 		try {
-			if (unit != null) {			
-				fTemplateEngine.reset(viewer);
-				fTemplateEngine.complete(unit, documentOffset);
-			}			
+			fTemplateEngine.reset();
+			fTemplateEngine.complete(viewer, documentOffset, unit);
 		} catch (JavaModelException x) {
 		}				
 		

@@ -6,32 +6,13 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.codeassist.complete.CompletionParser;
-import org.eclipse.jdt.internal.compiler.CompilationResult;
-import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
-import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.jdt.internal.compiler.problem.ProblemIrritants;
-import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
-import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.internal.core.SearchableEnvironment;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.util.DocumentManager;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.core.Assert;
 
 public class TemplateContext implements VariableEvaluator {
 	
@@ -52,19 +33,22 @@ public class TemplateContext implements VariableEvaluator {
 	private static final String ELEMENT_TYPE= "element_type"; //$NON-NLS-1$
 	private static final String ELEMENT= "element"; //$NON-NLS-1$
 
-	private ICompilationUnit fUnit;
-	private IDocument fDocument;
+	private ITextViewer fViewer;
 	private int fStart;
 	private int fEnd;
-	private ITextViewer fViewer;
+	private ICompilationUnit fUnit;
 
-	public TemplateContext(ICompilationUnit unit, int start, int end, ITextViewer viewer) {
+	/**
+	 * compilation unit can be null.
+	 */
+	public TemplateContext(ITextViewer viewer, int start, int end, ICompilationUnit unit) {
+		Assert.isNotNull(viewer);
 		Assert.isTrue(start <= end);
 		
-		fUnit= unit;
+		fViewer= viewer;
 		fStart= start;
 		fEnd= end;
-		fViewer= viewer;
+		fUnit= unit;
 	}
 
 	public int getStart() {
@@ -77,14 +61,6 @@ public class TemplateContext implements VariableEvaluator {
 	
 	public ITextViewer getViewer() {
 		return fViewer;
-	}
-
-	public void setDocument(IDocument document) {
-		fDocument= document;
-	}
-	
-	public IDocument getDocument() {
-		return fDocument;
 	}
 
 	/*
@@ -104,16 +80,19 @@ public class TemplateContext implements VariableEvaluator {
 	 */
 	public String evaluateVariable(String variable, int offset) {
 		if (variable.equals(FILE)) {
-			return fUnit.getElementName();
+			if (fUnit == null)
+				return null;
+			else
+				return fUnit.getElementName();
 
 		// line number			
 		} else if (variable.equals(LINE)) {
-			int line= getLineNumber(fUnit, fEnd);
-				
-			if (line == -1)
-				return null;
-			else
+			try {
+				int line= fViewer.getDocument().getLineOfOffset(offset) + 1;
 				return Integer.toString(line);
+			} catch (BadLocationException e) {} // ignore
+			
+			return null;
 			
 		} else if (variable.equals(DATE)) {
 			return DateFormat.getDateInstance().format(new Date());
@@ -123,37 +102,5 @@ public class TemplateContext implements VariableEvaluator {
 		}
 	}
 
-	/*
-	 * @see VariableEvaluator#getRecognizedVariables()
-	 */
-	public String[] getRecognizedVariables() {
-		return null;
-	}
-
-	private static int getLineNumber(ICompilationUnit unit, int offset) {
-		CompilationUnitDocumentProvider documentProvider=
-			JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-			
-		try {
-			DocumentManager documentManager= new DocumentManager(unit);
-			documentManager.connect();
-				
-			IDocument document= documentManager.getDocument();
-			if (document == null) {
-				documentManager.disconnect();
-				return -1;	
-			}
-
-			try {				
-				return document.getLineOfOffset(offset) + 1;
-			} catch (BadLocationException e) {
-				documentManager.disconnect();
-			}
-			
-		} catch (CoreException e) {
-		}
-		
-		return -1;
-	}
 }
 
