@@ -16,13 +16,13 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareViewerPane;
-import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -125,11 +125,11 @@ public class CompareResultDialog extends Dialog {
         }
     }
     
-	private static class CompareElement implements ITypedElement, IStreamContentAccessor {
-	    private InputStream fContent;
+	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor {
+	    private String fContent;
 	    
 	    public CompareElement(String content) {
-	        fContent= createInputStream(content);
+	        fContent= content;
 	    }
 	    public String getName() {
 	        return "<no name>"; //$NON-NLS-1$
@@ -141,15 +141,15 @@ public class CompareResultDialog extends Dialog {
 	        return "txt"; //$NON-NLS-1$
 	    }
 	    public InputStream getContents() {
-	        return fContent;
-	    }
-	    private static InputStream createInputStream(String s) {
 		    try {
-		        return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
+		        return new ByteArrayInputStream(fContent.getBytes("UTF-8")); //$NON-NLS-1$
 		    } catch (UnsupportedEncodingException e) {
-		        return new ByteArrayInputStream(s.getBytes());
+		        return new ByteArrayInputStream(fContent.getBytes());
 		    }
-		}
+	    }
+        public String getCharset() throws CoreException {
+            return "UTF-8"; //$NON-NLS-1$
+        }
 	}
 
     private TextMergeViewer fViewer;
