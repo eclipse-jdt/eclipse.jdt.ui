@@ -120,7 +120,7 @@ public class ChkpiiTests extends TestCase {
 		boolean isExecuted= executeChkpiiProcess(type);
 		assertTrue("Could not run chkpii test on " + type + " files. See console for details.", isExecuted); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
-		boolean isValid= checkLogFile(type.getOutputFile(), buf);
+		boolean isValid= checkLogFile(type, buf);
 		assertTrue(buf + "See " + type.getOutputFile() + " for details.", isValid); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
@@ -230,21 +230,24 @@ public class ChkpiiTests extends TestCase {
 	/**
 	 * Checks if the given log file is valid and states no errors.
 	 * 
-	 * @param logFilePath the path of the chkpii log file
-	 * @param message a stringbuffer to append error messages to
+	 * @param type the file category
+	 * @param message a string buffer to append error messages to
 	 * @return <code>true</code> if there are errors in the log file
 	 */
-	private boolean checkLogFile(String logFilePath, StringBuffer message) {
+	private boolean checkLogFile(FileCategory type, StringBuffer message) {
+		String logFilePath= type.getOutputFile();
 		BufferedReader aReader= null;
-		int errors= -1, notProcessed= -1, endOfSummary= -1;
-		boolean hasErrors= false;
+		int errors= -1, warnings= -1, notProcessed= -1, endOfSummary= -1;
+		boolean hasFailed= false;
 		
 		try {
 			aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath), Charset.forName("ISO-8859-1")));
 			String aLine= aReader.readLine();
 			while (aLine != null) {
 				if (errors == -1)
-					errors= parseErrorSummary(aLine);
+					errors= parseSummary(aLine, "Files Contain Error");
+				if (XML != type  && warnings == -1)
+					warnings= parseSummary(aLine, "Files Contain Warnings Only");
 				else if (notProcessed == -1)
 					notProcessed= parseNotProcessedSummary(aLine);
 				else if (endOfSummary == -1)
@@ -257,39 +260,43 @@ public class ChkpiiTests extends TestCase {
 			
 			if (errors > 0) {
 				message.append("" + errors + " files containing errors\n");
-				hasErrors= true;
+				hasFailed= true;
+			}
+			if (XML != type && warnings > 0) {
+				message.append("" + errors + " files containing errors\n");
+				hasFailed= true;
 			}
 			if (notProcessed > 0) { 
 				message.append("" + notProcessed + " files not found\n");
-				hasErrors= true;
+				hasFailed= true;
 			}
 			if (endOfSummary != 0) {
 				message.append("Incomplete logfile\n");
-				hasErrors= true;
+				hasFailed= true;
 			}
 			
 		} catch (FileNotFoundException e) {
 			message.append("Could not open log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
-			hasErrors= true;
+			hasFailed= true;
 		} catch (IOException e) {
 			message.append("Error reading log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
-			hasErrors= true;
+			hasFailed= true;
 		} finally {
 			if (aReader != null) {
 				try {
 					aReader.close();
 				} catch (IOException e) {
 					message.append("Error closing log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
-					hasErrors= true;
+					hasFailed= true;
 				}
 			}
 		}
 		
-		return !hasErrors;
+		return !hasFailed;
 	}
 	
-	private int parseErrorSummary(String aLine) {
-		int index= aLine.indexOf("Files Contain Error"); //$NON-NLS-1$
+	private int parseSummary(String aLine, String parseString) {
+		int index= aLine.indexOf(parseString); //$NON-NLS-1$
 		if (index == -1)
 			return -1;
 		
