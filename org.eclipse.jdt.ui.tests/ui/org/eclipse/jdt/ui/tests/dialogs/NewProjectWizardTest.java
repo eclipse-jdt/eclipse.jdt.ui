@@ -1,0 +1,1162 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.ui.tests.dialogs;
+
+import java.lang.reflect.InvocationTargetException;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatus;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.JavaProject;
+
+import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
+import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
+import org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation;
+import org.eclipse.jdt.internal.corext.buildpath.EditOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
+import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
+import org.eclipse.jdt.internal.corext.buildpath.IncludeOperation;
+import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ResetOperation;
+import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
+import org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+
+public class NewProjectWizardTest extends TestCase {
+	
+    private static final Class THIS= NewProjectWizardTest.class;
+    
+    protected JavaProject fProject;
+    protected static NewProjectTestSetup fTestSetup;
+    protected String fNormalFolder= "NormalFolder";
+    protected String fSubFolder= "SubFolder";
+    
+    public NewProjectWizardTest(String name) {
+        super(name);
+    }
+    
+    public static Test allTests() {
+        return setUpTest(new TestSuite(THIS));
+    }
+    
+    public static Test setUpTest(Test test) {
+        return new NewProjectTestSetup(test);
+    }
+    
+    public static Test suite() {
+        TestSuite suite= new TestSuite(THIS);
+        fTestSetup= new NewProjectTestSetup(suite);
+        suite.addTestSuite(NewEmptyProjectWizardTest.THIS);
+        return fTestSetup;
+    }
+    
+    protected void setUp() throws Exception {
+        fProject= (JavaProject)fTestSetup.getWorkspaceProjectWithSrc();
+        assertFalse(fProject.isOnClasspath(fProject.getUnderlyingResource()));
+    }
+
+    protected void tearDown() throws Exception {
+        fProject.getProject().delete(true, true, null);
+    }
+    
+    // Test folder creation (on project, on fragment root, on fragment; as source folder, as normal folder)
+    public void testCreateNormalFolderOnProject() throws CoreException, InvocationTargetException, InterruptedException {
+        IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, null, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, getNormalFolderCreationQuery(), null);
+        
+        assertTrue(folder.exists());
+        assertTrue(folder.getName().equals(fNormalFolder));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testCreateSourceFolderOnProject() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, null, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, getSourceFolderCreationQuery(), null);
+        
+        assertTrue(root.getUnderlyingResource().exists());
+        assertTrue(root.getElementName().equals(fSubFolder));
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testCreateNormalFolderOnFragRoot() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot parentRoot= addToClasspath(new Path(fSubFolder));
+        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return false;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(new Path(fSubFolder).append(fNormalFolder));
+            }
+            
+        };
+        IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, parentRoot, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, folderQuery, null);
+        
+        assertTrue(folder.exists());
+        assertTrue(folder.getName().equals(fNormalFolder));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(new Path(fNormalFolder), fProject) == null);
+        assertTrue(ClasspathModifier.contains(new Path(fNormalFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testCreateSourceFolderOnFragRoot() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot parentRoot= addToClasspath(new Path(fNormalFolder));
+        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return true;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
+            }
+            
+        };
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, parentRoot, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, folderQuery, null);
+        
+        assertTrue(root.getUnderlyingResource().exists());
+        assertTrue(root.getElementName().equals(fSubFolder));
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(ClasspathModifier.contains(new Path(fSubFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testCreateNormalFolderOnFrag() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        final IPath nfFolder= new Path(fNormalFolder).append(fSubFolder).append("nfFolder");
+        IFolder fragment= getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
+        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return false;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(nfFolder);
+            }
+            
+        };
+        IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, fragment, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, folderQuery, null);
+        
+        assertTrue(folder.exists());
+        assertTrue(folder.getParent().equals(fragment));
+        assertTrue(folder.getName().equals(nfFolder.lastSegment()));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject) == null);
+        assertTrue(ClasspathModifier.contains(folder.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testCreateSourceFolderOnFrag() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot parentRoot= addToClasspath(new Path(fNormalFolder));
+        IFolder fragment= getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
+        final IPath srcFolder= new Path(fNormalFolder).append(fSubFolder).append("srcFolder");
+        
+        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return true;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(srcFolder);
+            }
+            
+        };
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, fragment, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, folderQuery, null);
+        
+        assertTrue(root.getUnderlyingResource().exists());
+        assertTrue(root.getUnderlyingResource().getParent().equals(fragment));
+        assertTrue(root.getElementName().equals(srcFolder.lastSegment()));
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(ClasspathModifier.contains(root.getPath().removeFirstSegments(2), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testAddNormalFolderToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        int numberOfEntries= fProject.getRawClasspath().length;
+        
+        addToClasspath(new Path(fNormalFolder));
+        
+        int newNumberOfEntries= fProject.getRawClasspath().length;
+        assertTrue(numberOfEntries + 1 == newNumberOfEntries);
+        
+        validateClasspath();
+    }
+    
+    public void testAddNestedNormalFolderToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= excludePackage();
+        
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
+        
+        addToClasspath(folder.getProjectRelativePath());
+        
+        entry= root.getRawClasspathEntry();
+        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }    
+    
+    public void testAddPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
+        IPackageFragment fragment= root.getPackageFragment(fSubFolder);
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        
+        int nrExclusions= entry.getExclusionPatterns().length;        
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        
+        addToClasspath(fragment);
+         
+        entry= root.getRawClasspathEntry();
+        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(entry.getExclusionPatterns().length - 1 == nrExclusions);
+        
+        validateClasspath();
+    }
+    
+    public void testAddIncludedPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= includePackage();
+        
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragment fragment= root.getPackageFragment(fSubFolder);
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        
+        int nrInclusions= entry.getInclusionPatterns().length;
+        int nrExclusions= entry.getExclusionPatterns().length;
+        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        
+        addToClasspath(fragment);
+        
+        entry= root.getRawClasspathEntry();
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
+        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(entry.getInclusionPatterns().length + 1 == nrInclusions);
+        assertTrue(entry.getExclusionPatterns().length - 1 == nrExclusions);
+        
+        validateClasspath();
+    }
+    
+    public void testAddExcludedPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= excludePackage();
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragment element= root.getPackageFragment(fSubFolder);
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        assertTrue(ClasspathModifier.contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
+        
+        addToClasspath(element);
+        
+        root= fProject.getPackageFragmentRoot(element.getParent().getPath());
+        entry= root.getRawClasspathEntry();
+        
+        assertTrue(ClasspathModifier.contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testAddProjectToCP() throws CoreException, InvocationTargetException, InterruptedException {
+        // Situation: Project wich one source folderand one normal folder as 
+        // direct childs --> adding the project to the CP should convert the folder into 
+        // a package and the .java file into a compilation unit
+        IPath srcPath= new Path("src2");
+        IPackageFragmentRoot root= addToClasspath(srcPath);
+        IFolder normalFolder= getFolderHandle(new Path(fNormalFolder));
+        IPackageFragmentRoot projectRoot= getProjectRoot(fProject.getCorrespondingResource());
+        IPackageFragment fragment= projectRoot.createPackageFragment("", false, null);
+        
+        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
+        assertTrue(fProject.findPackageFragment(fragment.getPath()) == null);
+        
+        projectRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, fProject, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertTrue(projectRoot.equals(getProjectRoot(fProject.getCorrespondingResource())));
+        
+        // project is on classpath
+        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        // root is on classpath and excluded on the project
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(ClasspathModifier.isExcludedOnProject(root.getUnderlyingResource(), fProject));
+        assertFalse(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
+        assertFalse(fProject.findPackageFragment(fragment.getPath()) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testRemoveFromCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        // add folder
+        int before= fProject.getRawClasspath().length;
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        
+        // and remove it
+        IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, root, null, null, null, null);
+        
+        assertTrue(folder.getFullPath().equals(root.getPath()));
+        assertFalse(ClasspathModifier.contains(new Path(fNormalFolder), getPaths(), null));
+        int after= fProject.getRawClasspath().length;
+        assertTrue(before == after);
+        
+        validateClasspath();
+    }
+    
+    public void removeProjectFromCP() throws CoreException, InvocationTargetException, InterruptedException {
+        IPath srcPath= new Path("src2");
+        IPackageFragmentRoot root= addToClasspath(srcPath);
+        IFolder normalFolder= getFolderHandle(new Path(fNormalFolder));
+        IPackageFragmentRoot projectRoot= getProjectRoot(fProject.getCorrespondingResource());
+        IPackageFragment fragment= projectRoot.createPackageFragment("", false, null);
+        
+        // add project to class path
+        projectRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, fProject, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertTrue(projectRoot.equals(getProjectRoot(fProject.getCorrespondingResource())));
+        
+        // project is on classpath
+        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        // root is on classpath
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
+        assertFalse(fProject.findPackageFragment(fragment.getPath()) == null);
+        
+        IJavaProject jProject= (IJavaProject)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, fProject, null, null, null, null);
+        
+        assertTrue(jProject.equals(fProject));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
+        assertTrue(fProject.findPackageFragment(fragment.getPath()) == null);
+        
+        projectRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, fProject, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertTrue(projectRoot.equals(getProjectRoot(fProject.getCorrespondingResource())));
+        
+        validateClasspath();
+    }
+    
+    // Test include, exclude, uninclude, unexclude, ...
+    public void testIncludePackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        includePackage();
+        
+        validateClasspath();
+    }
+    
+    public void testExcludePackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        excludePackage();
+        
+        validateClasspath();
+    }
+    
+    public void testExcludeIncludedPackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= includePackage();
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragment fragment= root.getPackageFragment(fSubFolder);
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int nrIncluded= entry.getInclusionPatterns().length;
+        int nrExcluded= entry.getExclusionPatterns().length;
+        
+        IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.EXCLUDE, fragment, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] inclusionPatterns= entry.getInclusionPatterns();
+        IPath[] exclusionPatterns= entry.getExclusionPatterns();
+        assertTrue(inclusionPatterns.length + 1 == nrIncluded);
+        assertTrue(exclusionPatterns.length - 1 == nrExcluded);
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), inclusionPatterns, null));
+        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        assertTrue(folder.getFullPath().equals(fragment.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testIncludeExcludedFolder() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= excludePackage();
+        
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int nrIncluded= entry.getInclusionPatterns().length;
+        int nrExcluded= entry.getExclusionPatterns().length;
+        
+        IPackageFragment fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.INCLUDE, folder, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] inclusionPatterns= entry.getInclusionPatterns();
+        IPath[] exclusionPatterns= entry.getExclusionPatterns();
+        assertTrue(inclusionPatterns.length - 1 == nrIncluded);
+        assertTrue(exclusionPatterns.length + 1 == nrExcluded);
+        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), exclusionPatterns, null));
+        assertTrue(fragment.getPath().equals(folder.getFullPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testRemoveInclusion() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= includePackage();
+        
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragment fragment= root.getPackageFragment(fSubFolder);
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int nrIncluded= entry.getInclusionPatterns().length;
+        int nrExcluded= entry.getExclusionPatterns().length;
+        
+        IPackageFragment frag= (IPackageFragment)executeOperation(IClasspathInformationProvider.UNINCLUDE, fragment, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] inclusionPatterns= entry.getInclusionPatterns();
+        IPath[] exclusionPatterns= entry.getExclusionPatterns();
+        assertTrue(inclusionPatterns.length + 1 == nrIncluded);
+        assertTrue(exclusionPatterns.length == nrExcluded);
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), inclusionPatterns, null));
+        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        assertTrue(frag.getPath().equals(fragment.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testRemoveExclusion() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IFolder cpFolder= excludePackage();
+        
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int nrIncluded= entry.getInclusionPatterns().length;
+        int nrExcluded= entry.getExclusionPatterns().length;
+        
+        IPackageFragment fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.UNEXCLUDE, folder, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] inclusionPatterns= entry.getInclusionPatterns();
+        IPath[] exclusionPatterns= entry.getExclusionPatterns();
+        assertTrue(inclusionPatterns.length == nrIncluded);
+        assertTrue(exclusionPatterns.length + 1 == nrExcluded);
+        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), exclusionPatterns, null));
+        assertTrue(fragment.getPath().equals(folder.getFullPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testEditFilters() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        final IPackageFragment includedPackage= root.getPackageFragment(fSubFolder);
+        final IPackageFragment excludedPackage= root.getPackageFragment(fSubFolder + "2");
+        
+        assertFalse(ClasspathModifier.contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertFalse(ClasspathModifier.contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        ClasspathModifierQueries.IInclusionExclusionQuery query= new ClasspathModifierQueries.IInclusionExclusionQuery() {
+
+            public boolean doQuery(CPListElement element, boolean focusOnExcluded) {
+                return true;
+            }
+
+            public IPath[] getInclusionPattern() {
+                return new IPath[] {new Path(includedPackage.getElementName()).addTrailingSeparator()};
+            }
+
+            public IPath[] getExclusionPattern() {
+                return new IPath[] {new Path(excludedPackage.getElementName()).addTrailingSeparator()};
+            }
+            
+        };
+        root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.EDIT, root, null, null, null, query);
+        
+        assertTrue(ClasspathModifier.contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(ClasspathModifier.contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testResetFilters() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IFolder folder= getFolderHandle(new Path(fNormalFolder));
+        
+        IPackageFragment includedPackage= root.getPackageFragment(fSubFolder);
+        IPackageFragment excludedPackage= root.getPackageFragment(fSubFolder + "2");
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        
+        executeOperation(IClasspathInformationProvider.INCLUDE, includedPackage, null, null, null, null);
+        executeOperation(IClasspathInformationProvider.EXCLUDE, excludedPackage, null, null, null, null);
+        addToClasspath(folder.getProjectRelativePath().append(fSubFolder + "3"));
+        IFolder subSrcFolder= getFolderHandle(folder.getProjectRelativePath().append(fSubFolder + "3"));
+        int numberOnCP= fProject.getRawClasspath().length;
+        
+        IPackageFragmentRoot editedRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.RESET, root, null, null, null, null);
+        
+        entry= editedRoot.getRawClasspathEntry();
+        assertTrue(entry.getInclusionPatterns().length == 0);
+        // one has to be left because it is a source folder
+        assertTrue(entry.getExclusionPatterns().length == 1);
+        assertTrue(ClasspathModifier.contains(folder.getFullPath(), getPaths(), null));
+        assertTrue(ClasspathModifier.contains(subSrcFolder.getFullPath(), getPaths(), null));
+        assertTrue(fProject.getRawClasspath().length == numberOnCP);
+        assertTrue(editedRoot.getPath().equals(root.getPath()));
+        
+        validateClasspath();
+    }
+    
+    // Test output folder manipulations (create, edit, reset)
+    public void testCreateOutputFolder() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPath oldOutputPath= fProject.getOutputLocation();
+        IPath newOutputPath= new Path(oldOutputPath.toString() + "2");
+        createOutputFolder(newOutputPath);
+        
+        validateClasspath();
+    }
+    
+    public CPListElementAttribute createOutputFolder(IPath newOutputPath) throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        
+        IFolder outputFolder= fProject.getProject().getFolder(newOutputPath);
+        assertFalse(outputFolder.exists());
+        
+        ClasspathModifierQueries.IOutputLocationQuery query= getOutputLocationQuery();
+        
+        CPListElementAttribute outputAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.CREATE_OUTPUT, root, null, query, null, null);
+        
+        root= fProject.findPackageFragmentRoot(root.getPath());
+        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject);
+        
+        assertTrue(((IPath)outputAttribute.getValue()).equals(newOutputPath));
+        assertTrue(((IPath)outputAttribute.getValue()).equals(elem.getAttribute(CPListElement.OUTPUT)));
+        
+        validateClasspath();
+        return outputAttribute;
+    }
+    
+    public void testEditOutputFolder() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPath oldOutputPath= fProject.getOutputLocation();
+        IPath newOutputPath= new Path(oldOutputPath.toString() + "2");
+        CPListElementAttribute attribute= createOutputFolder(newOutputPath);
+        
+        ClasspathModifierQueries.IOutputLocationQuery query= new ClasspathModifierQueries.IOutputLocationQuery() {
+            
+            public boolean doQuery(CPListElement element) {
+                return true;
+            }
+
+            public IPath getOutputLocation() {
+                IPath path= null;
+                try {
+                    path= fProject.getOutputLocation();
+                } catch (JavaModelException e) {}
+                return new Path(path.toString() + "3");
+            }
+
+            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+                return getOutputFolderQueryInternal(fProject.getOutputLocation());
+            }         
+        };
+        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT, attribute, null, query, null, null);
+        
+        IPath editedOutputPath= new Path(oldOutputPath.toString() + "3");
+
+        IFolder folder= getFolderHandle(new Path (fNormalFolder));
+        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(folder.getFullPath());
+        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject);
+        
+        assertTrue(((IPath)newAttribute.getValue()).equals(editedOutputPath));
+        assertTrue(((IPath)newAttribute.getValue()).equals(elem.getAttribute(CPListElement.OUTPUT)));
+        
+        validateClasspath();
+    }
+    
+    public void testEditOutputFolderWithNullReturn() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {        
+        CPListElementAttribute attribute= createOutputFolder(getOutputLocationQuery().getOutputLocation());
+        IPackageFragmentRoot root= fProject.getFolderPackageFragmentRoot(fProject.getPath().append(fNormalFolder));
+        
+        assertTrue(root.getRawClasspathEntry().getOutputLocation() != null);
+        
+        ClasspathModifierQueries.IOutputLocationQuery query= new ClasspathModifierQueries.IOutputLocationQuery() {
+            
+            public boolean doQuery(CPListElement element) {
+                return true;
+            }
+
+            public IPath getOutputLocation() {
+                return null;
+            }
+
+            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+                return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
+            }      
+        };
+        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT, attribute, null, query, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getOutputLocation() == null);
+        assertTrue(newAttribute.getValue() == null);
+        
+        validateClasspath();
+    }
+    
+    public void testResetOutputFolder() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPath oldOutputPath= fProject.getOutputLocation();
+        IPath newOutputPath= new Path(oldOutputPath.toString() + "2");
+        CPListElementAttribute attribute= createOutputFolder(newOutputPath);
+        
+        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.RESET, attribute, null, null, null, null);
+        
+        assertTrue(((IPath)newAttribute.getValue()) == null);
+        
+        validateClasspath();
+    }
+    
+    // Test file manipulations (include, exclude, ...)
+    public void testIncludeCompilationUnit() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        
+        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(newCu.getPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testExcludeCompilationUnit() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        
+        IFile excludedFile=(IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
+        
+        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testIncludeExcludedFile() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(excludedFile.getFullPath().equals(newCu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testExcludeIncludedFile() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        assertTrue(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, newCu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(excludedFile.getFullPath().equals(newCu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testUnincludeFile() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        
+        newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNINCLUDE, newCu, null, null, null, null);
+        
+        assertFalse(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(newCu.getPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testUnexcludeFile() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
+      
+        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
+        
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNEXCLUDE, excludedFile, null, null, null, null);
+        
+        assertFalse(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(newCu.getPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testIncludeFileOnFolder() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment2= root.createPackageFragment(fSubFolder+"2", false, null);
+        executeOperation(IClasspathInformationProvider.INCLUDE, fragment2, null, null, null, null);
+        
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        // Note: the parent of cu is a folder which is not excluded! This is important as
+        // 'include' on a cu which parent folder is explicitly excluded is not possible!
+        // Therefore fragment2 had to be included to test this case!
+        assertTrue(fProject.findElement(cu.getPath().makeRelative()) == null);
+        
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu.getUnderlyingResource(), null, null, null, null);
+        
+        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(newCu.getPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testExcludeFileOnFolder() throws CoreException, InvocationTargetException, InterruptedException {
+        // Special case: there are 2 packages fSubFolder and fSubFolder2 where the fSubFolder2 is 
+        // included. Now we include the compilation unit from fSubFolder and then exlude it.
+        // After inclusion, the returned object must be of type ICompilation unit,
+        // after exclusion, the returned object must be of type IFile (because
+        // only fSubFolder2 is included. We only test that the return type is correct because
+        // the correctness of the filters has been tested before.
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment2= root.createPackageFragment(fSubFolder+"2", false, null);
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        // include fragment2
+        executeOperation(IClasspathInformationProvider.INCLUDE, fragment2, null, null, null, null);
+        
+        // Check that the compilation unit cannot be found (because now its only
+        // a normal file and not a CU).
+        assertTrue(fProject.findElement(cu.getPath().makeRelative()) == null);
+        // include the cu --> if cast fails, then include is broken
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu.getUnderlyingResource(), null, null, null, null);
+        
+        // exclude the file --> if cast fails, then exclude is broken
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, newCu, null, null, null, null);
+        
+        assertTrue(excludedFile.getFullPath().equals(newCu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    public void testUnincludeFileOnFolder() throws CoreException, InvocationTargetException, InterruptedException {
+        // Same situation as in testExcludeFileOnFolder, but this time, we use
+        // uninclude instead of exclude
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment2= root.createPackageFragment(fSubFolder+"2", false, null);
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        // include fragment2
+        executeOperation(IClasspathInformationProvider.INCLUDE, fragment2, null, null, null, null);
+        
+        // Check that the compilation unit cannot be found (because now its only
+        // a normal file and not a CU).
+        assertTrue(fProject.findElement(cu.getPath().makeRelative()) == null);
+        // include the cu --> if cast fails, then include is broken
+        ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu.getUnderlyingResource(), null, null, null, null);
+        
+        // uninclude the file --> if cast fails, then uninclude is broken
+        IFile file= (IFile)executeOperation(IClasspathInformationProvider.UNINCLUDE, newCu, null, null, null, null);
+        
+        assertTrue(file.getFullPath().equals(cu.getPath()));
+        validateClasspath();
+    }
+    
+    public void testIncludeFileOnIncludedFragment() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.INCLUDE, fragment, null, null, null, null);
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 1);
+        
+        cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 2);
+        assertTrue(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testExcludeFileOnIncludedFragment() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.INCLUDE, fragment, null, null, null, null);
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 1);
+        
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
+        
+        assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 1);
+        assertFalse(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testUnincludeOnIncludedFragment() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.INCLUDE, fragment, null, null, null, null);
+        cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
+        
+        cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNINCLUDE, cu, null, null, null, null);
+        assertFalse(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        
+        validateClasspath();
+    }
+    
+    public void testUnexcludeOnIncludedFragment() throws CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IPackageFragment fragment= root.createPackageFragment(fSubFolder, false, null);
+        ICompilationUnit cu= createICompilationUnit("C", fragment);
+        
+        fragment= (IPackageFragment)executeOperation(IClasspathInformationProvider.INCLUDE, fragment, null, null, null, null);
+        IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
+        
+        cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNEXCLUDE, excludedFile, null, null, null, null);
+        assertFalse(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
+        
+        validateClasspath();
+    }
+    
+    // Helper methods
+    protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.IOutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.IFolderCreationQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
+        final Object[] returnValue= {null};
+        IClasspathInformationProvider provider= new IClasspathInformationProvider() {
+
+            public void handleResult(Object result, IPath oldOutputLocation, CoreException exception, int operationType) {
+                returnValue[0]= result;
+            }
+
+            public Object getSelection() {
+                return selection;
+            }
+
+            public IJavaProject getJavaProject() {
+                return fProject;
+            }
+
+            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery() {
+                return outputQuery;
+            }
+
+            public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery() {
+                return inclQuery;
+            }
+
+            public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery() {
+                return locationQuery;
+            }
+
+            public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery() {
+                return creationQuery;
+            }
+            
+        };
+        
+        ClasspathModifierOperation op= null;
+        switch(type) {
+            case IClasspathInformationProvider.CREATE_FOLDER: op= new CreateFolderOperation(null, provider); break;
+            case IClasspathInformationProvider.ADD_TO_BP: op= new AddToClasspathOperation(null, provider); break;
+            case IClasspathInformationProvider.REMOVE_FROM_BP: op= new RemoveFromClasspathOperation(null, provider); break;
+            case IClasspathInformationProvider.INCLUDE: op= new IncludeOperation(null, provider); break;
+            case IClasspathInformationProvider.UNINCLUDE: op= new UnincludeOperation(null, provider); break;
+            case IClasspathInformationProvider.EXCLUDE: op= new ExcludeOperation(null, provider); break;
+            case IClasspathInformationProvider.UNEXCLUDE: op= new UnexcludeOperation(null, provider); break;
+            case IClasspathInformationProvider.EDIT: op= new EditOperation(null, provider); break;
+            case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
+            case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
+        }
+        
+        op.run(null);
+        
+        return returnValue[0];
+    }
+    
+    protected IPackageFragmentRoot addToClasspath(IPath path) throws CoreException, InvocationTargetException, InterruptedException {
+        IPath[] paths= getPaths();
+        assertFalse(ClasspathModifier.contains(path, paths, null));     
+        
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(path), getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+
+        paths= getPaths();
+        assertTrue(ClasspathModifier.contains(root.getPath(), getPaths(), null));
+        return root;
+    }
+    
+    protected IPackageFragmentRoot addToClasspath(IJavaElement element) throws CoreException, InvocationTargetException, InterruptedException {
+        IPath[] paths= getPaths();
+        assertFalse(ClasspathModifier.contains(element.getPath(), paths, null));
+        
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, element, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        
+        paths= getPaths();
+        assertTrue(ClasspathModifier.contains(element.getPath(), paths, null));
+        return root;
+    }
+    
+    protected IFolder includePackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IFolder cpFolder= getFolderHandle(new Path(fNormalFolder));
+        
+        IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int before= entry.getInclusionPatterns().length;
+        
+        // include
+        executeOperation(IClasspathInformationProvider.INCLUDE, folder, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] inclusionPatterns= entry.getInclusionPatterns();
+        int after= inclusionPatterns.length;
+        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertTrue(before + 1 == after);
+        return cpFolder;
+    }
+    
+    protected IFolder excludePackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
+        IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
+        IFolder cpFolder= getFolderHandle(new Path(fNormalFolder));
+
+        IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
+        IPackageFragment fragment= root.getPackageFragment(folder.getName());
+        
+        IClasspathEntry entry= root.getRawClasspathEntry();
+        int nrExcluded= entry.getExclusionPatterns().length;
+        executeOperation(IClasspathInformationProvider.EXCLUDE, fragment, null, null, null, null);
+        
+        entry= root.getRawClasspathEntry();
+        IPath[] exclusionPatterns= entry.getExclusionPatterns();
+        assertTrue(nrExcluded + 1 == exclusionPatterns.length);
+        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        return cpFolder;
+    }
+    
+    protected IFolder getFolderHandle(IPath path) {
+        IFolder folder= fProject.getProject().getFolder(path);
+        try {
+            if (!folder.exists())
+                folder.create(true, false, null);
+        } catch (CoreException e) {
+        }
+        return folder;
+    }
+    
+    protected ICompilationUnit createICompilationUnit(String className, IPackageFragment fragment) throws JavaModelException {
+        String packString= fragment.getElementName().equals("") ? fragment.getElementName() : "package " + fragment.getElementName() +";\n";
+        StringBuffer content= getFileContent(className, packString);
+        return fragment.createCompilationUnit(className+".java", content.toString(), false, null);
+    }
+    
+    protected StringBuffer getFileContent(String className, String packageHeader) {
+        StringBuffer buf= new StringBuffer();
+        buf.append(packageHeader);
+        buf.append("\n");   
+        buf.append("public class "+className+ " {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("    }\n");      
+        buf.append("}\n");
+        return buf;
+    }
+    
+    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation) throws JavaModelException{
+        return new ClasspathModifierQueries.IOutputFolderQuery(desiredOutputLocation) {
+            public boolean doQuery(boolean b, IJavaProject project) {
+                return true;
+            }
+
+            public IPath getOutputLocation() {
+                IPath newOutputFolder= null;
+                try {
+                    if (fProject.isOnClasspath(fProject.getUnderlyingResource())) {
+                        String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+                        newOutputFolder= fProject.getPath().append(outputFolderName);
+                        return newOutputFolder;
+                    }
+                } catch (JavaModelException e) {
+                    fail();
+                }
+                return null;
+            }
+            
+            public boolean removeProjectFromClasspath() {
+                return true;
+            }
+        };
+    }
+    
+    public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery() {
+        return new ClasspathModifierQueries.IOutputLocationQuery() {
+            
+            public boolean doQuery(CPListElement element) {
+                return true;
+            }
+
+            public IPath getOutputLocation() {
+                IPath oldOutputPath= null;
+                try {
+                    oldOutputPath= fProject.getOutputLocation();
+                } catch (JavaModelException e) {}
+                return new Path(oldOutputPath.toString() + "2");
+            }
+
+            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+                return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
+            }         
+        };
+    }
+    
+    protected ClasspathModifierQueries.IFolderCreationQuery getSourceFolderCreationQuery() {
+        return new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return true;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(new Path(fSubFolder));
+            }
+            
+        };
+    }
+    
+    protected ClasspathModifierQueries.IFolderCreationQuery getNormalFolderCreationQuery() {
+        return new ClasspathModifierQueries.IFolderCreationQuery() {
+
+            public boolean doQuery() {
+                return true;
+            }
+
+            public boolean isSourceFolder() {
+                return false;
+            }
+
+            public IFolder getCreatedFolder() {
+                return getFolderHandle(new Path(fNormalFolder));
+            }
+            
+        };
+    }
+    
+    protected IPath[] getPaths() throws JavaModelException {
+        IClasspathEntry[] entries= fProject.getRawClasspath();
+        IPath[] paths= new IPath[entries.length];
+        for(int i= 0; i < entries.length; i++) {
+            paths[i]= entries[i].getPath();
+        }
+        return paths;
+    }
+    
+    protected void validateClasspath() throws JavaModelException {
+        IJavaModelStatus status= JavaConventions.validateClasspath(fProject, fProject.getRawClasspath(), fProject.getOutputLocation());
+        assertFalse(status.getSeverity() == IStatus.ERROR);
+    }
+    
+    protected IPackageFragmentRoot getProjectRoot(IResource resource) throws JavaModelException {
+        return ClasspathModifier.getFragmentRoot(resource, fProject, null);
+    }
+}
+
