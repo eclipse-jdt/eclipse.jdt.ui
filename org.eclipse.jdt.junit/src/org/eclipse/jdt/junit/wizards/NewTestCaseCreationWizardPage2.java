@@ -190,7 +190,13 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 			ArrayList types= null;
 			try {
 				ITypeHierarchy hierarchy= currType.newSupertypeHierarchy(null);
-				IType[] superTypes= hierarchy.getAllSuperclasses(currType);
+				IType[] superTypes;
+				if (currType.isClass())
+					superTypes= hierarchy.getAllSuperclasses(currType);
+				else if (currType.isInterface())
+					superTypes= hierarchy.getAllSuperInterfaces(currType);
+				else
+					superTypes= new IType[0];
 				types= new ArrayList(superTypes.length+1);
 				types.add(currType);
 				types.addAll(Arrays.asList(superTypes));
