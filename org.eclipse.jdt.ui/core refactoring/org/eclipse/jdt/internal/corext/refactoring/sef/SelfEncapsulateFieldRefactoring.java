@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -133,19 +134,26 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result=  new RefactoringStatus();
-		ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
-		if (node == null || !(node instanceof VariableDeclarationFragment)) {
-			return mappingErrorFound(result, node);
-		}
-		fFieldDeclaration= (VariableDeclarationFragment)node;
-		if (fFieldDeclaration.resolveBinding() == null) {
-			if (!processCompilerError(result, node))
-				result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
+		try {
+			RefactoringStatus result=  new RefactoringStatus();
+			ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
+			if (node == null || !(node instanceof VariableDeclarationFragment)) {
+				return mappingErrorFound(result, node);
+			}
+			fFieldDeclaration= (VariableDeclarationFragment)node;
+			if (fFieldDeclaration.resolveBinding() == null) {
+				if (!processCompilerError(result, node))
+					result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
+				return result;
+			}
+			result.merge(Checks.validateModifiesFiles(new IFile[]{ResourceUtil.getFile(fField.getCompilationUnit())}));
+			if (result.hasFatalError())
+				return result;
+			computeUsedNames();
 			return result;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
-		computeUsedNames();
-		return result;
 	}
 
 	private RefactoringStatus mappingErrorFound(RefactoringStatus result, ASTNode node) {
@@ -214,7 +222,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 				new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
 				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
-				
+			
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedCUs)));
 			if (result.hasFatalError())
 				return result;
