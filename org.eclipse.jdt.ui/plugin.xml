@@ -830,7 +830,7 @@ JavaStructureDiffViewerCreator
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
 			menubarPath="navigate/openTypeGroup"
-			toolbarPath="Normal/Java"			
+			toolbarPath="Normal/Search"			
 			label="%OpenTypeAction.label"
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
