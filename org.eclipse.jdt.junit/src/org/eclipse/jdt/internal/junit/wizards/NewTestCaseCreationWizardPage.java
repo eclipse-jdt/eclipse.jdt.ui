@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.junit.wizards;
+package org.eclipse.jdt.internal.junit.wizards;
 
 import java.awt.Stroke;
 import java.util.ArrayList;

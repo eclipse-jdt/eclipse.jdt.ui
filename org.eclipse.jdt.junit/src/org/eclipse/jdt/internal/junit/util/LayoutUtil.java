@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.junit.util;
 
-import org.eclipse.jdt.junit.wizards.MethodStubsSelectionButtonGroup;
+import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
