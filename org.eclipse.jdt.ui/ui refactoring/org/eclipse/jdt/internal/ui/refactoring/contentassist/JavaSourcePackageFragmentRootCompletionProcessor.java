@@ -110,7 +110,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 			IJavaProject[] projects= fRoot.getJavaProjects();
 			for (int i= 0; i < projects.length; i++) {
 				IJavaProject project= projects[i];
-				IPackageFragmentRoot[] roots= project.getAllPackageFragmentRoots();
+				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int j= 0; j < roots.length; j++) {
 					IPackageFragmentRoot root= roots[j];
 					if (root.exists() && (root.getKind() == IPackageFragmentRoot.K_SOURCE)) {
