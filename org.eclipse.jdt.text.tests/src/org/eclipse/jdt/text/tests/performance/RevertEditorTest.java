@@ -29,7 +29,7 @@ public abstract class RevertEditorTest extends TestCase {
 	private PerformanceMeter fPerformanceMeter;
 	
 	
-	protected void setUp() {
+	protected void setUp() throws Exception {
 		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 	}
 	
