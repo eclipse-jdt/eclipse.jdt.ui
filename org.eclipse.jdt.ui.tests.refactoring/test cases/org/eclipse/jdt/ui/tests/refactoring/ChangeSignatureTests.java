@@ -1312,4 +1312,41 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] newIndices= {0};
 		helperAdd(signature, newParamInfo, newIndices);
 	}
+	
+	public void testImport05() throws Exception {
+		String[] signature= {};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= "Object";
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testImport06() throws Exception {
+		String[] signature= {"QPermission;", "Qjava.security.acl.Permission;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"perm", "acl"};
+		String[] newParamNames= {"xacl", "xperm"};
+		String[] newParamTypeNames= {"java.security.acl.Permission [] []", "java.security.Permission"};
+		int[] permutation= {1, 0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= "java.security.acl.Permission";
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
 }
+
