@@ -117,14 +117,20 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		public void selectionChanged(SelectionChangedEvent event) {
 			final IStructuredSelection selection= (IStructuredSelection)event.getSelection();
 			final Category selected= (Category)selection.getFirstElement();
-			fDialogSettings.put(PREF_CATEGORY_INDEX, selected.index);
-			fJavaPreview.setPreviewText(selected.previewText);
-			doUpdatePreview();
-			fOptionsViewer.setInput(selected.options);
-
-			for (int i = 0; i < selected.options.length; i++) {
-				final boolean checked= fWorkingValues.get(selected.options[i].key).equals(JavaCore.INSERT);
-				fOptionsViewer.setChecked(selected.options[i], checked);
+			if (selected != null) {
+				fDialogSettings.put(PREF_CATEGORY_INDEX, selected.index);
+				fJavaPreview.setPreviewText(selected.previewText);
+				doUpdatePreview();
+				fOptionsViewer.setInput(selected.options);
+				
+				for (int i = 0; i < selected.options.length; i++) {
+					final boolean checked= fWorkingValues.get(selected.options[i].key).equals(JavaCore.INSERT);
+					fOptionsViewer.setChecked(selected.options[i], checked);
+				}
+			} else {
+				fJavaPreview.setPreviewText(null);
+				doUpdatePreview();
+				fOptionsViewer.setInput(new Object[0]);
 			}
 		}
 		
@@ -139,7 +145,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 				index= 1; // in order to select a category with preview initially
 			}
 			final Category category= (Category)fCategoriesList.get(index);
-			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));
+			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}), true);
 		}
 	}
 	
@@ -685,7 +691,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		fOptionsViewer.getControl().setLayoutData(gd);
 		
 		fCategoriesViewer.setInput(fCategories);
-		fCategoriesViewer.setExpandedElements(fCategories.toArray());
+		fCategoriesViewer.expandAll();
 		
 
 		initializeControls();

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.MarginPainter;
@@ -35,6 +36,8 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -126,7 +129,9 @@ public class JavaPreview {
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		
 		fMarginPainter= new MarginPainter(fSourceViewer);
-		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(new RGB(100, 100, 100)));
+		final IPreferenceStore prefStore= JavaPlugin.getDefault().getPreferenceStore();
+		final RGB rgb= PreferenceConverter.getColor(prefStore, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR);
+		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(rgb));
 		fSourceViewer.addPainter(fMarginPainter);
 		
 		new JavaSourcePreviewerUpdater(fSourceViewer, fTextTools);
