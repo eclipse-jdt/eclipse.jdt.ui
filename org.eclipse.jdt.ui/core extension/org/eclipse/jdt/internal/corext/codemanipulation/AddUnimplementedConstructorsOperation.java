@@ -252,7 +252,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 								}
 							}
 						}
-						imports.createEdit(document);
+						imports.createEdit(document, new SubProgressMonitor(monitor, 1));
 						if (!fImports)
 							rewrite.clearImportRewrites();
 						fCreatedImports= imports.getCreatedImports();
