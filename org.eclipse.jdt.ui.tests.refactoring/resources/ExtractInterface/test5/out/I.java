@@ -4,5 +4,5 @@ import java.io.IOException;
 
 /** typecomment template*/
 interface I {
-	public void m() throws IOException;
+	void m() throws IOException;
 }
