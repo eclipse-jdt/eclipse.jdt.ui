@@ -2540,10 +2540,17 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
 				if (annotationPref.getAnnotationType().equals(a.getAnnotationType())) {
 					String key;
-					if (forward)
-						key= annotationPref.getIsGoToNextNavigationTargetKey();
-					else
-						key= annotationPref.getIsGoToPreviousNavigationTargetKey();
+					/*
+					 * Fixes bug 41689
+					 * This code can be simplified if we decide that
+					 * we don't allow to use different settings for go to
+					 * previous and go to next annotation.
+					 */
+					key= annotationPref.getIsGoToNextNavigationTargetKey();
+//					if (forward)
+//						key= annotationPref.getIsGoToNextNavigationTargetKey();
+//					else
+//						key= annotationPref.getIsGoToPreviousNavigationTargetKey();
 					if (key != null)
 						isNavigationTarget= workbenchTextEditorPrefStore.getBoolean(key);
 					break;
