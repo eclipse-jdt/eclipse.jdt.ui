@@ -11,15 +11,11 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
+import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
-
-import org.eclipse.search.internal.ui.SearchPlugin;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,37 +27,34 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 
-public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
+class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
 	public static final String POTENTIAL_MATCH= SearchMessages.getString("JavaSearchResultLabelProvider.potentialMatch"); //$NON-NLS-1$
-	private int fTextFlags= 0;
 	
 	// Cache
 	private IMarker fLastMarker;
 	private IJavaElement fLastJavaElement;
 	private StringBuffer fBufffer= new StringBuffer(50);
 	
-	public static final JavaSearchResultLabelProvider INSTANCE= new JavaSearchResultLabelProvider();
-	public JavaSearchResultLabelProvider() {
-		super(getJavaElementLabelProvider(), getDecoratorManager());
-	}	
 
-	private static ILabelDecorator getDecoratorManager() {
-		if (getSite() != null)
-			return getSite().getDecoratorManager();
-		else
-			return null;
-	}
-	
-	private static ILabelProvider getJavaElementLabelProvider() {	
-		return
+	JavaSearchResultLabelProvider(ISearchResultView view) {
+		super(
 			new StandardJavaUILabelProvider(
 				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
 				StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-				null
-			);
+				null)
+			, null);
+		setLabelDecorator(getDecoratorManager(view.getSite()));
+	}	
+
+
+	private ILabelDecorator getDecoratorManager(IWorkbenchPartSite site) {
+		if (site != null)
+			return site.getDecoratorManager();
+		else
+			return null;
 	}
 	
 	public String getText(Object o) {
@@ -88,12 +81,14 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		else
 			return super.getText(javaElement);
 	}
+
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
 			return null;
 		return super.getImage(javaElement);
 	}
+
 	public void setOrder(int orderFlag) {
 		int flags= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
@@ -110,6 +105,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		}
 		((StandardJavaUILabelProvider)getLabelProvider()).setTextFlags(flags);
 	}
+
 	private IJavaElement getJavaElement(Object o) {
 		if (o instanceof IJavaElement)
 			return (IJavaElement)o;
@@ -120,6 +116,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 			return null;
 		return getJavaElement(marker);
 	}
+
 	private IMarker getMarker(Object o) {
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
@@ -160,14 +157,4 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
 		return handle;
 	}
-
-	private static IWorkbenchPartSite getSite() {
-		IWorkbenchPage page= SearchPlugin.getActivePage();
-		if (page != null) {
-			IWorkbenchPart part= page.getActivePart();
-			if (part != null)
-				return part.getSite();
-		}
-		return null;
-	}		
 }
