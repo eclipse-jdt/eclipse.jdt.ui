@@ -12,13 +12,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.wizard.IWizardPage;
-
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
@@ -36,7 +35,7 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 		icon="icons/full/ctool16/newjprj_wiz.gif">
 		<description>My project</description>
     </wizard>	 
-<extension/>
+</extension>
  */   
 
 
@@ -60,24 +59,23 @@ public class MyProjectCreationWizard extends BasicNewResourceWizard implements I
 		fMainPage.setTitle("New");
 		fMainPage.setDescription("Create a new XY project.");
 		addPage(fMainPage);
-		fJavaPage= new JavaCapabilityConfigurationPage();
+		fJavaPage= new JavaCapabilityConfigurationPage() {
+			public void setVisible(boolean visible) {
+				// need to override to set the latest project
+				updatePage();
+				super.setVisible(visible);
+			}
+		};
 		addPage(fJavaPage);
-		// TODO: add your own page(s), before or after the Java page.
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
-	 */
-	public IWizardPage getNextPage(IWizardPage page) {
-		IWizardPage nextPage= super.getNextPage(page);
-		// initialize the java page before it gets visible (wuth the latest settings from the main page)
-		// TODO: do the same thing for your page
-		if (nextPage == fJavaPage) {
-			IProject project= fMainPage.getProjectHandle();
-			fJavaPage.init(JavaCore.create(project), null, null, false);
+	private void updatePage() {
+		IJavaProject jproject= JavaCore.create(fMainPage.getProjectHandle());
+		if (!jproject.equals(fJavaPage.getJavaProject())) {
+			fJavaPage.init(jproject, null, null, false);	
 		}
-		return nextPage;
-	}	
+	}
+	
 	
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		try {		
@@ -95,6 +93,7 @@ public class MyProjectCreationWizard extends BasicNewResourceWizard implements I
 			project.create(desc, new SubProgressMonitor(monitor, 1));
 			project.open(new SubProgressMonitor(monitor, 1));
 			
+			updatePage();
 			fJavaPage.configureJavaProject(new SubProgressMonitor(monitor, 1));
 			// TODO: configure your page / nature
 	
