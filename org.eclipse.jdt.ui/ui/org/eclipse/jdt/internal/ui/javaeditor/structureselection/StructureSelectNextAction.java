@@ -4,7 +4,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
@@ -45,13 +44,13 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 	}
 	
 	private static ASTNode getNextNode(ASTNode parent, ASTNode node){
-		Statement[] statements= StructureSelectionAction.getStatements(parent);
-		if (statements == null || statements.length == 0)
+		ASTNode[] siblingNodes= StructureSelectionAction.getChildNodes(parent);
+		if (siblingNodes == null || siblingNodes.length == 0)
 			return parent;
-		if (node == statements[statements.length -1 ])
+		if (node == siblingNodes[siblingNodes.length -1 ])
 			return parent;
 		else
-			return statements[StructureSelectionAction.findIndex(statements, node) + 1];
+			return siblingNodes[StructureSelectionAction.findIndex(siblingNodes, node) + 1];
 	}
 }
 

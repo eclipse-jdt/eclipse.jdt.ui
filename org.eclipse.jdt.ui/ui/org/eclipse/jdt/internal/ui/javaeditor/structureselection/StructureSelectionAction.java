@@ -13,8 +13,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -121,15 +120,18 @@ public abstract class StructureSelectionAction extends Action {
 		return new SourceRange(Math.max(0, offset), length);
 	}
 	
-	static Statement[] getStatements(ASTNode node){
+	static ASTNode[] getChildNodes(ASTNode node){
 		if (node instanceof Block)
-			return convertToStatementArray(((Block)node).statements());	
-			
+			return convertToNodeArray(((Block)node).statements());	
+		if (node instanceof TypeDeclaration)
+			return convertToNodeArray(((TypeDeclaration)node).bodyDeclarations());	
+		if (node instanceof CompilationUnit)
+			return convertToNodeArray(((CompilationUnit)node).types());	
 		return null;	
 	}
 	
-	private static Statement[] convertToStatementArray(Collection statements){
-		return (Statement[]) statements.toArray(new Statement[statements.size()]);
+	private static ASTNode[] convertToNodeArray(Collection statements){
+		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);
 	}
 
 	static int findIndex(Object[] array, Object o){
