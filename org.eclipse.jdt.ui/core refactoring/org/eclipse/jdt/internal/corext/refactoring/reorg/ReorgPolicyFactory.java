@@ -1149,7 +1149,7 @@ class ReorgPolicyFactory {
 			int i= 1;
 			while (true){
 				String newName;
-				if (i == 0)
+				if (i == 1)
 					newName= RefactoringCoreMessages.getFormattedString("CopyRefactoring.package.copyOf1", //$NON-NLS-1$
 								pack.getElementName());
 				else
