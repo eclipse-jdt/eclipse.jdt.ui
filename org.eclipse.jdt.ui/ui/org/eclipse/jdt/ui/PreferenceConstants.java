@@ -118,7 +118,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #CODEGEN_USE_GETTERSETTER_SUFFIX
 	 */	
-	public static final String CODEGEN_GETTERSETTER_SUFFIX= CodeGenerationPreferencePage.PREF_USE_GETTERSETTER_SUFFIX;
+	public static final String CODEGEN_GETTERSETTER_SUFFIX= CodeGenerationPreferencePage.PREF_GETTERSETTER_SUFFIX;
 
 	/**
 	 * A name preference that controls if a JavaDoc stub gets added to newly created types and methods.
