@@ -21,7 +21,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
@@ -42,8 +42,8 @@ public class JavaTypeHover implements ITextHover {
 	private ICodeAssist getCodeAssist() {
 		if (fEditor != null) {
 			IEditorInput input= fEditor.getEditorInput();
-			if (input instanceof ClassFileEditorInput) {
-				ClassFileEditorInput cfeInput= (ClassFileEditorInput) input;
+			if (input instanceof IClassFileEditorInput) {
+				IClassFileEditorInput cfeInput= (IClassFileEditorInput) input;
 				return cfeInput.getClassFile();
 			}
 			

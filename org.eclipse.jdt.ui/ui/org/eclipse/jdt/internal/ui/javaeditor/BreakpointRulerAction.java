@@ -117,8 +117,8 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				IRegion line= document.getLineInformation(lineNumber - 1);
 				
 				IType type = null;
-				if (editorInput instanceof ClassFileEditorInput) {
-					ClassFileEditorInput input= (ClassFileEditorInput) editorInput;
+				if (editorInput instanceof IClassFileEditorInput) {
+					IClassFileEditorInput input= (IClassFileEditorInput) editorInput;
 					type = input.getClassFile().getType();
 				} else if (editorInput instanceof IFileEditorInput) {
 					IFileEditorInput input= (IFileEditorInput) editorInput;

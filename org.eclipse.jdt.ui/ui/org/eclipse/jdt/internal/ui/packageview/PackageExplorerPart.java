@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -976,10 +976,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns the element contained in the EditorInput
 	 */
 	Object getElementOfInput(IEditorInput input) {
-		if (input instanceof IFileEditorInput)
+		if (input instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)input).getClassFile();
+		else if (input instanceof IFileEditorInput)
 			return ((IFileEditorInput)input).getFile();
-		else if (input instanceof ClassFileEditorInput)
-			return ((ClassFileEditorInput)input).getClassFile();
 		else if (input instanceof JarEntryEditorInput)
 			return ((JarEntryEditorInput)input).getStorage();
 		return null;

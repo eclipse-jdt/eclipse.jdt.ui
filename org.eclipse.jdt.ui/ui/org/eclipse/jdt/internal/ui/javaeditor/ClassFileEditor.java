@@ -4,23 +4,27 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
- 
-import org.eclipse.jface.action.IMenuManager;
 
-import org.eclipse.core.resources.IMarker;
+ 
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.jface.action.IMenuManager;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * Java specific text editor.
@@ -72,10 +76,10 @@ public class ClassFileEditor extends JavaEditor {
 	 * @see JavaEditor#getJavaSourceReferenceAt
 	 */
 	protected ISourceReference getJavaSourceReferenceAt(int position) {
-		if (getEditorInput() instanceof ClassFileEditorInput) {
+		if (getEditorInput() instanceof IClassFileEditorInput) {
 			try {
 				
-				ClassFileEditorInput input= (ClassFileEditorInput) getEditorInput();
+				IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
 				IJavaElement element= input.getClassFile().getElementAt(position);
 				if (element instanceof ISourceReference)
 					return (ISourceReference) element;
@@ -91,13 +95,13 @@ public class ClassFileEditor extends JavaEditor {
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		
 		if (input instanceof IFileEditorInput) {
-			IFileEditorInput fileInput= (IFileEditorInput) input;
-			Object element= JavaCore.create(fileInput.getFile());
+			IFile file= ((IFileEditorInput) input).getFile();
+			Object element= JavaCore.create(file);
 			if (element instanceof IClassFile)
-				input= new ClassFileEditorInput((IClassFile) element);
+				input= new ExternalClassFileEditorInput(file, (IClassFile) element);
 		}
 		
-		if (!(input instanceof ClassFileEditorInput))
+		if (!(input instanceof IClassFileEditorInput))
 			throw new PartInitException(JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message")); //$NON-NLS-1$
 			
 		super.init(site, input);
@@ -116,9 +120,9 @@ public class ClassFileEditor extends JavaEditor {
 		
 		super.editorContextMenuAboutToShow(menu);
 		
-		if (getEditorInput() instanceof ClassFileEditorInput) {
+		if (getEditorInput() instanceof IClassFileEditorInput) {
 			
-			ClassFileEditorInput input= (ClassFileEditorInput) getEditorInput();
+			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
 			IClassFile file= input.getClassFile();
 			
 			try {
@@ -136,9 +140,9 @@ public class ClassFileEditor extends JavaEditor {
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
 		
-		if (getEditorInput() instanceof ClassFileEditorInput) {
+		if (getEditorInput() instanceof IClassFileEditorInput) {
 			
-			ClassFileEditorInput input= (ClassFileEditorInput) getEditorInput();
+			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
 			IClassFile file= input.getClassFile();
 			
 			try {
@@ -154,8 +158,8 @@ public class ClassFileEditor extends JavaEditor {
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
-		if (page != null && input instanceof ClassFileEditorInput) {
-			ClassFileEditorInput cfi= (ClassFileEditorInput) input;
+		if (page != null && input instanceof IClassFileEditorInput) {
+			IClassFileEditorInput cfi= (IClassFileEditorInput) input;
 			page.setInput(cfi.getClassFile());
 		}
 	}

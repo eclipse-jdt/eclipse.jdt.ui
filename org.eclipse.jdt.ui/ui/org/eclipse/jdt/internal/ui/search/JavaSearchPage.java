@@ -73,8 +73,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -469,8 +468,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private ICodeAssist getCodeAssist(IEditorPart editorPart) {
 		IEditorInput input= editorPart.getEditorInput();
-		if (input instanceof ClassFileEditorInput)
-			return ((ClassFileEditorInput)input).getClassFile();
+		if (input instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)input).getClassFile();
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(input);
 	}

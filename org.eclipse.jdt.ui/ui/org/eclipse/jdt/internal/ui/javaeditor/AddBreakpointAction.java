@@ -64,9 +64,9 @@ public class AddBreakpointAction extends AddMarkerAction {
 					IRegion line= document.getLineInformation(lineNumber - 1);
 					
 					IType type = null;
-					if (editorInput instanceof ClassFileEditorInput) {
+					if (editorInput instanceof IClassFileEditorInput) {
 						
-						ClassFileEditorInput input= (ClassFileEditorInput) editorInput;
+						IClassFileEditorInput input= (IClassFileEditorInput) editorInput;
 						type = input.getClassFile().getType();
 					
 					} else if (editorInput instanceof IFileEditorInput) {

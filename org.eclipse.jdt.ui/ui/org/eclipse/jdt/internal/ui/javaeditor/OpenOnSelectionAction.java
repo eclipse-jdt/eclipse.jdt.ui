@@ -108,8 +108,8 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 	
 	protected ICodeAssist getCodeAssist() {	
 		IEditorInput input= fEditor.getEditorInput();
-		if (input instanceof ClassFileEditorInput) {
-			ClassFileEditorInput cfInput= (ClassFileEditorInput) input;
+		if (input instanceof IClassFileEditorInput) {
+			IClassFileEditorInput cfInput= (IClassFileEditorInput) input;
 			return cfInput.getClassFile();
 		}
 		

@@ -5,14 +5,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.IResourceLocator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
+
 public class ClassFileDocumentProvider extends FileDocumentProvider {
 		
 	/**
@@ -39,13 +40,13 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 */
 	protected class ClassFileSynchronizer implements IElementChangedListener {
 		
-		protected ClassFileEditorInput fInput;
+		protected IClassFileEditorInput fInput;
 		protected IPackageFragmentRoot fPackageFragmentRoot;
 		
 		/**
 		 * Default constructor.
 		 */
-		public ClassFileSynchronizer(ClassFileEditorInput input) {
+		public ClassFileSynchronizer(IClassFileEditorInput input) {
 			
 			fInput= input;
 			
@@ -163,34 +164,21 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 */
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 		
-		IClassFile classFile= null;
-		ClassFileEditorInput classFileEditorInput= null;
-		IFileEditorInput fileEditorInput= null;
-		
-		if (element instanceof ClassFileEditorInput) {
-			classFileEditorInput= (ClassFileEditorInput) element;
-			classFile= classFileEditorInput.getClassFile();
-		} else if (element instanceof IFileEditorInput) {
-			fileEditorInput= (IFileEditorInput) element;
-			Object created= JavaCore.create(fileEditorInput.getFile());
-			if (created instanceof IClassFile)
-				classFile= (IClassFile) created;
-		}
-		
-		if (classFile == null)
-			return null;
-		
-		IDocument d= createClassFileDocument(classFile);
-		IAnnotationModel m= createClassFileAnnotationModel(classFile);
-		
-		if (classFileEditorInput != null) {
-			ClassFileSynchronizer s= new ClassFileSynchronizer(classFileEditorInput);
-			s.install();
-			return new ClassFileInfo(d, m, s);
-		} else if (fileEditorInput != null) {
-			_FileSynchronizer s= new _FileSynchronizer(fileEditorInput);
-			s.install();
-			return new ClassFileInfo(d, m, s);
+		if (element instanceof IClassFileEditorInput) {
+			IClassFileEditorInput input = (IClassFileEditorInput) element;
+			IClassFile c= input.getClassFile();
+			IDocument d= createClassFileDocument(c);
+			IAnnotationModel m= createClassFileAnnotationModel(c);
+			
+			if (input instanceof InternalClassFileEditorInput) {
+				ClassFileSynchronizer s= new ClassFileSynchronizer(input);
+				s.install();
+				return new ClassFileInfo(d, m, s);			
+			} else if (element instanceof ExternalClassFileEditorInput) {
+				_FileSynchronizer s= new _FileSynchronizer((ExternalClassFileEditorInput) input);
+				s.install();
+				return new ClassFileInfo(d, m, s);
+			}
 		}
 		
 		return null;
@@ -215,7 +203,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
 	}
 	
-	protected void handleDelete(ClassFileEditorInput input) {
+	protected void handleDelete(IClassFileEditorInput input) {
 		fireElementDeleted(input);
 	}
 }

@@ -38,8 +38,8 @@ class ClassFileMarkerRulerAction extends MarkerRulerAction {
 		IResource resource= null;
 		
 		IEditorInput input= getTextEditor().getEditorInput();
-		if (input instanceof ClassFileEditorInput) {
-			IClassFile c= ((ClassFileEditorInput) input).getClassFile();
+		if (input instanceof IClassFileEditorInput) {
+			IClassFile c= ((IClassFileEditorInput) input).getClassFile();
 			IResourceLocator locator= (IResourceLocator) c.getAdapter(IResourceLocator.class);
 			if (locator != null) {
 				try {
@@ -61,8 +61,8 @@ class ClassFileMarkerRulerAction extends MarkerRulerAction {
 		Map attributes= super.getInitialAttributes();
 		
 		IEditorInput input= getTextEditor().getEditorInput();
-		if (input instanceof ClassFileEditorInput) {
-			IClassFile classFile= ((ClassFileEditorInput) input).getClassFile();
+		if (input instanceof IClassFileEditorInput) {
+			IClassFile classFile= ((IClassFileEditorInput) input).getClassFile();
 			JavaCore.addJavaElementMarkerAttributes(attributes, classFile);
 		}
 		

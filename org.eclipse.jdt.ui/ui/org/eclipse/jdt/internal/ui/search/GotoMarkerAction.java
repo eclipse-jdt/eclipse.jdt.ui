@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.Action;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.search.internal.ui.SearchPlugin;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.Action;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.search.internal.ui.SearchPlugin;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class GotoMarkerAction extends Action {
 
@@ -50,7 +50,7 @@ class GotoMarkerAction extends Action {
 		else {
 			IClassFile cf= getClassFile(javaElement);
 			if (cf != null)
-				showInEditor(marker, new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
+				showInEditor(marker, new InternalClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
 		}
 	}
 

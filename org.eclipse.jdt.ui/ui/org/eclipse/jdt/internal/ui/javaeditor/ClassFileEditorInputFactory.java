@@ -42,7 +42,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 		return null;
 	}
 	
-	public static void saveState(IMemento memento, ClassFileEditorInput input) {
+	public static void saveState(IMemento memento, InternalClassFileEditorInput input) {
 		IClassFile c= input.getClassFile();
 		memento.putString(KEY, c.getHandleIdentifier());
 	}

@@ -18,67 +18,76 @@ import org.eclipse.ui.IPersistableElement;
 /**
  * Class file considered as editor input.
  */
-public class ClassFileEditorInput implements IEditorInput, IPersistableElement {
+public class InternalClassFileEditorInput implements IClassFileEditorInput, IPersistableElement {
 		
 	private IClassFile fClassFile;
 	
-	public ClassFileEditorInput(IClassFile classFile) {
+	public InternalClassFileEditorInput(IClassFile classFile) {
 		fClassFile= classFile;
 	}
 	
-	/**
-	 * Indicates whether some other object is "equal to" this one.
-	 * In this case it means that the underlying IClassFiles are equal.
+	/*
+	 * @see Object#equals(Object)
 	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof ClassFileEditorInput))
+		if (!(obj instanceof InternalClassFileEditorInput))
 			return false;
-		ClassFileEditorInput other= (ClassFileEditorInput) obj;
+		InternalClassFileEditorInput other= (InternalClassFileEditorInput) obj;
 		return fClassFile.equals(other.fClassFile);
 	}
 	
+	/*
+	 * @see Object#hashCode
+	 */
+	public int hashCode() {
+		return fClassFile.hashCode();
+	}
+	
+	/*
+	 * @see IClassFileEditorInput#getClassFile()
+	 */
 	public IClassFile getClassFile() {
 		return fClassFile;
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getPersistable()
 	 */
 	public IPersistableElement getPersistable() {
 		return this;
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getName()
 	 */
 	public String getName() {
 		return fClassFile.getElementName();
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getFullPath()
 	 */
 	public String getFullPath() {
 		return fClassFile.getElementName();
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getContentType()
 	 */
 	public String getContentType() {
 		return "class"; //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getToolTipText()
 	 */
 	public String getToolTipText() {
 		return fClassFile.getElementName();
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#getImageDescriptor()
 	 */
 	public ImageDescriptor getImageDescriptor() {
@@ -92,14 +101,14 @@ public class ClassFileEditorInput implements IEditorInput, IPersistableElement {
 		return JavaPluginImages.DESC_OBJS_CFILE;
 	}
 	
-	/**
+	/*
 	 * @see IEditorInput#exists()
 	 */
 	public boolean exists() {
 		return fClassFile.exists();
 	}
 	
-	/**
+	/*
 	 * @see IAdaptable#getAdapter(Class)
 	 */
 	public Object getAdapter(Class adapter) {
@@ -108,14 +117,14 @@ public class ClassFileEditorInput implements IEditorInput, IPersistableElement {
 		return fClassFile.getAdapter(adapter);
 	}
 	
-	/**
+	/*
 	 * @see IPersistableElement#saveState(IMemento)
 	 */
 	public void saveState(IMemento memento) {
 		ClassFileEditorInputFactory.saveState(memento, this);
 	}
 	
-	/**
+	/*
 	 * @see IPersistableElement#getFactoryId()
 	 */
 	public String getFactoryId() {

@@ -158,7 +158,7 @@ public class EditorUtility {
 			}
 			
 			if (element instanceof IClassFile)
-				return new ClassFileEditorInput((IClassFile) element);
+				return new InternalClassFileEditorInput((IClassFile) element);
 			
 			element= element.getParent();
 		}
