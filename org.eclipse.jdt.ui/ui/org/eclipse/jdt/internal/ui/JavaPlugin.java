@@ -87,9 +87,9 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 /**
- * Represents the java plugin. It provides a series of convenience methods such as
+ * Represents the java plug-in. It provides a series of convenience methods such as
  * access to the workbench, keeps track of elements shared by all editors and viewers
- * of the plugin such as document providers and find-replace-dialogs.
+ * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
 	
@@ -340,16 +340,16 @@ public class JavaPlugin extends AbstractUIPlugin {
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
 		getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
-
-	/* (non - Javadoc)
-	 * Method declared in AbstractUIPlugin
+	
+	/*
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#createImageRegistry()
 	 */
 	protected ImageRegistry createImageRegistry() {
 		return JavaPluginImages.getImageRegistry();
 	}
 
-	/* (non - Javadoc)
-	 * Method declared in Plugin
+	/*
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#shutdown()
 	 */
 	public void shutdown() throws CoreException {
 		
@@ -364,8 +364,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fASTProvider.dispose();
 			fASTProvider= null;
 		}
-		
-		super.shutdown();
 		
 		if (fWorkingCopyManager != null) {
 			fWorkingCopyManager.shutdown();
@@ -382,12 +380,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools= null;
 		}
 		
-		
 		JavaDocLocations.shutdownJavadocLocations();
 		
 		uninstallPreferenceStoreBackwardsCompatibility();
 		
 		RefactoringCore.getUndoManager().shutdown();
+		
+		super.shutdown();
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {
