@@ -192,5 +192,16 @@ public class DeleteSourceReferenceActionTests extends RefactoringTest{
 		SourceReferenceTestUtil.delete(elems);
 		check();
 	}
+
+	public void test16() throws Exception{
+		printTestDisabledMessage("test for bug#15412 deleting type removes too much from editor");		
+		if (true)
+			return;
+		
+		Object elem0= fCuA.getType("Test");
+		Object[] elems= new Object[]{elem0};
+		SourceReferenceTestUtil.delete(elems);
+		check();
+	}
 	
 }
