@@ -914,6 +914,7 @@
     	id="JavaSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
 		<viewPage
+			id="org.eclipse.jdt.ui.JavaSearchResultPage"
 			targetClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>

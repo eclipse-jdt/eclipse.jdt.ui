@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
@@ -79,7 +78,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
 		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), SearchMessages.getString("JavaSearchResultPage.groupby_type.tooltip"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "class_obj.gif"); //$NON-NLS-1$
-		fCurrentGrouping= JavaPlugin.getDefault().getPluginPreferences().getInt(KEY_GROUPING);
+		try {
+			fCurrentGrouping= getSettings().getInt(KEY_GROUPING);
+		} catch (NumberFormatException e) {
+			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
+		}
 	}
 
 	public void setViewPart(ISearchResultViewPart part) {
@@ -230,7 +233,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		LevelTreeContentProvider cp= (LevelTreeContentProvider) viewer.getContentProvider();
 		cp.setLevel(grouping);
 		updateGroupingActions();
-		JavaPlugin.getDefault().getPluginPreferences().setValue(KEY_GROUPING, fCurrentGrouping);
+		getSettings().put(KEY_GROUPING, fCurrentGrouping);
 	}
 	
 	protected StructuredViewer getViewer() {
@@ -256,12 +259,5 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
-	}
-
-	/**
-	 * @param store
-	 */
-	public static void initializeDefaultValues(IPreferenceStore store) {
-		store.setDefault(KEY_GROUPING, LevelTreeContentProvider.LEVEL_PACKAGE);
 	}
 }
