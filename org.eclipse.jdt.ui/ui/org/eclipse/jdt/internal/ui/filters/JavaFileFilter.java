@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.filters;
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -21,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Filters out all compilation units and class files elements.
  */
-public class JavaFileFilter  extends AbstractFilter {
+public class JavaFileFilter  extends ViewerFilter {
 	
 	private boolean fFilterContainers;
 	

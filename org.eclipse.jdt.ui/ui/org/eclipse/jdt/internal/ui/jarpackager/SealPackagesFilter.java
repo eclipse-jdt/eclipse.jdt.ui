@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -7,17 +7,16 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import java.util.List;
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 
 /**
  * Only selects packages (i.e. IPackageFragments) which are in
  * the initial packages list and parent types (i.e. package fragment
  * root, Java project and Java model)
  */
-class SealPackagesFilter  extends AbstractFilter {
+class SealPackagesFilter  extends ViewerFilter {
 
 	private List fAllowedPackages;	
 

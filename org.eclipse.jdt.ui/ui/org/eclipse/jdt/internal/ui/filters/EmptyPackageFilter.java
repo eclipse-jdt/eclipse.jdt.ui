@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.filters;
 
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -20,8 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /** 
  * filters out all empty package fragments.
  */
-
-public class EmptyPackageFilter extends AbstractFilter {
+public class EmptyPackageFilter extends ViewerFilter {
 
 	/**
 	 * Returns the result of this filter, when applied to the

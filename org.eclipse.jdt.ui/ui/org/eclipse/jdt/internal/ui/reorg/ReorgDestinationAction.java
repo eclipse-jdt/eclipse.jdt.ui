@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2000, 2002 IBM Corp. and others..
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Common Public License v0.5
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ */
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +38,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
@@ -55,7 +66,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
@@ -374,7 +384,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	//-----
-	private static class ContainerFilter extends AbstractFilter {
+	private static class ContainerFilter extends ViewerFilter {
 		private ReorgRefactoring fRefactoring;
 	
 		ContainerFilter(ReorgRefactoring refactoring) {

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.filters;
 
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageDeclaration;
 
@@ -19,7 +20,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 /**
  * Filters package declarations
  */
-public class PackageDeclarationFilter extends AbstractFilter {
+public class PackageDeclarationFilter extends ViewerFilter {
 
 	/*
 	 * @see ViewerFilter

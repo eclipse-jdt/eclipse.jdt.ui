@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.filters;
 
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -20,7 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Filters interfaces
  */
-public class InterfaceFilter extends AbstractFilter {
+public class InterfaceFilter extends ViewerFilter {
 
 	/*
 	 * @see ViewerFilter

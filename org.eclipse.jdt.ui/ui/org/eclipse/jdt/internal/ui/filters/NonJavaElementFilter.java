@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.filters;
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -18,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 /**
  * Filters out all non-Java elements.
  */
-public class NonJavaElementFilter  extends AbstractFilter {
+public class NonJavaElementFilter  extends ViewerFilter {
 	
 	private boolean fFilterContainers;
 	

@@ -5,15 +5,14 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 
 /**
  * Filters out all elements which libraries
  */
-public class LibraryFilter extends AbstractFilter {
+public class LibraryFilter extends ViewerFilter {
 
 	/**
 	 * Returns the result of this filter, when applied to the
