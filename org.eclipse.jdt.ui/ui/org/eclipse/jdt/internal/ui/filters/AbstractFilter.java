@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.filters;
 
 
-import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 
@@ -20,7 +19,4 @@ import org.eclipse.jface.viewers.ViewerFilter;
  */
 public abstract class AbstractFilter extends ViewerFilter {
 
-	public boolean isFilterProperty(Object element, String property) {
-		return IBasicPropertyConstants.P_TEXT.equals(property) || IBasicPropertyConstants.P_IMAGE.equals(property);
-	}
 }
