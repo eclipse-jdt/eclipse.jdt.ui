@@ -35,5 +35,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(ScrollJavaEditorTest.class);
 		addTestSuite(ScrollTextEditorTest.class);
 		addTestSuite(JavaIndenterTest.class);
+		addTestSuite(NonInitialTypingTest.class);
 	}
 }

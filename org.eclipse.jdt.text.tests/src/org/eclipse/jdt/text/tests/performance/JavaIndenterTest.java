@@ -24,6 +24,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
+import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class JavaIndenterTest extends TestCase {
@@ -38,11 +41,15 @@ public class JavaIndenterTest extends TestCase {
 
 	private ITextEditor fEditor;
 
+	private IEvaluator fEvaluator;
+
 	protected void setUp() throws PartInitException {
 		EditorTestHelper.runEventQueue();
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
+		
+		fEvaluator= Evaluator.getDefaultEvaluator();
 		
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
@@ -80,6 +87,7 @@ public class JavaIndenterTest extends TestCase {
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
 		fPerformanceMeter.commit();
+		fEvaluator.evaluate(fPerformanceMeter.getSessionData());
 	}
 
 	private void runAction(IAction action) {

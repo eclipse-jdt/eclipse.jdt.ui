@@ -23,6 +23,9 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
+import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
+
 /**
  * Measures the time to type in one single method into a large Java class
  * @since 3.1
@@ -31,7 +34,7 @@ public class NonInitialTypingTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private PerformanceMeterFactory fPerformanceMeterFactory= new SystemTimePerformanceMeterFactory();
+	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
 	private ITextEditor fEditor;
 	
@@ -43,13 +46,16 @@ public class NonInitialTypingTest extends TestCase {
 
 	private KeyboardProbe fKeyboardProbe;
 
+	private IEvaluator fEvaluator;
+
 	protected void setUp() throws PartInitException, BadLocationException {
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
+		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
 		fMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		fKeyboardProbe= new KeyboardProbe();
+		fEvaluator= Evaluator.getDefaultEvaluator();
 
 		int offset= getInsertPosition();
 		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
@@ -64,6 +70,7 @@ public class NonInitialTypingTest extends TestCase {
 		
 		Display display= SWTEventHelper.getActiveDisplay();
 		fKeyboardProbe.pressChar('{', display);
+		EditorTestHelper.runEventQueue();
 		SWTEventHelper.pressKeyCode(display, SWT.BS);
 		sleep(1000);
 	}
@@ -72,8 +79,6 @@ public class NonInitialTypingTest extends TestCase {
 		sleep(1000);
 		EditorTestHelper.revertEditor(fEditor, true);
 		EditorTestHelper.closeAllEditors();
-		
-		fMeter.commit();
 	}
 
 	public void testTypeAMethod() {
@@ -82,8 +87,11 @@ public class NonInitialTypingTest extends TestCase {
 		fMeter.start();
 		for (int i= 0; i < METHOD.length; i++) {
 			fKeyboardProbe.pressChar(METHOD[i], display);
+			EditorTestHelper.runEventQueue();
 		}
 		fMeter.stop();
+		fMeter.commit();
+		fEvaluator.evaluate(fMeter.getSessionData());
 	}
 
 	private synchronized void sleep(int time) {

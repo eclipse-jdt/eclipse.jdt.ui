@@ -39,6 +39,8 @@ public class KeyboardProbe {
 	private static final int SHIFT= 1;
 	private boolean fKeyContinue;
 	private boolean fTextContinue;
+	private boolean fDisposeDisplay= false;
+	private Shell fShell;
 	
 	/**
 	 * Returns the characters being input into a text component by injecting key
@@ -54,9 +56,14 @@ public class KeyboardProbe {
 			try {
 				probe();
 			} finally {
-				if (fDisplay != null) {
+				if (fDisposeDisplay && fDisplay != null) {
 					fDisplay.dispose();
 					fDisplay= null;
+				}
+				
+				if (fShell != null && !fShell.isDisposed()) {
+					fShell.dispose();
+					fShell= null;
 				}
 			}
 		}
@@ -196,7 +203,11 @@ public class KeyboardProbe {
 	}
 
 	private Display createDisplay() {
-		Display display= new Display();
+		Display display= Display.getCurrent();
+		if (display == null) {
+			display= Display.getDefault();
+			fDisposeDisplay= true;
+		}
 		return display;
 	}
 	
@@ -219,15 +230,15 @@ public class KeyboardProbe {
 		});
 	}
 	
-	
 	private Text createControl(Display display) {
-		Shell shell= new Shell(display);
-		shell.setActive();
-		shell.setSize(300, 200);
-		shell.setLayout(new FillLayout());
-		Text text= new Text(shell, SWT.MULTI | SWT.LEFT | SWT.WRAP);
+		fShell= new Shell(display);
+		fShell.setActive();
+		fShell.setSize(300, 200);
+		fShell.setText("Keyboard Probe"); //$NON-NLS-1$
+		fShell.setLayout(new FillLayout());
+		Text text= new Text(fShell, SWT.MULTI | SWT.LEFT | SWT.WRAP);
 		text.setSize(300, 200);
-		shell.setVisible(true);
+		fShell.setVisible(true);
 		addListeners(text);
 		
 		text.setFocus();

@@ -10,7 +10,7 @@
 <stringAttribute key="location1" value="/home/tei/eclipse/workspaces/runtime/open-editor"/>
 <stringAttribute key="location2" value="c:\local\eclipse\workspace\performance-workspace"/>
 <booleanAttribute key="default" value="true"/>
-<stringAttribute key="vmargs" value="-Xms250M -Xmx250M -Detools_perf_ctrl=testname=RevertJavaEditorTest;log=/home/tei/tmp/perfmsr;driver=3.0-runtime2;driverdate=200407220001;driverstream=3.0.0;driverlabel=I200407220001;uploadhost=eclipseperf.torolab.ibm.com;uploadport=9080;uploaduserid=tkilla"/>
+<stringAttribute key="vmargs" value="-Xms250M -Xmx250M -Detools_perf_ctrl=testname=RevertJavaEditorTest;log=/home/tei/tmp/perfmsr;driver=3.0-runtime2;driverdate=200407220001;driverstream=3.0.0;driverlabel=I200407220001 -Declipse.performance.reference.driver=3.0-runtime2 -Declipse.performance.reference.timestamp=1091544587460"/>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 <booleanAttribute key="clearConfig" value="false"/>
 <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>

@@ -46,7 +46,7 @@ public class Unit {
 			ratio= mag / div;
 		}
 		ratio= mag * div;
-		while (ratio < div) {
+		while (ratio != 0.0 && ratio < div) {
 			mag= ratio;
 			divs--;
 			ratio= mag * div;

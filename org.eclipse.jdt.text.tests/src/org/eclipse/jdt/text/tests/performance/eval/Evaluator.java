@@ -46,8 +46,9 @@ public class Evaluator implements IEvaluator {
 	private AssertChecker[] fCheckers;
 
 	public void evaluate(MeteringSession session) {
+		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
 		MeteringSession reference= getReferenceSession(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY), session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY));
-		Assert.assertTrue("reference is null", reference != null); //$NON-NLS-1$
+		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$
 		
 		StatisticsSession referenceStats= new StatisticsSession(reference);
 		StatisticsSession measuredStats= new StatisticsSession(session);
@@ -136,8 +137,6 @@ public class Evaluator implements IEvaluator {
 			String timestamp= System.getProperty(TIMESTAMP_SYSTEM_PROPERTY);
 			if (timestamp == null)
 				timestamp= Platform.getDebugOption(PLUGIN_ID + TIMESTAMP_OPTION);
-			if (timestamp == null)
-				timestamp= "20040625"; //$NON-NLS-1$
 			
 			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
 			
