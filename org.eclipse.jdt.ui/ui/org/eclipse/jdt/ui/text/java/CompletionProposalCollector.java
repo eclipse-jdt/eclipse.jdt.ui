@@ -136,11 +136,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fCompilationUnit= cu;
 
 		fUserReplacementLength= -1;
-		fLastProblem= null;
-
-		fJavaProposals.clear();
-		fKeywords.clear();
-		fSuggestedMethodNames.clear();
 	}
 
 	/**
@@ -199,6 +194,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			fStartTime= System.currentTimeMillis();
 			fUITime= 0;
 		}
+		
+		fLastProblem= null;
+		fJavaProposals.clear();
+		fKeywords.clear();
+		fSuggestedMethodNames.clear();
 	}
 	
 	/**
