@@ -214,6 +214,13 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		Composite warningsComposite= new Composite(folder, SWT.NULL);
 		warningsComposite.setLayout(layout);
 
+		Label description= new Label(warningsComposite, SWT.WRAP);
+		description.setText(JavaUIMessages.getString("CompilerPreferencePage.warnings.description")); //$NON-NLS-1$
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		gd.widthHint= convertWidthInCharsToPixels(60);
+		description.setLayoutData(gd);
+
 		String label= JavaUIMessages.getString("CompilerPreferencePage.pb_unreachable_code.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels);	
 		
