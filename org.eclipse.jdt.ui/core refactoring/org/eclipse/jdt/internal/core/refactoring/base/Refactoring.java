@@ -156,7 +156,7 @@ public abstract class Refactoring implements IRefactoring {
 	 * Returns the <code>IResource</code> that the given <code>IMember</code> is defined in.
 	 * @see #getResource
 	 */
-	protected static IResource getResource(IMember member) throws JavaModelException{
+	public static IResource getResource(IMember member) throws JavaModelException{
 		Assert.isTrue(!member.isBinary());
 		return getResource(member.getCompilationUnit());
 	}
