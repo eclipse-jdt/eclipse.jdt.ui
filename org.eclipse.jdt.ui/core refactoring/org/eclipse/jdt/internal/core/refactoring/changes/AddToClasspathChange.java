@@ -33,6 +33,12 @@ public class AddToClasspathChange extends Change {
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentRootPath;
 	
+	public AddToClasspathChange(IJavaProject project, String sourceFolderName){
+		fProjectHandle= project.getHandleIdentifier();
+		fEntryKind= IClasspathEntry.CPE_SOURCE;
+		fPath= project.getProject().getFullPath().append(sourceFolderName);
+	}
+	
 	public AddToClasspathChange(IJavaProject project, int entryKind, int contentKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
 		fProjectHandle= project.getHandleIdentifier();
 		fEntryKind= entryKind;
@@ -50,10 +56,17 @@ public class AddToClasspathChange extends Change {
 		try{
 			if (!isActive())
 				return;
-			getJavaProject().setRawClasspath(getNewClasspathEntries(), new SubProgressMonitor(pm, 1));
+			if (!entryAlreadyExists())
+				getJavaProject().setRawClasspath(getNewClasspathEntries(), new SubProgressMonitor(pm, 1));
+			else
+				setActive(false);	
 		}finally{
 			pm.done();
 		}		
+	}
+	
+	private boolean entryAlreadyExists() throws JavaModelException{
+		return Arrays.asList(getJavaProject().getRawClasspath()).contains(createNewClasspathEntry());
 	}
 	
 	private IClasspathEntry[] getNewClasspathEntries() throws JavaModelException{
