@@ -287,7 +287,7 @@ public class JavaElementImageProvider {
 		
 		int flags= computeBasicAdornmentFlags(element, renderFlags);
 		
-		if (showOverlayIcons(flags) && element instanceof ISourceReference) { 
+		if (showOverlayIcons(renderFlags) && element instanceof ISourceReference) { 
 			ISourceReference sourceReference= (ISourceReference)element;
 			int modifiers= getModifiers(sourceReference);
 		
