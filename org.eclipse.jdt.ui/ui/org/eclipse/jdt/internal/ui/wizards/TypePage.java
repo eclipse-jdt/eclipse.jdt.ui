@@ -49,10 +49,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -1168,14 +1165,14 @@ public abstract class TypePage extends ContainerPage {
 		
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
-			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
+			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
 			String content= createTypeBody(imports, lineDelimiter, parentCU);
-			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
+			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
 		} else {
 			IType enclosingType= getEnclosingType();
 			
@@ -1344,36 +1341,17 @@ public abstract class TypePage extends ContainerPage {
 	
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		Template[] templates= Templates.getInstance().getTemplates();
-		for (int i= 0; i < templates.length; i++) {
-			if (name.equals(templates[i].getName())) {
-				return evaluateTemplate(templates[i], parentCU);
-//				return templates[i].getPattern();
+		try {
+			for (int i= 0; i < templates.length; i++) {
+				if (name.equals(templates[i].getName())) {
+					return JavaContext.evaluateTemplate(templates[i], parentCU);
+				}
 			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 		return null;
 	}	
-
-	private String evaluateTemplate(Template template, ICompilationUnit compilationUnit) {
-		
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java");
-		if (contextType == null)
-			return null;
-
-		try {
-			String string= compilationUnit.getSource();
-			int position= 0;
-
-			JavaContext context= new JavaContext(contextType, string, position, compilationUnit);
-			context.setForceEvaluation(true);
-
-			TemplateBuffer buffer= context.evaluate(template);
-			return buffer.getString();
-
-		} catch (CoreException e) {
-			JavaPlugin.log(e);			
-			return null;
-		}
-	}
 	
 	/**
 	 * Creates the bodies of all unimplemented methods or/and all constructors

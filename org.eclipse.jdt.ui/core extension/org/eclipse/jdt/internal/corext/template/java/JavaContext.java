@@ -4,9 +4,11 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -14,7 +16,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -293,5 +298,28 @@ public class JavaContext extends DocumentTemplateContext {
 			return null;
 		}	
 	}
+	
+	/**
+	 * Evaluates a 'java' template in thecontext of a compilation unit
+	 */
+	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit) throws CoreException {
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java");
+		if (contextType == null)
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "java context type missing", null));
+
+		String string= "";
+		if (compilationUnit != null && compilationUnit.exists()) {
+			string= compilationUnit.getSource();
+		}
+		int position= 0;
+
+		JavaContext context= new JavaContext(contextType, string, position, compilationUnit);
+		context.setForceEvaluation(true);
+
+		TemplateBuffer buffer= context.evaluate(template);
+		return buffer.getString();
+	}
+	
+	
 }
 
