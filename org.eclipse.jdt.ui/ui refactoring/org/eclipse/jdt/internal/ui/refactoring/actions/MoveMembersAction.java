@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactor
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -130,6 +131,10 @@ public class MoveMembersAction extends SelectionDispatchAction{
 	
 	private void startRefactoring() {
 		Assert.isNotNull(fRefactoring);
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getMovedMembers()[0]))
+			return;
+		
 		try{
 			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 			if (newElementToProcess == null)
