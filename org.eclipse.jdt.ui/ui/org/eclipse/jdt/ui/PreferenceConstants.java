@@ -1400,7 +1400,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>.
 	 * </p>
 	 * 
-	 * @see #EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIERR
+	 * @see #EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER
 	 * @since 2.1.1
 	 */
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= "browserLikeLinksKeyModifierMask"; //$NON-NLS-1$
