@@ -332,7 +332,8 @@ public class Bindings {
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
-	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only 
+	 *  the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
@@ -688,7 +689,7 @@ public class Bindings {
 		if (methodParameters.length != parameters.length)
 			return false;
 		for (int i= 0; i < parameters.length; i++) {
-			if (parameters[i].getTypeDeclaration() != methodParameters[i].getTypeDeclaration())
+			if (!equals(methodParameters[i].getErasure(), parameters[i].getErasure()))
 				return false;
 		}
 		return true;
@@ -708,7 +709,7 @@ public class Bindings {
 			index= first.indexOf('<');
 			if (index > 0)
 				first= first.substring(0, index);
-			second= methodParameters[i].getTypeDeclaration().getQualifiedName();
+			second= methodParameters[i].getErasure().getQualifiedName();
 			index= second.indexOf('<');
 			if (index > 0)
 				second= second.substring(0, index);
@@ -1050,7 +1051,7 @@ public class Bindings {
 		} else {
 			// normalize (quick hack until binding.getJavaElement works)
 			candidate= Signature.getTypeErasure(candidate);
-			type= type.getTypeDeclaration();
+			type= type.getErasure();
 			
 			if (isResolvedType(candidate)) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
@@ -1133,16 +1134,10 @@ public class Bindings {
 		private static class VisitCancelledException extends RuntimeException {
 			private static final long serialVersionUID= 1L;
 		}
-
 		public AllBindingsVisitor(TypeBindingVisitor visitor) {
 			super(true);
 			fVisitor= visitor;
 		}
-		
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
-		 */
 		public boolean visit(SimpleName node) {
 			ITypeBinding binding= node.resolveTypeBinding();
 			if (binding != null) {
@@ -1156,7 +1151,6 @@ public class Bindings {
 			}
 			return false;
 		}
-		
 	}
 	
 	public static String getRawName(ITypeBinding binding) {
@@ -1297,14 +1291,14 @@ public class Bindings {
 		if (overriddenReturn == null || overridableReturn == null)
 			return false;
 		
-		if (!overriddenReturn.getTypeDeclaration().isSubTypeCompatible(overridableReturn.getTypeDeclaration()))
+		if (!overriddenReturn.getErasure().isSubTypeCompatible(overridableReturn.getErasure()))
 			return false;
 		
 		ITypeBinding[] overriddenTypes= overridden.getParameterTypes();
 		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
 		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
 		for (int index= 0; index < overriddenTypes.length; index++) {
-			if (!overridableTypes[index].getTypeDeclaration().isSubTypeCompatible(overriddenTypes[index].getTypeDeclaration()))
+			if (!overridableTypes[index].getErasure().isSubTypeCompatible(overriddenTypes[index].getErasure()))
 				return false;
 		}
 		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();
