@@ -44,6 +44,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static final Key PREF_PB_MAX_PER_UNIT= getJDTCoreKey(JavaCore.COMPILER_PB_MAX_PER_UNIT);
 	private static final Key PREF_PB_FORBIDDEN_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
+	private static final Key PREF_PB_DISCOURRAGED_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE);
 
 
 	private static final Key PREF_RESOURCE_FILTER= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER);
@@ -80,7 +81,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static Key[] getKeys() {
 		Key[] keys= new Key[] {
-				PREF_PB_MAX_PER_UNIT, PREF_PB_FORBIDDEN_REFERENCE,
+				PREF_PB_MAX_PER_UNIT, PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE,
 				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
@@ -149,15 +150,24 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		gd.horizontalAlignment= GridData.END;
 		text.setTextLimit(6);
 		
-		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_forbidden_reference.label"); //$NON-NLS-1$
-		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.enable_exclusion_patterns.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
 
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.access_rules"); //$NON-NLS-1$
+		excomposite= createStyleSection(composite, label, nColumns);
+		
+		othersComposite= new Composite(excomposite, SWT.NONE);
+		excomposite.setClient(othersComposite);
+		othersComposite.setLayout(new GridLayout(nColumns, false));
+		
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_forbidden_reference.label"); //$NON-NLS-1$
+		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_discourraged_reference.label"); //$NON-NLS-1$
+		addComboBox(othersComposite, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_problems"); //$NON-NLS-1$
 		excomposite= createStyleSection(composite, label, nColumns);
