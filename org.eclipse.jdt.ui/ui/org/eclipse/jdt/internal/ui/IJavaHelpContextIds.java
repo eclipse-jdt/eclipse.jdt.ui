@@ -39,7 +39,8 @@ public interface IJavaHelpContextIds {
 	public static final String ENABLE_METHODFILTER_ACTION= 								PREFIX + "enable_methodfilter_action"; //$NON-NLS-1$
 	public static final String ADD_IMPORT_ON_SELECTION_ACTION= 						PREFIX + "add_imports_on_selection_action_context"; //$NON-NLS-1$
 	public static final String ORGANIZE_IMPORTS_ACTION= 									PREFIX + "organize_imports_action_context"; //$NON-NLS-1$
-	public static final String ADDJAR_ACTION=														PREFIX + "addjartoclasspath_action_context"; //$NON-NLS-1$
+	public static final String ADD_TO_CLASSPATH_ACTION=														PREFIX + "addjtoclasspath_action_context"; //$NON-NLS-1$
+	public static final String REMOVE_FROM_CLASSPATH_ACTION=														PREFIX + "removefromclasspath_action_context"; //$NON-NLS-1$
 
 	public static final String TOGGLE_PRESENTATION_ACTION= 								PREFIX + "toggle_presentation_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_TEXTHOVER_ACTION= 									PREFIX + "toggle_texthover_action_context"; //$NON-NLS-1$
