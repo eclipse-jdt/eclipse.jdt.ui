@@ -14,6 +14,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 
+import org.eclipse.jdt.internal.core.CreateMethodOperation;
+
 /**
  * Bundle of most images used by the Java plugin.
  */
@@ -134,9 +136,11 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SEARCH_DECL= createManaged(T_OBJ, IMG_OBJS_SEARCH_DECL);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_REF= createManaged(T_OBJ, IMG_OBJS_SEARCH_REF);
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManaged(T_OBJ, IMG_OBJS_CLASS);
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS= create(T_OBJ, "innerclass_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_CLASSALT= createManaged(T_OBJ, IMG_OBJS_CLASSALT);
 	public static final ImageDescriptor DESC_OBJS_PCLASS= createManaged(T_OBJ, IMG_OBJS_PCLASS);
 	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManaged(T_OBJ, IMG_OBJS_INTERFACE);
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE= create(T_OBJ, "innerinterface_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManaged(T_OBJ, IMG_OBJS_INTERFACEALT);
 	public static final ImageDescriptor DESC_OBJS_PINTERFACE= createManaged(T_OBJ, IMG_OBJS_PINTERFACE);
 	public static final ImageDescriptor DESC_OBJS_CUNIT= createManaged(T_OBJ, IMG_OBJS_CUNIT);
@@ -194,6 +198,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_OVERRIDES= create(T_OVR, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
+	// public static final ImageDescriptor DESC_OVR_TYPE_IN_FOCUS_UNDERLAY= create(T_OVR, "typeinfocus_underlay.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif"); 			//$NON-NLS-1$

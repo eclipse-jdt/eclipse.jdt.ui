@@ -185,13 +185,21 @@ public class JavaElementImageProvider {
 						else 
 							return JavaPluginImages.DESC_OBJS_INTERFACEALT;
 					}					
-										
-					int flags= type.getFlags();
-					boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
-					
-					if (type.isClass())
-						return hasVisibility ? JavaPluginImages.DESC_OBJS_CLASS : JavaPluginImages.DESC_OBJS_PCLASS;
-					return hasVisibility ? JavaPluginImages.DESC_OBJS_INTERFACE : JavaPluginImages.DESC_OBJS_PINTERFACE;
+
+					IJavaElement parent= type.getParent();
+					int typeType= parent != null ? parent.getElementType() : 0;
+					if (parent == null || typeType == IJavaElement.COMPILATION_UNIT || typeType == IJavaElement.CLASS_FILE) {
+						int flags= type.getFlags();
+						boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
+						
+						if (type.isClass())
+							return hasVisibility ? JavaPluginImages.DESC_OBJS_CLASS : JavaPluginImages.DESC_OBJS_PCLASS;
+						return hasVisibility ? JavaPluginImages.DESC_OBJS_INTERFACE : JavaPluginImages.DESC_OBJS_PINTERFACE;
+					} else {
+						if (type.isClass())
+							return JavaPluginImages.DESC_OBJS_INNER_CLASS;
+						return JavaPluginImages.DESC_OBJS_INNER_INTERFACE;
+					}
 				}
 
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
