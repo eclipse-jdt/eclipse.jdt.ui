@@ -3191,7 +3191,7 @@
 	</filter>
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.StaticsFilter"
-		name= "%HideStatic.label"
+		name= "%HideStatics.label"
 		description= "%HideStatics.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.StaticsFilter"
