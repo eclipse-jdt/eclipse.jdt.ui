@@ -378,10 +378,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			treeViewer.expandAll();
 		}
 		
-		fStatusTextLabel.setText(getInfoLabel());
-		
 		fOtherContentProvider= contentProvider;
 		fOtherExpandedElements= expandedElements;
+		
+		fStatusTextLabel.setText(getInfoLabel());
 	}
 	
 	
