@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -38,11 +39,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -70,12 +72,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -165,10 +166,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
-				if (JavaSearchScopeFactory.getInstance().getEnclosingProjectsCount(scope) > 1)
-					scopeDescription= SearchMessages.getString("EnclosingProjectsScope"); //$NON-NLS-1$
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				if (projects.length > 1)
+					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				else
-					scopeDescription= SearchMessages.getString("EnclosingProjectScope"); //$NON-NLS-1$
+					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
@@ -662,7 +664,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				text= ""; //$NON-NLS-1$
 			}
 			result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
-		}
+			}
 		return result;
 	}
 	

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
@@ -45,12 +46,13 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -90,6 +92,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -170,10 +173,11 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection());
-				if (JavaSearchScopeFactory.getInstance().getEnclosingProjectsCount(scope) > 1)
-					scopeDescription= NLSSearchMessages.getString("EnclosingProjectsScope"); //$NON-NLS-1$
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				if (projects.length > 1)
+					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				else
-					scopeDescription= NLSSearchMessages.getString("EnclosingProjectScope"); //$NON-NLS-1$
+					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE :
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
