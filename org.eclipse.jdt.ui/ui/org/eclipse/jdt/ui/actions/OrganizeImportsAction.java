@@ -292,7 +292,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor.selectAndReveal(errorRange.getOffset(), errorRange.getLength());
 				}
 			} else {
-				setStatusBarMessage(getOrganizeInfo(op));
+				if (fEditor != null) {
+					setStatusBarMessage(getOrganizeInfo(op));
+				}
 			}
 		} catch (CoreException e) {	
 			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
