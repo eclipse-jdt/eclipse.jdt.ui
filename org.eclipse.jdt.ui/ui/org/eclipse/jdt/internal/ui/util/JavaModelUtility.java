@@ -33,7 +33,7 @@ public class JavaModelUtility {
 	}
 
 	/** 
-	 * Finds a type by packge and type name.
+	 * Finds a type by package and type name.
 	 * @param jproject the java project to search in
 	 * @param pack The package name
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
@@ -51,12 +51,13 @@ public class JavaModelUtility {
 		} else {
 			packPath= new Path("");
 		}
-		IPath path= packPath.append(typeQualifiedName.substring(0, dot)).append(".java");
+		// fixed for 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
+		IPath path= packPath.append(typeQualifiedName.substring(0, dot) + ".java");
 		IJavaElement elem= jproject.findElement(path);
 		if (elem instanceof ICompilationUnit) {
 			return findTypeInCompilationUnit((ICompilationUnit)elem, typeQualifiedName);
 		} else if (elem instanceof IClassFile) {
-			path= packPath.append(typeQualifiedName.replace('.', '$')).append(".class");
+			path= packPath.append(typeQualifiedName.replace('.', '$') + ".class");
 			elem= jproject.findElement(path);
 			if (elem instanceof IClassFile) {
 				return ((IClassFile)elem).getType();
@@ -66,7 +67,7 @@ public class JavaModelUtility {
 	}
 	
 	/** 
-	 * Finds a type in a compilation unit
+	 * Finds a type in a compilation unit.
 	 * @param cu the compilation unit to search in
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
@@ -80,8 +81,8 @@ public class JavaModelUtility {
 			}
 		}
 		return null;
-	}	
-
+	}
+	
 	/**
 	 * Returns the qualified type name of the given type using '.' as separators.
 	 * This is a replace to IType.getTypeQualifiedName()

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.compiler.env.IConstants;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.compiler.env.IConstants;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public abstract class TypePage extends ContainerPage {
 	
@@ -87,6 +87,8 @@ public abstract class TypePage extends ContainerPage {
 	
 	private StringButtonDialogField fSuperClassDialogField;
 	private ListDialogField fSuperInterfacesDialogField;
+	
+	private IType fSuperClass;
 	
 	private SelectionButtonDialogFieldGroup fAccMdfButtons;
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
@@ -419,6 +421,7 @@ public abstract class TypePage extends ContainerPage {
 			fSuperInterfacesStatus= superInterfacesChanged();
 		} else if (fieldName ==  ENCLOSING || fieldName == PACKAGE) {
 			fTypeNameStatus= typeNameChanged();
+			fSuperClassStatus= superClassChanged();
 		} else if (fieldName ==  ENCLOSINGSELECTION) {
 			boolean isEnclosedType= isEnclosingTypeSelected();
 			if (!isEnclosedType) {
@@ -432,10 +435,11 @@ public abstract class TypePage extends ContainerPage {
 					fOtherMdfButtons.setSelection(fStaticMdfIndex, false);
 				}
 			}
-			fAccMdfButtons.enableSelectionButton(2, isEnclosedType);
-			fAccMdfButtons.enableSelectionButton(3, isEnclosedType);
+			fAccMdfButtons.enableSelectionButton(2, isEnclosedType && fIsClass);
+			fAccMdfButtons.enableSelectionButton(3, isEnclosedType && fIsClass);
 			fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, isEnclosedType);
 			fTypeNameStatus= typeNameChanged();
+			fSuperClassStatus= superClassChanged();
 		}
 	}
 	
@@ -557,7 +561,7 @@ public abstract class TypePage extends ContainerPage {
 		} else if (fAccMdfButtons.isSelected(3)) {	
 			mdf+= IConstants.AccProtected;
 		}
-		if (fOtherMdfButtons.isSelected(0)) {	
+		if (fOtherMdfButtons.isSelected(0) && (fStaticMdfIndex != 0)) {	
 			mdf+= IConstants.AccAbstract;
 		}
 		if (fOtherMdfButtons.isSelected(1)) {	
@@ -804,6 +808,8 @@ public abstract class TypePage extends ContainerPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		fSuperClassDialogField.enableButton(root != null);
 		
+		fSuperClass= null;
+		
 		String sclassName= getSuperClass();
 		if ("".equals(sclassName)) {
 			// accept the empty field (stands for java.lang.Object)
@@ -817,7 +823,7 @@ public abstract class TypePage extends ContainerPage {
 		
 		if (root != null) {
 			try {		
-				IType type= JavaModelUtility.findType(root.getJavaProject(), sclassName);
+				IType type= resolveSuperTypeName(root.getJavaProject(), sclassName);
 				if (type == null) {
 					status.setWarning(getResourceString(WARNING_SUPER_NOTEXISTS));
 					return status;
@@ -835,6 +841,7 @@ public abstract class TypePage extends ContainerPage {
 						return status;
 					}
 				}
+				fSuperClass= type;
 			} catch (JavaModelException e) {
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
 			}							
@@ -844,6 +851,40 @@ public abstract class TypePage extends ContainerPage {
 		return status;
 		
 	}
+	
+	// 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
+	private IType resolveSuperTypeName(IJavaProject jproject, String sclassName) throws JavaModelException {
+		IType type= null;
+		if (isEnclosingTypeSelected()) {
+			// search in the context of the enclosing type
+			IType enclosingType= getEnclosingType();
+			if (enclosingType != null) {
+				String[][] res= enclosingType.resolveType(sclassName);
+				if (res != null && res.length > 0) {
+					type= JavaModelUtility.findType(jproject, res[0][0], res[0][1]);
+				}
+			}
+		} else {
+			IPackageFragment currPack= getPackageFragment();
+			if (type == null && currPack != null) {
+				String packName= currPack.getElementName();
+				// search in own package
+				if (!currPack.isDefaultPackage()) {
+					type= JavaModelUtility.findType(jproject, packName, sclassName);
+				}
+				// search in java.lang
+				if (type == null && !"java.lang".equals(packName)) {
+					type= JavaModelUtility.findType(jproject, "java.lang", sclassName);
+				}
+			}
+			// search fully qualified
+			if (type == null) {
+				type= JavaModelUtility.findType(jproject, sclassName);
+			}
+		}
+		return type;
+	}		
+	
 	
 	/**
 	 * Called when the list of super interface has changed
@@ -1080,8 +1121,12 @@ public abstract class TypePage extends ContainerPage {
 		String typename= getSuperClass();
 		if (fIsClass && !"".equals(typename) && !"java.lang.Object".equals(typename)) {
 			buf.append(" extends ");
-			imports.addImport(typename);
 			buf.append(Signature.getSimpleName(typename));
+			if (fSuperClass != null) {
+				imports.addImport(JavaModelUtility.getFullyQualifiedName(fSuperClass));
+			} else {
+				imports.addImport(typename);
+			}
 		}
 	}
 	
