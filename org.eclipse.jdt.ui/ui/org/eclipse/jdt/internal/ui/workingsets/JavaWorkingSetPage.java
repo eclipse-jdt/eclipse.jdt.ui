@@ -292,7 +292,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				boolean state= event.getChecked();		
 				fTree.setGrayed(element, false);
 				if (isExpandable(element))
-					setSubtreeChecked(element, state, true);
+					setSubtreeChecked(element, state, state); // only check subtree if state is set to true
 					
 				updateParentState(element, state);
 				validateInput();
@@ -317,7 +317,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			else
 				fTree.setGrayChecked(element, false);
 			if (isExpandable(element))
-				setSubtreeChecked(element, state, true);
+				setSubtreeChecked(element, state, checkExpandedState);
 		}
 	}
 
