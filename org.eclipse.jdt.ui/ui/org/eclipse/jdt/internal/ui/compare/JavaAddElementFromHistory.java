@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.lang.reflect.InvocationTargetException;
 
@@ -121,38 +123,50 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			d.setAddMode(true);
-			ITypedElement ti= d.selectEdition(target, editions, parent);
-			if (!(ti instanceof IStreamContentAccessor))
+			ITypedElement selected= d.selectEdition(target, editions, parent);
+			if (selected == null)
 				return;	// user cancel
 			
-			// from the edition get the lines (text) to insert
-			String[] lines= null;
-			try {
-				lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
-			} catch (CoreException ex) {
-				JavaPlugin.log(ex);
+			ITypedElement[] results= d.getSelection();
+			//ITypedElement[] results= new ITypedElement[] { selected };
+			ArrayList edits= new ArrayList();
+			for (int i= 0; i < results.length; i++) {
+				ITypedElement ti= results[i];
+				if (!(ti instanceof IStreamContentAccessor))
+					continue;
+				IStreamContentAccessor sca= (IStreamContentAccessor)ti;
+				// from the edition get the lines (text) to insert
+				String[] lines= null;
+				try {
+					lines= JavaCompareUtilities.readLines(sca.getContents());								
+				} catch (CoreException ex) {
+					JavaPlugin.log(ex);
+				}
+				if (lines == null) {
+					MessageDialog.openError(shell, errorTitle, errorMessage);
+					return;
+				}
+				
+				// build the TextEdit that inserts the text into the buffer
+				MemberEdit edit= null;
+				if (input != null)
+					edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
+				else
+					edit= createEdit(lines, parent);
+				if (edit == null) {
+					MessageDialog.openError(shell, errorTitle, errorMessage);
+					return;
+				}
+				edit.setAddLineSeparators(false);
+				edits.add(edit);
 			}
-			if (lines == null) {
-				MessageDialog.openError(shell, errorTitle, errorMessage);
-				return;
-			}
-			
-			// build the TextEdit that inserts the text into the buffer
-			MemberEdit edit= null;
-			if (input != null)
-				edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
-			else
-				edit= createEdit(lines, parent);
-			if (edit == null) {
-				MessageDialog.openError(shell, errorTitle, errorMessage);
-				return;
-			}
-			edit.setAddLineSeparators(false);
 			
 			IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
 
 			TextBufferEditor editor= new TextBufferEditor(buffer);
-			editor.add(edit);
+			Iterator iter= edits.iterator();
+			while (iter.hasNext())
+				editor.add((TextEdit)iter.next());
 			editor.performEdits(nullProgressMonitor);
 			
 			final TextBuffer bb= buffer;
