@@ -7,15 +7,13 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-
 
 public class UnknownMethodEvaluator {
 		

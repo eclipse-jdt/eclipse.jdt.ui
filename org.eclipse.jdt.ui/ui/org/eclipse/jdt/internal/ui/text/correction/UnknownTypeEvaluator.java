@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
