@@ -196,7 +196,6 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fInitialCharHeight= height;
 	}
 	
-	/* workaround for VA-Java */
 	private void access$superOpen() {
 		super.open();
 	}	

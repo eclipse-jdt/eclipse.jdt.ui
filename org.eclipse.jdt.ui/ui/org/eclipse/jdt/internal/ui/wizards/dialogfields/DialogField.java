@@ -96,7 +96,7 @@ public class DialogField {
 			if (fLabelText != null && !"".equals(fLabelText)) {
 				fLabel.setText(fLabelText);
 			} else {
-				// hack to avoid a 16 pixel wide empty label
+				// XXX: to avoid a 16 pixel wide empty label - revisit
 				fLabel.setText(".");
 				fLabel.setVisible(false);
 			}			

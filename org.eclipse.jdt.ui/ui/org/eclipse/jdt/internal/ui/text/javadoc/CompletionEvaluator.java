@@ -389,7 +389,7 @@ public class CompletionEvaluator {
 		}
 		
 		if (wordEnd + 2 < content.length) {
-			// workaround for 1GAVL08
+			// XXX: workaround for 1GAVL08
 			content[wordEnd]= ' ';
 			content[wordEnd + 1]= 'x';
 		}

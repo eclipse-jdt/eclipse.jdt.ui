@@ -123,7 +123,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	private int getHoverWidth(Display display) {
 		Rectangle displayBounds= display.getBounds();
 		int hoverWidth= displayBounds.width - (display.getCursorLocation().x - displayBounds.x);
-		hoverWidth-= 12; // add some space to the border, hack!
+		hoverWidth-= 12; // XXX: Add some space to the border, Revisit
 		if (hoverWidth < 200) {
 			hoverWidth= 200;
 		}

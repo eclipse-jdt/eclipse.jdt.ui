@@ -732,16 +732,6 @@ public class ListDialogField extends DialogField {
 			return fLabelProvider.getText(element);
 		}
 		
-		/*public Image getColumnImage(Viewer viewer, Object element, int columnIndex) {
-			org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("To be removed");
-			return fLabelProvider.getImage(element);
-		}
-
-		public String getColumnText(Viewer viewer, Object element, int columnIndex) {
-			org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("To be removed");
-			return fLabelProvider.getText(element);
-		}*/
-		
 		public void addListener(ILabelProviderListener listener) {
 			fLabelProvider.addListener(listener);
 		}

@@ -130,7 +130,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 	}
 	
 	protected void specifyArguments(Map map, int portNumber) {
-		// this is a hack to allow us to put a quote (") around the classpath
+		// XXX: Revisit - allows us to put a quote (") around the classpath
 		Connector.IntegerArgument port= (Connector.IntegerArgument) map.get("port");
 		port.setValue(portNumber);
 		

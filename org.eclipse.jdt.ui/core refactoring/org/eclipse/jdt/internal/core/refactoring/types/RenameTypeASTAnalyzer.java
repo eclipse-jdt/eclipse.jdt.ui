@@ -210,7 +210,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		while (current != null && !(current instanceof CompilationUnitScope))
 			current= current.parent;
 		if (current == null)
-			return false; //???
+			return false; //XXX: Revisit
 		return typeImported(((CompilationUnitScope)current).referenceContext, type);
 	}
 	

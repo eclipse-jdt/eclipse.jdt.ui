@@ -211,7 +211,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		if (Checks.isTopLevel(getType())){
 			ICompilationUnit cu= (ICompilationUnit)getType().getParent();
 			/*
-			 * ICompilationUnit.getType feature - walkback if not simple name
+			 * ICompilationUnit.getType expects simple name
 			 */ 
 			if ((fNewName.indexOf(".") == -1) && cu.getType(fNewName).exists())
 				result.addError("Type " + fNewName + " already exists in \"" + cu.getElementName() +"\"");

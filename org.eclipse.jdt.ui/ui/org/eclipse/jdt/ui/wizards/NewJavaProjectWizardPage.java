@@ -85,11 +85,11 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * </p>
 	 *
 	 * @param entries the default classpath entries
-	 * @param appendDefaultJDK <code>true</code> if the standard Java library 
+	 * @param appendDefaultJRE <code>true</code> if the standard Java library 
 	 *    specified in the preferences should be added to the classpath
 	 */
-	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJDK) {
-		fBuildPathsBlock.setDefaultClassPath(entries, appendDefaultJDK);
+	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJRE) {
+		fBuildPathsBlock.setDefaultClassPath(entries, appendDefaultJRE);
 	}
 
 	/**

@@ -45,7 +45,7 @@ abstract class TypeRefactoring extends Refactoring{
 		Assert.isTrue(pack.exists(), "package must exist");
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read-only");
 		/*
-		 * ICompilationUnit.getType feature - walkback if not simple name
+		 * ICompilationUnit.getType expects simple name
 		 */  
 		if (name.indexOf(".") != -1)
 			name= name.substring(0, name.indexOf("."));
