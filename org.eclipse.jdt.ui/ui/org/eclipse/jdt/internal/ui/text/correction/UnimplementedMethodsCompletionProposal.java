@@ -174,18 +174,15 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int i= 0; i < typeMethods.length; i++) {
 			IMethodBinding curr= typeMethods[i];
-			int modifiers= curr.getModifiers();
-			if (!Modifier.isStatic(modifiers)) {
-				IMethodBinding impl= findMethod(curr, allMethods);
-				if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
-					if (impl != null) {
-						allMethods.remove(impl);
-					}
-					// implement an interface method when it does not exist in the hierarchy
-					// or when it throws less exceptions that the implemented
-					toImplement.add(curr);
-					allMethods.add(curr);
+			IMethodBinding impl= findMethod(curr, allMethods);
+			if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
+				if (impl != null) {
+					allMethods.remove(impl);
 				}
+				// implement an interface method when it does not exist in the hierarchy
+				// or when it throws less exceptions that the implemented
+				toImplement.add(curr);
+				allMethods.add(curr);
 			}
 		}
 		ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
