@@ -75,10 +75,10 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		// Only calculating one constructor here
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}			
 			monitor.setTaskName(CodeGenerationMessages.getString("AddCustomConstructorOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", 7); //$NON-NLS-1$			
 			monitor.worked(1);
@@ -127,7 +127,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				// Allow no collisions with super constructor parameter names
 				String paramName= StubUtility.suggestArgumentName(project, accessName, excludedNames);
 
-				excludedNames[k]= new String(paramName);
+				excludedNames[k]= paramName;
 				params[i]= paramName;
 				buf.append(paramName);		
 			}

@@ -96,16 +96,13 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		if (fMembers.length == 0) {
+			return;
+		}
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}
-			
-			if (fMembers.length == 0) {
-				return;
-			}
-			
 			monitor.beginTask(CodeGenerationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length + 2); //$NON-NLS-1$
 
 			addJavadocComments(monitor);

@@ -60,10 +60,10 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	}
 
 	public void run(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}		
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}		
 			int listSize= fList.size();
 			String message = ActionMessages.getFormattedString("AddDelegateMethodsOperation.monitor.message", String.valueOf(listSize)); //$NON-NLS-1$
 			monitor.setTaskName(message);

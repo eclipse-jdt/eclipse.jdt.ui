@@ -57,10 +57,10 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}			
 			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			

@@ -96,10 +96,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}			
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}			
 			monitor.setTaskName(CodeGenerationMessages.getString("AddMethodStubOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", fMethods.length + 2); //$NON-NLS-1$
 
@@ -122,7 +122,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			
 			ITypeHierarchy typeHierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			
-			for (int i= 0; i < fMethods.length; i++) {
+			loop: for (int i= 0; i < fMethods.length; i++) {
 				try {
 					String content;
 					IMethod curr= fMethods[i];
@@ -130,7 +130,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						IMethod meth= (IMethod) createdMethods.get(k);
 						if (JavaModelUtil.isSameMethodSignature(meth.getElementName(), meth.getParameterTypes(), meth.isConstructor(), curr)) {
 							// ignore duplicated methods
-							continue;
+							continue loop;
 						}
 					}			 	
 					
