@@ -139,6 +139,11 @@
 		<showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
 		<showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
 	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+		<showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
+		<showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
+	</perspectiveExtension>
 	
 </extension>
 
