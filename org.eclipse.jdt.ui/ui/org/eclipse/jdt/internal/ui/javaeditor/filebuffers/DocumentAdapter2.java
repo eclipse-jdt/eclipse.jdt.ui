@@ -238,7 +238,7 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.disconnect(fFile.getLocation(), new NullProgressMonitor());
+				manager.disconnect(fTextFileBuffer.getLocation(), new NullProgressMonitor());
 			} catch (CoreException x) {
 				// ignore
 			}
