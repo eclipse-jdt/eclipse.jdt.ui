@@ -741,7 +741,9 @@ class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			if (! super.canEnable()) return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				if (! ReorgUtils.isSourceFolder(fPackageFragmentRoots[i])) return false;
+				if (! (ReorgUtils.isSourceFolder(fPackageFragmentRoots[i])
+						|| (fPackageFragmentRoots[i].isArchive()
+								&& ! fPackageFragmentRoots[i].isExternal()))) return false;
 			}
 			if (ReorgUtils.containsLinkedResources(fPackageFragmentRoots)) 
 				return false;					
@@ -763,6 +765,7 @@ class ReorgPolicyFactory {
 			if (javaElement.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2writable")); //$NON-NLS-1$
 			if (ReorgUtils.isPackageFragmentRoot((IJavaProject)javaElement))
+				//TODO: adapt message to archives:
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2nosrc")); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
@@ -1224,7 +1227,8 @@ class ReorgPolicyFactory {
 			if (! super.canEnable()) return false;
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].isReadOnly())	return  false;
+				if (roots[i].isReadOnly() && 
+						! (roots[i].isArchive() && ! roots[i].getResource().isReadOnly()))	return  false;
 			}
 			return true;
 		}

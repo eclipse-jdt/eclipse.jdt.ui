@@ -33,7 +33,7 @@ public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdap
 				Object element= iter.next();
 				if (element instanceof IJavaElement) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot)((IJavaElement)element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					if (root != null && root.isArchive())
+					if (root != null && root.isArchive() && root.isExternal())
 						return false;
 				}
 			}

@@ -104,11 +104,8 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		if (! JavaCore.create(getDestinationProject()).exists())
 			return replace | originating;
 
-		if (! getRoot().isArchive())
-			return replace | originating | destination;
-
 		if (fUpdateClasspathQuery == null)
-			return replace | originating;
+			return replace | originating | destination;
 
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(getRoot());
 		if (referencingProjects.length == 0)
