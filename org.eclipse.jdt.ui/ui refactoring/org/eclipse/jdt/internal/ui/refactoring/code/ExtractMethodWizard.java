@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
-import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class ExtractMethodWizard extends RefactoringWizard {
 	
@@ -25,11 +25,11 @@ public class ExtractMethodWizard extends RefactoringWizard {
 	}
 
 	protected Refactoring doGetRefactoring() {
-		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Query Preferences for asymetric assignment and tab width");
 		return new ExtractMethodRefactoring(
 			fCUnit, new DocumentTextBufferChangeCreator(fDocumentProvider), 
 			fSelection.getOffset(), fSelection.getLength(),
-			true, 4);	// asymertic Assignment and tab with
+			CodeFormatterPreferencePage.isCompactingAssignment(),
+			CodeFormatterPreferencePage.getTabSize());
 	}
 	
 	

@@ -261,13 +261,11 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private boolean visitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
-		if (visitNode(assignment, scope)) {
-			fLocalVariableAnalyzer.visitLhsOfAssignment(assignment.lhs, scope, fMode, compound);
-			assignment.expression.traverse(this, scope);
+		if (!visitNode(assignment, scope))
+			return false;
 			
-		}
-		// Since we visited the assigment node by ourselves we have to return false.	
-		return false;
+		fLocalVariableAnalyzer.visitAssignment(assignment, scope, fMode, compound);
+		return true;
 	}
 	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
@@ -558,6 +556,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
+		HackFinder.fixMeSoon("1GEG3MS: ITPJCORE:WIN2000 - AbstractVariableDeclaration - declarationSourceStart and declarationSourceEnd set to incorrect values");
+		// return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
+		// 	localDeclaration, scope);
 		return visitNode(localDeclaration, scope);
 	}
 
@@ -566,7 +567,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(ArrayReference arrayReference, BlockScope scope) {
-		return false;
+		return visitNode(arrayReference, scope);
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {

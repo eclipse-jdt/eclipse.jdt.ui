@@ -43,7 +43,8 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 				javaSearchMM.add(action);
 		}
 		
-		manager.appendToGroup(GROUP_NAME, javaSearchMM);
+		if (!javaSearchMM.isEmpty())
+			manager.appendToGroup(GROUP_NAME, javaSearchMM);
 	}
 
 	public String getGroupName() {

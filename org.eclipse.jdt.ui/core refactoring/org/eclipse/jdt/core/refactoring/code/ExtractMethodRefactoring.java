@@ -232,7 +232,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		});
 		
 		// Replacing the old statements with the new method call.
-		result.addSimpleTextChange(new SimpleReplaceTextChange("substitue statement(s) with call to " + fMethodName, fSelectionStart, fSelectionLength, null) {
+		result.addSimpleTextChange(new SimpleReplaceTextChange("substitute statement(s) with call to " + fMethodName, fSelectionStart, fSelectionLength, null) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
 				setText(computeCall(buffer, delimiter));

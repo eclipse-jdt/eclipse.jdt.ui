@@ -11,7 +11,7 @@ import java.util.List;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.ArrayReference;import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
@@ -32,7 +32,10 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	// selected statements.
 	private List fFollowingLocalWrites= new ArrayList(2);
 	private List fFollowingLocalReads= new ArrayList(2);
-	
+
+	// References already handled as a LHS of an assignment
+	private List fLhsOfAssignment= new ArrayList(2);
+		
 	// Return statement handling if a return statement has been selected.
 	private ReturnStatement fExtractedReturnStatement;
 	
@@ -62,43 +65,34 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 
 	//---- Analyzing statements ----------------------------------------------------------------
 
-	public void visit(SingleNameReference singleNameReference, BlockScope scope, int mode) {
-		if (isOfInterestForRead(mode))
-			processLocalVariableBindingRead(getLocalVariableBindingIfSingleNameReference(singleNameReference), mode);
+	public void visit(SingleNameReference reference, BlockScope scope, int mode) {
+		if (isOfInterestForRead(mode, reference))
+			processLocalVariableBindingRead(getLocalVariableBindingIfSingleNameReference(reference), mode);
 	}
 	
 	public void visit(QualifiedNameReference reference, BlockScope scope, int mode) {
-		if (isOfInterestForRead(mode))
+		if (isOfInterestForRead(mode, reference))
 			processLocalVariableBindingRead(getLocalVariableBindingIfQualifiedNameReference(reference), mode);
 	}
 	
-	public void visitLhsOfAssignment(Reference reference, BlockScope scope, int mode, boolean compound) {
-		if (isOfInterestForWrite(mode)) {
+	public void visitAssignment(Assignment assignment, BlockScope scope, int mode, boolean compound) {
+		Reference reference= assignment.lhs;
+		if (isOfInterestForWrite(mode, reference)) {
 			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(reference);
 			if (binding != null) {
 			    addLocalWrite(binding, mode);
+			    fLhsOfAssignment.add(reference);
 			    if (compound)
 			    	addLocalRead(binding, mode);
-			} else {
-				binding= getLocalVariableBindingIfQualifiedNameReference(reference);
-				if (binding != null) {
-					// code like this:
-					// class A {
-					//	public int x;
-					// }
-					//
-					// a.x= 10;
-					// 
-					// is a read to variable a.
-					addLocalRead(binding, mode);
-				}
+			    return;
 			}
 		}
 	}
-	
+
 	public void visitPostfixPrefixExpression(Assignment assignment, BlockScope scope, int mode) {
-		if (isOfInterestForWrite(mode) || isOfInterestForRead(mode)) {
-			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(assignment.lhs);
+		Reference lhs= assignment.lhs;
+		if (isOfInterestForWrite(mode, lhs) || isOfInterestForRead(mode, lhs)) {
+			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(lhs);
 			if (binding != null) {
 				addLocalWrite(binding, mode);
 				addLocalRead(binding, mode);
@@ -166,11 +160,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 	}
 	
-	private boolean isOfInterestForRead(int mode) {
-		return mode == StatementAnalyzer.SELECTED || mode == StatementAnalyzer.AFTER;
+	private boolean isOfInterestForRead(int mode, Reference reference) {
+		return (mode == StatementAnalyzer.SELECTED || mode == StatementAnalyzer.AFTER) &&
+			!fLhsOfAssignment.contains(reference);
 	}
 	
-	private boolean isOfInterestForWrite(int mode) {
+	private boolean isOfInterestForWrite(int mode, Reference reference) {
 		return mode == StatementAnalyzer.SELECTED || mode == StatementAnalyzer.AFTER;
 	}
 	
