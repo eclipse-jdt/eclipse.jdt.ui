@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.base;
 
-import java.util.List;import org.eclipse.core.resources.IResource;
+import java.util.List;import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -30,18 +31,19 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 public abstract class Refactoring implements IRefactoring {
 	private static IUndoManager fgUndoManager= new UndoManager();
 	
-	private List fUnsavedFileList; //list of IFiles
+	private IFile[] fUnsavedFiles;
 		
 	public static IUndoManager getUndoManager() {
 		return fgUndoManager;
 	}
 	
-	public void setUnsavedFileList(List list){
-		fUnsavedFileList= list;
+	public void setUnsavedFiles(IFile[] files){
+		Assert.isNotNull(files);
+		fUnsavedFiles= files;
 	}
 	
-	protected List getUnsavedFileList(){
-		return fUnsavedFileList;
+	protected IFile[] getUnsavedFiles(){
+		return fUnsavedFiles;
 	}
 	
 	/* non java-doc
