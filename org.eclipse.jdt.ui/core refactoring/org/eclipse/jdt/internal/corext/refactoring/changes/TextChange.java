@@ -194,6 +194,21 @@ public abstract class TextChange extends AbstractTextChange {
 			res[i]= elem.getGroupDescription();
 		}
 		return res;	
+	}
+	
+	/**
+	 * Returns the group description with the given name or <code>null</code> if no such
+	 * GroupDescription exists.
+	 */	
+	public GroupDescription getGroupDescription(String name) {
+		for (int i= 0; i < fTextEditChanges.size(); i++) {
+			EditChange elem= (EditChange) fTextEditChanges.get(i);
+			GroupDescription description= elem.getGroupDescription();
+			if (name.equals(description.getName())) {
+				return description;
+			}
+		}
+		return null;	
 	}	
 	
 	
