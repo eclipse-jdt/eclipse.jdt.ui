@@ -26,8 +26,7 @@ public class ReorgGroup extends ContextMenuGroup {
 		
 		for (int i= 0; i < fActions.length; i++) {
 			fActions[i].update();
-			if (fActions[i].isEnabled())
-				manager.appendToGroup(GROUP_NAME, fActions[i]);
+			manager.appendToGroup(GROUP_NAME, fActions[i]);
 		}
 	}
 	
@@ -37,21 +36,42 @@ public class ReorgGroup extends ContextMenuGroup {
 			return;
 			
 		fActions= new IRefactoringAction[] {	
-			new RenameAction(p),
-			new CutSourceReferencesToClipboardAction(p),
-			new CopyResourcesToClipboardAction(p),
-			new CopySourceReferencesToClipboardAction(p),
-			new MoveAction(provider),
-			new PasteSourceReferencesAction(p),
-			new PasteResourcesFromClipboardAction(p),
+			new JdtMoveAction(provider),
+			createCutAction(p),
+			createCopyAction(p),
+			createPasteAction(p),
 			//new DuplicateSourceReferenceAction(provider, p),
-			new DeleteAction(p)
+			new RenameAction(p),
+			createDeleteAction(p)
 		};		
 	}	
 	
 	public static void addGlobalReorgActions(IActionBars actionBars, ISelectionProvider provider) {
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, new CopySourceReferencesToClipboardAction(provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, new CutSourceReferencesToClipboardAction(provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, new PasteSourceReferencesAction(provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, createCopyAction(provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, createCutAction(provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, createPasteAction(provider));
 	}
+
+	private static IRefactoringAction createCutAction(ISelectionProvider p){
+		return new CutSourceReferencesToClipboardAction(p);
+	}
+	
+	public static IRefactoringAction createCopyAction(ISelectionProvider p){
+		IRefactoringAction copyResources= new CopyResourcesToClipboardAction(p);
+		IRefactoringAction copySourceReferences= new CopySourceReferencesToClipboardAction(p);
+		return new DualReorgAction(p, "&Copy", ReorgMessages.getString("copyAction.description"), copyResources, copySourceReferences);
+	}
+	
+	public static IRefactoringAction createPasteAction(ISelectionProvider p){
+		IRefactoringAction pasteResources= new PasteResourcesFromClipboardAction(p);
+		IRefactoringAction pasteSourceReferences= new PasteSourceReferencesFromClipboardAction(p);
+		return new DualReorgAction(p, "&Paste", "Pastes elements from the clipboard", pasteResources, pasteSourceReferences);
+	}
+	
+	public static IRefactoringAction createDeleteAction(ISelectionProvider p){
+		IRefactoringAction deleteResources= new DeleteResourcesAction(p);
+		IRefactoringAction deleteSourceReferences= new DeleteSourceReferencesAction(p);
+		return new DualReorgAction(p, "&Delete", ReorgMessages.getString("deleteAction.description"), deleteResources, deleteSourceReferences);
+	}
+	
 }
