@@ -9,6 +9,7 @@ import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
+	private static final String SPACE_MATCH= " " + SearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-2$ //$NON-NLS-1$
 	private static final String SPACE_MATCHES= " " + SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-2$ //$NON-NLS-1$
 	
 	private IProgressMonitor fMonitor;
@@ -89,16 +90,29 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		marker.setAttributes(attributes);
 
 		fView.addMatch(enclosingElement.getElementName(), enclosingElement, resource, marker);
-		if (!getProgressMonitor().isCanceled())
-			getProgressMonitor().subTask(++fMatchCount + SPACE_MATCHES);
+		fMatchCount= fMatchCount + 1;
+		if (!getProgressMonitor().isCanceled()) {
+			String text;
+			if (fMatchCount == 1)
+				text= fMatchCount + SPACE_MATCH;
+			else
+				text= fMatchCount + SPACE_MATCHES;
+			getProgressMonitor().subTask(text);
+		}
 	}
 	
 	/**
 	 * @see IJavaSearchResultCollector#done().
 	 */
 	public void done() {
-		if (!getProgressMonitor().isCanceled())
-			getProgressMonitor().setTaskName(SearchMessages.getString("SearchResultCollector.done") + ": " + fMatchCount + SPACE_MATCHES + "   "); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		if (!getProgressMonitor().isCanceled()) {
+			String matchString;
+			if (fMatchCount == 1)
+				matchString= fMatchCount + SPACE_MATCH;
+			else
+				matchString= fMatchCount + SPACE_MATCHES;
+			getProgressMonitor().setTaskName(SearchMessages.getString("SearchResultCollector.done") + ": " + matchString + "   "); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		}
 
 		if (fView != null)
 			fView.searchFinished();
