@@ -216,8 +216,8 @@ public class EditorUtility {
 				continue;
 			}
 			IJavaLineBreakpoint breakpoint = (IJavaLineBreakpoint) breakpoints[i];
-			if (breakpoint.getType().equals(markerType)) {
-				if (breakpoint.getType().equals(containingType)) {
+			if (breakpoint.getMarker().getType().equals(markerType)) {
+				if (breakpoint.getMarker().getType().equals(containingType)) {
 					if (breakpoint.getLineNumber() == lineNumber) {
 						return true;
 					}

@@ -8,6 +8,7 @@ import java.text.MessageFormat;
 import java.util.*;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.*;
 import org.eclipse.debug.core.model.*;
@@ -128,7 +129,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			}
 		}
 		IJavaBreakpoint breakpoint= thread.getBreakpoint();
-		if (breakpoint != null && breakpoint.exists()) {			
+		if (breakpoint != null && breakpoint.getMarker().exists()) {			
 			return breakpoint.getThreadText(thread.getName(), qualified, thread.isSystemThread());
 		}
 
@@ -371,13 +372,17 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			IBreakpointManager manager= getBreakpointManager();
 			IBreakpoint breakpoint= manager.getBreakpoint((IMarker)item);
 			if (breakpoint instanceof IJavaBreakpoint) {
-				return getBreakpointImage((IJavaBreakpoint)breakpoint);
+				try {
+					return getBreakpointImage((IJavaBreakpoint)breakpoint);
+				} catch (CoreException e) {
+					DebugUIUtils.logError(e);
+				}
 			}
 		}
 		return null;
 	}
 
-	protected Image getBreakpointImage(IJavaBreakpoint breakpoint) {
+	protected Image getBreakpointImage(IJavaBreakpoint breakpoint) throws CoreException {
 		if (breakpoint instanceof IJavaExceptionBreakpoint) {
 			return getExceptionBreakpointImage((IJavaExceptionBreakpoint)breakpoint);
 		} if (breakpoint instanceof IJavaRunToLineBreakpoint) {
@@ -387,7 +392,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		}
 	}
 
-	protected Image getExceptionBreakpointImage(IJavaExceptionBreakpoint breakpoint) {
+	protected Image getExceptionBreakpointImage(IJavaExceptionBreakpoint breakpoint) throws CoreException {
 		if (!breakpoint.isEnabled()) {
 			return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_DISABLED);
 		} else if (breakpoint.isChecked()) {
@@ -397,7 +402,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		}
 	}
 
-	protected Image getLineBreakpointImage(IJavaBreakpoint breakpoint) {
+	protected Image getLineBreakpointImage(IJavaBreakpoint breakpoint) throws CoreException {
 		if (!breakpoint.isEnabled()) {
 			return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_DISABLED);
 		}
@@ -432,7 +437,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			IMarker marker= (IMarker) item;
 			IBreakpoint breakpoint= getBreakpointManager().getBreakpoint(marker);
 			if (breakpoint instanceof IJavaBreakpoint) {
-				item= ((IJavaBreakpoint)breakpoint).getInstalledType();
+				item= ((IJavaBreakpoint)breakpoint).getType();
 			}
 		}
 		if (item instanceof IType) {

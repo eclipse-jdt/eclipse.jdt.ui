@@ -804,9 +804,15 @@
 	</filter>
 </extension>
 
-<extension id="snippetSupportLineBreakpoint" point="org.eclipse.core.resources.markers">
-	<super type="org.eclipse.jdt.debug.javaLineBreakpoint"/>
+<extension id="snippetSupportLineBreakpointMarker" point="org.eclipse.core.resources.markers">
+	<super type="org.eclipse.jdt.debug.javaLineBreakpointMarker"/>
 	<persistent value="false"/>
+</extension>	
+
+<extension
+	id="snippetSupportLineBreakpoint"
+	point="org.eclipse.debug.core.breakpoints">
+	markerType="org.eclipse.jdt.debug.snippetSupportLineBreakpointMarker">
 </extension>	
 
 <!-- =========================================================================== -->
@@ -823,11 +829,6 @@
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
 </extension> 
-
-<extension id="snippetSupportLineBreakpoint" point="org.eclipse.core.resources.markers">
-	<super type="org.eclipse.jdt.debug.javaLineBreakpoint"/>
-	<persistent value="false"/>
-</extension>	
 
 <extension point="org.eclipse.ui.popupMenus">
 	<objectContribution
