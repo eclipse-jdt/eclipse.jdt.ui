@@ -553,7 +553,7 @@ public class JavaModelUtil {
 	
 	/**
 	 * Returns the original type if the given type. If the type is already
-	 * an original input type is returned. The returned type must not exist
+	 * an original the input type is returned. The returned type must not exist
 	 */
 	public static IType toOriginal(IType type) {
 		ICompilationUnit cu= type.getCompilationUnit();
@@ -561,6 +561,16 @@ public class JavaModelUtil {
 			return (IType)cu.getOriginal(type);
 		return type;
 	}
+	
+	/**
+	 * Returns the original cu if the given cu. If the cu is already
+	 * an original the input cu is returned. The returned cu must not exist
+	 */
+	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
+		if (cu != null && cu.isWorkingCopy())
+			return (ICompilationUnit) cu.getOriginal(cu);
+		return cu;
+	}	
 	
 	/**
 	 * Returns the working copy type of the given type. If the type is already in a

@@ -1287,10 +1287,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Creates the new type using the entered field values.
 	 * 
-	 * @param monitor a progress monitor to report progress. The progress
-	 * monitor must not be <code>null</code>
+	 * @param monitor a progress monitor to report progress.
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+
 		monitor.beginTask(NewWizardMessages.getString("NewTypeWizardPage.operationdesc"), 10); //$NON-NLS-1$
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();

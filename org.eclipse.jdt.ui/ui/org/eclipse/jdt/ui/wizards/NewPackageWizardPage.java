@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -284,16 +285,27 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Returns the created package fragment. This method only returns a valid value
-	 * after the runnable returned from <code>getRunnable</code> has been 
+	 * after <code>getRunnable</code> or <code>createPackage</code> have been 
 	 * executed.
 	 * 
-	 * @return the create package fragment
+	 * @return the created package fragment
 	 */	
 	public IPackageFragment getNewPackageFragment() {
 		return fCreatedPackageFragment;
 	}
 	
-	private void createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	/**
+	 * Creates the new package using the entered field values.
+	 * 
+	 * @param monitor a progress monitor to report progress. The progress
+	 * monitor must not be <code>null</code>
+	 * @since 2.1
+	 */
+	public void createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);

@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
@@ -25,7 +25,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -345,25 +344,16 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	
 	// ---- creation ----------------
 	
-	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					fCreatedRoot= createPackageFragmentRoot(monitor, getShell());
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} 
-			}
-		};
-	}
-	
-	protected IPackageFragmentRoot getNewPackageFragmentRoot() {
+	public IPackageFragmentRoot getNewPackageFragmentRoot() {
 		return fCreatedRoot;
 	}
 	
+	public void createPackageFragmentRoot(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 
-	
-	protected IPackageFragmentRoot createPackageFragmentRoot(IProgressMonitor monitor, Shell shell) throws CoreException, InterruptedException {
+		Shell shell= getShell();
 		String relPath= fRootDialogField.getText();
 			
 		IFolder folder= fCurrJProject.getProject().getFolder(relPath);
@@ -411,7 +401,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 		fCurrJProject.setRawClasspath(newEntries, outputLocation, monitor);
 		
-		return fCurrJProject.getPackageFragmentRoot(folder);
+		fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
 	}
 		
 	// ------------- choose dialogs

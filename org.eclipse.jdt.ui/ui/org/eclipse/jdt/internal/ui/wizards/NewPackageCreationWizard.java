@@ -4,10 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
 
@@ -35,24 +33,11 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		fPage.init(getSelection());
 	}	
 	
-
-	/*
-	 * @see Wizard#performFinish
-	 */		
-	public boolean performFinish() {
-		if (finishPage(fPage.getRunnable())) {
-			IPackageFragment pack= fPage.getNewPackageFragment();
-			try {
-				IResource resource= pack.getUnderlyingResource();
-				selectAndReveal(resource);
-				openResource(resource);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
-				// let pass, only reveal and open will fail
-			}
-			return true;
-		}
-		return false;		
-	}	
-	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fPage.createPackage(monitor); // use the full progress monitor
+		selectAndReveal(fPage.getNewPackageFragment().getResource());
+	}
 }

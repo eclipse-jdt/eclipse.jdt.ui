@@ -6,12 +6,13 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
@@ -48,26 +49,21 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		addPage(fJavaPage);
 	}		
 	
-	/*
-	 * @see Wizard#performFinish
-	 */		
-	public boolean performFinish() {
-		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fJavaPage.getRunnable());
-		try {
-			getContainer().run(false, true, op);
-		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.getString("NewProjectCreationWizard.op_error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error.message");			 //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), title, message);
-			return false;
-		} catch  (InterruptedException e) {
-			return false;
-		}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fJavaPage.createProject(monitor); // use the full progress monitor
 		BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 		selectAndReveal(fJavaPage.getJavaProject().getProject());
-		return true;
 	}
-		
+	
+	protected void handleFinishException(Shell shell, InvocationTargetException e) {
+		String title= NewWizardMessages.getString("NewProjectCreationWizard.op_error.title"); //$NON-NLS-1$
+		String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error.message");			 //$NON-NLS-1$
+		ExceptionHandler.handle(e, getShell(), title, message);
+	}	
+			
 	/*
 	 * Stores the configuration element for the wizard.  The config element will be used
 	 * in <code>performFinish</code> to set the result perspective.

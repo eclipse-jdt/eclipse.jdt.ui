@@ -92,7 +92,8 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		
 				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 3);				 //$NON-NLS-1$
 				try {
-					createProject(new SubProgressMonitor(monitor, 1));
+					BuildPathsBlock.createProject(fMainPage.getProjectHandle(), fMainPage.getLocationPath(), new SubProgressMonitor(monitor, 1));
+					fProjectCreated= true;					
 					initFromExistingStructures(new SubProgressMonitor(monitor, 2));						
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -130,42 +131,26 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		}
 		return super.getPreviousPage();
 	}
-	
-	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null)
-					monitor= new NullProgressMonitor();
-				
-				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.NormalCreationOperation.desc"), 4); //$NON-NLS-1$
-				try {
-					createProject(new SubProgressMonitor(monitor, 1));
-					if (getJavaProject() == null) {
-						initFromExistingStructures(new SubProgressMonitor(monitor, 1));
-					} else {
-						monitor.worked(1);
-					}
-					configureJavaProject(new SubProgressMonitor(monitor, 2));
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} finally {
-					monitor.done();
-				}
+		
+	public void createProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		try {		
+			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.NormalCreationOperation.desc"), 4); //$NON-NLS-1$
+			BuildPathsBlock.createProject(fMainPage.getProjectHandle(), fMainPage.getLocationPath(), new SubProgressMonitor(monitor, 1));
+			if (getJavaProject() == null) {
+				initFromExistingStructures(new SubProgressMonitor(monitor, 1));
+			} else {
+				monitor.worked(1);
 			}
-		};
-	}
-
-	private void createProject(IProgressMonitor monitor) throws CoreException {
-		IProject project= fMainPage.getProjectHandle();
-		IPath projectLocation= fMainPage.getLocationPath();
-		BuildPathsBlock.createProject(project, projectLocation, monitor);
-		fProjectCreated= true;
+			configureJavaProject(new SubProgressMonitor(monitor, 2));
+		} finally {
+			monitor.done();
+		}
 	}
 	
 	private void initFromExistingStructures(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();		
-		
 		monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.DetectingClasspathOperation.desc"), 2); //$NON-NLS-1$
 		try {
 			IProject project= fMainPage.getProjectHandle();

@@ -4,13 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -35,27 +39,17 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		fPage.init(getSelection());	
 	}
 
-	/*
-	 * @see Wizard#performFinish
-	 */		
-	public boolean performFinish() {
-		if (finishPage(fPage.getRunnable())) {
-			ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
-			if (cu.isWorkingCopy()) {
-				cu= (ICompilationUnit) cu.getOriginalElement();
-			}	
-
-			try {
-				IResource resource= cu.getUnderlyingResource();
-				selectAndReveal(resource);
-				openResource(resource);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				// let pass, only reveal and open will fail
-			}
-			return true;
-		}
-		return false;
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fPage.createType(monitor); // use the full progress monitor
+		ICompilationUnit cu= JavaModelUtil.toOriginal(fPage.getCreatedType().getCompilationUnit());
+		if (cu != null) {
+			IResource resource= cu.getResource();
+			selectAndReveal(resource);
+			openResource((IFile) resource);
+		}	
 	}	
 	
 }

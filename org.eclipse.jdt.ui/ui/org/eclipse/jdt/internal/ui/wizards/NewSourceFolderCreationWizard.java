@@ -4,10 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -34,23 +32,12 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 		fPage.init(getSelection());
 	}			
 
-	/*
-	 * @see Wizard#performFinish
-	 */		
-	public boolean performFinish() {
-		if (finishPage(fPage.getRunnable())) {
-			IPackageFragmentRoot root= fPage.getNewPackageFragmentRoot();
-			try {
-				IResource resource= root.getUnderlyingResource();
-				selectAndReveal(resource);
-				openResource(resource);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				// let pass, only reveal and open will fail
-			}
-			return true;
-		}
-		return false;		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fPage.createPackageFragmentRoot(monitor); // use the full progress monitor
+		selectAndReveal(fPage.getNewPackageFragmentRoot().getResource());
 	}	
 	
 }
