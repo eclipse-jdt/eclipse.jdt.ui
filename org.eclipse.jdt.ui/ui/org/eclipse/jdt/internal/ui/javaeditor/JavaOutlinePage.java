@@ -71,6 +71,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
@@ -83,7 +84,6 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -716,9 +716,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		// register global actions
 		IActionBars bars= getSite().getActionBars();
 		
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_JAVA_DOC, fShowJavadoc);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		

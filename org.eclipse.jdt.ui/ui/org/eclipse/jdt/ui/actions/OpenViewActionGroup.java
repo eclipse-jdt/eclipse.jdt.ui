@@ -33,7 +33,6 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -140,9 +139,9 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
-		actionBars.setGlobalActionHandler(RetargetActionIDs.OPEN_SUPER_IMPLEMENTATION, fOpenSuperImplementation);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_SUPER_IMPLEMENTATION, fOpenSuperImplementation);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fOpenPropertiesDialog);		
 	}
 	

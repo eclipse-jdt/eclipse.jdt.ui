@@ -30,10 +30,10 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 
 public class BasicEditorActionContributor extends BasicTextEditorActionContributor {
 	
@@ -52,13 +52,13 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		
-		fRetargetShowJavaDoc= new RetargetAction(RetargetActionIDs.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
+		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
 	}
 	
 	public void init(IActionBars bars) {
 		super.init(bars);
 		// register actions that have a dynamic editor. 
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_JAVA_DOC, fShowJavaDoc);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
 	}
 
 	/**
@@ -102,8 +102,8 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		
-		actionBars.setGlobalActionHandler(RetargetActionIDs.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
-		actionBars.setGlobalActionHandler(RetargetActionIDs.SHIFT_LEFT, getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
+		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
+		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_LEFT, getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
 	}
 	
 	private void registerListeners(IEditorPart part) {

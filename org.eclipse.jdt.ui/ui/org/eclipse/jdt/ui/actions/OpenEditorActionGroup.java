@@ -33,7 +33,6 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -117,7 +116,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
-		actionBars.setGlobalActionHandler(RetargetActionIDs.OPEN, fOpen);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {

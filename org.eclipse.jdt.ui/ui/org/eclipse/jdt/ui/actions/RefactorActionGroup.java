@@ -24,7 +24,6 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
@@ -136,14 +135,14 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.SELF_ENCAPSULATE_FIELD, fSelfEncapsulateField);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.MOVE, fMoveAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.RENAME, fRenameAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.MODIFY_PARAMETERS, fModifyParametersAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.PULL_UP, fPullUpAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.INLINE_TEMP, fInlineTempAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.EXTRACT_TEMP, fExtractTempAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.EXTRACT_METHOD, fExtractMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.SELF_ENCAPSULATE_FIELD, fSelfEncapsulateField);
+		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE, fMoveAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.RENAME, fRenameAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.MODIFY_PARAMETERS, fModifyParametersAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.PULL_UP, fPullUpAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_TEMP, fInlineTempAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 	}
 	
 	/* (non-Javadoc)

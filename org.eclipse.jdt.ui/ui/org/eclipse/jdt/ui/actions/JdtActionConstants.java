@@ -18,9 +18,216 @@ package org.eclipse.jdt.ui.actions;
  */
 public class JdtActionConstants {
 
+	// Navigate menu
+	
 	/**
 	 * Context menu: name of navigate sub menu (value <code>"navigate"</code>).
 	 */
 	public static final String NAVIGATE_MENU= "navigate";	//$NON-NLS-1$
 
+	/**
+	 * Navigate menu: name of standard Goto Type global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.GoToType"</code>).
+	 */
+	public static final String GOTO_TYPE= "org.eclipse.jdt.ui.actions.GoToType"; //$NON-NLS-1$
+	
+	/**
+	 * Navigate menu: name of standard Goto Package global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.GoToPackage"</code>).
+	 */
+	public static final String GOTO_PACKAGE= "org.eclipse.jdt.ui.actions.GoToPackage"; //$NON-NLS-1$
+	
+	/**
+	 * Navigate menu: name of standard Open global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Open"</code>).
+	 */
+	public static final String OPEN= "org.eclipse.jdt.ui.actions.Open"; //$NON-NLS-1$
+
+	/**
+	 * Navigate menu: name of standard Open Super Implementation global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OpenSuperImplementation"</code>).
+	 */
+	public static final String OPEN_SUPER_IMPLEMENTATION= "org.eclipse.jdt.ui.actions.OpenSuperImplementation"; //$NON-NLS-1$
+	
+	/**
+	 * Navigate menu: name of standard Open Type Hierarchy global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OpenTypeHierarchy"</code>).
+	 */
+	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.actions.OpenTypeHierarchy"; //$NON-NLS-1$
+
+	/**
+	 * Navigate menu: name of standard Open External Javadoc global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).
+	 */
+	public static final String OPEN_EXTERNAL_JAVA_DOC= "org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"; //$NON-NLS-1$
+	
+	/**
+	 * Navigate menu: name of standard Show in Packages View global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ShowInPackagesView"</code>).
+	 */
+	public static final String SHOW_IN_PACKAGE_VIEW= "org.eclipse.jdt.ui.actions.ShowInPackagesView"; //$NON-NLS-1$
+
+	/**
+	 * Navigate menu: name of standard Show in Navigator View global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ShowInNaviagtorView"</code>).
+	 */
+	public static final String SHOW_IN_NAVIGATOR_VIEW= "org.eclipse.jdt.ui.actions.ShowInNaviagtorView"; //$NON-NLS-1$
+
+	/**
+	 * Navigate menu: name of standard Show Next Problem global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.NextProblem"</code>).
+	 */
+	public static final String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.actions.NextProblem"; //$NON-NLS-1$
+	
+	/**
+	 * Navigate menu: name of standard Show Previous Problem global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.PreviousProblem"</code>).
+	 */
+	public static final String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.actions.PreviousProblem";	 //$NON-NLS-1$
+
+
+	// Edit menu
+
+	/**
+	 * Edit menu: name of standard Show Javadoc global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ShowJavaDoc"</code>).
+	 */
+	public static final String SHOW_JAVA_DOC= "org.eclipse.jdt.ui.actions.ShowJavaDoc"; //$NON-NLS-1$
+
+	// Source menu	
+	
+	/**
+	 * Source menu: name of standard Comment global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Comment"</code>).
+	 */
+	public static final String COMMENT= "org.eclipse.jdt.ui.actions.Comment"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Uncomment global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Uncomment"</code>).
+	 */
+	public static final String UNCOMMENT= "org.eclipse.jdt.ui.actions.Uncomment"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Shift Rightl action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ShiftRight"</code>).
+	 */
+	public static final String SHIFT_RIGHT= "org.eclipse.jdt.ui.actions.ShiftRight"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Shift Left global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ShiftLeft"</code>).
+	 */
+	public static final String SHIFT_LEFT= "org.eclipse.jdt.ui.actions.ShiftLeft"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Format global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Format"</code>).
+	 */
+	public static final String FORMAT= "org.eclipse.jdt.ui.actions.Format"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Add Import global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.AddImport"</code>).
+	 */
+	public static final String ADD_IMPORT= "org.eclipse.jdt.ui.actions.AddImport"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Organize Imports global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OrganizeImports"</code>).
+	 */
+	public static final String ORGANIZE_IMPORTS= "org.eclipse.jdt.ui.actions.OrganizeImports"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Surround with try/catch block global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.SurroundWithTryCatch"</code>).
+	 */
+	public static final String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryCatch"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Override Methods global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OverrideMethods"</code>).
+	 */
+	public static final String OVERRIDE_METHODS= "org.eclipse.jdt.ui.actions.OverrideMethods"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Generate Getter and Setter global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.GenerateGetterSetter"</code>).
+	 */
+	public static final String GENERATE_GETTER_SETTER= "org.eclipse.jdt.ui.actions.GenerateGetterSetter"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Add Constructor From Superclass global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"</code>).
+	 */
+	public static final String ADD_CONSTRUCTOR_FROM_SUPERCLASS= "org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Add Javadoc Comment global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.AddJavaDocComment"</code>).
+	 */
+	public static final String ADD_JAVA_DOC_COMMENT= "org.eclipse.jdt.ui.actions.AddJavaDocComment"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Find Strings to Externalize global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.FindStringsToExternalize"</code>).
+	 */
+	public static final String FIND_STRINGS_TO_EXTERNALIZE= "org.eclipse.jdt.ui.actions.FindStringsToExternalize"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Externalize Strings global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ExternalizeStrings"</code>).
+	 */
+	public static final String EXTERNALIZE_STRINGS= "org.eclipse.jdt.ui.actions.ExternalizeStrings"; //$NON-NLS-1$
+	
+
+	// Refactor menu
+	
+	/**
+	 * Refactor menu: name of standard Self Encapsulate Field global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.SelfEncapsulateField"</code>).
+	 */
+	public static final String SELF_ENCAPSULATE_FIELD= "org.eclipse.jdt.ui.actions.SelfEncapsulateField"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Modify Parameters global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ModifyParameters"</code>).
+	 */
+	public static final String MODIFY_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyParameters"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Pull Up global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.PullUp"</code>).
+	 */
+	public static final String PULL_UP= "org.eclipse.jdt.ui.actions.PullUp"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Move Element global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Move"</code>).
+	 */
+	public static final String MOVE= "org.eclipse.jdt.ui.actions.Move"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Rename Element global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Rename"</code>).
+	 */
+	public static final String RENAME= "org.eclipse.jdt.ui.actions.Rename"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Inline Temp global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.InlineTemp"</code>).
+	 */
+	public static final String INLINE_TEMP= "org.eclipse.jdt.ui.actions.InlineTemp"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Extract Temp global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractTemp"</code>).
+	 */
+	public static final String EXTRACT_TEMP= "org.eclipse.jdt.ui.actions.ExtractTemp"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Extract Method global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
+	 */
+	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
 }

@@ -21,7 +21,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
@@ -110,7 +109,7 @@ public class ShowActionGroup extends ActionGroup {
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		if (!fIsPackageExplorer)
-			actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
+			actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
 	}	
 }

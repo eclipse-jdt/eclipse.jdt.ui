@@ -11,9 +11,10 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -119,8 +120,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fRetargetTogglePresentation= new RetargetEditorAction(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		fRetargetToggleTextHover= new RetargetEditorAction(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		
-		fRetargetPreviousError= new RetargetEditorAction(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
-		fRetargetNextError= new RetargetEditorAction(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
+		fRetargetPreviousError= new RetargetEditorAction(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		fRetargetNextError= new RetargetEditorAction(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
 		
 		fStructureSelectEnclosingAction= new RetargetTextEditorAction(bundle, "StructureSelectEnclosing."); //$NON-NLS-1$
 		fStructureSelectNextAction= new RetargetTextEditorAction(bundle, "StructureSelectNext."); //$NON-NLS-1$
@@ -143,8 +144,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
-		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
 	}
 
 	/**
@@ -209,13 +210,13 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		IActionBars bars= getActionBars();		
 		// Source menu.
 
-		bars.setGlobalActionHandler(RetargetActionIDs.COMMENT, getAction(textEditor, "Comment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(RetargetActionIDs.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(RetargetActionIDs.FORMAT, getAction(textEditor, "Format")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.COMMENT, getAction(textEditor, "Comment")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.FORMAT, getAction(textEditor, "Format")); //$NON-NLS-1$
 
-		bars.setGlobalActionHandler(RetargetActionIDs.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(RetargetActionIDs.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch")); //$NON-NLS-1$
 		
 		// Navigate menu
 	

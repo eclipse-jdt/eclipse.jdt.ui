@@ -843,50 +843,60 @@ JavaStructureDiffViewerCreator
          	<separator name="showGroup"/>
          	<separator name="problemGroup"/>
       	</menu>
-		<action id="openExternalJavadoc"
+      	
+		<action id="org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"
       		menubarPath="navigate/openGroup"
       		label="%OpenExternalJavadocAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenExternalJavadoc" />
-		<action id="openSuperImplementation"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.OpenSuperImplementation"
       		menubarPath="navigate/openGroup"
       		label="%OpenSuperImplementationAction.label"
 			tooltip="%OpenSuperImplementationAction.tooltip"
 			description="%OpenSuperImplementationAction.description"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenSuperImplementation" />
-		<action id="openTypeHierarchy"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
       		menubarPath="navigate/openGroup"
       		label="%OpenTypeHierarchyAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenTypeHierarchy" />
-		<action id="openSelection"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Open"
       		menubarPath="navigate/openGroup"
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenAction" />
-		<action id="showInNavigatorView"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
       		menubarPath="navigate/showGroup"
       		label="%ShowInNavigatorViewAction.label"
       		tooltip="%ShowInNavigatorViewAction.tooltip"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowInNavigatorView" />
-		<action id="showInPackageView"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ShowInPackagesView"
       		menubarPath="navigate/showGroup"
       		label="%ShowInPackageViewAction.label"
       		tooltip="%ShowInPackageViewAction.tooltip"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowInPackageView" />
-		<action id="previousProblem"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.PreviousProblem"
       		menubarPath="navigate/problemGroup"
       		label="%ShowPreviousProblemAction.label"
       		icon="icons/full/ctool16/prev_error_nav.gif"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowPreviousProblem" />
-		<action id="nextProblem"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.NextProblem"
       		menubarPath="navigate/problemGroup"
       		label="%ShowNextProblemAction.label"
       		icon="icons/full/ctool16/next_error_nav.gif"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowNextProblem" />
+			retarget="true" />
+			
 		<action id="org.eclipse.jdt.ui.actions.GoToPackage"
 			menubarPath="navigate/goTo/"
 			label="%GoToPackageAction.label"
 			retarget="true"/>
+			
 		<action id="org.eclipse.jdt.ui.actions.GoToType"
 			menubarPath="navigate/goTo/"
 			label="%GoToTypeAction.label"
@@ -916,40 +926,46 @@ JavaStructureDiffViewerCreator
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
 				
 		<!-- reorg group  -->		
-		<action id="MoveAction"
+		<action id="org.eclipse.jdt.ui.actions.Move"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.moveAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Move" />
-		<action id="ModifyParametersAction"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ModifyParameters"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.modifyParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ModifyParameters" />
-		<action id="RenameAction"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Rename"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.renameAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Rename" />	
-		<action id="PullUpAction"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.PullUp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.pullUpAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$PullUp" />
+			retarget="true" />
 		
 		<!-- coding group  -->	
-		<action id="ExtractMethodAction"
+		<action id="org.eclipse.jdt.ui.actions.ExtractMethod"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractMethodAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ExtractMethod" />	
+			retarget="true" />
+			
 		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
 			label="%Refactoring.selfEncapsulateFieldAction.label"
-			retarget="true"/>	
-		<action id="InlineTempAction"
+			retarget="true"/>
+			
+		<action id="org.eclipse.jdt.ui.actions.InlineTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.inlineTempAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$InlineTemp" />	
-		<action id="ExtractTempAction"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractTempAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ExtractTemp" />	
+			retarget="true" />
 
 		<!-- =========================================================================== -->
 		<!-- Source Menu                                                                 -->
@@ -966,70 +982,82 @@ JavaStructureDiffViewerCreator
       	
       	<!-- NLS Group -->
       	
-		<action id="externalizeStrings"
+		<action id="org.eclipse.jdt.ui.actions.ExternalizeStrings"
       		menubarPath="org.eclipse.jdt.ui.source.menu/nlsGroup"
       		label="%ExternalizeStringsAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ExternalizeStrings" />
-		<action id="findStringsToExternalize"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.FindStringsToExternalize"
       		menubarPath="org.eclipse.jdt.ui.source.menu/nlsGroup"
       		label="%FindStringsToExternalizeAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$FindStringsToExternalize" />
+			retarget="true" />
 			
 		<!-- Generate Group -->	
 			
-		<action id="addJavaDocComment"
+		<action id="org.eclipse.jdt.ui.actions.AddJavaDocComment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%AddJavaDocCommentAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddJavaDocComment" />
-		<action id="addConstructorFromSuperclass"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%AddConstructorFromSuperclassAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddConstructorFromSuperclass" />
-		<action id="generateGetterSetter"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.GenerateGetterSetter"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%GenerateGetterSetterAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$GenerateGetterSetter" />
-		<action id="overrideMethods"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.OverrideMethods"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%OverrideMethodsAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OverrideMethods" />
-		<action id="surroundWithTryCatch"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.SurroundWithTryCatch"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%SurroundWithTryCatchAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$SurroundWithTryCatch" />
-		<action id="organizeImports"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%OrganizeImportsAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OrganizeImports" />
-		<action id="addImport"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.AddImport"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%AddImportAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddImport" />
+			retarget="true" />
+			
 			
 		<!-- edit group -->	
 			
-		<action id="format"
+		<action id="org.eclipse.jdt.ui.actions.Format"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%FormatAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Format" />			
-		<action id="shiftLeft"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ShiftLeft"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%ShiftLeftAction.label"
       		icon="icons/full/ctool16/shift_l_edit.gif"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShiftLeft" />			
-		<action id="shiftRight"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.ShiftRight"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%ShiftRightAction.label"
       		icon="icons/full/ctool16/shift_r_edit.gif"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShiftRight" />			
-		<action id="uncomment"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Uncomment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%UncommentAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Uncomment" />
-		<action id="comment"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Comment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%CommentAction.label"
-			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Comment" />
+			retarget="true" />
 	</actionSet>			
 </extension>
 

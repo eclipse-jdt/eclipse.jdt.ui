@@ -28,7 +28,6 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
@@ -147,14 +146,14 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBar) {
-		actionBar.setGlobalActionHandler(RetargetActionIDs.OVERRIDE_METHODS, fOverrideMethods);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.GENERATE_GETTER_SETTER, fAddGetterSetter);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
+		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
+		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);
+		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
+		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmark);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.EXTERNALIZE_STRINGS, fExternalizeStrings);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, fOrganizeImports);
+		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
+		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {

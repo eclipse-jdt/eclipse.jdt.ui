@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
@@ -62,7 +63,6 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 public class PackageExplorerActionGroup extends CompositeActionGroup {
@@ -142,8 +142,8 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.GOTO_TYPE, fGotoTypeAction);
-		actionBars.setGlobalActionHandler(RetargetActionIDs.GOTO_PACKAGE, fGotoPackageAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_PACKAGE, fGotoPackageAction);
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
