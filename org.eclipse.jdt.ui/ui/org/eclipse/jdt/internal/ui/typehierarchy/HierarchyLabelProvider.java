@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -40,30 +39,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * input scope are rendered differntly.
   */
 public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
-
-	
-	private static class HierarchyOverrideIndicatorLabelDecorator extends OverrideIndicatorLabelDecorator {
-		
-		private TypeHierarchyLifeCycle fHierarchy;
-		
-		public HierarchyOverrideIndicatorLabelDecorator(TypeHierarchyLifeCycle lifeCycle) {
-			super(null);
-			fHierarchy= lifeCycle;
-		}
-		
-		/* (non-Javadoc)
-		 * @see OverrideIndicatorLabelDecorator#getOverrideIndicators(IMethod)
-		 */
-		protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-			IType type= (IType) JavaModelUtil.toOriginal(method.getDeclaringType());
-			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
-			if (hierarchy != null) {
-				return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
-			}
-			return 0;
-		}
-	}
-	
 
 	private static class FocusDescriptor extends CompositeImageDescriptor {
 		private ImageDescriptor fBase;

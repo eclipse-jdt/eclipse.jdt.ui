@@ -59,7 +59,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	private static final String TAG_SORTBYDEFININGTYPE= "sortbydefiningtype";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
-	private HierarchyLabelProvider fLabelProvider;
+	private MethodsLabelProvider fLabelProvider;
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 	
@@ -70,7 +70,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	public MethodsViewer(Composite parent, final TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
+		fLabelProvider= new MethodsLabelProvider(lifeCycle, this);
 	
 		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
 		setContentProvider(new MethodsContentProvider(lifeCycle));

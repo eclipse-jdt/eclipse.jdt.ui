@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.PlatformUI;
@@ -32,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * in the constructor. So on each getImage the corrsponding decorators are
  * turned off and on again.
   */
-public class DecoratingJavaLabelProvider extends DecoratingLabelProvider {
+public class DecoratingJavaLabelProvider extends DecoratingLabelProvider implements IColorProvider {
 
 	private static final boolean USE_LIGHTWEIGHT= false;
 	
@@ -130,6 +133,28 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider {
 			}
 		}
 		return super.getText(element);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+	 */
+	public Color getForeground(Object element) {
+		ILabelProvider provider= getLabelProvider();
+		if (provider instanceof IColorProvider) {
+			return ((IColorProvider) provider).getForeground(element);
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+	 */
+	public Color getBackground(Object element) {
+		ILabelProvider provider= getLabelProvider();
+		if (provider instanceof IColorProvider) {
+			return ((IColorProvider) provider).getBackground(element);
+		}
+		return null;
 	}
 
 }
