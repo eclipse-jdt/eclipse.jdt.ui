@@ -121,6 +121,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	private int fTypes;
 	
 	private SnippetFinder(ASTNode[] snippet) {
+		super(true);
 		fSnippet= snippet;
 		fMatcher= new Matcher();
 		reset();

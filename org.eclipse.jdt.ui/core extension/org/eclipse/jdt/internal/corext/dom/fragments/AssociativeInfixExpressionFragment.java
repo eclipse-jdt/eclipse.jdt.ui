@@ -333,6 +333,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		}
 		
 		private GroupMemberFinder(InfixExpression groupRoot) {
+			super(true);
 			Assert.isTrue(isAssociativeInfix(groupRoot));
 			fGroupRoot= groupRoot;
 			fGroupRoot.accept(this);

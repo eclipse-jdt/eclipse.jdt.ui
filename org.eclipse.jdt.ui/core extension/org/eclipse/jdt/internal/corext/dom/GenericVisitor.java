@@ -18,6 +18,13 @@ public class GenericVisitor extends ASTVisitor {
 		super();
 	}
 
+	/**
+	 * @param visitJavadocTags <code>true</code> if doc comment tags are
+	 * to be visited by default, and <code>false</code> otherwise
+	 * @see Javadoc#tags()
+	 * @see #visit(Javadoc)
+	 * @since 3.0
+	 */
 	public GenericVisitor(boolean visitJavadocTags) {
 		super(visitJavadocTags);
 	}
@@ -120,7 +127,10 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(Javadoc node) {
-		return visitNode(node);
+		if (super.visit(node))
+			return visitNode(node);
+		else
+			return false;
 	}
 	public boolean visit(LabeledStatement node) {
 		return visitNode(node);

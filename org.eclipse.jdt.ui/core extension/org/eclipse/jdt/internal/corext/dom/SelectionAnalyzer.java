@@ -34,6 +34,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 	private List fSelectedNodes;
 	
 	public SelectionAnalyzer(Selection selection, boolean traverseSelectedNode) {
+		super(true);
 		Assert.isNotNull(selection);
 		fSelection= selection;
 		fTraverseSelectedNode= traverseSelectedNode;

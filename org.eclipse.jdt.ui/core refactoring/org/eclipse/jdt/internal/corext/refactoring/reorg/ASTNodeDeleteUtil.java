@@ -87,7 +87,7 @@ public class ASTNodeDeleteUtil {
 		final Set result= new HashSet();
 		ASTNode rootNode= rewrite.getRootNode();
 		if (rootNode != null) {
-			rootNode.accept(new GenericVisitor(){
+			rootNode.accept(new GenericVisitor(true){
 				protected boolean visitNode(ASTNode node) {
 					if (rewrite.isRemoved(node))
 						result.add(node);

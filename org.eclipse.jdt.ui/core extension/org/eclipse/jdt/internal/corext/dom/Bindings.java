@@ -798,6 +798,7 @@ public class Bindings {
 		}
 
 		public AllBindingsVisitor(TypeBindingVisitor visitor) {
+			super(true);
 			fVisitor= visitor;
 		}
 		

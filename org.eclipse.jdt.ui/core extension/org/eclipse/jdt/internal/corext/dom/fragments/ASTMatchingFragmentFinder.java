@@ -26,6 +26,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	private List fMatches= new ArrayList();
 
 	private ASTMatchingFragmentFinder(ASTFragment toMatch) {
+		super(true);
 		fFragmentToMatch= toMatch;	
 	}
 	private IASTFragment[] findMatches(ASTNode scope) {

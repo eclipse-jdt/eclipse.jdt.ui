@@ -31,6 +31,7 @@ public class JavaElementMapper extends GenericVisitor {
 	private ASTNode fResult;
 	
 	private JavaElementMapper(IMember element) throws JavaModelException {
+		super(true);
 		Assert.isNotNull(element);
 		fElement= element;
 		ISourceRange sourceRange= fElement.getNameRange();

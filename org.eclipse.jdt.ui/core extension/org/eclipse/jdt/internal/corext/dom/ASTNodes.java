@@ -749,7 +749,7 @@ public class ASTNodes {
 	 * @param flags The flags to set
 	 */
 	public static void setFlagsToAST(ASTNode root, final int flags) {
-		root.accept(new GenericVisitor() {
+		root.accept(new GenericVisitor(true) {
 			protected boolean visitNode(ASTNode node) {
 				node.setFlags(node.getFlags() | flags);
 				return true;

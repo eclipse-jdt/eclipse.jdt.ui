@@ -27,6 +27,7 @@ public class ASTFlattener extends GenericVisitor {
 	protected StringBuffer fResult;
 
 	public ASTFlattener() {
+		super(true);
 		fResult= new StringBuffer();
 	}
 	
