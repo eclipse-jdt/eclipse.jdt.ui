@@ -588,11 +588,6 @@
             annotationType="org.eclipse.jdt.ui.info"
             annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationImageProvider">
       </specification>
-      <specification
-            annotationType="org.eclipse.debug.core.breakpoint"
-            icon="icons/full/obj16/brkp_obj.gif"
-            annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.BreakpointImageProvider">
-      </specification>
 	  <specification
             annotationType="org.eclipse.jdt.ui.occurrences"
             label="%OccurrenceAnnotation.label"
