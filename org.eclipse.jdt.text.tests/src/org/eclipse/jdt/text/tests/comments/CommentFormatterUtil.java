@@ -70,6 +70,6 @@ public class CommentFormatterUtil {
 
 		final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), preferences, textMeasurement);
 
-		return region.format();
+		return region.format(region.getIndentation());
 	}
 }

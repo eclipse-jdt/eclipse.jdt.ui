@@ -85,6 +85,12 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	private int fTabs;
 
 	/**
+	 * <code>true</code> if tabs, not spaces, should be used for indentation
+	 * @since 3.1
+	 */
+	private boolean fUseTab;
+
+	/**
 	 * Creates a new comment region.
 	 * 
 	 * @param document
@@ -117,6 +123,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			}
 		else
 			fTabs= 4;
+		fUseTab= JavaCore.TAB.equals(getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
 
@@ -197,11 +204,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * 
 	 * @return The resulting text edit of the formatting process
 	 */
-	public final TextEdit format() {
-
-		final boolean useTab= JavaCore.TAB.equals(getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
-		final String indentation= getLineIndentation(getDocument(), getOffset(), useTab);
-		
+	public final TextEdit format(final String indentation) {
 		fResult= new MultiTextEdit();
 
 		final String probe= getText(0, CommentLine.NON_FORMAT_START_PREFIX.length());
@@ -482,27 +485,23 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Returns the indentation of the line at the specified offset.
+	 * Returns the indentation of this region.
 	 * 
-	 * @param document	the document which owns the line
-	 * @param offset	the offset where to determine the indentation
-	 * @param useTab		<code>true</code> iff the indentation should use tabs
-	 *                   instead of spaces, <code>false</code> otherwise
-	 * @return The indentation of the line
+	 * @return the indentation of this region
+	 * @since 3.1
 	 */
-	private String getLineIndentation(final IDocument document, final int offset, final boolean useTab) {
-
+	public final String getIndentation() {
 		String result= ""; //$NON-NLS-1$
-
+		
 		try {
-
-			final IRegion line= document.getLineInformationOfOffset(offset);
-
+		
+			final IRegion line= getDocument().getLineInformationOfOffset(getOffset());
+		
 			final int begin= line.getOffset();
-			final int end= Math.min(offset, line.getOffset() + line.getLength());
-
-			result= stringToIndent(document.get(begin, end - begin), useTab);
-
+			final int end= Math.min(getOffset(), line.getOffset() + line.getLength());
+		
+			result= stringToIndent(getDocument().get(begin, end - begin), fUseTab);
+		
 		} catch (BadLocationException exception) {
 			// Ignore and return empty
 		}
