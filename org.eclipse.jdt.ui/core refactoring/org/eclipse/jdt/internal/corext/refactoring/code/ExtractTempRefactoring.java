@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.text.edits.InsertEdit;
@@ -172,11 +173,9 @@ public class ExtractTempRefactoring extends Refactoring {
 	 * The first proposal should be used as "best guess" (if it exists).
 	 */
 	public String[] guessTempNames() {
-		List proposals= new ArrayList();
+		LinkedHashSet proposals= new LinkedHashSet(); //retain ordering, but prevent duplicates
 		try {
-			IExpressionFragment selected;
-				selected= getSelectedExpression();
-			ASTNode associatedNode= selected.getAssociatedNode();
+			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
 			if (associatedNode instanceof MethodInvocation){
 				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode));
 			}
@@ -210,14 +209,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		return Arrays.asList(proposals);
 	}
 	
-	private void sortByLength(String[] proposals) {
-		Arrays.sort(proposals, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((String) o2).length() - ((String) o1).length();
-			}
-		});
-	}
-
 	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression) throws JavaModelException {
 		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
 		String typeName= getQualifiedName(expressionBinding);
@@ -230,6 +221,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		return Arrays.asList(proposals);
 	}
 	
+	private void sortByLength(String[] proposals) {
+		Arrays.sort(proposals, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((String) o2).length() - ((String) o1).length();
+			}
+		});
+	}
+
 	private String[] getExcludedVariableNames() throws JavaModelException {
 		IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
 		String[] names= new String[bindings.length];
