@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids - Fixed bug 25898
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
