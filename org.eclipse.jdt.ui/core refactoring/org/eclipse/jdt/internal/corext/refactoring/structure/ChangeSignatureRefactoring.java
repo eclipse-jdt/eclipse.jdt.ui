@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -41,6 +43,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -73,7 +77,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ChangeSignatureRefactoring extends Refactoring {
 	
@@ -391,18 +394,20 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				trimmed.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
 	}
 
-		public RefactoringStatus checkPreactivation() throws JavaModelException{
-			RefactoringStatus result= new RefactoringStatus();
-			result.merge(Checks.checkAvailability(fMethod));
-			if (result.hasFatalError())
-				return result;
-				
-			//XXX disable for non-arg constructors see 24713
-			if (fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0)
-				return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for no-arg constructors");
-	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
 			return result;
-		}
+		result.merge(super.checkPreconditions(pm));
+		return result;
+	}
+
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
+		return Checks.checkAvailability(fMethod);
+	}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
@@ -490,6 +495,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				continue;
 			ICompilationUnit cu= fAstManager.getCompilationUnit(methodOccurrence);
 			MethodDeclaration decl= getMethodDeclaration(methodOccurrence);
+			if (decl == null) //this can be null because of bug 27236
+				continue;
 			String typeName= getFullTypeName(decl);
 			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
@@ -791,16 +798,126 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("Preparing preview", 1);
+		pm.beginTask("Preparing preview", 2);
 
 		if (! areNamesSameAsInitial())
 			addRenamings();
 		modifyMethodOccurrences(new SubProgressMonitor(pm, 1));
-
+		if (isNoArgConstructor())
+			modifyImplicitCallsToNoArgConstructor(new SubProgressMonitor(pm, 1));
+		
 		TextChangeManager manager= new TextChangeManager();
 		fillWithRewriteEdits(manager);
 		pm.done();
 		return manager;
+	}	
+	
+	private void modifyImplicitCallsToNoArgConstructor(IProgressMonitor pm) throws JavaModelException {
+		TypeDeclaration[] subclassNodes= getSubclassNodes(fMethod.getDeclaringType(), pm);
+		for (int i= 0; i < subclassNodes.length; i++) {
+			modifyImplicitCallsToNoArgConstructor(subclassNodes[i]);
+		}
+	}
+	
+	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass) {
+		MethodDeclaration[] constructors= getAllConstructors(subclass);
+		if (constructors.length == 0){
+			addNewConstructorToSubclass(subclass);
+		} else {
+			ASTRewrite rewrite= getRewrite(subclass);
+			for (int i= 0; i < constructors.length; i++) {
+				if (containsImplicitCallToSuperConstructor(constructors[i])){
+					SuperConstructorInvocation superCall= addExplicitSuperConstructorCall(constructors[i], rewrite);
+					rewrite.markAsInserted(superCall);
+				}	
+			}
+		}
+	}
+	
+	private SuperConstructorInvocation addExplicitSuperConstructorCall(MethodDeclaration constructor, ASTRewrite rewrite) {
+		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
+		addArgumentsToNewCuperConstructorCall(superCall, rewrite);
+		constructor.getBody().statements().add(0, superCall);
+		return superCall;
+	}
+	
+	private void addArgumentsToNewCuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite) {
+		int i= 0;
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			superCall.arguments().add(i, createNewExpression(rewrite, info));
+		}
+	}
+	
+	private boolean containsImplicitCallToSuperConstructor(MethodDeclaration constructor) {
+		Assert.isTrue(constructor.isConstructor());
+		Block body= constructor.getBody();
+		if (body == null)
+			return false;
+		if (body.statements().size() == 0)
+			return true;
+		if (body.statements().get(0) instanceof ConstructorInvocation)
+			return false;
+		if (body.statements().get(0) instanceof SuperConstructorInvocation)
+			return false;
+		return true;
+	}
+	
+	private void addNewConstructorToSubclass(TypeDeclaration subclass) {
+		AST ast= subclass.getAST();
+		MethodDeclaration newConstructor= ast.newMethodDeclaration();
+		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
+		newConstructor.setConstructor(true);
+		newConstructor.setBody(ast.newBlock());
+		newConstructor.setExtraDimensions(0);
+		newConstructor.setJavadoc(null);
+		newConstructor.setModifiers(getAccessModifier(subclass));
+		newConstructor.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+		
+		addExplicitSuperConstructorCall(newConstructor, getRewrite(subclass));
+		subclass.bodyDeclarations().add(0, newConstructor); // ok to add as first ???
+		getRewrite(subclass).markAsInserted(newConstructor);
+	}
+	
+	private static int getAccessModifier(TypeDeclaration subclass) {
+		int modifiers= subclass.getModifiers();
+		if (Modifier.isPublic(modifiers))
+			return Modifier.PUBLIC;
+		else if (Modifier.isProtected(modifiers))
+			return Modifier.PROTECTED;
+		else if (Modifier.isPrivate(modifiers))
+			return Modifier.PRIVATE;
+		else
+			return Modifier.NONE;
+	}
+	
+	private MethodDeclaration[] getAllConstructors(TypeDeclaration typeDeclaration) {
+		MethodDeclaration[] methods= typeDeclaration.getMethods();
+		List result= new ArrayList(1);
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].isConstructor())
+				result.add(methods[i]);
+		}
+		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+	}
+	
+	private TypeDeclaration[] getSubclassNodes(IType iType, IProgressMonitor pm) throws JavaModelException {
+		IType[] subclasses= getSubclasses(iType, pm);
+		List result= new ArrayList(subclasses.length);
+		for(int i= 0; i < subclasses.length; i++){
+			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(subclasses[i], fAstManager);
+			if (td != null)
+				result.add(td);
+		}
+		return (TypeDeclaration[]) result.toArray(new TypeDeclaration[result.size()]);
+	}
+	
+	private IType[] getSubclasses(IType iType, IProgressMonitor pm) throws JavaModelException {
+		return iType.newTypeHierarchy(pm).getSubclasses(iType);
+	}
+	
+	private boolean isNoArgConstructor() throws JavaModelException {
+		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 
 	private void fillWithRewriteEdits(TextChangeManager manager) throws JavaModelException, CoreException {
@@ -834,7 +951,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private void updateDeclarationNode(ASTNode methodOccurrence) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
-
+		if (methodDeclaration == null) //can be null - see bug 27236
+			return;
 		if (! methodDeclaration.isConstructor())
 			changeReturnType(methodDeclaration);
 		changeParameterTypes(methodDeclaration);
@@ -1035,7 +1153,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private SingleVariableDeclaration[] getSubNodesOfMethodDeclarationNode(ASTNode occurrenceNode) {
 		Assert.isTrue(! isReferenceNode(occurrenceNode));
-		return (SingleVariableDeclaration[]) getMethodDeclaration(occurrenceNode).parameters().toArray(new SingleVariableDeclaration[getMethodDeclaration(occurrenceNode).parameters().size()]);
+		MethodDeclaration methodDeclaration= getMethodDeclaration(occurrenceNode);
+		if (methodDeclaration == null) //can be null - see bug 27236
+			return new SingleVariableDeclaration[0];
+		return (SingleVariableDeclaration[]) methodDeclaration.parameters().toArray(new SingleVariableDeclaration[methodDeclaration.parameters().size()]);
 	}
 	
 	private static MethodDeclaration getMethodDeclaration(ASTNode node){
