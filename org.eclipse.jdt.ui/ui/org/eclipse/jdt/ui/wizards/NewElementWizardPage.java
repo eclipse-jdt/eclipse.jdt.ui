@@ -37,7 +37,8 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 */	
 	public NewElementWizardPage(String name) {
 		super(name);
-		fPageVisible= false;	
+		fPageVisible= false;
+		fCurrStatus=  new StatusInfo();
 	}
 		
 	// ---- WizardPage ----------------
