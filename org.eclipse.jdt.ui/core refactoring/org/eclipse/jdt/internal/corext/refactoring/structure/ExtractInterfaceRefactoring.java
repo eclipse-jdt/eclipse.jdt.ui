@@ -427,6 +427,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					nodesToRemove.addAll(getAllReturnTypeNodes(methods));
 					return true;
 				}	
+				ASTNode[] referenceNodes= getReferenceNodes(methods, pm);
+				for (int i= 0; i < referenceNodes.length; i++) {
+					if (! isReferenceUpdatable(referenceNodes[i], nodesToRemove)){
+						nodesToRemove.addAll(getAllReturnTypeNodes(methods));
+						return true;
+					}
+				}
 			}		
 		}
 		return false;
@@ -523,19 +530,26 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
 		return ASTNodeSearchUtil.findReferenceNodes(member, fASTMappingManager, pm);
 	}
+
+	private ASTNode[] getReferenceNodes(IMember[] members, IProgressMonitor pm) throws JavaModelException{
+		if (members == null || members.length ==0)
+			return new ASTNode[0];
+		IJavaSearchScope scope= RefactoringScopeFactory.create(members[0]);
+		return ASTNodeSearchUtil.findReferenceNodes(members, fASTMappingManager, pm, scope);
+	}
 		
-	private boolean isReferenceUpdatable(ASTNode varReference, Collection nodesToRemove) throws JavaModelException{
-		ASTNode parent= varReference.getParent();
+	private boolean isReferenceUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
+		ASTNode parent= node.getParent();
 		if (parent instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment r1= (VariableDeclarationFragment)parent;
-			if (varReference == r1.getInitializer()){
+			if (node == r1.getInitializer()){
 				IVariableBinding vb= r1.resolveBinding();
-				if (vb != null && fBadVarSet.contains(getCompilationUnitNode(varReference).findDeclaringNode(vb)))
+				if (vb != null && fBadVarSet.contains(getCompilationUnitNode(node).findDeclaringNode(vb)))
 					return false;
 			}
 		} else if (parent instanceof Assignment){
 			Assignment assmnt= (Assignment)parent;
-			if (varReference == assmnt.getRightHandSide()){
+			if (node == assmnt.getRightHandSide()){
 				Expression lhs= assmnt.getLeftHandSide();
 				if (lhs instanceof SimpleName){
 					IBinding binding= ((SimpleName)lhs).resolveBinding();
@@ -545,7 +559,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			}
 		} else if (parent instanceof MethodInvocation){
 			MethodInvocation mi= (MethodInvocation)parent;
-			int argumentIndex= mi.arguments().indexOf(varReference);
+			int argumentIndex= mi.arguments().indexOf(node);
 			if (argumentIndex != -1 ){
 				IBinding bin= mi.getName().resolveBinding();
 				if (! (bin instanceof IMethodBinding))
