@@ -20,7 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.core.dom.Modifier;
 
@@ -32,18 +32,11 @@ class VisibilityControlUtil {
 		if (allowedVisibilities.size() == 1)
 			return null;
 		
-		Composite composite= new Composite(parent, SWT.NONE);
+		Group group= new Group(parent, SWT.NONE);
+		group.setText("Access modifier");
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2; layout.marginWidth= 0;
-		composite.setLayout(layout);
-		
-		
-		Label label= new Label(composite, SWT.NONE);
-		label.setText("Access modifier:");
-		
-		Composite group= new Composite(composite, SWT.NONE);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layout= new GridLayout();
 		layout.numColumns= 4; layout.marginWidth= 0;
 		group.setLayout(layout);
 		
@@ -72,9 +65,8 @@ class VisibilityControlUtil {
 				}
 			});
 		}
-		label.setLayoutData((new GridData()));
 		group.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-		return composite;
+		return group;
 	}
 	private static List convertToIntegerList(int[] array) {
 		List result= new ArrayList(array.length);
