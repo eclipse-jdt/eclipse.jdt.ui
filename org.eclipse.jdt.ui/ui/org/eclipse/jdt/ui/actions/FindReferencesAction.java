@@ -10,6 +10,8 @@
  */
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.Flags;
@@ -25,8 +27,11 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
+
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds references of the selected element in the workspace.
@@ -39,6 +44,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @since 2.0
  */
 public class FindReferencesAction extends FindAction {
+
+	private static final String BIN_PRIM_CONST_WARN_DIALOG_ID= "BinaryPrimitiveConstantWarningDialog"; //$NON-NLS-1$
+
 
 	/**
 	 * Creates a new <code>FindReferencesAction</code>.
@@ -74,6 +82,35 @@ public class FindReferencesAction extends FindAction {
 	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
 	}	
+
+	void run(IJavaElement element) {
+		if (isBinaryPrimitveConstant(element))
+			OptionalMessageDialog.open(
+				BIN_PRIM_CONST_WARN_DIALOG_ID,
+				getShell(),
+				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.title"), //$NON-NLS-1$
+				null,
+				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.message"), //$NON-NLS-1$
+				OptionalMessageDialog.INFORMATION,
+				new String[] { IDialogConstants.OK_LABEL },
+				0);
+
+		super.run(element);
+	}
+	
+	private boolean isBinaryPrimitveConstant(IJavaElement element) {
+		if (element.getElementType() == IJavaElement.FIELD) {
+			IField field= (IField)element;
+			int flags;
+			try {
+				flags= field.getFlags();
+			} catch (JavaModelException ex) {
+				return false;
+			}
+			return field.isBinary() && Flags.isStatic(flags) && Flags.isFinal(flags) && isPrimitive(field);
+		}
+		return false;
+	}
 
 	private static boolean isPrimitive(IField field) {
 		String fieldType;

@@ -4,8 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.HashMap;
 import java.text.MessageFormat;
+import java.util.HashMap;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -14,20 +14,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.viewers.IInputSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.search.ui.IActionGroupFactory;
 import org.eclipse.search.ui.IContextMenuContributor;
 import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,12 +32,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
@@ -52,6 +45,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
 	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
 	private static final Boolean POTENTIAL_MATCH_VALUE= new Boolean(true);
+	private static final String POTENTIAL_MATCH_DIALOG_ID= "Search.PotentialMatchDialog"; //$NON-NLS-1$
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
@@ -141,7 +135,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		}
 
 		if (fView != null) {
-			if (fPotentialMatchCount > 0 && PotentialMatchDialog.shouldExplain())
+			if (fPotentialMatchCount > 0)
 				explainPotentialMatch(fPotentialMatchCount);
 			fView.searchFinished();
 		}
@@ -154,9 +148,23 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private void explainPotentialMatch(final int potentialMatchCount) {
 		// Make sure we are doing it in the right thread.
 		final Shell shell= fView.getSite().getShell();
+		final String title;
+		if (potentialMatchCount == 1)
+			title= new String(SearchMessages.getString("Search.potentialMatchDialog.title.foundPotentialMatch")); //$NON-NLS-1$
+		else
+			title= new String(SearchMessages.getFormattedString("Search.potentialMatchDialog.title.foundPotentialMatches", "" + potentialMatchCount)); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				PotentialMatchDialog.open(shell, potentialMatchCount);
+				OptionalMessageDialog.open(
+					POTENTIAL_MATCH_DIALOG_ID, //$NON-NLS-1$,
+					shell,
+					title,
+					null,
+					SearchMessages.getString("Search.potentialMatchDialog.message"), //$NON-NLS-1$,
+					OptionalMessageDialog.INFORMATION,
+					new String[] { IDialogConstants.OK_LABEL },
+					0);
 			}
 		});
 	}
