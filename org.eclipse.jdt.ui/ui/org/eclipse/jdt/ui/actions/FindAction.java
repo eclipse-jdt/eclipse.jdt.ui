@@ -242,7 +242,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 					IJavaElement element= elements[0];
 					if (elements.length > 1)
 						element= SelectionConverter.codeResolve(fEditor, getShell(), title, message);
-					run(element);
+					if (element != null)
+						run(element);
 			}
 			else
 				showOperationUnavailableDialog();
