@@ -112,6 +112,7 @@ public interface IJavaHelpContextIds {
 	public static final String MOVE_ACTION= 														PREFIX + "move_action"; //$NON-NLS-1$
 	public static final String OPEN_ACTION= 														PREFIX + "open_action"; //$NON-NLS-1$
 	public static final String OPEN_EXTERNAL_JAVADOC_ACTION= 							PREFIX + "open_external_javadoc_action"; //$NON-NLS-1$
+	public static final String OPEN_INPUT_ACTION= 														PREFIX + "open_input_action"; //$NON-NLS-1$
 	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$
 	public static final String PULL_UP_ACTION= 													PREFIX + "pull_up_action"; //$NON-NLS-1$
 	public static final String PUSH_DOWN_ACTION= 													PREFIX + "push_down_action"; //$NON-NLS-1$
