@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 public class DialogFieldExample {
 	private Shell fShell;
@@ -88,8 +88,8 @@ public class DialogFieldExample {
 		
 		LayoutUtil.doDefaultLayout(fShell, new DialogField[] { string1, rdgroup2, stringbutton, selButton, list, rdgroup1 }, false);
 		
-		((MGridData)string1.getTextControl(null).getLayoutData()).widthHint= 100;
-		((MGridData)stringbutton.getTextControl(null).getLayoutData()).widthHint= 100;
+		((GridData)string1.getTextControl(null).getLayoutData()).widthHint= 100;
+		((GridData)stringbutton.getTextControl(null).getLayoutData()).widthHint= 100;
 		
 		fShell.setSize(fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		fShell.open ();
