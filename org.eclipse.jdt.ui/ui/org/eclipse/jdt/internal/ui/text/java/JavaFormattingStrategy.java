@@ -52,8 +52,7 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 		if (fInitialIndentation != null) {
 			indent= TextUtil.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
 		}
-		formatter.setInitialIndentationLevel(indent);
-		String string= formatter.formatSourceString(content);
+		String string= formatter.format(content, indent);
 		System.arraycopy(formatter.getMappedPositions(), 0, positions, 0, positions.length);
 		return string;
 	}	

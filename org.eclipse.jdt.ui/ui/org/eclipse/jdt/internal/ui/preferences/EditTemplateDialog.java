@@ -221,7 +221,7 @@ public class EditTemplateDialog extends StatusDialog {
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
 
-		Label patternLabel= createLabel(composite, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
+		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
 		fPatternEditor= createEditor(parent);
 		
 		Label filler= new Label(composite, SWT.NONE);		
