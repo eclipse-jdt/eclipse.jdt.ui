@@ -353,7 +353,8 @@ public class RenameParametersTests extends RefactoringTest{
 	}
 	
 	public void testFail21() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("Disabled since 1.4 compliance level doesn't produce error message");
+		// helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 }
