@@ -196,7 +196,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		dialog.setExpandedElements(expanded.toArray());
 		dialog.setContainerMode(true);
 		dialog.setSorter(sorter);
-		dialog.setSize(60, 25);
+		dialog.setSize(60, 18);
 		dialog.setInput(this); // input does not matter
 		if (dialog.open() == dialog.OK) {
 			Object[] checkedElements= dialog.getResult();
