@@ -340,10 +340,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		 * Returns a argument node for the specified variable binding.
 		 * 
 		 * @param binding the binding to create a argument node for
+		 * @param last <code>true</code> if the argument represented by this node is the last one in its declaring method
 		 * @return the corresponding node
 		 * @throws JavaModelException if an error occurs
 		 */
-		public ASTNode getArgumentNode(IVariableBinding binding) throws JavaModelException;
+		public ASTNode getArgumentNode(IVariableBinding binding, boolean last) throws JavaModelException;
 
 		/**
 		 * Returns a target node for the current target.
@@ -865,7 +866,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			}
 		}
 
-		public ASTNode getArgumentNode(final IVariableBinding binding) throws JavaModelException {
+		public ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) throws JavaModelException {
 			Assert.isNotNull(binding);
 			adjustTypeVisibility(binding.getType());
 			return fAst.newSimpleName(binding.getName());
@@ -1402,18 +1403,19 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		IVariableBinding binding= null;
 		VariableDeclaration variable= null;
 		boolean added= false;
-		for (final Iterator iterator= declaration.parameters().iterator(); iterator.hasNext();) {
-			variable= (VariableDeclaration) iterator.next();
+		final int size= declaration.parameters().size();
+		for (int index= 0; index < size; index++) {
+			variable= (VariableDeclaration) declaration.parameters().get(index);
 			binding= variable.resolveBinding();
 			if (binding != null) {
 				if (!Bindings.equals(binding, fTarget))
-					arguments.add(factory.getArgumentNode(binding));
+					arguments.add(factory.getArgumentNode(binding, index == size - 1));
 				else if (!finder.getStatus().isOK()) {
 					arguments.add(factory.getTargetNode());
 					added= true;
 				}
 			} else
-				arguments.add(factory.getArgumentNode(binding));
+				arguments.add(factory.getArgumentNode(binding, index == size - 1));
 		}
 		if (!finder.getStatus().isOK() && !added) {
 			arguments.add(0, factory.getTargetNode());
@@ -1667,14 +1669,19 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final List arguments= new ArrayList(declaration.parameters().size() + 1);
 		final boolean result= createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments) {
 
-			public final ASTNode getArgumentNode(final IVariableBinding binding) throws JavaModelException {
+			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) throws JavaModelException {
 				Assert.isNotNull(binding);
 				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
 				final ITypeBinding type= binding.getType();
 				adjustTypeVisibility(type);
-				variable.setType(ASTNodeFactory.newType(ast, type, false));
 				variable.setName(ast.newSimpleName(binding.getName()));
 				variable.modifiers().addAll(ast.newModifiers(binding.getModifiers()));
+				final IMethodBinding method= binding.getDeclaringMethod();
+				if (last && method != null && method.isVarargs()) {
+					variable.setVarargs(true);
+					variable.setType(ast.newSimpleType(ast.newSimpleName(type.isArray() ? type.getElementType().getName() : type.getName())));
+				} else
+				variable.setType(ASTNodeFactory.newType(ast, type, false));
 				return variable;
 			}
 
@@ -1770,7 +1777,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final List arguments= new ArrayList(bindings.length + 1);
 			createArgumentList(declaration, arguments, new IArgumentFactory() {
 
-				public final ASTNode getArgumentNode(final IVariableBinding argument) throws JavaModelException {
+				public final ASTNode getArgumentNode(final IVariableBinding argument, final boolean last) throws JavaModelException {
 					Assert.isNotNull(argument);
 					if (elements.containsKey(argument.getKey()))
 						return rewrite.createCopyTarget((ASTNode) elements.get(argument.getKey()));
@@ -2206,7 +2213,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		reference.setQualifier(ASTNodeFactory.newName(ast, JavaModelUtil.getFullyQualifiedName(fTargetType)));
 		createArgumentList(declaration, reference.parameters(), new IArgumentFactory() {
 
-			public final ASTNode getArgumentNode(final IVariableBinding binding) {
+			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) {
 				Assert.isNotNull(binding);
 				final MethodRefParameter parameter= ast.newMethodRefParameter();
 				parameter.setType(ASTNodeFactory.newType(ast, binding.getType(), true));
