@@ -138,7 +138,8 @@ public class CallInliner {
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
-				if (fFormalArgument.getSimplifiedAccessMode() == FlowInfo.READ)
+				int accessMode = fFormalArgument.getSimplifiedAccessMode();
+				if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
 					return setResult(true);
 				// from now on we only have write accesses.
 				IVariableBinding vb= (IVariableBinding)binding;
