@@ -12,20 +12,27 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Assert;
+
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -33,8 +40,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -111,10 +116,10 @@ public class RefactoringExecutionHelper {
 					return;
 				}
 			} catch (InvocationTargetException e) {
-				Throwable inner= e.getTargetException();
 				PerformChangeOperation pco= op.fPerformChangeOperation;
-				if (pco.changeExecutionFailed()) {
+				if (pco != null && pco.changeExecutionFailed()) {
 					ChangeExceptionHandler handler= new ChangeExceptionHandler(fParent, fRefactoring);
+					Throwable inner= e.getTargetException();
 					if (inner instanceof RuntimeException) {
 						handler.handle(pco.getChange(), (RuntimeException)inner);
 					} else if (inner instanceof CoreException) {

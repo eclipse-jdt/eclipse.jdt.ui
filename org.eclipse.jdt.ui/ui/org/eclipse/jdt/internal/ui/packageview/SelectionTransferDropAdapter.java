@@ -139,7 +139,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InterruptedException e) {
 			//ok
-		}	finally{
+		} finally {
 			// The drag source listener must not perform any operation
 			// since this drop adapter did the remove of the source even
 			// if we moved something.
