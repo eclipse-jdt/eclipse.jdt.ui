@@ -5,24 +5,10 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.launcher.VMWizardPage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-
-import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.launcher.VMWizardPage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-public class NewProjectCreationWizard extends NewElementWizard {
+public class NewProjectCreationWizard extends NewElementWizard 
+	implements IExecutableExtension {
 
 	public static final String NEW_PROJECT_WIZARD_ID= "org.eclipse.jdt.ui.wizards.NewProjectCreationWizard";
 		
@@ -35,6 +21,7 @@ public class NewProjectCreationWizard extends NewElementWizard {
 	private NewJavaProjectWizardPage fJavaPage;
 	private WizardNewProjectCreationPage fMainPage;
 	private VMWizardPage fVMPage;
+	private IConfigurationElement fConfigElement;
 
 	public NewProjectCreationWizard() {
 		super();
@@ -74,8 +61,43 @@ public class NewProjectCreationWizard extends NewElementWizard {
 		} catch  (InterruptedException e) {
 			return false;
 		}
+		updatePerspective();
 		revealSelection(fJavaPage.getNewJavaProject());
 		return true;
 	}
 		
+	/**
+	 * Stores the configuration element for the wizard.  The config element will be used
+	 * in <code>performFinish</code> to set the result perspective.
+	 */
+	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+		fConfigElement= cfig;
+	}
+	/**
+	 * Updates the perspective for the active page within the window.
+	 */
+	protected void updatePerspective() {
+		// Read final persp from config.
+		String perspID = fConfigElement.getAttribute("finalPerspective");
+		if (perspID == null)
+			return;
+			
+		// Map persp id to descriptor.
+		IPerspectiveRegistry reg= PlatformUI.getWorkbench().getPerspectiveRegistry();
+		IPerspectiveDescriptor persp= reg.findPerspectiveWithId(perspID);
+		if (persp == null)
+			return;
+	
+		// Get the active page.
+		IWorkbenchWindow dw= JavaPlugin.getActiveWorkbenchWindow();
+		if (dw ==  null)
+			return;
+		IWorkbenchPage page= dw.getActivePage();
+		if (page == null)
+			return;
+	
+		// Set the perspective.
+		page.setPerspective(persp);
+	}
+
 }
