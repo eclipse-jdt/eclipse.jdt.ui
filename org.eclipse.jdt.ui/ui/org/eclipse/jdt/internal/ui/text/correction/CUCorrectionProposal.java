@@ -183,31 +183,34 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			}
 			
 			CompilationUnitChange change= getCompilationUnitChange();
-			if (change.getGroupDescriptions().length > 0) {
+			GroupDescription[] descriptions= change.getGroupDescriptions();
+			GroupDescription selection= null;
+			for (int i= 0; i < descriptions.length; i++) {
+				GroupDescription curr= descriptions[i];
+				if (SELECTION_GROUP_DESC.equals(curr.getName())) {
+					selection= curr;
+					break;
+				}
+			}
+			
+			IEditorPart part= null;
+			if (selection != null) {
 				change.setKeepExecutedTextEdits(true);
-			}
-
-			IEditorPart part= EditorUtility.isOpenInEditor(unit);
-			if (part == null) {
-				part= EditorUtility.openInEditor(unit, true);
-			}
-			IWorkbenchPage page= JavaPlugin.getActivePage();
-			if (page != null && part != null) {
-				page.bringToTop(part);
+				part= EditorUtility.isOpenInEditor(unit);
+				if (part == null) {
+					part= EditorUtility.openInEditor(unit, true);
+				}
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page != null && part != null) {
+					page.bringToTop(part);
+				}
 			}
 			
 			super.apply(document);
 
 			if (part instanceof ITextEditor) {
-				GroupDescription[] descriptions= change.getGroupDescriptions();
-				for (int i= 0; i < descriptions.length; i++) {
-					GroupDescription curr= descriptions[i];
-					if (SELECTION_GROUP_DESC.equals(curr.getName())) {
-						TextRange range= change.getNewTextRange(curr.getTextEdits());
-						((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
-						return;
-					}		
-				}
+				TextRange range= change.getNewTextRange(selection.getTextEdits());
+				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
