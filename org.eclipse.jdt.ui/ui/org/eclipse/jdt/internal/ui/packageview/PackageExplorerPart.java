@@ -454,9 +454,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		final LocalSelectionTransfer lt= LocalSelectionTransfer.getInstance();
 		Transfer[] transfers= new Transfer[] {
-			lt, 
+			LocalSelectionTransfer.getInstance(), 
 			ResourceTransfer.getInstance(),
 			FileTransfer.getInstance()};
 		
@@ -465,7 +464,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new SelectionTransferDropAdapter(fViewer),
 			new FileTransferDropAdapter(fViewer)
 		};
-		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
 		
 		// Drag Adapter
 		Control control= fViewer.getControl();

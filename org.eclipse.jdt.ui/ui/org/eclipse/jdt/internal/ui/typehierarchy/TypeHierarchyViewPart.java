@@ -545,12 +545,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		for (int i= 0; i < fAllViewers.length; i++) {
 			addDragAdapters(fAllViewers[i], ops, transfers);
-			addDropAdapters(fAllViewers[i], ops, transfers);
+			addDropAdapters(fAllViewers[i], ops | DND.DROP_DEFAULT, transfers);
 		}	
 		addDragAdapters(fMethodsViewer, ops, transfers);
 
 		//dnd on empty hierarchy
-		DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops);
+		DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops | DND.DROP_DEFAULT);
 		dropTarget.setTransfer(transfers);
 		dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this, fAllViewers[0]));
 	}

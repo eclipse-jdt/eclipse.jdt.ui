@@ -262,7 +262,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fViewer)
 		};
-		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
 		
 		// Drag Adapter
 		Control control= fViewer.getControl();

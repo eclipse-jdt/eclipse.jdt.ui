@@ -934,7 +934,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fOutlineViewer)
 		};
-		fOutlineViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
 		
 		// Drag Adapter
 		Control control= fOutlineViewer.getControl();
