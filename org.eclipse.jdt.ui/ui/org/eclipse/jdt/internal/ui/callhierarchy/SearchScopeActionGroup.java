@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  * 			(report 36180: Callers/Callees view)
+ *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
+ *          (report 60714: Call Hierarchy: display search scope in view title)
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -385,5 +387,10 @@ class SearchScopeActionGroup extends ActionGroup {
 		return false;
 	}
 	
+	public String getFullDescription() {
+		if (fSelectedAction != null)
+			return fSelectedAction.getFullDescription();
+		return null;
+	}
 }
 

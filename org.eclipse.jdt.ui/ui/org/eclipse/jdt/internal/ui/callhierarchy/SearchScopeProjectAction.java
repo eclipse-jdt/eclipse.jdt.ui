@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  *          (report 36180: Callers/Callees view)
+ *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
+ *          (report 60714: Call Hierarchy: display search scope in view title)
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -20,6 +22,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 
 class SearchScopeProjectAction extends SearchScopeAction {
@@ -53,5 +56,19 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	 */
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_PROJECT;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
+	 */
+	public String getFullDescription() {
+		IMethod method = this.fGroup.getView().getMethod();
+		IJavaProject project = null;
+		
+		if (method != null) {
+			project = method.getJavaProject();
+		}
+
+		return SearchMessages.getFormattedString("ProjectScope", project.getElementName());
 	}
 }

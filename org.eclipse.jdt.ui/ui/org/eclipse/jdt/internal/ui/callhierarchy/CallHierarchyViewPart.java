@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *             (report 36180: Callers/Callees view)
+ *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
+ *             (report 60714: Call Hierarchy: display search scope in view title)
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -813,11 +815,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
             String elementName= JavaElementLabels.getElementLabel(fShownMethod, JavaElementLabels.ALL_DEFAULT);
+            String scopeDescription = fSearchScopeActions.getFullDescription();
+            String[] args = new String[] { elementName, scopeDescription};
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", elementName)); //$NON-NLS-1$
+                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", args)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
             } else {
-                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", elementName)); //$NON-NLS-1$
+                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", args)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
         }
