@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -288,27 +289,42 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
-		{
+		{ // move first statments inside an ifstatement, move second statment inside a new while statement
+		   // that is in the ifstatement
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
+			assertTrue("Cannot find Constructor E", methodDecl != null);
 
-//			{ // nest body of constructor in a while statement
-//				MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
-//				assertTrue("Cannot find Constructor E", methodDecl != null);
-//
-//				Block body= methodDecl.getBody();
-//
-//				WhileStatement whileStatement= ast.newWhileStatement();
-//				whileStatement.setExpression(ast.newBooleanLiteral(true));
-//				
-//				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getInsertNodeForExisting(body);
-//				
-//				whileStatement.setBody(insertNodeForCopy); // set existing body
-//
-//				Block newBody= ast.newBlock();
-//				List newStatements= newBody.statements();				
-//				newStatements.add(whileStatement);
-//				
-//				ASTRewriteAnalyzer.markAsReplaced(body, newBody);
-//			}			
+			Block body= methodDecl.getBody();
+			List statements= body.statements();
+			
+			assertTrue("Cannot find if statement", statements.get(3) instanceof IfStatement);
+			
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+			
+			Statement insertNodeForCopy1= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting((ASTNode) statements.get(1));
+			Statement insertNodeForCopy2= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting((ASTNode) statements.get(2));
+			
+			Block whileBody= ast.newBlock();
+			
+			WhileStatement whileStatement= ast.newWhileStatement();
+			whileStatement.setExpression(ast.newBooleanLiteral(true));
+			whileStatement.setBody(whileBody);
+			
+			List whileBodyStatements= whileBody.statements();
+			whileBodyStatements.add(insertNodeForCopy2);
+			
+			
+			assertTrue("if statement body not a block", ifStatement.getThenStatement() instanceof Block);
+			
+			List ifBodyStatements= ((Block)ifStatement.getThenStatement()).statements();
+			
+			ifBodyStatements.add(0, whileStatement);
+			ifBodyStatements.add(1, insertNodeForCopy1);
+			
+			ASTRewriteAnalyzer.markAsInserted(whileStatement);
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(1), null);
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(2), null);
 		}	
 					
 
@@ -329,9 +345,11 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("    private int k;\n");
 		buf.append("    public E() {\n");
 		buf.append("        super();\n");
-		buf.append("        i= 0;\n");
-		buf.append("        k= 9;\n");
 		buf.append("        if (System.out == null) {\n");
+		buf.append("            while (true) {\n");
+		buf.append("                k= 9;\n");
+		buf.append("            }\n");		
+		buf.append("            i= 0;\n");
 		buf.append("            gee(); // cool\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
