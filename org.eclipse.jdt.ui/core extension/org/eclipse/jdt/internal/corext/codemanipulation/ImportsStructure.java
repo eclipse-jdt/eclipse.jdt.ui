@@ -287,13 +287,21 @@ public class ImportsStructure implements IImportsStructure {
 				if (bestChar < newChar) {								// b < n < c
 					return (currChar - newChar) < (newChar - bestChar);	// -> (c - n) < (n - b)
 				} else {												// n < b  && n < c
-					return currName.compareTo(fBestName) < 0;			// -> (c < b)
+					if (currChar == bestChar) { // longer match between curr and best
+						return false; // keep curr and best together, new should be before both
+					} else {
+						return currChar < bestChar; // -> (c < b)
+					}
 				}
 			} else {
 				if (bestChar > newChar) {								// c < n < b
 					return (newChar - currChar) < (bestChar - newChar);	// -> (n - c) < (b - n)
 				} else {												// n > b  && n > c
-					return fBestName.compareTo(currName) < 0;			// -> (c > b)
+					if (currChar == bestChar) {  // longer match between curr and best
+						return true; // keep curr and best together, new should be ahead of both
+					} else {
+						return currChar > bestChar; // -> (c > b)
+					}
 				}
 			}
 		}

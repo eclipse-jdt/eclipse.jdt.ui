@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
  */
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,38 +24,16 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
@@ -74,20 +52,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private static class TypeRefASTVisitor extends ASTVisitor {
 
-		private HashMap fReferences;
+		private Collection fResult;
+		private HashSet fNamesFound;
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 
-		public TypeRefASTVisitor(HashMap references, ArrayList oldSingleImports, ArrayList oldDemandImports) {
-			fReferences= references;
+		public TypeRefASTVisitor(Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
+			fResult= result;
+			fNamesFound= new HashSet();
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 		}
 		
 		private void addReference(SimpleName name) {
 			String identifier= name.getIdentifier();
-			if (!fReferences.containsKey(identifier)) {
-				fReferences.put(identifier, name);
+			if (fNamesFound.add(identifier)) {
+				fResult.add(name);
 			}
 		}			
 		
@@ -543,11 +523,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			}
 		}
-		HashMap references= new HashMap();
-		TypeRefASTVisitor visitor = new TypeRefASTVisitor(references, oldSingleImports, oldDemandImports);
+		ArrayList result= new ArrayList();
+		TypeRefASTVisitor visitor = new TypeRefASTVisitor(result, oldSingleImports, oldDemandImports);
 		astRoot.accept(visitor);
 
-		return references.values().iterator();
+		return result.iterator();
 	}	
 	
 	/**

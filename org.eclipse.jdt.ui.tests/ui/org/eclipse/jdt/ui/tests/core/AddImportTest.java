@@ -9,17 +9,13 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 public class AddImportTest extends TestCase {
 	
@@ -50,43 +46,6 @@ public class AddImportTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
-	}
-	
-	private IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
-		return new IChooseImportQuery() {
-			public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
-				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
-				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);
-				if (nEntries != null) {
-					for (int i= 0; i < nEntries.length; i++) {
-						assertTrue(name + "-query-cnt" + i, openChoices[i].length == nEntries[i]);
-					}
-				}
-				TypeInfo[] res= new TypeInfo[openChoices.length];
-				for (int i= 0; i < openChoices.length; i++) {
-					TypeInfo[] selection= openChoices[i];
-					assertNotNull(name + "-query-setset" + i, selection);
-					assertTrue(name + "-query-setlen" + i, selection.length > 0);
-					TypeInfo found= null;
-					for (int k= 0; k < selection.length; k++) {
-						if (selection[k].getFullyQualifiedName().equals(choices[i])) {
-							found= selection[k];
-						}
-					}
-					assertNotNull(name + "-query-notfound" + i, found);
-					res[i]= found;
-				}
-				return res;
-			}
-		};
-	}
-	
-	private void assertImports(ICompilationUnit cu, String[] imports) throws Exception {
-		IImportDeclaration[] desc= cu.getImports();
-		assertTrue(cu.getElementName() + "-count", desc.length == imports.length);
-		for (int i= 0; i < imports.length; i++) {
-			assertEquals(cu.getElementName() + "-cmpentries" + i, desc[i].getElementName(), imports[i]);
-		}
 	}
 	
 	private static final int printRange= 6;

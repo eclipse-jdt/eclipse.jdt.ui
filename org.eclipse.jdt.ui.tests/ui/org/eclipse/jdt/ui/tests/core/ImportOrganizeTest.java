@@ -41,11 +41,11 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testImportStructureOnNonExistingCU"));
+			suite.addTest(new ImportOrganizeTest("testBaseGroups1"));
 			return suite;
 		}	
 	}
@@ -930,22 +930,11 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("\n");
-					
-		String vm= System.getProperty("java.version");
-		if (vm != null && vm.startsWith("1.4")) {
-			buf.append("import java.io.File;\n");
-			buf.append("import java.io.IOException;\n");
-			buf.append("import java.io.RandomAccessFile;\n");
-			buf.append("\n");
-			buf.append("import pack0.List1;\n");
-		}
-		else {
-			buf.append("import pack0.List1;\n");
-			buf.append("\n");
-			buf.append("import java.io.File;\n");
-			buf.append("import java.io.IOException;\n");
-			buf.append("import java.io.RandomAccessFile;\n");
-		}
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.RandomAccessFile;\n");
+		buf.append("\n");
+		buf.append("import pack0.List1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    File f;\n");
