@@ -162,7 +162,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 			fJarPackage.setExportWarnings(settings.getBoolean(STORE_EXPORT_WARNINGS));
 			fJarPackage.setExportErrors(settings.getBoolean(STORE_EXPORT_ERRORS));
 			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
-			fJarPackage.setDescriptionLocation(getPathFromString(settings.get(STORE_DESCRIPTION_LOCATION)));
+			fJarPackage.setDescriptionLocation(new Path(settings.get(STORE_DESCRIPTION_LOCATION)));
 		}
 	}
 	/**
@@ -357,9 +357,5 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (result.isOK() && workspace.getRoot().exists(path))
 			return workspace.getRoot().findMember(path);
 		return null;
-	}
-
-	protected IPath getPathFromString(String text) {
-		return new Path(text).makeAbsolute();
 	}
 }
