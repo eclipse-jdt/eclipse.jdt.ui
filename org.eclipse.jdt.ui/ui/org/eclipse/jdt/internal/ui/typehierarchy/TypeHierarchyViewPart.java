@@ -948,20 +948,32 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-	private void updateMethodViewer(IType input) {
+	private void updateMethodViewer(final IType input) {
 		if (!fIsEnableMemberFilter && fCurrentOrientation != VIEW_ORIENTATION_SINGLE) {
 			if (input == fMethodsViewer.getInput()) {
 				if (input != null) {
-					fMethodsViewer.refresh();
+					Runnable runnable= new Runnable() {
+						public void run() {
+							fMethodsViewer.refresh(); // refresh
+						}
+					};
+					BusyIndicator.showWhile(getDisplay(), runnable);					
 				}
-			} else if (input != null) {
-				fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(input));
-				fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(input));
 			} else {
-				fMethodViewerPaneLabel.setText(""); //$NON-NLS-1$
-				fMethodViewerPaneLabel.setImage(null);
+				if (input != null) {
+					fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(input));
+					fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(input));
+				} else {
+					fMethodViewerPaneLabel.setText(""); //$NON-NLS-1$
+					fMethodViewerPaneLabel.setImage(null);
+				}
+				Runnable runnable= new Runnable() {
+					public void run() {
+						fMethodsViewer.setInput(input); // refresh
+					}
+				};
+				BusyIndicator.showWhile(getDisplay(), runnable);				
 			}
-			fMethodsViewer.setInput(input);
 		}
 	}
 	
