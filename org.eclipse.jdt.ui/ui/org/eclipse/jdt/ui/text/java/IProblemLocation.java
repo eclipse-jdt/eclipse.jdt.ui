@@ -14,45 +14,52 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
- *
+ * This API is work in progress and may change before the final 3.0 release.
+ * This interface is not intended to be implemented.
+ * @since 3.0
  */
 public interface IProblemLocation {
 	
 	/**
 	 * Returns the id of problem that is associated with this context. See {@link org.eclipse.jdt.core.compiler.IProblem} for
 	 * id definitions
-	 * @return int
+	 * @return int The id of the problem.
 	 */
 	int getProblemId();
 	
 	/**
 	 * Returns the problem argument is associated with this context. <code>null</code> is returned
 	 * if no problem exists. 
-	 * @return String[]
+	 * @return String[] The problem arguments.
 	 */
 	String[] getProblemArguments();
 	
 	/**
-	 * Returns the length of the problem
-	 * @return int
+	 * @return Returns if the problem has error severity.
+	 */
+	boolean isError();
+	
+	/**
+	 * @return Returns the length of the problem.
 	 */
 	int getLength();
 	
 	/**
-	 * Returns the offset of the problem
-	 * @return int
+	 * @return Returns the offset of the problem.
 	 */
 	int getOffset();
 	
 	/**
-	 * Returns the node that covers the location of the problem
+	 * @param astRoot The root node of the current AST
+	 * @return Returns the node that covers the location of the problem
 	 */
-	public ASTNode getCoveringNode(CompilationUnit astRoot);
+	ASTNode getCoveringNode(CompilationUnit astRoot);
 
 	/**
-	 * Returns the node that is covered by the location of the problem
+	 * @param astRoot The root node of the current AST
+	 * @return Returns the node that is covered by the location of the problem
 	 */	
-	public ASTNode getCoveredNode(CompilationUnit astRoot);
+	ASTNode getCoveredNode(CompilationUnit astRoot);
 	
 
 }

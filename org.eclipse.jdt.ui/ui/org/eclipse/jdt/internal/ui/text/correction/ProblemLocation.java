@@ -18,6 +18,7 @@ import org.eclipse.jdt.ui.text.java.*;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
 /**
  *
@@ -28,19 +29,22 @@ public class ProblemLocation implements IProblemLocation {
 	private String[] fArguments;
 	private int fOffset;
 	private int fLength;
+	private boolean fIsError;
 	
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		fId= annotation.getId();
 		fArguments= annotation.getArguments();
 		fOffset= offset;
 		fLength= length;
+		fIsError= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType());
 	}
 	
-	public ProblemLocation(int offset, int length, int id, String[] arguments) {
+	public ProblemLocation(int offset, int length, int id, String[] arguments, boolean isError) {
 		fId= id;
 		fArguments= arguments;
 		fOffset= offset;
 		fLength= length;
+		fIsError= isError;
 	}	
 
 
@@ -70,6 +74,13 @@ public class ProblemLocation implements IProblemLocation {
 	 */
 	public int getOffset() {
 		return fOffset;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IProblemLocation#isError()
+	 */
+	public boolean isError() {
+		return fIsError;
 	}
 
 	/*
@@ -136,8 +147,5 @@ public class ProblemLocation implements IProblemLocation {
 		buf.append(code & IProblem.IgnoreCategoriesMask);
 			
 		return buf.toString();
-	}	
-
-
-
+	}
 }

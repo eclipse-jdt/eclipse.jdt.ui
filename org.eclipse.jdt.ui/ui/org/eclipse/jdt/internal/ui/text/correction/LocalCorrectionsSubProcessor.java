@@ -435,7 +435,7 @@ public class LocalCorrectionsSubProcessor {
 				qualified= (QualifiedName) qualified.getQualifier();
 			}
 			selectedNode= qualified;
-			problem= new ProblemLocation(qualified.getStartPosition(), qualified.getLength(), problem.getProblemId(), args);
+			problem= new ProblemLocation(qualified.getStartPosition(), qualified.getLength(), problem.getProblemId(), args, problem.isError());
 		}
 		
 		

@@ -199,9 +199,11 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 			int start= marker.getAttribute(IMarker.CHAR_START, -1);
 			int end= marker.getAttribute(IMarker.CHAR_END, -1);
+			int severity= marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
 			String[] arguments= CorrectionEngine.getProblemArguments(marker);
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
-				return new ProblemLocation(start, end - start, id, arguments);
+				boolean isError= (severity == IMarker.SEVERITY_ERROR);
+				return new ProblemLocation(start, end - start, id, arguments, isError);
 			}			
 		}
 		return null;

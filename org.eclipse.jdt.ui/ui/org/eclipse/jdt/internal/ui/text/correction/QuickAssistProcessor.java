@@ -75,7 +75,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			// quick assists that show up also if there is an error/warning
 			getRenameLocalProposals(context, coveringNode, resultingCollections);
 		
-			if (locations == null || locations.length == 0) {
+			if (noErrorsAtLocation(locations)) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
 				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
@@ -92,7 +92,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 	
-	
+	private boolean noErrorsAtLocation(IProblemLocation[] locations) {
+		if (locations != null) {
+			for (int i= 0; i < locations.length; i++) {
+				if (locations[i].isError()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	private boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof VariableDeclarationFragment)) {
@@ -111,7 +121,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
 		
 		SimpleName[] names= LinkedNodeFinder.findByBinding(statement.getParent(), binding);
-		if (names.length <= 1 && names[0] != fragment.getName()) {
+		if (names.length <= 1 || names[0] != fragment.getName()) {
 			return false;
 		}
 		
