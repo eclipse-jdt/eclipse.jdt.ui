@@ -61,8 +61,9 @@ public class Bindings {
 	
 	public static String getFullyQualifiedImportName(ITypeBinding type) {
 		if (type.isArray())
-			type= type.getElementType();
-		return getFullyQualifiedName(type);
+			return getFullyQualifiedName(type.getElementType());
+		else	
+			return getFullyQualifiedName(type);
 	}
 	
 	public static String[] getNameComponents(ITypeBinding type) {
