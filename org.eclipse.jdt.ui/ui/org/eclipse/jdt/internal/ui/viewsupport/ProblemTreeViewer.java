@@ -135,7 +135,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 		ISelection validNewSelection= getValidSelection(newSelection);
-		if (isShowingWorkingCopies()) {
+		if (getComparer() == null && isShowingWorkingCopies()) {
 			// Convert to and from working copies
 			if (invalidSelection instanceof IStructuredSelection) {
 				IStructuredSelection structSel= (IStructuredSelection)invalidSelection;
