@@ -109,7 +109,7 @@ public class RenameTempTests extends RefactoringTest{
 		failTestHelper(newName, updateReferences, cu, selection);
 	}
 
-	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws JavaModelException {
+	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws Exception {
 		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
