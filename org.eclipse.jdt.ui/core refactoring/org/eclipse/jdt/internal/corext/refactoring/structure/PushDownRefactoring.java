@@ -320,7 +320,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
-		IType[] modifiableSubclasses= getDestinationSubclassesForNonAbstractMembers(pm);
+		IType[] modifiableSubclasses= getDestinationClassesForNonAbstractMembers(pm);
 		if (modifiableSubclasses.length == 0){
 			String pattern= "Class ''{0}'' does not have any modifiable non-anonymous subclasses";
 			String msg= MessageFormat.format(pattern, new String[]{createTypeLabel(getDeclaringClass())});
@@ -413,7 +413,7 @@ public class PushDownRefactoring extends Refactoring {
 	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("Checking referenced elements", 3);
-		IType[] subclasses= getDestinationSubclassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
+		IType[] subclasses= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		result.merge(checkAccessedTypes(subclasses, new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFields(subclasses, new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedMethods(subclasses, new SubProgressMonitor(pm, 1)));
@@ -557,7 +557,7 @@ public class PushDownRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] membersToPushDown= getMembersToPushDown();
 
-		IType[] destinationClassesForNonAbstract= getDestinationSubclassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
+		IType[] destinationClassesForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		result.merge(checkNonAbstractMembersInDestinationClasses(membersToPushDown, destinationClassesForNonAbstract));
 		
 		IType[] destinationClassesForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
@@ -621,12 +621,43 @@ public class PushDownRefactoring extends Refactoring {
 	
 			createMembersInSubclasses(new SubProgressMonitor(pm, 1));
 			
+			addImportsToSubclasses(new SubProgressMonitor(pm, 1));
+			
 			TextChangeManager manager= new TextChangeManager();
 			fillWithRewriteEdits(manager);
 			return manager;
 		} finally{
 			pm.done();
 		}
+	}
+
+	private void addImportsToSubclasses(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 4);
+		IMember[] allMembers= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
+		IMember[] nonAbstractMembers= getNonAbstractMembers(allMembers);
+		IType[] destForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
+		addImportsToTypesReferencedInMembers(nonAbstractMembers, destForNonAbstract, new SubProgressMonitor(pm, 1));
+
+		IMember[] abstractMembers= getAbstractMembers(allMembers);
+		IType[] destForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
+		addImportsToTypesReferencedInMembers(abstractMembers, destForAbstract, new SubProgressMonitor(pm, 1));
+		pm.done();
+	}
+	
+	private void addImportsToTypesReferencedInMembers(IMember[] members, IType[] destinationClasses, IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 1);
+		IType[] typesReferenced= getTypesReferencedIn(members, pm);
+		for (int i= 0; i < destinationClasses.length; i++) {
+			ICompilationUnit cu= getWorkingCopyOfCu(destinationClasses[i]);
+			for (int j= 0; j < typesReferenced.length; j++) {
+				fImportEditManager.addImportTo(typesReferenced[j], cu);
+			}
+		}
+		pm.done();
+	}
+	
+	private IType[] getTypesReferencedIn(IMember[] members, IProgressMonitor pm) throws JavaModelException {
+		return ReferenceFinderUtil.getTypesReferencedIn(members, pm);
 	}
 
 	private void deleteMembersFromDeclaringClass() throws JavaModelException {
@@ -652,22 +683,22 @@ public class PushDownRefactoring extends Refactoring {
 	private void deleteFieldFromDeclaringClass(IField field) throws JavaModelException{
 		FieldDeclaration fd= getFieldDeclarationNode(field);
 		if (fd.fragments().size() == 1){
-			fRewriteManager.getRewrite(getWorkingCopy(field)).markAsRemoved(fd);
+			fRewriteManager.getRewrite(getWorkingCopyOfCu(field)).markAsRemoved(fd);
 		} else {	
 			VariableDeclarationFragment fragment= getFieldDeclarationFragmentNode(field);
-			fRewriteManager.getRewrite(getWorkingCopy(field)).markAsRemoved(fragment);
+			fRewriteManager.getRewrite(getWorkingCopyOfCu(field)).markAsRemoved(fragment);
 		}
 	}
 
 	private void deleteMethodFromDeclaringClass(IMethod method) throws JavaModelException{
 		MethodDeclaration md= getMethodDeclarationNode(method);
-		fRewriteManager.getRewrite(getWorkingCopy(method)).markAsRemoved(md);
+		fRewriteManager.getRewrite(getWorkingCopyOfCu(method)).markAsRemoved(md);
 	}
 
 	private void createMembersInSubclasses(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 2);
 		MemberActionInfo[] allMembers= getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass();
-		IType[] destinationsForNonAbstract= getDestinationSubclassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
+		IType[] destinationsForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		IType[] destinationsForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
 		for (int i= 0; i < allMembers.length; i++) {
 			MemberActionInfo info= allMembers[i];
@@ -676,13 +707,6 @@ public class PushDownRefactoring extends Refactoring {
 			else
 				createInAll(info, destinationsForNonAbstract);
 		}
-//		for (int i= 0; i < allSubclasses.length; i++) {
-//			IType subclass= allSubclasses[i];
-//			TypeDeclaration typeDeclaration= getTypeDeclarationNode(subclass);
-//			for (int j= 0; j < allMembers.length; j++) {
-//				create(allMembers[j], typeDeclaration);
-//			}
-//		}
 		pm.done();
 	}
 
@@ -845,10 +869,10 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private IType[] getDestinationClassesForAbstractMembers(IProgressMonitor pm) throws JavaModelException {
-		return toTypeArray(getAbstractMembers(getDestinationSubclassesForNonAbstractMembers(pm)));
+		return toTypeArray(getAbstractMembers(getDestinationClassesForNonAbstractMembers(pm)));
 	}
 	
-	private IType[] getDestinationSubclassesForNonAbstractMembers(IProgressMonitor pm) throws JavaModelException {
+	private IType[] getDestinationClassesForNonAbstractMembers(IProgressMonitor pm) throws JavaModelException {
 		IType[] allDirectSubclasses= getAllDirectSubclassesOfDeclaringClass(pm);
 		List result= new ArrayList(allDirectSubclasses.length);
 		for (int i= 0; i < allDirectSubclasses.length; i++) {
@@ -973,7 +997,7 @@ public class PushDownRefactoring extends Refactoring {
 		}
 	}
 
-	private ICompilationUnit getWorkingCopy(IMember member){
+	private ICompilationUnit getWorkingCopyOfCu(IMember member){
 		return WorkingCopyUtil.getWorkingCopyIfExists(member.getCompilationUnit());
 	}
 	
