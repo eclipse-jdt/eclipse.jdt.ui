@@ -41,7 +41,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 					jProject= JavaCore.create(resource.getProject());
 					try {						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
 						if (pkgFragment != null)
-							pkgRoot= JavaModelUtil.getPackageFragmentRoot(pkgFragment);						else							pkgRoot= jProject.findPackageFragmentRoot(resource.getFullPath().uptoSegment(2));					} catch (JavaModelException ex) {
+							pkgRoot= JavaModelUtil.getPackageFragmentRoot(pkgFragment);						else							pkgRoot= jProject.findPackageFragmentRoot(resource.getFullPath().removeLastSegments(1));					} catch (JavaModelException ex) {
 						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.javaPackageNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$						return;					}
 				}			}						if (pkgRoot != null) {				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();				if (fJarPackage.useSourceFolderHierarchy()&& !pkgRoot.getElementName().equals(pkgRoot.DEFAULT_PACKAGEROOT_PATH))					leadSegmentsToRemove--;			}			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
