@@ -7,7 +7,7 @@
       </appInfo>
       <documentation>
          This extension point allows to add a wizard page to create or
-edit a Classpath Container Entry.
+edit a classpath container entry.
       </documentation>
    </annotation>
 
@@ -83,7 +83,7 @@ with a public 0-argument constructor.
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.classpathContainerPage&quot;&gt;
   &lt;classpathContainerPage
-   id=&quot;JRE&quot;
+   id=&quot;com.example.myplugin.myContainerId&quot;
    name=&quot;JRE System Libraries&quot;
    class=&quot;com.example.NewJDKEntryPage&quot;&gt;
   &lt;/classpathContainerPage&gt;

@@ -117,7 +117,7 @@ Extensions may optionally contribute a preference block which will appear on the
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         &lt;code&gt;org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingStructureProvider&lt;/code&gt; provides the default folding structure for the java editor.
+         &lt;code&gt;org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingStructureProvider&lt;/code&gt; provides the default folding structure for the Java editor.
          &lt;code&gt;org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingPreferenceBlock&lt;/code&gt; provides the preference block for the default structure provider.
       </documentation>
    </annotation>

@@ -44,7 +44,7 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the Javadoc Completion processor
+                  Unique identifier for the Javadoc completion processor.
                </documentation>
             </annotation>
          </attribute>
@@ -58,7 +58,7 @@
          <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  the name of the class that implements this Javadoc completion processor.  The
+                  The name of the class that implements this Javadoc completion processor. The
 class must be public and implement
 &lt;samp&gt;org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor&lt;/samp&gt;
 with a public 0-argument constructor.
