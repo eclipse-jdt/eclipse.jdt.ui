@@ -49,7 +49,7 @@ public class MySetup extends TestSetup {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
+		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
 		JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
