@@ -22,9 +22,16 @@ class GroupByKeyComputer implements IGroupByKeyComputer {
 	String fLastHandle= null;;
 
 	public Object computeGroupByKey(IMarker marker) {
-		// no help from JavaModel to rename yet
-		// return getJavaElement(marker);
-		return getJavaElementHandleId(marker);
+		if (marker == null)
+			return null;
+		
+		IJavaElement jElement= getJavaElement(marker);
+		if (jElement != null && jElement.exists()) {
+			// no help from JavaModel to rename yet
+			// return getJavaElement(marker);
+			return fLastHandle;
+		}	
+		return null;
 	}
 
 	private String getJavaElementHandleId(IMarker marker) {
@@ -38,7 +45,13 @@ class GroupByKeyComputer implements IGroupByKeyComputer {
 	
 	private IJavaElement getJavaElement(IMarker marker) {
 		String handle= getJavaElementHandleId(marker);
-		if (handle != null && !handle.equals(fLastHandle)) {
+		if (handle == null) {
+			fLastHandle= null;
+			fLastJavaElement= null;
+			return null;
+		}
+		
+		if (!handle.equals(fLastHandle)) {
 			fLastHandle= handle;
 			fLastJavaElement= JavaCore.create(handle);
 			IResource handleResource= null;
