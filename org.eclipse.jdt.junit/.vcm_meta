@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-description>
+	<nature id="org.eclipse.jdt.core.javanature"/>
+	<reference project-name="org.eclipse.ui"/>
+	<reference project-name="org.eclipse.junit"/>
+	<reference project-name="org.eclipse.debug.core"/>
+	<reference project-name="org.eclipse.jdt.core"/>
+	<reference project-name="org.eclipse.jdt.launching"/>
+	<builder name="org.eclipse.jdt.core.javabuilder">
+	</builder>
+</project-description>

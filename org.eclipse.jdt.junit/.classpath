@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="/org.eclipse.ui"/>
+    <classpathentry kind="src" path="Eclipse JUnit"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
+    <classpathentry kind="lib" path="/org.junit/junit.jar" sourcepath="D:/junit3.7/src.jar"/>
+    <classpathentry kind="lib" path="/org.eclipse.swt/swt.jar" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
+    <classpathentry kind="lib"
+        path="/org.eclipse.core.runtime/runtime.jar" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
+    <classpathentry kind="lib"
+        path="/org.eclipse.core.resources/resources.jar" sourcepath="/org.eclipse.core.resources/resourcessrc.zip"/>
+    <classpathentry kind="lib" path="/org.eclipse.core.boot/boot.jar" sourcepath="/org.eclipse.core.boot/bootsrc.zip"/>
+    <classpathentry kind="src" path="/org.eclipse.junit"/>
+    <classpathentry kind="src" path="/org.eclipse.debug.core"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
+    <classpathentry kind="output" path="bin"/>
+</classpath>

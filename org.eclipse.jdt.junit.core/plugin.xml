@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- File written by PDE 1.0 -->
+<plugin
+   id="org.eclipse.jdt.junit"
+   name="org.eclipse.jdt.junit"
+   version="1.0.0"
+   class="org.eclipse.jdt.junit.internal.JUnitUIPlugin">
+   
+	<requires>
+	   <import plugin="org.eclipse.jdt.core"/>
+	   <import plugin="org.eclipse.jdt.ui"/>
+	   <import plugin="org.eclipse.jdt.debug"/>
+	   <import plugin="org.eclipse.jdt.launching"/>
+	   <import plugin="org.apache.xerces"/>	   
+	   <import plugin="org.eclipse.debug.core"/>
+	   <import plugin="org.eclipse.debug.ui"/>
+	   <import plugin="org.eclipse.ui"/>
+	   <import plugin="org.eclipse.help"/>
+	   <import plugin="org.eclipse.core.resources"/>
+	   <import plugin="org.eclipse.core.boot"/>
+	   <import plugin="org.eclipse.core.runtime"/>
+	   <import plugin="org.eclipse.swt"/>
+	   <import plugin="org.eclipse.junit"/>	  
+	   <import plugin="org.junit"/>	     
+	</requires>
+	
+	<runtime>
+	   <library name="eclipsejdtjunit.jar">
+	         <export name="*"/>
+	    </library>
+	</runtime>
+
+	<extension
+	      id="testapplication"
+	      point="org.eclipse.core.runtime.applications">
+		   <application>
+		      <run
+		            class="org.eclipse.jdt.junit.internal.TestApplication">
+		           <parameter name="productInfo" value="product.ini"/>
+		      </run>
+		   </application>
+	</extension>
+	
+    <extension 
+      point = "org.eclipse.debug.core.launchers"> 
+         <launcher 
+             id = "org.eclipse.jdt.junit.launcher"
+             class = "org.eclipse.jdt.junit.internal.Launcher"
+             modes = "run, debug"
+  	     	 label = "%UIEclipseLauncher.label" 
+  	     	 wizard = "org.eclipse.junit.ApplicationWizard"   	     	 
+	     	 public = "true"
+	     	 description = "Launches UI Eclipse JUnit Test(s)"
+	     	 application = "org.eclipse.jdt.junit.testapplication"
+	     	 pluginID = "org.eclipse.jdt.junit"/>
+    </extension> 
+
+	<extension
+		point="org.eclipse.ui.preferencePages">
+		<page name="%EclipseJUnitPageName"
+			id="org.eclipse.jdt.junit.preferences"
+			class="org.eclipse.jdt.junit.internal.PreferencePage"
+			category="org.eclipse.junit.preferences">
+		</page>
+   	</extension>
+
+	<extension 
+		point="org.eclipse.ui.perspectives">
+		<perspective
+			id="org.eclipse.jdt.junit.EmptyPerspective"
+			name="Empty Perspective"
+			class="org.eclipse.jdt.junit.util.EmptyPerspective">
+		</perspective>
+	</extension>
+   	
+</plugin>
