@@ -2312,6 +2312,20 @@
             command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+      <keyBinding
+            platform="gtk"
+            string="Ctrl+Shift+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="gtk"
+            string="Esc Ctrl+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="%ActionDefinition.format.name"
             description="%ActionDefinition.format.description"
@@ -2334,6 +2348,20 @@
       <keyBinding
             platform="carbon"
             string="Command+Shift+F"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.format"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="gtk"
+            string="Ctrl+Shift+F"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="gtk"
+            string="Esc Ctrl+F"
             scope="org.eclipse.jdt.ui.javaEditorScope"
             command="org.eclipse.jdt.ui.edit.text.java.format"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
