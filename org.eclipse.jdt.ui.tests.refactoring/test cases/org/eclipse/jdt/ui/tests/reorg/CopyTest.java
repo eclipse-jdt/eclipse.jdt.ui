@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyRefactoring2;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgUtils2;
@@ -75,13 +75,13 @@ public class CopyTest extends RefactoringTest {
 		assertTrue(refactoring2 == null);
 	}
 
-	private CopyRefactoring2 verifyEnabled(IResource[] resources, IJavaElement[] javaElements, ICopyQueries copyQueries) throws JavaModelException {
+	private CopyRefactoring2 verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries copyQueries) throws JavaModelException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		assertTrue("copy should be enabled", CopyRefactoring2.isAvailable(resources, javaElements, settings));
 		CopyRefactoring2 refactoring2= CopyRefactoring2.create(resources, javaElements, settings);
 		assertNotNull(refactoring2);
 		if (copyQueries != null)
-			refactoring2.setQueries(copyQueries);
+			refactoring2.setNewNameQueries(copyQueries);
 		return refactoring2;
 	}
 
@@ -121,7 +121,7 @@ public class CopyTest extends RefactoringTest {
 		return fileName.substring(0, fileName.lastIndexOf('.'));
 	}
 
-	private static class TestCopyQueries implements ICopyQueries{
+	private static class TestCopyQueries implements INewNameQueries{
 
 		private static final String NEW_PACKAGE_NAME= "unused.name";
 		private static final String NEW_FILE_NAME= "UnusedName.gif";
@@ -1649,7 +1649,7 @@ public class CopyTest extends RefactoringTest {
 		
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1686,7 +1686,7 @@ public class CopyTest extends RefactoringTest {
 		
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1720,7 +1720,7 @@ public class CopyTest extends RefactoringTest {
 				
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1757,7 +1757,7 @@ public class CopyTest extends RefactoringTest {
 				
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1793,7 +1793,7 @@ public class CopyTest extends RefactoringTest {
 		IPackageFragment otherPackage= getRoot().createPackageFragment("other.pack", true, new NullProgressMonitor());
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1831,7 +1831,7 @@ public class CopyTest extends RefactoringTest {
 		assertTrue(defaultPackage.isDefaultPackage());
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1865,7 +1865,7 @@ public class CopyTest extends RefactoringTest {
 				
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1899,7 +1899,7 @@ public class CopyTest extends RefactoringTest {
 				
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1934,7 +1934,7 @@ public class CopyTest extends RefactoringTest {
 		IFile newFile= null;
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -1972,7 +1972,7 @@ public class CopyTest extends RefactoringTest {
 		simpleProject.create(null);
 		simpleProject.open(null);
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
@@ -2009,7 +2009,7 @@ public class CopyTest extends RefactoringTest {
 		
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
@@ -2042,7 +2042,7 @@ public class CopyTest extends RefactoringTest {
 
 		ICompilationUnit newCu= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
@@ -2075,7 +2075,7 @@ public class CopyTest extends RefactoringTest {
 				
 		ICompilationUnit newCu= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
@@ -2108,7 +2108,7 @@ public class CopyTest extends RefactoringTest {
 
 		IPackageFragment otherPackage= getRoot().createPackageFragment("other.pack", true, new NullProgressMonitor());
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2141,7 +2141,7 @@ public class CopyTest extends RefactoringTest {
 		assertTrue(defaultPackage.exists());
 		assertTrue(defaultPackage.isDefaultPackage());
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2171,7 +2171,7 @@ public class CopyTest extends RefactoringTest {
 
 		ICompilationUnit newCu= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2201,7 +2201,7 @@ public class CopyTest extends RefactoringTest {
 
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2238,7 +2238,7 @@ public class CopyTest extends RefactoringTest {
 
 		ICompilationUnit newCu= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2276,7 +2276,7 @@ public class CopyTest extends RefactoringTest {
 
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2312,7 +2312,7 @@ public class CopyTest extends RefactoringTest {
 
 		IFile newFile= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
@@ -2341,7 +2341,7 @@ public class CopyTest extends RefactoringTest {
 	public void testCopy_Package_to_Its_Root() throws Exception {
 		IPackageFragment newPackage= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
@@ -2368,7 +2368,7 @@ public class CopyTest extends RefactoringTest {
 	public void testCopy_Package_to_Itself() throws Exception {
 		IPackageFragment newPackage= null;
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
@@ -2398,7 +2398,7 @@ public class CopyTest extends RefactoringTest {
 		IPackageFragment newPackage= null;
 		String packageName= getPackageP().getElementName();
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
@@ -2427,7 +2427,7 @@ public class CopyTest extends RefactoringTest {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("otherProject", null);
 		JavaProjectHelper.addSourceContainer(otherProject, null);
 		try {
-			ICopyQueries queries= new TestCopyQueries();
+			INewNameQueries queries= new TestCopyQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
