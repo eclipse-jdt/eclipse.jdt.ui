@@ -34,7 +34,7 @@ public class SearchEngine {
 		private HashMap fMap= new HashMap();
 		
 		public void addRef(String word, String path) {
-			System.err.println("Index.add: " + path + " " + word);
+			System.err.println("Index.add: " + path + " " + word); //$NON-NLS-1$ //$NON-NLS-2$
 			HashMap words= (HashMap) fMap.get(path);
 			if (words == null) {
 				words= new HashMap();
@@ -44,7 +44,7 @@ public class SearchEngine {
 		}
 		
 		public void remove(String path) {
-			System.err.println("Index.remove: " + path);
+			System.err.println("Index.remove: " + path); //$NON-NLS-1$
 			fMap.remove(path);
 		}
 		

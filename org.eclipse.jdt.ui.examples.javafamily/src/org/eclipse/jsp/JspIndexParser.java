@@ -83,7 +83,7 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 			String s= null;
 			IPath location= fFile.getLocation();
 			if (location == null)
-				s= "";
+				s= ""; //$NON-NLS-1$
 			else
 				s= new String(Util.getFileCharContent(location.toFile(), encoding));
 			

@@ -24,7 +24,7 @@ public class Util {
 	}
 	
 	static char[] getFileCharContent(File file, String encoding) throws IOException {
-		System.out.println("****jdt.internal.compiler.util.Util.getFileCharContent: " + file + " " + encoding);
+		System.out.println("****jdt.internal.compiler.util.Util.getFileCharContent: " + file + " " + encoding); //$NON-NLS-1$ //$NON-NLS-2$
 		InputStream stream = null;
 		try {
 			stream = new BufferedInputStream(new FileInputStream(file));
