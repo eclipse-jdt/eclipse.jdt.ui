@@ -92,6 +92,27 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";//$NON-NLS-1$
 
 	/**
+	 * A named preference that defines how member elements are ordered by the
+	 * Java views using the <code>JavaElementSorter</code>.
+	 * <p>
+	 * Value is of type <code>String</code>: A comma separated list of the
+	 * following entries. Each entry must be in the list, no duplication.
+	 * <ul>
+	 * <li><b>T</b>: Types</li>
+	 * <li><b>C</b>: Constructors</li>
+	 * <li><b>I</b>: Initializers</li>
+	 * <li><b>M</b>: Methods</li>
+	 * <li><b>F</b>: Fields</li>
+	 * <li><b>SI</b>: Static Initializers</li>
+	 * <li><b>SM</b>: Static Methods</li>
+	 * <li><b>SF</b>: Static Fields</li>
+	 * </ul>
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String APPEARANCE_MEMBER_SORT_ORDER= "outlinesortoption"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1520,6 +1541,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS, false);
 		store.setDefault(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);		
 
+		// MembersOrderPreferencePage
+		store.setDefault(APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
+
 		// JavaEditorPreferencePage
 		/*
 		 * Ensure that the display is accessed only in the UI thread.
@@ -1666,7 +1690,8 @@ public class PreferenceConstants {
 		
 		JavadocPreferencePage.initDefaults(store);
 		NewJavaProjectPreferencePage.initDefaults(store);
-		MembersOrderPreferencePage.initDefaults(store);		
+
+		
 	}
 	
 	/**

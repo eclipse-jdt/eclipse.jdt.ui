@@ -39,6 +39,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.Flags;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,17 +52,17 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class MembersOrderPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String DEFAULT_SORT_ORDER= "T,SI,SF,SM,I,F,C,M"; //$NON-NLS-1$
-	public static final String PREF_OUTLINE_SORT_OPTION= "outlinesortoption"; //$NON-NLS-1$
+	private static final String ALL_ENTRIES= "T,SI,SF,SM,I,F,C,M"; //$NON-NLS-1$
+	private static final String PREF_OUTLINE_SORT_OPTION= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
 
-	public static String CONSTRUCTORS= "C"; //$NON-NLS-1$
-	public static String FIELDS= "F"; //$NON-NLS-1$
-	public static String METHODS= "M"; //$NON-NLS-1$
-	public static String STATIC_METHODS= "SM"; //$NON-NLS-1$
-	public static String STATIC_FIELDS= "SF"; //$NON-NLS-1$
-	public static String INIT= "I"; //$NON-NLS-1$
-	public static String STATIC_INIT= "SI"; //$NON-NLS-1$
-	public static String TYPES= "T"; //$NON-NLS-1$
+	private static String CONSTRUCTORS= "C"; //$NON-NLS-1$
+	private static String FIELDS= "F"; //$NON-NLS-1$
+	private static String METHODS= "M"; //$NON-NLS-1$
+	private static String STATIC_METHODS= "SM"; //$NON-NLS-1$
+	private static String STATIC_FIELDS= "SF"; //$NON-NLS-1$
+	private static String INIT= "I"; //$NON-NLS-1$
+	private static String STATIC_INIT= "SI"; //$NON-NLS-1$
+	private static String TYPES= "T"; //$NON-NLS-1$
 
 	public static final int TYPE_INDEX= 0;
 	public static final int CONSTRUCTORS_INDEX= 1;
@@ -71,13 +72,13 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	public static final int STATIC_FIELDS_INDEX= 5;
 	public static final int STATIC_INIT_INDEX= 6;
 	public static final int STATIC_METHODS_INDEX= 7;
+	
 	private static final int LAST_INDEX= STATIC_METHODS_INDEX;
-
 	private final int DEFAULT= 0;
 
 	private ListDialogField fSortOrderList;
 
-	private static Cache fgCache;
+	private static Cache fgCache= null;
 
 	private static class Cache implements IPropertyChangeListener {
 		private int[] offsets= null;
@@ -114,13 +115,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		}
 	}
 
-	//this should be abstracted in PreferencePage 
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PREF_OUTLINE_SORT_OPTION, DEFAULT_SORT_ORDER); //$NON-NLS-1$
-		fgCache= new Cache();
-		store.addPropertyChangeListener(fgCache);
-	}
-
 	private static List getSortOrderList(String string) {
 		StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
 		List entries= new ArrayList();
@@ -135,7 +129,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		if (entries.size() != LAST_INDEX + 1)
 			return false;
 
-		StringTokenizer tokenizer= new StringTokenizer(DEFAULT_SORT_ORDER, ","); //$NON-NLS-1$//$NON-NLS-2$
+		StringTokenizer tokenizer= new StringTokenizer(ALL_ENTRIES, ","); //$NON-NLS-1$
 		for (int i= 0; tokenizer.hasMoreTokens(); i++) {
 			String token= tokenizer.nextToken();
 			if (!entries.contains(token))
@@ -247,6 +241,10 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	public static int getOffset(int kind) {
+		if (fgCache == null) {
+			fgCache= new Cache();
+			JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fgCache);
+		}			
 		return fgCache.getIndex(kind);
 	}
 
