@@ -44,9 +44,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -283,7 +283,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	
 	//overriden by d'n'd - must be protected
 	protected Object selectDestination(ReorgRefactoring refactoring) {
-		JavaElementContentProvider cp= new JavaElementContentProvider() {
+		StandardJavaElementContentProvider cp= new StandardJavaElementContentProvider() {
 			public boolean hasChildren(Object element) {
 				// prevent the + from being shown in front of packages
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
@@ -307,7 +307,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		return null;
 	}
 		
-	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, JavaElementContentProvider cp, ReorgRefactoring refactoring){
+	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
 		return new ElementTreeSelectionDialog(parent, labelProvider, cp);
 	}
 	

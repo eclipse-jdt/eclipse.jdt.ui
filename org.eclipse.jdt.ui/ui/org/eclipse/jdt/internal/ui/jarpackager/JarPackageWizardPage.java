@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -462,7 +461,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
 		ITreeContentProvider treeContentProvider=
-			new JavaElementContentProvider() {
+			new StandardJavaElementContentProvider() {
 				public boolean hasChildren(Object element) {
 					// prevent the + from being shown in front of packages
 					return !(element instanceof IPackageFragment) && super.hasChildren(element);

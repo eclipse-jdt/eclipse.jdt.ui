@@ -90,9 +90,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
@@ -242,7 +242,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
 		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
-		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, reconcile));
+		fViewer.setContentProvider(new PackageExplorerContentProvider(showCUChildren, reconcile));
 		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
@@ -873,7 +873,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			actionBars.updateActionBars();
 			
 			boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
-			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
+			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
 			refreshViewer= true;
 		}

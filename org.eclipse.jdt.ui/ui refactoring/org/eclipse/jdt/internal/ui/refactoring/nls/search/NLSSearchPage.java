@@ -76,7 +76,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -707,7 +707,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	 */
 	protected ElementTreeSelectionDialog createWorkspaceFileSelectionDialog(String title, String message) {
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_SMALL_ICONS;
-		ITreeContentProvider contentProvider= new JavaElementContentProvider();
+		ITreeContentProvider contentProvider= new StandardJavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider);
 		dialog.setAllowMultiple(false);

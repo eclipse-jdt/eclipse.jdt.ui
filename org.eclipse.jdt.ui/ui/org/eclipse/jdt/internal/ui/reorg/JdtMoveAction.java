@@ -26,8 +26,6 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -39,6 +37,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public class JdtMoveAction extends ReorgDestinationAction {
 
@@ -85,7 +84,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
-	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, JavaElementContentProvider cp, ReorgRefactoring refactoring){
+	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
 		return new MoveDestinationDialog(parent, labelProvider, cp, (MoveRefactoring)refactoring);
 	}	
 	

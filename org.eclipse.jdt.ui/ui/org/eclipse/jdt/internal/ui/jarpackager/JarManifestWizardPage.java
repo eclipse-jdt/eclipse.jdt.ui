@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -890,7 +891,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
 				packages.add(fragment);
 		}
-		JavaElementContentProvider cp= new JavaElementContentProvider() {
+		StandardJavaElementContentProvider cp= new StandardJavaElementContentProvider() {
 			public boolean hasChildren(Object element) {
 				// prevent the + from being shown in front of packages
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
@@ -935,7 +936,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
 						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
-		ITreeContentProvider contentProvider= new JavaElementContentProvider();
+		ITreeContentProvider contentProvider= new StandardJavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider); 
 		dialog.setAllowMultiple(false);

@@ -14,12 +14,12 @@ import org.eclipse.swt.widgets.*;
 /**
  * A tree content provider for Java elements. It extends the 
  * StandardJavaElementContentProvider with support for listening to changes.
- * It is recommended to implement a custom listening support
- * and to derive from the StandardJavaElementContentProvider directly.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * @deprecated use the StandardJavaElementContentProvider
  * @see StandardJavaElementContentProvider
+ * @see PackageExplorerPart
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
