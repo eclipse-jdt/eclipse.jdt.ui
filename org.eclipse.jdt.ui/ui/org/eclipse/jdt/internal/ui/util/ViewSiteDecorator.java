@@ -25,6 +25,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 public class ViewSiteDecorator extends PlatformObject implements IViewSite {
@@ -96,7 +97,14 @@ public class ViewSiteDecorator extends PlatformObject implements IViewSite {
 			fSelectionProvider= new SelectionProviderDecorator(provider);
 		}
 	}
-	
+	/* (non-Javadoc)
+     * @see org.eclipse.ui.IWorkbenchPartSite#getPart()
+     */
+    public IWorkbenchPart getPart() {
+    	return null;
+    	// TODO has to be enabled after next integration build
+        // return fViewSite.getPart();
+    }
 	public IActionBars getActionBars() {
 		return fViewSite.getActionBars();
 	}
