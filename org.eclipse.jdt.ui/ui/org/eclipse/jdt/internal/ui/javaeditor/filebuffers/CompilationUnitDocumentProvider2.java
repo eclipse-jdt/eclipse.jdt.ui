@@ -770,9 +770,10 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		if (cuInfo.fModel instanceof CompilationUnitAnnotationModel)   {
 			CompilationUnitAnnotationModel model= (CompilationUnitAnnotationModel) cuInfo.fModel;
 			model.setCompilationUnit(cuInfo.fCopy);
+		} else if (cuInfo.fModel != null) {
+			cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
 		}
-		cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
-						
+		
 		if (requestor instanceof IProblemRequestorExtension) {
 			IProblemRequestorExtension extension= (IProblemRequestorExtension) requestor;
 			extension.setIsActive(isHandlingTemporaryProblems());
@@ -800,7 +801,8 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				cuInfo.fCopy.destroy();
 			}
 			
-			cuInfo.fModel.removeAnnotationModelListener(fGlobalAnnotationModelListener);
+			if (cuInfo.fModel != null)
+				cuInfo.fModel.removeAnnotationModelListener(fGlobalAnnotationModelListener);
 		}
 		super.disposeFileInfo(element, info);
 	}
@@ -859,16 +861,19 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			// If here, the dirty state of the editor will change to "not dirty".
 			// Thus, the state changing flag will be reset.
 			
-			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 			IDocument document= getDocument(element);
-			model.updateMarkers(document);
-				
+			if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+				model.updateMarkers(document);
+			}
+			
 			if (fSavePolicy != null) {
 				ICompilationUnit unit= fSavePolicy.postSave(original);
-				if (unit != null) {
+				if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
 					IResource r= unit.getResource();
 					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
 					if (markers != null && markers.length > 0) {
+						AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
 						for (int i= 0; i < markers.length; i++)
 							model.updateMarker(markers[i], document, null);
 					}
