@@ -729,6 +729,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
+		Label note= new Label(composite, SWT.NONE);
+		note.setText("Note: Updates on next change in the editor");
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalSpan= 2;
+		note.setLayoutData(gd);
+			
 		return composite;
 	}
 
