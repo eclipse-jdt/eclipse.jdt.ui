@@ -79,7 +79,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.jarpackager.JarWriter;
+import org.eclipse.jdt.ui.jarpackager.JarWriter2;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -98,7 +98,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 	}
 
-	private JarWriter fJarWriter;
+	private JarWriter2 fJarWriter;
 	private JarPackageData fJarPackage;
 	private JarPackageData[] fJarPackages;
 	private Shell fParentShell;

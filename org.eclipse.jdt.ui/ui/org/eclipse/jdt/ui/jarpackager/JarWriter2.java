@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,11 +47,11 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * Clients may subclass.
  * 
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
- * @since 2.0
  * 
- * @deprecated use {@link org.eclipse.jdt.ui.jarpackager.JarWriter2} instead.
+ * @since 3.1
  */
-public class JarWriter {
+public class JarWriter2 {
+	
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
@@ -67,10 +66,10 @@ public class JarWriter {
 	 *				 			or <code>null</code> if "false/no/cancel" is the answer
 	 * 							and no dialog should be shown
 	 * @throws	CoreException	to signal any other unusual termination.
-	 * 								This can also be used to return information
-	 * 								in the status object.
+	 * 							This can also be used to return information
+	 * 							in the status object.
 	 */
-	public JarWriter(JarPackageData jarPackage, Shell parent) throws CoreException {
+	public JarWriter2(JarPackageData jarPackage, Shell parent) throws CoreException {
 		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
 		fJarPackage= jarPackage;
 		Assert.isTrue(fJarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
@@ -118,46 +117,20 @@ public class JarWriter {
 	 * 								in the status object.
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		ByteArrayOutputStream output= null;
-		BufferedInputStream contentStream= null;
-		
-		try {
-			output= new ByteArrayOutputStream();
-			if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-				String message= JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath()); //$NON-NLS-1$
-				throw JarPackagerUtil.createCoreException(message, null);
-			}
-			contentStream= new BufferedInputStream(resource.getContents(false));
-			int chunkSize= 4096;
-			byte[] readBuffer= new byte[chunkSize];
-			int count;
-			while ((count= contentStream.read(readBuffer, 0, chunkSize)) != -1)
-				output.write(readBuffer, 0, count);
-		} catch (IOException ex) {
-			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
-		} finally {
-			try {
-				if (output != null)
-					output.close();
-				if (contentStream != null)
-					contentStream.close();
-			} catch (IOException ex) {
-				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
-			}
+		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
+			String message= JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath()); //$NON-NLS-1$
+			throw JarPackagerUtil.createCoreException(message, null);
 		}
+
 		try {
 			IPath fileLocation= resource.getLocation();
-			long lastModified= System.currentTimeMillis();
 			File file= null;
 			if (fileLocation != null) {
 				file= new File(fileLocation.toOSString());
-				if (file.exists()) {
-					lastModified= file.lastModified();
-				}
 			}
 			if (fJarPackage.areDirectoryEntriesIncluded())
 				addDirectories(destinationPath, file);
-			write(destinationPath, output.toByteArray(), lastModified);
+			addFile(resource, destinationPath, file);
 		} catch (IOException ex) {
 			// Ensure full path is visible
 			String message= null;
@@ -173,31 +146,40 @@ public class JarWriter {
 	 * Creates a new JarEntry with the passed path and contents, and writes it
 	 * to the current archive.
 	 *
-	 * @param	path			the path inside the archive
-	 * @param	contents		the bytes to write
-	 * @param	lastModified	a long which represents the last modification date
-     * @throws	IOException		if an I/O error has occurred
+	 * @param	resource			the file to write
+	 * @param	path				the path inside the archive
+	 * @param	correspondingFile	the corresponding file in the file system
+	 *								or <code>null</code> if it doesn't exist
+     * @throws	IOException			if an I/O error has occurred
+	 * @throws	CoreException 		if the resource can-t be accessed
 	 */
-	protected void write(IPath path, byte[] contents, long lastModified) throws IOException {
+	protected void addFile(IFile resource, IPath path, File correspondingFile) throws IOException, CoreException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
+		byte[] readBuffer= new byte[4096];             
+
 		if (fJarPackage.isCompressed())
 			newEntry.setMethod(ZipEntry.DEFLATED);
 			// Entry is filled automatically.
 		else {
 			newEntry.setMethod(ZipEntry.STORED);
-			newEntry.setSize(contents.length);
-			CRC32 checksumCalculator= new CRC32();
-			checksumCalculator.update(contents);
-			newEntry.setCrc(checksumCalculator.getValue());
+			calculateCrcAndSize(newEntry, resource, readBuffer);
 		}
-		
+
+		long lastModified= correspondingFile != null && correspondingFile.exists() ? correspondingFile.lastModified() : System.currentTimeMillis();
 		// Set modification time
 		newEntry.setTime(lastModified);
 
+		InputStream contentStream = resource.getContents(false);
+
 		try {		
 			fJarOutputStream.putNextEntry(newEntry);
-			fJarOutputStream.write(contents);
+			int count;
+			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1)
+				fJarOutputStream.write(readBuffer, 0, count);
 		} finally  {
+			if (contentStream != null)
+				contentStream.close();
+
 			/*
 			 * Commented out because some JREs throw an NPE if a stream
 			 * is closed twice. This works because
@@ -207,16 +189,45 @@ public class JarWriter {
 			// fJarOutputStream.closeEntry();
 		}
 	}
+
+	/**
+	 * Calculates the crc and size of the resource and updates the jarEntry.
+	 * 
+	 * @param jarEntry			the JarEntry to update
+	 * @param resource			the file to calculate 
+	 * @param readBuffer 		a shared read buffer to store temporarz data
+	 * 
+     * @throws	IOException		if an I/O error has occurred
+	 * @throws	CoreException 	if the resource can-t be accessed
+	 */
+	private void calculateCrcAndSize(JarEntry jarEntry, IFile resource, byte[] readBuffer) throws IOException, CoreException {
+		InputStream contentStream = resource.getContents(false);
+		int size = 0;
+		CRC32 checksumCalculator= new CRC32();
+		int count;
+		try {
+			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1) {
+				checksumCalculator.update(readBuffer, 0, count);
+				size += count;
+			}
+		} finally {
+			if (contentStream != null)
+				contentStream.close();
+		}
+		jarEntry.setSize(size);
+		jarEntry.setCrc(checksumCalculator.getValue());
+	}
 	
 	/**
-	 * Add the directory entries for the given path to the jar.
+	 * Creates the directory entries for the given path and writes it to the 
+	 * current archive.
 	 * 
-	 * @param destinationPath the path to add
+	 * @param destinationPath 	the path to add
 	 * @param correspondingFile the corresponding file in the file system 
-	 *  or <code>null</code> if it doesn't exist
+	 *  						or <code>null</code> if it doesn't exist
 	 * @throws IOException if an I/O error has occurred  
 	 */
-	private void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
+	protected void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
 		List directories= new ArrayList(2);

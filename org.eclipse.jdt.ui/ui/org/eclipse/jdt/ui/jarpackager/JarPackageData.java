@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  * 
  * Clients may subclass.
  * 
- * @see org.eclipse.jdt.ui.jarpackager.JarWriter
+ * @see org.eclipse.jdt.ui.jarpackager.JarWriter2
  * @since 2.0
  */
 public class JarPackageData {
@@ -829,10 +829,10 @@ public class JarPackageData {
 	 *				 	or <code>null</code> if "false/no/cancel" is the answer
 	 * 					and no dialog should be shown
 	 * @return a JarWriter
-	 * @see JarWriter
+	 * @see JarWriter2
 	 */
-	public JarWriter createJarWriter(Shell parent) throws CoreException {
-		return new JarWriter(this, parent);
+	public JarWriter2 createJarWriter(Shell parent) throws CoreException {
+		return new JarWriter2(this, parent);
 	}
 	
 	/**
