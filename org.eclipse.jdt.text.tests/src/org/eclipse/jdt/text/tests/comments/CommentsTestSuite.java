@@ -28,6 +28,5 @@ public class CommentsTestSuite extends TestSuite {
 		addTest(MultiLineTestCase.suite());
 		addTest(SingleLineTestCase.suite());
 		addTest(JavaDocTestCase.suite());
-		addTest(org.eclipse.jdt.text.tests.formatter.comment.CommentsTestSuite.suite());
 	}
 }

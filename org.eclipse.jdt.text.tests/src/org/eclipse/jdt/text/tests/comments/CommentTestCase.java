@@ -71,6 +71,6 @@ public abstract class CommentTestCase extends TestCase {
 		assertNotNull(type);
 		assertTrue(type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT));
 
-		return CommentFormatterUtil.format(type, text, offset, length, CommentFormatterUtil.createOptions(getUserOptions()), null);
+		return CommentFormatterUtil.format(type, text, offset, length, CommentFormatterUtil.createOptions(getUserOptions()));
 	}
 }

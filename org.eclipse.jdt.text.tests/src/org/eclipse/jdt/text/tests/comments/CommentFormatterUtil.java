@@ -26,7 +26,6 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
@@ -52,11 +51,9 @@ public class CommentFormatterUtil {
 	 *                format
 	 * @param length the length of the region in the source string to format
 	 * @param preferences preferences for the comment formatter
-	 * @param textMeasurement optional text measurement for font specific
-	 *                formatting, can be <code>null</code>
 	 * @return the formatted source string
 	 */
-	public static String format(String type, String source, int offset, int length, Map preferences, ITextMeasurement textMeasurement) {
+	public static String format(String type, String source, int offset, int length, Map preferences) {
 		Assert.isTrue(IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type) || IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type));
 
 		Assert.isNotNull(source);
@@ -73,7 +70,7 @@ public class CommentFormatterUtil {
 		context.setProperty(FormattingContextProperties.CONTEXT_MEDIUM, document);
 		context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, new TypedPosition(offset, length, type));
 		
-		CommentFormattingStrategy strategy= new CommentFormattingStrategy(textMeasurement);
+		CommentFormattingStrategy strategy= new CommentFormattingStrategy();
 		strategy.formatterStarts(context);
 		strategy.format();
 		strategy.formatterStops();
