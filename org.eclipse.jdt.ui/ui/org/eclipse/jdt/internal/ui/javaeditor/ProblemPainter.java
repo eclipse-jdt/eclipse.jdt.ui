@@ -115,8 +115,11 @@ public class ProblemPainter implements IPainter, PaintListener {
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			ProblemPosition p = (ProblemPosition) e.next();
-			if (p.overlapsWith(offset, length))
-				draw(gc, p.getOffset() - offset, p.getLength());
+			if (p.overlapsWith(offset, length)) {
+				int p1= Math.max(offset, p.getOffset());
+				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
+				draw(gc, p1 - offset, p2 - p1);
+			}
 		}
 	}
 	
