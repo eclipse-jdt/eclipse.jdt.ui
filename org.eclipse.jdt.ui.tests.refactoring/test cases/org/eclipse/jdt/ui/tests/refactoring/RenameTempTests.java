@@ -328,6 +328,16 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 //		printTestDisabledMessage("regression test for Bug#22938");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
+
+	public void test49() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#30923 ");
+		helper1("newname", true, 4, 16, 4, 20);
+	}
+	
+	public void test50() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#30923 ");
+		helper1("newname", true, 4, 16, 4, 20);
+	}
 	
 // -----
 	public void testFail0() throws Exception{

@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -120,8 +120,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		initAST();
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
-		if (! Checks.isDeclaredInMethod(fTempDeclarationNode))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.only_in_methods")); //$NON-NLS-1$
 			
 		initNames();			
 		return new RefactoringStatus();
@@ -187,8 +185,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 				return result;
 			
 			String fullKey= RefactoringAnalyzeUtil.getFullDeclarationBindingKey(edits, fCompilationUnitNode);	
-			MethodDeclaration methodDeclaration= RefactoringAnalyzeUtil.getMethodDeclaration(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
-			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(methodDeclaration, edits, change, fullKey);
+			ASTNode enclosing= getEnclosingBlockOrMethod(edits, change, newCUNode);
+			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, edits, change, fullKey);
 			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
 			return result;
 		} catch(CoreException e) {
@@ -197,6 +195,13 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			if (wc != null)
 				wc.destroy();
 		}
+	}
+
+	private ASTNode getEnclosingBlockOrMethod(TextEdit[] edits, TextChange change, CompilationUnit newCUNode) {
+		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
+		if (enclosing == null)	
+			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
+		return enclosing;
 	}
 	
     private RefactoringStatus analyzeCompileErrors(String newCuSource, CompilationUnit newCUNode) {
