@@ -281,14 +281,17 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		return createCU(pack, fileName + "_in.java", getFileContents(fullName));
 	}
 
-	private void doMultiUnitTest(ICompilationUnit[] CUs, String testPath, String[] outputFileBaseNames) throws Exception, JavaModelException, IOException {
-		ISourceRange		selection= findSelectionInSource(CUs[0].getSource());
+	private void doMultiUnitTest(ICompilationUnit[] CUs, String testPath, String[] outputFileBaseNames, String factoryClassName) throws Exception, JavaModelException, IOException {
+		ISourceRange selection= findSelectionInSource(CUs[0].getSource());
 		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength(), 
 												   JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+
+		if (factoryClassName != null)
+			ref.setFactoryClass(factoryClassName);
 
 		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
@@ -329,7 +332,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		String	testPath= TEST_PATH_PREFIX + getRefactoringPath() + "positive/";
 
-		doMultiUnitTest(CUs, testPath, inputFileBaseNames);
+		doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
 	}
 
 	/**
@@ -340,26 +343,28 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * Test files are assumed to be located in the resources directory.
 	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
 	 * @param inputFileBaseNames an array of input source file base names
+	 * @param factoryClassName the fully-qualified name of the class to receive the factory method, or null
+	 * if the factory method is to be placed on the class defining the given constructor
 	 * @see createCUFromFileName()
 	 */
-	void multiUnitBugHelper(boolean staticFactoryMethod, String[] inputFileBaseNames)
+	void multiUnitBugHelper(boolean staticFactoryMethod, String[] inputFileBaseNames, String factoryClassName)
 		throws Exception
 	{
 		ICompilationUnit CUs[]= new ICompilationUnit[inputFileBaseNames.length];
 
-		for (int i = 0; i < inputFileBaseNames.length; i++) {
+		for(int i= 0; i < inputFileBaseNames.length; i++) {
 			int pkgEnd= inputFileBaseNames[i].lastIndexOf('/')+1;
 			boolean explicitPkg= (pkgEnd > 0);
 			IPackageFragment pkg= explicitPkg ? getRoot().createPackageFragment(inputFileBaseNames[i].substring(0, pkgEnd-1), true, new NullProgressMonitor()) : getPackageP();
 
-			CUs[i] = createCUForBugTestCase(pkg, inputFileBaseNames[i].substring(pkgEnd), true);
+			CUs[i]= createCUForBugTestCase(pkg, inputFileBaseNames[i].substring(pkgEnd), true);
 		}
 
 		String	testName= getName();
 		String	testNumber= testName.substring("test".length());
 		String	testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
 
-		doMultiUnitTest(CUs, testPath, inputFileBaseNames);
+		doMultiUnitTest(CUs, testPath, inputFileBaseNames, factoryClassName);
 	}
 
 	private void failHelper(boolean staticFactory, int expectedStatus) throws Exception {
@@ -490,7 +495,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	// ================================================================================
 	//
 	public void test45942() throws Exception {
-		multiUnitBugHelper(true, new String[] { "TestClass", "UseTestClass" });
+		multiUnitBugHelper(true, new String[] { "TestClass", "UseTestClass" }, null);
 	}
 
 	public void test46189() throws Exception {
@@ -510,7 +515,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	public void test46608() throws Exception {
-		multiUnitBugHelper(true, new String[] { "p1/TT", "p2/TT" });
+		multiUnitBugHelper(true, new String[] { "p1/TT", "p2/TT" }, null);
+	}
+
+	public void test48504() throws Exception {
+		multiUnitBugHelper(true, new String[] { "p1/A", "p1/B" }, "p1.B");
 	}
 
 	public void test58293() throws Exception {
