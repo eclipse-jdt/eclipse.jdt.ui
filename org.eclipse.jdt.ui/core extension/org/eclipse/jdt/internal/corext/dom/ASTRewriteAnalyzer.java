@@ -828,27 +828,27 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				String insertStr= formatted.substring(currPos, offset);
 				doTextInsert(insertOffset, insertStr, description);
 			}
-			String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
-			
 			Object data= markers[i].data;
-			if (data instanceof MovePlaceholderData) {
-				ASTNode existingNode= ((MovePlaceholderData) data).node;
-				int srcIndentLevel= getIndent(existingNode.getStartPosition());
-				doTextMove(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
-			} else if (data instanceof CopyPlaceholderData) {
-				ASTNode existingNode= ((CopyPlaceholderData) data).node;
-				int srcIndentLevel= getIndent(existingNode.getStartPosition());
-				doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
-			} else if (data instanceof StringPlaceholderData) {
-				String code= ((StringPlaceholderData) data).code;
-				String str= Strings.changeIndent(code, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
-				doTextInsert(insertOffset, str, description);
-			} else if (data instanceof AnnotationData) {
-				TextEdit edit= new RangeMarker(offset, 0);
+			if (data instanceof AnnotationData) {
+				TextEdit edit= new RangeMarker(insertOffset, 0);
 				addDescription(((AnnotationData) data).description, edit);	
-				addEdit(edit);
+				addEdit(edit);				
+			} else {
+				String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
+				if (data instanceof MovePlaceholderData) {
+					ASTNode existingNode= ((MovePlaceholderData) data).node;
+					int srcIndentLevel= getIndent(existingNode.getStartPosition());
+					doTextMove(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+				} else if (data instanceof CopyPlaceholderData) {
+					ASTNode existingNode= ((CopyPlaceholderData) data).node;
+					int srcIndentLevel= getIndent(existingNode.getStartPosition());
+					doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+				} else if (data instanceof StringPlaceholderData) {
+					String code= ((StringPlaceholderData) data).code;
+					String str= Strings.changeIndent(code, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
+					doTextInsert(insertOffset, str, description);
+				}
 			}
-		
 			currPos= offset + markers[i].length;
 		}
 		if (currPos < formatted.length()) {

@@ -66,7 +66,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 			int startPos= markers[i].offset;
 			int length= markers[i].length;
 			positions[k++]= startPos;
-			positions[k++]= startPos + length - 1;
+			if (length > 0) {
+				positions[k++]= startPos + length - 1;
+			}
 		}		
 		
 		Hashtable map= JavaCore.getOptions();
@@ -76,9 +78,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 		
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			int startPos= positions[k++];
-			int endPos= positions[k++] + 1;
 			markers[i].offset= startPos;
-			markers[i].length= endPos - startPos;
+			if (markers[i].length > 0) {
+				int endPos= positions[k++] + 1;
+				markers[i].length= endPos - startPos;
+			}
 		}
 		return formatted;
 	}	

@@ -184,6 +184,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			
 			CompilationUnitChange change= getCompilationUnitChange();
 			GroupDescription[] descriptions= change.getGroupDescriptions();
+			if (descriptions.length > 0) {
+				change.setKeepExecutedTextEdits(true);
+			}
 			GroupDescription selection= null;
 			for (int i= 0; i < descriptions.length; i++) {
 				GroupDescription curr= descriptions[i];
@@ -195,7 +198,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			
 			IEditorPart part= null;
 			if (selection != null) {
-				change.setKeepExecutedTextEdits(true);
 				part= EditorUtility.isOpenInEditor(unit);
 				if (part == null) {
 					part= EditorUtility.openInEditor(unit, true);
