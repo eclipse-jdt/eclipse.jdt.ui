@@ -112,11 +112,11 @@ public class ParameterInfo {
 	}
 	
 	public boolean isRenamed() {
-		return !isAdded() && !fOldName.equals(fNewName);
+		return !fOldName.equals(fNewName);
 	}
 	
 	public boolean isTypeNameChanged() {
-		return !isAdded() && !fOldTypeName.equals(fNewTypeName);
+		return !fOldTypeName.equals(fNewTypeName);
 	}
 	
 }
