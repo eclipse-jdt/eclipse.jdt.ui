@@ -109,6 +109,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
+import org.eclipse.jface.text.link.LinkedEnvironment;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -3172,7 +3173,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		private boolean isCancelled() {
 			return fCancelled || fProgressMonitor.isCanceled()
-				||  fPostSelectionValidator != null && !fPostSelectionValidator.isValid(fSelection);
+				||  fPostSelectionValidator != null && !fPostSelectionValidator.isValid(fSelection)
+				|| LinkedEnvironment.hasEnvironment(fDocument);
 		}
 		
 		/*
