@@ -251,15 +251,9 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method, IWorkingCopy[] workingCopies) throws JavaModelException{
 		pm.beginTask("", 4); //$NON-NLS-1$
 		Set methods= methodsToRename(method, new SubProgressMonitor(pm, 3), workingCopies);
-		Iterator iter= methods.iterator();
-		ISearchPattern pattern= SearchEngine.createSearchPattern((IMethod)iter.next(), IJavaSearchConstants.ALL_OCCURRENCES);
-		
-		while (iter.hasNext()){
-			ISearchPattern methodPattern= SearchEngine.createSearchPattern((IMethod)iter.next(), IJavaSearchConstants.ALL_OCCURRENCES);	
-			pattern= SearchEngine.createOrSearchPattern(pattern, methodPattern);
-		}
+		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 		pm.done();
-		return pattern;
+		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
 	static Set getMethodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{

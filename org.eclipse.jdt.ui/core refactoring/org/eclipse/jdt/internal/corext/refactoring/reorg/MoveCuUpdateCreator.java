@@ -298,14 +298,7 @@ class MoveCuUpdateCreator {
 	}
 	
 	private static ISearchPattern createSearchPattern(ICompilationUnit cu) throws JavaModelException{
-		IType[] types= cu.getTypes();
-		if (types.length == 0)
-			return null;
-		ISearchPattern pattern= SearchEngine.createSearchPattern(types[0], IJavaSearchConstants.REFERENCES);
-		for(int i= 1; i < types.length; i++){ //not-idiomatic loop
-			pattern= SearchEngine.createOrSearchPattern(pattern, SearchEngine.createSearchPattern(types[i], IJavaSearchConstants.REFERENCES));
-		}
-		return pattern;
+		return RefactoringSearchEngine.createSearchPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
 	}
 
 	private static class UpdateTypeReferenceEdit extends SimpleTextEdit{

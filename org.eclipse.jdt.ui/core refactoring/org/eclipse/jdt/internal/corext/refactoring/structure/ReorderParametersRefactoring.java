@@ -272,17 +272,9 @@ class ReorderParametersRefactoring extends Refactoring {
 	}
 	
 	private ISearchPattern createSearchPattern() throws JavaModelException{
-		ISearchPattern pattern= createSearchPattern(fRippleMethods[0]);
-		for (int i= 1; i < fRippleMethods.length; i++) {
-			pattern= SearchEngine.createOrSearchPattern(pattern, createSearchPattern(fRippleMethods[i]));
-		}
-		return pattern;
+		return RefactoringSearchEngine.createSearchPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
-	private ISearchPattern createSearchPattern(IMethod method) {
-		return SearchEngine.createSearchPattern(method, IJavaSearchConstants.ALL_OCCURRENCES);
-	}
-	
 	//-------------------------------------
 	
 	/*

@@ -147,12 +147,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	}
 
 	private static ISearchPattern createSearchPattern(IType[] movedPackageVisibleTypes) {
-		ISearchPattern pattern= SearchEngine.createSearchPattern(movedPackageVisibleTypes[0], IJavaSearchConstants.REFERENCES);
-		for (int i= 1; i < movedPackageVisibleTypes.length; i++) { //not-idiomatic loop
-			ISearchPattern newPattern= SearchEngine.createSearchPattern(movedPackageVisibleTypes[i], IJavaSearchConstants.REFERENCES);
-			pattern= SearchEngine.createOrSearchPattern(pattern, newPattern);
-		}
-		return pattern;
+		return RefactoringSearchEngine.createSearchPattern(movedPackageVisibleTypes, IJavaSearchConstants.REFERENCES);
 	}
 	
 	private static IType[] getMovedPackageVisibleTypes(ICompilationUnit[] movedCus) throws JavaModelException{

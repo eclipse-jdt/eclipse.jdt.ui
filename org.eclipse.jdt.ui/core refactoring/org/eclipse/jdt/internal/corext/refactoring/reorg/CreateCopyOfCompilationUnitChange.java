@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -107,15 +108,11 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	
 	private static 	ISearchPattern createSearchPattern(IType type) throws JavaModelException{
 		ISearchPattern pattern= SearchEngine.createSearchPattern(type, IJavaSearchConstants.ALL_OCCURRENCES);
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethod method= methods[i];
-			if (method.isConstructor()){
-				ISearchPattern newPattern= SearchEngine.createSearchPattern(method, IJavaSearchConstants.DECLARATIONS);
-				pattern= SearchEngine.createOrSearchPattern(pattern, newPattern);
-			}	
-		}
-		return pattern;
+		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
+		ISearchPattern constructorDeclarationPattern= RefactoringSearchEngine.createSearchPattern(constructors, IJavaSearchConstants.DECLARATIONS);
+		if (constructorDeclarationPattern == null)
+			return pattern;
+		return SearchEngine.createOrSearchPattern(pattern, constructorDeclarationPattern);
 	}
 
 }
