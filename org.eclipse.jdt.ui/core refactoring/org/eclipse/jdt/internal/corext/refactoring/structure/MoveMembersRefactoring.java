@@ -47,8 +47,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MemberCheckUtil;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -135,24 +133,24 @@ public class MoveMembersRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("Checking preconditions", 4);
-			if (fDestinationType == null)
-				return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationTypeName + "\' not be found.");
-			if (! fDestinationType.exists())
-				return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' does not exist.");
 			
-			if (fDestinationType.isBinary())	
-				return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' is binary.");
-
 			RefactoringStatus result= new RefactoringStatus();	
-
-			if (! canDeclareStaticMembers(fDestinationType))	
-				result.addError("Static members cannot be declared in the destination type \'" + fDestinationType.getFullyQualifiedName() + "\'.");
 			
+			result.merge(checkDestinationType());			
+			if (result.hasFatalError())
+				return result;
+						
 			result.merge(MemberCheckUtil.checkMembersInDestinationType(fMembers, fDestinationType));	
+			if (result.hasFatalError())
+				return result;
 			
 			result.merge(checkAccessedMembersAvailability(new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
 
 			result.merge(checkMovedMembersAvailability(new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
 			
 			result.merge(checkNativeMovedMethods(new SubProgressMonitor(pm, 1)));
 			return result;
@@ -160,7 +158,31 @@ public class MoveMembersRefactoring extends Refactoring {
 			pm.done();
 		}	
 	}
+	
+	private RefactoringStatus checkDestinationType() throws JavaModelException {
+		if (fDestinationType == null)
+			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationTypeName + "\' not be found.");
+		
+		if (! fDestinationType.exists())
+			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' does not exist.");
+			
+		if (fDestinationType.isBinary())	
+			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' is binary.");
 
+		if (fDestinationType.isInterface() && ! getDeclaringType().isInterface())
+			return RefactoringStatus.createFatalErrorStatus("Currently, only members declared in an interface can be moved to another interface.");
+
+		if (! fDestinationType.isInterface() && getDeclaringType().isInterface())
+			return RefactoringStatus.createFatalErrorStatus("Currently, members declared in an interface can be moved only to another interface.");
+
+		RefactoringStatus result= new RefactoringStatus();				
+		
+		if (! canDeclareStaticMembers(fDestinationType))	
+			result.addError("Static members cannot be declared in the destination type \'" + fDestinationType.getFullyQualifiedName() + "\'.");
+				
+		return result;	
+	}
+	
 	private RefactoringStatus checkNativeMovedMethods(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", fMembers.length);
 		RefactoringStatus result= new RefactoringStatus();
@@ -327,8 +349,14 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (! member.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on elements with unknown structure.");					
 
-			if (! Flags.isStatic(member.getFlags()))
-				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static elements.");
+			if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
+				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on interface methods.");
+				
+			if (member.getElementType() == IJavaElement.METHOD && ! Flags.isStatic(member.getFlags()))
+				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static methods.");
+
+			if (! member.getDeclaringType().isInterface() && ! Flags.isStatic(member.getFlags()))
+				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static elements (and interface fields).");
 			
 			if (member.getElementType() == IJavaElement.METHOD)
 				return checkMethod((IMethod)member);
@@ -346,9 +374,6 @@ public class MoveMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkDeclaringType() throws JavaModelException{
 		IType declaringType= getDeclaringType();
 				
-		if (declaringType.isInterface()) //for now
-			return RefactoringStatus.createFatalErrorStatus("Move is not allowed on interface members.");
-		
 		if (declaringType.getFullyQualifiedName().equals("java.lang.Object"))
 			return RefactoringStatus.createFatalErrorStatus("Move is not allowed on members declared in java.lang.Object.");	
 
