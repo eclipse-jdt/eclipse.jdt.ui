@@ -45,7 +45,8 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 public class JavaSearchScopeFactory {
 
 	private static JavaSearchScopeFactory fgInstance;
-	private static IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
+	private static final IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
+	private static final Set EMPTY_SET= new HashSet(0);
 	
 	private JavaSearchScopeFactory() {
 	}
@@ -94,34 +95,54 @@ public class JavaSearchScopeFactory {
 	}
 	
 	public IJavaSearchScope createJavaSearchScope(ISelection selection) {
+		return createJavaSearchScope(getJavaElements(selection));
+	}
+	
+	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
+		Set javaElements= getJavaElements(selection);
+		Set javaProjects= new HashSet(javaElements.size());
+		Iterator elements= javaElements.iterator();
+		while (elements.hasNext()) {
+			IJavaProject jp= ((IJavaElement)elements.next()).getJavaProject();
+			if (jp != null)
+				javaProjects.add(jp);	
+		}
+		return createJavaSearchScope(javaProjects);
+	}
+
+	private Set getJavaElements(ISelection selection) {
+		Set javaElements;
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
-			Iterator iter= ((IStructuredSelection)selection).iterator();
-			Set javaElements= new HashSet(((IStructuredSelection)selection).size());
+			Iterator iter= ((IStructuredSelection) selection).iterator();
+			javaElements= new HashSet(((IStructuredSelection) selection).size());
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
 
 				// Unpack search result view entry
 				if (selectedElement instanceof ISearchResultViewEntry)
-					selectedElement= ((ISearchResultViewEntry)selectedElement).getGroupByKey();
+					selectedElement= ((ISearchResultViewEntry) selectedElement).getGroupByKey();
 
 				if (selectedElement instanceof IJavaElement)
-					addJavaElements(javaElements, (IJavaElement)selectedElement);
+					addJavaElements(javaElements, (IJavaElement) selectedElement);
 				else if (selectedElement instanceof IResource)
-					addJavaElements(javaElements, (IResource)selectedElement);
+					addJavaElements(javaElements, (IResource) selectedElement);
 				else if (selectedElement instanceof LogicalPackage)
-					addJavaElements(javaElements, (LogicalPackage)selectedElement);
+					addJavaElements(javaElements, (LogicalPackage) selectedElement);
 				else if (selectedElement instanceof IAdaptable) {
-					IResource resource= (IResource)((IAdaptable)selectedElement).getAdapter(IResource.class);
+					IResource resource= (IResource) ((IAdaptable) selectedElement).getAdapter(IResource.class);
 					if (resource != null)
 						addJavaElements(javaElements, resource);
 				}
 			}
-			return createJavaSearchScope(javaElements);
+		} else {
+			javaElements= EMPTY_SET;
 		}
-		return EMPTY_SCOPE;
+		return javaElements;
 	}
 
 	private IJavaSearchScope createJavaSearchScope(Set javaElements) {
+		if (javaElements.isEmpty())
+			return EMPTY_SCOPE;
 		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
 	}
 
