@@ -92,31 +92,22 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	}
 	
 	protected void java(char ch, String java, int line) {
-		int i= 0;
-		StringBuffer out= new StringBuffer();
-		while (i < java.length()) {
-			char c= java.charAt(i++);
-			if (c == '\n') {
-				if (ch == '!')  {
-					fDeclarations.append(out.toString() + "\n");
-					fDeclarationLines.add(new Integer(line++));
-				} else  {
-					fContent.append(out.toString() + "\n");
-					fContentLines.add(new Integer(line++));
-				}
-				out.setLength(0);
-			} else {
-				out.append(c);	
-			}
-		}
-		if (out.length() > 0)  {
-			if (ch == '!')  {
-				fDeclarations.append(out.toString() + "\n");
-				fDeclarationLines.add(new Integer(line));
-			} else  {
-				fContent.append(out.toString() + "\n");
-				fContentLines.add(new Integer(line));
-			}
+
+		if (ch == '!')
+			fCurrentTagHandler= fTagHandlerFactor.getHandler("<%!");
+		else
+			fCurrentTagHandler= fTagHandlerFactor.getHandler("<%");
+
+		/*
+		 * XXX: This is needed because the used parser does not treat
+		 *      "<%" like every other tag.
+		 */
+		fCurrentTagHandler.addAttribute("source", java, line);
+
+		try {
+			fCurrentTagHandler.processEndTag(fResultCollector, line);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.source.ITagHandler;
@@ -29,6 +28,9 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	private String fTagLibValue;
 	private String fClass;
 	private String fId;
+	private String fSource;
+	private boolean fInDeclaration;
+	private boolean fInJavaSection;
 	
 
 	/*
@@ -48,6 +50,8 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	public void reset(String startTag)  {
 		fInUseBean= "jsp:useBean".equals(startTag);
 		fInTagLib= "c:out".equals(startTag);
+		fInJavaSection= "<%".equals(startTag);
+		fInDeclaration= "<%!".equals(startTag);
 	}
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandler#addAttribute(java.lang.String, java.lang.String)
@@ -62,14 +66,8 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		if (fInTagLib) {
 			fTagLibValue= value;
 		}
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.source.ITagHandler#getSmap()
-	 */
-	public int[] getSmap() {
-		// XXX Auto-generated method stub
-		return null;
+		if ("source".equals(name))
+			fSource= value;
 	}
 
 	/*
@@ -140,6 +138,38 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 			jspResultCollector.appendContent("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n", sourceLineNumber);  
 			fTagLibValue= null;
 			fInTagLib= false;
+		}
+		if (fInJavaSection)  {
+			int i= 0;
+			StringBuffer out= new StringBuffer();
+			while (i < fSource.length()) {
+				char c= fSource.charAt(i++);
+				if (c == '\n') {
+					jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber++);
+					out.setLength(0);
+				} else {
+					out.append(c);	
+				}
+			}
+			if (out.length() > 0)  {
+				jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber);
+			}
+		}
+		if (fInDeclaration)  {
+			int i= 0;
+			StringBuffer out= new StringBuffer();
+			while (i < fSource.length()) {
+				char c= fSource.charAt(i++);
+				if (c == '\n') {
+					jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber++);
+					out.setLength(0);
+				} else {
+					out.append(c);	
+				}
+			}
+			if (out.length() > 0)  {
+				jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber);
+			}
 		}
 	}
 }
