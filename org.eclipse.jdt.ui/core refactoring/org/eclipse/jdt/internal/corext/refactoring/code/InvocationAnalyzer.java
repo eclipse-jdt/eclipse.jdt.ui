@@ -74,10 +74,25 @@ class InvocationAnalyzer {
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW);
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
-			if (!(isValidParent(fTargetNode.getParent()) || fSourceProvider.getNumberOfStatements() == 1)) {
+			ASTNode parent= fTargetNode.getParent();
+			if (parent.getNodeType() == ASTNode.ASSIGNMENT || isSingleDeclaration(parent)) {
+				// this is ok
+			} else if (isMultiDeclarationFragment(parent)) {
+				if (!fSourceProvider.isSimpleFunction()) {
+					addEntry(result,
+						RefactoringCoreMessages.getString("InvocationAnalyzer.multiDeclaration"), //$NON-NLS-1$
+						RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT);
+				}
+			} else if (fSourceProvider.getNumberOfStatements() > 1 ) {
 				addEntry(result,
 					RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS);
+			} else if (!fSourceProvider.isSimpleFunction()) {
+				addEntry(result,
+					RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+					fSeverity,
+					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()),
+					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW);
 			}
 		}		
 	}
@@ -99,14 +114,26 @@ class InvocationAnalyzer {
 		}
 	}
 	
-	private static boolean isValidParent(ASTNode parent) {
-		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.ASSIGNMENT)
-			return true;
+	private static boolean isMultiDeclarationFragment(ASTNode node) {
+		int nodeType= node.getNodeType();
 		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			parent= parent.getParent();
-			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-				VariableDeclarationStatement vs= (VariableDeclarationStatement)parent;
+			node= node.getParent();
+			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
+				return vs.fragments().size() > 1;
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isSingleDeclaration(ASTNode node) {
+		int type= node.getNodeType();
+		if (type == ASTNode.SINGLE_VARIABLE_DECLARATION)
+			return true;
+		if (type == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			node= node.getParent();
+			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
 				return vs.fragments().size() == 1;
 			}
 		}

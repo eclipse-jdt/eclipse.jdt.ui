@@ -42,4 +42,5 @@ public class RefactoringStatusCodes {
 	public static final int INLINE_METHOD_NULL_BINDING= 						   		258;
 	public static final int INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS=				259;
 	public static final int INLINE_METHOD_EXECUTION_FLOW= 							260;
+	public static final int INLINE_METHOD_INITIALIZER_IN_FRAGEMENT= 			261;
 }
