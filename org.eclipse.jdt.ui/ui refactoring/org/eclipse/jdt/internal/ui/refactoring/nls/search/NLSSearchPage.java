@@ -88,6 +88,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -711,6 +712,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 	protected void handleBrowsePropertiesButtonPressed() {
 		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.title"), NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
+		dialog.setSorter(new JavaElementSorter());
 		dialog.setInitialSelections(new String[] { fPropertyFileText.getText()});
 		if (dialog.open() == Window.OK) {
 			Object[] resources= dialog.getResult();
