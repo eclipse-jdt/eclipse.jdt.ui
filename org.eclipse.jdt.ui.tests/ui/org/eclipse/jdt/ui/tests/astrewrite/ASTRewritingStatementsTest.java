@@ -637,4 +637,232 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 	}
 	
+	public void testForStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i= 0; i < len; i++) {\n");
+		buf.append("        }\n");
+		buf.append("        for (i= 0, j= 0; i < len; i++, j++) {\n");
+		buf.append("        }\n");
+		buf.append("        for (;;) {\n");
+		buf.append("        }\n");	
+		buf.append("        for (;;) {\n");
+		buf.append("        }\n");						
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace initializer, change expression, add updater, replace cody
+			ForStatement forStatement= (ForStatement) statements.get(0);
+			
+			List initializers= forStatement.initializers();
+			assertTrue("Number of initializers not 1", initializers.size() == 1);
+			
+			Assignment assignment= ast.newAssignment();
+			assignment.setLeftHandSide(ast.newSimpleName("i"));
+			assignment.setOperator(Assignment.Operator.ASSIGN);
+			assignment.setRightHandSide(ast.newNumberLiteral("3"));
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) initializers.get(0), assignment);
+			
+			Assignment assignment2= ast.newAssignment();
+			assignment2.setLeftHandSide(ast.newSimpleName("j"));
+			assignment2.setOperator(Assignment.Operator.ASSIGN);
+			assignment2.setRightHandSide(ast.newNumberLiteral("4"));
+			
+			ASTRewriteAnalyzer.markAsInserted(assignment2);
+			
+			initializers.add(assignment2);
+			
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(forStatement.getExpression(), literal);
+			
+			// add updater
+			PrefixExpression prefixExpression= ast.newPrefixExpression();
+			prefixExpression.setOperand(ast.newSimpleName("j"));
+			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
+			
+			forStatement.updaters().add(prefixExpression);
+			
+			ASTRewriteAnalyzer.markAsInserted(prefixExpression);
+			
+			// replace body		
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			ASTRewriteAnalyzer.markAsReplaced(forStatement.getBody(), newBody);
+		}
+		{ // remove initializers, expression and updaters
+			ForStatement forStatement= (ForStatement) statements.get(1);
+			
+			List initializers= forStatement.initializers();
+			assertTrue("Number of initializers not 2", initializers.size() == 2);
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) initializers.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) initializers.get(1));
+			
+			ASTRewriteAnalyzer.markAsRemoved(forStatement.getExpression());
+			
+			List updaters= forStatement.updaters();
+			assertTrue("Number of initializers not 2", updaters.size() == 2);
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) updaters.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) updaters.get(1));
+		}
+		{ // insert updater
+			ForStatement forStatement= (ForStatement) statements.get(2);
+			
+			PrefixExpression prefixExpression= ast.newPrefixExpression();
+			prefixExpression.setOperand(ast.newSimpleName("j"));
+			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
+			
+			forStatement.updaters().add(prefixExpression);
+			
+			ASTRewriteAnalyzer.markAsInserted(prefixExpression);
+		}
+		
+		{ // insert updater & initializer
+			ForStatement forStatement= (ForStatement) statements.get(3);
+			
+			Assignment assignment= ast.newAssignment();
+			assignment.setLeftHandSide(ast.newSimpleName("j"));
+			assignment.setOperator(Assignment.Operator.ASSIGN);
+			assignment.setRightHandSide(ast.newNumberLiteral("3"));
+			
+			forStatement.initializers().add(assignment);
+			
+			ASTRewriteAnalyzer.markAsInserted(assignment);	
+			
+			PrefixExpression prefixExpression= ast.newPrefixExpression();
+			prefixExpression.setOperand(ast.newSimpleName("j"));
+			prefixExpression.setOperator(PrefixExpression.Operator.INCREMENT);
+			
+			forStatement.updaters().add(prefixExpression);
+			
+			ASTRewriteAnalyzer.markAsInserted(prefixExpression);
+		}			
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (i = 3, j = 4; true; i++, ++j) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        for (;;) {\n");
+		buf.append("        }\n");
+		buf.append("        for (;;++j) {\n");
+		buf.append("        }\n");		
+		buf.append("        for (j = 3;;++j) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
+	
+	public void testIfStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 2", statements.size() == 2);
+
+		{ // replace expression body and then body, remove else body
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(ifStatement.getExpression(), literal);			
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			Block newBody= ast.newBlock();
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			ASTRewriteAnalyzer.markAsReplaced(ifStatement.getThenStatement(), newBody);
+			
+			ASTRewriteAnalyzer.markAsRemoved(ifStatement.getElseStatement());
+		}
+		{ // add else body
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			Block newBody= ast.newBlock();
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			ASTRewriteAnalyzer.markAsInserted(newBody);
+			
+			ifStatement.setElseStatement(newBody);
+		}		
+		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
+	
 }

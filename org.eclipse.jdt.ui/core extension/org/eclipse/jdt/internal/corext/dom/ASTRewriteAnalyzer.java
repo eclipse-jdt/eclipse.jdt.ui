@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.Iterator;
 import java.util.List;
 
+import sun.security.action.GetLongAction;
+
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -350,10 +352,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	private void visitList(List list) {
+	private int visitList(List list, int defaultPos) {
+		ASTNode curr= null;
 		for (Iterator iter= list.iterator(); iter.hasNext();) {
-			((ASTNode) iter.next()).accept(this);
+			curr= ((ASTNode) iter.next());
+			curr.accept(this);
 		}
+		if (curr == null) {
+			return defaultPos;
+		}
+		return curr.getStartPosition() + curr.getLength();
 	}
 	
 	private int rewriteList(int startPos, String keyword, List list, boolean updateKeyword) {
@@ -795,13 +803,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayAccess)
 	 */
 	public boolean visit(ArrayAccess node) {
-		Expression arrayExpr= node.getArray();
-		Assert.isTrue(!isInserted(node), "Array expression in ArrayAccess can only be replaced");
-		rewriteNode(arrayExpr, 0);
-		
-		Expression indexExpr= node.getIndex();
-		Assert.isTrue(!isInserted(node), "Index expression in ArrayAccess can only be replaced");
-		rewriteNode(indexExpr, 0);		
+		rewriteRequiredNode(node.getArray());
+		rewriteRequiredNode(node.getIndex());
 		return false;
 	}
 
@@ -987,7 +990,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				JavaPlugin.log(e);
 			}
 		} else {
-			visitList(arguments);
+			visitList(arguments, 0);
 		}
 		
 		AnonymousClassDeclaration decl= node.getAnonymousClassDeclaration();
@@ -1020,7 +1023,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				JavaPlugin.log(e);
 			}
 		} else {
-			visitList(arguments);
+			visitList(arguments, 0);
 		}
 		return false;
 	}
@@ -1090,14 +1093,66 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ForStatement)
 	 */
 	public boolean visit(ForStatement node) {
-		return super.visit(node);
+		try {
+			int pos= node.getStartPosition();
+			
+			List initializers= node.initializers();
+			if (hasChanges(initializers)) { // position after opening parent
+				int startOffset= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameLPAREN);
+				pos= rewriteList(startOffset, "", initializers, false);
+			} else {
+				pos= visitList(initializers, pos);
+			}
+			
+			// position after first semicolon
+			pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameSEMICOLON);
+			
+			Expression expression= node.getExpression();
+			if (expression != null) {
+				rewriteNode(expression, pos);
+			}
+			
+			List updaters= node.updaters();
+			if (hasChanges(updaters)) {
+				int startOffset= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameSEMICOLON);
+				rewriteList(startOffset, "", updaters, false);
+			} else {
+				visitList(updaters, 0);
+			}
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
+		}
+			
+		rewriteRequiredNode(node.getBody()); // statement
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(IfStatement)
 	 */
 	public boolean visit(IfStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getExpression()); // statement
+		
+		Statement thenStatement= node.getThenStatement();
+		rewriteRequiredNode(thenStatement); // statement
+
+		Statement elseStatement= node.getElseStatement();
+		if (elseStatement != null) {
+			int startPos= thenStatement.getStartPosition() + thenStatement.getLength();
+			if (isInserted(elseStatement)) {
+				addInsert(startPos, " else ", "Insert else");
+				insertNode(elseStatement, startPos);
+			} else if (isReplaced(elseStatement)) {
+				ASTNode replacingNode= getReplacingNode(elseStatement);
+				if (replacingNode == null) {
+					int endPos= elseStatement.getStartPosition() + elseStatement.getLength();
+					addDelete(startPos, endPos - startPos, "Remove else statement");
+				} else {
+					replaceNode(elseStatement, replacingNode);
+				}
+			}
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -1314,7 +1369,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationExpression)
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		return super.visit(node);
+		// same code as FieldDeclaration
+		if (isModified(node)) {
+			VariableDeclarationExpression modifedNode= (VariableDeclarationExpression) getModifiedNode(node);
+			rewriteModifiers(node.getStartPosition(), node.getModifiers(), modifedNode.getModifiers());
+		}
+		
+		Type type= node.getType();
+		rewriteRequiredNode(type);
+		
+		List fragments= node.fragments();
+		int startPos= getNextExistingStartPos(fragments, 0, type.getStartPosition() + type.getLength());
+		rewriteList(startPos, "", fragments, false);
+
+		return false;
 	}
 
 	/* (non-Javadoc)
