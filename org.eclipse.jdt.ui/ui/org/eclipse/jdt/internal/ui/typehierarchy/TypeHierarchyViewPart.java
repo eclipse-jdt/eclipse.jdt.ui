@@ -636,14 +636,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			fIsEnableMemberFilter= on;
 			if (!on) {
 				Object methodViewerInput= fMethodsViewer.getInput();
+				IType input= getInput();
 				setMemberFilter(null);
 				if (methodViewerInput != null && fCurrentViewer.containsElement(methodViewerInput)) {
 					// avoid that the method view chnages content by selecting the previous input
 					fCurrentViewer.setSelection(new StructuredSelection(methodViewerInput));
-				} else {
+				} else if (input != null) {
 					// choose a input that exists
-					fCurrentViewer.setSelection(new StructuredSelection(getInput()));
-					updateMethodViewer(getInput());
+					fCurrentViewer.setSelection(new StructuredSelection(input));
+					updateMethodViewer(input);
 				}
 			} else {
 				methodSelectionChanged(fMethodsViewer.getSelection());

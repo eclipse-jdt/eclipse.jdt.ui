@@ -117,23 +117,21 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				result.addFatalError("Cannot rename a compilation unit to " + fNewName + ".java - name already used by another file in this directory");
 			pm.worked(1);	
 			if (isEnclosedInType(getType(), fNewName))	
-				result.addFatalError("Type " + getType().getFullyQualifiedName() + " is enclosed in a type named " + fNewName);
+				result.addError("Type " + getType().getFullyQualifiedName() + " is enclosed in a type named " + fNewName);
 			pm.worked(1);	
 			if (enclosesType(getType(), fNewName))
-				result.addFatalError("Type " + getType().getFullyQualifiedName() + " encloses a type named " + fNewName);
+				result.addError("Type " + getType().getFullyQualifiedName() + " encloses a type named " + fNewName);
 			pm.worked(1);	
 			if (typeNameExistsInPackage(getType().getPackageFragment(), fNewName))
-				result.addFatalError("Type " + fNewName + " already exists in package " + getType().getPackageFragment().getElementName());
+				result.addError("Type " + fNewName + " already exists in package " + getType().getPackageFragment().getElementName());
 			pm.worked(1);	
 			if (compilationUnitImportsType(getType().getCompilationUnit(), fNewName))	
-				result.addFatalError("Type " + fNewName + " is imported (single-type-import) in " + getResource(getType()).getFullPath() + " (a compilation unit must not import and declare a type with the same name)");
+				result.addError("Type " + fNewName + " is imported (single-type-import) in " + getResource(getType()).getFullPath() + " (a compilation unit must not import and declare a type with the same name)");
 			pm.worked(1);	
 			result.merge(Checks.checkForNativeMethods(getType()));
 			pm.worked(1);	
 			result.merge(Checks.checkForMainMethod(getType()));
 			pm.worked(1);	
-			result.merge(Checks.checkTypeName(fNewName));
-			pm.worked(1);
 			
 			// before doing any expensive analysis
 			if (result.hasFatalError())
@@ -224,11 +222,11 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 				if ( new String(typeDeclaration.name).equals(newName)
 					&& isInType(type.getElementName(), scope))
-						result.addFatalError("A local type enclosed in type " + type.getElementName() + " is already named " + newName);
+						result.addError("A local type enclosed in type " + type.getElementName() + " is already named " + newName);
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addError("A local type enclosed in type " + type.getElementName() + " declares a native method");
+							result.addWarning("A local type enclosed in type " + type.getElementName() + " declares a native method");
 					}	
 				}	
 				return true;
@@ -237,11 +235,11 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
 				if (new String(typeDeclaration.name).equals(newName)
 				    && isInType(type.getElementName(), scope))
-						result.addFatalError("A type enclosed in type " + type.getElementName() + " is already named " + newName);
+						result.addError("A type enclosed in type " + type.getElementName() + " is already named " + newName);
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addError("A type enclosed in type " + type.getElementName() + " declares a native method");
+							result.addWarning("A type enclosed in type " + type.getElementName() + " declares a native method");
 					}	
 				}	
 				return true;
@@ -251,8 +249,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 
 	private boolean mustRenameCU() throws JavaModelException{
-		return Checks.isTopLevel(getType())
-				&& (Flags.isPublic(getType().getFlags()));
+		return Checks.isTopLevel(getType())	&& (Flags.isPublic(getType().getFlags()));
 	}
 	
 	//-----	analyzing import declarations in other compilation units
@@ -349,7 +346,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		Iterator iter= getOccurrences(null).iterator();
-		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer();
+		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, getType());
 		while (iter.hasNext()){
 			analyzeCompilationUnit(analyzer, (List)iter.next(), result);
 		}
@@ -362,15 +359,20 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzeCompilationUnit(cu));	
-		result.merge(analyzer.analyze(searchResults, fNewName, cu, getType()));
+		result.merge(analyzer.analyze(searchResults, cu));
 	}
 	
 	/* non java-doc
-	 * all the analyzis that can be done with no AST walking
+	 * all the analysis that can be done with no AST walking
 	 */
 	private RefactoringStatus analyzeCompilationUnit(ICompilationUnit cu) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		if (cu.getType(fNewName).exists())
+		HackFinder.fixMeSoon("ICompilation unit feature - walkback if not simple name");
+		String name;
+		if (fNewName.indexOf(".") != -1)
+			name= fNewName.substring(0, fNewName.indexOf("."));
+		else name= fNewName;	
+		if (cu.getType(name).exists())
 			result.addError("Possible name conflict with type " + fNewName + " declared in \"" + getResource(cu).getFullPath() + "\"");
 		return result;
 	}

@@ -138,8 +138,8 @@ public class JavaModelUtility {
 				"([Ljava/lang/String;)V".equals(signature))
 				return true;
 			if ("([QString;)V".equals(signature)) {
-				String[] resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType());
-				if (resolvedName != null && "java.lang".equals(resolvedName[0]))
+				String resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType());
+				if ("java.lang.String".equals(resolvedName))
 					return true;
 			}
 			return false;

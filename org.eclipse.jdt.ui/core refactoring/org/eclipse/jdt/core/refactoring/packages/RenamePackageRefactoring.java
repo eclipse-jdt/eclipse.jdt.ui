@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -169,9 +170,20 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		result.merge(Checks.checkPackageName(fNewName));
 		if (Checks.isAlreadyNamed(fPackage, fNewName))
 			result.addFatalError("Choose another name.");
-		if (((IPackageFragmentRoot)fPackage.getParent()).getPackageFragment(fNewName).exists())
-			result.addFatalError("Package already exists.");
+		result.merge(checkPackageInCurrentRoot());
 		return result;
+	}
+	
+	
+	
+	private RefactoringStatus checkPackageInCurrentRoot(){
+		if  (((IPackageFragmentRoot)fPackage.getParent()).getPackageFragment(fNewName).exists()){
+			RefactoringStatus result= new RefactoringStatus();
+			result.addFatalError("Package already exists.");
+			return result;
+		}
+		else 
+			return null;		
 	}
 
 	private ISearchPattern createSearchPattern(){
@@ -179,6 +191,10 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private RefactoringStatus checkPackageName() throws JavaModelException{
+		RefactoringStatus r= checkPackageInCurrentRoot();
+		if (r != null && (!r.isOK())) 
+			return r;
+		
 		RefactoringStatus result= new RefactoringStatus();
 		
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
@@ -191,10 +207,29 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		}
 		return result;	
 	}
+		
+	//-------------- AST visitor-based analysis
 	
-	private RefactoringStatus analyzeAffectedCompilationUnits(){
+	/*
+	 * (non java-doc)
+	 * Analyzes all compilation units in which type is referenced
+	 */
+	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
+		Iterator iter= getOccurrences(null).iterator();
+		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
+		while (iter.hasNext()){
+			analyzeCompilationUnit(analyzer, (List)iter.next(), result);
+		}
 		return result;
+	}
+	
+	private void analyzeCompilationUnit(RenamePackageASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
+		SearchResult searchResult= (SearchResult)searchResults.get(0);
+		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
+		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
+			return;
+		result.merge(analyzer.analyze(searchResults, cu));
 	}
 	
 	// ----------- Changes ---------------

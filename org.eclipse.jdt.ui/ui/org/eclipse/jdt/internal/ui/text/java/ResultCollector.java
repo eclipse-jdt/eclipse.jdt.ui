@@ -6,17 +6,17 @@ package org.eclipse.jdt.internal.ui.text.java;
  * (c) Copyright IBM Corp 1999, 2000
  */
   
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICodeCompletionRequestor;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -27,23 +27,25 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class ResultCollector implements ICodeCompletionRequestor {
 	
-	protected Vector	fFields= new Vector(), fKeywords= new Vector(), 
-						fLabels= new Vector(), fMethods= new Vector(), 
-						fModifiers= new Vector(), fPackages= new Vector(),
-						fTypes= new Vector(), fVariables= new Vector();
+	protected ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
+						fLabels= new ArrayList(), fMethods= new ArrayList(), 
+						fModifiers= new ArrayList(), fPackages= new ArrayList(),
+						fTypes= new ArrayList(), fVariables= new ArrayList();
 
 	protected IMarker fLastProblem;
 	
-	protected Vector[] fResults = new Vector[] {
+	protected IJavaProject fJavaProject;
+	
+	protected ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
 	};
-	
+		
 	/**
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
-		fTypes.addElement(
-			createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false));
+		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
+		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
 	}
 	
 	/**
@@ -80,15 +82,17 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		String declaringClass= null;
 		if (declaringTypeName.length > 0)
 			declaringClass= new String(declaringTypeName);
-	
-		fFields.addElement(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), declaringClass, false));
+			
+		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name);
+		fFields.add(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), declaringClass, false, info));
 	}
 	
 	/**
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
-		fTypes.addElement(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), false));
+		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
+		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), false, info));
 	}
 	
 	/**
@@ -96,7 +100,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptKeyword(char[] keyword, int start, int end) {
 		String kw= new String(keyword);
-		fKeywords.addElement(createCompletion(start, end, kw, null, kw, null, true));
+		fKeywords.add(createCompletion(start, end, kw, null, kw, null, true, null));
 	}
 	
 	/**
@@ -104,7 +108,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptLabel(char[] labelName, int start, int end) {
 		String ln= new String(labelName);
-		fLabels.addElement(createCompletion(start, end, ln, null, ln, null, false));
+		fLabels.add(createCompletion(start, end, ln, null, ln, null, false, null));
 	}
 	
 	/**
@@ -116,7 +120,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		nameBuffer.append("   ");
 		nameBuffer.append(typeName);
 	
-		fVariables.addElement(createCompletion(start, end, new String(name), null, nameBuffer.toString(), null, false));
+		fVariables.add(createCompletion(start, end, new String(name), null, nameBuffer.toString(), null, false, null));
 	}
 	
 	/**
@@ -147,17 +151,19 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			int length= parameterTypeNames.length;
 			hasParametersToComplete= (length > 0);
 			for (int i= 0; i < length; i++) {
-				nameBuffer.append(parameterTypeNames[i]);
-				if (i != length - 1) // no comma after the last item
+				if (i != 0) 
 					nameBuffer.append(',');
+				nameBuffer.append(parameterTypeNames[i]);
 			}
 		}
 		nameBuffer.append(")   ");
 		nameBuffer.append(returnTypeName);
+		
+		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames);
 	
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
 		hasClosingBracket= (hasClosingBracket && hasParametersToComplete);
-		fMethods.addElement(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), new String(declaringTypeName), false, !hasClosingBracket));
+		fMethods.add(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), new String(declaringTypeName), false, !hasClosingBracket, info));
 	}
 	
 	/**
@@ -165,21 +171,22 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptModifier(char[] modifier, int start, int end) {
 		String mod= new String(modifier);
-		fModifiers.addElement(createCompletion(start, end, mod, null, mod, null, true));
+		fModifiers.add(createCompletion(start, end, mod, null, mod, null, true, null));
 	}
 	
 	/**
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end) {
-		fPackages.addElement(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_PACKAGE, new String(packageName), null, false));
+		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_PACKAGE, new String(packageName), null, false, null));
 	}
 	
 	/**
 	 * @see ICompletionRequestor#acceptType
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
-		fTypes.addElement(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false));
+		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
+		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
 	}
 	
 	public String getErrorMessage() {
@@ -188,22 +195,22 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return "";
 	}
 
-	public Vector getResults() {
-		Vector result= new Vector();
+	public ICompletionProposal[] getResults() {
+		ArrayList result= new ArrayList();
 		for (int i= 0; i < fResults.length; i++) {
-			Vector bucket = fResults[i];
+			ArrayList bucket = fResults[i];
 			int size= bucket.size();
 			if (size == 1) {
-				result.addElement(bucket.elementAt(0));
+				result.add(bucket.get(0));
 			} else if (size > 1) {
 				Object[] sortedBucket = new Object[size];
-				bucket.copyInto(sortedBucket);
+				bucket.toArray(sortedBucket);
 				quickSort(sortedBucket, 0, size - 1);
 				for (int j= 0; j < sortedBucket.length; j++)
-					result.addElement(sortedBucket[j]);
+					result.add(sortedBucket[j]);
 			}
-		}
-		return result;
+		}		
+		return (ICompletionProposal[]) result.toArray(new ICompletionProposal[result.size()]);
 	}
 	
 	protected Image getIcon(String name) {
@@ -212,11 +219,11 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return null;
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true);
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, proposalInfo);
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion) {
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalInfo proposalInfo) {
 		
 		if (qualification != null)
 			name += (" - " + qualification);
@@ -225,7 +232,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		if (!placeCursorBehindInsertion)
 			-- cursorPosition;
 	
-		return new CompletionProposal(completion, start, end - start, cursorPosition, getIcon(iconName), name, null /* IContentAsisstTip */, null /* additionalInfo */);
+		return new JavaCompletionProposal(completion, start, end - start, cursorPosition, getIcon(iconName), name, null /* IContentAsisstTip */, proposalInfo);
 	} 
 		
 	protected int compare(Object o1, Object o2) {
@@ -265,9 +272,10 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return collection;
 	}
 	
-	public void reset() {
+	public void reset(IJavaProject jproject) {
+		fJavaProject= jproject;
 		fLastProblem= null;
 		for (int i= 0; i < fResults.length; i++)
-			fResults[i].removeAllElements();
+			fResults[i].clear();
 	}
 }

@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
@@ -81,8 +82,6 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	protected final static String ERROR_NO_LAUNCHER_PREFIX= PREFIX + "error.no_launcher.";
 	
 	protected final static String INFO_NOMAIN= PREFIX+"info.noMain.";
-	protected final static String INFO_CLASSPATH= PREFIX+"info.classpath.";
-	protected final static String INFO_NO_OUTPUT= PREFIX+"info.no_output.message";
 	
 	protected final static String PROGRESS_LAUNCHING= PREFIX+"progress.launching";
 
@@ -110,10 +109,12 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 		IJavaProject javaProject= mainType.getJavaProject();
 		fSourceLocator= new ProjectSourceLocator(javaProject);
 		ExecutionArguments args= null;
-		MultiStatus warnings= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, "status", null);
-		String[] classPath= getClassPath(new Vector(10), javaProject, warnings);
-		if (!warnings.isOK()) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), INFO_CLASSPATH, warnings);
+		String[] classPath= null;
+		try {
+			classPath= JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
+		} catch (CoreException e) {
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CLASSPATH_PREFIX, e.getStatus());
+			return false;
 		}
 		try {
 			args= ExecutionArguments.getArguments(mainType);
@@ -266,67 +267,11 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}
 
 	
-	public static String[] getClassPath(Vector visited, IJavaProject project, MultiStatus warnings) {
-		if (visited.contains(project))
-			return new String[0];
-		visited.addElement(project);
-		IWorkspace ws= project.getProject().getWorkspace();
-		if (project != null) {
-			try {
-				Vector paths= new Vector();
-				IPath iPath= project.getOutputLocation();
-				IResource resource= ws.getRoot().findMember(iPath);
-				if (resource == null) {
-					String format= JavaLaunchUtils.getResourceString(INFO_NO_OUTPUT);
-					String name= project.getElementName();
-					warnings.add(new LauncherException(MessageFormat.format(format, new String[] { name })));
-				} else {
-					paths.addElement(resource.getLocation().toOSString());
-					IClasspathEntry[] cp= project.getClasspath();
-					for (int i= 0; i < cp.length; i++) {
-						String[] entries= getClassPathStrings(visited, project, cp[i], warnings);
-						for (int j= 0; j < entries.length; j++) {
-							if (!paths.contains(entries[j]))
-								paths.addElement(entries[j]);
-						}
-					}
-				}
-				String[] result= new String[paths.size()];
-				paths.copyInto(result);
-				return result;
-			} catch (JavaModelException e) {
-				JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CLASSPATH_PREFIX, e.getStatus());
-			}
-		}
-		return new String[0];
-	}
 	
-	private static String[] getClassPathStrings(Vector visited, IJavaProject project, IClasspathEntry entry, MultiStatus warnings) {
-		if (entry.getEntryKind() == entry.CPE_PROJECT) {
-			IPath path= entry.getPath();
-			IJavaProject innerProject= (IJavaProject)JavaCore.create(project.getProject().getWorkspace().getRoot().findMember(path));
-			if (innerProject != null) 
-				return getClassPath(visited, innerProject, warnings);
-			else
-				return new String[0];
-		} 
-		// new code to not add source folders to the class path
-		else if (entry.getEntryKind() == entry.CPE_LIBRARY) {
-			return new String[] { makeAbsolute(project.getProject().getWorkspace(), entry.getPath()) };
-		}
-		return new String[0];
-		// end new code
-		
-		// commented out old version:
-		//return new String[] { makeAbsolute(project.getWorkspace(), entry.getPath()) };
-	}
 	
-	protected static String makeAbsolute(IWorkspace ws, IPath path) {
-		IResource resource= ws.getRoot().findMember(path);
-		if (resource != null) 
-			return resource.getLocation().toOSString();
-		return path.toOSString();
-	}
+	
+	
+	
 	
 	/**
 	 * Returns a collection of elements this launcher is capable of launching

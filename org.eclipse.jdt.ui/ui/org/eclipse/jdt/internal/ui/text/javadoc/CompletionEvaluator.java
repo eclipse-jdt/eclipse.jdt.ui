@@ -299,9 +299,11 @@ public class CompletionEvaluator {
 		int wordStart= fCurrentPos - arg.length();
 		int pidx= arg.indexOf('#');
 		if (pidx == -1) {
-			Collection completions= getTypeNameCompletion(wordStart);
+			ICompletionProposal[] completions= getTypeNameCompletion(wordStart);
 			if (completions != null) {
-				fResult.addAll(completions);
+				for (int i= 0; i < completions.length; i++) {
+					fResult.add(completions[i]);
+				}
 			}
 		} else {
 			IType parent= null;
@@ -329,7 +331,7 @@ public class CompletionEvaluator {
 		}
 	}
 	
-	private Collection getTypeNameCompletion(int wordStart) throws JavaModelException {
+	private ICompletionProposal[] getTypeNameCompletion(int wordStart) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(wordStart, fCurrentPos);
 		if (preparedCU != null) {
 			ResultCollector collector= new ResultCollector();

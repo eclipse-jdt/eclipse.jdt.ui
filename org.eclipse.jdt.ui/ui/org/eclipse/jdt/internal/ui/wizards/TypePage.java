@@ -486,13 +486,13 @@ public abstract class TypePage extends ContainerPackagePage {
 			return;
 		}
 		
-		if (root != null) {		
-			IType type= JavaModelUtility.findType(root.getJavaProject(), sclassName);
-			if (type == null) {
-				fSuperClassStatus.setWarning(getResourceString(WARNING_SUPER_NOTEXISTS));
-				return;
-			} else {
-				try {
+		if (root != null) {
+			try {		
+				IType type= JavaModelUtility.findType(root.getJavaProject(), sclassName);
+				if (type == null) {
+					fSuperClassStatus.setWarning(getResourceString(WARNING_SUPER_NOTEXISTS));
+					return;
+				} else {
 					if (type.isInterface()) {
 						fSuperClassStatus.setWarning(getFormattedString(WARNING_SUPER_NOTCLASS, sclassName));
 						return;
@@ -504,11 +504,11 @@ public abstract class TypePage extends ContainerPackagePage {
 					} else if (!JavaModelUtility.isVisible(getPackageFragment(), flags, type.getPackageFragment())) {
 						fSuperClassStatus.setWarning(getFormattedString(WARNING_SUPER_NOTVISIBLE, sclassName));
 						return;
-					}		
-				} catch (JavaModelException e) {
-					ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+					}
 				}
-			}					
+			} catch (JavaModelException e) {
+				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+			}							
 		}
 	}
 	
@@ -524,13 +524,12 @@ public abstract class TypePage extends ContainerPackagePage {
 			int nElements= elements.size();
 			for (int i= 0; i < nElements; i++) {
 				String intfname= (String)elements.get(i);
-				
-				IType type= JavaModelUtility.findType(root.getJavaProject(), intfname);
-				if (type == null) {
-					fSuperInterfacesStatus.setWarning(getFormattedString(WARNING_INTFC_NOTEXISTS, intfname));
-					return;
-				} else {
-					try {
+				try {
+					IType type= JavaModelUtility.findType(root.getJavaProject(), intfname);
+					if (type == null) {
+						fSuperInterfacesStatus.setWarning(getFormattedString(WARNING_INTFC_NOTEXISTS, intfname));
+						return;
+					} else {
 						if (type.isClass()) {
 							fSuperInterfacesStatus.setWarning(getFormattedString(WARNING_INTFC_NOTINTERFACE, intfname));
 							return;
@@ -538,11 +537,11 @@ public abstract class TypePage extends ContainerPackagePage {
 						if (!JavaModelUtility.isVisible(getPackageFragment(), type.getFlags(), type.getPackageFragment())) {
 							fSuperInterfacesStatus.setWarning(getFormattedString(WARNING_INTFC_NOTVISIBLE, intfname));
 							return;
-						}		
-					} catch (JavaModelException e) {
-						ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+						}
 					}
-				}
+				} catch (JavaModelException e) {
+					ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+				}					
 			}				
 		}
 		fSuperInterfacesStatus.setOK();

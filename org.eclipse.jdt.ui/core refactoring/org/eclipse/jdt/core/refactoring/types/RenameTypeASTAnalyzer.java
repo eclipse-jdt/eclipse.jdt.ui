@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
@@ -47,72 +48,61 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * non java-doc
  * not API
  */
-class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
+class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 
-	private List fSearchResults;
 	private String fNewName;
 	private char[] fNewNameArray;
 	private IType fType;
-	private RefactoringStatus fResult;
-	private CompilationUnit fCu;
-
-	RefactoringStatus analyze(List searchResults, String newName, ICompilationUnit cu, IType type) throws JavaModelException{
-		Assert.isNotNull(searchResults, "searchResults");
-		Assert.isNotNull(searchResults, "newName");
-		Assert.isNotNull(type, "type");
+	
+	RenameTypeASTAnalyzer(String newName, IType type){
+		Assert.isNotNull(newName, "newName");
 		Assert.isTrue(type.exists());
-		
 		fNewNameArray= newName.toCharArray();
 		fNewName= newName;
-		fSearchResults= searchResults;
 		fType= type;
-		fResult= new RefactoringStatus();
-		fCu= (CompilationUnit)cu;
-		fCu.accept(this);
-		return fResult;
 	}
 
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
 		if (messageSend.receiver != ThisReference.ThisImplicit && sourceRangeOnList(messageSend.receiver) && nameDefinedInScope(fNewName, scope)) {
-			addWarning ("Name " + fNewName + " is already used in scope (in " + cuFullPath() + ")");
+			addWarning(messageSend);
 		}
 		return true;
 	}
 
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope scope) {
 		if (sourceRangeOnList(qualifiedNameReference) && nameDefinedInScope(fNewName, scope)) {
-			addWarning("Name " + fNewName + " is already used in scope (in " + cuFullPath() + ")");
+			addWarning(qualifiedNameReference);
 		}
 		return true;
 	}
 
 	public boolean visit(CastExpression castExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(castExpression.type, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects a cast expression");
+			addWarning(castExpression);
 		return true;
 	}
 
 	public boolean visit(ClassLiteralAccess classLiteral, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(classLiteral.type, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects a class literal");
+			addWarning(classLiteral);
 		return true;
 	}
 
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(instanceOfExpression.type, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects an instanceof expression");
+			addWarning(instanceOfExpression);
 		return true;
 	}
 
 	public boolean visit(ArrayAllocationExpression arrayAllocationExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(arrayAllocationExpression.type, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects an array allocation expression");
+			addWarning(arrayAllocationExpression);
 		return true;
 	}
 
-	public boolean visit(CompilationUnitDeclaration compilationUnitDeclaration, CompilationUnitScope scope) {
+	public boolean doVisit(CompilationUnitDeclaration compilationUnitDeclaration, CompilationUnitScope scope) {
 		if (typeImported(compilationUnitDeclaration, fNewName))
-			addWarning(fNewName + " causes a name conflict in import declarations in " + cuFullPath());
+			addWarning(fNewName + " causes a name conflict in import declarations in \"" + cuFullPath() + "\"");
 		if (!typeImported(compilationUnitDeclaration))
 			return true;	
 		if (typeDeclared(compilationUnitDeclaration, fNewName))
@@ -127,7 +117,9 @@ class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 
 	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 		if (methodDeclaration.isNative() && typeUsedAsParameter(methodDeclaration))
-			addWarning(fType.getFullyQualifiedName() + " is used as a parameter type for a native method " + new String(methodDeclaration.selector) + " in " + cuFullPath()); 
+			addWarning(fType.getFullyQualifiedName() + " is used as a parameter type for a native method " 
+					+ new String(methodDeclaration.selector) + " in \"" + cuFullPath() 
+					+ "\" (line number:"+ getLineNumber(methodDeclaration)+")"); 
 		return true;
 	}
 
@@ -153,46 +145,37 @@ class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		if (referenceConflictsWithImport(singleTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addWarning(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(singleTypeReference) +") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects a type reference");
+			addWarning(singleTypeReference);
 		return true;
 	}
 
 	public boolean visit(SingleTypeReference singleTypeReference, ClassScope scope) {
 		if (referenceConflictsWithImport(singleTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addWarning(cuFullPath() + " refers to a type named " + fNewName + "(line number:" + getLineNumber(singleTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects a type reference");
+			addWarning(singleTypeReference);
 		return true;
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
 		if (referenceConflictsWithImport(arrayTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addWarning(cuFullPath() + " refers to a type named " + fNewName+ " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fNewNameArray)) {
-			addWarning("Name " + fNewName + " is already used in for a local type (in " + cuFullPath() + "), which affects a type reference");
+			addWarning(arrayTypeReference);
 		}
 		return true;
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, ClassScope scope) {
 		if (referenceConflictsWithImport(arrayTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addWarning(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		return true;
 	}
 	//-----------------------------------------------------------
-	
-	private void addWarning(String msg){
-		fResult.addError(msg);
-	}
-	
-	private void addError(String msg){
-		fResult.addFatalError(msg);
-	}
-	
-	private String cuFullPath(){
-		return RenameTypeRefactoring.getFullPath(fCu);
+	private void addWarning(AstNode node){
+		addWarning("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fNewName + " is already used.");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -203,22 +186,6 @@ class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 
 	private boolean referenceConflictsWithImport(char[] typeName, Scope scope) {
 		return fNewName.equals(new String(typeName)) && cuImportsType(scope, fType);
-	}
-	
-	private boolean sourceRangeOnList(int start, int end){
-		//	DebugUtils.dump("start:" + start + " end:" + end);
-		Iterator iter= fSearchResults.iterator();
-		while (iter.hasNext()){
-			SearchResult searchResult= (SearchResult)iter.next();
-			//	DebugUtils.dump("[" + searchResult.getStart() + ", " + searchResult.getEnd() + "]");
-			if (start == searchResult.getStart() && end == searchResult.getEnd())
-				return true;
-		}
-		return false;
-	}
-	
-	private boolean sourceRangeOnList(AstNode astNode){
-		return sourceRangeOnList(astNode.sourceStart, astNode.sourceEnd + 1);
 	}
 	
 	private static final boolean typeExists(Scope scope, char[] name){
@@ -326,13 +293,13 @@ class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 				&& sourceRangeOnList(typeDeclaration.superclass)
 				&& new String(typeDeclaration.name).equals(fNewName)
 				&& (typeDeclaration.superclass instanceof SingleTypeReference)) {
-				fResult.addError(fType + " has a subclass named " + fNewName);
+				addWarning(fType + " has a subclass named " + fNewName);
 			}
 			if (fType.isInterface()
 				&& typeDeclaration.superInterfaces != null
 				&& singleTypeReferenceInRange(typeDeclaration.superInterfaces)
 				&& nameInConflictWithSuperInterfaces(typeDeclaration, fNewName)) {
-				fResult.addError("Name " + fNewName + " is in conflict with superinterfaces list for type " + new String(typeDeclaration.name));
+				addWarning("Name " + fNewName + " is in conflict with superinterfaces list for type " + new String(typeDeclaration.name));
 			}
 		} catch (JavaModelException e) {
 			HackFinder.fixMeSoon("should we log it or ignore it?");
@@ -393,12 +360,7 @@ class RenameTypeASTAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		}
 		return false;
 	}
-	
-	private boolean sourceRangeOnList(QualifiedNameReference qualifiedNameReference){
-		int start= qualifiedNameReference.sourceStart;
-		return sourceRangeOnList(start, start + qualifiedNameReference.tokens[0].length);
-	}
-	
+		
 	private static boolean typeDeclared(CompilationUnitDeclaration compilationUnitDeclaration, String typeName){
 		TypeDeclaration[] types= compilationUnitDeclaration.types;
 		if (types == null)

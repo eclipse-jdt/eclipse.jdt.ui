@@ -24,10 +24,9 @@ import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
  */
 public class JarEntryEditorInput implements IStorageEditorInput {
 		
-	private IFile fJarEntryFile; 
+	private IStorage fJarEntryFile; 
 	
-	public JarEntryEditorInput(IFile jarEntryFile) {
-		JdtHackFinder.fixme("need better JarEntryFile support from JCORE");
+	public JarEntryEditorInput(IStorage jarEntryFile) {
 		fJarEntryFile= jarEntryFile;
 	}
 	
@@ -67,7 +66,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 * @see IEditorInput#getContentType()
 	 */
 	public String getContentType() {
-		return fJarEntryFile.getFileExtension();
+		return fJarEntryFile.getFullPath().getFileExtension();
 	}
 	
 	/*
@@ -82,14 +81,15 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 */
 	public ImageDescriptor getImageDescriptor() {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		return registry.getImageDescriptor(fJarEntryFile.getFileExtension());
+		return registry.getImageDescriptor(fJarEntryFile.getFullPath().getFileExtension());
 	}
 	
 	/*
 	 * @see IEditorInput#exists()
 	 */
 	public boolean exists() {
-		return fJarEntryFile.exists();
+		// JAR entries can't be deleted
+		return true;
 	}
 	
 	/*

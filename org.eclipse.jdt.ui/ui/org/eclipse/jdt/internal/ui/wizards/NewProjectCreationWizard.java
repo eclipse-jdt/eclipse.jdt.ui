@@ -65,7 +65,7 @@ public class NewProjectCreationWizard extends NewElementWizard {
 	public boolean performFinish() {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fJavaPage.getRunnable());
 		try {
-			getContainer().run(true, true, op);
+			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
 			if (!ExceptionHandler.handle(e.getTargetException(), getShell(), JavaPlugin.getResourceBundle(), PREFIX_OP_ERROR)) {
 				MessageDialog.openError(getShell(), "Error", e.getTargetException().getMessage());

@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -67,6 +68,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 		fListField.setRemoveButtonLabel(JavaLaunchUtils.getResourceString(REMOVE) );
 
 		Group parent= new Group(ancestor, SWT.NONE);
+		parent.setLayoutData(new GridData());
 		MGridLayout gl= new MGridLayout();
 		gl.numColumns= 3;
 		parent.setLayout(gl);
@@ -99,6 +101,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 			fFirst= false;
 			initialSetup(p);
 		}
+		super.setVisible(visible);
 	}
 	
 	private void initialSetup(IJavaProject project) {

@@ -7,6 +7,7 @@ package org.eclipse.jdt.core.refactoring.code;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 
@@ -45,19 +46,20 @@ public class Selection {
 		return start <= position && position <= end;
 	}
 	
+	public boolean coveredBy(AstNode node) {
+		return coveredBy(node.sourceStart, node.sourceEnd);
+	}
+	
+	public boolean coveredBy(int sourceStart, int sourceEnd) {
+		return sourceStart <= start && end <= sourceEnd;
+	}
+	
 	public boolean endsIn(AstNode node) {
 		return node.sourceStart <= end && end < node.sourceEnd;
 	}
 	
-	public boolean intersects(AstNode node) {
-		return intersects(node.sourceStart, node.sourceEnd);
-	}
-	
-	public boolean intersects(int sourceStart, int sourceEnd) {
-		return
-			start < sourceStart && end <= sourceEnd ||
-			start == sourceStart && end < sourceEnd ||
-		      sourceStart <= start && sourceEnd < end ||
-		      sourceStart < start && sourceEnd == end;
+	public boolean intersectsBlock(Block block) {
+		return block.sourceStart < start && start <= block.sourceEnd && block.sourceEnd <= end ||
+		       start <= block.sourceStart && block.sourceStart <= end && end < block.sourceEnd;
 	}
 }

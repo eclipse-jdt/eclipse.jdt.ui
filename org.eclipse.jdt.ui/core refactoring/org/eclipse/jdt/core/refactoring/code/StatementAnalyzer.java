@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
@@ -38,7 +39,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	static final int AFTER=	      3;
 	
 	// The selection's start and end position
-	private IBuffer fBuffer;
+	private ExtendedBuffer fBuffer;
 	private Selection fSelection;
 	
 	// internal state.
@@ -58,18 +59,25 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	private RefactoringStatus fStatus= new RefactoringStatus();
 	private LocalVariableAnalyzer fLocalVariableAnalyzer;
 	private LocalTypeAnalyzer fLocalTypeAnalyzer;
+	private ExceptionAnalyzer fExceptionAnalyzer;
 	
 	// Handling label and branch statements.
 	private Stack fImplicitBranchTargets= new Stack();	
 	private List fLabeledStatements= new ArrayList(2);
+	
+	private static final int BREAK_LENGTH= "break".length();
+	private static final int CONTINUE_LENGTH= "continue".length();
+	private static final int DO_LENGTH=    "do".length();
+	private static final int ELSE_LENGTH=  "else".length();
 	 
 	public StatementAnalyzer(IBuffer buffer, int start, int length) {
 		// System.out.println("Start: " + start + " length: " + length);
-		fBuffer= buffer;
+		fBuffer= new ExtendedBuffer(buffer);
 		Assert.isTrue(fBuffer != null);
 		fSelection= new Selection(start, start + length - 1);
 		fLocalVariableAnalyzer= new LocalVariableAnalyzer(this);
 		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
+		fExceptionAnalyzer= new ExceptionAnalyzer();
 	}
 
 	/**
@@ -120,6 +128,11 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		return fLastSelectedStatement.sourceEnd;
 	}
 	
+	public String getSignature(String methodName) {
+		return fLocalVariableAnalyzer.getSignature(methodName)
+		       + fExceptionAnalyzer.getThrowClause();
+	}
+	
 	private void reset() {
 		fMode= UNDEFINED;
 		fFirstSelectedStatement= null;
@@ -134,8 +147,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		boolean result= true;
 		switch(fMode) {
 			case UNDEFINED:
-				result= false;
-				break;			
+				return false;			
 			case BEFORE:
 				if (fLastEnd < fSelection.start) {
 					if (fSelection.covers(statement)) {
@@ -183,13 +195,15 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			fLastEnd= statement.sourceEnd;
 	}
 	
+	private void trackLastEnd(int end) {
+		if (end > fLastEnd)
+			fLastEnd= end;
+	}
+	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
-		// node.bodyStart is the first character after the {
-		// node.bodyEnd is the last character before the }
-		HackFinder.fixMeSoon("1GCSJPZ: ITPJCORE:WIN2000 - AbstractMethodDeclaration: bodyStart body End inconsistent");
-		node.bodyEnd= node.bodyEnd - 1;
 		boolean result= fSelection.enclosedBy(node);
 		if (result) {
+			fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
 			reset();
 			fEnclosingMethod= node;
 			fMode= BEFORE;
@@ -248,12 +262,13 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	private void endVisitCompoundStatement(AstNode node, Scope scope) {
-		int realEnd= TextUtilities.indexOfNextStatementCharacter(fBuffer, node.sourceEnd + 1) - 1;
-		if (realEnd < 0 || fSelection.intersects(node.sourceStart, realEnd)) {
+		int realEnd= fBuffer.indexOfStatementCharacter(node.sourceEnd + 1) - 1;
+		if (fSelection.covers(node) || fSelection.coveredBy(node.sourceStart, realEnd)) {
+			fLastEnd= node.sourceEnd;
+		} else {
 			reset();
 			fLastEnd= Integer.MAX_VALUE;
 		}
-		fLastEnd= node.sourceEnd;
 	}
 	
 	//---- Problem management -----------------------------------------------------
@@ -432,7 +447,10 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public boolean visit(Block block, BlockScope scope) {
 		boolean result= visitStatement(block, scope);
 		
-		if (result && fSelection.end >= block.sourceStart) {
+		if (fSelection.intersectsBlock(block)) {
+			reset();
+			fLastEnd= Integer.MAX_VALUE;
+		} else {
 			fLastEnd= block.sourceStart;
 		}
 		
@@ -440,18 +458,13 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public void endVisit(Block block, BlockScope scope) {
-		if (fSelection.intersects(block)) {
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
-		} else {
-			fLastEnd= block.sourceEnd;
-		}
+		trackLastEnd(block);
 	}
 
 	public boolean visit(Break breakStatement, BlockScope scope) {
 		HackFinder.fixMeSoon("1GCU7OH: ITPJCORE:WIN2000 - Break.sourceEnd contains tailing comments");
 		if (breakStatement.label == null) {
-			breakStatement.sourceEnd= breakStatement.sourceStart + "break".length() - 1;
+			breakStatement.sourceEnd= breakStatement.sourceStart + BREAK_LENGTH - 1;
 		}
 		return visitBranchStatement(breakStatement, scope, "break");
 	}
@@ -485,7 +498,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public boolean visit(Continue continueStatement, BlockScope scope) {
 		HackFinder.fixMeSoon("1GCU7OH: ITPJCORE:WIN2000 - Break.sourceEnd contains tailing comments");
 		if (continueStatement.label == null) {
-			continueStatement.sourceEnd= continueStatement.sourceStart + "continue".length() - 1;
+			continueStatement.sourceEnd= continueStatement.sourceStart + CONTINUE_LENGTH - 1;
 		}
 		return visitBranchStatement(continueStatement, scope, "continue");
 	}
@@ -495,17 +508,31 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(DoStatement doStatement, BlockScope scope) {
-		boolean result= visitImplicitBranchTarget(doStatement, scope);
-		if (result && fSelection.end >= doStatement.sourceStart) {
-			// skip the do.
-			fLastEnd= doStatement.sourceStart + 1;
+		// skip the string "do"
+		int actionStart= doStatement.sourceStart + DO_LENGTH;		
+		int actionEnd= fBuffer.indexOfStatementCharacter(doStatement.action.sourceEnd + 1);
+		// Either the selection covers the whole do statement or the section lies
+		// inside the do statement's action.	
+		if (fSelection.start != actionStart && // Selection doesn't start right after do. This avoid dofoo();
+		    (fSelection.covers(doStatement) || fSelection.coveredBy(actionStart, actionEnd))) {
+			boolean result= visitImplicitBranchTarget(doStatement, scope);
+			if (result && fSelection.end >= doStatement.sourceStart) {
+				// skip the do.
+				fLastEnd= actionStart;
+			}
+			return result;
+		} else {
+			// Push it anyway since we pop it during end visit.
+			fImplicitBranchTargets.push(doStatement);
+			reset();
+			fLastEnd= Integer.MAX_VALUE;
+			return false;
 		}
-		return result;
 	}
 	
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(doStatement, scope);
-		endVisitCompoundStatement(doStatement, scope);
+		fLastEnd= doStatement.sourceEnd;
 	}
 
 	public boolean visit(DoubleLiteral doubleLiteral, BlockScope scope) {
@@ -545,7 +572,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			} else if (forStatement.initializations != null) {
 				start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
 			}
-			fLastEnd= TextUtilities.indexOf(fBuffer, start + 1, ')');
+			fLastEnd= fBuffer.indexOf(start + 1, ')');
 		}
 		return result;
 	}
@@ -556,9 +583,40 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
-		return visitStatement(ifStatement, scope);
+		int lastEnd= ifStatement.sourceEnd;
+		boolean result= false;
+		if (fSelection.covers(ifStatement) || (lastEnd= getIfElseBodyStart(ifStatement) - 1) >= 0) {
+			result= visitStatement(ifStatement, scope);
+			fLastEnd= lastEnd;
+			
+		} else {
+			reset();
+			fLastEnd= Integer.MAX_VALUE;
+		}
+		return result;
 	}
 
+	private int getIfElseBodyStart(IfStatement ifStatement) {
+		int sourceStart;
+		int sourceEnd;
+		if (ifStatement.thenStatement != null) {
+			sourceStart= fBuffer.indexOf(ifStatement.condition.sourceEnd + 1, ')') + 1;
+			if (ifStatement.elseStatement != null) {
+				sourceEnd= ifStatement.elseStatement.sourceStart - 1;
+			} else {
+				sourceEnd= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1) - 1;
+			}
+			if (fSelection.coveredBy(sourceStart, sourceEnd))
+				return sourceStart;
+		} else if (ifStatement.elseStatement != null) {
+			sourceStart= fBuffer.indexOfStatementCharacter(ifStatement.thenStatement.sourceEnd + 1) + ELSE_LENGTH;
+			sourceEnd= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1) - 1;
+			if (fSelection.coveredBy(sourceStart, sourceEnd))
+				return sourceStart;
+		}
+		return -1;
+	}
+	
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
 		return visitStatement(instanceOfExpression, scope);
 	}
@@ -577,7 +635,9 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
-		return visitStatement(messageSend, scope);
+		boolean result= visitStatement(messageSend, scope);
+		fExceptionAnalyzer.visitMessageSend(messageSend, scope, fMode);
+		return result;
 	}
 
 	public boolean visit(NullLiteral nullLiteral, BlockScope scope) {
@@ -616,11 +676,56 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(SwitchStatement switchStatement, BlockScope scope) {
-		return visitImplicitBranchTarget(switchStatement, scope);
+		// Include "}" into switch statement
+		switchStatement.sourceEnd++;
+		int lastEnd= switchStatement.sourceEnd;
+		boolean result= false;
+		if (fSelection.covers(switchStatement) || (lastEnd= getCaseBodyStart(switchStatement) - 1) >= 0) {
+			result= visitImplicitBranchTarget(switchStatement, scope);
+			fLastEnd= lastEnd;
+			
+		} else {
+			reset();
+			fLastEnd= Integer.MAX_VALUE;
+			fImplicitBranchTargets.push(switchStatement);
+		}
+		return result;
 	}
 
 	public void endVisit(SwitchStatement switchStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(switchStatement, scope);
+	}
+
+	private int getCaseBodyStart(SwitchStatement switchStatement) {
+		if (switchStatement.statements == null)
+			return -1;
+		List cases= getCases(switchStatement);
+		for (Iterator iter= cases.iterator(); iter.hasNext(); ) {
+			Statement kase= (Statement)iter.next();
+			Statement last= (Statement)iter.next();
+			int sourceStart= fBuffer.indexOf(kase.sourceEnd + 1, ':') + 1;
+			int sourceEnd= fBuffer.indexOfStatementCharacter(last.sourceEnd + 1) - 1;
+			if (fSelection.coveredBy(sourceStart, sourceEnd))
+				return sourceStart;
+		}
+		return -1;	
+	}
+	
+	private List getCases(SwitchStatement switchStatement) {
+		List result= new ArrayList();
+		Statement[] statements= switchStatement.statements;
+		if (statements == null)
+			return result;
+		for (int i= 0; i < statements.length; i++) {
+			Statement statement= statements[i];
+			if (statement instanceof Case || statement instanceof DefaultCase) {
+				if (i > 0)
+					result.add(statements[i - 1]);
+				result.add(statement);	
+			}
+		}
+		result.add(statements[statements.length - 1]);
+		return result;
 	}
 
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
@@ -636,9 +741,44 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(TryStatement tryStatement, BlockScope scope) {
-		return visitStatement(tryStatement, scope);
+		// Include "}" into sourceEnd;
+		tryStatement.sourceEnd++;
+		
+		boolean result= visitStatement(tryStatement, scope);
+		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
+		
+		int lastEnd= Integer.MAX_VALUE;
+		if (fSelection.covers(tryStatement)) {
+			lastEnd= tryStatement.sourceEnd;
+		} else if (fSelection.enclosedBy(tryStatement.tryBlock)) {
+			lastEnd= tryStatement.tryBlock.sourceStart;
+		} else if (tryStatement.catchBlocks != null && (lastEnd= getCatchBodyStart(tryStatement.catchBlocks)) >= 0) {
+			// do nothing.
+		} else if (tryStatement.finallyBlock != null && fSelection.enclosedBy(tryStatement.finallyBlock)) {
+			lastEnd=tryStatement.finallyBlock.sourceStart;
+		} else {
+			reset();
+			result= false;
+		}
+		fLastEnd= lastEnd;
+		return result;
 	}
 
+	public void endVisit(TryStatement tryStatement, BlockScope scope) {
+		if (tryStatement.catchArguments != null)
+			fExceptionAnalyzer.visitCatchArguments(tryStatement.catchArguments, scope, fMode);
+		fExceptionAnalyzer.visitEndTryStatement(tryStatement, scope, fMode);	
+	}
+	
+	private int getCatchBodyStart(Block[] catchBlocks) {
+		for (int i= 0; i < catchBlocks.length; i++) {
+			Block catchBlock= catchBlocks[i];
+			if (fSelection.enclosedBy(catchBlock))
+				return catchBlock.sourceStart;
+		}
+		return -1;
+	}
+	
 	public boolean visit(UnaryExpression unaryExpression, BlockScope scope) {
 		return visitStatement(unaryExpression, scope);
 	}
@@ -650,7 +790,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			if (whileStatement.condition != null) {
 				start= whileStatement.condition.sourceEnd;
 			}
-			fLastEnd= TextUtilities.indexOf(fBuffer, start, ')');
+			fLastEnd= fBuffer.indexOf(start, ')');
 		}
 		return result;
 	}

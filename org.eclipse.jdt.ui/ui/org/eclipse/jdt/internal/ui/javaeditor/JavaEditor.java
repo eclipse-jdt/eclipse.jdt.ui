@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;
-import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -141,8 +140,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page));
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction(page));
-		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page));
-		page.setAction("AddEdition", new org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory(page));
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page));
 
 		IStatusLineManager statusLineManager= getStatusLineManager();
@@ -169,10 +166,10 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	/*
 	 * Get the dektop's StatusLineManager
 	 */
-	private IStatusLineManager getStatusLineManager() {
+	protected IStatusLineManager getStatusLineManager() {
 		IEditorActionBarContributor contributor= getEditorSite().getActionBarContributor();
 		if (contributor instanceof EditorActionBarContributor) {
-			return ((EditorActionBarContributor)contributor).getActionBars().getStatusLineManager();
+			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
 		}
 		return null;
 	}	

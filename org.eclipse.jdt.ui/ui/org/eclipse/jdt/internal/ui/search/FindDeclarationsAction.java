@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class FindDeclarationsAction extends ElementSearchAction {
 
@@ -27,6 +28,7 @@ public class FindDeclarationsAction extends ElementSearchAction {
 
 	public FindDeclarationsAction(String label, Class[] validTypes) {
 		super(label, validTypes);
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {

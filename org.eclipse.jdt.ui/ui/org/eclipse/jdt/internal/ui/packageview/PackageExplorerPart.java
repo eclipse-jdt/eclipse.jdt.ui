@@ -91,6 +91,8 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -335,6 +337,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		addOpenWithMenu(menu, selection);
 		
 		addOpenToMenu(menu, selection);
+		addRefactoring(menu);
 		addInheritanceItems(menu);
 		if (selectionHasElements) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowNavigatorAction);
@@ -369,6 +372,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+	}
+	
+	private void addRefactoring(IMenuManager menu){
+		MenuManager refactoring= new MenuManager(RefactoringResources.getResourceString("Refactoring.submenu"));
+		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
+		if (!refactoring.isEmpty())
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}
 	
 	private void addOpenToMenu(IMenuManager menu, IStructuredSelection selection) {

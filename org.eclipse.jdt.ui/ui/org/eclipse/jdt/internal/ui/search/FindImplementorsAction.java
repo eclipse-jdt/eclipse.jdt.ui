@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -22,6 +23,7 @@ public class FindImplementorsAction extends ElementSearchAction {
 	public FindImplementorsAction() {
 		super(JavaPlugin.getResourceString("Search.FindImplementorsAction.label"), new Class[] {IType.class});
 		setToolTipText(JavaPlugin.getResourceString("Search.FindImplementorsAction.tooltip"));
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
 	public boolean canOperateOn(ISelection sel) {

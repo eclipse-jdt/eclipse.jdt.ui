@@ -18,10 +18,12 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.PortingFinder;
 
 /**
  * Tries to reveal the selected element in the package navigator 
@@ -66,7 +68,11 @@ public class ShowInPackageViewAction extends JavaUIAction implements IUpdate {
 			element= JavaModelUtility.getParent((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
 		
 		if (o instanceof IImportDeclaration) {
-			element= JavaModelUtility.convertFromImportDeclaration((IImportDeclaration)o);
+			try {
+				element= JavaModelUtility.convertFromImportDeclaration((IImportDeclaration)o);
+			} catch (JavaModelException e) {
+				PortingFinder.toBeDone("handle Exception");
+			}
 			if (element instanceof IType) {
 				IJavaElement temp= JavaModelUtility.getParent(element, IJavaElement.COMPILATION_UNIT);
 				if (temp == null)

@@ -9,7 +9,6 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Vector;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -26,6 +25,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 
@@ -65,12 +65,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.launcher.JDK12PreferencePage;
-import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
-
-
-
-
+import org.eclipse.jdt.launching.JavaRuntime;
 
 /**
  * An editor for Java snippets.
@@ -427,8 +423,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	String[] getClassPath(IJavaProject project) {
-		MultiStatus warnings= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, "status", null);
-		return JavaApplicationLauncher.getClassPath(new Vector(), project, warnings); 
+		try {
+			return JavaRuntime.computeDefaultRuntimeClassPath(project);
+		} catch (CoreException e) {
+			return new String[0];
+		}
 	}
 	
 	protected Shell getShell() {

@@ -231,7 +231,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 			result.append(delimiter);
 		result.append(indent);
 		result.append("protected ");
-		result.append(localAnalyzer.getSignature(fMethodName));
+		result.append(fStatementAnalyzer.getSignature(fMethodName));
 		result.append(" {");
 		result.append(delimiter);
 		result.append(computeSource(buffer, indent + '\t', delimiter));

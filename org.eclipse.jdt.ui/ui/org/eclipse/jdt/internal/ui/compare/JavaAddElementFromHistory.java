@@ -15,18 +15,25 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.compare.*;
 
 
 public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.AddFromHistoryAction";		
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.AddFromHistoryAction";
 	
-	public JavaAddElementFromHistory(ISelectionProvider sp) {
+	private JavaEditor fEditor;
+		
+	public JavaAddElementFromHistory(JavaEditor editor, ISelectionProvider sp) {
 		super(sp, BUNDLE_NAME);
+		fEditor= editor;
 	}
 			
 	/**
@@ -37,15 +44,37 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		ISelection selection= fSelectionProvider.getSelection();
-		IMember input= getEditionElement(selection);
-		if (input == null) {
-			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openError(shell, fTitle, "No editions for selection");
-			return;
+		
+		ICompilationUnit cu= null;
+		IParent parent= null;
+		
+		if (selection.isEmpty()) {
+			if (fEditor != null) {
+				IEditorInput editorInput= fEditor.getEditorInput();
+				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+				cu= manager.getWorkingCopy(editorInput);
+				parent= cu;
+			}
+			
+		} else {
+			IMember input= getEditionElement(selection);
+			if (input == null) {
+				// shouldn't happen because Action should not be enabled in the first place
+				MessageDialog.openError(shell, fTitle, "No editions for selection");
+				return;
+			}
+			cu= input.getCompilationUnit();
+			
+			if (input instanceof IParent) {
+				parent= (IParent)input;
+			} else {
+				IJavaElement parentElement= input.getParent();
+				if (parentElement instanceof IParent)
+					parent= (IParent)parentElement; 
+			}
 		}
 		
 		// extract CU from selection
-		ICompilationUnit cu= input.getCompilationUnit();
 		if (cu.isWorkingCopy())
 			cu= (ICompilationUnit) cu.getOriginalElement();
 
@@ -71,22 +100,13 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			return;
 		}
 		
-		IParent parent= null;
-		if (input instanceof IParent) {
-			parent= (IParent)input;
-		} else {
-			IJavaElement parentElement= input.getParent();
-			if (parentElement instanceof IParent)
-				parent= (IParent)parentElement; 
-		}
-		
 		ITypedElement target= new ResourceNode(file);
 		ITypedElement[] editions= new ITypedElement[states.length];
 		for (int i= 0; i < states.length; i++)
 			editions[i]= new HistoryItem(target, states[i]);
 		
 		EditionSelectionDialog esd= new EditionSelectionDialog(shell, fBundle);
-		esd.setAddMode(true);
+		//esd.setAddMode(true);
 		esd.selectEdition(target, editions, parent);
 	}
 	

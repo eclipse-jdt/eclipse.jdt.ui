@@ -78,7 +78,7 @@ public class PackageReorgSupport implements ICopySupport, IMoveSupport, INamingP
 			
 		// the order is important here since getPackageFragment() throws an exception
 		// if the name is invalid.
-		if (!JavaConventions.isValidPackageName(name))
+		if (!JavaConventions.validatePackageName(name).isOK())
 			return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
 		if (root.getPackageFragment(name).exists())
 			return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
@@ -92,7 +92,7 @@ public class PackageReorgSupport implements ICopySupport, IMoveSupport, INamingP
 			
 		// the order is important here since getPackageFragment() throws an exception
 		// if the name is invalid.
-		if (!JavaConventions.isValidPackageName(name))
+		if (!JavaConventions.validatePackageName(name).isOK())
 			return null;
 		return root.getPackageFragment(name);
 	}

@@ -80,9 +80,9 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 
 	public void checkActivation(RefactoringStatus status) {
 		if (fBeforeTypeReferenced != null)
-			status.addFatalError(fBeforeTypeReferenced);
+			status.addError(fBeforeTypeReferenced);
 		if (fSelectedTypeReferenced != null)
-			status.addFatalError(fSelectedTypeReferenced);
+			status.addError(fSelectedTypeReferenced);
 	}
 	
 }

@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * An undo manager keeps track of changes performed by refactorings. Use <code>performUndo</code> 
  * and <code>performRedo</code> to undo and redo changes.
  * <p>
- * NOTE: This interface is not intended to be implemented. Use Refactoring.getUndoManager()
+ * NOTE: This interface is not intended to be implemented or extended. Use Refactoring.getUndoManager()
  * to access the undo manager. </p>
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
@@ -31,7 +31,7 @@ public interface IUndoManager {
 	public void addListener(IUndoManagerListener listener);
 	
 	/**
-	 * Reomves the given listener from this undo manager.
+	 * Removes the given listener from this undo manager.
 	 * 
 	 * @param listener the listener to be removed
 	 */

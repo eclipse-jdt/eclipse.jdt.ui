@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -85,14 +86,14 @@ public class EditorUtility {
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
 	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {
-		JdtHackFinder.fixme("workaround for lack of JarEntryFile support");
-		if (inputElement.getClass().getName().equals("org.eclipse.jdt.internal.core.JarEntryFile")) {
-			JarEntryEditorInput jarEditorInput= new JarEntryEditorInput((IFile)inputElement);
-			return openInEditor(jarEditorInput, getEditorID(jarEditorInput, inputElement));
-		}
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement);
 		
+		if (inputElement instanceof IStorage) {
+			JarEntryEditorInput jarEditorInput= new JarEntryEditorInput((IStorage)inputElement);
+			return openInEditor(jarEditorInput, getEditorID(jarEditorInput, inputElement));
+		}
+
 		IEditorInput input= getEditorInput(inputElement);
 		return openInEditor(input, getEditorID(input, inputElement));
 	}
@@ -136,8 +137,10 @@ public class EditorUtility {
 		} 
 		if (input instanceof JarEntryEditorInput) {
 			IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-			IEditorDescriptor descriptor= registry.getDefaultEditor(inputObject.toString());
-			return descriptor.getId();
+			IEditorDescriptor descriptor= registry.getDefaultEditor(((JarEntryEditorInput)input).getName());
+			if (descriptor != null)
+				return descriptor.getId();
+			return null;
 		}
 		
 		return null;
@@ -170,7 +173,10 @@ public class EditorUtility {
 			
 		if (input instanceof IFile) 
 			return new FileEditorInput((IFile) input);
-			
+		
+		if (input instanceof IStorage) 
+			return new JarEntryEditorInput((IStorage)input);
+	
 		return null;
 	}
 	

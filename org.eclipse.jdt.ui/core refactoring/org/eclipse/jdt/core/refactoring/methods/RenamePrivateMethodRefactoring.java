@@ -84,8 +84,11 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(checkAvailability(getMethod()));
 		if (! Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("Only applicable to private methods");
+
+		HackFinder.fixMeSoon("remove this constraint");	
 		if (Flags.isNative(getMethod().getFlags()))
-			result.addFatalError("not applicable to native methods");
+			result.addFatalError("Not applicable to native methods");
+
 		if (Flags.isStatic(getMethod().getFlags()))
 			result.addFatalError("Not applicable to static methods");	
 		return result;
@@ -98,7 +101,7 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			return null;
 		List searchResults= (List)grouped.get(0);
 		Assert.isTrue(searchResults.size() > 0, "no declarations/references to a method found");
-		return new RenameMethodASTAnalyzer().analyze(searchResults, getNewName(), getMethod().getCompilationUnit(), getMethod());
+		return new RenameMethodASTAnalyzer(getNewName(), getMethod()).analyze(searchResults, getMethod().getCompilationUnit());
 	}
 	
 	/* non java-doc

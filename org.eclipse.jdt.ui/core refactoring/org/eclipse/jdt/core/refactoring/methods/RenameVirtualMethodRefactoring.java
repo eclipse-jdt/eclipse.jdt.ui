@@ -76,8 +76,11 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkActivation(pm));
 		result.merge(checkAvailability(getMethod()));
+		
+		HackFinder.fixMeSoon("remove this constraint");
 		if (Flags.isNative(getMethod().getFlags()))
 			result.addFatalError("not applicable to native methods");
+			
 		if (Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("not applicable to private methods");
 		if (Flags.isStatic(getMethod().getFlags()))
@@ -94,11 +97,11 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		if (grouped.isEmpty())
 			return null;
 		RefactoringStatus result= new RefactoringStatus();	
-		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer();
+		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
 			List searchResults= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
-			result.merge(analyzer.analyze(searchResults, getNewName(), cu, getMethod()));
+			result.merge(analyzer.analyze(searchResults, cu));
 		}
 		return result;
 	}

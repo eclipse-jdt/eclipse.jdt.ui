@@ -76,8 +76,8 @@ public class NewClassCreationWizardPage extends TypePage {
 			}
 			IPackageFragmentRoot root= getPackageFragmentRoot();
 			if (root != null) {
-				IType type= JavaModelUtility.findType(root.getJavaProject(), superclass);
 				try {
+					IType type= JavaModelUtility.findType(root.getJavaProject(), superclass);
 					if (type != null && type.isInterface()) {
 						superinterfaces.add(superclass);
 						superclass= "java.lang.Object";

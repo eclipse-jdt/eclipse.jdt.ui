@@ -67,8 +67,8 @@ public class OpenImportDeclarationAction extends JavaUIAction implements IUpdate
 		if (s instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection) s;
 			IImportDeclaration declaration= (IImportDeclaration) ss.getFirstElement();
-			IJavaElement element= JavaModelUtility.convertFromImportDeclaration(declaration);
 			try {
+				IJavaElement element= JavaModelUtility.convertFromImportDeclaration(declaration);
 				EditorUtility.openInEditor(element);
 			} catch (JavaModelException x) {
 				Shell shell= JavaPlugin.getActiveWorkbenchShell();

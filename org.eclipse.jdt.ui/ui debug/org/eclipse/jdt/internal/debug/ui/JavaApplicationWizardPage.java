@@ -120,8 +120,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 
 	class SimpleSorter extends ViewerSorter {
 		/**
-		 * Returns <code>true</code> if this sorter is affected by a property 
-		 * change of propertyName on the specified element.
+		 * @seeViewerSorter#isSorterProperty(Object, Object)
 		 */
 		public boolean isSorterProperty(Object element, Object property) {
 			return true;

@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -62,6 +63,7 @@ public class PackageViewerSorter extends ViewerSorter {
 	
 	public int compare(Viewer v, Object e1, Object e2) {
 		// show resources after Java elements
+		// we have to handle both IStorage and IResource separetly...
 		IResource r1= null;
 		IResource r2= null;
 		if (e1 instanceof IResource)
@@ -74,8 +76,20 @@ public class PackageViewerSorter extends ViewerSorter {
 			return 1;
 		if (r1 == null && r2 != null)
 			return -1;
-		Assert.isTrue(r1 == null && r2 == null);
-		
+	
+		IStorage s1= null;
+		IStorage s2= null;
+		if (e1 instanceof IStorage)
+			s1= (IStorage)e1;
+		if (e2 instanceof IStorage)
+			s2= (IStorage)e2;
+		if (s1 != null && s2 != null)
+			return s1.getName().compareToIgnoreCase(s2.getName());
+		if (s1 != null && s2 == null)
+			return 1;
+		if (s1 == null && s2 != null)
+			return -1;
+
 		if (fIsClassPathSortOrder) {
 			int p1= classPathIndex((IJavaElement)e1);
 			int p2= classPathIndex((IJavaElement)e2);

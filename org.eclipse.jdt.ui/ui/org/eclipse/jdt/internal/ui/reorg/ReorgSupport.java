@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -105,4 +106,19 @@ public class ReorgSupport {
 		return result;
 	}
 	
+	public static Object getResource(IPackageFragment fragment, String name) throws JavaModelException {
+		Object[] children= fragment.getNonJavaResources();
+		for (int i= 0; i < children.length; i++) {
+			if (children[i] instanceof IResource) {
+				IResource child= (IResource)children[i];
+				if (child.getName().equals(name))
+					return children[i];
+			} else if (children[i] instanceof IStorage) {
+				IStorage child= (IStorage)children[i];
+				if (child.getName().equals(name))
+					return children[i];
+			}
+		}
+		return null;
+	}
 }

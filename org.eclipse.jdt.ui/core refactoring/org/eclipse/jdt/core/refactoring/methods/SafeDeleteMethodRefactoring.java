@@ -61,9 +61,9 @@ public class SafeDeleteMethodRefactoring extends MethodRefactoring{
 		if (r == 0)
 			return result;
 		else if  (r == 1)
-			result.addFatalError("method is referenced in 1 place");
+			result.addError("method is referenced in 1 place");
 		else 
-			result.addFatalError("method is referenced " + r + " times");
+			result.addError("method is referenced " + r + " times");
 		return result;
 	}
 		
@@ -71,7 +71,7 @@ public class SafeDeleteMethodRefactoring extends MethodRefactoring{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
 		if (getMethod().isConstructor())
-			result.addFatalError("can't rename a constructor");
+			result.addFatalError("can't delete a constructor");
 		if 	(! Flags.isStatic(getMethod().getFlags()) && ! Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("only applicable for static or private methods");	
 		return result;

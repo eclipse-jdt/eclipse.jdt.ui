@@ -58,28 +58,28 @@ public class RefactoringStatusEntry{
 	}
 	
 	/**
-	 * @return <code>true</code> iff (severity == RefactoringStatus.FATAL).
+	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.FATAL</code>).
 	 */
 	public boolean isFatalError(){
 		return fSeverity == RefactoringStatus.FATAL;
 	}
 	
 	/**
-	 * @return <code>true</code> iff (severity == RefactoringStatus.ERROR).
+	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.ERROR</code>).
 	 */
 	public boolean isError(){
 		return fSeverity == RefactoringStatus.ERROR;
 	}
 	
 	/**
-	 * @return <code>true</code> iff (severity == RefactoringStatus.WARNING).
+	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.WARNING</code>).
 	 */
 	public boolean isWarning(){
 		return fSeverity == RefactoringStatus.WARNING;
 	}
 	
 	/**
-	 * @return <code>true</code> iff (severity == RefactoringStatus.INFO).
+	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.INFO</code>).
 	 */
 	public boolean isInfo(){
 		return fSeverity == RefactoringStatus.INFO;

@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 /*
@@ -460,14 +461,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			case IJavaElement.TYPE:
 				searchFor= TYPE;
 				limitTo= REFERENCES;
-				pattern= ((IType)element).getFullyQualifiedName();
+				pattern= JavaModelUtility.getFullyQualifiedName((IType)element);
 				break;
 			case IJavaElement.FIELD:
 				IType type= ((IField)element).getDeclaringType();
 				searchFor= FIELD;
 				limitTo= REFERENCES;
 				StringBuffer buffer= new StringBuffer();
-				buffer.append(type.getFullyQualifiedName());
+				buffer.append(JavaModelUtility.getFullyQualifiedName(type));
 				buffer.append('.');
 				buffer.append(element.getElementName());
 				pattern= buffer.toString();

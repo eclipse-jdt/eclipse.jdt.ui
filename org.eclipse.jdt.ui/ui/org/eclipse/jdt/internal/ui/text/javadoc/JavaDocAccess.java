@@ -87,7 +87,7 @@ public class JavaDocAccess {
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
 	 */
-	public static Reader getJavaDocRange(IMember member) throws JavaModelException {
+	public static Reader getJavaDoc(IMember member) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
 		if (buf == null) {
 			// no source attachment found

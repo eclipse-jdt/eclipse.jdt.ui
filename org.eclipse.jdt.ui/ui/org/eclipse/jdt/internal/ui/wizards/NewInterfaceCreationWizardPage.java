@@ -60,8 +60,8 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 			}
 			IPackageFragmentRoot root= getPackageFragmentRoot();
 			if (root != null) {
-				IType type= JavaModelUtility.findType(root.getJavaProject(), selName);
 				try {
+					IType type= JavaModelUtility.findType(root.getJavaProject(), selName);
 					if (type != null && type.isInterface()) {
 						superinterfaces.add(selName);
 					}

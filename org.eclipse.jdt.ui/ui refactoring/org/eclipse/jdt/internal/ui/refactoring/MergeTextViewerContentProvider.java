@@ -131,8 +131,8 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 		if (element instanceof ISourceReference) {
 			ISourceRange range= ((ISourceReference)element).getSourceRange();
 			result= content.substring(
-				correctStart(content, range.getStartIndex()), 
-				range.getEndIndex() - sizeDiff + 1);
+				correctStart(content, range.getOffset()), 
+				(range.getOffset() + range.getLength() - 1) - sizeDiff + 1);
 		}	
 		return result;	
 	}

@@ -10,6 +10,19 @@ import org.eclipse.jdt.core.IBuffer;
 public class TextUtilities {
 
 	/**
+	 * Returns the length of the string desribed by <code>start</code> and 
+	 * <code>end</code>.
+	 *
+	 * @param start the start position. The position is inclusive
+	 * @param end the end position. The position is inclusive
+	 * @return the length of the string desribed by <code>start</code> and
+	 *  <code>end</code>
+	 */
+	public static int getLength(int start, int end) {
+		return end - start + 1;
+	}
+
+	/**
 	 * Returns the indent of the given line.
 	 * @param line the text line
 	 * @param tabWidth the width of the '\t' character.
@@ -175,93 +188,5 @@ public class TextUtilities {
 			}
 		}
 		return result;
-	}
-	
-	/**
-	 * Returns the index of the given character inside the provided buffer
-	 * starting at position <code>start</code>. The method overreads comments,
-	 * meaning that the character isn't found inside a comment.
-	 */
-	public static int indexOf(IBuffer buffer, int start, char search) {
-		int length= buffer.getLength();
-		for (int i= start; i < length && i != -1; i++) {
-			char c= buffer.getChar(i);
-			if (c == search)
-				return i;
-				
-			switch (c) {
-				case '/':
-					int j= i + 1;
-					if (j < length) {
-						char nextChar= buffer.getChar(j);
-						if (nextChar == '*') {
-							i= getCommentEnd(buffer, j + 1);
-						} else if (nextChar == '/') {
-							i= getLineEnd(buffer, j + 1);
-						}
-					}	
-					break;
-			}
-		}
-		return -1;
-	}
-	
-	public static int indexOfNextStatementCharacter(IBuffer buffer, int start) {
-		int length= buffer.getLength();
-		for (int i= start; i < length && i != -1; i++) {
-			char c= buffer.getChar(i);
-			switch (c) {
-				case ';':
-				case ' ':
-				case '\t':
-				case '\r':
-				case '\n':
-					break;
-				case '/':
-					int j= i + 1;
-					if (j < length) {
-						char nextChar= buffer.getChar(j);
-						if (nextChar == '*') {
-							i= getCommentEnd(buffer, j + 1);
-						} else if (nextChar == '/') {
-							i= getLineEnd(buffer, j + 1);
-						}
-					}	
-					break;
-				default:
-					return i;
-			}
-		}
-		return -1;
-	}
-	
-	private static int getCommentEnd(IBuffer buffer, int start) {
-		int length= buffer.getLength();
-		for (int i= start; i < length; i++) {
-			char c= buffer.getChar(i);
-			if (c == '*') {
-				int j= i + 1;
-				if (j < length && buffer.getChar(j) == '/')
-					return j;
-			} 
-		}
-		return -1;
-	}
-	
-	private static int getLineEnd(IBuffer buffer, int start) {
-		int length= buffer.getLength();
-		for (int i= start; i < length; i++) {
-			char c= buffer.getChar(i);
-			switch (c) {
-				case '\n':
-					return i;
-				case '\r':
-					int j= i + 1;
-					if (j < length && buffer.getChar(j) == '\n')
-						return j;
-					return i;	
-			}
-		}
-		return length - 1;
-	} 
+	}	
 }

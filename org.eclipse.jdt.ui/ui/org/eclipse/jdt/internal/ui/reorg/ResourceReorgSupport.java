@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -80,14 +81,6 @@ public class ResourceReorgSupport  implements ICopySupport, IMoveSupport, INamin
 		return c.findMember(name);
 	}
 	
-	private IResource getResource(IPackageFragment fragment, String name) throws JavaModelException {
-		IResource[] children= fragment.getNonJavaResources();
-		for (int i= 0; i < children.length; i++) {
-			if (children[i].getName().equals(name))
-				return children[i];
-		}
-		return null;
-	}
 
 	public Object moveTo(Object element, Object dest, String newName, IProgressMonitor pm) throws JavaModelException, CoreException {
 		IResource destResource= getDestination(dest);

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
@@ -305,18 +306,23 @@ public abstract class ContainerPackagePage extends ContainerPage {
 			fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_ENTERNAME));
 			return;
 		}
-		IType type= JavaModelUtility.findType(root.getJavaProject(), enclName);
-		if (type == null) {
-			fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_NOTEXISTS));
-			return;
-		}
+		try {
+			IType type= JavaModelUtility.findType(root.getJavaProject(), enclName);
+			if (type == null) {
+				fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_NOTEXISTS));
+				return;
+			}
 
-		if (type.getCompilationUnit() == null) {
-			fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_PARENTISBINARY));
-			return;
+			if (type.getCompilationUnit() == null) {
+				fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_PARENTISBINARY));
+				return;
+			}
+			fCurrEnclosingType= type;
+			fEnclosingTypeStatus.setOK();
+		} catch (JavaModelException e) {
+			fEnclosingTypeStatus.setError(getResourceString(ERROR_ENCLOSING_NOTEXISTS));
+			JavaPlugin.getDefault().getLog().log(e.getStatus());
 		}
-		fCurrEnclosingType= type;
-		fEnclosingTypeStatus.setOK();
 	}
 	
 	// ---- set / get ----------------

@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IChange;
@@ -35,7 +36,6 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.util.HackFinder;
-
 
 /**
  * <p>
@@ -110,7 +110,7 @@ public class RenamePrivateFieldRefactoring extends FieldRefactoring implements I
 		if (Checks.isAlreadyNamed(getField(), fNewName))
 			result.addFatalError("Choose another name.");
 		if (getField().getDeclaringType().getField(fNewName).exists())
-			result.addFatalError("Field with this name already defined");
+			result.addError("Field with this name already defined");
 		return result;
 	}
 	
@@ -118,7 +118,8 @@ public class RenamePrivateFieldRefactoring extends FieldRefactoring implements I
 	 * @see Refactoring#checkInput
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("checking preconditions", 1);
+		pm.beginTask("", 1);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkNewName());
 		HackFinder.fixMeSoon("must add precondions");
@@ -127,6 +128,10 @@ public class RenamePrivateFieldRefactoring extends FieldRefactoring implements I
 		 * referrenced only in the same compilation unit. And this one is checked by
 		 * checkActivation. 
 		 */
+		pm.worked(1);
+		result.merge(checkEnclosingHierarchy());
+		pm.worked(1);
+		result.merge(checkNestedHierarchy(getField().getDeclaringType()));
 		pm.worked(1);
 		pm.done();
 		return result;
@@ -142,6 +147,34 @@ public class RenamePrivateFieldRefactoring extends FieldRefactoring implements I
 		result.merge(checkAvailability(getField()));	
 		return result;
 	}
+	
+	private RefactoringStatus checkNestedHierarchy(IType type) throws JavaModelException {
+		IType[] nestedTypes= type.getTypes();
+		if (nestedTypes == null)
+			return null;
+		RefactoringStatus result= new RefactoringStatus();	
+		for (int i= 0; i < nestedTypes.length; i++){
+			IField otherField= nestedTypes[i].getField(fNewName);
+			if (otherField.exists())
+				result.addWarning("After renaming, the field " + getField().getElementName() + " will be hidden in the scope of the field "+ fNewName + " declared in type " + nestedTypes[i].getFullyQualifiedName());
+			result.merge(checkNestedHierarchy(nestedTypes[i]));	
+		}	
+		return result;
+	}
+	
+	private RefactoringStatus checkEnclosingHierarchy() throws JavaModelException {
+		IType current= getField().getDeclaringType();
+		if (Checks.isTopLevel(current))
+			return null;
+		RefactoringStatus result= new RefactoringStatus();
+		while (current != null){
+			IField otherField= current.getField(fNewName);
+			if (otherField.exists())
+				result.addWarning("After renaming, the field named " + fNewName + " declared in type " + current.getFullyQualifiedName() + " will be hidden in the scope of the field " + getField().getElementName());
+			current= current.getDeclaringType();
+		}
+		return result;
+	}	
 
 	// ---------- Changes -----------------
 	/**

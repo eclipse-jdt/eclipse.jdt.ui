@@ -21,6 +21,8 @@ public class JavaDocTextReader extends SingleCharReader {
 		fgHTMLTagLookup= new HashMap(7);
 		fgHTMLTagLookup.put("p", LINE_DELIM);
 		fgHTMLTagLookup.put("br", LINE_DELIM);
+		fgHTMLTagLookup.put("dt", LINE_DELIM);	// definition title in definition list
+		fgHTMLTagLookup.put("dd", " ");		// definition doc in definition list
 		fgHTMLTagLookup.put("li", LINE_DELIM + "· ");
 		
 		fgEntityLookup= new HashMap(7);
@@ -49,7 +51,7 @@ public class JavaDocTextReader extends SingleCharReader {
 		fIndex= 0;
 		fReadFromBuffer= false;
 		fCharAfterWhiteSpace= -1;
-		fWasWhiteSpace= false;
+		fWasWhiteSpace= true;
 	}
 	
 	private int nextChar() throws IOException {
@@ -106,7 +108,7 @@ public class JavaDocTextReader extends SingleCharReader {
 			}
 		} while (fWasWhiteSpace && (ch == ' '));
 				
-		fWasWhiteSpace= (ch == ' ');
+		fWasWhiteSpace= (ch == ' ' || ch == '\r' || ch == '\n');
 		return ch;
 	}
 	

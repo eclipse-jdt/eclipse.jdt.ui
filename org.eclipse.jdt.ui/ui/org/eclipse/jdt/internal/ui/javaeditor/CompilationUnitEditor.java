@@ -7,15 +7,31 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.util.Iterator;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.views.tasklist.TaskList;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,13 +45,23 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
 import org.eclipse.jdt.internal.ui.reorg.CUSavePolicy;
 
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
+
+
 /**
  * Java specific text editor.
  */
 public class CompilationUnitEditor extends JavaEditor {
 	
+	
 	/** Save policy determining the compilation unit save behavior */
 	protected ISavePolicy fSavePolicy;
+	
+	/** The status line clearer */
+	protected ISelectionChangedListener fStatusLineClearer;
+	
+	
 	
 	/**
 	 * Default constructor.
@@ -119,6 +145,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		JavaOutlinePage page= super.createOutlinePage();
 		page.setAction("DeleteElement", new DeleteISourceManipulationsAction(getResourceBundle(), "Outliner.DeleteISourceManipulations.", page));
 		page.setAction("OrganizeImports", new OrganizeImportsAction(this));
+		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page));
+		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page));
 		return page;
 	}
 
@@ -133,7 +161,7 @@ public class CompilationUnitEditor extends JavaEditor {
 	}
 	
 	/**
-	 * @see AbstarctTextEditor#doSave(IProgressMonitor)
+	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
 		
@@ -152,5 +180,80 @@ public class CompilationUnitEditor extends JavaEditor {
 			if (fSavePolicy != null)
 				fSavePolicy.postSave(original);
 		}
-	}	
+		
+		getStatusLineManager().setErrorMessage("");
+	}
+		
+	public void gotoError(boolean forward) {
+		
+		ISelectionProvider provider= getSelectionProvider();
+		
+		if (fStatusLineClearer != null) {
+			provider.removeSelectionChangedListener(fStatusLineClearer);
+			fStatusLineClearer= null;
+		}
+		
+		ITextSelection s= (ITextSelection) provider.getSelection();
+		
+		int distance= forward ? 1 : -1;
+		int offset= s.getOffset();
+		IMarker nextError= null;
+		
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		Iterator e= model.getAnnotationIterator();
+		while (e.hasNext()) {
+			Annotation a= (Annotation) e.next();
+			if (a instanceof MarkerAnnotation) {
+				MarkerAnnotation ma= (MarkerAnnotation) a;
+				IMarker marker= ma.getMarker();
+				
+				if (MarkerUtilities.isMarkerType(marker, IMarker.PROBLEM)) {
+					Position p= model.getPosition(a);
+					if (!p.includes(offset)) {
+						int currentDistance= offset - p.getOffset();
+						if (forward) {
+							if (currentDistance < 0 && (distance == 1 || currentDistance > distance)) {
+								distance= currentDistance;
+								nextError= marker;
+							}
+						} else {
+							if (currentDistance > 0 && (distance == -1 || currentDistance < distance)) {
+								distance= currentDistance;
+								nextError= marker;
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+		if (nextError != null) {
+			
+			gotoMarker(nextError);
+			
+			IWorkbenchPage page= getSite().getPage();
+			
+			IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList");
+			if (view instanceof TaskList) {
+				StructuredSelection ss= new StructuredSelection(nextError);
+				((TaskList) view).setSelection(ss, true);
+			}
+			
+			getStatusLineManager().setErrorMessage(nextError.getAttribute(IMarker.MESSAGE, ""));
+			fStatusLineClearer= new ISelectionChangedListener() {
+				public void selectionChanged(SelectionChangedEvent event) {
+					getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
+					fStatusLineClearer= null;
+					getStatusLineManager().setErrorMessage("");
+				}
+			};
+			provider.addSelectionChangedListener(fStatusLineClearer);
+			
+		} else {
+			
+			getStatusLineManager().setErrorMessage("");
+			
+		}
+	}
 }

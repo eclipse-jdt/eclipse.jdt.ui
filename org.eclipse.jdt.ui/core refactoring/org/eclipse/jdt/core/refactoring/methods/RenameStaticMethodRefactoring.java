@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
  * <p>
@@ -49,8 +50,11 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkActivation(pm));
 		result.merge(checkAvailability(getMethod()));
+		
+		HackFinder.fixMeSoon("remove this constraint");	
 		if (Flags.isNative(getMethod().getFlags()))
 			result.addFatalError("not applicable to native methods");
+			
 		if (Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("must not be private");
 		if (! Flags.isStatic(getMethod().getFlags()))

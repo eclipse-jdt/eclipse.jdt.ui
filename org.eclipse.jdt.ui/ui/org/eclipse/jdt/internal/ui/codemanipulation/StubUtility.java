@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 public class StubUtility {
 
 	/**
-	 * Generate a stub. Given a template method a stub with the same signature
+	 * Generate a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
 	 * @param parenttype The type to which the method will be added to
 	 * @param method A method template (method belongs to different type than the parent)
@@ -162,9 +162,11 @@ public class StubUtility {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}
 
-	private static void resolveAndAdd(String refTypeSig, IType declaringType, ImportsStructure imports) {
-		String[] resolvedTypeName= getResolvedTypeName(refTypeSig, declaringType);
-		imports.sortIn(resolvedTypeName[0], resolvedTypeName[1]);
+	private static void resolveAndAdd(String refTypeSig, IType declaringType, ImportsStructure imports) throws JavaModelException {
+		String resolvedTypeName= getResolvedTypeName(refTypeSig, declaringType);
+		if (resolvedTypeName != null) {
+			imports.sortIn(resolvedTypeName);		
+		}
 	}
 
 	/**
@@ -361,29 +363,29 @@ public class StubUtility {
 	/**
 	 * Resolves a type name in the context of the declaring type
 	 * @param refTypeSig the type name in signature notation (for example 'QVector')
-	 *                   this can also be an array type
+	 *                   this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
-	 * @return returns the fully qualified type name (package name / type name), or the simple name if resolve did not
-	 *         succeed
+	 * @return returns the fully qualified type name or build-in-type name. 
+	 *  			if a unresoved type couldn't be resolved null is returned
 	 */
-	public static String[] getResolvedTypeName(String refTypeSig, IType declaringType) {
+	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
-		int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
-		if (semi == -1) {
-			throw new IllegalArgumentException();
-		}
-		String name= refTypeSig.substring(arrayCount + 1, semi);
-		if (refTypeSig.charAt(arrayCount) == Signature.C_UNRESOLVED) {
-			try {
-				String[][] resolvedTypes= declaringType.resolveType(name);
-				if (resolvedTypes != null && resolvedTypes.length > 0) {
-					return resolvedTypes[0];
-				}
-			} catch (JavaModelException e) {
-				// ignore
+		char type= refTypeSig.charAt(arrayCount);
+		if (type == Signature.C_UNRESOLVED) {
+			int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
+			if (semi == -1) {
+				throw new IllegalArgumentException();
 			}
+			String name= refTypeSig.substring(arrayCount + 1, semi);				
+			
+			String[][] resolvedNames= declaringType.resolveType(name);
+			if (resolvedNames != null && resolvedNames.length > 0) {
+				return JavaModelUtility.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
+			}
+			return null;
+		} else {
+			return Signature.toString(refTypeSig.substring(arrayCount));
 		}
-		return new String[] {Signature.getQualifier(name), Signature.getSimpleName(name)};
 	}
 
 	/**

@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
 import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;
 import org.eclipse.jdt.internal.ui.util.PortingFinder;
 import org.eclipse.jdt.launching.IVMRunner;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.launching.VMRunnerResult;
 import org.eclipse.jdt.launching.WorkspaceSourceLocator;
@@ -114,12 +114,14 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		
 		IJavaProject javaProject= JavaCore.create(page.getProject());
 		ISourceLocator locator= new WorkspaceSourceLocator(javaProject.getProject().getWorkspace());
+		String[] classPath= null;
 		MultiStatus warnings= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, "status", null);
-		String[] classPath= getClassPath(new Vector(10), javaProject, warnings);
-		if (!warnings.isOK()) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), INFO_CLASSPATH, warnings);
+		try {
+			classPath= JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
+		} catch (CoreException e) {
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CLASSPATH_PREFIX, warnings);
+			return false;
 		}
-		
 		
 		String[] extraPath = new String[classPath.length + 1];
 		System.arraycopy(classPath, 0, extraPath, 0, classPath.length);

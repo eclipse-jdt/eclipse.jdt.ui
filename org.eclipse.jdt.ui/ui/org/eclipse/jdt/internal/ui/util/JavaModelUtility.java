@@ -29,27 +29,57 @@ import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
  * <code>IJavaModel</code> but unfortunately they aren't.
  */
 public class JavaModelUtility {
-	
-	public static IType findType(IJavaProject jproject, String str) {
+
+	/** 
+	 * Finds a type by its qualified type name. (dot separated)
+	 * @param jproject the java project to search in
+	 * @param str the fully qualified name (type name with enclosing type names and package (all separated by dots))
+	 * @return the type found, or null if not existing
+	 * The method does not find inner types. Waiting for a Java Core solution
+	 */	
+	public static IType findType(IJavaProject jproject, String str) throws JavaModelException {
 		String pathStr= str.replace('.', '/') + ".java";
-		IJavaElement jelement= null;
-		try {
-			jelement= jproject.findElement(new Path(pathStr));
-		} catch (JavaModelException e) {
-			// an illegal path -> no element found
-		}
-		IType resType= null;
+		IJavaElement jelement= jproject.findElement(new Path(pathStr));
 		if (jelement instanceof ICompilationUnit) {
 			String simpleName= Signature.getSimpleName(str);
-			resType= ((ICompilationUnit)jelement).getType(simpleName);
+			return ((ICompilationUnit)jelement).getType(simpleName);
 		} else if (jelement instanceof IClassFile) {
-			try {
-				resType= ((IClassFile)jelement).getType();
-			} catch (JavaModelException e) {
-				// Fall through and return null.
+			return ((IClassFile)jelement).getType();
+		}
+		return null;
+	}
+
+	/** 
+	 * Finds a type by packge and type name.
+	 * @param jproject the java project to search in
+	 * @param pack The package name
+	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
+	 * @return the type found, or null if not existing
+	 */	
+	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
+		// should be supplied from java core
+		int dot= typeQualifiedName.indexOf('.');
+		if (dot == -1) {
+			return findType(jproject, concatenateName(pack, typeQualifiedName));
+		}
+		IPath packPath;
+		if (pack.length() > 0) {
+			packPath= new Path(pack.replace('.', '/'));
+		} else {
+			packPath= new Path("");
+		}
+		IPath path= packPath.append(typeQualifiedName.substring(0, dot)).append(".java");
+		IJavaElement elem= jproject.findElement(path);
+		if (elem instanceof ICompilationUnit) {
+			return findTypeInCompilationUnit((ICompilationUnit)elem, typeQualifiedName);
+		} else if (elem instanceof IClassFile) {
+			path= packPath.append(typeQualifiedName.replace('.', '$')).append(".class");
+			elem= jproject.findElement(path);
+			if (elem instanceof IClassFile) {
+				return ((IClassFile)elem).getType();
 			}
 		}
-		return resType;
+		return null;
 	}
 	
 	/** 
@@ -68,7 +98,6 @@ public class JavaModelUtility {
 		}
 		return null;
 	}	
-	
 
 	/**
 	 * Returns the qualified type name of the given type using '.' as separators.
@@ -158,7 +187,7 @@ public class JavaModelUtility {
 	 * versus p1.p2.T1.*). A normal import declaration is converted into the 
 	 * corresponding <code>IType</code>.
 	 */
-	public static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) {
+	public static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) throws JavaModelException {
 		if (declaration.isOnDemand()) {
 			String pattern= declaration.getElementName();
 			pattern= pattern.substring(0, pattern.length() - 2);
@@ -203,7 +232,7 @@ public class JavaModelUtility {
 		}	
 	}
 	
-	private static IType convertToType(IImportDeclaration declaration) {
+	private static IType convertToType(IImportDeclaration declaration) throws JavaModelException {
 		IJavaProject project= declaration.getJavaProject();
 		return findType(project, declaration.getElementName());
 	}
@@ -284,8 +313,9 @@ public class JavaModelUtility {
 				"([Ljava/lang/String;)V".equals(signature))
 				return true;
 			if ("([QString;)V".equals(signature)) {
-				String[] resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType());
-				if (resolvedName != null && "java.lang".equals(resolvedName[0]))
+				String[][] resolvedNames= method.getDeclaringType().resolveType("String");
+				if (resolvedNames != null && resolvedNames.length > 0 
+					&& "java.lang".equals(resolvedNames[0][0]) && "String".equals(resolvedNames[0][1]))
 					return true;
 			}
 			return false;

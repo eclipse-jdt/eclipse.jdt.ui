@@ -396,15 +396,21 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fCompilationUnit));
+		if (result.hasFatalError())
+			return result;
+		if (getPackage(fCompilationUnit).isDefaultPackage())
+			result.addFatalError("Moving out of the the default package is not supported");	
 		pm.done();
 		return result;
 	}
 	
 	public RefactoringStatus checkPackage() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
+		result.merge(checkAvailability(fNewPackage));
 		if (((IPackageFragment)fCompilationUnit.getParent()).equals(fNewPackage))
 			result.addFatalError("Please choose another package");
-		result.merge(checkAvailability(fNewPackage));
+		if (fNewPackage.isDefaultPackage())
+			result.addFatalError("Moving to the default package is not supported");
 		return result;
 	}
 

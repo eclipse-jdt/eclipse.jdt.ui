@@ -26,9 +26,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	
 	protected OpenOnSelectionAction fOpenOnSelection;
 	protected OpenOnSelectionAction fOpenOnTypeSelection;
-	protected RetargetTextEditorAction fAddImportOnSelectionAction;
-	protected RetargetTextEditorAction fOrganizeImportsAction;
-	protected TogglePresentationAction fTogglePresentationAction;
+	protected RetargetTextEditorAction fAddImportOnSelection;
+	protected RetargetTextEditorAction fOrganizeImports;
+	protected TogglePresentationAction fTogglePresentation;
+	protected GotoErrorAction fPreviousError;
+	protected GotoErrorAction fNextError;
 	
 	
 	public CompilationUnitEditorActionContributor() {
@@ -38,9 +40,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		fOpenOnSelection= new OpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
 		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction(bundle, "Editor.OpenHierarchyOnSelection.");
-		fAddImportOnSelectionAction= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction.");
-		fOrganizeImportsAction= new RetargetTextEditorAction(bundle, "OrganizeImportsAction.");
-		fTogglePresentationAction= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
+		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction.");
+		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction.");
+		fTogglePresentation= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
+		fPreviousError= new GotoErrorAction(bundle, "Editor.PreviousError.", false);
+		fNextError= new GotoErrorAction(bundle, "Editor.NextError.", true);
 	}
 	
 	/**
@@ -54,8 +58,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (editMenu != null) {
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelection);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelectionAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImportsAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
+			// editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fPreviousError);
+			// editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fNextError);
 		}
 		
 	}
@@ -65,7 +71,9 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	 */
 	public void contributeToToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator());
-		tbm.add(fTogglePresentationAction);
+		tbm.add(fTogglePresentation);
+		tbm.add(fNextError);
+		tbm.add(fPreviousError);
 	}
 	
 	/**
@@ -82,9 +90,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fOpenOnSelection.setContentEditor(textEditor);
 		fOpenOnTypeSelection.setContentEditor(textEditor);
 		
-		fAddImportOnSelectionAction.setAction(getAction(textEditor,"AddImportOnSelection"));
-		fOrganizeImportsAction.setAction(getAction(textEditor, "OrganizeImports"));
+		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection"));
+		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports"));
 		
-		fTogglePresentationAction.setEditor(textEditor);
+		fTogglePresentation.setEditor(textEditor);
+		fPreviousError.setEditor(textEditor);
+		fNextError.setEditor(textEditor);
 	}
 }

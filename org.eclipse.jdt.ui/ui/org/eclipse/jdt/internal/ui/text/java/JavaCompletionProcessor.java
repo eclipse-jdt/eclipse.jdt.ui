@@ -87,11 +87,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
-		fCollector.reset();
-			
+		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
+		
+		fCollector.reset(unit.getJavaProject());
 		try {
-			
-			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 			if (unit != null)
 				unit.codeComplete(offset, fCollector);
 		
@@ -101,9 +100,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			ErrorDialog.openError(shell, b.getString(ERROR_TITLE), b.getString(ERROR_MESSAGE), x.getStatus());
 		}
 		
-		Vector v= fCollector.getResults();
-		ICompletionProposal[] result= new ICompletionProposal[v.size()];
-		v.copyInto(result);
-		return result;
+		ICompletionProposal[] results= fCollector.getResults();
+		return results;
 	}
 }

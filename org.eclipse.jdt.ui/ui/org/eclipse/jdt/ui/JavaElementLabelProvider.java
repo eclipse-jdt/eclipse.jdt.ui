@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -157,16 +158,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 			return fImageLabelProvider.getLabelImage(e);
 		}
 
-		if (element.getClass().getName().equals("org.eclipse.jdt.internal.core.JarEntryFile")) {
-			JdtHackFinder.fixme("JarEntryFile support issue");
-			return getImageForJarEntry(element);
-		}
-
 		JdtHackFinder.fixme("Should use workbench adapter to ensure that the image size is as expected");
 		Image result= fWorkbenchLabelProvider.getImage(element);
 		if (result != null) {
 			return result;
 		}
+
+		if (element instanceof IStorage) 
+			return getImageForJarEntry((IStorage)element);
 
 		return super.getImage(element);
 	}
@@ -185,6 +184,10 @@ public class JavaElementLabelProvider extends LabelProvider {
 			IWorkbenchAdapter p= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
 			if (p != null)
 				return p.getLabel(element);
+		}
+
+		if (element instanceof IStorage) {
+			return ((IStorage)element).getName();
 		}
 
 		return super.getText(element);
@@ -215,19 +218,15 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Gets and caches an image for a JarEntryFile.
 	 * The image for a JarEntryFile is retrieved from the EditorRegistry.
 	 */ 
-	private Image getImageForJarEntry(Object element) {
-		// hack, since JarEntryFile isn't a public type
-		IWorkbenchAdapter p= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
-		IPath path= new Path(p.getLabel(element));
-		String extension= new Path(p.getLabel(element)).getFileExtension();
+	private Image getImageForJarEntry(IStorage element) {
+		String extension= element.getFullPath().getFileExtension();
 		Image image= (Image)fJarImageMap.get(extension);
 		if (image != null) 
 			return image;
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		ImageDescriptor desc= registry.getImageDescriptor(extension);
+		ImageDescriptor desc= registry.getImageDescriptor(element.getName());
 		image= desc.createImage();
 		fJarImageMap.put(extension, image);
 		return image;
 	}
-
 }

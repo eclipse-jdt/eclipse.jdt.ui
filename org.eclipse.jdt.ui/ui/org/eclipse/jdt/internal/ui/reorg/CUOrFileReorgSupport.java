@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -76,11 +77,11 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 		if (original instanceof ICompilationUnit) {
 			if (!name.endsWith(".java"))
 				return JavaPlugin.getResourceString(PREFIX+ERROR_WRONG_EXTENSION);
-			if (!JavaConventions.isValidCompilationUnitName(name))
+			if (!JavaConventions.validateCompilationUnitName(name).isOK())
 				return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
 		}
 		try {
-			if (pkg.getCompilationUnit(name).exists() || getResource(pkg, name) != null)
+			if (pkg.getCompilationUnit(name).exists() || ReorgSupport.getResource(pkg, name) != null)
 				return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
 		} catch (JavaModelException e) {
 		}
@@ -95,7 +96,7 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 		if (name.endsWith(".java"))
 			return pkg.getCompilationUnit(name);
 		try {
-			return getResource(pkg, name);
+			return ReorgSupport.getResource(pkg, name);
 		} catch (JavaModelException e) {
 		}
 		return null;
@@ -128,7 +129,7 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 	public boolean canReplace(Object original, Object container, String newName) {
 		IPackageFragment fragment= (IPackageFragment)container;
 		try {
-			IResource res= getResource(fragment, newName);
+			Object res= ReorgSupport.getResource(fragment, newName);
 			if (original.equals(res))
 				return false;
 		} catch (JavaModelException e) {
@@ -138,16 +139,6 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 			return false;
 		return true;
 	}
-	
-	private IResource getResource(IPackageFragment fragment, String name) throws JavaModelException {
-		IResource[] children= fragment.getNonJavaResources();
-		for (int i= 0; i < children.length; i++) {
-			if (children[i].getName().equals(name))
-				return children[i];
-		}
-		return null;
-	}
-
 	
 	public boolean canCopy(List elements, Object dest) {
 		return getDestination(dest) != null;

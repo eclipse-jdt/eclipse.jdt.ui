@@ -114,7 +114,6 @@ public class CUSavePolicy implements ISavePolicy {
  * @param t com.oti.leapfrog.javamodel.ILFType
  */
 protected void renameConstructors(IType t, String oldName, String newName) throws JavaModelException {
-	JdtHackFinder.fixMeSoon("1G3FV4S: ITPJCORE:WIN - DOMException when renaming constructor");
 	if (oldName == null)
 		return;
 	IMethod[] p= t.getMethods();

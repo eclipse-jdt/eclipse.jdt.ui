@@ -355,8 +355,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							IJavaElement e= add[i].getElement();
 							ISourceReference r= (ISourceReference)e ;
 							doUpdateParent= doUpdateParent || mustUpdateParent(add[i], e);
-							int start= r.getSourceRange().getStartIndex();
-							int end= r.getSourceRange().getEndIndex();
+							ISourceRange rng= r.getSourceRange();
+							int start= rng.getOffset();
+							int end= start + rng.getLength() - 1;
 							
 							Item last= null;
 							item= null;
@@ -379,7 +380,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 										reuseTreeItem(item, (Object) add[i].getElement());
 										continue go2;
 										
-									} else if (r.getSourceRange().getStartIndex() > start) {
+									} else if (r.getSourceRange().getOffset() > start) {
 										
 										if (last != null && deletions.contains(last)) {
 											// reuse item
@@ -430,8 +431,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				protected boolean overlaps(ISourceReference reference, int start, int end) {
 					try {
 						
-						ISourceRange range= reference.getSourceRange();
-						return start <= range.getEndIndex() && range.getStartIndex() <= end;
+						ISourceRange rng= reference.getSourceRange();
+						return start <= (rng.getOffset() + rng.getLength() - 1) && rng.getOffset() <= end;
 					
 					} catch (JavaModelException x) {
 						return false;

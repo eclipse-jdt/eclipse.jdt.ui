@@ -78,17 +78,14 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int position) {
-		
-		fCollector.reset();
-			
 		try {
+			fCollector.reset(fEditor.findJavaProject());
 			fEditor.codeComplete(fCollector);
 		} catch (JavaModelException x) {
 			ResourceBundle b= JavaPlugin.getResourceBundle();
 			Shell shell= viewer.getTextWidget().getShell();
 			ErrorDialog.openError(shell, b.getString(ERROR_TITLE), b.getString(ERROR_MESSAGE), x.getStatus());
 		}
-		List v= fCollector.getResults();
-		return (ICompletionProposal[])v.toArray(new ICompletionProposal[v.size()]);
+		return fCollector.getResults();
 	}
 }

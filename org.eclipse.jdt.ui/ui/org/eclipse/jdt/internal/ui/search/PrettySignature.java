@@ -5,7 +5,12 @@ package org.eclipse.jdt.internal.ui.search;
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 class PrettySignature {
 
@@ -17,7 +22,7 @@ class PrettySignature {
 				case IJavaElement.METHOD:
 					return getMethodSignature((IMethod)element);
 				case IJavaElement.TYPE:
-					return ((IType)element).getFullyQualifiedName();
+					return JavaModelUtility.getFullyQualifiedName((IType)element);
 				default:
 					return element.getElementName();
 			}
@@ -25,7 +30,7 @@ class PrettySignature {
 	
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(method.getDeclaringType().getFullyQualifiedName());
+		buffer.append(JavaModelUtility.getFullyQualifiedName(method.getDeclaringType()));
 		buffer.append('.');
 		buffer.append(getUnqualifiedMethodSignature(method));
 		
