@@ -75,8 +75,8 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -1355,25 +1355,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#isPrefQuickDiffAlwaysOn()
 	 */
 	protected boolean isPrefQuickDiffAlwaysOn() {
+		// reestablishes the behaviour from ExtendedTextEditor which was hacked by JavaEditor
+		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
-		if (store == null)
-			return false;
-		
-		Iterator iter= getAnnotationPreferences().getAnnotationPreferences().iterator();
-		while (iter.hasNext()) {
-			AnnotationPreference pref= (AnnotationPreference) iter.next();
-			if (QUICKDIFF_CHANGE_MARKER_PREFERENCE.equals(pref.getMarkerType()) //$NON-NLS-1$
-					|| QUICKDIFF_ADDITION_MARKER_PREFERENCE.equals(pref.getMarkerType()) //$NON-NLS-1$
-					|| QUICKDIFF_DELETION_MARKER_PREFERENCE.equals(pref.getMarkerType())) { //$NON-NLS-1$
-				if (store.getBoolean(pref.getHighlightPreferenceKey())
-						|| store.getBoolean(pref.getOverviewRulerPreferenceKey())
-						|| store.getBoolean(pref.getTextPreferenceKey())
-						|| store.getBoolean(pref.getVerticalRulerPreferenceKey()))
-					return true;
-			}
-		}
-		
-		return false;
+		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 
 }
