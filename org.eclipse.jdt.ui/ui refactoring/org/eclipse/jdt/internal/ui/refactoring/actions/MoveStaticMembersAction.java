@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -40,6 +41,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	public MoveStaticMembersAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RefactoringGroup.move_label"));//$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);		
 	}
 
 	public MoveStaticMembersAction(CompilationUnitEditor editor) {
