@@ -64,7 +64,6 @@ public class JavaCompareAction implements IActionDelegate {
 	
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.CompareAction"; //$NON-NLS-1$
 
-	private ISelection fSelection;
 	private ISourceReference fLeft;
 	private ISourceReference fRight;
 	
@@ -72,7 +71,6 @@ public class JavaCompareAction implements IActionDelegate {
 	
 
 	public void selectionChanged(IAction action, ISelection selection) {
-		fSelection= selection;
 		action.setEnabled(isEnabled(selection));
 	}
 	

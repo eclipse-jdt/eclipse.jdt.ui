@@ -32,7 +32,6 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	 */
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
 		
-		private String fValue;
 		private boolean fIsEditable;
 		private PropertyNode fParent;
 		
@@ -40,7 +39,6 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		public PropertyNode(PropertyNode parent, int type, String id, String value, IDocument doc, int start, int length) {
 			super(type, id, doc, start, length);
 			fParent= parent;
-			fValue= value;
 			if (parent != null) {
 				parent.addChild(this);
 				fIsEditable= parent.isEditable();	// propagate editability
@@ -49,7 +47,6 @@ public class PropertiesStructureCreator implements IStructureCreator {
 						
 		public PropertyNode(IDocument doc, boolean editable) {
 			super(0, "root", doc, 0, doc.getLength()); //$NON-NLS-1$
-			fValue= ""; //$NON-NLS-1$
 			fIsEditable= editable;
 		}
 				
