@@ -346,31 +346,39 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 
 	private void showPreview(ChangeElement element) {
 		try {
-			ChangePreviewViewerDescriptor descriptor= element.getChangePreviewViewer();
-			if (fCurrentDescriptor != descriptor) {
-				IChangePreviewViewer newViewer;
-				if (descriptor != null) {
-					newViewer= descriptor.createViewer();
-					newViewer.createControl(fPreviewContainer);
-				} else {
-					newViewer= fNullPreviewer;
-				}
-				fCurrentDescriptor= descriptor;
-				element.feedInput(newViewer);
-				if (fCurrentPreviewViewer != null && fCurrentPreviewViewer != fNullPreviewer)
-					fCurrentPreviewViewer.getControl().dispose();
-				fCurrentPreviewViewer= newViewer;				
-				fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+			if (element == null) {
+				showNullPreviewer();
 			} else {
-				element.feedInput(fCurrentPreviewViewer);
+				ChangePreviewViewerDescriptor descriptor= element.getChangePreviewViewer();
+				if (fCurrentDescriptor != descriptor) {
+					IChangePreviewViewer newViewer;
+					if (descriptor != null) {
+						newViewer= descriptor.createViewer();
+						newViewer.createControl(fPreviewContainer);
+					} else {
+						newViewer= fNullPreviewer;
+					}
+					fCurrentDescriptor= descriptor;
+					element.feedInput(newViewer);
+					if (fCurrentPreviewViewer != null && fCurrentPreviewViewer != fNullPreviewer)
+						fCurrentPreviewViewer.getControl().dispose();
+					fCurrentPreviewViewer= newViewer;				
+					fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+				} else {
+					element.feedInput(fCurrentPreviewViewer);
+				}
 			}
 		} catch (CoreException e) {
-			fCurrentDescriptor= null;
-			fCurrentPreviewViewer= fNullPreviewer;
-			fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+			showNullPreviewer();
 		}
 	}
 	
+	private void showNullPreviewer() {
+		fCurrentDescriptor= null;
+		fCurrentPreviewViewer= fNullPreviewer;
+		fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+	}
+
 	/**
 	 * Returns <code>true</code> if the preview page will show any changes when
 	 * it becomes visibile. Otherwise <code>false</code> is returned.
