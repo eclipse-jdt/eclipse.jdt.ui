@@ -387,7 +387,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
+		fViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, false, false));
+		// problem decoration provided by PackageLabelProvider
 	}
 	
 	void toggleLayout() {

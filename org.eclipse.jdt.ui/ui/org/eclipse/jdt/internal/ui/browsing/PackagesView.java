@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
 
 
 public class PackagesView extends JavaBrowsingPart{
@@ -227,9 +226,7 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	private JavaUILabelProvider createTreeLabelProvider() {
-		PackagesViewLabelProvider lprovider= new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE);
-		lprovider.addLabelDecorator(new TreeHierarchyLayoutProblemsDecorator(null));
-		return lprovider;
+		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE);
 	}
 
 	private JavaUILabelProvider createListLabelProvider() {
@@ -527,7 +524,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jface.viewers.ILabelDecorator)
 	 */
 	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
-		return new DecoratingJavaLabelProvider(provider) {
+		return new DecoratingJavaLabelProvider(provider, false, false) {
 			
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {

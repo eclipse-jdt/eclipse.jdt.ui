@@ -32,6 +32,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 	private static final String SHOW_CU_CHILDREN= PreferenceConstants.SHOW_CU_CHILDREN;
 	private static final String PREF_METHOD_RETURNTYPE= PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE;
+	private static final String PREF_OVERRIDE_INDICATOR= PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR;
 	private static final String PREF_COMPRESS_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES;
 	private static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW;
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
@@ -70,6 +71,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	private SelectionButtonDialogField fShowMethodReturnType;
+	private SelectionButtonDialogField fShowOverrideIndicator;
 	private SelectionButtonDialogField fCompressPackageNames;
 	private SelectionButtonDialogField fStackBrowsingViewsVertically;
 	private SelectionButtonDialogField fShowMembersInPackageView;
@@ -92,6 +94,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.setDialogFieldListener(listener);
 		fShowMethodReturnType.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.methodreturntype.label")); //$NON-NLS-1$
 		
+		fShowOverrideIndicator= new SelectionButtonDialogField(SWT.CHECK);
+		fShowOverrideIndicator.setDialogFieldListener(listener);
+		fShowOverrideIndicator.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.overrideindicator.label")); //$NON-NLS-1$
+
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
 		fShowMembersInPackageView.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.showMembersInPackagesView")); //$NON-NLS-1$
@@ -116,6 +122,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private void initFields() {
 		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getBoolean(PREF_METHOD_RETURNTYPE));
+		fShowOverrideIndicator.setSelection(prefs.getBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getBoolean(SHOW_CU_CHILDREN));
 		fStackBrowsingViewsVertically.setSelection(prefs.getBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
@@ -148,6 +155,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		composite.setLayout(layout);
 				
 		fShowMethodReturnType.doFillIntoGrid(composite, nColumns);
+		fShowOverrideIndicator.doFillIntoGrid(composite, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(composite, nColumns);				
 		fFoldPackagesInPackageExplorer.doFillIntoGrid(composite, nColumns);
 
@@ -202,6 +210,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	public boolean performOk() {
 		IPreferenceStore prefs= getPreferenceStore();
 		prefs.setValue(PREF_METHOD_RETURNTYPE, fShowMethodReturnType.isSelected());
+		prefs.setValue(PREF_OVERRIDE_INDICATOR, fShowOverrideIndicator.isSelected());
 		prefs.setValue(SHOW_CU_CHILDREN, fShowMembersInPackageView.isSelected());
 		prefs.setValue(STACK_BROWSING_VIEWS_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
@@ -217,6 +226,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	protected void performDefaults() {
 		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getDefaultBoolean(PREF_METHOD_RETURNTYPE));
+		fShowOverrideIndicator.setSelection(prefs.getDefaultBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getDefaultBoolean(SHOW_CU_CHILDREN));
 		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));

@@ -35,7 +35,7 @@ class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 
 	PackageExplorerLabelProvider(int textFlags, int imageFlags, ITreeContentProvider cp) {
 		super(textFlags, imageFlags);
-		fProblemDecorator= new TreeHierarchyLayoutProblemsDecorator(null);
+		fProblemDecorator= new TreeHierarchyLayoutProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);
 		Assert.isNotNull(cp);
 		fContentProvider= cp;

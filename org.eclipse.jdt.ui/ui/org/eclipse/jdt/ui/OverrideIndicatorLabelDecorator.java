@@ -103,6 +103,10 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	public int computeAdornmentFlags(Object element) {
 		if (element instanceof IMethod) {
+			if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR)) {
+				return 0;
+			}
+			
 			try {
 				IMethod method= (IMethod) element;
 				int flags= method.getFlags();

@@ -20,8 +20,6 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -34,8 +32,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecora
  * XXX: not yet reviewed - part of experimental logical packages view
  */
 class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
-	
-	private static final int NO_ADORNMENT= 0;
 	
 	static final int HIERARCHICAL_VIEW_STATE= 0;
 	static final int FLAT_VIEW_STATE= 1;
@@ -56,6 +52,8 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		fViewState= state;
 		fElementImageProvider= new ElementImageProvider();
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
+		addLabelDecorator(new TreeHierarchyLayoutProblemsDecorator(isFlatView()));
+
 	}
 	
 	private boolean isValidState(int state) {
@@ -93,30 +91,11 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		if (fLabelDecorators == null)
 			return image;
 		
-		int currentAdornment= NO_ADORNMENT;
-		
 		for (int i= 0; i < fragments.length; i++) {
 			IPackageFragment fragment= fragments[i];
 			for (int j= 0; j < fLabelDecorators.size(); j++) {
 				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(j);
-				if (decorator instanceof TreeHierarchyLayoutProblemsDecorator) {
-					TreeHierarchyLayoutProblemsDecorator dec= (TreeHierarchyLayoutProblemsDecorator) decorator;
-					try {
-						int adornment= dec.computeAdornmentFlags(fragment);
-						//only adorn if severity has increased / fix priority clash
-						if ((adornment == JavaElementImageDescriptor.WARNING) && (currentAdornment == NO_ADORNMENT)) {
-							currentAdornment= adornment;
-							image= dec.decorateImage(image, currentAdornment);
-						} else if((adornment == JavaElementImageDescriptor.ERROR) && (currentAdornment == NO_ADORNMENT || currentAdornment == JavaElementImageDescriptor.WARNING)) {
-							currentAdornment= adornment;
-							image= dec.decorateImage(image, currentAdornment);
-						}						
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
-				} else {
-					image= decorator.decorateImage(image, fragment);
-				}
+				image= decorator.decorateImage(image, fragment);
 			}
 		}
 		return image;
