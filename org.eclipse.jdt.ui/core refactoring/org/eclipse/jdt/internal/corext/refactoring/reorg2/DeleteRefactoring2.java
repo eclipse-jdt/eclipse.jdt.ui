@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
@@ -74,7 +73,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -82,8 +80,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class DeleteRefactoring2 extends Refactoring{
 	
@@ -173,7 +169,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	private void recalculateElementsToDelete() throws CoreException {
 		//the sequence is critical here
 		
-		convertJavaElementsToWorkingCopies();
+		fJavaElements= ReorgUtils2.toWorkingCopies(fJavaElements);
 		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete 
 												 *the package, in which the cus live*/
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder
@@ -244,21 +240,15 @@ public class DeleteRefactoring2 extends Refactoring{
 		return false;
 	}
 
-	private void convertJavaElementsToWorkingCopies() throws JavaModelException{
-		for (int i= 0; i < fJavaElements.length; i++) {
-			fJavaElements[i]= ReorgUtils2.toWorkingCopy(fJavaElements[i]);
-		}
-	}
-	
 	private void removeElementsWithParentsInSelection() {
-		ParentUtil parentUtil= new ParentUtil(fJavaElements, fResources);
+		ParentChecker parentUtil= new ParentChecker(fResources, fJavaElements);
 		parentUtil.removeElementsWithParentsOnList(false);
 		fJavaElements= parentUtil.getJavaElements();
 		fResources= parentUtil.getResources();
 	}
 
 	private void removeJavaElementsChildrenOfJavaElements(){
-		ParentUtil parentUtil= new ParentUtil(fJavaElements, fResources);
+		ParentChecker parentUtil= new ParentChecker(fResources, fJavaElements);
 		parentUtil.removeElementsWithParentsOnList(true);
 		fJavaElements= parentUtil.getJavaElements();
 	}
@@ -280,15 +270,15 @@ public class DeleteRefactoring2 extends Refactoring{
 	}
 	
 	private void addToSetToDelete(IJavaElement[] newElements){
-		fJavaElements= union(fJavaElements, newElements);		
+		fJavaElements= ReorgUtils2.union(fJavaElements, newElements);		
 	}
 	
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-		fResources= setMinus(fResources, resourcesToNotDelete);
+		fResources= ReorgUtils2.setMinus(fResources, resourcesToNotDelete);
 	}
 	
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-		fJavaElements= setMinus(fJavaElements, elementsToNotDelete);
+		fJavaElements= ReorgUtils2.setMinus(fJavaElements, elementsToNotDelete);
 	}
 	
 	//--- getter setter related methods
@@ -456,35 +446,6 @@ public class DeleteRefactoring2 extends Refactoring{
 		return true;
 	}
 
-	//--other helpers
-	private static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
-		Set union= new HashSet(set1.length + set2.length);
-		union.addAll(Arrays.asList(set1));
-		union.addAll(Arrays.asList(set2));
-		return (IJavaElement[]) union.toArray(new IJavaElement[union.size()]);
-	}	
-
-	private static Set union(Set set1, Set set2){
-		Set union= new HashSet(set1.size() + set2.size());
-		union.addAll(set1);
-		union.addAll(set2);
-		return union;
-	}
-	
-	private static IResource[] setMinus(IResource[] setToRemoveFrom, IResource[] elementsToRemove) {
-		Set setMinus= new HashSet(setToRemoveFrom.length - setToRemoveFrom.length);
-		setMinus.addAll(Arrays.asList(setToRemoveFrom));
-		setMinus.removeAll(Arrays.asList(elementsToRemove));
-		return (IResource[]) setMinus.toArray(new IResource[setMinus.size()]);		
-	}
-
-	private static IJavaElement[] setMinus(IJavaElement[] setToRemoveFrom, IJavaElement[] elementsToRemove) {
-		Set setMinus= new HashSet(setToRemoveFrom.length - setToRemoveFrom.length);
-		setMinus.addAll(Arrays.asList(setToRemoveFrom));
-		setMinus.removeAll(Arrays.asList(elementsToRemove));
-		return (IJavaElement[]) setMinus.toArray(new IJavaElement[setMinus.size()]);		
-	}
-	
 	//----static classes
 	private static class DeleteChangeCreator{
 		static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException{
@@ -781,9 +742,9 @@ public class DeleteRefactoring2 extends Refactoring{
 			if (element instanceof IMember && ((IMember)element).isBinary())
 				return false;
 		
-			if (element instanceof ISourceReference && isDeletedFromEditor((ISourceReference)element))
+			if (ReorgUtils2.isDeletedFromEditor(element))
 				return false;								
-			
+				
 			return true;
 		}
 	
@@ -799,18 +760,6 @@ public class DeleteRefactoring2 extends Refactoring{
 			return false;
 		}
 
-		private static boolean isDeletedFromEditor(ISourceReference elem) throws JavaModelException{
-			if (elem instanceof IMember && ((IMember)elem).isBinary())
-				return false;
-			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(elem);
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-			if (wc.equals(cu))
-				return false;
-			IJavaElement element= (IJavaElement)elem;
-			IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, element);
-			return wcElement == null || ! wcElement.exists();
-		}
-			
 		private static boolean isEmptySuperPackage(IPackageFragment pack) throws JavaModelException {
 			return  pack.hasSubpackages() &&
 					pack.getNonJavaResources().length == 0 &&
@@ -822,113 +771,13 @@ public class DeleteRefactoring2 extends Refactoring{
 		}
 	}
 	
-	private static class ParentUtil{
-		private IJavaElement[] fJavaElements;
-		private IResource[] fResources;
-		ParentUtil(IJavaElement[] javaElements, IResource[] resources){
-			fJavaElements= javaElements;
-			fResources= resources;
-		}
-
-		IResource[] getResources(){
-			return fResources;
-		}		
-		
-		IJavaElement[] getJavaElements(){
-			return fJavaElements;
-		}
-
-		void removeElementsWithParentsOnList(boolean removeOnlyJavaElements) {
-			if (! removeOnlyJavaElements){
-				removeResourcesChildrenOfResources();
-				removeResourcesChildrenOfJavaElements();
-			}
-			removeJavaElementsChildrenOfJavaElements();
-//			removeJavaElementsChildrenOfResources(); //this case is covered by removeUnconfirmedArchives
-		}
-				
-		private void removeResourcesChildrenOfJavaElements() {
-			List subResources= new ArrayList(3);
-			for (int i= 0; i < fResources.length; i++) {
-				IResource subResource= fResources[i];
-				for (int j= 0; j < fJavaElements.length; j++) {
-					IJavaElement superElements= fJavaElements[j];
-					if (isChildOf(subResource, superElements))
-						subResources.add(subResource);
-				}
-			}
-			removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
-		}
-
-		private void removeJavaElementsChildrenOfJavaElements() {
-			List subElements= new ArrayList(3);
-			for (int i= 0; i < fJavaElements.length; i++) {
-				IJavaElement subElement= fJavaElements[i];
-				for (int j= 0; j < fJavaElements.length; j++) {
-					IJavaElement superElement= fJavaElements[j];
-					if (isChildOf(subElement, superElement))
-						subElements.add(subElement);
-				}
-			}
-			removeFromSetToDelete((IJavaElement[]) subElements.toArray(new IJavaElement[subElements.size()]));
-		}
-
-		private void removeResourcesChildrenOfResources() {
-			List subResources= new ArrayList(3);
-			for (int i= 0; i < fResources.length; i++) {
-				IResource subResource= fResources[i];
-				for (int j= 0; j < fResources.length; j++) {
-					IResource superResource= fResources[j];
-					if (isChildOf(subResource, superResource))
-						subResources.add(subResource);
-				}
-			}
-			removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
-		}
-
-		private static boolean isChildOf(IResource subResource, IJavaElement superElement) {
-			IResource parent= subResource.getParent();
-			while(parent != null){
-				IJavaElement el= JavaCore.create(parent);
-				if (el != null && el.exists() && el.equals(superElement))
-					return true;
-				parent= parent.getParent();
-			}
-			return false;
-		}
-
-		private static boolean isChildOf(IJavaElement subElement, IJavaElement superElement) {
-			if (subElement.equals(superElement))
-				return false;
-			IJavaElement parent= subElement.getParent();
-			while(parent != null){
-				if (parent.equals(superElement))
-					return true;
-				parent= parent.getParent();
-			}
-			return false;
-		}
-
-		private static boolean isChildOf(IResource subResource, IResource superResource) {
-			return ! subResource.equals(superResource) && superResource.getFullPath().isPrefixOf(subResource.getFullPath());
-		}
-
-		private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-			fResources= DeleteRefactoring2.setMinus(fResources, resourcesToNotDelete);
-		}
-	
-		private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-			fJavaElements= DeleteRefactoring2.setMinus(fJavaElements, elementsToNotDelete);
-		}
-	}
-	
 	private static class ReadOnlyResourceFinder{
 		private ReadOnlyResourceFinder(){
 		}
 		static IResource[] getReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
 			Set readOnlyResources= getReadOnlyResourcesAndSubResources(resources);
 			Set readOnlyResourcesForJavaElements= getReadOnlyResourcesAndSubResources(javaElements);
-			Set union= union(readOnlyResources, readOnlyResourcesForJavaElements);
+			Set union= ReorgUtils2.union(readOnlyResources, readOnlyResourcesForJavaElements);
 			return (IResource[]) union.toArray(new IResource[union.size()]);
 		}
 
