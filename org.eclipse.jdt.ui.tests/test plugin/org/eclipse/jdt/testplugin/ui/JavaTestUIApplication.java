@@ -11,12 +11,10 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IPerspectiveRegistry;
-import org.eclipse.ui.IProductInfo;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.internal.ProductInfo;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
 public class JavaTestUIApplication implements IPlatformRunnable {
@@ -58,10 +56,6 @@ public class JavaTestUIApplication implements IPlatformRunnable {
 			return WorkbenchPlugin.getDefault().getPreferenceManager();
 		}
 
-		public IProductInfo getProductInfo() {
-			return new ProductInfo();
-		}
-		
 		public ISharedImages getSharedImages() {
 			return WorkbenchPlugin.getDefault().getSharedImages();
 		}
