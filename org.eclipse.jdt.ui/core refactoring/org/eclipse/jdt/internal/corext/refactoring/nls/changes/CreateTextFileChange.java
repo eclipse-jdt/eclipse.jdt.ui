@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -37,12 +40,20 @@ public class CreateTextFileChange extends CreateFileChange {
 		IFile file= getOldFile(new NullProgressMonitor());
 		if (! file.exists())
 			return ""; //$NON-NLS-1$
+		InputStream stream= null;
 		try{
-			String c= NLSUtil.readString(file.getContents());	
+			stream= file.getContents();
+			String c= NLSUtil.readString(stream);
 			return (c == null) ? "": c; //$NON-NLS-1$
 		} catch (CoreException e){
 			throw new JavaModelException(e, IJavaModelStatusConstants.CORE_EXCEPTION);
-		}	
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException x) {
+			}
+		}
 	}
 	
 	public String getPreview() {
