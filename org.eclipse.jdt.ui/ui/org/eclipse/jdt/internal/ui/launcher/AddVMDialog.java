@@ -34,7 +34,7 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected void createDialogFields() {
 		fVMName= new StringDialogField();
-		fVMName.setLabelText("VM Install Name");
+		fVMName.setLabelText("JRE Name:");
 		fVMName.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[0]= validateVMName();
@@ -47,8 +47,8 @@ public class AddVMDialog extends StatusDialog {
 				browseForInstallDir();
 			}
 		});
-		fJDKRoot.setLabelText("Root Directory");
-		fJDKRoot.setButtonLabel("Browse");
+		fJDKRoot.setLabelText("JRE Home Directory:");
+		fJDKRoot.setButtonLabel("Browse...");
 		fJDKRoot.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[1]= validateJDKLocation();
@@ -60,7 +60,7 @@ public class AddVMDialog extends StatusDialog {
 		});
 		
 		fDebuggerTimeout= new StringDialogField();
-		fDebuggerTimeout.setLabelText("Debugger Timeout");
+		fDebuggerTimeout.setLabelText("Debugger timeout:");
 		fDebuggerTimeout.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[2]= validateDebuggerTimeout();
@@ -73,7 +73,7 @@ public class AddVMDialog extends StatusDialog {
 				browseForSystemLibrary();
 			}
 		});
-		fSystemLibrary.setLabelText("System Library:");
+		fSystemLibrary.setLabelText("JRE JAR file:");
 		fSystemLibrary.setButtonLabel("Browse...");
 		fSystemLibrary.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -88,6 +88,8 @@ public class AddVMDialog extends StatusDialog {
 			}
 		}); 
 		
+		fSystemLibrarySource.setLabelText("JRE source file:");
+		fSystemLibrarySource.setButtonLabel("Browse...");
 		fSystemLibrarySource.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[4]= validateSystemLibrarySource();
@@ -118,7 +120,7 @@ public class AddVMDialog extends StatusDialog {
 				
 		Label l= new Label(parent, SWT.NULL);
 		l.setLayoutData(new MGridData());		
-		l.setText("VM Install Types");
+		l.setText("JRE types:");
 		
 		fVMTypeCombo= new Combo(parent, SWT.READ_ONLY);
 		initVMTypeCombo();
@@ -133,13 +135,19 @@ public class AddVMDialog extends StatusDialog {
 				vmTypeChanged();
 			}
 		});
-				
+								
 		fVMName.doFillIntoGrid(parent, 3);
 		fJDKRoot.doFillIntoGrid(parent, 3);
 		fDebuggerTimeout.doFillIntoGrid(parent, 3);
 		
+		l= new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		gd= new MGridData();
+		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalSpan= 3;
+		l.setLayoutData(gd);
+		
 		fUseCustomLibrary= new Button(parent, SWT.CHECK);
-		fUseCustomLibrary.setText("Use custom system library");
+		fUseCustomLibrary.setText("Use custom library");
 		gd= new MGridData();
 		gd.horizontalSpan=3;
 		fUseCustomLibrary.setLayoutData(gd);
@@ -312,7 +320,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForInstallDir() {
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setFilterPath(fJDKRoot.getText());
-		dialog.setMessage("Select the root directory the VM Installation");
+		dialog.setMessage("Select the root directory the JRE Installation");
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fJDKRoot.setText(newPath);
@@ -321,7 +329,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForSystemLibrary() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrary.getText());
-		dialog.setText("Select the system library for the VM Installation");
+		dialog.setText("Select the library JAR file for the JRE Installation");
 		dialog.setFilterExtensions(new String[] { "*.zip", "*.jar"});
 		String newPath= dialog.open();
 		if  (newPath != null)
@@ -331,7 +339,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForSystemLibrarySource() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrarySource.getText());
-		dialog.setText("Select the system library sources for the VM Installation");
+		dialog.setText("Select the JRE library source file");
 		dialog.setFilterExtensions(new String[] { "*.zip", "*.jar"});
 		String newPath= dialog.open();
 		if  (newPath != null)

@@ -20,6 +20,7 @@ public class VMWizardPage extends NewElementWizardPage {
 		super(NAME, JavaLaunchUtils.getResourceBundle());
 		fMainPage= mainPage;
 		fVMSelector= new VMSelector();
+		setDescription("Select the JRE for running Java programs");
 	}
 	/**
 	 * @see WizardPage#createContents

@@ -488,13 +488,13 @@
 	point="org.eclipse.ui.propertyPages">
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="Java VM"
+		name="JRE"
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="Java VM"
+		name="JRE"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
@@ -559,7 +559,7 @@
 	<page
 		id = "org.eclipse.jdt.ui.preferences.VMPreferencePage"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPreferencePage"
-		name= "Installed VMs"
+		name= "Installed JREs"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 </extension>

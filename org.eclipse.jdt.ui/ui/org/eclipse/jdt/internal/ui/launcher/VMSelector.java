@@ -1,16 +1,12 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.util.ArrayList;import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTableViewer;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;
 
-public class VMSelector {
-	private TableViewer fVMList;
+public class VMSelector implements ISelectionProvider {
+	private CheckboxTableViewer fVMList;	private List fListeners;		public VMSelector() {		fListeners= new ArrayList();	}
 	
 	protected Control createContents(Composite ancestor) {		
-		Composite parent= new Composite(ancestor, SWT.NULL);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
-		parent.setLayout(layout);
 
-				fVMList= new TableViewer(parent, SWT.BORDER | SWT.MULTI);		GridData gd= new GridData(GridData.FILL_BOTH);		fVMList.getTable().setLayoutData(gd);		fVMList.setLabelProvider(new VMLabelProvider());		fVMList.setContentProvider(new VMContentProvider());			Table table= fVMList.getTable();				table.setHeaderVisible(true);		table.setLinesVisible(true);				TableLayout tableLayout= new TableLayout();		table.setLayout(tableLayout);				TableColumn column1= new TableColumn(table, SWT.NULL);		column1.setText("VM Install Type");		tableLayout.addColumnData(new ColumnWeightData(50));			TableColumn column2= new TableColumn(table, SWT.NULL);		column2.setText("Name");		tableLayout.addColumnData(new ColumnWeightData(50));				fVMList.setInput(JavaRuntime.getVMInstallTypes());		
-		return parent;
+		fVMList= new CheckboxTableViewer(ancestor, SWT.BORDER | SWT.SINGLE | SWT.HIDE_SELECTION);		fVMList.setLabelProvider(new VMLabelProvider());		fVMList.setContentProvider(new VMContentProvider());			Table table= fVMList.getTable();				fVMList.addCheckStateListener(new ICheckStateListener() {			public void checkStateChanged(CheckStateChangedEvent event) {				IVMInstall vm=  (IVMInstall)event.getElement();				if (event.getChecked())					fVMList.setCheckedElements(new Object[] { vm });				fireSelectedVMChanged(vm);			}		});		table.setHeaderVisible(true);		table.setLinesVisible(true);				TableLayout tableLayout= new TableLayout();		table.setLayout(tableLayout);				TableColumn column1= table.getColumn(0);		column1.setText("JRE Type");		tableLayout.addColumnData(new ColumnWeightData(50));			TableColumn column2= new TableColumn(table, SWT.NULL);		column2.setText("Name");		tableLayout.addColumnData(new ColumnWeightData(50));				fVMList.setInput(JavaRuntime.getVMInstallTypes());		
+		return table;
 	}
 
 		
@@ -27,24 +23,23 @@ public class VMSelector {
 	
 	public void selectVM(IVMInstall vm) {
 		if (vm != null)
-			fVMList.setSelection(new StructuredSelection(vm));
+			fVMList.setCheckedElements(new Object[] { vm });
 	}
 	
 	public IVMInstall getSelectedVM() {
-		IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
-		if (selection.isEmpty())
+		Object[] selection= fVMList.getCheckedElements();
+		if (selection == null || selection.length != 1)
 			return null;
-		Object o= selection.getFirstElement();
-		return (IVMInstall)o;
+		return (IVMInstall)selection[0];
 	}
 	
 	public void addSelectionChangedListener(ISelectionChangedListener l) {
-		fVMList.addSelectionChangedListener(l);
+		fListeners.add(l);
 	}
 	
 	public void removeSelectionChangedListener(ISelectionChangedListener l) {
-		fVMList.removeSelectionChangedListener(l);
-	}
+		fListeners.remove(l);
+	}		private void fireSelectedVMChanged(IVMInstall vmInstall) {		ISelection selection= null;		if (vmInstall != null)			selection= new StructuredSelection(vmInstall);		else 			selection= new StructuredSelection();		for (int i= 0; i < fListeners.size(); i++) {			ISelectionChangedListener l= (ISelectionChangedListener)fListeners.get(i);			l.selectionChanged(new SelectionChangedEvent(this, selection));		}	}
 	
 	public boolean validateSelection(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
@@ -55,6 +50,5 @@ public class VMSelector {
 		} else {
 			return false;
 		}
-	}
-
+	}		public ISelection getSelection() {		return new StructuredSelection(getSelectedVM());	}	/**	 * does nothing	 */	public void setSelection(ISelection selection) {	}
 }

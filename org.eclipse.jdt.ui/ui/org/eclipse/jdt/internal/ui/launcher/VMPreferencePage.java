@@ -1,25 +1,21 @@
-/*
+/*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTableViewer;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /*
  * The page for setting the default java runtime preference.
  */
 public class VMPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {	
-	public static final String PREFIX= "org.eclipse.jdt.ui.launcher.";
-	public static final String DEFAULT_VM_LABEL= "launcher.default_vm.label";
-	public static final String PREF_VM= PREFIX+"default_vm";
 
-	private TableViewer fVMList;
+	private CheckboxTableViewer fVMList;
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private Button fEditButton;
-	private Button fDefaultCheckbox;
 	
 	private IVMInstallType[] fVMTypes;
 	
@@ -27,6 +23,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 
 	public VMPreferencePage() {
 		super();
+		setDescription("Create, remove or edit JRE definitions.\nThe checked JRE will be used by default to build and run Java programs");
 	}
 	
 	/**
@@ -44,17 +41,11 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
+		layout.numColumns= 2;
 		parent.setLayout(layout);		
-		
-		Label l2= new Label(parent, SWT.NULL);
-		l2.setText("VM Instances:");
-		GridData gd= new GridData();
-		gd.verticalAlignment= gd.BEGINNING;
-		l2.setLayoutData(gd);
-		
-		fVMList= new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
-		gd= new GridData(GridData.FILL_BOTH);
+				
+		fVMList= new CheckboxTableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		fVMList.getTable().setLayoutData(gd);
 		fVMList.setLabelProvider(new VMLabelProvider());
@@ -67,8 +58,8 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
 		
-		TableColumn column1= new TableColumn(table, SWT.NULL);
-		column1.setText("VM Install Type");
+		TableColumn column1= table.getColumn(0);
+		column1.setText("JRE Type");
 		tableLayout.addColumnData(new ColumnWeightData(50));
 	
 		TableColumn column2= new TableColumn(table, SWT.NULL);
@@ -81,6 +72,12 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		fVMList.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent evt) {
 				vmSelectionChanged();
+			}
+		});
+		
+		fVMList.addCheckStateListener(new ICheckStateListener() {
+			public void checkStateChanged(CheckStateChangedEvent event) {				IVMInstall vm=  (IVMInstall)event.getElement();
+				fVMList.setCheckedElements(new Object[] { vm });				JavaRuntime.setDefaultVMInstall(vm);
 			}
 		});
 		
@@ -115,20 +112,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 				editVM();
 			}
 		});
-		
-		// placeholder
-		Label l3= new Label(parent, SWT.NULL);
-		l3.setLayoutData(new GridData());
-		
-		fDefaultCheckbox= new Button(parent, SWT.CHECK);
-		fDefaultCheckbox.setText("Default VM");
-		fDefaultCheckbox.setLayoutData(new GridData());
-		fDefaultCheckbox.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				setDefaultVM();
-			}
-		});
-		
+						
 		return parent;
 	}
 	
@@ -143,7 +127,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		
 	private void addVM() {
 		AddVMDialog dialog= new AddVMDialog(getShell(), fVMTypes, fVMTypes[0]);
-		dialog.setTitle("Add VM");
+		dialog.setTitle("Add JRE");
 		if (dialog.open() != dialog.OK)
 			return;
 		fVMList.refresh();
@@ -170,7 +154,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	
 	private void editVM(IVMInstall vm) {
 		EditVMDialog dialog= new EditVMDialog(getShell(), fVMTypes, vm);
-		dialog.setTitle("Edit VM");
+		dialog.setTitle("Edit JRE");
 		if (dialog.open() != dialog.OK)
 			return;
 		fVMList.refresh(vm);
@@ -181,7 +165,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 			JavaRuntime.saveVMConfiguration();
 			setClassPathVariables();
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, "VM Configuration", "An exception occurred while saving configuration data");
+			ExceptionHandler.handle(e, "JRE Configuration", "An exception occurred while saving configuration data");
 		}
 		return super.performOk();
 	}
@@ -199,30 +183,8 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		updateDefaultVM();
 	}
 	
-	private void setDefaultVM() {
-		if (fDefaultCheckbox.getSelection()) {
-			IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
-			// assume it's length one, otherwise this will not be called
-			IVMInstall vm= (IVMInstall)selection.getFirstElement();
-			JavaRuntime.setDefaultVMInstall(vm);
-		} else {
-			JavaRuntime.setDefaultVMInstall(null);
-		}
-	}
-
-	private void updateDefaultVM() {
-		IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
-		if (selection.size() != 1) {
-			fDefaultCheckbox.setSelection(false);
-			fDefaultCheckbox.setEnabled(false);
-		
-		} else {			
-			IVMInstall vm= (IVMInstall)selection.getFirstElement();
-			boolean isDefault= vm == JavaRuntime.getDefaultVMInstall();
-			fDefaultCheckbox.setSelection(isDefault);
-			fDefaultCheckbox.setEnabled(!isDefault);
-		}
-	}
+	private void updateDefaultVM() {		IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();		if (defaultVM != null) {
+			fVMList.setCheckedElements(new Object[] { defaultVM });		} else {			fVMList.setCheckedElements(new Object[0]);		}	}
 	
 	private void selectVM(IVMInstall vm) {
 		if (vm == null)
