@@ -37,7 +37,5 @@ public class StatusUtil {
 	/**
 	 * Applies the status to the status line of a dialog page.
 	 */
-	public static void applyToStatusLine(DialogPage page, IStatus status) {
-		int messageType= page.NONE;		switch (status.getSeverity()) {			case IStatus.ERROR:				messageType= page.ERROR;			case IStatus.WARNING:				messageType= page.WARNING;					case IStatus.INFO:				messageType= page.INFORMATION;		}		page.setMessage(status.getMessage(), messageType);
-	}
+	public static void applyToStatusLine(DialogPage page, IStatus status) {		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setErrorMessage(null);				page.setMessage(message, DialogPage.NONE);				break;			case IStatus.WARNING:				page.setErrorMessage(null);				page.setMessage(message, DialogPage.WARNING);				break;							case IStatus.INFO:				page.setErrorMessage(null);				page.setMessage(message, DialogPage.INFORMATION);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setErrorMessage(message);				page.setMessage(null);				break;				}	}
 }
