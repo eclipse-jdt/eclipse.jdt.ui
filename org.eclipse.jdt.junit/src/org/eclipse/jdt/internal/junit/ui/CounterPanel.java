@@ -26,10 +26,10 @@ import org.eclipse.swt.widgets.Text;
  * A panel with counters for the number of Runs, Errors and Failures.
  */
 public class CounterPanel extends Composite {
-	private Text fNumberOfErrors;
-	private Text fNumberOfFailures;
-	private Text fNumberOfRuns;
-	private int fTotal;
+	protected Text fNumberOfErrors;
+	protected Text fNumberOfFailures;
+	protected Text fNumberOfRuns;
+	protected int fTotal;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$

@@ -40,9 +40,9 @@ import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.OpenStrategy;
 
 /**
- * A view that shows a stack trace of a failed test.
+ * A pane that shows a stack trace of a failed test.
  */
-class FailureTraceView implements IMenuListener {
+class FailureTrace implements IMenuListener {
     private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
     private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
     
@@ -53,8 +53,9 @@ class FailureTraceView implements IMenuListener {
 	private final Clipboard fClipboard;
     private TestRunInfo fFailure;
     private CompareResultsAction fCompareAction;
+    
 
-	public FailureTraceView(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
+	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
 		
 		// fill the failure trace viewer toolbar
@@ -73,7 +74,7 @@ class FailureTraceView implements IMenuListener {
 		handler.addOpenListener(new IOpenEventListener() {
 			public void handleOpen(SelectionEvent e) {
 				if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
-					(new CompareResultsAction(FailureTraceView.this)).run();
+					(new CompareResultsAction(FailureTrace.this)).run();
 				}
 				if (fTable.getSelection().length != 0) {
 					Action a = createOpenEditorAction(getSelectedText());
@@ -105,10 +106,10 @@ class FailureTraceView implements IMenuListener {
 			Action a= createOpenEditorAction(getSelectedText());
 			if (a != null)
 				manager.add(a);		
-			manager.add(new CopyTraceAction(FailureTraceView.this, fClipboard));
+			manager.add(new CopyTraceAction(FailureTrace.this, fClipboard));
 		}
 		if (fFailure.isComparisonFailure()) 
-			manager.add(new CompareResultsAction(FailureTraceView.this));
+			manager.add(new CompareResultsAction(FailureTrace.this));
 	}
 
 	public String getTrace() {

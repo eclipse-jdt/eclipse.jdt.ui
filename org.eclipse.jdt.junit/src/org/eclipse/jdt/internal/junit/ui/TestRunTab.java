@@ -10,74 +10,95 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.dnd.Clipboard;
+
 
 /**
- * A TestRunView is shown as a page in a tabbed folder.
- * It contributes the page contents and can return
- * the currently selected test.
+ * A TestRunTab is shown as a tab in a tabbed folder.
  */
-interface ITestRunView {
+public abstract class TestRunTab {
+	
+	/**
+	 * Create the tab control
+	 * @param tabFolder the containing tab folder
+	 * @param clipboard the clipboard to be used by the tab
+	 * @param runner the testRunnerViewPart containing the tab folder
+	 */
+	public abstract void createTabControl(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner);
+	
 	/**
 	 * Returns the name of the currently selected Test in the View
 	 */
-	public String getSelectedTestId();
+	public abstract String getSelectedTestId();
 
 	/**
 	 * Activates the TestRunView
 	 */
-	public void activate();
+	public void activate() {
+	}
 	
 	/**
 	 * Sets the focus in the TestRunView
 	 */
-	public void setFocus();
+	public void setFocus() {
+	}
 	
 	/**
 	 * Informs that the suite is about to start 
 	 */
-	public void aboutToStart();
+	public void aboutToStart() { 
+	}
 
 	/**
 	 * Informs that the suite is about to start 
 	 */
-	public void aboutToEnd();
+	public void aboutToEnd() {
+	}
 	
 	/**
 	 * Returns the name of the RunView
 	 */
-	public String getName();
+	public abstract String getName();
 	
 	/**
 	 * Sets the current Test in the View
 	 */
-	public void setSelectedTest(String testId);
+	public void setSelectedTest(String testId) {
+	}
 	
 	/**
 	 * A test has started
 	 */
-	public void startTest(String testId);
+	public void startTest(String testId) {
+	}
 
 	/**
 	 * A test has ended
 	 */
-	public void endTest(String testId);
+	public void endTest(String testId) {
+	}
 	
 	/**
 	 * The status of a test has changed
 	 */
-	public void testStatusChanged(TestRunInfo newInfo);
+	public void testStatusChanged(TestRunInfo newInfo) {
+	}
 	/**
 	 * A new tree entry got posted.
 	 */
-	public void newTreeEntry(String treeEntry);	
+	public void newTreeEntry(String treeEntry) {
+	}
 	
 	/**
 	 * Select next test failure.
 	 */
-	public void selectNext();	
+	public void selectNext() {
+	}
 	
 	/**
 	 * Select previous test failure.
 	 */
-	public void selectPrevious();	
+	public void selectPrevious() {
+	}
 }

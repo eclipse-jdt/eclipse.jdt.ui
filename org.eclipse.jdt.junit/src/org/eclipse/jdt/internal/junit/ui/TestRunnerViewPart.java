@@ -22,8 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -89,7 +93,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
 
-	private static final int REFRESH_INTERVAL= 200;
+	static final int REFRESH_INTERVAL= 200;
  	/**
  	 * Number of executed tests during a test run
  	 */
@@ -105,11 +109,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	/**
 	 * Number of tests run
 	 */
-	private volatile int fTestCount;
+	protected volatile int fTestCount;
 	/**
 	 * Whether the output scrolls and reveals tests as they are executed.
 	 */
-	private boolean fAutoScroll = true;
+	protected boolean fAutoScroll = true;
 	/**
 	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
 	 * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
@@ -132,25 +136,25 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private List fFailures= new ArrayList();
 
 	protected JUnitProgressBar fProgressBar;
-	private ProgressImages fProgressImages;
-	private Image fViewImage;
-	private CounterPanel fCounterPanel;
-	private boolean fShowOnErrorOnly= false;
-	private Clipboard fClipboard;
-	private volatile String fStatus;
+	protected ProgressImages fProgressImages;
+	protected Image fViewImage;
+	protected CounterPanel fCounterPanel;
+	protected boolean fShowOnErrorOnly= false;
+	protected Clipboard fClipboard;
+	protected volatile String fStatus;
 
 	/** 
-	 * The view that shows the stack trace of a failure
+	 * The tab that shows the stack trace of a failure
 	 */
-	private FailureTraceView fFailureView;
+	private FailureTrace fFailureTrace;
 	/** 
-	 * The collection of ITestRunViews
+	 * The collection of ITestRunTabs
 	 */
-	private Vector fTestRunViews = new Vector();
+	protected Vector fTestRunTabs = new Vector();
 	/**
-	 * The currently active run view
+	 * The currently active run tab
 	 */
-	private ITestRunView fActiveRunView;
+	private TestRunTab fActiveRunTab;
 	/**
 	 * Is the UI disposed
 	 */
@@ -211,6 +215,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private UpdateUIJob fUpdateJob;
 
 	private StopAction fStopAction;
+
+	public static final String ID_EXTENSION_POINT_TESTRUN_TABS= JUnitPlugin.PLUGIN_ID + "." + "testRunTabs"; //$NON-NLS-1$
+
 	
 	private class StopAction extends Action {
 		public StopAction() {
@@ -334,7 +341,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		if (page != null) {
 			int p= page.intValue();
 			fTabFolder.setSelection(p);
-			fActiveRunView= (ITestRunView)fTestRunViews.get(p);
+			fActiveRunTab= (TestRunTab)fTestRunTabs.get(p);
 		}
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) 
@@ -392,15 +399,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 	
 	public void selectNextFailure() {
-		fActiveRunView.selectNext();
+		fActiveRunTab.selectNext();
 	}
 	
 	public void selectPreviousFailure() {
-		fActiveRunView.selectPrevious();
+		fActiveRunTab.selectPrevious();
 	}
 
 	public void showTest(TestRunInfo test) {
-		fActiveRunView.setSelectedTest(test.getTestId());
+		fActiveRunTab.setSelectedTest(test.getTestId());
 		handleTestSelected(test.getTestId());
 		new OpenTestAction(this, test.getClassName(), test.getTestMethodName()).run();
 	}
@@ -438,8 +445,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					fDirtyListener= new DirtyListener();
 					JavaCore.addElementChangedListener(fDirtyListener);
 				}
-				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-					ITestRunView v= (ITestRunView) e.nextElement();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
 					v.aboutToEnd();
 				}
 			}
@@ -450,7 +457,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	protected void selectFirstFailure() {
 		TestRunInfo firstFailure= (TestRunInfo)fFailures.get(0);
 		if (firstFailure != null && fAutoScroll) {
-			fActiveRunView.setSelectedTest(firstFailure.getTestId());
+			fActiveRunTab.setSelectedTest(firstFailure.getTestId());
 			handleTestSelected(firstFailure.getTestId());
 		}
 	}
@@ -601,7 +608,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		TestRunInfo info= getTestInfo(testId);
 		info.setActual(actualResult);
 		info.setExpected(expectedResult);
-		fFailureView.updateEnablement(info);
+		fFailureTrace.updateEnablement(info);
 	}
 	
 	private void updateTest(TestRunInfo info, final int status) {
@@ -632,8 +639,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				//refreshCounters();
-				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-					ITestRunView v= (ITestRunView) e.nextElement();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
 					v.testStatusChanged(finalInfo);
 				}
 			}
@@ -649,8 +656,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			public void run() {
 				if(isDisposed()) 
 					return;
-				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-					ITestRunView v= (ITestRunView) e.nextElement();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
 					v.newTreeEntry(treeEntry);
 				}
 			}
@@ -693,7 +700,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		setTitle(title);
 	}
 
-	private void aboutToLaunch() {
+	protected void aboutToLaunch() {
 		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
 		//showInformation(msg);
 		setInfoMessage(msg);
@@ -716,7 +723,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			fClipboard.dispose();
 	}
 
-	private void start(final int total) {
+	protected void start(final int total) {
 		resetProgressBar(total);
 		fCounterPanel.setTotal(total);
 		fCounterPanel.setRunValue(0);	
@@ -736,8 +743,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (!isDisposed()) {
-					for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-						ITestRunView v= (ITestRunView) e.nextElement();
+					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+						TestRunTab v= (TestRunTab) e.nextElement();
 						v.aboutToStart();
 					}
 					fNextAction.setEnabled(false);
@@ -753,8 +760,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				if(isDisposed()) 
 					return;
 				handleEndTest();
-				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-					ITestRunView v= (ITestRunView) e.nextElement();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
 					v.endTest(testId);
 				}
 				
@@ -771,8 +778,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			public void run() {
 				if(isDisposed()) 
 					return;
-				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-					ITestRunView v= (ITestRunView) e.nextElement();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
 					v.startTest(testId);
 				}
 			}
@@ -874,39 +881,56 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (!isDisposed())
-					fFailureView.setInformation(info);
+					fFailureTrace.setInformation(info);
 			}
 		});
 	}
 
-	private CTabFolder createTestRunViews(Composite parent) {
+	protected CTabFolder createTestRunTabs(Composite parent) {
 		CTabFolder tabFolder= new CTabFolder(parent, SWT.TOP);
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
-		ITestRunView failureRunView= new FailureRunView(tabFolder, fClipboard, this);		
-		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, this);
-		
-		fTestRunViews.addElement(failureRunView);
-		fTestRunViews.addElement(testHierarchyRunView);
-		
+		loadTestRunTabs(tabFolder);
 		tabFolder.setSelection(0);				
-		fActiveRunView= (ITestRunView)fTestRunViews.firstElement();		
+		fActiveRunTab= (TestRunTab)fTestRunTabs.firstElement();		
 				
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				testViewChanged(event);
+				testTabChanged(event);
 			}
 		});
 		return tabFolder;
 	}
 
-	private void testViewChanged(SelectionEvent event) {
-		for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-			ITestRunView v= (ITestRunView) e.nextElement();
+	private void loadTestRunTabs(CTabFolder tabFolder) {
+		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_TABS);
+		if (extensionPoint == null) {
+			return;
+		}
+		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
+		MultiStatus status= new MultiStatus(JUnitPlugin.PLUGIN_ID, IStatus.OK, "Could not load some testRunTabs extension points", null); //$NON-NLS-1$ 	
+
+		for (int i= 0; i < configs.length; i++) {
+			try {
+				TestRunTab testRunTab= (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
+				testRunTab.createTabControl(tabFolder, fClipboard, this);
+				fTestRunTabs.addElement(testRunTab);
+			} catch (CoreException e) {
+				status.add(e.getStatus());
+			}
+		}
+		if (!status.isOK()) {
+			JUnitPlugin.log(status);
+		}
+	}
+
+	private void testTabChanged(SelectionEvent event) {
+		for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+			TestRunTab v= (TestRunTab) e.nextElement();
 			if (((CTabFolder) event.widget).getSelection().getText() == v.getName()){
-				v.setSelectedTest(fActiveRunView.getSelectedTestId());
-				fActiveRunView= v;
-				fActiveRunView.activate();
+				v.setSelectedTest(fActiveRunTab.getSelectedTestId());
+				fActiveRunTab= v;
+				fActiveRunTab.activate();
 			}
 		}
 	}
@@ -914,7 +938,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private SashForm createSashForm(Composite parent) {
 		fSashForm= new SashForm(parent, SWT.VERTICAL);
 		ViewForm top= new ViewForm(fSashForm, SWT.NONE);
-		fTabFolder= createTestRunViews(top);
+		fTabFolder= createTestRunTabs(top);
 		fTabFolder.setLayoutData(new TabFolderLayout());
 		top.setContent(fTabFolder);
 		
@@ -926,8 +950,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
-		fFailureView= new FailureTraceView(bottom, fClipboard, this, failureToolBar);
-		bottom.setContent(fFailureView.getComposite()); 
+		fFailureTrace= new FailureTrace(bottom, fClipboard, this, failureToolBar);
+		bottom.setContent(fFailureTrace.getComposite()); 
 		
 		fSashForm.setWeights(new int[]{50, 50});
 		return fSashForm;
@@ -939,7 +963,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				if (isDisposed()) 
 					return;
 				fCounterPanel.reset();
-				fFailureView.clear();
+				fFailureTrace.clear();
 				fProgressBar.reset();
 				fStopAction.setEnabled(true);
 				clearStatus();
@@ -961,8 +985,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
     public void setFocus() {
-    	if (fActiveRunView != null)
-    		fActiveRunView.setFocus();
+    	if (fActiveRunTab != null)
+    		fActiveRunTab.setFocus();
     }
 
     public void createPartControl(Composite parent) {	
@@ -984,7 +1008,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		IActionBars actionBars= getViewSite().getActionBars();
 		actionBars.setGlobalActionHandler(
 			ActionFactory.COPY.getId(),
-			new CopyTraceAction(fFailureView, fClipboard));
+			new CopyTraceAction(fFailureTrace, fClipboard));
 		
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
@@ -1098,7 +1122,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		return getViewSite().getActionBars().getStatusLineManager();
 	}
 
-	private Composite createProgressCountPanel(Composite parent) {
+	protected Composite createProgressCountPanel(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		composite.setLayout(layout);
@@ -1133,7 +1157,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (!isDisposed())
-					fFailureView.showFailure(failure);
+					fFailureTrace.showFailure(failure);
 			}
 		});		
 	}
@@ -1146,7 +1170,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		return fLastLaunch;
 	}
 	
-	protected static Image createImage(String path) {
+	public static Image createImage(String path) {
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
 			return id.createImage();

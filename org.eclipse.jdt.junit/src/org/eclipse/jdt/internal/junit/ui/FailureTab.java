@@ -40,19 +40,22 @@ import org.eclipse.swt.widgets.TableItem;
 
 
 /**
- * A view presenting the failed tests in a table.
+ * A tab presenting the failed tests in a table.
  */
-class FailureRunView implements ITestRunView, IMenuListener {
+public class FailureTab extends TestRunTab implements IMenuListener {
 	private Table fTable;
 	private TestRunnerViewPart fRunnerViewPart;
-	private final Clipboard fClipboard;	
+	private Clipboard fClipboard;	
 	private boolean fMoveSelection= false;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
 	private final Image fFailureTabIcon= TestRunnerViewPart.createImage("obj16/failures.gif"); //$NON-NLS-1$
 
-	public FailureRunView(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner) {
+	public FailureTab() {
+	}
+
+	public void createTabControl(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner) {
 		fRunnerViewPart= runner;
 		fClipboard= clipboard;
 		
@@ -82,7 +85,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		failureTab.setToolTipText(JUnitMessages.getString("FailureRunView.tab.tooltip")); //$NON-NLS-1$
 		
 		initMenu();
-		addListeners();	
+		addListeners();
 	}
 
 	private void disposeIcons() {
@@ -155,7 +158,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 				if (!fRunnerViewPart.lastLaunchIsKeptAlive()) 
 					manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName, ILaunchManager.DEBUG_MODE));
 				manager.add(new Separator());
-				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureRunView.this, fClipboard));
+				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureTab.this, fClipboard));
 			}
 		}
 	}		
@@ -266,9 +269,6 @@ class FailureRunView implements ITestRunView, IMenuListener {
 			new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
 	}
 	
-	public void newTreeEntry(String treeEntry) {
-	}
-	
 	/*
 	 * @see ITestRunView#testStatusChanged(TestRunInfo)
 	 */
@@ -287,12 +287,6 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		}
 		if (item != null)
 			fTable.showItem(item);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#startTest(java.lang.String)
-	 */
-	public void startTest(String testId) {
 	}
 
 	/* (non-Javadoc)
@@ -337,8 +331,5 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		TableItem item= fTable.getItem(index);
 		TestRunInfo info= getTestInfo(item);
 		fRunnerViewPart.showTest(info);
-	}
-
-	public void aboutToEnd() {
 	}
 }

@@ -32,6 +32,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -50,8 +51,8 @@ import org.eclipse.swt.widgets.TreeItem;
  * A view that shows the contents of a test suite
  * as a tree.
  */
-class HierarchyRunView implements ITestRunView, IMenuListener {
-	
+public class TestHierarchyTab extends TestRunTab implements IMenuListener {
+	 
 	private Tree fTree;
 	
 	private TreeItem fCachedParent;
@@ -107,7 +108,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			expandAll();
 		}
 	}
-	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
+	public TestHierarchyTab() {
+	} 
+
+	public void createTabControl(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
 		
 		CTabItem hierarchyTab= new CTabItem(tabFolder, SWT.NONE);

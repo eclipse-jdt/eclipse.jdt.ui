@@ -18,9 +18,9 @@ import org.eclipse.jface.action.Action;
  */
 public class CompareResultsAction extends Action {
 
-	private FailureTraceView fView;	
+	private FailureTrace fView;	
 	
-	public CompareResultsAction(FailureTraceView view) {
+	public CompareResultsAction(FailureTrace view) {
 		super(JUnitMessages.getString("CompareResultsAction.label"));   //$NON-NLS-1$
 		setDescription(JUnitMessages.getString("CompareResultsAction.description"));   //$NON-NLS-1$
 		setToolTipText(JUnitMessages.getString("CompareResultsAction.tooltip"));  //$NON-NLS-1$

@@ -25,14 +25,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Copies the names of the methods that failed to the clipboard.
  */
 public class CopyFailureListAction extends Action {
-	private FailureRunView fView;
+	private FailureTab fView;
 	
 	private final Clipboard fClipboard;
 		
 	/**
 	 * Constructor for CopyFailureListAction.
 	 */
-	public CopyFailureListAction(TestRunnerViewPart runner, FailureRunView view, Clipboard clipboard) {
+	public CopyFailureListAction(TestRunnerViewPart runner, FailureTab view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyFailureList.action.label"));  //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
 		fView= view;

@@ -31,14 +31,14 @@ import org.eclipse.jface.util.Assert;
  * Copies a test failure stack trace to the clipboard.
  */
 public class CopyTraceAction extends Action {
-	private FailureTraceView fView;
+	private FailureTrace fView;
 	
 	private final Clipboard fClipboard;
 
 	/**
 	 * Constructor for CopyTraceAction.
 	 */
-	public CopyTraceAction(FailureTraceView view, Clipboard clipboard) {
+	public CopyTraceAction(FailureTrace view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyTrace.action.label"));  //$NON-NLS-1$
 		Assert.isNotNull(clipboard);
 		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);

@@ -19,9 +19,9 @@ import org.eclipse.ui.help.WorkbenchHelp;
  */
 public class EnableStackFilterAction extends Action {
 
-	private FailureTraceView fView;	
+	private FailureTrace fView;	
 	
-	public EnableStackFilterAction(FailureTraceView view) {
+	public EnableStackFilterAction(FailureTrace view) {
 		super(JUnitMessages.getString("EnableStackFilterAction.action.label"));  //$NON-NLS-1$
 		setDescription(JUnitMessages.getString("EnableStackFilterAction.action.description"));  //$NON-NLS-1$
 		setToolTipText(JUnitMessages.getString("EnableStackFilterAction.action.tooltip")); //$NON-NLS-1$
