@@ -238,7 +238,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// --------- compilation unit refactorings  --------------------
 	
 	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
+		String label= RefactoringMessages.getString("RefactoringGroup.move_to_another_package"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 
 				return new MoveCompilationUnitWizard(); 
