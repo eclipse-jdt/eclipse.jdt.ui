@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,8 +49,8 @@ class OpenResourceAction extends SelectionProviderAction implements ISelectionCh
 			
 			try {	  
 				IEditorPart part= EditorUtility.openInEditor(element);
-				if (element instanceof ISourceReference && !(element instanceof IOpenable)) 	
-					EditorUtility.revealInEditor(part, (ISourceReference)element);
+				if (element instanceof IJavaElement) 	
+					EditorUtility.revealInEditor(part, (IJavaElement) element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
 					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), e)); //$NON-NLS-1$

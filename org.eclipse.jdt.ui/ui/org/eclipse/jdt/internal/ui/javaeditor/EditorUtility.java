@@ -105,7 +105,16 @@ public class EditorUtility {
 	/** 
 	 * Selects a Java Element in an editor
 	 */	
-	public static void revealInEditor(IEditorPart part, ISourceReference element) {
+	public static void _revealInEditor(IEditorPart part, ISourceReference element) {
+		if (element != null && part instanceof JavaEditor) {
+			((JavaEditor) part)._setSelection(element);
+		}
+	}
+	
+	/** 
+	 * Selects a Java Element in an editor
+	 */	
+	public static void revealInEditor(IEditorPart part, IJavaElement element) {
 		if (element != null && part instanceof JavaEditor) {
 			((JavaEditor) part).setSelection(element);
 		}
@@ -226,6 +235,56 @@ public class EditorUtility {
 			}
 		}
 		return null;
-	}	
-
+	}
+	
+	/**
+	 * Returns the compilation unit for the given java element.
+	 * @param element the java element whose compilation unit is searched for
+	 * @return the compilation unit of the given java element
+	 */
+	private static ICompilationUnit getCompilationUnit(IJavaElement element) {
+		
+		if (element == null)
+			return null;
+			
+		if (element instanceof IMember)
+			return ((IMember) element).getCompilationUnit();
+		
+		int type= element.getElementType();
+		if (IJavaElement.COMPILATION_UNIT == type)
+			return (ICompilationUnit) element;
+		if (IJavaElement.CLASS_FILE == type)
+			return null;
+			
+		return getCompilationUnit(element.getParent());
+	}
+	
+	/** 
+	 * Returns the working copy of the given java element.
+	 * @param javaElement the javaElement for which the working copyshould be found
+	 * @param reconcile indicates whether the working copy must be reconcile prior to searching it
+	 * @return the working copy of the given element or <code>null</code> if none
+	 */	
+	public static IJavaElement getWorkingCopy(IJavaElement element, boolean reconcile) throws JavaModelException {
+		ICompilationUnit unit= getCompilationUnit(element);
+		if (unit == null)
+			return null;
+			
+		if (unit.isWorkingCopy())
+			return element;
+			
+		ICompilationUnit workingCopy= getWorkingCopy(unit);
+		if (workingCopy != null) {
+			if (reconcile) {
+				synchronized (workingCopy) {
+					workingCopy.reconcile();
+					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
+				}
+			} else {
+					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
+			}
+		}
+		
+		return null;
+	}
 }

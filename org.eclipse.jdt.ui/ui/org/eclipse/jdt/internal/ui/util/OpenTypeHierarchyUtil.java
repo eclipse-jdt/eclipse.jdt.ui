@@ -165,8 +165,8 @@ public class OpenTypeHierarchyUtil {
 
 	private static void openEditor(Object input) throws PartInitException, JavaModelException {
 		IEditorPart part= EditorUtility.openInEditor(input, true);
-		if (input instanceof ISourceReference)
-			EditorUtility.revealInEditor(part, (ISourceReference)input);
+		if (input instanceof IJavaElement)
+			EditorUtility.revealInEditor(part, (IJavaElement) input);
 	}
 	
 	private static TypeHierarchyViewPart openWindow(IWorkbenchWindow activeWindow, IPerspectiveDescriptor pd, IJavaElement input) throws WorkbenchException, JavaModelException {

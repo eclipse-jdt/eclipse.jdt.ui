@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
+import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
@@ -93,7 +93,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	private MethodsViewerFilterAction[] fFilterActions;
 	private MethodsViewerFilter fFilter;
 		
-	private OpenSourceReferenceAction fOpen;
+	private OpenJavaElementAction fOpen;
 	
 	private TableColumn fTableColumn;
 
@@ -121,7 +121,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		setLabelProvider(lprovider);
 		setContentProvider(contentProvider);
 				
-		fOpen= new OpenSourceReferenceAction(this);
+		fOpen= new OpenJavaElementAction(this);
 		
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {

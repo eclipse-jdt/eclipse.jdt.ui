@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 
 /**
@@ -74,21 +75,36 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#getJavaSourceReferenceAt
 	 */
-	protected ISourceReference getJavaSourceReferenceAt(int position) {
+	protected ISourceReference getJavaSourceReferenceAt(int offset) {
+		IJavaElement element= getElementAt(offset);
+		if (element instanceof ISourceReference)
+			return (ISourceReference) element;
+		return null;
+	}
+	
+	/*
+	 * @see JavaEditor#getElementAt
+	 */
+	protected IJavaElement getElementAt(int offset) {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			try {
-				
 				IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
-				IJavaElement element= input.getClassFile().getElementAt(position);
-				if (element instanceof ISourceReference)
-					return (ISourceReference) element;
+				return input.getClassFile().getElementAt(offset);
 			} catch (JavaModelException x) {
 			}
 		}
 		return null;
+	}
+	
+	/*
+	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
+	 */
+	protected IJavaElement getCorrespondingElement(IJavaElement element) {
+		IJavaElement parent= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
+		return (parent == this ? element : null);
 	}
 	
 	/**

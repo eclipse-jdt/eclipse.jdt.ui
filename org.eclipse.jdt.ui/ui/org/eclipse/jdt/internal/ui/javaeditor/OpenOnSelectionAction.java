@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
+import org.eclipse.jdt.internal.ui.actions.AbstractOpenJavaElementAction;
 
 
 
@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
  * This action opens a java editor on the element represented by text selection of
  * the connected java source viewer.
  */
-public class OpenOnSelectionAction extends OpenJavaElementAction {
+public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	
 	
 	class SelectionChangedListener implements ISelectionChangedListener {
@@ -124,15 +124,15 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 		
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null && fEditor.getSelectionProvider() != null) {
-			ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+			ITextSelection selection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 			try {
 				if (selection.getLength() > 0) {
 					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
 					if (result != null && result.length > 0) {
 						List filtered= filterResolveResults(result);
-						ISourceReference chosen= selectSourceReference(filtered, getShell(), fDialogTitle, fDialogMessage);
-						if (chosen != null) {
-							open(chosen);
+						IJavaElement selected= selectJavaElement(filtered, getShell(), fDialogTitle, fDialogMessage);
+						if (selected != null) {
+							open(selected);
 							return;
 						}
 					}

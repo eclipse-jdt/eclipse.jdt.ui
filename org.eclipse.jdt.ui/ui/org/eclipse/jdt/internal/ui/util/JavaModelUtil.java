@@ -170,6 +170,62 @@ public class JavaModelUtil {
 	}
 	
 	/**
+	 * Returns the element contained in the given set with the same name
+	 * as the given key.
+	 * 
+	 * @param set the set to choose from
+	 * @param key the key to look for
+	 * @return the member of the given set with the same name as the given key
+	 */
+	private static IJavaElement find(IJavaElement[] set, IJavaElement key) {
+		if (set == null)
+			return null;
+			
+		String name= key.getElementName();
+		if (name == null)
+			return null;
+			
+		for (int i= 0; i < set.length; i++) {
+			if (name.equals(set[i].getElementName()))
+				return set[i];
+		}
+		
+		return null;
+	}
+	
+	/** 
+	 * Returns the element of the given compilation unit which is "equal" to the
+	 * given element. Note that the given element usually has a parent different
+	 * from the given compilation unit.
+	 * 
+	 * @param cu the cu to search in
+	 * @param element the element to look for
+	 * @return an element of the given cu "equal" to the given element
+	 */		
+	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) throws JavaModelException {
+		
+		if (element instanceof IMember)
+			return findMemberInCompilationUnit(cu, (IMember) element);
+		
+		int type= element.getElementType();
+		switch (type) {
+			case IJavaElement.IMPORT_CONTAINER:
+				return cu.getImportContainer();
+			
+			case IJavaElement.PACKAGE_DECLARATION:
+				return find(cu.getPackageDeclarations(), element);
+			
+			case IJavaElement.IMPORT_DECLARATION:
+				return find(cu.getImports(), element);
+			
+			case IJavaElement.COMPILATION_UNIT:
+				return cu;
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Returns the qualified type name of the given type using '.' as separators.
 	 * This is a replace for IType.getTypeQualifiedName()
 	 * which uses '$' as separators. As '$' is also a valid character in an id

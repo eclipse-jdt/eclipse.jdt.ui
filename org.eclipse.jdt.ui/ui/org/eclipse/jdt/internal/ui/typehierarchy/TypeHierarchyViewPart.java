@@ -905,10 +905,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		
 		IEditorPart editorPart= EditorUtility.isOpenInEditor(elem);
-		if (editorPart != null && (elem instanceof ISourceReference)) {
+		if (editorPart != null && (elem instanceof IJavaElement)) {
 			try {
 				EditorUtility.openInEditor(elem, false);
-				EditorUtility.revealInEditor(editorPart, (ISourceReference)elem);
+				EditorUtility.revealInEditor(editorPart, (IJavaElement) elem);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

@@ -380,10 +380,23 @@ public final class JavaUI {
 	 * </p>
 	 *
 	 * @param part the editor displaying the compilation unit or class file
-	 * @param element the source reference element defining the source range to be
-	 *   revealed
+	 * @param element the source reference element defining the source range to be revealed
+	 * 
+	 * @deprecated use <code>revealInEditor(IEditorPart, IJavaElement)</code> instead
 	 */	
 	public static void revealInEditor(IEditorPart part, ISourceReference element) {
+		if (element instanceof IJavaElement)
+			revealInEditor(part, (IJavaElement) element);
+	}
+	
+	/** 
+	 * Reveals the given java element  in the given editor. No checking is done if the 
+	 * editor displays a compilation unit or class file that contains the given element.
+	 * If the element is not contained, nothing happens.
+	 * @param part the editor displaying a compilation unit or class file
+	 * @param element the element to be revealed
+	 */
+	public static void revealInEditor(IEditorPart part, IJavaElement element) {
 		EditorUtility.revealInEditor(part, element);
 	}
 	 

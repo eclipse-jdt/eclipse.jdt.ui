@@ -113,6 +113,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			private JavaPairMatcher fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
 			private Position fBracketPosition= new Position(0, 0);
+			private int fAnchor;
+			
 			private boolean fIsActive= false;
 			private StyledText fTextWidget;
 			private Color fColor;
@@ -120,7 +122,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			public HighlightBrackets() {
 				fTextWidget= fSourceViewer.getTextWidget();
-				fColor= fTextWidget.getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
+				fColor= fTextWidget.getDisplay().getSystemColor(SWT.COLOR_BLUE);
 			}
 						
 			public void dispose() {
@@ -159,15 +161,20 @@ public class CompilationUnitEditor extends JavaEditor {
 				
 				if (fIsActive) {
 					// only if different
-					if (pair.getOffset() != fBracketPosition.getOffset() || pair.getLength() != fBracketPosition.getLength()) {
+					if (pair.getOffset() != fBracketPosition.getOffset() || 
+							pair.getLength() != fBracketPosition.getLength() || 
+							fMatcher.getAnchor() != fAnchor) {
+						
 						// remove old highlighting
 						handleDrawRequest(null);
 						// update position
 						fBracketPosition.isDeleted= false;
 						fBracketPosition.offset= pair.getOffset();
 						fBracketPosition.length= pair.getLength();
+						fAnchor= fMatcher.getAnchor();
 						// apply new highlighting
 						handleDrawRequest(null);
+					
 					}
 				} else {
 					
@@ -176,6 +183,7 @@ public class CompilationUnitEditor extends JavaEditor {
 					fBracketPosition.isDeleted= false;
 					fBracketPosition.offset= pair.getOffset();
 					fBracketPosition.length= pair.getLength();
+					fAnchor= fMatcher.getAnchor();
 					
 					fTextWidget.addPaintListener(this);
 					fManager.manage(fBracketPosition);
@@ -193,13 +201,11 @@ public class CompilationUnitEditor extends JavaEditor {
 				int length= fBracketPosition.getLength();
 				
 				if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
-					offset -= region.getOffset();						
-					if (length == 2) {
-						draw(gc, offset, length);
-					} else {
+					offset -= region.getOffset();
+					if (fMatcher.RIGHT == fAnchor)
 						draw(gc, offset, 1);
-						draw(gc, offset + length -1, 1);
-					}
+					else 
+						draw(gc, offset + length -1, 1);					
 				}
 			}
 			
@@ -207,8 +213,10 @@ public class CompilationUnitEditor extends JavaEditor {
 				if (gc != null) {
 					Point left= fTextWidget.getLocationAtOffset(offset);
 					Point right= fTextWidget.getLocationAtOffset(offset + length);
+					
 					gc.setForeground(fColor);
 					gc.drawRectangle(left.x, left.y, right.x - left.x - 1, gc.getFontMetrics().getHeight() - 1);
+										
 				} else {
 					fTextWidget.redrawRange(offset, length, true);
 				}
@@ -454,8 +462,17 @@ public class CompilationUnitEditor extends JavaEditor {
 	/*
 	 * @see JavaEditor#getJavaSourceReferenceAt
 	 */
-	protected ISourceReference getJavaSourceReferenceAt(int position) {
-		
+	protected ISourceReference getJavaSourceReferenceAt(int offset) {
+		IJavaElement element= getElementAt(offset);
+		if (element instanceof ISourceReference)
+			return (ISourceReference) element;
+		return null;
+	}
+	
+	/*
+	 * @see JavaEditor#getElementAt
+	 */
+	protected IJavaElement getElementAt(int offset) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
 		
@@ -463,14 +480,24 @@ public class CompilationUnitEditor extends JavaEditor {
 			synchronized (unit) {
 				try {
 					unit.reconcile();
-					IJavaElement element= unit.getElementAt(position);
-					if (element instanceof ISourceReference)
-						return (ISourceReference) element;
+					return unit.getElementAt(offset);
 				} catch (JavaModelException x) {
 				}
 			}
 		}
 		
+		return null;
+	}
+	
+	/*
+	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
+	 */
+	protected IJavaElement getCorrespondingElement(IJavaElement element) {
+		try {
+			return EditorUtility.getWorkingCopy(element, true);
+		} catch (JavaModelException x) {
+			// nothing found, be tolerant and go on
+		}
 		return null;
 	}
 	

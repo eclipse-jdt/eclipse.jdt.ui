@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
+import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements IProblemChangedListener {
 	
-	private OpenSourceReferenceAction fOpen;
+	private OpenJavaElementAction fOpen;
 	private ShowInPackageViewAction fShowInPackageViewAction;
 	private ContextMenuGroup[] fStandardGroups;
 			
@@ -70,7 +70,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 			}
 		});
 		
-		fOpen= new OpenSourceReferenceAction(this);
+		fOpen= new OpenJavaElementAction(this);
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fOpen.run();

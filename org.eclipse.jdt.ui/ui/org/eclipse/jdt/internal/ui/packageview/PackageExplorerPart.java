@@ -748,8 +748,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				Object input= getElementOfInput(editor.getEditorInput());					
 				if (input != null && input.equals(element)) {
 					page.bringToTop(editor);
-					if (obj instanceof ISourceReference && !(obj instanceof IOpenable)) 
-						EditorUtility.revealInEditor(editor, (ISourceReference)obj);
+					if (obj instanceof IJavaElement) 
+						EditorUtility.revealInEditor(editor, (IJavaElement) obj);
 					return;
 				}
 			}

@@ -16,6 +16,10 @@ import org.eclipse.jface.text.Region;
  * Helper class for match pairs of characters.
  */
 public class JavaPairMatcher {
+	
+	
+	public static final int LEFT=	   1;
+	public static final int RIGHT= 2;
 
 	
 	protected char[] fPairs;
@@ -24,6 +28,7 @@ public class JavaPairMatcher {
 	
 	protected int fStartPos;
 	protected int fEndPos;
+	protected int fAnchor;
 	
 	protected JavaCodeReader fReader= new JavaCodeReader();
 	
@@ -45,6 +50,10 @@ public class JavaPairMatcher {
 			return new Region(fStartPos, fEndPos - fStartPos + 1);
 			
 		return null;
+	}
+	
+	public int getAnchor() {
+		return fAnchor;
 	}
 	
 	public void dispose() {
@@ -76,38 +85,40 @@ public class JavaPairMatcher {
 
 			// search for opening peer character next to the activation point
 			for (i= 0; i < fPairs.length; i= i + 2) {
-				if (prevChar == fPairs[i]) {
-					fStartPos= fOffset - 1;
-					pairIndex1= i;
-				} else if (nextChar == fPairs[i]) {
+				if (nextChar == fPairs[i]) {
 					fStartPos= fOffset;
+					pairIndex1= i;
+				} else if (prevChar == fPairs[i]) {
+					fStartPos= fOffset - 1;
 					pairIndex1= i;
 				}
 			}
 			
 			// search for closing peer character next to the activation point
 			for (i= 1; i < fPairs.length; i= i + 2) {
-				if (nextChar == fPairs[i]) {
-					fEndPos= fOffset;
-					pairIndex2= i;
-				} else if (prevChar == fPairs[i]) {
+				if (prevChar == fPairs[i]) {
 					fEndPos= fOffset - 1;
+					pairIndex2= i;
+				} else if (nextChar == fPairs[i]) {
+					fEndPos= fOffset;
 					pairIndex2= i;
 				}
 			}
 
-			if (fStartPos > -1) {
-				fEndPos= searchForClosingPeer(fStartPos, fPairs[pairIndex1], fPairs[pairIndex1 + 1], fDocument);
-				if (fEndPos > -1)
-					return true;
-				else
-					fStartPos= -1;
-			} else if (fEndPos > -1) {
+			if (fEndPos > -1) {
+				fAnchor= RIGHT;
 				fStartPos= searchForOpeningPeer(fEndPos, fPairs[pairIndex2 - 1], fPairs[pairIndex2], fDocument);
 				if (fStartPos > -1)
 					return true;
 				else
 					fEndPos= -1;
+			}	else if (fStartPos > -1) {
+				fAnchor= LEFT;
+				fEndPos= searchForClosingPeer(fStartPos, fPairs[pairIndex1], fPairs[pairIndex1 + 1], fDocument);
+				if (fEndPos > -1)
+					return true;
+				else
+					fStartPos= -1;
 			}
 
 		} catch (BadLocationException x) {

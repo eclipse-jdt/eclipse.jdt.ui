@@ -71,10 +71,19 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	protected String fOutlinerContextMenuId;	
 	
 	/**
-	 * Returns the smallest ISourceReference also implementing IJavaElement
-	 * containing the given position.
+	 * Returns the smallest ISourceReference also implementing IJavaElement containing the given position.
 	 */
-	abstract protected ISourceReference getJavaSourceReferenceAt(int position);
+	abstract protected ISourceReference getJavaSourceReferenceAt(int offset);
+	
+	/**
+	 * Returns the most narrow java element including the given offset
+	 */
+	abstract protected IJavaElement getElementAt(int offset);
+	
+	/**
+	 * Returns the java element of this editor's input corresponding to the given IJavaElement
+	 */
+	abstract protected IJavaElement getCorrespondingElement(IJavaElement element);
 	
 	/**
 	 * Sets the input of the editor's outline page.
@@ -205,6 +214,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			try {
 				
 				ISourceRange range= reference.getSourceRange();
+				if (range == null)
+					return;
+				
 				int offset= range.getOffset();
 				int length= range.getLength();
 				
@@ -233,7 +245,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			resetHighlightRange();
 	}
 		
-	public void setSelection(ISourceReference reference) {
+	public void _setSelection(ISourceReference reference) {
 		
 		if (reference == null || reference instanceof ICompilationUnit) {
 			/*
@@ -267,7 +279,32 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			fOutlinePage.select(reference);
 			fOutlinePage.addSelectionChangedListener(this);
 		}
-	}	
+	}
+	
+	public void setSelection(IJavaElement element) {
+		
+		if (element == null || element instanceof ICompilationUnit) {
+			/*
+			 * If the element is an ICompilationUnit this unit is either the input
+			 * of this editor or not being displayed. In both cases, nothing should
+			 * happened. (http://dev.eclipse.org/bugs/show_bug.cgi?id=5128)
+			 */
+			return;
+		}
+		
+		IJavaElement corresponding= getCorrespondingElement(element);
+		if (corresponding instanceof ISourceReference) {
+			ISourceReference reference= (ISourceReference) corresponding;
+			// set hightlight range
+			setSelection(reference, true);
+			// set outliner selection
+			if (fOutlinePage != null) {
+				fOutlinePage.removeSelectionChangedListener(this);
+				fOutlinePage.select(reference);
+				fOutlinePage.addSelectionChangedListener(this);
+			}
+		}
+	}
 	
 	public void selectionChanged(SelectionChangedEvent event) {
 				

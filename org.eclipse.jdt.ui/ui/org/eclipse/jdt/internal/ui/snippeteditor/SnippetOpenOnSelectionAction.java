@@ -14,14 +14,14 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
+import org.eclipse.jdt.internal.ui.actions.AbstractOpenJavaElementAction;
 
 
 /**
  * This action opens a java editor on the element represented by text selection of
  * the code snippet.
  */
-public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
+public class SnippetOpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	
 	protected JavaSnippetEditor fEditor;
 	private String fDialogTitle;
@@ -63,12 +63,7 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 		try {
 			IJavaElement[] result= fEditor.codeResolve();
 			if (result != null && result.length > 0) {
-				ISourceReference chosen= selectSourceReference(
-										filterResolveResults(result),
-										getShell(), 
-										fDialogTitle, 
-										fDialogMessage
-										);
+				IJavaElement chosen= selectJavaElement(filterResolveResults(result), getShell(),  fDialogTitle, fDialogMessage);
 				if (chosen != null) {
 					open(chosen);
 					return;

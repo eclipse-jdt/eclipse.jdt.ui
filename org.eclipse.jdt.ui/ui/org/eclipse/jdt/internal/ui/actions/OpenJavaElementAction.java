@@ -2,97 +2,63 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-// AW
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jface.action.Action;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Opens a Java element in the specified editor. Subclasses must overwrite
- * <code>IAction.run</code> and knit the methods together.
+ * Open a java element in an editor
  */
-public abstract class OpenJavaElementAction extends Action {
+public class OpenJavaElementAction extends AbstractOpenJavaElementAction {
 	
-	/**
-	 * Creates a new action without label. Initializing is 
-	 * subclass responsibility.
-	 */
-	protected OpenJavaElementAction() {
+	private ISelectionProvider fSelectionProvider;
+	
+	public OpenJavaElementAction(ISelectionProvider provider) {
+		super(JavaUIMessages.getString("OpenJavaElementAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("OpenJavaElementAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("OpenJavaElementAction.tooltip")); //$NON-NLS-1$
+		fSelectionProvider= provider;
 	}
 	
-	/**
-	 * Opens the editor on the given source reference and subsequently selects it.
-	 */
-	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
-		IEditorPart part= EditorUtility.openInEditor(sourceReference);
-		EditorUtility.revealInEditor(part, sourceReference);
-	}
-	
-	/**
-	 * Filters out source references from the given code resolve results.
-	 * A utility method that can be called by subclassers. 
-	 */
-	protected List filterResolveResults(IJavaElement[] codeResolveResults) {
-		int nResults= codeResolveResults.length;
-		List refs= new ArrayList(nResults);
-		for (int i= 0; i < nResults; i++) {
-			if (codeResolveResults[i] instanceof ISourceReference)
-				refs.add(codeResolveResults[i]);
-		}
-		return refs;
-	}
-						
-	/**
-	 * Shows a dialog for resolving an ambigous source reference.
-	 * Utility method that can be called by subclassers.
-	 */
-	protected ISourceReference selectSourceReference(List sourceReferences, Shell shell, String title, String message) {
-		
-		int nResults= sourceReferences.size();
-		
-		if (nResults == 0)
-			return null;
-		
-		if (nResults == 1)
-			return (ISourceReference) sourceReferences.get(0);
-		
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT
-						| JavaElementLabelProvider.SHOW_QUALIFIED
-							| JavaElementLabelProvider.SHOW_ROOT;
-						
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
-		dialog.setTitle(title);
-		dialog.setMessage(message);
-		dialog.setElements(sourceReferences.toArray());
-		
-		if (dialog.open() == dialog.OK) {
-			Object[] elements= dialog.getResult();
-			if (elements != null && elements.length > 0) {
-				nResults= elements.length;
-				for (int i= 0; i < nResults; i++) {
-					Object curr= elements[i];
-					if (curr instanceof ISourceReference)
-						return (ISourceReference) curr;
-				}
+	public void run() {
+		ISelection selection= fSelectionProvider.getSelection();
+		if ( !(selection instanceof IStructuredSelection) || selection.isEmpty())
+			return;
+			
+		try {
+			Iterator iter= ((IStructuredSelection) selection).iterator();
+			while (iter.hasNext()) {
+				Object current= iter.next();
+				if (current instanceof IJavaElement)
+					open((IJavaElement) current);
 			}
+		} catch (JavaModelException x) {
+			String title= JavaUIMessages.getString("OpenJavaElementAction.errorTitle"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("OpenJavaElementAction.errorMessage"); //$NON-NLS-1$
+			ExceptionHandler.handle(x, title, message);
+		} catch (PartInitException x) {
+			String title= JavaUIMessages.getString("OpenJavaElementAction.errorTitle"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("OpenJavaElementAction.errorMessage"); //$NON-NLS-1$
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
+			JavaPlugin.log(x);
 		}
-		
-		return null;
 	}
 }

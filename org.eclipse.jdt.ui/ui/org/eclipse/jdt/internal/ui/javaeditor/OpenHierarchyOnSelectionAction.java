@@ -55,12 +55,11 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	}
 	
 	/**
-	 * @see OpenJavaElementAction#open
+	 * @see AbstractOpenJavaElementAction#open
 	 */
-	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
-		if (sourceReference instanceof IMember) {
-			IMember member= (IMember) sourceReference;
-			OpenTypeHierarchyUtil.open(new IJavaElement[] { member }, fEditor.getSite().getWorkbenchWindow());
+	protected void open(IJavaElement element) throws JavaModelException, PartInitException {
+		if (element instanceof IMember) {
+			OpenTypeHierarchyUtil.open(new IJavaElement[] { (IMember) element }, fEditor.getSite().getWorkbenchWindow());
 		} else {
 			getShell().getDisplay().beep();
 		}
@@ -71,7 +70,8 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	 */
 	protected void openOnEmptySelection(ITextSelection selection) throws JavaModelException, PartInitException {
 		if (fEditor instanceof JavaEditor) {
-			open(((JavaEditor)fEditor).getJavaSourceReferenceAt(selection.getOffset()));
+			JavaEditor editor= (JavaEditor) fEditor;
+			open(editor.getElementAt(selection.getOffset()));
 		}
-	}
+	}
 }

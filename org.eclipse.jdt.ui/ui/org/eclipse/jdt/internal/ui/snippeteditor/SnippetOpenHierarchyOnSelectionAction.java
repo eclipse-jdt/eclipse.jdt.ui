@@ -37,11 +37,11 @@ public class SnippetOpenHierarchyOnSelectionAction extends SnippetOpenOnSelectio
 	}
 
 	/**
-	 * @see OpenJavaElementAction#open
+	 * @see AbstractOpenJavaElementAction#open
 	 */
-	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
-		if (sourceReference instanceof IMember) {
-			OpenTypeHierarchyUtil.open(new IMember[] { (IMember) sourceReference }, fEditor.getSite().getWorkbenchWindow());
+	protected void open(ISourceReference element) throws JavaModelException, PartInitException {
+		if (element instanceof IMember) {
+			OpenTypeHierarchyUtil.open(new IMember[] { (IMember) element }, fEditor.getSite().getWorkbenchWindow());
 		} else {
 			getShell().getDisplay().beep();
 		}
