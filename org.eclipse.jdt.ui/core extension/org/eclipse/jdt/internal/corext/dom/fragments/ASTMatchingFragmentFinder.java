@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Javadoc;
+
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 class ASTMatchingFragmentFinder extends GenericVisitor {
@@ -36,6 +38,10 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	}
 	private IASTFragment[] getMatches() {
 		return (IASTFragment[]) fMatches.toArray(new IASTFragment[fMatches.size()]);
+	}
+	
+	public boolean visit(Javadoc node) {
+		return false;
 	}
 	
 	protected boolean visitNode(ASTNode node) {
