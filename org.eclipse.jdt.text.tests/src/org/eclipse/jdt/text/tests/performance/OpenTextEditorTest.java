@@ -54,6 +54,6 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	}
 	public void testOpenTextEditor2() throws PartInitException {
 		// warm run
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES),  "Open text editor (warm run)");
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES),  null);
 	}
 }
