@@ -206,7 +206,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test24() throws Exception{
-		validatePassingTest("A", "I", true, true);
+		standardPassingTest();
 	}
 
 	public void test25() throws Exception{
