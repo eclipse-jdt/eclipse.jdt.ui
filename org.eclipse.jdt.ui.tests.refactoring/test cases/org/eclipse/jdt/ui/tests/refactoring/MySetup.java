@@ -30,7 +30,6 @@ public class MySetup extends TestSetup {
 	private static IPackageFragmentRoot fgRoot;
 	private static IPackageFragment fgPackageP;
 	private static IJavaProject fgJavaTestProject;
-	private boolean fAutobuilding;
 	
 	public static IPackageFragmentRoot getDefaultSourceFolder() throws Exception {
 		if (fgRoot != null) 
@@ -52,7 +51,7 @@ public class MySetup extends TestSetup {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fAutobuilding = JavaProjectHelper.setAutoBuilding(false);
+		JavaProjectHelper.setAutoBuilding(false);
 		if (JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().close();
 		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
@@ -62,7 +61,6 @@ public class MySetup extends TestSetup {
 	}
 	
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.setAutoBuilding(fAutobuilding);
 		if (fgPackageP.exists())
 			fgPackageP.delete(true, null);
 		JavaProjectHelper.removeSourceContainer(fgJavaTestProject, CONTAINER);
