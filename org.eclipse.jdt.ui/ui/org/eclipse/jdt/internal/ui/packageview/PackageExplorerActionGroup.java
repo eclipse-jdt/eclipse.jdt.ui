@@ -302,7 +302,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 					fZoomInAction.run();
 				}
 			} else {
-				if (element instanceof ICompilationUnit && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
+				IAction openAction= fNavigateActionGroup.getOpenAction();
+				if (openAction != null && openAction.isEnabled() && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
 					return;
 				viewer.setExpandedState(element, !viewer.getExpandedState(element));
 			}
