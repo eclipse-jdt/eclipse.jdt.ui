@@ -326,7 +326,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 				}
 
-			}
+			}	
+			else
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+				
 			return state;
 		}			
 	}
