@@ -53,7 +53,6 @@ public class JavaTextTools {
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
-//	private JavaPartitionScanner fPartitionScanner;	
 	private FastJavaPartitionScanner fPartitionScanner;	
 	
 	/** The preference store */
@@ -75,7 +74,6 @@ public class JavaTextTools {
 		fSinglelineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_STRING);
 		fJavaDocScanner= new JavaDocScanner(fColorManager, store);
-//		fPartitionScanner= new JavaPartitionScanner();
 		fPartitionScanner= new FastJavaPartitionScanner();
 	}
 	
@@ -168,7 +166,6 @@ public class JavaTextTools {
 	 * @return a Java partition scanner
 	 */
 	public IPartitionTokenScanner getPartitionScanner() {
-//	public RuleBasedScanner getPartitionScanner() {
 		return fPartitionScanner;
 	}
 	
@@ -189,7 +186,6 @@ public class JavaTextTools {
 		};
 
 		return new DefaultPartitioner(getPartitionScanner(), types);
-//		return new RuleBasedPartitioner(getPartitionScanner(), types);
 	}
 	
 	/**
@@ -202,7 +198,6 @@ public class JavaTextTools {
 	 * 			if there is none
 	 */
 	public String[] getPartitionManagingPositionCategories() {
-//		return new String[] { RuleBasedPartitioner.CONTENT_TYPES_CATEGORY };
 		return new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY };
 	}
 	
