@@ -418,7 +418,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				 * if (methods[i].getNameRange() == null), then it's a binary file so it's wrong anyway 
 				 * (checked as a precondition)
 				 */
-				change.addReplace("Constructor rename", methods[i].getNameRange().getOffset(), typeNameLength, fNewName);
+				change.addReplace("rename constructor", methods[i].getNameRange().getOffset(), typeNameLength, fNewName);
 			}
 		}	
 	}
@@ -429,7 +429,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			List l= (List)iter.next();
 			IResource resource= ((SearchResult)l.get(0)).getResource();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
-			ITextBufferChange change= fTextBufferChangeCreator.create("Type Reference Update in \"" + cu.getElementName() + "\"", cu );
+			ITextBufferChange change= fTextBufferChangeCreator.create("update references to " + getType().getFullyQualifiedName(), cu );
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
@@ -447,7 +447,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("Type Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update type reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String packageName= getType().getPackageFragment().getElementName();
 				String oldTypeName= getType().getElementName();

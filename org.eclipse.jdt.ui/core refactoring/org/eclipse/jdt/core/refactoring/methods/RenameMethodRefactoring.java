@@ -134,7 +134,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
 		if (Flags.isNative(getMethod().getFlags()))
-			result.addError("Renaming native methods can change the program's behavior");
+			result.addError("Renaming native methods can change the program's behavior.");
 		if (isSpecialCase(getMethod()))
 			result.addError("This method is a special case - renaming might change program's behavior.");	
 		return result;
@@ -162,13 +162,13 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		while (methods.hasNext()){
 			IMethod method= (IMethod)methods.next();
 			if (! method.exists()){
-				result.addFatalError(computeErrorMessage(method, " does not exist in the model"));
+				result.addFatalError(computeErrorMessage(method, " does not exist in the model."));
 				continue;
 			}	
 			if (method.isBinary())
-				result.addFatalError(computeErrorMessage(method, " is binary"));
+				result.addFatalError(computeErrorMessage(method, " is binary. Refactoring cannot be performed."));
 			if (method.isReadOnly())
-				result.addFatalError(computeErrorMessage(method, " is read-only"));
+				result.addFatalError(computeErrorMessage(method, " is read-only. Refactoring cannot be performed."));
 			if (Flags.isNative(method.getFlags()))
 				result.addError(computeErrorMessage(method, " is native. Refactoring can cause an UnasisfiedLinkError on run-time."));
 			}
@@ -207,7 +207,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= fTextBufferChangeCreator.create("Rename Method", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= fTextBufferChangeCreator.create("update method references", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
@@ -219,7 +219,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	}
 	
 	protected SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("Method Occurrence Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update method reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) {
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
 				String oldMethodName= getMethod().getElementName();

@@ -75,7 +75,7 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 		if (fOldParameterNames.length != fNewParameterNames.length)
 			result.addFatalError("Must have the same number of parameters");
 		if (!anythingRenamed())
-			result.addError("Enter new parameter names");
+			result.addError("All parameter names are unchanged. Please enter new parameter names");
 		if (result.isOK())
 			result.merge(checkForDuplicateNames());
 		if (result.isOK())	
@@ -159,7 +159,7 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("creating change", 10);
-		ITextBufferChange builder= fTextBufferChangeCreator.create("Rename Parameters", getMethod().getCompilationUnit());
+		ITextBufferChange builder= fTextBufferChangeCreator.create("rename method parameters", getMethod().getCompilationUnit());
 		List renamed= getRenamedParameterIndices(fOldParameterNames, fNewParameterNames);
 		for (Iterator iter= renamed.iterator(); iter.hasNext() ;){
 			Integer i= 	(Integer)iter.next();

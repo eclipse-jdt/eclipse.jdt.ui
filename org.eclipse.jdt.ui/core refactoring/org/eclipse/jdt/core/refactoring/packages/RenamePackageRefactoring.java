@@ -271,13 +271,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange("Package Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName);
+		return new SimpleReplaceTextChange("update package reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName);
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= fTextBufferChangeCreator.create("Rename Package", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= fTextBufferChangeCreator.create("update references to " + fPackage.getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

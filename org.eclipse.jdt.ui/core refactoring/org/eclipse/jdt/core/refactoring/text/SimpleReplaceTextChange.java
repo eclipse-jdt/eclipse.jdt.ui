@@ -37,7 +37,7 @@ public class SimpleReplaceTextChange extends SimpleTextChange {
 		this(name, 0, 0, null);
 	}
 	/**
-	 * Creates a replace text change. The length is set to sero and the new
+	 * Creates a replace text change. The length is set to zero and the new
 	 * text is the empty string.
 	 *
 	 * @param name the changes name. The name is mainly used to render the change in the 
@@ -95,7 +95,7 @@ public class SimpleReplaceTextChange extends SimpleTextChange {
 	}
 	
 	/**
-	 * Sets the length of the text to be replace by this text change.
+	 * Sets the length of the text to be replaced by this text change.
 	 *
 	 * @param length the length of the text to be replaced.
 	 */

@@ -481,7 +481,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		 */
 		HackFinder.fixMeSoon("see comment");
 		
-		SimpleReplaceTextChange change= new SimpleReplaceTextChange("Type Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) {
+		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update type reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) {
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
 				String packageName= getPackage(getCu()).getElementName();
@@ -589,12 +589,12 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		}	
 			
 		String newImportText= "\nimport " + pack.getElementName() + ".*;\n";
-		change.addInsert("add import " + pack.getElementName(), start + 1, newImportText);
+		change.addInsert("add import declaration" + pack.getElementName(), start + 1, newImportText);
 		return true;
 	}
 	
 	private void addLocalImportUpdate(CompositeChange builder) throws JavaModelException {
-		ITextBufferChange change= getTextBufferChangeCreator().create("Update Import", getCu());
+		ITextBufferChange change= getTextBufferChangeCreator().create("update import declaration", getCu());
 		/*
 		 * could remove useless import declarations
 		 */

@@ -65,7 +65,7 @@ public class RenameResourceChange extends Change {
 	
 	/**
 	 * changes resource names - changes the name, leaves the extension untouched
-	 * /s/p/Fred.java renamed to Dude becomes /s/p/Dude.java
+	 * /s/p/A.java renamed to B becomes /s/p/B.java
 	 */
 	public static IPath renamedResourcePath(IPath path, String newName){
 		String oldExtension= path.getFileExtension();
@@ -74,7 +74,7 @@ public class RenameResourceChange extends Change {
 	}
 	
 	public String getName(){
-		return "RenameResource: " + fResourcePath.toString() + " to:" + renamedResourcePath(fResourcePath, fNewName);
+		return "Rename \"" + fResourcePath.toString() + "\" to:\"" + fNewName + "\"";
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){
