@@ -359,10 +359,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		boolean enabled= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
-		if (!enabled)
-			return null;
-
 		JavaEditorTextHoverDescriptor descriptor= JavaEditorTextHoverDescriptor.getTextHoverDescriptor(stateMask);
 
 		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {

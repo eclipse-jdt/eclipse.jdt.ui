@@ -1495,7 +1495,6 @@ public class PreferenceConstants {
 	
 	
 	public static void initializeDefaultValues(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_SHOW_HOVER, true);
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage

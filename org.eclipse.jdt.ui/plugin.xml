@@ -1570,7 +1570,6 @@ JavaStructureDiffViewerCreator
 
 	<!-- miscellaenous -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
 </extension>
 
 <!-- =========================================================================== -->
@@ -1663,7 +1662,6 @@ JavaStructureDiffViewerCreator
 	
 		<!-- miscellaenous -->
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
 	</acceleratorSet>	
 	
 	<acceleratorSet
@@ -1745,7 +1743,6 @@ JavaStructureDiffViewerCreator
 	
 		<!-- miscellaenous -->
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
 	</acceleratorSet>
 	
 	<acceleratorSet scopeId="org.eclipse.ui.globalScope" configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">

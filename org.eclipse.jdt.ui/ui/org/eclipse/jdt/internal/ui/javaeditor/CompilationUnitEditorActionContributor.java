@@ -134,7 +134,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	private RetargetTextEditorAction fOpenStructure;
 		
 	protected TogglePresentationAction fTogglePresentation;
-	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
@@ -150,20 +149,12 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "ToggleTextHover.", IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, true); //$NON-NLS-1$
-		a.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_TEXT_HOVER);
-		JavaPluginImages.setToolImageDescriptors(a, "jdoc_hover_edit.gif"); //$NON-NLS-1$
-		fRetargetToolbarActions.add(a);
-		markAsPartListener(a);
-		
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
 		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		a= new RetargetToolbarAction(b, "PreviousError.", IJavaEditorActionConstants.PREVIOUS_ERROR, false); //$NON-NLS-1$
 		a.setActionDefinitionId("org.eclipse.ui.navigate.previous");
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
@@ -192,7 +183,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		// actions that are "contributed" to editors, they are consider belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
-		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
 		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous");
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
@@ -207,7 +197,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
@@ -259,7 +248,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			textEditor= (ITextEditor) part;
 			
 		fTogglePresentation.setEditor(textEditor);
-		fToggleTextHover.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
 		

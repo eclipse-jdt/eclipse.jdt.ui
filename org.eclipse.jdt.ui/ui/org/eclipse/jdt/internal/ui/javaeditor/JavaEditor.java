@@ -1397,10 +1397,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 			}
 
-			if (PreferenceConstants.EDITOR_SHOW_HOVER.equals(property)) {
-				updateHoverBehavior();
-			}
-
 			if (isJavaEditorHoverProperty(property)) {
 				updateHoverBehavior();
 			}				

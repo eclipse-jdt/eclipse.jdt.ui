@@ -24,6 +24,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 
@@ -31,7 +32,6 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	
 	protected RetargetTextEditorAction fShowJavaDoc;
 	protected TogglePresentationAction fTogglePresentationAction;
-	protected ToggleTextHoverAction fToggleTextHover;
 	
 	
 	public ClassFileEditorActionContributor() {
@@ -40,7 +40,6 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		fTogglePresentationAction= new TogglePresentationAction();				
-		fToggleTextHover= new ToggleTextHoverAction();
 	}
 	
 	/*
@@ -67,7 +66,6 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	public void contributeToToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator());
 		tbm.add(fTogglePresentationAction);		
-		tbm.add(fToggleTextHover);
 	}
 	
 	/*
@@ -87,7 +85,6 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		fTogglePresentationAction.setEditor(textEditor);		
-		fToggleTextHover.setEditor(textEditor);
 
 		if (classFileEditor != null) {
 			IActionBars bars= getActionBars();

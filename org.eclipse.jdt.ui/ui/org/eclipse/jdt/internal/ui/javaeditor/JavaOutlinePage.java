@@ -729,7 +729,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Hashtable fActions= new Hashtable();
 	
 	private TogglePresentationAction fTogglePresentation;
-	private ToggleTextHoverAction fToggleTextHover;
 	private GotoErrorAction fPreviousError;
 	private GotoErrorAction fNextError;
 	private TextEditorAction fShowJavadoc;
@@ -750,7 +749,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fEditor= editor;
 		
 		fTogglePresentation= new TogglePresentationAction();
-		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
@@ -760,7 +758,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
 		
 		fTogglePresentation.setEditor(editor);
-		fToggleTextHover.setEditor(editor);
 		fPreviousError.setEditor(editor);
 		fNextError.setEditor(editor);	
 		
@@ -924,7 +921,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
@@ -980,7 +976,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			fActionGroups.dispose();
 			
 		fTogglePresentation.setEditor(null);
-		fToggleTextHover.setEditor(null);
 		fPreviousError.setEditor(null);
 		fNextError.setEditor(null);	
 		

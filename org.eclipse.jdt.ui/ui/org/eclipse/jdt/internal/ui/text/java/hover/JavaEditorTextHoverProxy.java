@@ -15,13 +15,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
@@ -70,30 +67,13 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	};
 
 
-	// XXX: Can be removed if we decide we don't want enabling and disabling of hovers
-	class EnableStateUpdater implements IPropertyChangeListener {
-		/*
-		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-		 */
-		public void propertyChange(PropertyChangeEvent event) {
-			if (PreferenceConstants.EDITOR_SHOW_HOVER.equals(event.getProperty())) {
-				Object newValue= event.getNewValue();
-				if (newValue instanceof Boolean)
-					fEnabled= ((Boolean) newValue).booleanValue();
-			}
-		}
-	};
-	
-
 	private JavaEditorTextHoverDescriptor fHoverDescriptor;
 	private IJavaEditorTextHover fHover;
-	private boolean fEnabled;
 	private IPropertyChangeListener fEnableStateUpdater;
 	private ListenerRemover fListenerRemover;
 
 
 	public JavaEditorTextHoverProxy(JavaEditorTextHoverDescriptor descriptor, IEditorPart editor) {
-		fEnabled= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		fHoverDescriptor= descriptor;
 		setEditor(editor);
 	}
