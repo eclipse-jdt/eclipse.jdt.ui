@@ -89,6 +89,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -483,7 +484,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fSelectionHistory.setHistoryAction(historyAction);		
 
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-			new OpenEditorActionGroup(this), new OpenViewActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+			new OpenEditorActionGroup(this), 
+			new OpenViewActionGroup(this), 
+			new ShowActionGroup(this), 
+			new GenerateActionGroup(this),
+			new RefactorActionGroup(this)});
 	}
 	
 	/*
