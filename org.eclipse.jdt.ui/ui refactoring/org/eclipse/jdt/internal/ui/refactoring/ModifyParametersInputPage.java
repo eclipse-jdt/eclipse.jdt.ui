@@ -108,7 +108,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		
 		fTableViewer.setContentProvider(new ParameterInfoContentProvider());
 		fTableViewer.setLabelProvider(new ParameterInfoLabelProvider());
-		fTableViewer.setSorter(new ParameterInfoListSorter(getReorderRenameParameterWrapperRefactoring()));
+		fTableViewer.setSorter(new ParameterInfoListSorter(getModifyParametersRefactoring()));
 		
 		fTableViewer.setInput(createParameterInfos());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
@@ -134,9 +134,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	private ParameterInfo[] createParameterInfos() {
 		try {
-			Map renamings= getReorderRenameParameterWrapperRefactoring().getNewNames();
-			String[] typeNames= getReorderRenameParameterWrapperRefactoring().getMethod().getParameterTypes();
-			String[] oldNames= getReorderRenameParameterWrapperRefactoring().getMethod().getParameterNames();
+			Map renamings= getModifyParametersRefactoring().getNewNames();
+			String[] typeNames= getModifyParametersRefactoring().getMethod().getParameterTypes();
+			String[] oldNames= getModifyParametersRefactoring().getMethod().getParameterNames();
 			Collection result= new ArrayList(typeNames.length);
 			
 			for (int i= 0; i < oldNames.length; i++){
@@ -177,12 +177,12 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 	
 	private boolean isFirst(ParameterInfo selected){
-		return getReorderRenameParameterWrapperRefactoring().getNewParameterPosition(selected.oldName) == 0;
+		return getModifyParametersRefactoring().getNewParameterPosition(selected.oldName) == 0;
 	}
 	
 	private boolean isLast(ParameterInfo selected){
-		return getReorderRenameParameterWrapperRefactoring().getNewParameterPosition(selected.oldName) == 
-					(getReorderRenameParameterWrapperRefactoring().getParamaterPermutation().length - 1);
+		return getModifyParametersRefactoring().getNewParameterPosition(selected.oldName) == 
+					(getModifyParametersRefactoring().getParamaterPermutation().length - 1);
 	}
 	
 	private ParameterInfo getSelectedItem(){
@@ -207,7 +207,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 	
 	private boolean doesMethodHaveOneParameter(){
-		return getReorderRenameParameterWrapperRefactoring().getMethod().getParameterTypes().length == 1;
+		return getModifyParametersRefactoring().getMethod().getParameterTypes().length == 1;
 	}
 
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
@@ -221,7 +221,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 					return;
 				if (getSelectedItem() == null)
 					return;	
-				getReorderRenameParameterWrapperRefactoring().setNewParameterOrder(move(up, getSelectedItem()));
+				getModifyParametersRefactoring().setNewParameterOrder(move(up, getSelectedItem()));
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(selection);
@@ -266,15 +266,15 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 	
 	private String[] moveUp(ParameterInfo element){
-		int position= getReorderRenameParameterWrapperRefactoring().getNewParameterPosition(element.oldName);
+		int position= getModifyParametersRefactoring().getNewParameterPosition(element.oldName);
 		Assert.isTrue(position > 0);
-		return swap(getReorderRenameParameterWrapperRefactoring().getNewParameterOrder(), position - 1, position);
+		return swap(getModifyParametersRefactoring().getNewParameterOrder(), position - 1, position);
 	}
 	
 	private String[] moveDown(ParameterInfo element){
-		int position= getReorderRenameParameterWrapperRefactoring().getNewParameterPosition(element.oldName);
-		Assert.isTrue(position < getReorderRenameParameterWrapperRefactoring().getParamaterPermutation().length - 1);
-		return swap(getReorderRenameParameterWrapperRefactoring().getNewParameterOrder(), position + 1, position);
+		int position= getModifyParametersRefactoring().getNewParameterPosition(element.oldName);
+		Assert.isTrue(position < getModifyParametersRefactoring().getParamaterPermutation().length - 1);
+		return swap(getModifyParametersRefactoring().getNewParameterOrder(), position + 1, position);
 	}
 	
 	private static String[] swap(String[] array, int p1, int p2){
@@ -284,7 +284,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		return array;
 	}
 	
-	private ModifyParametersrRefactoring getReorderRenameParameterWrapperRefactoring(){
+	private ModifyParametersrRefactoring getModifyParametersRefactoring(){
 		return	(ModifyParametersrRefactoring)getRefactoring();
 	}
 	
@@ -298,7 +298,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 	
 	private RefactoringStatus validateTable(Map renamings) throws JavaModelException{
-		IMultiRenameRefactoring ref= getReorderRenameParameterWrapperRefactoring();
+		IMultiRenameRefactoring ref= getModifyParametersRefactoring();
 		ref.setNewNames(renamings);
 		return ref.checkNewNames();
 	}
@@ -328,7 +328,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	private void updateSignaturePreview() {
 		try{
-			fSignaturePreview.setText("Method Signature Preview: " + getReorderRenameParameterWrapperRefactoring().getMethodSignaturePreview());
+			fSignaturePreview.setText("Method Signature Preview: " + getModifyParametersRefactoring().getMethodSignaturePreview());
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Reorder/rename parameters", "Unexpected exception. See log for details.");
 		}	
