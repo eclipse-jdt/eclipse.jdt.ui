@@ -61,6 +61,8 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	 */
 	public void check(IDocument document, IRegion[] regions, SpellingContext context, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellingEngine engine= getEngine(context.getContentType());
+		if (engine == null)
+			engine= getEngine(TEXT_CONTENT_TYPE);
 		if (engine != null)
 			engine.check(document, regions, context, collector, monitor);
 	}
