@@ -28,12 +28,14 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 				URL url = JavaDocLocations.getJavadocBaseLocation((IJavaElement) element);
 				if (url != null) {
 					doc = url.toExternalForm();
-					return text + " - " + doc; //$NON-NLS-1$
+					Object[] args= new Object[] { text, doc };
+					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args);
+				} else {
+					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-
 		}
 		return text;
 

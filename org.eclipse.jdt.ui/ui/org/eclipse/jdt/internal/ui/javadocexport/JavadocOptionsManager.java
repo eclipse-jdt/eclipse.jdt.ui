@@ -142,9 +142,10 @@ public class JavadocOptionsManager {
 				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
 				element= reader.readXML();
 	
-				if (element == null)
+				if (element == null) {
+					fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectCE.warning")); //$NON-NLS-1$
 					loadStore(settings, currSelection);
-				else
+				} else
 					loadStore(element, settings);
 			} catch(CoreException e) {
 				JavaPlugin.log(e);
@@ -155,7 +156,6 @@ public class JavadocOptionsManager {
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectIOE.warning")); //$NON-NLS-1$
 				loadStore(settings, currSelection);
 			} catch(SAXException e) {
-				JavaPlugin.log(e);
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectSAXE.warning")); //$NON-NLS-1$
 				loadStore(settings, currSelection);
 			}		

@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -27,7 +28,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -38,10 +42,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
+import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -214,7 +221,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 4, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;
 	
-		String[] buttonlabels= new String[] {JavadocExportMessages.getString("JavadcoStandardWizardPage.selectallbutton.label") , JavadocExportMessages.getString("JavadcoStandardWizardPage.clearallbutton.label")}; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] buttonlabels= new String[] {JavadocExportMessages.getString("JavadcoStandardWizardPage.selectallbutton.label") , JavadocExportMessages.getString("JavadcoStandardWizardPage.clearallbutton.label"), JavadocExportMessages.getString("JavadocStandardWizardPage.configurebutton.label")}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		JavadocLinkDialogLabelProvider labelProvider= new JavadocLinkDialogLabelProvider();
 		
@@ -227,6 +234,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		
 		LayoutUtil.setHorizontalGrabbing(fListDialogField.getListControl(null));
 		
+		fListDialogField.enableButton(2, false);
+	
 		fTempLinks= createTempLinksStore();
 		UpdateCheckedListGroup();
 		
@@ -291,8 +300,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					IPackageFragmentRoot el = jproject.getPackageFragmentRoot(curr.getPath().toOSString());
 					if(el != null) {
 						if (!referencedClasses.contains(el)) {
-							URL url= JavaDocLocations.getJavadocBaseLocation(el);
-							if(url != null)
+//							URL url= JavaDocLocations.getJavadocBaseLocation(el);
+//							if(url != null)
 								referencedClasses.add(el);
 						}
 					}
@@ -486,14 +495,77 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		 * @see IListAdapter#customButtonPressed(DialogField, int)
 		 */
 		public void customButtonPressed(DialogField field, int index) {
+				if(index == 2)
+					doEditButtonPressed();
 		}
+
 
 		/**
 		 * @see IListAdapter#selectionChanged(DialogField)
 		 */
 		public void selectionChanged(DialogField field) {
+			List selection = fListDialogField.getSelectedElements();
+			if(selection.size() != 1) {
+					fListDialogField.enableButton(2, false);
+			} else {
+				fListDialogField.enableButton(2, true);
+			}
 		}
 
 	}
+	
+		/**
+		 * Method doEditButtonPressed.
+		 */
+	private void doEditButtonPressed() {
 
+		StructuredSelection selection =	(StructuredSelection) fListDialogField.getTableViewer().getSelection();
+		Iterator iter = selection.iterator();
+
+		Object obj = selection.getFirstElement();
+		if (obj instanceof IAdaptable) {
+			IJavaElement el = (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+
+			JavadocPropertyDialog jdialog = new JavadocPropertyDialog(getShell(), el);
+			jdialog.open();
+
+		}
+	}
+	
+	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
+		
+		private JavadocConfigurationBlock fJavadocConfigurationBlock;
+		private IJavaElement fElement;
+				
+		public JavadocPropertyDialog(Shell parent, IJavaElement selection) {
+			super(parent);
+			setTitle(JavadocExportMessages.getString("JavadocStandardWizardPage.javadocpropertydialog.title")); //$NON-NLS-1$
+	
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock( selection, parent , this);
+		}
+				
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite)super.createDialogArea(parent);			
+			Control inner= fJavadocConfigurationBlock.createContents(composite);
+			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			return composite;
+		}
+		
+		public void statusChanged(IStatus status) {
+			updateStatus(status);
+			
+		}
+			
+		/**
+		 * @see Dialog#okPressed()
+		 */
+		protected void okPressed() {
+			fJavadocConfigurationBlock.performOk();
+			super.okPressed();
+			
+			fListDialogField.refresh();
+		}
+
+	}
+	
 }
