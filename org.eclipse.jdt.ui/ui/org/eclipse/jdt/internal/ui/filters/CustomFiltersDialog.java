@@ -176,8 +176,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections(getEnabledFilterDescriptors());
-
-		if (getInitialSelections() != null && !getInitialSelections().isEmpty())
+		
+		List initialSelection= getInitialElementSelections();
+		if (initialSelection != null && !initialSelection.isEmpty())
 			checkInitialSelections();
 
 		// Description
@@ -236,7 +237,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	}
 
 	private void checkInitialSelections() {
-		Iterator itemsToCheck= getInitialSelections().iterator();
+		Iterator itemsToCheck= getInitialElementSelections().iterator();
 		while (itemsToCheck.hasNext())
 			fCheckBoxList.setChecked(itemsToCheck.next(),true);
 	}
