@@ -69,7 +69,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -254,7 +253,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			}
 			final SuperTypeConstraintsSolver solver= new SuperTypeConstraintsSolver(model);
 			solver.solveConstraints();
-			fTypeMatches= solver.getTypeMatches();
+			fTypeMatches= solver.getTypeOccurrences();
 			fObsoleteCasts= solver.getObsoleteCasts();
 		} finally {
 			monitor.done();
@@ -376,7 +375,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		IJavaProject project= null;
 		for (int index= 0; index < nodes.length; index++) {
 			node= nodes[index];
-			project= ASTCreator.getCu(node).getJavaProject();
+			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
 			if (project != null) {
 				final List fields= getReferencingFields(node, project);
 				for (int offset= 0; offset < fields.size(); offset++) {
@@ -409,7 +408,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		IJavaProject project= null;
 		for (int index= 0; index < nodes.length; index++) {
 			node= nodes[index];
-			project= ASTCreator.getCu(node).getJavaProject();
+			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
 			if (project != null) {
 				method= getReferencingMethod(node, project);
 				if (method != null) {
