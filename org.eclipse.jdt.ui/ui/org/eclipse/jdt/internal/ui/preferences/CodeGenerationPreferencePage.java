@@ -23,7 +23,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.codegeneration.StubUtility;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -81,11 +80,11 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	
 
 	private static String[] unpackOrderList(String str) {
-		StringTokenizer tok= new StringTokenizer(str, ", "); //$NON-NLS-1$
+		StringTokenizer tok= new StringTokenizer(str, ","); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken();
+			res[i]= tok.nextToken().trim();
 		}
 		return res;
 	}
