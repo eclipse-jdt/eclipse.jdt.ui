@@ -38,11 +38,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.jsp.JspUIPlugin;
 
 import org.eclipse.ui.IWorkbenchPage;
@@ -71,12 +73,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
