@@ -559,7 +559,6 @@
             label="%Refactoring.menu.label"
             path="edit">
          	<separator name="undoRedoGroup"/>
-         	<separator name="selectionGroup"/>
          	<separator name="reorgGroup"/>
          	<separator name="codingGroup"/>
       	</menu>
@@ -573,21 +572,7 @@
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
-		
-		<!-- selectionGroup  -->
-		<action id="StructureSelectNextAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
-			label="%Refactoring.structureSelection.next.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction"/>
-		<action id="StructureSelectAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
-			label="%Refactoring.structureSelection.up.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction"/>
-		<action id="StructureSelectPreviousAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
-			label="%Refactoring.structureSelection.previous.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction"/>
-		
+				
 		<!-- reorg group  -->		
 		<action id="MoveAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
