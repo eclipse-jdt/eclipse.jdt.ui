@@ -68,21 +68,67 @@ public class CodeFormatterUtil {
 	
 	/**
 	 * Gets the current tab width.
-	 * @param project The project where the source is used, used for project specific options or <code>null</code> if
-	 * 	the project is unknown and the workspace default should be used
-	 * 	@return The indent width
+	 * 
+	 * @param project The project where the source is used, used for project
+	 *        specific options or <code>null</code> if the project is unknown
+	 *        and the workspace default should be used
+	 * @return The tab width
 	 */
 	public static int getTabWidth(IJavaProject project) {
-		String tabSize;
-		if (project != null) {
-			tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
-		} else {
-			tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-		}
+		return getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+	}
+
+	/**
+	 * Returns the current indent width.
+	 * 
+	 * @param project the project where the source is used or <code>null</code>
+	 *        if the project is unknown and the workspace default should be used
+	 * @return the indent width
+	 * @since 3.1
+	 */
+	public static int getIndentWidth(IJavaProject project) {
+		String key;
+		if (DefaultCodeFormatterConstants.MIXED.equals(getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+		
+		return getCoreOption(project, key, 4);
+	}
+
+	/**
+	 * Returns the possibly <code>project</code>-specific core preference
+	 * defined under <code>key</code>.
+	 * 
+	 * @param project the project to get the preference from, or
+	 *        <code>null</code> to get the global preference
+	 * @param key the key of the preference
+	 * @return the value of the preference
+	 * @since 3.1
+	 */
+	private static String getCoreOption(IJavaProject project, String key) {
+		if (project == null)
+			return JavaCore.getOption(key);
+		return project.getOption(key, true);
+	}
+
+	/**
+	 * Returns the possibly <code>project</code>-specific core preference
+	 * defined under <code>key</code>, or <code>def</code> if the value is
+	 * not a integer.
+	 * 
+	 * @param project the project to get the preference from, or
+	 *        <code>null</code> to get the global preference
+	 * @param key the key of the preference
+	 * @param def the default value
+	 * @return the value of the preference
+	 * @since 3.1
+	 */
+	private static int getCoreOption(IJavaProject project, String key, int def) {
 		try {
-			return Integer.parseInt(tabSize);
+			return Integer.parseInt(getCoreOption(project, key));
 		} catch (NumberFormatException e) {
-			return 4;
+			return def;
 		}
 	}
 

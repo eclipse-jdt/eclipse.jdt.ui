@@ -1,15 +1,16 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
+ * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -153,83 +154,155 @@ public class Strings {
 	 * 
 	 * @param line the text line
 	 * @param tabWidth the width of the '\t' character.
+	 * @deprecated use {@link #computeIndentUnits(String, int, int)} instead
 	 */
 	public static int computeIndent(String line, int tabWidth) {
-		int result= 0;
-		int blanks= 0;
-		int size= line.length();
-		for (int i= 0; i < size; i++) {
-			char c= line.charAt(i);
-			if (c == '\t') {
-				result++;
-				blanks= 0;
-			} else if (isIndentChar(c)) {
-				blanks++;
-				if (blanks == tabWidth) {
-					result++;
-					blanks= 0;
-				}
-			} else {
-				return result;
-			}
-		}
-		return result;
+		return computeIndentUnits(line, tabWidth, tabWidth);
 	}
 	
 	/**
-	 * Removes the given number of idents from the line. Asserts that the given line 
+	 * Returns the indent of the given string in indentation units. Odd spaces
+	 * are not counted.
+	 * 
+	 * @param line the text line
+	 * @param tabWidth the width of the '\t' character in space equivalents
+	 * @param indentWidth the width of one indentation unit in space equivalents
+	 * @since 3.1
+	 */
+	public static int computeIndentUnits(String line, int tabWidth, int indentWidth) {
+		if (indentWidth == 0)
+			return -1;
+		int visualLength= measureIndentLength(line, tabWidth);
+		return visualLength / indentWidth;
+	}
+	
+	/**
+	 * Computes the visual length of the indentation of a
+	 * <code>CharSequence</code>, counting a tab character as the size until
+	 * the next tab stop and every other whitespace character as one.
+	 * 
+	 * @param line the string to measure the indent of
+	 * @param tabSize the visual size of a tab in space equivalents
+	 * @return the visual length of the indentation of <code>line</code>
+	 * @since 3.1
+	 */
+	public static int measureIndentLength(CharSequence line, int tabSize) {
+		int length= 0;
+		int max= line.length();
+		for (int i= 0; i < max; i++) {
+			char ch= line.charAt(i);
+			if (ch == '\t') {
+				int reminder= length % tabSize;
+				length += tabSize - reminder;
+			} else if (isIndentChar(ch)) {
+				length++;
+			} else {
+				return length;
+			}
+		}
+		return length;
+	}
+
+	/**
+	 * Removes the given number of indents from the line. Asserts that the given line 
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
+	 * 
+	 * @deprecated as of 3.1 use {@link #trimIndent(String, int, int, int)} instead
 	 */
 	public static String trimIndent(String line, int indentsToRemove, int tabWidth) {
+		return trimIndent(line, indentsToRemove, tabWidth, tabWidth);
+	}
+	
+	/**
+	 * Removes the given number of indents from the line. Asserts that the given line 
+	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
+	 * the line is returned.
+	 * 
+	 * @since 3.1
+	 */
+	public static String trimIndent(String line, int indentsToRemove, int tabWidth, int indentWidth) {
 		if (line == null || indentsToRemove <= 0)
 			return line;
-			
+
+		final int spaceEquivalentsToRemove= indentsToRemove * indentWidth;
+		
 		int start= 0;
-		int indents= 0;
-		int blanks= 0;
+		int spaceEquivalents= 0;
 		int size= line.length();
+		String prefix= null;
 		for (int i= 0; i < size; i++) {
 			char c= line.charAt(i);
 			if (c == '\t') {
-				indents++;
-				blanks= 0;
+				int remainder= spaceEquivalents % tabWidth;
+				spaceEquivalents += tabWidth - remainder;
 			} else if (isIndentChar(c)) {
-					blanks++;
-					if (blanks == tabWidth) {
-						indents++;
-						blanks= 0;
-					}
+				spaceEquivalents++;
 			} else {
 				// Assert.isTrue(false, "Line does not have requested number of indents"); //$NON-NLS-1$
 				start= i;
 				break; 
 			}
-			if (indents == indentsToRemove) {
+			if (spaceEquivalents == spaceEquivalentsToRemove) {
 				start= i + 1;
 				break;
-			}	
+			}
+			if (spaceEquivalents > spaceEquivalentsToRemove) {
+				// can happen if tabSize > indentSize, e.g tabsize==8, indent==4, indentsToRemove==1, line prefixed with one tab
+				// this implements the third option
+				start= i + 1; // remove the tab
+				// and add the missing spaces
+				char[] missing= new char[spaceEquivalents - spaceEquivalentsToRemove];
+				Arrays.fill(missing, ' ');
+				prefix= new String(missing);
+				break;
+			}
 		}
+		String trimmed;
 		if (start == size)
-			return ""; //$NON-NLS-1$
+			trimmed= ""; //$NON-NLS-1$
 		else
-			return line.substring(start);
+			trimmed= line.substring(start);
+		
+		if (prefix == null)
+			return trimmed;
+		return prefix + trimmed;
+	}
+
+	/**
+	 * Removes the common number of indents from all lines. If a line
+	 * only consists out of white space it is ignored.
+	 * @deprecated as of 3.1 use {@link #trimIndentation(String[], int, int)} instead
+	 */
+	public static void trimIndentation(String[] lines, int tabWidth) {
+		trimIndentation(lines, tabWidth, tabWidth);
 	}
 	
 	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
 	 */
-	public static void trimIndentation(String[] lines, int tabWidth) {
-		trimIndentation(lines, tabWidth, true);
+	public static void trimIndentation(String[] lines, int tabWidth, int indentWidth) {
+		trimIndentation(lines, tabWidth, indentWidth, true);
 	}
 	
 	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored. If <code>
 	 * considerFirstLine</code> is false the first line will be ignored.
+	 * @deprecated as of 3.1 use {@link #trimIndentation(String[], int, int, boolean)} instead
 	 */
 	public static void trimIndentation(String[] lines, int tabWidth, boolean considerFirstLine) {
+		trimIndentation(lines, tabWidth, tabWidth, considerFirstLine);
+	}
+	
+	/**
+	 * Removes the common number of indents from all lines. If a line
+	 * only consists out of white space it is ignored. If <code>
+	 * considerFirstLine</code> is false the first line will be ignored.
+	 * @since 3.1
+	 */
+	public static void trimIndentation(String[] lines, int tabWidth, int indentWidth, boolean considerFirstLine) {
 		String[] toDo= new String[lines.length];
 		// find indentation common to all lines
 		int minIndent= Integer.MAX_VALUE; // very large
@@ -238,7 +311,7 @@ public class Strings {
 			if (containsOnlyWhitespaces(line))
 				continue;
 			toDo[i]= line;
-			int indent= computeIndent(line, tabWidth);
+			int indent= computeIndentUnits(line, tabWidth, indentWidth);
 			if (indent < minIndent) {
 				minIndent= indent;
 			}
@@ -249,12 +322,12 @@ public class Strings {
 			for (int i= considerFirstLine ? 0 : 1; i < toDo.length; i++) {
 				String s= toDo[i];
 				if (s != null)
-					lines[i]= trimIndent(s, minIndent, tabWidth);
+					lines[i]= trimIndent(s, minIndent, tabWidth, indentWidth);
 				else {
 					String line= lines[i];
-					int indent= computeIndent(line, tabWidth);
+					int indent= computeIndentUnits(line, tabWidth, indentWidth);
 					if (indent > minIndent)
-						lines[i]= trimIndent(line, minIndent, tabWidth);
+						lines[i]= trimIndent(line, minIndent, tabWidth, indentWidth);
 					else
 						lines[i]= trimLeadingTabsAndSpaces(line);
 				}
@@ -262,23 +335,50 @@ public class Strings {
 		}
 	}
 	
+	/**
+	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * a multiple of indentation units.
+	 * 
+	 * @param line the line to scan
+	 * @param tabWidth the size of one tab in space equivalents
+	 * @return the indent part of <code>line</code>, but no odd spaces
+	 * @deprecated as of 3.1 use {@link #getIndentString(String, int, int)} instead
+	 */
 	public static String getIndentString(String line, int tabWidth) {
+		return getIndentString(line, tabWidth, tabWidth);
+	}
+	
+	/**
+	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * a multiple of indentation units.
+	 * 
+	 * @param line the line to scan
+	 * @param tabWidth the size of one tab in space equivalents
+	 * @return the indent part of <code>line</code>, but no odd spaces
+	 * @since 3.1
+	 */
+	public static String getIndentString(String line, int tabWidth, int indentWidth) {
 		int size= line.length();
 		int end= 0;
-		int blanks= 0;
+		
+		int spaceEquivs= 0;
+		int characters= 0;
 		for (int i= 0; i < size; i++) {
 			char c= line.charAt(i);
 			if (c == '\t') {
-				end= i + 1;
-				blanks= 0;
+				int remainder= spaceEquivs % tabWidth;
+				spaceEquivs += tabWidth - remainder;
+				characters++;
 			} else if (isIndentChar(c)) {
-				blanks++;
-				if (blanks == tabWidth) {
-					end= i + 1;
-					blanks= 0;
-				}
+				spaceEquivs++;
+				characters++;
 			} else {
 				break;
+			}
+			if (spaceEquivs >= indentWidth) {
+				end += characters;
+				characters= 0;
+				spaceEquivs= spaceEquivs % indentWidth;
 			}
 		}
 		if (end == 0)
@@ -294,32 +394,42 @@ public class Strings {
 	 * indents in the given string <code>line</code>. Returns 
 	 * <code>-1<code> if the line isn't prefixed with an indent of
 	 * the given number of indents. 
+	 * @deprecated as of 3.1 use {@link #computeIndentLength(String, int, int, int)} instead
 	 */
 	public static int computeIndentLength(String line, int numberOfIndents, int tabWidth) {
+		return computeIndentLength(line, numberOfIndents, tabWidth, tabWidth);
+	}
+	
+	/**
+	 * Returns the length of the string representing the number of 
+	 * indents in the given string <code>line</code>. Returns 
+	 * <code>-1<code> if the line isn't prefixed with an indent of
+	 * the given number of indents.
+	 * @since 3.1
+	 */
+	public static int computeIndentLength(String line, int numberOfIndents, int tabWidth, int indentWidth) {
 		Assert.isTrue(numberOfIndents >= 0);
 		Assert.isTrue(tabWidth >= 0);
+		Assert.isTrue(indentWidth >= 0);
+		
+		int spaceEquivalents= numberOfIndents * indentWidth;
+		
 		int size= line.length();
 		int result= -1;
-		int indents= 0;
 		int blanks= 0;
-		for (int i= 0; i < size && indents < numberOfIndents; i++) {
+		for (int i= 0; i < size && blanks < spaceEquivalents; i++) {
 			char c= line.charAt(i);
 			if (c == '\t') {
-				indents++;
-				result= i;
-				blanks= 0;
+				int remainder= blanks % tabWidth;
+				blanks += tabWidth - remainder;
 			} else if (isIndentChar(c)) {
 				blanks++;
-				if (blanks == tabWidth) {
-					result= i;
-					indents++;
-					blanks= 0;
-				}
 			} else {
 				break;
 			}
+			result= i;
 		}
-		if (indents < numberOfIndents)
+		if (blanks < spaceEquivalents)
 			return -1;
 		return result + 1;
 	}
@@ -345,8 +455,19 @@ public class Strings {
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
+	 * @deprecated use the version specifying the indent width instead
 	 */
 	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent, String lineDelim) {
+		return changeIndent(code, codeIndentLevel, tabWidth, tabWidth, newIndent, lineDelim);
+	}
+	
+	/**
+	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
+	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
+	 * the middle of a line)
+	 * @since 3.1
+	 */
+	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, int indentWidth, String newIndent, String lineDelim) {
 		try {
 			ILineTracker tracker= new DefaultLineTracker();
 			tracker.set(code);
@@ -368,7 +489,7 @@ public class Strings {
 				} else { // no new line after last line
 					buf.append(lineDelim);
 					buf.append(newIndent); 
-					buf.append(trimIndent(line, codeIndentLevel, tabWidth));
+					buf.append(trimIndent(line, codeIndentLevel, tabWidth, indentWidth));
 				}
 			}
 			return buf.toString();
@@ -378,7 +499,14 @@ public class Strings {
 		}
 	}
 	
+	/**
+	 * @deprecated use {@link #trimIndentation(String, int, int, boolean)} instead
+	 */
 	public static String trimIndentation(String source, int tabWidth, boolean considerFirstLine) {
+		return trimIndentation(source, tabWidth, tabWidth, considerFirstLine);
+	}
+	
+	public static String trimIndentation(String source, int tabWidth, int indentSize, boolean considerFirstLine) {
 		try {
 			ILineTracker tracker= new DefaultLineTracker();
 			tracker.set(source);
@@ -391,7 +519,7 @@ public class Strings {
 				int offset= region.getOffset();
 				lines[i]= source.substring(offset, offset + region.getLength());
 			}
-			Strings.trimIndentation(lines, tabWidth, considerFirstLine);
+			Strings.trimIndentation(lines, tabWidth, indentSize, considerFirstLine);
 			StringBuffer result= new StringBuffer();
 			int last= size - 1;
 			for (int i= 0; i < size; i++) {
