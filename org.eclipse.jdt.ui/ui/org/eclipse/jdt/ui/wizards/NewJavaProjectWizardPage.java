@@ -223,6 +223,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * it becomes invisible
 	 */	
 	public void setVisible(boolean visible) {
+		super.setVisible(visible);		
 		if (visible) {
 			// evaluate if a initialization is required
 			if (fProjectModified || isNewProjectHandle()) {
@@ -231,7 +232,6 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				fProjectModified= false;
 			}
 		}
-		super.setVisible(visible);
 	}
 	
 	private boolean isNewProjectHandle() {

@@ -128,10 +128,10 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	 * @see WizardPage#becomesVisible
 	 */
 	public void setVisible(boolean visible) {
+		super.setVisible(visible);
 		if (visible) {
 			setFocus();
 		}
-		super.setVisible(visible);
 	}	
 	
 }

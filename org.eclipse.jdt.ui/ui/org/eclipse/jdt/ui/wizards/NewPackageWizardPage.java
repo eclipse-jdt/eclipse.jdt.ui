@@ -142,10 +142,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
+		super.setVisible(visible);
 		if (visible) {
 			setFocus();
 		}
-		super.setVisible(visible);
 	}
 	
 	/**
