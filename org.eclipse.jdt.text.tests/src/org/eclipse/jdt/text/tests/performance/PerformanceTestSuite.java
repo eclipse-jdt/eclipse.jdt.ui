@@ -42,7 +42,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(ConvertLineDelimitersProjectTest.suite());
 		addTest(JavaFormatterProjectTest.suite());
 		addTest(ContentTypeTest.suite());
-		addTest(EventDrivenTestSuite.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
 }
