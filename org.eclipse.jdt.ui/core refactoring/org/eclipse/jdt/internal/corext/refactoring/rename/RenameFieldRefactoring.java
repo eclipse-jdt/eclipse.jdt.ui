@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -196,8 +197,9 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return GetterSetterUtil.getSetter(fField, fPrefixes, fSuffixes);
 	}
 
-	public String getNewGetterName(){
-		return new NameProposer(fPrefixes, fSuffixes).proposeGetterName(fNewName);
+	public String getNewGetterName() throws JavaModelException {
+		boolean isBoolean=	fField.getTypeSignature() == Signature.SIG_BOOLEAN;
+		return new NameProposer(fPrefixes, fSuffixes).proposeGetterName(fNewName, isBoolean);
 	}
 	
 	public String getNewSetterName(){

@@ -122,11 +122,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			fSkipAllExisting= (fSkipExistingQuery == null);
 	
 			String fieldName= field.getElementName();
-			String accessorName= fNameProposer.proposeAccessorName(field);
 			String argname= fNameProposer.proposeArgName(field);
 			
 			boolean isStatic= Flags.isStatic(field.getFlags());
 			boolean isFinal= Flags.isFinal(field.getFlags());
+			boolean isBoolean=	field.getTypeSignature() == Signature.SIG_BOOLEAN;
 			
 			String typeName= Signature.toString(field.getTypeSignature());
 			
@@ -135,10 +135,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			boolean addComments= fSettings.createComments;
 			
 			// test if the getter already exists
-			String getterName= "get" + accessorName; //$NON-NLS-1$
+			String getterName= fNameProposer.proposeGetterName(fieldName, isBoolean);
 			IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
 			
-			String setterName= "set" + accessorName; //$NON-NLS-1$
+			String setterName= fNameProposer.proposeSetterName(fieldName);
 			String[] args= new String[] { field.getTypeSignature() };		
 			IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 			
@@ -147,7 +147,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 						
 			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
 			int indent= StubUtility.getIndentUsed(field);
-			
+					
 			if (doCreateGetter) {			
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();

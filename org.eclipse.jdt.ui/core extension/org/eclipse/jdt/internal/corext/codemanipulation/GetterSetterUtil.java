@@ -13,7 +13,7 @@ public class GetterSetterUtil {
 	}
 	
 	public static IMethod getGetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
-		String getterName= new NameProposer(namePrefixes, nameSuffixes).proposeGetterName(field.getElementName());
+		String getterName= new NameProposer(namePrefixes, nameSuffixes).proposeGetterName(field);
 		return JavaModelUtil.findMethod(getterName, new String[0], false, field.getDeclaringType());
 	}
 	

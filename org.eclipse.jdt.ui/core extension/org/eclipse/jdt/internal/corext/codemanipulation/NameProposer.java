@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 public class NameProposer {
 	
@@ -13,6 +15,7 @@ public class NameProposer {
 	private String[] fNameSuffixes;
 	
 	public static final String GETTER_NAME= "get";
+	public static final String GETTER_BOOL_NAME= "is";
 	public static final String SETTER_NAME= "set";
 
 	public NameProposer(String[] prefixes, String[] suffixes) {
@@ -24,11 +27,27 @@ public class NameProposer {
 		this(new String[0], new String[0]);
 	}
 	
-	public String proposeGetterName(String fieldName){
-		return GETTER_NAME + proposeAccessorName(fieldName);
+	public String proposeGetterName(String fieldName, boolean isBoolean) {
+		if (isBoolean) {
+			String name= removePrefixAndSuffix(fieldName);
+			int prefixLen=  GETTER_BOOL_NAME.length();
+			if (name.startsWith(GETTER_BOOL_NAME) 
+				&& name.length() > prefixLen && Character.isUpperCase(name.charAt(prefixLen))) {
+				return name;
+			} else {
+				return GETTER_BOOL_NAME + proposeAccessorName(fieldName);
+			}
+		} else {
+			return GETTER_NAME + proposeAccessorName(fieldName);
+		}
 	}
 	
-	public String proposeSetterName(String fieldName){
+	public String proposeGetterName(IField field) throws JavaModelException {
+		boolean isBoolean=	field.getTypeSignature() == Signature.SIG_BOOLEAN;
+		return proposeGetterName(field.getElementName(), isBoolean);
+	}	
+	
+	public String proposeSetterName(String fieldName) {
 		return SETTER_NAME + proposeAccessorName(fieldName);
 	}
 	
@@ -61,7 +80,7 @@ public class NameProposer {
 	public String[] proposeParameterNames(String[] paramTypes) {
 		String[] res= new String[paramTypes.length];
 		for (int i= 0; i < paramTypes.length; i++) {
-			String name= paramTypes[i];
+			String name= Signature.getSimpleName(paramTypes[i]);
 			
 			char firstLetter= name.charAt(0);
 			if (Character.isUpperCase(firstLetter)) {
