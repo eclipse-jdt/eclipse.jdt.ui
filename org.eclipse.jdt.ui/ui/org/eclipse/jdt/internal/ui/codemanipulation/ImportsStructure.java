@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.DocumentManager;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
@@ -34,9 +35,9 @@ public class ImportsStructure implements IImportsStructure {
 	private boolean fReplaceExistingImports;
 	
 	/**
-	 * Create an ImportsStructure for a compilation unit with existing
+	 * Creates an ImportsStructure for a compilation unit with existing
 	 * imports. New imports are added next to the existing import that
-	 * has the best match
+	 * has the best match.
 	 */
 	public ImportsStructure(ICompilationUnit cu) throws JavaModelException {
 		fCompilationUnit= cu;
@@ -58,7 +59,7 @@ public class ImportsStructure implements IImportsStructure {
 	}
 
 	/**
-	 * Create an ImportsStructure for a compilation unit where exiting imports should be
+	 * Creates an ImportsStructure for a compilation unit where exiting imports should be
 	 * completly ignored. Create will replace all existing imports 
 	 * @param preferenceOrder Defines the prefered order of imports.
 	 * @param importThreshold Defines the number of imports in a package needed to introduce a
@@ -141,21 +142,6 @@ public class ImportsStructure implements IImportsStructure {
 	}
 
 	/**
-	 * @deprecated
-	 */
-	public void sortIn(String qualifiedTypeName) {
-		addImport(qualifiedTypeName);
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public void sortIn(String packageName, String typeName) {
-		addImport(packageName, typeName);
-	}	
-
-	
-	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * the best match algorithm. If an import already exists, the import is
 	 * not added.
@@ -164,7 +150,7 @@ public class ImportsStructure implements IImportsStructure {
 	public void addImport(String qualifiedTypeName) {
 		String packName= Signature.getQualifier(qualifiedTypeName);
 		String typeName= Signature.getSimpleName(qualifiedTypeName);
-		sortIn(packName, typeName);
+		addImport(packName, typeName);
 	}
 	
 	/**
@@ -202,7 +188,7 @@ public class ImportsStructure implements IImportsStructure {
 	}
 	
 	/**
-	 * Add a new import declaration that is sorted in the structure using
+	 * Adds a new import declaration that is sorted in the structure using
 	 * the best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param packageName The package name of the type to import
@@ -210,7 +196,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
 	public void addImport(String packageName, String enclosingTypeName, String typeName) {
-		sortIn(JavaModelUtility.concatenateName(packageName, enclosingTypeName), typeName);
+		addImport(JavaModelUtility.concatenateName(packageName, enclosingTypeName), typeName);
 	}	
 		
 	private static int getMatchLen(String s, String t) {
@@ -231,7 +217,7 @@ public class ImportsStructure implements IImportsStructure {
 	}
 	
 	/**
-	 * Creates all new elements in the import structure
+	 * Creates all new elements in the import structure.
 	 * Returns all created IImportDeclaration. Does not return null
 	 */	
 	public IImportDeclaration[] create(boolean save, IProgressMonitor monitor) throws CoreException {
@@ -337,14 +323,30 @@ public class ImportsStructure implements IImportsStructure {
 					} else {
 						buf.append(lineDelim);
 					}
-				}			
-				doc.replace(importsStart, importsLen, buf.toString());
+				}
+				String newContent= buf.toString();
+				if (hasChanged(doc, importsStart, importsLen, newContent)) {
+					doc.replace(importsStart, importsLen, newContent);
+				}
 			} catch (BadLocationException e) {
 				// can not happen
-				e.printStackTrace();
+				JavaPlugin.log(e);
 			}
 		}
 	}
+	
+	private boolean hasChanged(IDocument doc, int offset, int length, String content) throws BadLocationException {
+		if (content.length() != length) {
+			return true;
+		}
+		for (int i= 0; i < length; i++) {
+			if (content.charAt(i) != doc.getChar(offset + i)) {
+				return true;
+			}
+		}
+		return false;	
+	}
+	
 
 	
 	private boolean isImportNeeded(String packName, IType[] cuTypes) {
