@@ -26,6 +26,11 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
   and enable the 'Rename with Participants' refactoring.
 - Fixed bug 37846. To do so we had to break the API of the class org.eclipse.jdt.ui.actions.SelectionDispatchAction. 
   See document apichanges_jdt-ui.html for a describtion how to deal with the breakage.
+- Editor
+	- Introduced "Smart Opening Brace". To enable go Preferences>Java>Work in Progress.
+	- Smart typing mode is enabled per default. Ctrl+M toggle the typing mode between "smart" and "raw". The default typing actions
+	  such as auto indent, automatic addition of '"', ']', ')', '}', Smart Semicolon, and Smart Opening Brace adhere to the typing mode.
+	- The automatic insertion of '}' has been changed to happen on <Enter> rather than on typing '{'.
 </pre>
 ========== Eclipse Build Input May 20th 2003 ==========<br>
 <pre>
