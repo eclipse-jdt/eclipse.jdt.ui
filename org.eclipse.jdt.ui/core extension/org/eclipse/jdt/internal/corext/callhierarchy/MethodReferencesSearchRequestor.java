@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 class MethodReferencesSearchRequestor extends SearchRequestor {
@@ -35,7 +34,7 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
      * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
      */
     public void acceptSearchMatch(SearchMatch match) {
-        if (fRequireExactMatch && (match.getAccuracy() != SearchPattern.R_EXACT_MATCH)) {
+        if (fRequireExactMatch && (match.getAccuracy() != SearchMatch.A_ACCURATE)) {
             return;
         }
         
