@@ -169,8 +169,7 @@ public class MoveCuUpdateCreator {
 			ICompilationUnit referencingCu= (ICompilationUnit)JavaCore.create(references[i].getResource());
 			if (hasSimpleReference(searchResultGroup) 
 				&& (!referencingCu.equals(movedUnit)) 
-				&& (!cuList.contains(referencingCu))
-				&& (!referencingCu.getImport(Utils.getPublicType(movedUnit).getFullyQualifiedName()).exists())){
+				&& (!cuList.contains(referencingCu))){
 					result.add(referencingCu);
 				}	
 		}
@@ -217,11 +216,14 @@ public class MoveCuUpdateCreator {
 	}
 	
 	private static ISearchPattern createSearchPattern(ICompilationUnit cu) throws JavaModelException{
-		IType publicType= Utils.getPublicType(cu);
-		if (publicType == null)
-			return null; 
-		else
-			return SearchEngine.createSearchPattern(publicType, IJavaSearchConstants.REFERENCES);
+		IType[] types= cu.getTypes();
+		if (types.length == 0)
+			return null;
+		ISearchPattern pattern= SearchEngine.createSearchPattern(types[0], IJavaSearchConstants.REFERENCES);
+		for(int i= 1; i < types.length; i++){ //not-idiomatic loop
+			pattern= SearchEngine.createOrSearchPattern(pattern, SearchEngine.createSearchPattern(types[i], IJavaSearchConstants.REFERENCES));
+		}
+		return pattern;
 	}
 
 	private static class UpdateTypeReferenceEdit extends SimpleTextEdit{
