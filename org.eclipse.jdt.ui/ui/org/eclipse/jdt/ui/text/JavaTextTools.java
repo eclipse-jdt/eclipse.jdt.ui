@@ -44,6 +44,8 @@ public class JavaTextTools {
 	private SingleTokenJavaScanner fMultilineCommentScanner;
 	/** The Java singleline comment scanner */
 	private SingleTokenJavaScanner fSinglelineCommentScanner;
+	/** The Java string scanner */
+	private SingleTokenJavaScanner fStringScanner;
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
@@ -66,6 +68,7 @@ public class JavaTextTools {
 		fCodeScanner= new JavaCodeScanner(fColorManager, store);
 		fMultilineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fStringScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_STRING);
 		fJavaDocScanner= new JavaDocScanner(fColorManager, store);
 		fPartitionScanner= new JavaPartitionScanner();
 	}
@@ -78,6 +81,7 @@ public class JavaTextTools {
 		fCodeScanner= null;
 		fMultilineCommentScanner= null;
 		fSinglelineCommentScanner= null;
+		fStringScanner= null;
 		fJavaDocScanner= null;
 		fPartitionScanner= null;
 		
@@ -131,6 +135,15 @@ public class JavaTextTools {
 	}
 	
 	/**
+	 * Returns a scanner which is configured to scan Java strings.
+	 *
+	 * @return a Java string scanner
+	 */
+	public RuleBasedScanner getStringScanner() {
+		return fStringScanner;
+	}
+	
+	/**
 	 * Returns a scanner which is configured to scan JavaDoc compliant comments.
 	 * Notes that the start sequence "/**" and the corresponding end sequence
 	 * are part of the JavaDoc comment.
@@ -164,7 +177,8 @@ public class JavaTextTools {
 		String[] types= new String[] {
 			JavaPartitionScanner.JAVA_DOC,
 			JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT,
-			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT
+			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT,
+			JavaPartitionScanner.JAVA_STRING
 		};
 		
 		return new RuleBasedPartitioner(getPartitionScanner(), types);
@@ -194,6 +208,7 @@ public class JavaTextTools {
 		return  fCodeScanner.affectsBehavior(event) ||
 					fMultilineCommentScanner.affectsBehavior(event) ||
 					fSinglelineCommentScanner.affectsBehavior(event) ||
+					fStringScanner.affectsBehavior(event) ||
 					fJavaDocScanner.affectsBehavior(event);
 	}
 	
@@ -210,6 +225,8 @@ public class JavaTextTools {
 			fMultilineCommentScanner.adaptToPreferenceChange(event);
 		else if (fSinglelineCommentScanner.affectsBehavior(event))
 			fSinglelineCommentScanner.adaptToPreferenceChange(event);
+		else if (fStringScanner.affectsBehavior(event))
+			fStringScanner.adaptToPreferenceChange(event);
 		else if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
 	}

@@ -114,6 +114,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/**
+	 * Returns the Java string scanner for this configuration.
+	 *
+	 * @return the Java string scanner
+	 */
+	protected RuleBasedScanner getStringScanner() {
+		return fJavaTextTools.getStringScanner();
+	}
+	
+	/**
 	 * Returns the JavaDoc scanner for this configuration.
 	 *
 	 * @return the JavaDoc scanner
@@ -171,6 +180,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		
+		dr= new RuleBasedDamagerRepairer(getStringScanner());
+		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_STRING);
+		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_STRING);
+		
 		return reconciler;
 	}
 
@@ -226,7 +239,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
 				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
-				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
+				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType) ||
+				JavaPartitionScanner.JAVA_STRING.equals(contentType))
 			return new DefaultTextDoubleClickStrategy();
 		return new JavaDoubleClickSelector();
 	}
@@ -299,7 +313,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
 	 */
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT };
+		return new String[] { 
+			IDocument.DEFAULT_CONTENT_TYPE, 
+			JavaPartitionScanner.JAVA_DOC, 
+			JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT, 
+			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT,
+			JavaPartitionScanner.JAVA_STRING
+		};
 	}
 	
 	/*

@@ -5,17 +5,28 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.custom.BidiSegmentEvent;
+import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
 
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -30,6 +41,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -54,6 +66,8 @@ import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 
 
 
@@ -97,17 +111,17 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	/**
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
-	 * 
-	 * This is the code that can be found in 1.0 fixing the bidi rendering of Java code.
-	 * Looking for something less vulernable in this stream.
-	 *
+	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		ISourceViewer viewer= super.createSourceViewer(parent, ruler, styles);
 		StyledText text= viewer.getTextWidget();
-		text.setBidiColoring(true);
+		text.addBidiSegmentListener(new  BidiSegmentListener() {
+			public void lineGetSegments(BidiSegmentEvent event) {
+				event.segments= getBidiLineSegments(event.lineOffset, event.lineText);
+			}
+		});
 		return viewer;
 	}
-	 */
 	
 	/**
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
@@ -384,5 +398,80 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
 			}
 		}
+	}
+	
+	/**
+	 * Returns a segmentation of the line of the given document appropriate for bidi rendering.
+	 * The default implementation returns only the string literals of a java code line as segments.
+	 * 
+	 * @param document the document
+	 * @param lineOffset the offset of the line
+	 * @return the line's bidi segmentation
+	 * @throws BadLocationException in case lineOffset is not valid in document
+	 */
+	public static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
+	
+		IRegion line= document.getLineInformationOfOffset(lineOffset);
+		ITypedRegion[] linePartitioning= document.computePartitioning(lineOffset, line.getLength());
+		
+		List segmentation= new ArrayList();
+		for (int i= 0; i < linePartitioning.length; i++) {
+			if (JavaPartitionScanner.JAVA_STRING.equals(linePartitioning[i].getType()))
+				segmentation.add(linePartitioning[i]);
+		}
+		
+		
+		if (segmentation.size() == 0) 
+			return null;
+			
+		int size= segmentation.size();
+		int[] segments= new int[size * 2 + 1];
+		
+		int j= 0;
+		for (int i= 0; i < size; i++) {
+			ITypedRegion segment= (ITypedRegion) segmentation.get(i);
+			
+			if (i == 0)
+				segments[j++]= 0;
+				
+			int offset= segment.getOffset() - lineOffset;
+			if (offset > segments[j - 1])
+				segments[j++]= offset;
+				
+			if (offset + segment.getLength() >= line.getLength())
+				break;
+				
+			segments[j++]= offset + segment.getLength();
+		}
+		
+		if (j < segments.length) {
+			int[] result= new int[j];
+			System.arraycopy(segments, 0, result, 0, j);
+			segments= result;
+		}
+		
+		return segments;
+	}
+		
+	/**
+	 * Returns a segmentation of the given line appropriate for bidi rendering. The default
+	 * implementation returns only the string literals of a java code line as segments.
+	 * 
+	 * @param lineOffset the offset of the line
+	 * @param line the content of the line
+	 * @return the line's bidi segmentation
+	 */
+	protected int[] getBidiLineSegments(int lineOffset, String line) {
+		IDocumentProvider provider= getDocumentProvider();
+		if (provider != null) {
+			IDocument document= provider.getDocument(getEditorInput());
+			if (document != null)
+				try {
+					return getBidiLineSegments(document, lineOffset);
+				} catch (BadLocationException x) {
+					// ignore
+				}
+		}
+		return null;
 	}
 }
