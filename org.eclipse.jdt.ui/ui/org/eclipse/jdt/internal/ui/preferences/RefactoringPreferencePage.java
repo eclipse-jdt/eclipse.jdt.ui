@@ -55,9 +55,8 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	}		
 
 	public void createFieldEditors() {
-		Composite parent= getFieldEditorParent();
-		addField(createSeverityLevelField(parent));
-		addField(createSaveAllField(parent));
+		addField(createSeverityLevelField(getFieldEditorParent()));
+		addField(createSaveAllField(getFieldEditorParent()));
 	}
 	
 	private FieldEditor createSeverityLevelField(Composite parent){
