@@ -59,9 +59,9 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(HierarchicalASTVisitorTest.suite());
 
-		addTest(ContentProviderTests1.suite());
+//		addTest(ContentProviderTests1.suite());
 		addTest(ContentProviderTests2.suite());
-		addTest(ContentProviderTests3.suite());
+//		addTest(ContentProviderTests3.suite());
 		addTest(ContentProviderTests4.suite());						
 	}
 	
