@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
@@ -75,7 +76,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+		setEnabled(fEditor != null);
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {
@@ -88,6 +89,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	 */
 	public void run() {
 		ICompilationUnit cu= getCompilationUnit();
+		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"))) //$NON-NLS-1$
+			return;
 		if (cu != null) {
 			ISelection s= fEditor.getSelectionProvider().getSelection();
 			IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());

@@ -15,15 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -34,6 +25,17 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -51,15 +53,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-
+import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -69,8 +69,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Organizes the imports of a compilation unit.
@@ -128,10 +133,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public OrganizeImportsAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-	}
-	
-	/* package */ void editorStateChanged() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
 	}
 	
 	/* (non-Javadoc)
@@ -242,7 +243,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-		runOnSingle(cu, true);
+		runOnSingle(cu, true, true);
 	}
 	
 	/* (non-Javadoc)
@@ -251,7 +252,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	protected void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
 		if (cus.length == 1) {
-			runOnSingle(cus[0], true);
+			runOnSingle(cus[0], true, false);
 		} else {
 			runOnMultiple(cus, true);
 		}
@@ -307,33 +308,30 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				ICompilationUnit cu= cus[i];
 				String cuLocation= cu.getPath().makeRelative().toString();
 				
-				if (!JavaModelUtil.isEditable(cu)) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.readonly", cuLocation); //$NON-NLS-1$
-					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-				} else {			
-					try {
-						cu= JavaModelUtil.toWorkingCopy(cu);
-						
-						monitor.subTask(cuLocation);
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
-						op.run(new SubProgressMonitor(monitor, 1));
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-						
-						ISourceRange errorRange= op.getErrorSourceRange();
-						if (errorRange != null) {
-							String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
-							status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-						} 
-					} catch (OrganizeImportError e) {
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
-						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
-					} catch (CoreException e) {
-						JavaPlugin.log(e);
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getMessage()); //$NON-NLS-1$
-						status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+				try {
+					cu= JavaModelUtil.toWorkingCopy(cu);
+					
+					monitor.subTask(cuLocation);
+					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
+					op.run(new SubProgressMonitor(monitor, 1));
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
 					}
+					
+					ISourceRange errorRange= op.getErrorSourceRange();
+					if (errorRange != null) {
+						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
+						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+					} 
+				} catch (OrganizeImportError e) {
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
+					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+				} catch (ValidateEditException e) {
+					status.add(e.getStatus());
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
+					status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
 				}
 			}
 		} finally {
@@ -342,7 +340,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 				
 
-	private void runOnSingle(ICompilationUnit cu, boolean doResolve) {
+	private void runOnSingle(ICompilationUnit cu, boolean doResolve, boolean inEditor) {
+		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), inEditor)) //$NON-NLS-1$ 
+			return;
 		try {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);

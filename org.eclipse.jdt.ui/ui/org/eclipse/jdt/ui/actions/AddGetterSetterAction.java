@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -118,7 +119,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(checkEnabledEditor());
 	}
 	
 	//---- Structured Viewer -----------------------------------------------------------
@@ -144,14 +144,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
 			if (canEnableOn(selectedFields)){
-				run(selectedFields[0].getDeclaringType(), selectedFields);
+				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
 			}	
 			Object firstElement= selection.getFirstElement();
 			if (firstElement instanceof IType)
-				run((IType)firstElement, new IField[0]);
+				run((IType)firstElement, new IField[0], false);
 			else if (firstElement instanceof ICompilationUnit)	
-				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0]);
+				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0], false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
@@ -184,10 +184,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
-		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
+		return fields != null && fields.length > 0;
 	}
 	
-	private void run(IType type, IField[] preselected) throws CoreException{
+	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
+		if (!ElementValidator.check(type, getShell(), dialogTitle, editor))
+			return;
+		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer(settings));
 		Map entries= createGetterSetterMapping(type, settings);
@@ -333,19 +336,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField)elements[0];
-				if (! checkCu(field))
-					return;
-				run(field.getDeclaringType(), new IField[] {field});
+				run(field.getDeclaringType(), new IField[] {field}, true);
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null){
 				IType type= (IType)element.getAncestor(IJavaElement.TYPE);
 				if (type != null){
-					if (! checkCu(type))
-						return; //dialog already shown - just return
 					if (type.getFields().length > 0){
-						run(type, new IField[0]);	
+						run(type, new IField[0], true);	
 						return;
 					} 
 				}
@@ -357,21 +356,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 	
-	/* package */ void editorStateChanged() {
-		setEnabled(checkEnabledEditor());
-	}
-	
 	private boolean checkEnabledEditor() {
 		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
 	}	
-	
-	private boolean checkCu(IMember member) throws JavaModelException{
-		if (JavaModelUtil.isEditable(member.getCompilationUnit())) 
-			return true;
-		MessageDialog.openInformation(getShell(), dialogTitle, 
-			ActionMessages.getFormattedString("AddGetterSetterAction.read_only", member.getElementName())); //$NON-NLS-1$
-		return false;
-	}
 	
 	//---- Helpers -------------------------------------------------------------------
 	

@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -99,7 +99,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 	private void handleFinishedDropMove(DragSourceEvent event) {
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
-			JavaStatusConstants.INTERNAL_ERROR, 
+			IJavaStatusConstants.INTERNAL_ERROR, 
 			JavaUIMessages.getString("ResourceTransferDragAdapter.cannot_delete_resource"),  //$NON-NLS-1$
 			null);
 		List resources= convertSelection();

@@ -93,7 +93,6 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fOrganizeImports= new OrganizeImportsAction(editor);
 		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
-		fOrganizeImports.editorStateChanged();
 		editor.setAction("OrganizeImports", fOrganizeImports); //$NON-NLS-1$
 	
 		fOverrideMethods= new OverrideMethodsAction(editor);
@@ -103,7 +102,6 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fAddGetterSetter= new AddGetterSetterAction(editor);
 		fAddGetterSetter.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_GETTER_SETTER);
-		fAddGetterSetter.editorStateChanged();
 		editor.setAction("AddGetterSetter", fAddGetterSetter); //$NON-NLS-1$
 		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
@@ -220,14 +218,10 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());
-		fAddImport.update();
 		fExternalizeStrings.editorStateChanged();
-		fOrganizeImports.editorStateChanged();
 		fOverrideMethods.editorStateChanged();
 		fAddUnimplementedConstructors.editorStateChanged();
 		fAddJavaDocStub.editorStateChanged();
-		fSurroundWithTryCatch.editorStateChanged();
-		fAddGetterSetter.editorStateChanged();
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=17709
 		fConvertToMac.update();

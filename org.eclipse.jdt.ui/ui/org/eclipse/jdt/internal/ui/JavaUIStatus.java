@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
 import org.eclipse.core.runtime.IStatus;
@@ -12,16 +18,20 @@ import org.eclipse.core.runtime.Status;
  */
 public class JavaUIStatus extends Status {
 
-	public JavaUIStatus(int code, String message, Throwable throwable) {
-		super(IStatus.ERROR, JavaPlugin.getPluginId(), code, message, throwable);
+	private JavaUIStatus(int severity, int code, String message, Throwable throwable) {
+		super(severity, JavaPlugin.getPluginId(), code, message, throwable);
 	}
 
-	public JavaUIStatus(int code, String message) {
-		this(code, message, null);
+	public static IStatus createError(int code, String message, Throwable throwable) {
+		return new JavaUIStatus(IStatus.ERROR, code, message, throwable);
+	}
+	
+	public static IStatus createWarning(int code, String message, Throwable throwable) {
+		return new JavaUIStatus(IStatus.WARNING, code, message, throwable);
 	}
 
-	public JavaUIStatus(int code) {
-		this(code, ""); //$NON-NLS-1$
+	public static IStatus createInfo(int code, String message, Throwable throwable) {
+		return new JavaUIStatus(IStatus.INFO, code, message, throwable);
 	}
 }
 

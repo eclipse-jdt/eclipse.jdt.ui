@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -218,6 +218,6 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 	
 	private static IStatus createStatus(String message) {
-		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, null);
+		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, null);
 	}			
 }

@@ -33,9 +33,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /* package */ class TextBufferFactory {
 
@@ -114,6 +115,21 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 		if (save) {
 			IWorkspaceRunnable action= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor pm) throws CoreException {
+					IFile file= value.input.getFile();
+					if (file.isReadOnly()) {
+						long oldTimeStamp= file.getModificationStamp();
+						IStatus status= ResourcesPlugin.getWorkspace().validateEdit(new IFile[] {file}, null);
+						if (!status.isOK())
+							throw new ValidateEditException(status);
+						if (oldTimeStamp != file.getModificationStamp())
+							throw new ValidateEditException(
+								new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
+									IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
+									TextManipulationMessages.getFormattedString(
+										"TextBufferFactory.fileModified", 
+										file.getFullPath().toString()), 
+									null));
+					}
 					fDocumentProvider.aboutToChange(value.input);
 					fDocumentProvider.saveDocument(pm, value.input, value.document, true);
 				}
@@ -154,7 +170,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 			document.set(buffer.toString());
 			return new TextBuffer(document);
 		} catch (IOException x) {
-			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, x.getMessage(), x);
+			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, x.getMessage(), x);
 			throw new CoreException(s);
 		} finally {
 			IOCloser.perform(in, stream);
@@ -188,7 +204,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 	
 	private void throwNotManaged() throws CoreException {
 		IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-			JavaStatusConstants.INTERNAL_ERROR, TextManipulationMessages.getString("TextBufferFactory.bufferNotManaged"), null); //$NON-NLS-1$
+			IJavaStatusConstants.INTERNAL_ERROR, TextManipulationMessages.getString("TextBufferFactory.bufferNotManaged"), null); //$NON-NLS-1$
 		throw new CoreException(s);
 	}
 }

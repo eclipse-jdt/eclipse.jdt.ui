@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -157,7 +157,7 @@ public class OpenAction extends SelectionDispatchAction {
 				OpenActionUtil.open(element, activateOnOpen);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					JavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+					IJavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(getShell(), 
 					getDialogTitle(),

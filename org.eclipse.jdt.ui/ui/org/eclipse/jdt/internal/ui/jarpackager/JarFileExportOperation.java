@@ -64,7 +64,7 @@ import org.eclipse.jdt.ui.jarpackager.JarWriter;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
@@ -139,7 +139,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
 	 */
 	protected void addInfo(String message, Throwable error) {
-		fStatus.add(new Status(IStatus.INFO, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+		fStatus.add(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
 	 */
 	protected void addWarning(String message, Throwable error) {
-		fStatus.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+		fStatus.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
 	}
 	
 	/**
@@ -159,7 +159,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 * @param	exception	the throwable that caused the error, or <code>null</code>
 	 */
 	protected void addError(String message, Throwable error) {
-		fStatus.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+		fStatus.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
 	}
 
 	/**
@@ -451,7 +451,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			outputContainer= createFolderHandle(outputPath);
 			if (outputContainer == null || !outputContainer.isAccessible()) {
 				String msg= JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible"); //$NON-NLS-1$
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
 			}
 		}
 
@@ -483,7 +483,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
 		if (classFileList == null || classFileList.isEmpty()) {
 			String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileOnClasspathNotAccessible", file.getFullPath()); //$NON-NLS-1$
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
 		}
 		return classFileList.iterator();
 	}

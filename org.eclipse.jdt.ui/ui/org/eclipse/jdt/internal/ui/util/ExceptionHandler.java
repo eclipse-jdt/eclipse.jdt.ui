@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -36,7 +36,7 @@ public class ExceptionHandler {
 	 */
 	public static void log(Throwable t, String message) {
 		JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-			JavaStatusConstants.INTERNAL_ERROR, message, t));
+			IJavaStatusConstants.INTERNAL_ERROR, message, t));
 	}
 	
 	/**

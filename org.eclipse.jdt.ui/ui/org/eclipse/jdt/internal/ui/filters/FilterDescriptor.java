@@ -33,7 +33,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
  * Represents a custom filter which is provided by the
@@ -119,7 +119,7 @@ public class FilterDescriptor implements Comparable {
 		} catch (CoreException ex) {
 			handleError(ex.getStatus());
 		} catch (ClassCastException ex) {
-			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 			return null;
 		}
 		return result;

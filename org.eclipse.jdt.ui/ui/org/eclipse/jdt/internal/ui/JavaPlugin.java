@@ -168,7 +168,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void logErrorMessage(String message) {
-		log(new Status(IStatus.ERROR, getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, null));
+		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, null));
 	}
 
 	public static void logErrorStatus(String message, IStatus status) {
@@ -176,13 +176,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 			logErrorMessage(message);
 			return;
 		}
-		MultiStatus multi= new MultiStatus(getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, null);
+		MultiStatus multi= new MultiStatus(getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, null);
 		multi.add(status);
 		log(multi);
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), JavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}
 	
 	public static boolean isDebug() {

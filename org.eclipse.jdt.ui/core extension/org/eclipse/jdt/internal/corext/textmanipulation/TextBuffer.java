@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextManipulationMessages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
  * An implementation of a <code>TextBuffer</code> that is based on <code>ITextSelection</code>
@@ -303,7 +303,7 @@ public class TextBuffer {
 		try {
 			fDocument.replace(offset, length, text);
 		} catch (BadLocationException e) {
-			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, 
+			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
 				TextManipulationMessages.getFormattedString(
 					"TextBuffer.wrongRange",  //$NON-NLS-1$
 					new Object[] {new Integer(offset), new Integer(length) } ), e);

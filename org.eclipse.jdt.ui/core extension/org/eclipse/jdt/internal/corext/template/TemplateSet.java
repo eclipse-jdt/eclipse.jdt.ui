@@ -35,7 +35,7 @@ import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 
@@ -230,13 +230,13 @@ public class TemplateSet {
 	}
 
 	private static void throwReadException(Throwable t) throws CoreException {
-		IStatus status= new JavaUIStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
+		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
 			TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}
 	
 	private static void throwWriteException(Throwable t) throws CoreException {
-		IStatus status= new JavaUIStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
+		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
 			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}

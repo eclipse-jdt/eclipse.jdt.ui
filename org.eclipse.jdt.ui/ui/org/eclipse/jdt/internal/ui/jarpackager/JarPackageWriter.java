@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 import org.apache.xml.serialize.Method;
 import org.apache.xml.serialize.OutputFormat;
@@ -59,7 +59,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		try  {
 			writeXML(jarPackage);
 		} catch (IOException ex) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 		}
 	}
 
@@ -211,7 +211,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			try {
 				fOutputStream.close();
 			} catch (IOException ex) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 			}
     	}
 	}

@@ -78,7 +78,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -851,7 +851,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				try {
 					a= (DocumentAdapter) c.getBuffer();
 				} catch (ClassCastException x) {
-					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", x); //$NON-NLS-1$
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", x); //$NON-NLS-1$
 					throw new CoreException(status);
 				}
 				
@@ -969,7 +969,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected IAnnotationModel createCompilationUnitAnnotationModel(Object element) throws CoreException {
 		if ( !(element instanceof IFileEditorInput))
-			throw new CoreException(new JavaUIStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
+			throw new CoreException(JavaUIStatus.createError(
+				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, "", null)); //$NON-NLS-1$
 		
 		IFileEditorInput input= (IFileEditorInput) element;
 		return new CompilationUnitAnnotationModel(input);

@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -85,6 +86,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	protected void run(ITextSelection selection) {
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
+			return;
 		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, 
 			JavaPreferencesSettings.getCodeGenerationSettings(),
 			new Query(getShell()));
@@ -121,10 +125,6 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* package */ void editorStateChanged() {
-		setEnabled(checkEditor());
-	}
-	
 	protected void selectionChanged(ITextSelection selection) {
 		setEnabled(selection.getLength() > 0 && checkEditor());
 	}
@@ -134,7 +134,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && getCompilationUnit() != null;
+		return fEditor != null && getCompilationUnit() != null;
 	}
 	
 	private static String getDialogTitle() {

@@ -7,10 +7,14 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -34,6 +38,8 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -535,15 +541,18 @@ public class ImportsStructure implements IImportsStructure {
 	}
 	
 	private TextBuffer aquireTextBuffer() throws CoreException {
+		return TextBuffer.acquire(getFile());
+	}
+
+	private IFile getFile() {
 		ICompilationUnit cu= fCompilationUnit;
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 		}		
 		IFile file= (IFile) cu.getResource();
-		return TextBuffer.acquire(file);
+		return file;
 	}
 	
-		
 	/**
 	 * Get the replace positons.
 	 * @param textBuffer The textBuffer

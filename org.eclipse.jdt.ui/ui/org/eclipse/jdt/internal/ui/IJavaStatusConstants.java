@@ -10,19 +10,22 @@ package org.eclipse.jdt.internal.ui;
  * the cause of the exception. The status objects originating from the
  * Java UI plug-in use the codes defined in this interface.
   */
-public class JavaStatusConstants {
-	
-	// Prevent instantiation
-	private JavaStatusConstants() {
-	}
+public interface IJavaStatusConstants {
 
-	/** Status code describing an internal error */
-	public static final int INTERNAL_ERROR= 1;
+	// Java UI status constants start at 10000 to make sure that we don't
+	// collide with resource and java model constants.
+	
+	public static final int INTERNAL_ERROR= 10001;
 	
 	/**
 	 * Status constant indicating that an exception occured on
 	 * storing or loading templates.
 	 */
-	public static final int TEMPLATE_IO_EXCEPTION = 2;
+	public static final int TEMPLATE_IO_EXCEPTION = 10002;
 	
-}
+	/**
+	 * Status constant indication that an validateEdit call has 
+	 * changed the content of a file on disk.
+	 */
+	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003; 
+ }

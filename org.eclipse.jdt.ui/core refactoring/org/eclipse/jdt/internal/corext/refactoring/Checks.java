@@ -170,7 +170,7 @@ public class Checks {
 		else
 			return new RefactoringStatus();
 	}
-
+		
 	private static boolean startsWithUpperCase(String s) {
 		if (s == null)
 			return false;
@@ -553,14 +553,24 @@ public class Checks {
 		return map;
 	}
 
-	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) throws CoreException{
+	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < filesToModify.length; i++) {
+			IFile file= filesToModify[i];
+			if (!file.isSynchronized(IResource.DEPTH_INFINITE))
+				result.addFatalError(
+					RefactoringCoreMessages.getFormattedString(
+						"Checks.outOfSync", //$NON-NLS-1$
+						file.getFullPath().toString()));
+		}
+		if (result.hasFatalError())
+			return result;
 		IFile[] readOnlyFiles= getReadOnly(filesToModify);
 		Map oldMap= createModificationStampMap(readOnlyFiles);
 		IStatus status= ResourcesPlugin.getWorkspace().validateEdit(readOnlyFiles, null);
 		if (! status.isOK())
 			return RefactoringStatus.create(status);
 		Map newMap= createModificationStampMap(readOnlyFiles);
-		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= oldMap.keySet().iterator(); iter.hasNext();) {
 			IFile file= (IFile) iter.next();
 			if (! oldMap.get(file).equals(newMap.get(file)))

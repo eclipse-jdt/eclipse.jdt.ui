@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
  * Utility for the Jar packager
@@ -135,7 +135,7 @@ public class JarPackagerUtil {
 	public static CoreException createCoreException(String message, Exception ex) {
 		if (message == null)
 			message= ""; //$NON-NLS-1$
-		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.INTERNAL_ERROR, message, ex));
+		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 	}
 
 	/**

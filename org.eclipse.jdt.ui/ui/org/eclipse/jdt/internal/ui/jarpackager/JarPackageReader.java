@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -68,9 +68,9 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		try {
 			readXML(jarPackage);
 		} catch (IOException ex) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 		} catch (SAXException ex) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 		}
 	}
 
@@ -86,7 +86,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
     		try {
 				fInputStream.close();
     		} catch (IOException ex) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
 			}
 	}
 
