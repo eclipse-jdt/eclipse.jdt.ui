@@ -24,9 +24,13 @@ public class TestResult {
 	
 	private int fValue;
 	
-	public static final TestResult FALSE= new TestResult(0);
-	public static final TestResult TRUE= new TestResult(1);
-	public static final TestResult NOT_LOADED= new TestResult(2);
+	private static final int FALSE_VALUE= 0;
+	private static final int TRUE_VALUE= 1;
+	private static final int NOT_LOADED_VALUE= 2;
+	
+	public static final TestResult FALSE= new TestResult(FALSE_VALUE);
+	public static final TestResult TRUE= new TestResult(TRUE_VALUE);
+	public static final TestResult NOT_LOADED= new TestResult(NOT_LOADED_VALUE);
 
 	private static final TestResult[][] AND= new TestResult[][] {
 						// FALSE	//TRUE		//NOT_LOADED

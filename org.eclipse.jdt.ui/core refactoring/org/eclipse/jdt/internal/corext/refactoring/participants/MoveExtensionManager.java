@@ -17,10 +17,11 @@ public class MoveExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "moveProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "moveParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager("Move", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
+	private static ExtensionManager fgInstance= new ExtensionManager("Move", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static IMoveProcessor getProcessor(Object[] elements) throws CoreException {
-		return (IMoveProcessor)fInstance.getProcessor(elements);
+		return (IMoveProcessor)fgInstance.getProcessor(
+			elements, fgInstance.createProcessorPool(elements));
 	}
 	
 	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
@@ -28,7 +29,8 @@ public class MoveExtensionManager {
 	}		
 
 	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements, new SharableParticipants());
+		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
+			fgInstance.createParticipantPool(elements, processor), new SharableParticipants());
 		IMoveParticipant[] result= new IMoveParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

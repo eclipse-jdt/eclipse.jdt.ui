@@ -20,15 +20,16 @@ public class DeleteExtensionManager {
 	private static ExtensionManager fgInstance= new ExtensionManager("Delete", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static boolean hasProcessor(Object[] elements) throws CoreException {
-		return fgInstance.hasProcessor(elements);
+		return fgInstance.hasProcessor(fgInstance.createProcessorPool(elements));
 	}
 	
 	public static DeleteProcessor getProcessor(Object[] elements) throws CoreException {
-		return (DeleteProcessor)fgInstance.getProcessor(elements);
+		return (DeleteProcessor)fgInstance.getProcessor(elements, fgInstance.createProcessorPool(elements));
 	}
 	
 	public static IDeleteParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, SharableParticipants shared) throws CoreException {
-		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, shared);
+		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
+			fgInstance.createParticipantPool(elements, processor), shared);
 		IDeleteParticipant[] result= new IDeleteParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

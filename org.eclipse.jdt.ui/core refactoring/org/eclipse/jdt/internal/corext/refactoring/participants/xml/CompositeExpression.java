@@ -37,20 +37,22 @@ public abstract class CompositeExpression extends Expression {
 		return (Expression[])fExpressions.toArray(new Expression[fExpressions.size()]);
 	}
 	
-	protected TestResult evaluateAnd(IScope scope) throws CoreException {
+	protected TestResult evaluateAnd(IVariablePool scope) throws CoreException {
 		if (fExpressions == null)
 			return TestResult.TRUE;
 		TestResult result= TestResult.TRUE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
 			result= result.and(expression.evaluate(scope));
-			if (result != TestResult.TRUE)
+			// keep iterating even if we have a not loaded found. It can be
+			// that we find a false which will result in a better result.
+			if (result == TestResult.FALSE)
 				return result;
 		}
 		return result;
 	}
 	
-	protected TestResult evaluateOr(IScope scope) throws CoreException {
+	protected TestResult evaluateOr(IVariablePool scope) throws CoreException {
 		if (fExpressions == null)
 			return TestResult.TRUE;
 		TestResult result= TestResult.FALSE;

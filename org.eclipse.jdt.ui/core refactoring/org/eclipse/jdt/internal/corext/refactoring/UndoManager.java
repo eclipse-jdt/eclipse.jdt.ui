@@ -194,6 +194,16 @@ public class UndoManager implements IUndoManager {
 			flush();
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see IUndoManager#shutdown()
+	 */
+	public void shutdown() {
+		if (fFlushListener != null)
+			JavaCore.removeElementChangedListener(fFlushListener);
+		if (fSaveListener != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fSaveListener);
+	}
 	
 	/* (Non-Javadoc)
 	 * Method declared in IUndoManager.

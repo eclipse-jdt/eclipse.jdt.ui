@@ -79,8 +79,8 @@ public class TestExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public TestResult evaluate(IScope scope) throws CoreException {
-		Object element= scope.getDefaultVariable();
+	public TestResult evaluate(IVariablePool pool) throws CoreException {
+		Object element= pool.getDefaultVariable();
 		// hard coded instanceof check to ensure it is evaluated fast.
 		if ("instanceof".equals(fProperty)) { //$NON-NLS-1$
 			return TestResult.valueOf(isInstanceOf(element, (String)fArgs[0]));

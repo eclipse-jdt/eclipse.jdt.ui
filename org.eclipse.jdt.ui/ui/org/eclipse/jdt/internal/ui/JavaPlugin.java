@@ -63,6 +63,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -309,6 +310,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		JavaDocLocations.shutdownJavadocLocations();
 		
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
+		
+		Refactoring.getUndoManager().shutdown();
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {

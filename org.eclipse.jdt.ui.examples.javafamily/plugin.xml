@@ -30,12 +30,19 @@
 	  <renameParticipant
 	  	id="org.eclipse.jsp.renameParticipant.IType"
 	  	class="org.eclipse.jsp.RenameTypeParticipant">
-	    <scopeState>
-	      <nature value="org.eclipse.jdt.core.javanature"/>
-	    </scopeState>
-	  	<objectState>
-	  	  <test property="instanceof" value="org.eclipse.jdt.core.IType"/>
-	  	</objectState>
+	  	<enablement>
+	  	  <with variable="affectedProjects">
+	  	    <iterate>
+	  	      <test property="projectNature" value="org.eclipse.jdt.core.javanature"/>
+	  	    </iterate>
+	  	  </with>
+	  	  <with variable="selection">
+	  	    <count value="1"/>
+	  	    <iterate>
+		  	  <test property="instanceof" value="org.eclipse.jdt.core.IType"/>
+	  	    </iterate>
+	  	  </with>
+	  	</enablement>
 	  </renameParticipant>
 	</extension>
 	

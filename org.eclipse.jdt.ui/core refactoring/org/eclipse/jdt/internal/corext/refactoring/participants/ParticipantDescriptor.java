@@ -15,10 +15,12 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IVariablePool;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
@@ -29,14 +31,11 @@ public class ParticipantDescriptor {
 	private IConfigurationElement fConfigurationElement;
 
 	private static final ExpressionParser EXPRESSION_PARSER= 
-		new ExpressionParser(new IElementHandler[] { new ScopeStateExpression.XMLHandler(), StandardElementHandler.getInstance() }); 
+		new ExpressionParser(new IElementHandler[] { StandardElementHandler.getInstance() }); 
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
 	
-	private static final String SCOPE_STATE= "scopeState"; //$NON-NLS-1$
-	private static final String OBJECT_STATE= "objectState"; //$NON-NLS-1$
-
 	public ParticipantDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 	}
@@ -46,40 +45,33 @@ public class ParticipantDescriptor {
 	}
 	
 	public IStatus checkSyntax() {
-		IConfigurationElement[] children= fConfigurationElement.getChildren(SCOPE_STATE);
-		switch(children.length) {
-			case 0:
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-					"Mandantory element <scopeState> missing. Disabling rename participant " + getId(), null);
-			case 1:
-				break;
-			default:
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-					"Only one <scopeState> element allowed. Disabling rename participant " + getId(), null);
-		}
-		children= fConfigurationElement.getChildren(OBJECT_STATE);
-		if (children.length > 1) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				"Only one <objectState> element allowed. Disabling rename participant " + getId(), null);
-		}
+//		IConfigurationElement[] children= fConfigurationElement.getChildren(SCOPE_STATE);
+//		switch(children.length) {
+//			case 0:
+//				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+//					"Mandantory element <scopeState> missing. Disabling rename participant " + getId(), null);
+//			case 1:
+//				break;
+//			default:
+//				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+//					"Only one <scopeState> element allowed. Disabling rename participant " + getId(), null);
+//		}
+//		children= fConfigurationElement.getChildren(OBJECT_STATE);
+//		if (children.length > 1) {
+//			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+//				"Only one <objectState> element allowed. Disabling rename participant " + getId(), null);
+//		}
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, 
 			"Syntactically correct rename participant element", null);
 	}
 	
-	public boolean matches(IRefactoringProcessor processor, Object element) throws CoreException {
-		IConfigurationElement scopeState= fConfigurationElement.getChildren(SCOPE_STATE)[0];
-		Expression exp= EXPRESSION_PARSER.parse(scopeState);
-		if (exp.evaluate(new Scope(null, processor.getAffectedProjects())) == TestResult.FALSE)
+	public boolean matches(IVariablePool pool) throws CoreException {
+		IConfigurationElement[] elements= fConfigurationElement.getChildren(EnablementExpression.NAME);
+		if (elements.length == 0)
 			return false;
-		
-		IConfigurationElement[] children= fConfigurationElement.getChildren(OBJECT_STATE);
-		if (children.length == 1) {
-			IConfigurationElement objectState= children[0];
-			exp= EXPRESSION_PARSER.parse(objectState);
-			return convert(exp.evaluate(new Scope(null, element)));
-			
-		}
-		return true;
+		Assert.isTrue(elements.length == 1);
+		Expression exp= EXPRESSION_PARSER.parse(elements[0]);
+		return convert(exp.evaluate(pool));
 	}
 
 	public IRefactoringParticipant createParticipant() throws CoreException {

@@ -17,7 +17,7 @@ public class CreateExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "createProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "createParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager("Create", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
+	private static ExtensionManager fgInstance= new ExtensionManager("Create", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	/* unclear if we are going to support create processors
 	public static IMoveProcessor getProcessor(Object element) throws CoreException {
@@ -29,7 +29,8 @@ public class CreateExtensionManager {
 	}		
 
 	public static ICreateParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements, new SharableParticipants());
+		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
+			fgInstance.createParticipantPool(elements, processor), new SharableParticipants());
 		ICreateParticipant[] result= new ICreateParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

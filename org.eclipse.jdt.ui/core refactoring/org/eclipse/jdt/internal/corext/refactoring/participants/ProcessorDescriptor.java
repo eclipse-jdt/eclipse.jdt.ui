@@ -14,11 +14,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.SelectionExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IVariablePool;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
@@ -31,8 +31,6 @@ public class ProcessorDescriptor {
 	private static final String OVERRIDE= "override"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
 	
-	private static final String OBJECT_STATE= "objectState"; //$NON-NLS-1$
-
 	public ProcessorDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 	}
@@ -49,19 +47,13 @@ public class ProcessorDescriptor {
 		return fConfigurationElement.getAttribute(OVERRIDE);
 	}
 
-	public boolean matches(Object[] elements) throws CoreException {
-		Assert.isNotNull(elements);
-		IConfigurationElement[] configElements= fConfigurationElement.getChildren(SelectionExpression.NAME);
-		IConfigurationElement selectionState= configElements.length > 0 ? configElements[0] : null; 
-		if (selectionState != null) {
-			Expression exp= PARSER.parse(selectionState);
-			return (convert(exp.evaluate(new Scope(null, elements))));
-		} else if (elements.length == 1) {
-			IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
-			if (objectState != null) {
-				Expression exp= PARSER.parse(objectState);
-				return (convert(exp.evaluate(new Scope(null, elements[0]))));
-			}
+	public boolean matches(IVariablePool pool) throws CoreException {
+		Assert.isNotNull(pool);
+		IConfigurationElement[] configElements= fConfigurationElement.getChildren(EnablementExpression.NAME);
+		IConfigurationElement enablement= configElements.length > 0 ? configElements[0] : null; 
+		if (enablement != null) {
+			Expression exp= PARSER.parse(enablement);
+			return (convert(exp.evaluate(pool)));
 		}
 		return false;
 	}

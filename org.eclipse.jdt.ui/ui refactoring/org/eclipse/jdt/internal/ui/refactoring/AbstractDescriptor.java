@@ -13,11 +13,13 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.AndExpression;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.VariablePool;
 
 public abstract class AbstractDescriptor {
 
@@ -38,12 +40,12 @@ public abstract class AbstractDescriptor {
 	
 	public boolean matches(Object element) throws CoreException {
 		Expression exp= getExpression();
-		if (exp.evaluate(new Scope(null, element)) == TestResult.FALSE)
+		if (exp.evaluate(new VariablePool(null, element)) == TestResult.FALSE)
 			return false;
 		return true;
 	}
 	
-	public Expression getExpression() {
+	public Expression getExpression() throws CoreException {
 		if (fExpression == null)
 			fExpression= createExpression(fConfigurationElement);
 		return fExpression;
@@ -53,22 +55,12 @@ public abstract class AbstractDescriptor {
 		fExpression= null;
 	}
 		
-	protected Expression createExpression(IConfigurationElement element) {
-		return createObjectStateExpression(element, Expression.FALSE);
+	protected Expression createExpression(IConfigurationElement element) throws CoreException {
+		IConfigurationElement[] children= element.getChildren(EnablementExpression.NAME);
+		if (children.length == 0)
+			return Expression.FALSE;
+		// TODO we should add some sort of syntax check and throw an core exception in this case
+		Assert.isTrue(children.length == 1);
+		return ExpressionParser.getStandard().parse(children[0]);
 	} 
-
-	protected static Expression createObjectStateExpression(IConfigurationElement element, Expression defaultValue) {
-		IConfigurationElement[] children= element.getChildren(OBJECT_STATE);
-		if (children.length == 0) {
-			return defaultValue;
-		} else if (children.length == 1) {
-			return ExpressionParser.getStandard().parse(children[0]);
-		} else {
-			AndExpression result= new AndExpression();
-			for (int i= 0; i < children.length; i++) {
-				result.add(ExpressionParser.getStandard().parse(children[i]));
-			}
-			return result;
-		}
-	}	
 }

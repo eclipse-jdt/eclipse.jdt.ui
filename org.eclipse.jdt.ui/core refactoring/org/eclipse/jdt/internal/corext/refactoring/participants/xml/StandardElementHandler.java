@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 public class StandardElementHandler implements IElementHandler {
@@ -23,18 +24,10 @@ public class StandardElementHandler implements IElementHandler {
 	private StandardElementHandler() {
 	}
 
-	public Expression create(IConfigurationElement element, ExpressionParser creator) {
+	public Expression create(IConfigurationElement element, ExpressionParser creator) throws CoreException {
 		String name= element.getName();
 		if (TestExpression.NAME.equals(name)) {
 			return new TestExpression(element);
-		} else if (ObjectStateExpression.NAME.equals(name)) {
-			ObjectStateExpression result= new ObjectStateExpression(element);
-			creator.processChildren(result, element);
-			return result;
-		} else if (SelectionExpression.NAME.equals(name)) {
-			SelectionExpression result= new SelectionExpression(element);
-			creator.processChildren(result, element);
-			return result;
 		} else if (OrExpression.NAME.equals(name)) {
 			OrExpression result= new OrExpression();
 			creator.processChildren(result, element);
@@ -45,7 +38,34 @@ public class StandardElementHandler implements IElementHandler {
 			return result;
 		} else if (NotExpression.NAME.equals(name)) {
 			return new NotExpression(creator.parse(element.getChildren()[0]));
+		} else if (WithExpression.NAME.equals(name)) {
+			WithExpression result= new WithExpression(element);
+			creator.processChildren(result, element);
+			return result;
+		} else if (AdaptExpression.NAME.equals(name)) {
+			AdaptExpression result= new AdaptExpression(element);
+			creator.processChildren(result, element);
+			return result;
+		} else if (IterateExpression.NAME.equals(name)) {
+			IterateExpression result= new IterateExpression(element);
+			creator.processChildren(result, element);
+			return result;
+		} else if (CountExpression.NAME.equals(name)) {
+			return new CountExpression(element);
+		} else if (EnablementExpression.NAME.equals(name)) {
+			EnablementExpression result= new EnablementExpression(element);
+			creator.processChildren(result, element);
+			return result;
 		}
+//		else if (ObjectStateExpression.NAME.equals(name)) {
+//			ObjectStateExpression result= new ObjectStateExpression(element);
+//			creator.processChildren(result, element);
+//			return result;
+//		} else if (SelectionExpression.NAME.equals(name)) {
+//			SelectionExpression result= new SelectionExpression(element);
+//			creator.processChildren(result, element);
+//			return result;
+//		} 
 		return null;
 	}
 }

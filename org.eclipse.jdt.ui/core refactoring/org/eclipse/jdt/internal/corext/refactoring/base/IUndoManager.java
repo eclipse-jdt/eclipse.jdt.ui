@@ -119,5 +119,10 @@ public interface IUndoManager {
 	/**
 	 * Flushes the undo manager's undo and redo stacks.
 	 */	
-	public void flush();	
+	public void flush();
+	
+	/**
+	 * Shut down the undo manager. 
+	 */
+	public void shutdown();
 }

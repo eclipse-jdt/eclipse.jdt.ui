@@ -51,6 +51,6 @@ public class Method {
 	}
 	
 	public int hashCode() {
-		return fName.hashCode();
+		return (fType.hashCode() << 16) | fName.hashCode();
 	}
 }

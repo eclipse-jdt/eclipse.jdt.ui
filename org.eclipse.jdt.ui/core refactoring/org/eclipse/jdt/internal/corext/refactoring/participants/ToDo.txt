@@ -66,6 +66,11 @@
   (similar to ResourceModifications) since the refactoring itself can't be extended.
   
 - processors and participants should derive from PlatformObject if the implement IAdaptable
+
+- we should remove the affected project test from the participants and force them to
+  specify a language the are working on. The language computer then takes a set of
+  projects and computes the effected languages. This will be consistent with what we do
+  for processors.
   
 ======================================= UI ===============================================
   

@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
 public interface IElementHandler {
 	
-	public Expression create(IConfigurationElement config, ExpressionParser creator);
+	public Expression create(IConfigurationElement config, ExpressionParser creator) throws CoreException;
 }

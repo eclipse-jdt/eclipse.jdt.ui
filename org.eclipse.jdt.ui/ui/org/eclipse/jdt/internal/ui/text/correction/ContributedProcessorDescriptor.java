@@ -16,11 +16,11 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ObjectStateExpression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.VariablePool;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -42,15 +42,15 @@ public class ContributedProcessorDescriptor {
 			
 	public IStatus checkSyntax() {
 		String id= fConfigurationElement.getAttribute(ID);
-		IConfigurationElement[] children= fConfigurationElement.getChildren(ObjectStateExpression.NAME);
+		IConfigurationElement[] children= fConfigurationElement.getChildren(EnablementExpression.NAME);
 		if (children.length > 1) {
-			return new StatusInfo(IStatus.ERROR, "Only one <objectState> element allowed. Disabling " + id); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, "Only one <enablement> element allowed. Disabling " + id); //$NON-NLS-1$
 		}
 		return new StatusInfo(IStatus.OK, "Syntactically correct quick assist/fix processor"); //$NON-NLS-1$
 	}
 	
 	private boolean matches(ICompilationUnit cunit) throws CoreException {
-		IConfigurationElement[] children= fConfigurationElement.getChildren(ObjectStateExpression.NAME);
+		IConfigurationElement[] children= fConfigurationElement.getChildren(EnablementExpression.NAME);
 		if (children.length == 1) {
 			if (cunit.equals(fLastCUnit)) {
 				return fLastResult;
@@ -58,7 +58,7 @@ public class ContributedProcessorDescriptor {
 			
 			ExpressionParser parser= ExpressionParser.getStandard();
 			Expression expression= parser.parse(children[0]);
-			fLastResult= !(expression.evaluate(new Scope(null, cunit)) != TestResult.TRUE);
+			fLastResult= !(expression.evaluate(new VariablePool(null, cunit, cunit)) != TestResult.TRUE);
 			fLastCUnit= cunit;
 			return fLastResult;
 
