@@ -87,6 +87,8 @@ public class TypeMismatchSubProcessor {
 			castTypeBinding= assign.getLeftHandSide().resolveTypeBinding();
 			if (leftHandSide instanceof Name) {
 				receiverNode= (Name) leftHandSide;
+			} else if (leftHandSide instanceof FieldAccess) {
+				receiverNode= ((FieldAccess) leftHandSide).getName();
 			}
 		} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
@@ -195,21 +197,20 @@ public class TypeMismatchSubProcessor {
 				targetCu= cu;
 			} else {
 				callerBindingDecl= Bindings.getFieldDeclaration(variableBinding);
-				declaringType= variableBinding.getDeclaringClass().getGenericType();
+				declaringType= variableBinding.getDeclaringClass().getTypeDeclaration();
 			}
 		} else if (callerBinding instanceof IMethodBinding) {
 			IMethodBinding methodBinding= (IMethodBinding) callerBinding;
 			if (!methodBinding.isConstructor()) {
-				declaringType= methodBinding.getDeclaringClass().getGenericType();
-				callerBindingDecl= methodBinding.getGenericMethod();
+				declaringType= methodBinding.getDeclaringClass().getTypeDeclaration();
+				callerBindingDecl= methodBinding.getMethodDeclaration();
 			}
 		}
 				
 		if (declaringType != null && declaringType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		}
-		if (targetCu != null) {
-			//	TODO: check if castTypeBinding contains type local types/variables
+		if (targetCu != null && ASTResolving.isUseableTypeInContext(castTypeBinding, callerBindingDecl, false)) {
 			proposals.add(new TypeChangeCompletionProposal(targetCu, callerBindingDecl, astRoot, castTypeBinding, isAssignedNode, relevance));
 		}
 		
@@ -217,10 +218,9 @@ public class TypeMismatchSubProcessor {
 		if (!isAssignedNode) {
 			ITypeBinding nodeType= nodeToCast.resolveTypeBinding();
 			if (castTypeBinding.isInterface() && nodeType != null && nodeType.isClass() && !nodeType.isAnonymous() && nodeType.isFromSource()) {
-				ITypeBinding typeDecl= nodeType.getGenericType();
+				ITypeBinding typeDecl= nodeType.getTypeDeclaration();
 				ICompilationUnit nodeCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 				if (nodeCu != null && ASTResolving.isUseableTypeInContext(castTypeBinding, typeDecl, true)) {
-					//TODO: check if interface contains wildcards
 					proposals.add(new ImplementInterfaceProposal(nodeCu, typeDecl, astRoot, castTypeBinding, relevance - 1));
 				}
 			}
@@ -295,12 +295,12 @@ public class TypeMismatchSubProcessor {
 
 		
 		ICompilationUnit cu= context.getCompilationUnit();
-		IMethodBinding methodDecl= methodDeclBinding.getGenericMethod();
+		IMethodBinding methodDecl= methodDeclBinding.getMethodDeclaration();
 		proposals.add(new TypeChangeCompletionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
 		
 		ICompilationUnit targetCu= cu;
 		
-		IMethodBinding overriddenDecl= overridden.getGenericMethod();
+		IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 		ITypeBinding overridenDeclType= overriddenDecl.getDeclaringClass();
 
 		ITypeBinding returnType= methodDeclBinding.getReturnType();
@@ -366,7 +366,7 @@ public class TypeMismatchSubProcessor {
 			for (int i= 0; i < undeclaredExceptions.size(); i++) {
 				changes[i + definedExceptions.length]= new InsertDescription((ITypeBinding) undeclaredExceptions.get(i), ""); //$NON-NLS-1$
 			}
-			IMethodBinding overriddenDecl= overridden.getGenericMethod();
+			IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 			String[] args= {  declaringType.getName(), overridden.getName() };
 			String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addexceptions.description", args); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
