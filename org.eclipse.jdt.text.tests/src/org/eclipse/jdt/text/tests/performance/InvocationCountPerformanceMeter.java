@@ -41,10 +41,10 @@ import com.sun.jdi.request.EventRequest;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.jdi.Bootstrap;
 
 /**
@@ -318,7 +318,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		fMethods= methods;
 		fConstructors= constructors;
 		fStartTime= System.currentTimeMillis();
-		fVerbose= !DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
+		fVerbose= PerformanceTestPlugin.getDBLocation() == null || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
 	}
 	
 	/**
