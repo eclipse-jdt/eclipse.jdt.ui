@@ -117,6 +117,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
 			pos++;
 		}
+		
 		if (pos < document.getLength() && document.getChar(pos) == ')') {
 			setReplacementLength(pos - offset + 1);
 		}
@@ -134,7 +135,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IMethod[] toImplementArray= null;
 		if (fDeclaringType.isClass()) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			OverrideMethodDialog selectionDialog= new OverrideMethodDialog(shell, null, fDeclaringType, true);			
+			OverrideMethodDialog selectionDialog= new OverrideMethodDialog(shell, null, fDeclaringType, true);	
+			selectionDialog.setGenerateComment(false); // no comments in anonymous classes by default
 			int selectionResult= selectionDialog.open();
 			if (selectionResult == Window.OK) {
 				Object[] checkedElements= selectionDialog.getResult();
@@ -164,6 +166,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);				
 		}
 		if (toImplementArray == null) {
+			setReplacementString(""); //$NON-NLS-1$
+			setReplacementLength(0);
 			return false;
 		}
 		
