@@ -34,8 +34,12 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -90,6 +94,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * @since 3.0
  */
 public class FormatAllAction extends SelectionDispatchAction {
+	
+	private DocumentRewriteSession fRewriteSession;
 	
 	/* (non-Javadoc)
 	 * Class implements IObjectActionDelegate
@@ -336,14 +342,20 @@ public class FormatAllAction extends SelectionDispatchAction {
     }
 
 	private void startSequentialRewriteMode(IDocument document) {
-		if (document instanceof IDocumentExtension) {
-			IDocumentExtension extension= (IDocumentExtension)document;
+		if (document instanceof IDocumentExtension4) {
+			IDocumentExtension4 extension= (IDocumentExtension4) document;
+			fRewriteSession= extension.startRewriteSession(DocumentRewriteSessionType.SEQUENTIAL);
+		} else if (document instanceof IDocumentExtension) {
+			IDocumentExtension extension= (IDocumentExtension) document;
 			extension.startSequentialRewrite(false);
 		}
 	}
 	
 	private void stopSequentialRewriteMode(IDocument document) {
-		if (document instanceof IDocumentExtension) {
+		if (document instanceof IDocumentExtension4) {
+			IDocumentExtension4 extension= (IDocumentExtension4) document;
+			extension.stopRewriteSession(fRewriteSession);
+		} else if (document instanceof IDocumentExtension) {
 			IDocumentExtension extension= (IDocumentExtension)document;
 			extension.stopSequentialRewrite();
 		}
