@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -77,6 +78,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -126,6 +129,7 @@ public class BuildPathsBlock {
 	
 	private int fPageIndex;
 	
+    private NewSourceContainerWorkbookPage fNewSourceContainerPage;
 	private SourceContainerWorkbookPage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
 	private LibrariesWorkbookPage fLibrariesPage;
@@ -134,6 +138,8 @@ public class BuildPathsBlock {
 	
 	private String fUserSettingsTimeStamp;
 	private long fFileTimeStamp;
+    
+    private IRunnableContext fRunnableContext= null;
 		
 	public BuildPathsBlock(IStatusChangeListener context, int pageToShow) {
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
@@ -141,10 +147,12 @@ public class BuildPathsBlock {
 		
 		fPageIndex= pageToShow;
 		
+        fNewSourceContainerPage= null;
 		fSourceContainerPage= null;
 		fLibrariesPage= null;
 		fProjectsPage= null;
 		fCurrPage= null;
+        fRunnableContext= new BusyIndicatorRunnableContext();
 				
 		BuildPathAdapter adapter= new BuildPathAdapter();			
 	
@@ -176,6 +184,11 @@ public class BuildPathsBlock {
 		
 		fCurrJProject= null;
 	}
+    
+    public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow) {
+        this(context, pageToShow);
+        fRunnableContext= runnableContext;
+    }
 	
 	// -------- UI creation ---------
 	
@@ -198,13 +211,20 @@ public class BuildPathsBlock {
 		ImageRegistry imageRegistry= JavaPlugin.getDefault().getImageRegistry();
 		
 		TabItem item;
-				
-		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField);		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
-		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
-		item.setData(fSourceContainerPage);		
-		item.setControl(fSourceContainerPage.getControl(folder));
+        item= new TabItem(folder, SWT.NONE);
+        item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
+        item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
+		
+        if (newPageEnabled()) {
+            fNewSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
+            item.setData(fNewSourceContainerPage);     
+            item.setControl(fNewSourceContainerPage.getControl(folder));
+        }
+        else {
+            fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField);
+            item.setData(fSourceContainerPage);     
+            item.setControl(fSourceContainerPage.getControl(folder));
+        }
 		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();	
 		Image projectImage= workbench.getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
@@ -235,7 +255,10 @@ public class BuildPathsBlock {
 		item.setControl(ordpage.getControl(folder));
 				
 		if (fCurrJProject != null) {
-			fSourceContainerPage.init(fCurrJProject);
+            if (fSourceContainerPage != null)
+                fSourceContainerPage.init(fCurrJProject);
+            else
+                fNewSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 		}		
@@ -343,6 +366,13 @@ public class BuildPathsBlock {
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 		}
+        else {
+            if (fNewSourceContainerPage != null) {
+                fNewSourceContainerPage.init(fCurrJProject);
+                fProjectsPage.init(fCurrJProject);
+                fLibrariesPage.init(fCurrJProject);
+            }
+        }
 		doStatusLineUpdate();
 	}
 	
@@ -417,6 +447,8 @@ public class BuildPathsBlock {
 		}
 		return entries;
 	}
+    
+    // TODO add method to undo changes --> forward call to NewSourceContainerWorkbookPage
 	
 	public int getPageIndex() {
 		return fPageIndex;
@@ -649,6 +681,12 @@ public class BuildPathsBlock {
 			monitor.done();
 		}
 	}
+    
+    public void undoAll() {
+        if (newPageEnabled() && fNewSourceContainerPage != null) {
+            fNewSourceContainerPage.undoAll();
+        }
+    }
 	
 	/*
 	 * Creates the Java project and sets the configured build path and output location.
@@ -824,5 +862,9 @@ public class BuildPathsBlock {
 			fCurrPage= newPage;
 			fPageIndex= tabItem.getParent().getSelectionIndex();
 		}
-	}		
+	}
+    
+    private boolean newPageEnabled() {
+        return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.NEW_SOURCE_PAGE);
+    }
 }

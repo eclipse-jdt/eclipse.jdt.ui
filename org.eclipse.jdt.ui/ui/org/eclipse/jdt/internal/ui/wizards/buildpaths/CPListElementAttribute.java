@@ -56,5 +56,11 @@ public class CPListElementAttribute {
 	public void setValue(Object value) {
 		fValue= value;
 	}	
-
+	
+    public boolean equals(Object obj) {
+        if (!(obj instanceof CPListElementAttribute))
+            return false;
+        CPListElementAttribute attrib= (CPListElementAttribute)obj;
+        return attrib.fKey== this.fKey && attrib.getParent().getPath().equals(fParent.getPath());
+    }
 }

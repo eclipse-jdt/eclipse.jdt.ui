@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -35,11 +38,13 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     private JavaProjectWizardSecondPage fSecondPage;
     
     private IConfigurationElement fConfigElement;
+    protected boolean fIsAutoBuilding;
     
     public JavaProjectWizard() {
         setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
         setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
         setWindowTitle(NewWizardMessages.getString("JavaProjectWizard.title")); //$NON-NLS-1$
+        fIsAutoBuilding= enableAutoBuild(false);
     }
 
     /*
@@ -88,6 +93,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			checkCompliance();
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
+            enableAutoBuild(fIsAutoBuilding);
 		}
 		return res;
 	}
@@ -111,6 +117,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      */
     public boolean performCancel() {
         fSecondPage.performCancel();
+        enableAutoBuild(fIsAutoBuilding);
         return super.performCancel();
     }
     
@@ -120,5 +127,26 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     public boolean canFinish() {
         return super.canFinish();
     }
-
+    
+    /**
+     * Set the autobuild to the value of the parameter and
+     * return the old one.
+     * 
+     * @param state the value to be set for autobuilding.
+     * @return the old value of the autobuild state
+     */
+    private boolean enableAutoBuild(boolean state) {
+        try {
+            IWorkspace workspace= ResourcesPlugin.getWorkspace();
+            IWorkspaceDescription desc= workspace.getDescription();
+            boolean isAutoBuilding= desc.isAutoBuilding();
+            if (isAutoBuilding != state)
+                desc.setAutoBuilding(state);
+            workspace.setDescription(desc);
+            return isAutoBuilding;
+        } catch (CoreException e) {
+            JavaPlugin.log(e);
+        }
+        return true;
+    }
 }

@@ -66,6 +66,9 @@ public class JavaPluginImages {
 	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
 	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
 	
+	public static final String IMG_REMOVE= NAME_PREFIX + "remove_exc.gif"; 	//$NON-NLS-1$
+    public static final String IMG_UNDO= NAME_PREFIX + "undo_edit.gif"; //$NON-NLS-1$
+	
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.gif"; 			//$NON-NLS-1$
@@ -75,6 +78,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_SEARCH_DECL= NAME_PREFIX + "search_decl_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.gif"; 	//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLEAR= NAME_PREFIX + "clear_co.gif";  		//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSALT= NAME_PREFIX + "classfo_obj.gif"; 			//$NON-NLS-1$	
 	public static final String IMG_OBJS_CLASS_DEFAULT= NAME_PREFIX + "class_default_obj.gif"; 			//$NON-NLS-1$
 	
@@ -147,6 +151,9 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
+	
+	public static final String IMG_OBJS_ADD_TO_CP= NAME_PREFIX + "add_to_classpath.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REMOVE_FROM_CP= NAME_PREFIX + "remove_from_classpath.gif"; //$NON-NLS-1$
 
 	/*
 	 * Set of predefined Image Descriptors.
@@ -164,6 +171,7 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_ELCL_VIEW_MENU= createManaged(T_ELCL, NAME_PREFIX + "view_menu.gif", IMG_ELCL_VIEW_MENU); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_VIEW_MENU= createManaged(T_DLCL, NAME_PREFIX + "view_menu.gif", IMG_DLCL_VIEW_MENU); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_REMOVE= createManaged(T_ELCL, IMG_REMOVE); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -177,6 +185,7 @@ public class JavaPluginImages {
 	
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_ETOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_ETOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
+    public static final ImageDescriptor DESC_UNDO= createManaged(T_ETOOL, IMG_UNDO); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManaged(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManaged(T_OBJ, IMG_OBJS_PACKDECL);
@@ -188,7 +197,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CUNIT= createManaged(T_OBJ, IMG_OBJS_CUNIT);
 	public static final ImageDescriptor DESC_OBJS_CUNIT_RESOURCE= createManaged(T_OBJ, IMG_OBJS_CUNIT_RESOURCE);
 	public static final ImageDescriptor DESC_OBJS_CFILE= createManaged(T_OBJ, IMG_OBJS_CFILE); 
-	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS); 
+	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS);
+	public static final ImageDescriptor DESC_OBJS_CLEAR= createManaged(T_ELCL, IMG_OBJS_CLEAR);
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManaged(T_OBJ, IMG_OBJS_CFILEINT); 
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManaged(T_OBJ, IMG_OBJS_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_LOGICAL_PACKAGE= createManaged(T_OBJ, IMG_OBJS_EMPTY_LOGICAL_PACKAGE);
@@ -276,6 +286,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_LOCAL_VARIABLE= createManaged(T_OBJ, IMG_OBJS_LOCAL_VARIABLE);
 	
 	public static final ImageDescriptor DESC_OBJS_HELP= createManaged(T_ELCL, IMG_OBJS_HELP);
+	
+	public static final ImageDescriptor DESC_ADD_TO_CP= createManaged(T_OBJ, IMG_OBJS_ADD_TO_CP);
+	public static final ImageDescriptor DESC_REMOVE_FROM_CP= createManaged(T_OBJ, IMG_OBJS_REMOVE_FROM_CP);
 
 	
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= create(T_OBJ, "over_co.gif");  					//$NON-NLS-1$

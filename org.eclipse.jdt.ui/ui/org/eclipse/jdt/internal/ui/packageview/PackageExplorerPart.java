@@ -836,7 +836,7 @@ public class PackageExplorerPart extends ViewPart
 	 * 
 	 * @since 2.1
 	 */
-	boolean isFlatLayout() {
+	public boolean isFlatLayout() {
 		return fIsCurrentLayoutFlat;
 	}
 	

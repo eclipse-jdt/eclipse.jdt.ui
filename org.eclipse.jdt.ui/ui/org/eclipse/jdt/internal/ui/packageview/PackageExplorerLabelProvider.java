@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
  * </p>
  * @since 2.1
  */
-class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
+public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private PackageExplorerContentProvider fContentProvider;
 
@@ -69,7 +69,7 @@ class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		return deltaname;
 	}
 	
-	void setIsFlatLayout(boolean state) {
+	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 		fProblemDecorator.setIsFlatLayout(state);
 	}

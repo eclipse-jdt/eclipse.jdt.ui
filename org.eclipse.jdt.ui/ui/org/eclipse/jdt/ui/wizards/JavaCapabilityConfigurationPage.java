@@ -63,20 +63,24 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * </p>
 	 */	
 	public JavaCapabilityConfigurationPage() {
-		super(PAGE_NAME);
-		fJavaProject= null;
-		
-		setTitle(NewWizardMessages.getString("JavaCapabilityConfigurationPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("JavaCapabilityConfigurationPage.description")); //$NON-NLS-1$
-		
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			public void statusChanged(IStatus status) {
-				updateStatus(status);
-			}
-		};
-
-		fBuildPathsBlock= new BuildPathsBlock(listener, 0);
+        super(PAGE_NAME);
+        fJavaProject= null;
+        
+        setTitle(NewWizardMessages.getString("JavaCapabilityConfigurationPage.title")); //$NON-NLS-1$
+        setDescription(NewWizardMessages.getString("JavaCapabilityConfigurationPage.description")); //$NON-NLS-1$
 	}
+    
+    private BuildPathsBlock getBuildPathsBlock() {
+        if (fBuildPathsBlock == null) {
+            IStatusChangeListener listener= new IStatusChangeListener() {
+                public void statusChanged(IStatus status) {
+                    updateStatus(status);
+                }
+            };
+            fBuildPathsBlock= new BuildPathsBlock(listener, 0);
+        }
+        return fBuildPathsBlock;
+    }
 	
 	/**
 	 * Initializes the page with the project and default classpaths.
@@ -102,7 +106,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			defaultOutputLocation= null;
 			defaultEntries= null;
 		}
-		fBuildPathsBlock.init(jproject, defaultOutputLocation, defaultEntries);
+		getBuildPathsBlock().init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
 	}
 	
@@ -111,7 +115,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @see WizardPage#createControl
 	 */	
 	public void createControl(Composite parent) {
-		Control control= fBuildPathsBlock.createControl(parent);
+		Control control= getBuildPathsBlock().createControl(parent);
 		setControl(control);
 		Dialog.applyDialogFont(control);
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
@@ -124,7 +128,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @return the currently configured output location
 	 */
 	public IPath getOutputLocation() {
-		return fBuildPathsBlock.getOutputLocation();
+		return getBuildPathsBlock().getOutputLocation();
 	}
 
 	/**
@@ -134,7 +138,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @return the currently configured classpath
 	 */	
 	public IClasspathEntry[] getRawClassPath() {
-		return fBuildPathsBlock.getRawClassPath();
+		return getBuildPathsBlock().getRawClassPath();
 	}
 	
 	/**
@@ -205,12 +209,16 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		try {
 			IProject project= getJavaProject().getProject();
 			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
-			fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 5));
+			getBuildPathsBlock().configureJavaProject(new SubProgressMonitor(monitor, 5));
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException();
 		} finally {
 			monitor.done();
 		}			
 	}
+    
+    public void undoChanges() {
+        getBuildPathsBlock().undoAll();
+    }
 	
 }

@@ -75,6 +75,11 @@ public class BuildPathDialog extends StatusDialog {
 		if (buttonId == IDialogConstants.OK_ID) {
 			configureBuildPath();
 		}
+        // TODO: is this undo necessary?
+        if (buttonId == IDialogConstants.CANCEL_ID) {
+            fBlock.undoAll();
+            configureBuildPath();
+        }
 		super.buttonPressed(buttonId);
 	}
 

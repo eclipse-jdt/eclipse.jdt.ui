@@ -62,7 +62,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
  * @see org.eclipse.jdt.internal.ui.packageview.PackageFragmentProvider
  */
-class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
 	protected static final int ORIGINAL= 0;
 	protected static final int PARENT= 1 << 0;
@@ -557,7 +557,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return false;
 	}
 	
-	void setIsFlatLayout(boolean state) {
+	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 	}
 	/**

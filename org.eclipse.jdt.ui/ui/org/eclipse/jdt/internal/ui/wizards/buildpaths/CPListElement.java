@@ -241,10 +241,32 @@ public class CPListElement {
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
 			CPListElement elem= (CPListElement)other;
+			if (!sameAttribute(getAttribute(CPListElement.INCLUSION), elem.getAttribute(CPListElement.INCLUSION)))
+                return false;
+            if (!sameAttribute(getAttribute(CPListElement.EXCLUSION), elem.getAttribute(CPListElement.EXCLUSION)))
+                return false;
+            if (!sameOutputAttribute(getAttribute(CPListElement.OUTPUT), elem.getAttribute(CPListElement.OUTPUT)))
+                return false;
 			return elem.fEntryKind == fEntryKind && elem.fPath.equals(fPath);
 		}
 		return false;
 	}
+    
+    private boolean sameAttribute(Object own, Object other) {
+        if (own == null || other == null)
+            return own == other;
+        IPath[] ownPaths= (IPath[]) own;
+        IPath[] otherPaths= (IPath[]) other;
+        return ownPaths.equals(otherPaths);
+    }
+    
+    private boolean sameOutputAttribute(Object own, Object other) {
+        if (own == null || other == null)
+            return own == other;
+        IPath ownPath= (IPath) own;
+        IPath otherPath= (IPath) other;
+        return ownPath.equals(otherPath);
+    }
 	
 	/*
 	 * @see Object#hashCode()
