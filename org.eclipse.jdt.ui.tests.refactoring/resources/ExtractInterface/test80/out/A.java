@@ -11,13 +11,13 @@ public class A implements I {
 	public void fz(){
 	} 
 
-	/**
+	/*
 	 * comment f1
 	 */
 	public void f1(){
 	} 
 
-	/** comment f1z*/
+	/* comment f1z*/
 	public void f1z(){
 	} 
 

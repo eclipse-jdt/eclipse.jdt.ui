@@ -140,10 +140,6 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		tryCatchTest();
 	}
 	
-	public void testExpressionStatement() throws Exception {
-		tryCatchTest();
-	}
-	
 	public void testInitializer() throws Exception {
 		tryCatchTest();
 	}
