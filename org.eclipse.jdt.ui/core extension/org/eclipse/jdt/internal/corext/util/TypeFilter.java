@@ -70,7 +70,13 @@ public class TypeFilter implements IPropertyChangeListener {
 			
 			fStringMatchers= new StringMatcher[nTokens];
 			for (int i= 0; i < nTokens; i++) {
-				fStringMatchers[i]= new StringMatcher(tok.nextToken(), false, false);
+				String curr= tok.nextToken();
+				if (curr.length() > 0) { 
+					if (curr.endsWith(".*")) { //$NON-NLS-1$
+						curr= curr.substring(0, curr.length() - 2) + '*';
+					}
+					fStringMatchers[i]= new StringMatcher(curr, false, false);
+				}
 			}
 		}
 		return fStringMatchers;

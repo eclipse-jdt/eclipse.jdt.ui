@@ -116,7 +116,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 		dialog.setFilter(fNameDialogField.getText());
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			PackageFragment res= (PackageFragment) dialog.getFirstResult();
-			fNameDialogField.setText(res.getElementName() + ".*"); //$NON-NLS-1$
+			fNameDialogField.setText(res.getElementName() + "*"); //$NON-NLS-1$
 		}
 	}
 	
