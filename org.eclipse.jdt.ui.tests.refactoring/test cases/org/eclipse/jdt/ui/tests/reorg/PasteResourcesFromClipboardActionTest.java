@@ -38,6 +38,7 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
@@ -171,8 +172,9 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 			return; 
 			
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(copySelection), fClipboard);	
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard, pasteAction);
+		CopyToClipboardAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
+		copyAction.setAutoRepeatOnFailure(true);
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
 	}

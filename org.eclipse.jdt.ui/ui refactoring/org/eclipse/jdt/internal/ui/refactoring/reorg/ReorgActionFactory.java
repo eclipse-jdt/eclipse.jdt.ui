@@ -37,7 +37,7 @@ public class ReorgActionFactory {
 		return a1;
 	}
 	
-	public static SelectionDispatchAction createCopyAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
+	public static CopyToClipboardAction createCopyAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
 		return new CopyToClipboardAction(site, clipboard, pasteAction);
 	}
 	
