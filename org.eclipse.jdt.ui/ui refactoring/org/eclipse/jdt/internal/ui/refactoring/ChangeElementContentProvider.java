@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -148,14 +148,19 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			}
 		}
 		changeElement.setChildren(result);
-		return result; 
+		return result;
 	}
 	
 	private EditChange[] getSortedTextEditChanges(TextChange change) {
-		EditChange[] result= change.getTextEditChanges();
+		EditChange[] edits= change.getTextEditChanges();
+		List result= new ArrayList(edits.length);
+		for (int i= 0; i < edits.length; i++) {
+			if (!edits[i].isEmpty())
+				result.add(edits[i]);
+		}
 		Comparator comparator= new OffsetComparator();
-		Arrays.sort(result, comparator);
-		return result;
+		Collections.sort(result, comparator);
+		return (EditChange[])result.toArray(new EditChange[result.size()]);
 	}
 	
 	private PseudoJavaChangeElement getChangeElement(Map map, IJavaElement element, List children, ChangeElement cunitChange) {

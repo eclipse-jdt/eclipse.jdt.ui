@@ -57,14 +57,17 @@ public abstract class TextChange extends AbstractTextChange {
 		public IRegion getTextRange() {
 			return fDescription.getTextRange();
 		}
+		public boolean isEmpty() {
+			return fDescription.hasTextEdits();
+		}
 		/* package */ GroupDescription getGroupDescription() {
 			return fDescription;
 		}
-		public boolean coveredBy(IRegion sourceRange) {
-			int sLength= sourceRange.getLength();
+		public boolean coveredBy(IRegion sourceRegion) {
+			int sLength= sourceRegion.getLength();
 			if (sLength == 0)
 				return false;
-			int sOffset= sourceRange.getOffset();
+			int sOffset= sourceRegion.getOffset();
 			int sEnd= sOffset + sLength - 1;
 			TextEdit[] edits= fDescription.getTextEdits();
 			for (int i= 0; i < edits.length; i++) {

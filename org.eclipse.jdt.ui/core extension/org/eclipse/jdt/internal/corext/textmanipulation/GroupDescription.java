@@ -47,7 +47,7 @@ public class GroupDescription {
 		fEdits.add(edit);
 	}
 	
-	public boolean isEmpty() {
+	public boolean hasTextEdits() {
 		return fEdits.isEmpty();
 	}
 	
