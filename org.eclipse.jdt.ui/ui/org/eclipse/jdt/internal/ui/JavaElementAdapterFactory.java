@@ -6,7 +6,7 @@
 package org.eclipse.jdt.internal.ui;
 
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.ui.IPersistableElement;import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -31,7 +31,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		ISearchPageScoreComputer.class,
 		IWorkbenchAdapter.class,
 		IResourceLocator.class,
-		IPersistableElement.class
+		IPersistableElement.class,
+		IProject.class
 	};
 	
 	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
@@ -50,6 +51,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 			return getProperties(java);
 		} else if (IResource.class.equals(key)) {
 			return getResource(java);
+		} else if (IProject.class.equals(key)) {
+			return getProject(java);
 		} else if (ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
 		} else if (IWorkbenchAdapter.class.equals(key)) {
@@ -58,7 +61,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 			return fgResourceLocator;
 		} else if (IPersistableElement.class.equals(key)) 
 			return new PersistableJavaElementFactory(java);
-		return null;
+		return null; 
 	}
 	
 	private IResource getResource(IJavaElement element) {
@@ -69,6 +72,10 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		}
 	}
 		
+	private IResource getProject(IJavaElement element) {
+		return element.getJavaProject().getProject();
+	}
+
 	private IPropertySource getProperties(IJavaElement element) {
 		return new JavaElementProperties(element);
 	}
