@@ -314,15 +314,15 @@ public class IndentAction extends TextEditorAction {
 		
 		// only change the document if it is a real change
 		if (!indent.equals(currentIndent)) {
+			String deletedText= document.get(offset, length);
 			document.replace(offset, length, indent);
 			
-			if (fIsTabAction) {
+			if (fIsTabAction && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
 				ITextEditor editor= getTextEditor();
 				if (editor != null) {
 					final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
 					if (manager != null) {
 						try {
-							String deletedText= document.get(offset, length);
 							// restore smart portion
 							ReplaceEdit smart= new ReplaceEdit(offset, indent.length(), deletedText);
 							
@@ -333,9 +333,6 @@ public class IndentAction extends TextEditorAction {
 									2,
 									null);
 							manager.register(spec);
-						} catch (BadLocationException e) {
-							// log & ignore
-							JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "ConcurrentModification in IndentAction", e)); //$NON-NLS-1$
 						} catch (MalformedTreeException e) {
 							// log & ignore
 							JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Illegal smart backspace action", e)); //$NON-NLS-1$

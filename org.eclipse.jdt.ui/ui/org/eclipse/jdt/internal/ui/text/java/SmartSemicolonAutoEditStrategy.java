@@ -149,7 +149,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			
 			final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
-			if (manager != null) {
+			if (manager != null && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
 				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(), document.get(command.offset, command.length));
 				UndoSpec s1= new UndoSpec(command.offset + command.text.length(),
 						new Region(command.offset, 0),

@@ -1689,6 +1689,15 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls the smart backspace behavior.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SMART_BACKSPACE= "smart_backspace"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether Java comments should be
 	 * spell-checked.
 	 * <p>
@@ -2421,6 +2430,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.MOD1);
 		
 		store.setDefault(PreferenceConstants.EDITOR_SMART_TAB, true);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_BACKSPACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMAT, true);

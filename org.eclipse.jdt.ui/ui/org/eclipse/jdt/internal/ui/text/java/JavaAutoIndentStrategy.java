@@ -1041,6 +1041,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param origText original text of the command
 	 */
 	private void installSmartBackspace(IDocument d, DocumentCommand c, int origOffset, int origLength, String origText) {
+		if (!JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE))
+			return;
+		
 		if (origText == null)
 			origText= new String();
 
