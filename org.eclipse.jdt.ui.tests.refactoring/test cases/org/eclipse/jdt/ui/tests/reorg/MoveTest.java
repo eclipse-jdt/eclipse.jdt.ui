@@ -31,13 +31,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
 public class MoveTest extends RefactoringTest {
@@ -65,25 +67,29 @@ public class MoveTest extends RefactoringTest {
 	private IReorgQueries createReorgQueries(){
 		return new MockReorgQueries();
 	}
+	
+	private RefactoringStatus performRefactoring(JavaMoveProcessor processor, boolean providesUndo) throws Exception {
+		return performRefactoring(new MoveRefactoring(processor), providesUndo);
+	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		assertTrue("move should be disabled", ! MoveRefactoring.isAvailable(resources, javaElements, settings));
-		MoveRefactoring refactoring2= MoveRefactoring.create(resources, javaElements, settings);
-		assertTrue(refactoring2 == null);
+		assertTrue("move should be disabled", ! JavaMoveProcessor.isAvailable(resources, javaElements, settings));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, settings);
+		assertTrue(processor == null);
 	}
 	
-	private MoveRefactoring verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
+	private JavaMoveProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		assertTrue("move should be enabled", MoveRefactoring.isAvailable(resources, javaElements, settings));
-		MoveRefactoring refactoring2= MoveRefactoring.create(resources, javaElements, settings);
+		assertTrue("move should be enabled", JavaMoveProcessor.isAvailable(resources, javaElements, settings));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, settings);
 		if (reorgQueries != null)
-			refactoring2.setReorgQueries(reorgQueries);
-		assertNotNull(refactoring2);
-		return refactoring2;
+			processor.setReorgQueries(reorgQueries);
+		assertNotNull(processor);
+		return processor;
 	}
 	
-	private void verifyValidDestination(MoveRefactoring ref, Object destination) throws Exception {
+	private void verifyValidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
 			status= ref.setDestination((IResource)destination);
@@ -94,7 +100,7 @@ public class MoveTest extends RefactoringTest {
 		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
-	private void verifyInvalidDestination(MoveRefactoring ref, Object destination) throws Exception {
+	private void verifyInvalidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
 			status= ref.setDestination((IResource)destination);
@@ -266,7 +272,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -286,7 +292,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file1};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file2;
 			verifyInvalidDestination(ref, destination);
@@ -304,7 +310,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -319,7 +325,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -335,7 +341,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu1;
 			verifyInvalidDestination(ref, destination);
@@ -356,7 +362,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file1;
 			verifyInvalidDestination(ref, destination);
@@ -370,7 +376,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_packageToItsef() throws Exception {
 		IJavaElement[] javaElements= {getPackageP()};
 		IResource[] resources= {};
-		MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+		JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getPackageP();
 		verifyInvalidDestination(ref, destination);
@@ -379,7 +385,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_sourceFolderToItsef() throws Exception {
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+		JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyInvalidDestination(ref, destination);
@@ -391,7 +397,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyInvalidDestination(ref, destination);
@@ -411,7 +417,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -430,7 +436,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -448,7 +454,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -469,7 +475,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {parentFolder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= parentFolder;
 			verifyInvalidDestination(ref, destination);
@@ -484,7 +490,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu.getParent();
 			verifyInvalidDestination(ref, destination);
@@ -497,7 +503,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_packageToParentSourceFolder() throws Exception {
 		IJavaElement[] javaElements= {getPackageP()};
 		IResource[] resources= {};
-		MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+		JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyInvalidDestination(ref, destination);
@@ -506,7 +512,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_sourceFolderToParentProject() throws Exception {
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+		JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot().getParent();
 		verifyInvalidDestination(ref, destination);
@@ -518,7 +524,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu.getType("A");
 			verifyInvalidDestination(ref, destination);
@@ -536,7 +542,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyValidDestination(ref, destination);
@@ -553,7 +559,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -572,7 +578,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -592,7 +598,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -612,7 +618,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -630,7 +636,7 @@ public class MoveTest extends RefactoringTest {
 //		try{
 //			IJavaElement[] javaElements= {pack1};
 //			IResource[] resources= {};
-//			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+//			JavaMoveProcessor2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 //
 //			Object destination= otherProject;
 //			verifyInvalidDestination(ref, destination);
@@ -646,7 +652,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= pack1;
 			verifyInvalidDestination(ref, destination);
@@ -662,7 +668,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -678,7 +684,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -697,7 +703,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -717,7 +723,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -733,7 +739,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -752,7 +758,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -771,7 +777,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= otherProject;
 			verifyInvalidDestination(ref, destination);
@@ -789,7 +795,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= cu1;
 			verifyInvalidDestination(ref, destination);
@@ -810,7 +816,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -831,7 +837,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -848,7 +854,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -864,7 +870,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -880,7 +886,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= MySetup.getProject();
 			verifyInvalidDestination(ref, destination);
@@ -899,7 +905,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -915,7 +921,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 			Object destination= cu1;
 			verifyInvalidDestination(ref, destination);			
 		}finally{
@@ -932,13 +938,13 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor processor= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherPackage;
-			verifyValidDestination(ref, destination);
+			verifyValidDestination(processor, destination);
 			
 			assertTrue("source file does not exist before moving", cu1.exists());
-			RefactoringStatus status= performRefactoring(ref, false);
+			RefactoringStatus status= performRefactoring(processor, false);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			ICompilationUnit newCu= otherPackage.getCompilationUnit(cu1.getElementName());
@@ -958,7 +964,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
@@ -991,7 +997,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cuD };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			verifyValidDestination(ref, org);			
 			
@@ -1021,7 +1027,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= MySetup.getProject();
 			verifyValidDestination(ref, destination);			
@@ -1049,7 +1055,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
@@ -1077,7 +1083,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);
@@ -1113,7 +1119,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
@@ -1149,7 +1155,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
@@ -1180,7 +1186,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu1;
 			verifyValidDestination(ref, destination);
@@ -1210,7 +1216,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);			
@@ -1240,7 +1246,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyValidDestination(ref, destination);
@@ -1270,7 +1276,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
@@ -1298,7 +1304,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= MySetup.getProject();
 			verifyInvalidDestination(ref, destination);			
@@ -1320,7 +1326,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherFolder;
 			verifyValidDestination(ref, destination);
@@ -1346,7 +1352,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= MySetup.getProject();
 			verifyInvalidDestination(ref, destination);						
@@ -1365,7 +1371,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);						
@@ -1391,7 +1397,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);						
@@ -1423,7 +1429,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= fileInAnotherFolder;
 			verifyValidDestination(ref, destination);						
@@ -1452,7 +1458,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu;
 			verifyValidDestination(ref, destination);						
@@ -1484,7 +1490,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
@@ -1510,7 +1516,7 @@ public class MoveTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { oldRoot };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherJavaProject;
 			verifyValidDestination(ref, destination);
@@ -1534,7 +1540,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 			Object destination= method;
 			verifyInvalidDestination(ref, destination);
 		} finally {
@@ -1551,7 +1557,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
@@ -1574,7 +1580,7 @@ public class MoveTest extends RefactoringTest {
 			IField field= cu.getType("A").getField("f");
 			IJavaElement[] javaElements= { field };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
@@ -1597,7 +1603,7 @@ public class MoveTest extends RefactoringTest {
 			IInitializer initializer= cu.getType("A").getInitializer(1);
 			IJavaElement[] javaElements= { initializer };
 			IResource[] resources= {};
-			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);

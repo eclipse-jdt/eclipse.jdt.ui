@@ -11,13 +11,17 @@
 package org.eclipse.ltk.core.refactoring.participants;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.IRefactoringCoreStatusCodes;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.internal.core.refactoring.RefactoringCorePlugin;
 
@@ -69,5 +73,24 @@ public class CheckConditionsContext {
 				RefactoringCoreMessages.getFormattedString("CheckConditionContext.error.checker_exists", checker.getClass().toString()), //$NON-NLS-1$
 				null));  
 		}
+	}
+	
+	/**
+	 * Checks the condition of all registered condition checkers and returns a
+	 * merge status result.
+	 * 
+	 * @param pm a progress monitor
+	 * 
+	 * @return the combined status result
+	 * 
+	 * @throws CoreException if an error occurs during condition checking
+	 */
+	public RefactoringStatus check(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= fCheckers.values().iterator(); iter.hasNext();) {
+			IConditionChecker checker= (IConditionChecker)iter.next();
+			result.merge(checker.check(new SubProgressMonitor(pm, 1)));
+		}
+		return result;
 	}
 }

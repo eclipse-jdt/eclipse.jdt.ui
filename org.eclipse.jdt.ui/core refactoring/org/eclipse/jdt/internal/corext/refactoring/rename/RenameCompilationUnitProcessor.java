@@ -14,8 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,7 +21,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -63,22 +60,6 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		}
 	}
 
-	public void initialize(Object[] elements) throws CoreException {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (element instanceof IFile) {
-			IJavaElement jElement= JavaCore.create((IFile)element);
-			if (jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT)
-				fCu= (ICompilationUnit)jElement;
-		} else if (element instanceof ICompilationUnit) {
-			fCu= (ICompilationUnit)element;
-		}
-		if (fCu != null) {
-			computeRenameTypeRefactoring();
-			setNewElementName(fCu.getElementName());
-		}
-	}
-	
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -101,18 +82,18 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			new String[]{fCu.getElementName(), getNewElementName()});
 	}
 
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fCu);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fCu);
 	}
 
 	public Object[] getElements() {
 		return new Object[] {fCu};
 	}
 
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
 		String newTypeName= removeFileNameExtension(getNewElementName());
 		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences());
-		return createSecondaryParticipants(computeDerivedElements(), arguments, computeResourceModifications());
+		return loadDerivedParticipants(computeDerivedElements(), arguments, computeResourceModifications());
 	}
 	
 	private Object[] computeDerivedElements() {

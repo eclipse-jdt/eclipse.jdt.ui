@@ -31,55 +31,57 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
 public class ReorgMoveStarter {
-	private final MoveRefactoring fMoveRefactoring;
+	private final JavaMoveProcessor fMoveProcessor;
 
-	private ReorgMoveStarter(MoveRefactoring moveRefactoring) {
-		Assert.isNotNull(moveRefactoring);
-		fMoveRefactoring= moveRefactoring;
+	private ReorgMoveStarter(JavaMoveProcessor moveProcessor) {
+		Assert.isNotNull(moveProcessor);
+		fMoveProcessor= moveProcessor;
 	}
 	
 	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IJavaElement destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		MoveRefactoring moveRefactoring= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
-		if (moveRefactoring == null)
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (processor == null)
 			return null;
-		if (! moveRefactoring.setDestination(destination).isOK())
+		if (! processor.setDestination(destination).isOK())
 			return null;
-		return new ReorgMoveStarter(moveRefactoring);
+		return new ReorgMoveStarter(processor);
 	}
 
 	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IResource destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		MoveRefactoring moveRefactoring= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
-		if (moveRefactoring == null)
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (processor == null)
 			return null;
-		if (! moveRefactoring.setDestination(destination).isOK())
+		if (! processor.setDestination(destination).isOK())
 			return null;
-		return new ReorgMoveStarter(moveRefactoring);
+		return new ReorgMoveStarter(processor);
 	}
 	
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 		try {
-			if (fMoveRefactoring.hasAllInputSet()) {
+			MoveRefactoring ref= new MoveRefactoring(fMoveProcessor);
+			if (fMoveProcessor.hasAllInputSet()) {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
-				fMoveRefactoring.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(fMoveRefactoring, RefactoringPreferences.getStopSeverity(), true, parent, context).perform();
+				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
+				new RefactoringExecutionHelper(ref, RefactoringPreferences.getStopSeverity(), true, parent, context).perform();
 			} else  {
-				RefactoringWizard wizard= new ReorgMoveWizard(fMoveRefactoring);
+				RefactoringWizard wizard= new ReorgMoveWizard(ref);
 				/*
 				 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 				 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 				 */
-				fMoveRefactoring.setReorgQueries(new ReorgQueries(wizard));
-				new RefactoringStarter().activate(fMoveRefactoring, wizard, parent, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+				fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
+				new RefactoringStarter().activate(ref, wizard, parent, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$

@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -30,8 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
@@ -62,21 +63,6 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 	
 	//---- IRenameProcessor methods ---------------------------------------
 		
-	public RenameResourceProcessor() {
-		super(RefactoringStyles.NONE);
-	}
-
-	public void initialize(Object[] elements) throws CoreException {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (!(element instanceof IAdaptable))
-			return;
-		fResource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
-		if (fResource == null)
-			return;
-		setNewElementName(fResource.getName());
-	}
-	
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -105,8 +91,8 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 		return fResource.getName();
 	}
 	
-	public IProject[] getAffectedProjects() {
-		return ResourceProcessors.computeScope(fResource);
+	public String[] getAffectedProjectNatures() throws CoreException {
+		return ResourceProcessors.computeAffectedNatures(fResource);
 	}
 
 	public Object getNewElement() {
@@ -117,8 +103,14 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 		return true;
 	}
 	
-	public RenameParticipant[] getElementParticipants() throws CoreException {
-		return ExtensionManagers.getRenameParticipants(this, getElements(), getAffectedProjects(), getSharedParticipants());
+	public RenameParticipant[] loadElementParticipants() throws CoreException {
+		Object[] elements= getElements();
+		String[] natures= getAffectedProjectNatures();
+		List result= new ArrayList();
+		for (int i= 0; i < elements.length; i++) {
+			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, elements[i], natures, getSharedParticipants())));
+		}
+		return (RenameParticipant[])result.toArray(new RenameParticipant[result.size()]);
 	}
 	
 	//--- Condition checking --------------------------------------------

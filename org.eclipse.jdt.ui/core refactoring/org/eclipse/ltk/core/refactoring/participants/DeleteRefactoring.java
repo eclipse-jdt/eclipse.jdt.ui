@@ -74,7 +74,7 @@ public class DeleteRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		
-		fElementParticipants= fProcessor.getElementParticipants();
+		fElementParticipants= fProcessor.loadElementParticipants();
 		IProgressMonitor sm= new SubProgressMonitor(pm, 1);
 		sm.beginTask("", fElementParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fElementParticipants.length; i++) {
@@ -101,7 +101,7 @@ public class DeleteRefactoring extends Refactoring {
 		}
 		if (result.hasFatalError())
 			return result;
-		fSecondaryParticipants= fProcessor.getSecondaryParticipants();
+		fSecondaryParticipants= fProcessor.loadDerivedParticipants();
 		sm= new SubProgressMonitor(pm, 1);
 		sm.beginTask("", fSecondaryParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fSecondaryParticipants.length; i++) {

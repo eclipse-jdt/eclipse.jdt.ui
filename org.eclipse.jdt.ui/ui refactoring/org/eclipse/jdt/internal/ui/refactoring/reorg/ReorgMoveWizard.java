@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -22,18 +25,16 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
-import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
-public class ReorgMoveWizard extends RefactoringWizard{
+public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
 		super(ref, ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
@@ -50,11 +51,11 @@ public class ReorgMoveWizard extends RefactoringWizard{
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
 	 */
 	protected boolean hasPreviewPage() {
-		return getMoveRefactoring().canUpdateReferences() || getMoveRefactoring().canEnableQualifiedNameUpdating();
+		return getJavaMoveProcessor().canUpdateReferences() || getJavaMoveProcessor().canEnableQualifiedNameUpdating();
 	}
 
-	private MoveRefactoring getMoveRefactoring(){
-		return (MoveRefactoring) getRefactoring();
+	private JavaMoveProcessor getJavaMoveProcessor(){
+		return (JavaMoveProcessor)getRefactoring().getAdapter(JavaMoveProcessor.class);
 	}
 
 	private static class MoveInputPage extends ReorgUserInputPage{
@@ -68,36 +69,36 @@ public class ReorgMoveWizard extends RefactoringWizard{
 			super(PAGE_NAME);
 		}
 
-		private MoveRefactoring getMoveRefactoring(){
-			return (MoveRefactoring) getRefactoring();
+		private JavaMoveProcessor getJavaMoveProcessor(){
+			return (JavaMoveProcessor)getRefactoring().getAdapter(JavaMoveProcessor.class);
 		}
 
 		protected Object getInitiallySelectedElement() {
-			return getMoveRefactoring().getCommonParentForInputElements();
+			return getJavaMoveProcessor().getCommonParentForInputElements();
 		}
 		
 		protected IJavaElement[] getJavaElements() {
-			return getMoveRefactoring().getJavaElements();
+			return getJavaMoveProcessor().getJavaElements();
 		}
 
 		protected IResource[] getResources() {
-			return getMoveRefactoring().getResources();
+			return getJavaMoveProcessor().getResources();
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
 		protected boolean performFinish() {
-			return super.performFinish() || getMoveRefactoring().wasCanceled(); //close the dialog if canceled
+			return super.performFinish() || getJavaMoveProcessor().wasCanceled(); //close the dialog if canceled
 		}
 		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
-			MoveRefactoring refactoring= getMoveRefactoring();
+			JavaMoveProcessor processor= getJavaMoveProcessor();
 			final RefactoringStatus refactoringStatus;
 			if (selected instanceof IJavaElement)
-				refactoringStatus= refactoring.setDestination((IJavaElement)selected);
+				refactoringStatus= processor.setDestination((IJavaElement)selected);
 			else if (selected instanceof IResource)
-				refactoringStatus= refactoring.setDestination((IResource)selected);
+				refactoringStatus= processor.setDestination((IResource)selected);
 			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgMoveWizard.4")); //$NON-NLS-1$
 			
 			updateUIStatus();
@@ -106,78 +107,78 @@ public class ReorgMoveWizard extends RefactoringWizard{
 	
 		private void updateUIStatus() {
 			getRefactoringWizard().setPreviewReview(false);
-			MoveRefactoring refactoring= getMoveRefactoring();
+			JavaMoveProcessor processor= getJavaMoveProcessor();
 			if (fReferenceCheckbox != null){
 				fReferenceCheckbox.setEnabled(canUpdateReferences());
-				refactoring.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
+				processor.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
 			}
 			if (fQualifiedNameCheckbox != null){
-				boolean enabled= refactoring.canEnableQualifiedNameUpdating();
+				boolean enabled= processor.canEnableQualifiedNameUpdating();
 				fQualifiedNameCheckbox.setEnabled(enabled);
 				if (enabled) {
-					fQualifiedNameComponent.setEnabled(refactoring.getUpdateQualifiedNames());
-					if (refactoring.getUpdateQualifiedNames())
+					fQualifiedNameComponent.setEnabled(processor.getUpdateQualifiedNames());
+					if (processor.getUpdateQualifiedNames())
 						getRefactoringWizard().setPreviewReview(true);
 				} else {
 					fQualifiedNameComponent.setEnabled(false);
 				}
-				refactoring.setUpdateQualifiedNames(fQualifiedNameCheckbox.getEnabled() && fQualifiedNameCheckbox.getSelection());
+				processor.setUpdateQualifiedNames(fQualifiedNameCheckbox.getEnabled() && fQualifiedNameCheckbox.getSelection());
 			}
 		}
 
 		private void addUpdateReferenceComponent(Composite result) {
-			final MoveRefactoring refactoring= getMoveRefactoring();
-			if (! refactoring.canUpdateReferences())
+			final JavaMoveProcessor processor= getJavaMoveProcessor();
+			if (! processor.canUpdateReferences())
 				return;
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
 			fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
-			fReferenceCheckbox.setSelection(refactoring.getUpdateReferences());
+			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
 			fReferenceCheckbox.setEnabled(canUpdateReferences());
 			
 			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					refactoring.setUpdateReferences(((Button)e.widget).getSelection());
+					processor.setUpdateReferences(((Button)e.widget).getSelection());
 					updateUIStatus();
 				}
 			});
 		}
 
 		private void addUpdateQualifiedNameComponent(Composite parent, int marginWidth) {
-			final MoveRefactoring refactoring= getMoveRefactoring();
-			if (!refactoring.canEnableQualifiedNameUpdating() || !refactoring.canUpdateQualifiedNames())
+			final JavaMoveProcessor processor= getJavaMoveProcessor();
+			if (!processor.canEnableQualifiedNameUpdating() || !processor.canUpdateQualifiedNames())
 				return;
 			fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);
 			int indent= marginWidth + fQualifiedNameCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 			fQualifiedNameCheckbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
 			fQualifiedNameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fQualifiedNameCheckbox.setSelection(refactoring.getUpdateQualifiedNames());
+			fQualifiedNameCheckbox.setSelection(processor.getUpdateQualifiedNames());
 		
-			fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, refactoring, getRefactoringSettings());
+			fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, processor, getRefactoringSettings());
 			fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
 			gd.horizontalAlignment= GridData.FILL;
 			gd.horizontalIndent= indent;
-			updateQualifiedNameUpdating(refactoring, refactoring.getUpdateQualifiedNames());
+			updateQualifiedNameUpdating(processor, processor.getUpdateQualifiedNames());
 
 			fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean enabled= ((Button)e.widget).getSelection();
-					updateQualifiedNameUpdating(refactoring, enabled);
+					updateQualifiedNameUpdating(processor, enabled);
 				}
 
 			});
 		}
 		
-		private void updateQualifiedNameUpdating(final MoveRefactoring refactoring, boolean enabled) {
+		private void updateQualifiedNameUpdating(final JavaMoveProcessor processor, boolean enabled) {
 			fQualifiedNameComponent.setEnabled(enabled);
-			refactoring.setUpdateQualifiedNames(enabled);
+			processor.setUpdateQualifiedNames(enabled);
 			updateUIStatus();
 		}
 		
 		public void createControl(Composite parent) {
 			Composite result;
 			
-			if (! getMoveRefactoring().hasDestinationSet()) {
+			if (! getJavaMoveProcessor().hasDestinationSet()) {
 				super.createControl(parent);
 				result= (Composite)super.getControl();
 			} else  {
@@ -194,7 +195,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		}
 
 		private boolean canUpdateReferences() {
-			return getMoveRefactoring().canUpdateReferences();
+			return getJavaMoveProcessor().canUpdateReferences();
 		}
 	}
 }

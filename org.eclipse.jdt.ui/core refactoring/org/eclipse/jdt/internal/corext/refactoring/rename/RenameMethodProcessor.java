@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -71,26 +70,18 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		initialize(method);
 	}
 	
+	protected void initialize(IMethod method) {
+		fMethod= method;
+		setNewElementName(fMethod.getElementName());
+		fUpdateReferences= true;
+	}	
+	
 	protected void setData(RenameMethodProcessor other) {
 		fUpdateReferences= other.fUpdateReferences;
 		setNewElementName(other.getNewElementName());
 	}
 	
 	//---- IRefactoringProcessor --------------------------------
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object method= elements[0];
-		if (!(method instanceof IMethod))
-			return;
-		initialize((IMethod)method);
-	}
-		
-	private void initialize(IMethod method) {
-		fMethod= method;
-		setNewElementName(fMethod.getElementName());
-		fUpdateReferences= true;
-	}
 
 	public String getIdentifier() {
 		return IDENTIFIER;
@@ -114,15 +105,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fMethod);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fMethod);
 	}
 
 	public Object[] getElements() {
 		return new Object[] {fMethod};
 	}
 
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
 		// TODO must caclulate ripple ??
 		return new RefactoringParticipant[0];
 	}

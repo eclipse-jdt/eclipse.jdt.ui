@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -116,18 +115,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	//---- IRefactoringProcessor ---------------------------------------------------
 	
 	public RenamePackageProcessor(IPackageFragment fragment) {
-		initialize(fragment);
-	}
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (!(element instanceof IPackageFragment))
-			return;
-		initialize((IPackageFragment)element);
-	}
-	
-	private void initialize(IPackageFragment fragment) {
 		fPackage= fragment;
 		setNewElementName(fPackage.getElementName());
 		fUpdateReferences= true;
@@ -153,16 +140,16 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 						new String[]{fPackage.getElementName(), getNewElementName()});
 	}
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fPackage);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fPackage);
 	}
 	
 	public Object[] getElements() {
 		return new Object[] {fPackage};
 	}
 	
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
-		return createSecondaryParticipants(null, null, computeResourceModifications());
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+		return loadDerivedParticipants(null, null, computeResourceModifications());
 	}
 
 	private ResourceModifications computeResourceModifications() throws CoreException {

@@ -22,9 +22,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-
-import org.eclipse.core.expressions.EvaluationContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -46,7 +43,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -58,7 +54,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
@@ -80,20 +76,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 	
 	public RenameFieldProcessor(IField field) {
-		initialize(field);
-	}
-	
-	//---- IRefactoringProcessor --------------------------------
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object field= elements[0];
-		if (!(field instanceof IField))
-			return;
-		initialize((IField)field);
-	}
-	
-	private void initialize(IField field) {
 		fField= field;
 		setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
@@ -103,6 +85,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fRenameSetter= false;
 	}
 	
+	//---- IRefactoringProcessor --------------------------------
+
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
@@ -119,16 +103,16 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			new String[]{fField.getElementName(), getNewElementName()});
 	 }
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fField);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fField);
 	}
 
 	public Object[] getElements() {
 		return new Object[] {fField};
 	}
 	
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
-		String[] natures= RefactoringProcessors.getNatures(getAffectedProjects());
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
@@ -147,11 +131,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	private void addParticipants(List result, IMethod method, String methodName, String[] natures) throws CoreException {
 		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		Object[] elements= new Object[] {method};
-		EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(this, 
-			elements, natures);
-		RenameParticipant[] participants= ExtensionManagers.getRenameParticipants(this, elements, 
-			evalContext, getSharedParticipants());
+		RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, method, natures, getSharedParticipants());
 		for (int i= 0; i < participants.length; i++) {
 			participants[i].setArguments(args);
 		}

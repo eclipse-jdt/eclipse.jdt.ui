@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -46,7 +45,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -58,7 +56,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
 
@@ -86,13 +84,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	}
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
-
-	public void initialize(Object[] elements) {
-		fElements= elements;
-		fResources= getResources(elements);
-		fJavaElements= getJavaElements(elements);
-		fStyle= getStyle(fResources, fJavaElements);
-	}
 
 	public String getIdentifier() {
 		return IDENTIFIER;
@@ -175,15 +166,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
 	}
 	
-	public IProject[] getAffectedProjects() throws CoreException {
-		IProject[] jScope= JavaProcessors.computeScope(fJavaElements);
-		IProject[] rScope= ResourceProcessors.computeScope(fResources);
-		Set result= new HashSet();
-		result.addAll(Arrays.asList(jScope));
-		result.addAll(Arrays.asList(rScope));
-		return (IProject[])result.toArray(new IProject[result.size()]);
-	}
-
 	public Object[] getElements() {
 		return fElements;
 	}
@@ -192,12 +174,18 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return fStyle;
 	}
 	
-	public DeleteParticipant[] getElementParticipants() throws CoreException {
-		return ExtensionManagers.getDeleteParticipants(this, getElements(), getAffectedProjects(), getSharedParticipants());
+	public DeleteParticipant[] loadElementParticipants() throws CoreException {
+		Object[] elements= getElements();
+		String[] natures= getAffectedProjectNatures();
+		List result= new ArrayList();
+		for (int i= 0; i < elements.length; i++) {
+			result.addAll(Arrays.asList(ParticipantManager.getDeleteParticipants(this, elements[i], natures, getSharedParticipants())));
+		}
+		return (DeleteParticipant[])result.toArray(new DeleteParticipant[result.size()]);
 	}
 
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
-		String[] natures= RefactoringProcessors.getNatures(getAffectedProjects());
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+		String[] natures= getAffectedProjectNatures();
 		
 		ResourceModifications modifications= new ResourceModifications();
 		for (int p= 0; p < fJavaElements.length; p++) {
@@ -215,7 +203,15 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return modifications.getParticipants(this, natures, getSharedParticipants());
 	}
 	
-	
+	private String[] getAffectedProjectNatures() throws CoreException {
+		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
+		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
+		Set result= new HashSet();
+		result.addAll(Arrays.asList(jNatures));
+		result.addAll(Arrays.asList(rNatures));
+		return (String[])result.toArray(new String[result.size()]);
+	}
+
 	private static IResource[] getResources(Object[] elements) {
 		List result= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {

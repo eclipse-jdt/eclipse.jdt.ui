@@ -13,33 +13,41 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 public class ResourceProcessors {
-
-	public static IProject[] computeScope(IResource resource) {
+	
+	public static String[] computeAffectedNatures(IResource resource) throws CoreException {
 		IProject project= resource.getProject();
 		Set result= new HashSet();
-		computeScope(result, project);
-		return (IProject[])result.toArray(new IProject[result.size()]);
+		Set visitedProjects= new HashSet();
+		computeNatures(result, visitedProjects, project);
+		return (String[])result.toArray(new String[result.size()]);
 	}
 	
-	public static IProject[] computeScope(IResource[] resources) {
+	public static String[] computeAffectedNatures(IResource[] resources) throws CoreException {
 		Set result= new HashSet();
+		Set visitedProjects= new HashSet();
 		for (int i= 0; i < resources.length; i++) {
-			computeScope(result, resources[i].getProject());
+			computeNatures(result, visitedProjects, resources[i].getProject());
 		}
-		return (IProject[])result.toArray(new IProject[result.size()]);
+		return (String[])result.toArray(new String[result.size()]);
 	}
 	
-	private static void computeScope(Set result, IProject focus) {
-		if (result.contains(focus))
+	private static void computeNatures(Set result, Set visitedProjects, IProject focus) throws CoreException {
+		if (visitedProjects.contains(focus))
 			return;
-		result.add(focus);
+		String[] pns= focus.getDescription().getNatureIds();
+		for (int p = 0; p < pns.length; p++) {
+			result.add(pns[p]);
+		}
+		visitedProjects.add(focus);
 		IProject[] referencing= focus.getReferencingProjects();
 		for (int i= 0; i < referencing.length; i++) {
-			computeScope(result, referencing[i]);
+			computeNatures(result, visitedProjects, referencing[i]);
 		}
 	}
 }

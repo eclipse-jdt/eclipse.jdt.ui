@@ -39,13 +39,13 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
 	private List fElements;
-	private MoveRefactoring fMoveRefactoring2;
+	private JavaMoveProcessor fMoveProcessor;
 	private int fCanMoveElements;
 	private CopyRefactoring fCopyRefactoring2;
 	private int fCanCopyElements;
@@ -80,7 +80,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private void clear() {
 		fElements= null;
 		fSelection= null;
-		fMoveRefactoring2= null;
+		fMoveProcessor= null;
 		fCanMoveElements= 0;
 		fCopyRefactoring2= null;
 		fCanCopyElements= 0;
@@ -157,18 +157,18 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		if (fMoveRefactoring2 == null) {
+		if (fMoveProcessor == null) {
 			IResource[] resources= ReorgUtils.getResources(fElements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			fMoveRefactoring2= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			fMoveProcessor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}
 		
 		if (!canMoveElements())
 			return DND.DROP_NONE;	
 
-		if (target instanceof IResource && fMoveRefactoring2 != null && fMoveRefactoring2.setDestination((IResource)target).isOK())
+		if (target instanceof IResource && fMoveProcessor != null && fMoveProcessor.setDestination((IResource)target).isOK())
 			return DND.DROP_MOVE;
-		else if (target instanceof IJavaElement && fMoveRefactoring2 != null && fMoveRefactoring2.setDestination((IJavaElement)target).isOK())
+		else if (target instanceof IJavaElement && fMoveProcessor != null && fMoveProcessor.setDestination((IJavaElement)target).isOK())
 			return DND.DROP_MOVE;
 		else
 			return DND.DROP_NONE;	
@@ -177,7 +177,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private boolean canMoveElements() {
 		if (fCanMoveElements == 0) {
 			fCanMoveElements= 2;
-			if (fMoveRefactoring2 == null)
+			if (fMoveProcessor == null)
 				fCanMoveElements= 1;
 		}
 		return fCanMoveElements == 2;

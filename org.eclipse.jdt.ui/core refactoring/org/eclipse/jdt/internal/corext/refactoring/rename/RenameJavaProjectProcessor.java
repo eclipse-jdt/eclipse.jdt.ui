@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -45,18 +44,6 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	//---- IRefactoringProcessor ---------------------------------------------------
 	
 	public RenameJavaProjectProcessor(IJavaProject project) {
-		initialize(project);
-	}
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (!(element instanceof IJavaProject))
-			return;
-		initialize((IJavaProject)element);
-	}
-	
-	private void initialize(IJavaProject project) {
 		fProject= project;
 		setNewElementName(fProject.getElementName());
 		fUpdateReferences= true;
@@ -82,16 +69,16 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			new String[]{getCurrentElementName(), getNewElementName()});
 	}
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fProject);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fProject);
 	}
 	
 	public Object[] getElements() {
 		return new Object[] {fProject};
 	}
 
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
-		return createSecondaryParticipants(null, null, computeResourceModifications());
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+		return loadDerivedParticipants(null, null, computeResourceModifications());
 	}
 	
 	private ResourceModifications computeResourceModifications() throws CoreException {

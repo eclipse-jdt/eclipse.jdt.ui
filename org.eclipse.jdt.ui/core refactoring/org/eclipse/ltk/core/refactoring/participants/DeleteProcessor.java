@@ -18,13 +18,13 @@ public abstract class DeleteProcessor extends RefactoringProcessor {
 	
 	private static final RefactoringParticipant[] EMPTY_PARTICIPANT_ARRAY= new RefactoringParticipant[0];
 
-	public abstract DeleteParticipant[] getElementParticipants() throws CoreException;
+	public abstract DeleteParticipant[] loadElementParticipants() throws CoreException;
 	
 	public void setArgumentsTo(DeleteParticipant participant) throws CoreException {
 		participant.setArguments(getArguments());
 	}
 	
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
 		return EMPTY_PARTICIPANT_ARRAY;
 	}
 	

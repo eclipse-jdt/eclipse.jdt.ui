@@ -26,18 +26,18 @@ import org.eclipse.core.runtime.CoreException;
  * 
  * @since 3.0
  */
-public abstract class RenameProcessor extends RefactoringProcessor {
+public abstract class MoveProcessor extends RefactoringProcessor {
 
 	private int fStyle;
 	private SharableParticipants fSharedParticipants= new SharableParticipants();
 	
 	private static final RefactoringParticipant[] EMPTY_PARTICIPANT_ARRAY= new RefactoringParticipant[0];
 	
-	protected RenameProcessor() {
+	protected MoveProcessor() {
 		fStyle= RefactoringStyles.NEEDS_PREVIEW;	
 	}
 	
-	protected RenameProcessor(int style) {
+	protected MoveProcessor(int style) {
 		fStyle= style;	
 	}
 
@@ -52,7 +52,7 @@ public abstract class RenameProcessor extends RefactoringProcessor {
 	 * 
 	 * @throws CoreException if the arguments can't be set
 	 */
-	public void setArgumentsTo(RenameParticipant participant) throws CoreException {
+	public void setArgumentsTo(MoveParticipant participant) throws CoreException {
 		participant.setArguments(getArguments());
 	}
 	
@@ -69,11 +69,11 @@ public abstract class RenameProcessor extends RefactoringProcessor {
 	 * 
 	 * @throws CoreException if creating or loading of the participants failed
 	 */
-	public abstract RenameParticipant[] loadElementParticipants() throws CoreException;
+	public abstract MoveParticipant[] loadElementParticipants() throws CoreException;
 	
 	/**
-	 * Returns an array of secondary participants. There are two different kinds of 
-	 * secondary participants that should be added via this hook method:
+	 * Returns an array of derived participants. There are two different kinds of 
+	 * derived participants that should be added via this hook method:
 	 * <ul>
 	 *   <li>participants listening to changes of derived elements. For example if
 	 *       a Java field gets renamed corresponding setter and getters methods are 
@@ -96,7 +96,7 @@ public abstract class RenameProcessor extends RefactoringProcessor {
 	 * This default implementation returns an empty array.
 	 * </p>
 	 * 
-	 * @return an array of secondary participants
+	 * @return an array of derived participants
 	 * 
 	 * @throws CoreException if creating or loading of the participants failed
 	 */
@@ -114,21 +114,20 @@ public abstract class RenameProcessor extends RefactoringProcessor {
 	}
 	
 	/**
-	 * Returns the arguments of the rename.
+	 * Returns the arguments of the move.
 	 * 
-	 * @return the rename arguments
+	 * @return the move arguments
 	 */
-	protected RenameArguments getArguments() {
-		return new RenameArguments(getNewElementName(), getUpdateReferences());
+	protected MoveArguments getArguments() {
+		return new MoveArguments(getDestination(), getUpdateReferences());
 	}
 	
 	/**
-	 * Returns the new name of the element to be renamed. The 
-	 * method must not return <code>null</code>.
+	 * Returns the destination of the move.
 	 * 
-	 * @return the new element name.
+	 * @return the target location of the move
 	 */
-	protected abstract String getNewElementName();
+	protected abstract Object getDestination();
 	
 	/**
 	 * Returns whether reference updating is requested or not.

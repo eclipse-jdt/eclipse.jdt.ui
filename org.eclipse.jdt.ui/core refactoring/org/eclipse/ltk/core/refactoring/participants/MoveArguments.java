@@ -20,29 +20,29 @@ import org.eclipse.ltk.internal.core.refactoring.Assert;
  */
 public class MoveArguments {
 	
-	private Object fTarget;
+	private Object fDestination;
 	private boolean fUpdateReferences;
 	
 	/**
 	 * Creates new rename arguments.
 	 * 
-	 * @param target the target location of the move
+	 * @param destination the destination of the move
 	 * @param updateReferences <code>true</code> if reference
 	 *  updating is requested; <code>false</code> otherwise
 	 */
-	public MoveArguments(Object target, boolean updateReferences) {
-		Assert.isNotNull(target);
-		fTarget= target;
+	public MoveArguments(Object destination, boolean updateReferences) {
+		Assert.isNotNull(destination);
+		fDestination= destination;
 		fUpdateReferences= updateReferences;
 	}
 	
 	/**
-	 * Returns the target location of the move
+	 * Returns the destination of the move
 	 * 
-	 * @return the move's target location
+	 * @return the move's destination
 	 */
-	public Object getTargetLocation() {
-		return fTarget;
+	public Object getDestination() {
+		return fDestination;
 	}
 	
 	/**

@@ -14,16 +14,21 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 ;
 
 public class MultiMoveTest extends RefactoringTest {
@@ -86,12 +91,12 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1B);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
-			ref.setReorgQueries(new MockReorgQueries());
-			ref.setDestination(packP2);
-			ref.setUpdateReferences(true);
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			processor.setReorgQueries(new MockReorgQueries());
+			processor.setDestination(packP2);
+			processor.setUpdateReferences(true);
 		    performDummySearch();
-			RefactoringStatus status= performRefactoring(ref, false);
+			RefactoringStatus status= performRefactoring(processor, false);
 
 			//-- checks
 			assertEquals("status should be ok here", null, status);
@@ -135,7 +140,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p3B);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor ref= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -182,7 +187,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1A);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor ref= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -232,7 +237,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1A);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor ref= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -258,5 +263,9 @@ public class MultiMoveTest extends RefactoringTest {
 			delete(packP3);		
 		}
 	}
+	
+	private RefactoringStatus performRefactoring(JavaMoveProcessor processor, boolean providesUndo) throws Exception {
+		return performRefactoring(new MoveRefactoring(processor), providesUndo);
+	}	
 }
 

@@ -48,11 +48,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return fOriginalMethod;
 	}
 
-	public void initialize(Object[] methods) {
-		super.initialize(methods);
-		fOriginalMethod= getMethod();
-	}
-
 	public boolean isApplicable() throws CoreException {
 		return super.isApplicable() && MethodChecks.isVirtual(getMethod());
 	}
@@ -74,14 +69,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			if (! method.getDeclaringType().isInterface()) {
 				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, new NullProgressMonitor());
 				if (inInterface != null && !inInterface.equals(method)) {
-					super.initialize(new Object[] {inInterface});
+					initialize(inInterface);
 					return result;	
 				}
 			}
 			
 			IMethod overrides= MethodChecks.overridesAnotherMethod(method, new NullProgressMonitor());
 			if (overrides != null && !overrides.equals(method)) {
-				super.initialize(new Object[] {overrides});
+				initialize(overrides);
 				return result;
 			}
 		}

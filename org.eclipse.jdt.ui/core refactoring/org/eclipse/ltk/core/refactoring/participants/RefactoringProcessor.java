@@ -19,8 +19,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class RefactoringProcessor extends PlatformObject {
 	
-	public abstract void initialize(Object[] elements) throws CoreException;
-	
 	public abstract Object[] getElements();
 	
 	public abstract String getIdentifier();

@@ -44,19 +44,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	//---- IRefactoringProcessor ---------------------------------------------------
 	
 	public RenameSourceFolderProcessor(IPackageFragmentRoot root) {
-		initialize(root);
-	}
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (!(element instanceof IPackageFragmentRoot))
-			return;
-		initialize((IPackageFragmentRoot)element);
-	}
-	
-	private void initialize(IPackageFragmentRoot sourceFolder) {
-		fSourceFolder= sourceFolder;
+		fSourceFolder= root;
 		setNewElementName(fSourceFolder.getElementName());
 	}
 
@@ -91,16 +79,16 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			new String[]{fSourceFolder.getElementName(), getNewElementName()});
 	}
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fSourceFolder);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fSourceFolder);
 	}
 	
 	public Object[] getElements() {
 		return new Object[] {fSourceFolder};
 	}
 
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
-		return createSecondaryParticipants(null, null, computeResourceModifications());
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+		return loadDerivedParticipants(null, null, computeResourceModifications());
 	}
 	
 	private ResourceModifications computeResourceModifications() throws CoreException {

@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -95,7 +94,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
 	
 	public RenameTypeProcessor(IType type) {
-		initialize(type);
+		fType= type;
+		setNewElementName(fType.getElementName());
+		fUpdateReferences= true; //default is yes
+		fUpdateTextualMatches= false;
 	}
 	
 	public IType getType() {
@@ -103,21 +105,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	//---- IRefactoringProcessor ---------------------------------------------------
-
-	public void initialize(Object[] elements) {
-		Assert.isTrue(elements != null && elements.length == 1);
-		Object element= elements[0];
-		if (!(element instanceof IType))
-			return;
-		initialize((IType)element);
-	}
-	
-	private void initialize(IType type) {
-		fType= type;
-		setNewElementName(fType.getElementName());
-		fUpdateReferences= true; //default is yes
-		fUpdateTextualMatches= false;
-	}
 
 	public String getIdentifier() {
 		return IDENTIFIER;
@@ -141,18 +128,18 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
 	}
 	
-	protected IProject[] getAffectedProjects() throws CoreException {
-		return JavaProcessors.computeScope(fType);
+	protected String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fType);
 	}
 
 	public Object[] getElements() {
 		return new Object[] {fType};
 	}
 	
-	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
 		String newCUName= getNewElementName() + ".java"; //$NON-NLS-1$
 		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
-		return createSecondaryParticipants(computeDerivedElements(), arguments, computeResourceModifications());
+		return loadDerivedParticipants(computeDerivedElements(), arguments, computeResourceModifications());
 	}
 	
 	private Object[] computeDerivedElements() throws CoreException {
