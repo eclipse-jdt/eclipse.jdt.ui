@@ -14,10 +14,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,7 +22,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -89,9 +84,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList fRadioButtons;
 	private ArrayList fTextControls;
 	
-	private SelectionListener fSelectionListener;
-	private ModifyListener fModifyListener;
-
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -100,20 +92,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
 		fTextControls= new ArrayList();
-		
-		fSelectionListener= new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {}
-
-			public void widgetSelected(SelectionEvent e) {
-				controlChanged(e.widget);
-			}
-		};
-		
-		fModifyListener= new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				controlModified(e.widget);
-			}
-		};
 	}
 
 	/*
@@ -200,14 +178,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		Dialog.applyDialogFont(result);
 		return result;
 	}
-	
 		
-	private void controlChanged(Widget widget) {
-	}
-	
-	private void controlModified(Widget widget) {
-	}	
-	
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
