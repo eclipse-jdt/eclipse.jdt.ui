@@ -107,6 +107,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -681,7 +682,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	//Map<ICompilationUnit, SearchMatch[]>
 	private Map createTypeReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fType));
 		engine.setStatus(status);

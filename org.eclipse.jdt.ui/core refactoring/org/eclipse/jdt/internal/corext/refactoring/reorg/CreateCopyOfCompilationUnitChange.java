@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -150,7 +151,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 	
 	private static SearchPattern createSearchPattern(IType type) throws JavaModelException{
-		SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.ALL_OCCURRENCES);
+		SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		if (constructors.length == 0)
 			return pattern;

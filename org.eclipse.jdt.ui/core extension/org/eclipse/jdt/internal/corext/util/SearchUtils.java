@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 public class SearchUtils {
 
@@ -54,4 +55,11 @@ public class SearchUtils {
 	public static SearchParticipant[] getDefaultSearchParticipants() {
 		return new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 	}
+	
+    /**
+     * Constant for use as matchRule in {@link SearchPattern#createPattern(IJavaElement, int, int)}
+     * to get search behavior as of 3.1M3 (all generic instantiations are found).
+     */
+    public final static int GENERICS_AGNOSTIC_MATCH_RULE= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
+
 }

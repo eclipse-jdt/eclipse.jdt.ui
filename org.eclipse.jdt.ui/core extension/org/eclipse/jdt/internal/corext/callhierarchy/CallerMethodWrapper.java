@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CallerMethodWrapper extends MethodWrapper {
@@ -65,7 +67,7 @@ class CallerMethodWrapper extends MethodWrapper {
                 checkCanceled(progressMonitor);
 
                 IMember member = (IMember) iter.next();
-                SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES); 
+				SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
                 searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
                         searchScope, searchRequestor, monitor);
             }

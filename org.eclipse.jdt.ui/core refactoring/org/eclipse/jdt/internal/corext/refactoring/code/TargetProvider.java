@@ -52,6 +52,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 abstract class TargetProvider {
@@ -324,7 +326,7 @@ abstract class TargetProvider {
 		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException {
 			IMethod method= Bindings.findMethod(fMethod.resolveBinding(), fCUnit.getJavaProject());
 			Assert.isTrue(method != null);
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES));
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(method));
 			engine.searchPattern(new SubProgressMonitor(pm, 1));

@@ -27,6 +27,9 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
@@ -108,12 +111,13 @@ public class JavaSearchQuery implements ISearchQuery {
 			String stringPattern= null;
 			
 			if (fPatternData instanceof ElementQuerySpecification) {
-				pattern= SearchPattern.createPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo());
+				pattern= SearchPattern.createPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				stringPattern= ((ElementQuerySpecification)fPatternData).getElement().getElementName();
 			} else {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
 				stringPattern = patternSpec.getPattern();
 				int matchMode = stringPattern.indexOf('*') != -1 || stringPattern.indexOf('?') != -1 ? SearchPattern.R_PATTERN_MATCH : SearchPattern.R_EXACT_MATCH;
+				matchMode |= SearchPattern.R_ERASURE_MATCH;
 				if (patternSpec.isCaseSensitive())
 					matchMode |= SearchPattern.R_CASE_SENSITIVE;
 				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);

@@ -329,7 +329,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		stringPattern.append(')');
 		
 		return SearchPattern.createPattern(stringPattern.toString(), IJavaSearchConstants.METHOD,
-				IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+				IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 	}
 	
 	protected final IJavaSearchScope createRefactoringScope() throws CoreException {

@@ -39,10 +39,7 @@ public class RenameTypeTests extends RefactoringTest {
 	private static final Class clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 	
-	private static final boolean BUG_79803_core= true;
-	private static final boolean BUG_79860_core= true;
 	private static final boolean BUG_79691_core= true;
-	private static final boolean BUG_generic_search_core= true;
 	
 	public RenameTypeTests(String name) {
 		super(name);
@@ -1066,32 +1063,18 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testGenerics1() throws Exception {
-		if (BUG_generic_search_core) {
-			printTestDisabledMessage("problems with generic search");
-			return;
-		}
 		helper2("A", "B");
 	}
 	
 	public void testGenerics2() throws Exception {
-		if (BUG_79803_core) {
-			printTestDisabledMessage("bug 79803");
-			return;
-		}
 		helper2("A", "B");
 	}
 	
 	public void testGenerics3() throws Exception {
-		if (BUG_79860_core)
-			return;
-		
 		helper2("A", "B");
 	}
 	
 	public void testGenerics4() throws Exception {
-		if (BUG_79860_core)
-			return;
-		
 		helper2("A", "B");
 	}
 	

@@ -174,7 +174,8 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IType testType, IProgressMonitor pm) throws CoreException{
-		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES);
+		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
+		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES, matchRule);
 		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(testType);
 		TestReferenceCollector requestor= new TestReferenceCollector();

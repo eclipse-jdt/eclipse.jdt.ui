@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
@@ -750,7 +751,7 @@ public final class MemberVisibilityAdjustor {
 		try {
 			monitor.beginTask("", 7); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES));
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
 			if (fIncoming) {

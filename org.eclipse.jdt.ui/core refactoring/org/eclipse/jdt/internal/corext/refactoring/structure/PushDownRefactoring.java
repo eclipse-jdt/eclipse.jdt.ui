@@ -280,7 +280,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(member);
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
 		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getDeclaringType()}));
 		engine.setStatus(status);

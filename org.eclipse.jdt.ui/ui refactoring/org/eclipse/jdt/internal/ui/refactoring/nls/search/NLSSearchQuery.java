@@ -30,6 +30,8 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -65,7 +67,7 @@ public class NLSSearchQuery implements ISearchQuery {
 		final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
 		textResult.removeAll();
 		
-		SearchPattern pattern= SearchPattern.createPattern(fWrapperClass, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= SearchPattern.createPattern(fWrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(fPropertiesFile, fResult);
 		try {

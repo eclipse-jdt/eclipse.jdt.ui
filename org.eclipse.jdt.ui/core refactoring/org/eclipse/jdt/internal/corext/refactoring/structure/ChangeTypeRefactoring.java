@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -1248,7 +1249,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
 			}
 			SearchPattern pattern= SearchPattern.createPattern(
-					iField, IJavaSearchConstants.ALL_OCCURRENCES);
+					iField, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 			ICompilationUnit[] workingCopies= null;
 			SearchResultGroup[] groups=

@@ -185,10 +185,10 @@ public class RefactoringSearchEngine {
 		Set set= new HashSet(Arrays.asList(elements));
 		Iterator iter= set.iterator();
 		IJavaElement first= (IJavaElement)iter.next();
-		SearchPattern pattern= SearchPattern.createPattern(first, limitTo);
+		SearchPattern pattern= SearchPattern.createPattern(first, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		while(iter.hasNext()){
 			IJavaElement each= (IJavaElement)iter.next();
-			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(each, limitTo));
+			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(each, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		}
 		return pattern;
 	}

@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -370,7 +372,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				RefactoringCoreMessages.getString("IntroduceFactory.noBindingForSelectedConstructor")); //$NON-NLS-1$
 		
 		if (ctor != null)
-			return SearchPattern.createPattern(ctor, IJavaSearchConstants.REFERENCES);
+			return SearchPattern.createPattern(ctor, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		else { // perhaps a synthetic method? (but apparently not always... hmmm...)
 			// Can't find an IMethod for this method, so build a string pattern instead
 			StringBuffer	buf= new StringBuffer();
@@ -384,7 +386,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			}
 			buf.append(")"); //$NON-NLS-1$
 			return SearchPattern.createPattern(buf.toString(), IJavaSearchConstants.CONSTRUCTOR,
-					IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+					IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		}
 	}
 	

@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -361,7 +362,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	private RefactoringStatus checkAccessorDeclarations(IProgressMonitor pm, IMethod existingAccessor) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
-		SearchPattern pattern= SearchPattern.createPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS);
+		SearchPattern pattern= SearchPattern.createPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(fField.getDeclaringType());
 		SearchResultGroup[] groupDeclarations= RefactoringSearchEngine.search(pattern, scope, pm, result);
 		Assert.isTrue(groupDeclarations.length > 0);
@@ -545,7 +546,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		Assert.isTrue(accessor.exists());
 		
 		IJavaSearchScope scope= RefactoringScopeFactory.create(accessor);
-		SearchPattern pattern= SearchPattern.createPattern(accessor, IJavaSearchConstants.ALL_OCCURRENCES);
+		SearchPattern pattern= SearchPattern.createPattern(accessor, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
 			pattern, scope, new MethodOccurenceCollector(accessor.getElementName()), pm, status);
 		

@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -154,7 +155,7 @@ class ConstructorReferenceFinder {
 	//List of SearchResults
 	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
-		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		List result= new ArrayList();

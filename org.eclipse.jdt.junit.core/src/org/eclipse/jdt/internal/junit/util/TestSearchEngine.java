@@ -100,7 +100,8 @@ public class TestSearchEngine {
 
 	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {		
 		SearchRequestor requestor= new JUnitSearchResultCollector(v);
-		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
+		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
+		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
 		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		new SearchEngine().search(suitePattern, participants, scope, requestor, progressMonitor); 
 		return v;

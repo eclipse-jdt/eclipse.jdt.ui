@@ -685,7 +685,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	}
 
 	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
 		engine.setStatus(status);

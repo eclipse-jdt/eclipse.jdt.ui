@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -132,13 +133,13 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		SearchPattern pattern= SearchPattern.createPattern(getMethod(), IJavaSearchConstants.ALL_OCCURRENCES);
+		SearchPattern pattern= SearchPattern.createPattern(getMethod(), IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		pm.done();
 		return pattern;
 	}
 
 	private SearchPattern createReferenceSearchPattern() {
-		return SearchPattern.createPattern(getMethod(), IJavaSearchConstants.REFERENCES);
+		return SearchPattern.createPattern(getMethod(), IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {

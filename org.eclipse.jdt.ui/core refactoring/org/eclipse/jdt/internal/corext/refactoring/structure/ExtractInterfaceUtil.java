@@ -94,6 +94,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstrain
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -408,7 +410,7 @@ class ExtractInterfaceUtil {
 	private ICompilationUnit[] getCusToParse(IType theType, IType theSupertype, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
-			SearchPattern pattern= SearchPattern.createPattern(theType, IJavaSearchConstants.REFERENCES);
+			SearchPattern pattern= SearchPattern.createPattern(theType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
 			ICompilationUnit[] workingCopies= getWorkingCopies(theType.getCompilationUnit(), theSupertype.getCompilationUnit());
 			if (workingCopies.length == 0)

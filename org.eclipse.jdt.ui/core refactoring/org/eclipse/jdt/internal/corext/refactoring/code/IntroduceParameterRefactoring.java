@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -556,7 +557,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		final IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(method));
 		engine.setStatus(status);

@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -458,7 +459,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private SearchPattern createSearchPattern() {
-		return SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
+		return SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
@@ -617,7 +618,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		RefactoringStatus result= new RefactoringStatus();
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchPattern pattern= SearchPattern.createPattern(getNewElementName(),
-				IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+				IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm, result);
 		if (cusWithReferencesToConflictingTypes.length == 0)
 			return result;
