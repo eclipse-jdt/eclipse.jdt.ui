@@ -262,7 +262,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	protected void createActions() {
 		super.createActions();
 		setAction("Inspect", new InspectAction(getResourceBundle(), "Editor.Inspect.", this));
-		setAction("Display", new DisplayAction(getResourceBundle(), "Editor.Display.", this));
 		setAction("RunToLine", new RunToLineAction(getResourceBundle(), "Editor.RunToLine.", this));
 	}
 }
