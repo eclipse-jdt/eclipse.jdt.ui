@@ -1,6 +1,8 @@
-# Report processor existing testing
-org.eclipse.jdt.ui/processor/existTracing=true
-org.eclipse.jdt.ui/typeExtension/tracing=true
+# Prints debug information
+org.eclipse.jdt.ui/debug=true
 
 # Prints debug information related to the AST provider
-org.eclipse.jdt.ui/debug/ASTProvider= true
+org.eclipse.jdt.ui/debug/ASTProvider=false
+
+# Turn on tracing of the all types cache
+org.eclipse.jdt.ui/debug/allTypesCache=false

@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -116,6 +117,13 @@ public class AllTypesCache {
 		}
 	}
 
+	/* debugging flag to enable tracing */
+	private static final boolean TRACING;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/allTypesCache"); //$NON-NLS-1$
+		TRACING= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
+	
 	static class TypeCacher extends Thread {
 		
 		private int fDelay;
@@ -127,7 +135,7 @@ public class AllTypesCache {
 			super("All Types Caching"); //$NON-NLS-1$
 			fSizeHint= sizeHint;
 			fDelay= delay;
-			setPriority(Thread.NORM_PRIORITY-1);
+			setPriority(Thread.NORM_PRIORITY - 1);
 		}
 		
 		void restart() {
@@ -266,8 +274,8 @@ public class AllTypesCache {
 		SubProgressMonitor searchingMonitor= new SubProgressMonitor(monitor, 9);
 		forceDeltaComplete(checkingMonitor);
 		searchingMonitor.setTaskName(CorextMessages.getString("AllTypesCache.searching")); //$NON-NLS-1$
+		
 		synchronized(fgLock) {
-			
 			try {
 				if (fgTypeCache == null) {
 					// cache is empty
@@ -354,6 +362,10 @@ public class AllTypesCache {
 	public static void forceCacheFlush() {
 		if (fgTerminated)
 			return;
+		if (TRACING) {
+			System.out.println("All Types Cache -- cache flushed."); //$NON-NLS-1$
+		}
+		
 		synchronized(fgLock) {
 			fgTypeCache= null;
 			fgNumberOfCacheFlushes++;
@@ -512,6 +524,7 @@ public class AllTypesCache {
 	 * Returns false if a JavaModelException occured.
 	 */
 	static boolean search(ITypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
+		long start= System.currentTimeMillis();
 		try {
 			if (monitor == null)
 				monitor= fDelegatedProgressMonitor;
@@ -528,7 +541,15 @@ public class AllTypesCache {
 				monitor);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
+			if (TRACING) {
+				System.out.println("All Types Cache -- building cache failed"); //$NON-NLS-1$
+			}
 			return false;
+		}
+		if (TRACING) {
+			System.out.println("All Types Cache"); //$NON-NLS-1$
+			System.out.println("\t cache populated in thread: " + Thread.currentThread().getName()); //$NON-NLS-1$
+			System.out.println("\t time needed to perform search: " + (System.currentTimeMillis() - start) + "ms");  //$NON-NLS-1$//$NON-NLS-2$)
 		}
 		return true;
 	}
@@ -554,10 +575,15 @@ public class AllTypesCache {
 	
 	private static void startBackgroundMode() {
 		
-		forceDeltaComplete(new NullProgressMonitor());
+		long start= System.currentTimeMillis();
+		
+		// forceDeltaComplete(new NullProgressMonitor());
 		
 		if (fgIsLocked) {
 			fgAsyncMode= true;
+			if (TRACING) {
+				System.out.println("All Types Cache -- Background Mode started. Time needed " + (System.currentTimeMillis() - start) + "ms.");  //$NON-NLS-1$//$NON-NLS-2$
+			}
 			return;
 		}
 		
@@ -577,13 +603,16 @@ public class AllTypesCache {
 				} else {
 					fgAsyncMode= true;
 					if (fgTypeCache != null) {
-						// the cache is already uptodate
+						// the cache is already up to date
 					} else {
 						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY);
 						fgTypeCacherThread.start();
 					}							
 				}
 			}
+		}
+		if (TRACING) {
+			System.out.println("All Types Cache -- Background Mode started. Time needed: " + (System.currentTimeMillis() - start) + "ms");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 	
