@@ -141,7 +141,6 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
-import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -2118,13 +2117,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public JavaEditor() {
 		super();
-		IPreferenceStore newStore= createNewPreferenceStore(null);
-		setNewPreferenceStore(newStore, JavaPlugin.getDefault().getPreferenceStore());
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
-		setRangeIndicator(new DefaultRangeIndicator());
-		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 	
 	/*
@@ -2132,6 +2124,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#initializeEditor()
+	 */
+	protected void initializeEditor() {
+		IPreferenceStore newStore= createNewPreferenceStore(null);
+		setNewPreferenceStore(newStore, JavaPlugin.getDefault().getPreferenceStore());
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
+		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 	
 	/*
