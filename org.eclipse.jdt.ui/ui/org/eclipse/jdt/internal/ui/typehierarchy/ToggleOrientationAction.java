@@ -23,24 +23,26 @@ public class ToggleOrientationAction extends Action {
 		JavaPluginImages.setImageDescriptors(this, "lcl16", "impl_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 
 		fView= v;
-		valueChanged(initHorizontal);
+		setChecked(initHorizontal);
 	}
 
 	/**
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		valueChanged(isChecked());
+		fView.setOrientation(isChecked()); // will toggle the checked state
 	}
 
-	private void valueChanged(boolean on) {
-		setChecked(on);
-		fView.setOrientation(on);
-		if (on) {
+	/**
+	 * @see Action#setChecked
+	 */		
+	public void setChecked(boolean checked) {
+		if (checked) {
 			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip.checked")); //$NON-NLS-1$
 		} else {
 			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip.unchecked")); //$NON-NLS-1$
 		}
-	}
+		super.setChecked(checked);
+	}	
 	
 }

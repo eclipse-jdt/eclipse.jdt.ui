@@ -29,29 +29,25 @@ public class ShowInheritedMembersAction extends Action {
 		fMethodsViewer= viewer;
 		
 		setChecked(initValue);
-		valueChanged(initValue);
 	}
 	
-
 	/**
 	 * @see Action#actionPerformed
 	 */	
 	public void run() {
-		valueChanged(isChecked());
-	}
-	
-	public void updateState() {
-		setChecked(fMethodsViewer.isShowInheritedMethods());
-	}
-	
-	
-	private void valueChanged(boolean on) {
-		fMethodsViewer.showInheritedMethods(on);
-		if (on) {
+		fMethodsViewer.showInheritedMethods(isChecked());
+	}	
+
+	/**
+	 * @see Action#setChecked
+	 */	
+	public void setChecked(boolean checked) {
+		if (checked) {
 			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.checked")); //$NON-NLS-1$
 		} else {
 			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.unchecked")); //$NON-NLS-1$
 		}
+		super.setChecked(checked);
 	}
 	
 }

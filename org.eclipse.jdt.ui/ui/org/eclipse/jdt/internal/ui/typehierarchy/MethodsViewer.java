@@ -55,13 +55,8 @@ public class MethodsViewer extends TableViewer {
 	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
-
-
 	
-	private MethodsViewerFilterAction fHideNonPublic;
-	private MethodsViewerFilterAction fHideFields;
-	private MethodsViewerFilterAction fHideStatic;
-	
+	private MethodsViewerFilterAction[] fFilterActions;
 	private MethodsViewerFilter fFilter;
 		
 	private OpenSourceReferenceAction fOpen;
@@ -97,31 +92,36 @@ public class MethodsViewer extends TableViewer {
 		
 		// fields
 		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
-		fHideFields= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_FIELDS, false);
-		fHideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
-		fHideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
-		fHideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(fHideFields, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		MethodsViewerFilterAction hideFields= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, false);
+		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
+		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
+		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(hideFields, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// static
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
-		fHideStatic= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_STATIC, false);
-		fHideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
-		fHideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
-		fHideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(fHideStatic, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		MethodsViewerFilterAction hideStatic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, false);
+		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
+		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
+		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(hideStatic, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// non-public
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
-		fHideNonPublic= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_NONPUBLIC, false);
-		fHideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
-		fHideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
-		fHideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(fHideNonPublic, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
-			
+		MethodsViewerFilterAction hideNonPublic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, false);
+		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
+		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
+		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(hideNonPublic, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		
+		// order corresponds to order in toolbar
+		fFilterActions= new MethodsViewerFilterAction[] { hideFields, hideStatic, hideNonPublic };
+		
+		
 		addFilter(fFilter);
 		
-		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);		
+		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
+		showInheritedMethods(false);
 		
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new GenerateGroup()
@@ -157,6 +157,8 @@ public class MethodsViewer extends TableViewer {
 		MethodsContentProvider cprovider= (MethodsContentProvider) getContentProvider();
 		try {
 			cprovider.showInheritedMethods(on);
+			fShowInheritedMembersAction.setChecked(on);
+			
 			JavaElementLabelProvider lprovider= (JavaElementLabelProvider) getLabelProvider();
 			if (on) {
 				lprovider.turnOn(JavaElementLabelProvider.SHOW_CONTAINER);
@@ -172,7 +174,19 @@ public class MethodsViewer extends TableViewer {
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
 	}
-	
+
+	/**
+	 * Filters the method list
+	 */	
+	public void setMemberFilter(int filterProperty, boolean set) {
+		fFilter.setFilter(filterProperty, set);
+		for (int i= 0; i < fFilterActions.length; i++) {
+			if (fFilterActions[i].getFilterProperty() == filterProperty) {
+				fFilterActions[i].setChecked(set);
+			}
+		}
+		refresh();
+	}
 	
 	/**
 	 * Saves the state of the filter actions
@@ -193,30 +207,22 @@ public class MethodsViewer extends TableViewer {
 	 */	
 	public void restoreState(IMemento memento) {
 		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		fFilter.setFilter(MethodsViewerFilter.FILTER_FIELDS, set);
+		setMemberFilter(MethodsViewerFilter.FILTER_FIELDS, set);
 		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		fFilter.setFilter(MethodsViewerFilter.FILTER_STATIC, set);
+		setMemberFilter(MethodsViewerFilter.FILTER_STATIC, set);
 		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		fFilter.setFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
-		
-		fHideFields.updateState();
-		fHideStatic.updateState();
-		fHideNonPublic.updateState();
+		setMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
 		
 		set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
 		showInheritedMethods(set);
 		
-		fShowInheritedMembersAction.updateState();
-		
-		String vScroll= memento.getString(TAG_VERTICAL_SCROLL);
-		try {
-			ScrollBar bar= getTable().getVerticalBar();
-			if (bar != null) {
-				bar.setSelection(Integer.parseInt(vScroll));
+		ScrollBar bar= getTable().getVerticalBar();
+		if (bar != null) {
+			Integer vScroll= memento.getInteger(TAG_VERTICAL_SCROLL);
+			if (vScroll != null) {
+				bar.setSelection(vScroll.intValue());
 			}
-		} catch (NumberFormatException e) {
-		}	
-		
+		}
 	}
 	
 	/**
@@ -254,10 +260,9 @@ public class MethodsViewer extends TableViewer {
 	public void contributeToToolBar(ToolBarManager tbm) {
 		tbm.add(fShowInheritedMembersAction);
 		tbm.add(new Separator());
-		tbm.add(fHideFields);
-		tbm.add(fHideStatic);
-		tbm.add(fHideNonPublic);
-		//tbm.update(true);
+		tbm.add(fFilterActions[0]); // fields
+		tbm.add(fFilterActions[1]); // static
+		tbm.add(fFilterActions[2]); // public
 	}
 
 }

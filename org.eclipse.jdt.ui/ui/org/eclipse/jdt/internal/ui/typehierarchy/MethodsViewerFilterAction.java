@@ -6,24 +6,21 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredViewer;
 
 /**
  * Action used to enable / disable method filter properties
  */
 public class MethodsViewerFilterAction extends Action {
 
-	private MethodsViewerFilter fFilter;
 	private int fFilterProperty;
-	private StructuredViewer fViewer;
+	private MethodsViewer fViewer;
 	
 	private String fCheckedTooltip;
 	private String fUncheckedTooltip;
 	
 	
-	public MethodsViewerFilterAction(StructuredViewer viewer, MethodsViewerFilter filter, String title, int property, boolean initValue) {
+	public MethodsViewerFilterAction(MethodsViewer viewer, String title, int property, boolean initValue) {
 		super(title);
-		fFilter= filter;
 		fViewer= viewer;
 		fFilterProperty= property;
 		
@@ -31,8 +28,15 @@ public class MethodsViewerFilterAction extends Action {
 		fUncheckedTooltip= ""; //$NON-NLS-1$
 		
 		setChecked(initValue);
-		valueChanged(initValue);
 	}
+	
+	/**
+	 * Returns this action's filter property
+	 */
+	public int getFilterProperty() {
+		return fFilterProperty;
+	}
+	
 	
 	/**
 	 * Sets the unchecked-tooltip text
@@ -40,9 +44,7 @@ public class MethodsViewerFilterAction extends Action {
 	 */
 	public void setToolTipUnchecked(String uncheckedTooltip) {
 		fUncheckedTooltip= uncheckedTooltip;
-		if (!isChecked()) {
-			setToolTipText(uncheckedTooltip);
-		}
+		updateToolTip(isChecked());
 	}
 
 
@@ -52,34 +54,30 @@ public class MethodsViewerFilterAction extends Action {
 	 */
 	public void setToolTipChecked(String checkedTooltip) {
 		fCheckedTooltip= checkedTooltip;
-		if (isChecked()) {
-			setToolTipText(checkedTooltip);
-		}		
+		updateToolTip(isChecked());		
 	}	
 	
 	/**
 	 * @see Action#actionPerformed
 	 */
 	public void run() {	
-		valueChanged(isChecked());
+		fViewer.setMemberFilter(fFilterProperty, isChecked());
 	}
 	
-	public void updateState() {
-		setChecked(fFilter.hasFilter(fFilterProperty));
-	}		
-	
-	
-	private void valueChanged(boolean on) {
+	private void updateToolTip(boolean on) {
 		if (on) {
-			fFilter.addFilter(fFilterProperty);
 			setToolTipText(fCheckedTooltip);
 		} else {
-			fFilter.removeFilter(fFilterProperty);
 			setToolTipText(fUncheckedTooltip);
 		}
-		fViewer.refresh();
 	}
-
-
-
+		
+	
+	/**
+	 * @see Action#setChecked
+	 */	
+	public void setChecked(boolean on) {
+		updateToolTip(on);
+		super.setChecked(on);
+	}
 }

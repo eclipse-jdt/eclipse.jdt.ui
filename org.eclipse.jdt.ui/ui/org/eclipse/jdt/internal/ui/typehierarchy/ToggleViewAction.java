@@ -10,40 +10,19 @@ public class ToggleViewAction extends Action {
 	
 	private TypeHierarchyViewPart fViewPart;
 	private int fViewerIndex;
-	private ToggleViewAction[] fOtherActions;
 		
-	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex, String title) {
+	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex, String title, boolean isChecked) {
 		super(title);
 		fViewPart= v;
 		fViewerIndex= viewerIndex;
+		setChecked(isChecked);
 	}
-	
-	public void setOthers(ToggleViewAction[] others) {
-		fOtherActions= others;
-	}
-	
-	public void setActive(boolean isActive) {
-		setChecked(isActive);
-	}
-	
-	public boolean isActive() {
-		return isChecked();
-	}
-	
+				
 	public int getViewerIndex() {
 		return fViewerIndex;
 	}
 	
 	public void run() {
-		if (isActive()) {
-			fViewPart.setView(fViewerIndex);
-			for (int i= 0; i < fOtherActions.length; i++) {
-				if (fOtherActions[i] != this) {
-					fOtherActions[i].setActive(false);
-				}
-			}
-		} else {
-			setActive(true);
-		}
+		fViewPart.setView(fViewerIndex);
 	}		
 }

@@ -23,24 +23,26 @@ public class EnableMemberFilterAction extends Action {
 		JavaPluginImages.setImageDescriptors(this, "lcl16", "impl_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 
 		fView= v;
-		valueChanged(initValue);
+		setChecked(initValue);
 	}
 
 	/**
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		valueChanged(isChecked());
+		fView.enableMemberFilter(isChecked());
 	}
-	
-	private void valueChanged(boolean on) {
-		setChecked(on);
-		fView.enableMemberFilter(on);
-		if (on) {
+
+	/**
+	 * @see Action#actionPerformed
+	 */			
+	public void setChecked(boolean checked) {
+		if (checked) {
 			setToolTipText(TypeHierarchyMessages.getString("EnableMemberFilterAction.tooltip.checked")); //$NON-NLS-1$
 		} else {
 			setToolTipText(TypeHierarchyMessages.getString("EnableMemberFilterAction.tooltip.unchecked")); //$NON-NLS-1$
 		}
+		super.setChecked(checked);
 	}
 	
 }
