@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -19,10 +20,6 @@ public class JdtFlags {
 	
 
 	public static final int VISIBILITY_CODE_INVALID= 	-1;
-	public static final int VISIBILITY_CODE_PRIVATE= 	0;
-	public static final int VISIBILITY_CODE_PACKAGE=		1;
-	public static final int VISIBILITY_CODE_PROTECTED=	2;
-	public static final int VISIBILITY_CODE_PUBLIC= 		3;
 
 	public static boolean isAbstract(IMember member) throws JavaModelException{
 		if (isInterfaceMethod(member))
@@ -116,23 +113,23 @@ public class JdtFlags {
 
 	public static int getVisibilityCode(IMember member) throws JavaModelException{
 		if (isPublic(member))
-			return VISIBILITY_CODE_PUBLIC;
+			return Modifier.PUBLIC;
 		else if (isProtected(member))
-			return VISIBILITY_CODE_PROTECTED;
+			return Modifier.PROTECTED;
 		else if (isPackageVisible(member))
-			return VISIBILITY_CODE_PACKAGE;
+			return Modifier.NONE;
 		else if (isPrivate(member))
-			return VISIBILITY_CODE_PRIVATE;
+			return Modifier.PRIVATE;
 		Assert.isTrue(false);
 		return VISIBILITY_CODE_INVALID;
 	}
 	
 	public static String getVisibilityString(int visibilityCode){
 		switch(visibilityCode){
-			case VISIBILITY_CODE_PUBLIC: return VISIBILITY_STRING_PUBLIC;
-			case VISIBILITY_CODE_PROTECTED: return VISIBILITY_STRING_PROTECTED;
-			case VISIBILITY_CODE_PACKAGE: return VISIBILITY_STRING_PACKAGE;
-			case VISIBILITY_CODE_PRIVATE: return VISIBILITY_STRING_PRIVATE;
+			case Modifier.PUBLIC: return VISIBILITY_STRING_PUBLIC;
+			case Modifier.PROTECTED: return VISIBILITY_STRING_PROTECTED;
+			case Modifier.NONE: return VISIBILITY_STRING_PACKAGE;
+			case Modifier.PRIVATE: return VISIBILITY_STRING_PRIVATE;
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -140,28 +137,28 @@ public class JdtFlags {
 	}
 	
 	public static void assertVisibility(int visibility){
-		Assert.isTrue(	visibility == JdtFlags.VISIBILITY_CODE_PUBLIC ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PROTECTED ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PACKAGE ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PRIVATE);  
+		Assert.isTrue(	visibility == Modifier.PUBLIC ||
+		            	visibility == Modifier.PROTECTED ||
+		            	visibility == Modifier.NONE ||
+		            	visibility == Modifier.PRIVATE);  
 	}
 	
 	public static boolean isHigherVisibility(int newVisibility, int oldVisibility){
 		assertVisibility(oldVisibility);
 		assertVisibility(newVisibility);
 		switch (oldVisibility) {
-			case JdtFlags.VISIBILITY_CODE_PRIVATE :
-				return 	newVisibility == JdtFlags.VISIBILITY_CODE_PACKAGE
-						||	newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC
-						||  newVisibility == JdtFlags.VISIBILITY_CODE_PROTECTED;
-			case JdtFlags.VISIBILITY_CODE_PACKAGE :
-				return 	newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC
-						||  newVisibility == JdtFlags.VISIBILITY_CODE_PROTECTED;
+			case Modifier.PRIVATE :
+				return 	newVisibility == Modifier.NONE
+						||	newVisibility == Modifier.PUBLIC
+						||  newVisibility == Modifier.PROTECTED;
+			case Modifier.NONE :
+				return 	newVisibility == Modifier.PUBLIC
+						||  newVisibility == Modifier.PROTECTED;
 
-			case JdtFlags.VISIBILITY_CODE_PROTECTED :
-				return newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC;
+			case Modifier.PROTECTED :
+				return newVisibility == Modifier.PUBLIC;
 
-			case JdtFlags.VISIBILITY_CODE_PUBLIC :
+			case Modifier.PUBLIC :
 				return false;
 			default: 
 				Assert.isTrue(false);
