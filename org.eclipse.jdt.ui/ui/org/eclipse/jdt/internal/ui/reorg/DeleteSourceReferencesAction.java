@@ -41,18 +41,31 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	
+	private boolean fCanDeleteGetterSetter;
+	private boolean fAskForDeleteConfirmation;
+	
 	public DeleteSourceReferencesAction(ISelectionProvider provider) {
 		super(ReorgMessages.getString("DeleteSourceReferencesAction.delete"), provider); //$NON-NLS-1$
+		fCanDeleteGetterSetter= true;
+		fAskForDeleteConfirmation= true;
 	}
 
+	public void setCanDeleteGetterSetter(boolean canDelete){
+		fCanDeleteGetterSetter= canDelete;
+	}
+
+	public void setAskForDeleteConfirmation(boolean ask){
+		fAskForDeleteConfirmation= ask;
+	}
+	
 	protected void perform() throws CoreException {
-		if (!confirmDelete())
+		if (fAskForDeleteConfirmation && !confirmDelete())
 			return;
 
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
 		if (areAllFilesReadOnly(mapping)){
-			String title= "Delete";
-			String label= "Cannot delete. All selected elements are defined in read-only files."; 
+			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
+			String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, label);
 			return;
 		}	
@@ -164,7 +177,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 
 
 	private static boolean isOkToDeleteReadOnly(ICompilationUnit cu){
-		String message= "Compilation unit \'" + cu.getElementName() + "\' is read-only. Do you still want to delete it?"; 
+		String message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_read_only", cu.getElementName());//$NON-NLS-1$
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 	}
 	
@@ -198,6 +211,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	//overridden to add getters/setters
 	protected ISourceReference[] getElementsToProcess() {
 		ISourceReference[] elements= super.getElementsToProcess();
+		if (! fCanDeleteGetterSetter)
+			return elements;
 		IField[] fields= getFields(elements);
 		if (fields.length == 0)
 			return elements;
@@ -256,7 +271,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	}
 
 	//made protected for ui-less testing
-	protected boolean confirmDelete() {
+	protected final boolean confirmDelete() {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
@@ -266,10 +281,11 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	//made protected for ui-less testing
 	protected  boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 		String message;
-		if (cusToDelete.length == 1) 
-			message= "After the delete operation the compilation unit \'" + cusToDelete[0].getElementName() + "\' contains no types. \nOK to delete it as well?";
-		else
-			message= "After the delete operation " + cusToDelete.length + " compilation units contain no types. \nOK to delete them as well?";	
+		if (cusToDelete.length == 1){
+			message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_empty", cusToDelete[0].getElementName());//$NON-NLS-1$
+		} else {
+			message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cus_empty", String.valueOf(cusToDelete.length));//$NON-NLS-1$
+		}	
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 	}
 	
