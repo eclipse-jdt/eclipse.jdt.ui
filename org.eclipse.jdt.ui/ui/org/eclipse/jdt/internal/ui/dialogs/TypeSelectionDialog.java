@@ -68,7 +68,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	public int open() {
 		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
 		
-		List typeList= TypeCache.findTypes(engine, fStyle, fRunnableContext, fScope);
+		List typeList= engine.searchTypes(fRunnableContext, fScope, fStyle);
 		
 		if (typeList.isEmpty()) {
 			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
