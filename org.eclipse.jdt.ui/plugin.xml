@@ -1580,12 +1580,6 @@
 		string="Alt+Shift+ARROW_UP"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>      
-	<keyBinding
-		string="Alt+Shift+ARROW_UP"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>      
       
@@ -1595,12 +1589,6 @@
 		name= "%ActionDefinition.selectNext.name"
 		description="%ActionDefinition.selectNext.description">
 	</command>
-	<keyBinding
-		string="Alt+Shift+ARROW_RIGHT"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.select.next"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Alt+Shift+ARROW_RIGHT"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1618,12 +1606,6 @@
 		string="Alt+Shift+ARROW_LEFT"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.select.previous"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+ARROW_LEFT"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.select.previous"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
       
@@ -1637,12 +1619,6 @@
 		string="Alt+Shift+ARROW_DOWN"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.select.last"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+ARROW_DOWN"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.select.last"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
       
@@ -1652,12 +1628,6 @@
 		name= "%ActionDefinition.correctionAssistProposals.name"
 		description="%ActionDefinition.correctionAssistProposals.description">
 	</command>
-	<keyBinding
-		string="Ctrl+1"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>      
 	<keyBinding
 		string="Ctrl+1"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1682,12 +1652,6 @@
 		string="F2"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>            
-	<keyBinding
-		string="F2"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding> 
 	     
@@ -1697,12 +1661,6 @@
 		name= "%ActionDefinition.showInPackageView.name"
 		description="%ActionDefinition.showInPackageView.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>            
 	<keyBinding
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1718,12 +1676,6 @@
 		name= "%ActionDefinition.comment.name"
 		description= "%ActionDefinition.comment.description">
 	</command>
-	<keyBinding
-		string="Ctrl+/"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.comment"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+/"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1748,12 +1700,6 @@
 		string="Ctrl+\"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.uncomment"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Ctrl+\"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.uncomment"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -1770,12 +1716,6 @@
 		name= "%ActionDefinition.format.name"
 		description= "%ActionDefinition.format.description">
 	</command>
-	<keyBinding
-		string="Ctrl+Shift+F"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.format"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+Shift+F"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1800,12 +1740,6 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.sort.members"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.sort.members"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -1815,12 +1749,6 @@
 		name= "%ActionDefinition.addImport.name"
 		description= "%ActionDefinition.addImport.description">
 	</command>
-	<keyBinding
-		string="Ctrl+Shift+M"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.add.import"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+Shift+M"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1845,12 +1773,6 @@
 		string="Ctrl+Shift+O"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.organize.imports"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Ctrl+Shift+O"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.organize.imports"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -1871,12 +1793,6 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.override.methods"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.override.methods"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -1886,12 +1802,6 @@
 		name= "%ActionDefinition.getterSetter.name"
 		description= "%ActionDefinition.getterSetter.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.create.getter.setter"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
@@ -1909,12 +1819,6 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -1924,12 +1828,6 @@
 		name= "%ActionDefinition.addJavadocComment.name"
 		description= "%ActionDefinition.addJavadocComment.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
@@ -1947,12 +1845,6 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -1962,12 +1854,6 @@
 		name= "%ActionDefinition.surroundWith.tryCatch.name"
 		description= "%ActionDefinition.surroundWith.tryCatch.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -1985,12 +1871,6 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -2000,12 +1880,6 @@
 		name= "%ActionDefinition.externalizeStrings.name"
 		description= "%ActionDefinition.externalizeStrings.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.externalize.strings"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
@@ -2027,12 +1901,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+Z"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
@@ -2045,12 +1913,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+Y"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2065,12 +1927,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+R"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.move.element"
@@ -2083,12 +1939,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.move.element"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+V"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.move.element"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2103,12 +1953,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
@@ -2121,12 +1965,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2141,12 +1979,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.push.down"
@@ -2159,12 +1991,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.push.down"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.push.down"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2179,12 +2005,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.pull.up"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.pull.up"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.extract.interface"
@@ -2197,12 +2017,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.extract.interface"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.extract.interface"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2217,12 +2031,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.use.supertype"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.use.supertype"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
     <command
     	id="org.eclipse.jdt.ui.edit.text.java.inline"
@@ -2235,12 +2043,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.inline"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+I"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.inline"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2255,12 +2057,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+M"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
@@ -2273,12 +2069,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Alt+Shift+L"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2293,12 +2083,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.extract.constant"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.extract.constant"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
@@ -2311,12 +2095,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 	
 	<command
@@ -2331,12 +2109,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	
 	
 <!-- navigate -->    
@@ -2347,12 +2119,6 @@
 		name= "%ActionDefinition.gotoNextMember.name"
 		description="%ActionDefinition.gotoNextMember.description">
 	</command>
-	<keyBinding
-		string="Ctrl+Shift+ARROW_DOWN"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+Shift+ARROW_DOWN"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2377,12 +2143,6 @@
 		string="Ctrl+Shift+ARROW_UP"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Ctrl+Shift+ARROW_UP"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -2403,12 +2163,6 @@
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.show.next.problem"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.show.next.problem"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -2422,12 +2176,6 @@
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.show.previous.problem"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.show.previous.problem"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 
@@ -2437,12 +2185,6 @@
 		name= "%ActionDefinition.gotoMatchingBracket.name"
 		description= "%ActionDefinition.gotoMatchingBracket.description">
 	</command>
-	<keyBinding
-		string="Ctrl+Shift+P"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+Shift+P"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2467,12 +2209,6 @@
 		string="Ctrl+O"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.show.outline"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Ctrl+O"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.show.outline"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
       
@@ -2482,12 +2218,6 @@
 		name= "%ActionDefinition.open.structure.name"
 		description="%ActionDefinition.open.structure.description">
 	</command>
-	<keyBinding
-		string="Ctrl+F3"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.navigate.java.open.structure"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string="Ctrl+F3"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2507,12 +2237,6 @@
 		command="org.eclipse.jdt.ui.navigate.open.type"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="Ctrl+Shift+T"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.navigate.open.type"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 
 	<command
 		id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
@@ -2525,12 +2249,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string="Ctrl+Shift+H"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 
 	<command
@@ -2545,12 +2263,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.open.editor"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="F3"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.open.editor"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
@@ -2563,12 +2275,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
 	</keyBinding>
 
 	<command
@@ -2583,12 +2289,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="Shift+F2"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
@@ -2602,12 +2302,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-	<keyBinding
-		string="F4"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 
 <!-- project --> 
 	<command
@@ -2616,12 +2310,6 @@
 		name= "%ActionDefinition.generateJavadoc.name"
 		description="%ActionDefinition.generateJavadoc.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.generate.javadoc"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
@@ -2637,12 +2325,6 @@
 		name= "%ActionDefinition.togglePresentation.name"
 		description="%ActionDefinition.togglePresentation.description">
 	</command>
-	<keyBinding
-		string=""
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.ui.edit.text.java.toggle.presentation"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration">
-	</keyBinding>
 	<keyBinding
 		string=""
 		scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2674,17 +2356,11 @@
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 	<keyBinding
-		string="Ctrl+Shift+G"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
-	<keyBinding
 		platform="carbon"
 		string="Command+Shift+G"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		configuration="org.eclipse.ui.defauktAcceleratorConfiguration"
 	/>
 
 	<command
@@ -2699,12 +2375,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2717,12 +2387,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 	
 	<command
@@ -2737,12 +2401,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2755,12 +2413,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 	
 	<command
@@ -2775,12 +2427,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2793,12 +2439,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 	
 	<command
@@ -2813,12 +2453,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2832,12 +2466,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2846,30 +2474,17 @@
 		description="%ActionDefinition.declarationsInWorkspace.description"
 	/>
 	<keyBinding
-		string="Alt+G"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		platform="carbon"
-		string="Command+G"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
 		string="Ctrl+G"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 	<keyBinding
 		platform="carbon"
 		string="Command+G"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 
 	<command
@@ -2884,12 +2499,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2902,12 +2511,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 	
 	<command
@@ -2922,12 +2525,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2941,12 +2538,6 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
-	<keyBinding
-		string=""
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
-	/>
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
@@ -2959,12 +2550,6 @@
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
-	/>
-	<keyBinding
-		string="Ctrl+Shift+U"
-		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-		configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
 	/>
 </extension>
 
