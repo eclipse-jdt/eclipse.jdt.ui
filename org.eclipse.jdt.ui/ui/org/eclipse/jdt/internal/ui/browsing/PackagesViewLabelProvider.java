@@ -111,8 +111,11 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	private Image getPackageFragmentImage(IPackageFragment fragment) {
 		Image image= fRegistry.get(fElementImageProvider.getBaseImageDescriptor(fragment, getImageFlags()));
 		
-		//decorate
-		Image decoratedImage= image;
+		if (fDecorators == null)
+			return image;
+
+		// Decorate
+		Image decoratedImage= image;		
 		for (int i= 0; i < fDecorators.length; i++) {
 			ILabelDecorator decorator= fDecorators[i];
 			decoratedImage= decorator.decorateImage(decoratedImage, fragment);
@@ -137,6 +140,9 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	
 	
 	private Image decorateCompoundElement(Image image, IPackageFragment[] fragments) {
+		if (fDecorators == null)
+			return image;
+		
 		int currentAdornment= NO_ADORNMENT;
 		
 		for (int i= 0; i < fragments.length; i++) {
@@ -219,6 +225,9 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	}
 	
 	private String decorateText(String name, Object element) {
+		if (fDecorators == null)
+			return name;
+
 		for (int i= 0; i < fDecorators.length; i++) {
 			ILabelDecorator decorator= fDecorators[i];
 			name= decorator.decorateText(name, element);
@@ -273,9 +282,11 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */
 	public void dispose() {
-		for (int i= 0; i < fDecorators.length; i++) {
-			ILabelDecorator decorator= fDecorators[i];
-			decorator.dispose();
+		if (fDecorators != null) {
+			for (int i= 0; i < fDecorators.length; i++) {
+				ILabelDecorator decorator= fDecorators[i];
+				decorator.dispose();
+			}
 		}
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}

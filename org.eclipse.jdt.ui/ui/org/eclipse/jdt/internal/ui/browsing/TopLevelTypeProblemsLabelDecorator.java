@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ui.IDecoratorManager;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -35,6 +38,10 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 	 * @see org.eclipse.jdt.ui.ProblemsLabelDecorator#isInside(int, ISourceReference)
 	 */
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
+		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
+		if (!decoratorMgr.getEnabled("org.eclipse.jdt.ui.problem.decorator")) //$NON-NLS-1$
+			return false;
+		
 		if (!(sourceElement instanceof IType) || ((IType)sourceElement).getDeclaringType() != null)
 			return false;
 
