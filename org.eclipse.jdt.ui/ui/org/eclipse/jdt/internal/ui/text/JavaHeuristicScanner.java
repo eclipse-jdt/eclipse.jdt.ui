@@ -110,6 +110,9 @@ public final class JavaHeuristicScanner implements Symbols {
 			return super.stop(ch, position, true) && isDefaultPartition(position);
 		}
 		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
+		 */
 		public int nextPosition(int position, boolean forward) {
 			ITypedRegion partition= getPartition(position);
 			if (fPartition.equals(partition.getType()))
@@ -119,15 +122,12 @@ public final class JavaHeuristicScanner implements Symbols {
 				int end= partition.getOffset() + partition.getLength();
 				if (position < end)
 					return end;
-				else
-					return super.nextPosition(position, forward);
 			} else {
 				int offset= partition.getOffset();
 				if (position > offset)
 					return offset - 1;
-				else
-					return super.nextPosition(position, forward);
 			}
+			return super.nextPosition(position, forward);
 		}
 	}
 	
@@ -154,6 +154,26 @@ public final class JavaHeuristicScanner implements Symbols {
 		 */
 		public boolean stop(char ch, int position, boolean forward) {
 			return super.stop(ch, position, true) || !isDefaultPartition(position);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
+		 */
+		public int nextPosition(int position, boolean forward) {
+			ITypedRegion partition= getPartition(position);
+			if (fPartition.equals(partition.getType()))
+				return super.nextPosition(position, forward);
+			
+			if (forward) {
+				int end= partition.getOffset() + partition.getLength();
+				if (position < end)
+					return end;
+			} else {
+				int offset= partition.getOffset();
+				if (position > offset)
+					return offset - 1;
+			}
+			return super.nextPosition(position, forward);
 		}
 	}
 	
@@ -187,6 +207,26 @@ public final class JavaHeuristicScanner implements Symbols {
 		 */
 		public boolean stop(char ch, int position, boolean forward) {
 			return Arrays.binarySearch(fChars, ch) >= 0 && isDefaultPartition(position);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#nextPosition(int, boolean)
+		 */
+		public int nextPosition(int position, boolean forward) {
+			ITypedRegion partition= getPartition(position);
+			if (fPartition.equals(partition.getType()))
+				return super.nextPosition(position, forward);
+			
+			if (forward) {
+				int end= partition.getOffset() + partition.getLength();
+				if (position < end)
+					return end;
+			} else {
+				int offset= partition.getOffset();
+				if (position > offset)
+					return offset - 1;
+			}
+			return super.nextPosition(position, forward);
 		}
 	}
 	
