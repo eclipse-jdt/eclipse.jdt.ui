@@ -170,7 +170,7 @@ public class Bindings {
 	 */
 	public static String getFullyQualifiedName(ITypeBinding type) {
 
-		// TODO replace by call to type.getJavaElement().getFullyQualifiedName (see 78087)
+		// TW: replace by call to type.getJavaElement().getFullyQualifiedName (see 78087)
 
 		String name= type.getQualifiedName();
 		final int index= name.indexOf('<');

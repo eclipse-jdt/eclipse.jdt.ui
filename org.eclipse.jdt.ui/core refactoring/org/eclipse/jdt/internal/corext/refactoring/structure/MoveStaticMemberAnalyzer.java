@@ -46,8 +46,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected IBinding[] fMembers;
 	
 	protected boolean fNeedsImport;
-	//TODO: MoveStaticMemberAnalyzer#rewrite... should use ImportRewrite
-	//(result of addImport(..) must be used as type qualifier)
+	// TW: MoveStaticMemberAnalyzer#rewrite... should use ImportRewrite (result of addImport(..) must be used as type qualifier)
 
 	protected Set fProcessed;
 	

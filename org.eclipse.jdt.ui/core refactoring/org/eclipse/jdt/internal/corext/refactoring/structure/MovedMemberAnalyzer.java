@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
  * - (static) access to target -> change to target.
  * - access to other type -> do nothing (import is done in MoveStaticMembersRefactoring#getUpdatedMemberSource())
  */
-//TODO:
+// TW: Adapted references to type
 //	- Reference to type inside moved type:
 //	  - if originally resolved by qualification -> no problem
 //	  - if originally resolved by import -> must add import in target too (qualify if import ambiguous)
