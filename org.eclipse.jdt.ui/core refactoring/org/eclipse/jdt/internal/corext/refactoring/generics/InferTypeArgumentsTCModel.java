@@ -37,15 +37,15 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintOperator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -104,10 +104,9 @@ public class InferTypeArgumentsTCModel {
 	 * 
 	 * @param cv1 
 	 * @param cv2
-	 * @param operator
 	 * @return <code>true</code> iff the type constraint should really be created
 	 */
-	public boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
+	public boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
 		if ((cv1 == null || cv2 == null))
 			return false;
 		
@@ -184,7 +183,7 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public void createSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
-		createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createSubTypeOperator());
+		createSimpleTypeConstraint(v1, v2);
 	}
 	
 //	public ITypeConstraint2[] createStrictSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
@@ -192,19 +191,19 @@ public class InferTypeArgumentsTCModel {
 //	}
 //	
 	
-	protected void createSimpleTypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
-		if (! keep(cv1, cv2, operator))
+	protected void createSimpleTypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
+		if (! keep(cv1, cv2))
 			return;
 		
 		ConstraintVariable2 storedCv1= storedCv(cv1);
 		ConstraintVariable2 storedCv2= storedCv(cv2);
-		TypeConstraint2 typeConstraint= new TypeConstraint2(storedCv1, storedCv2, operator);
+		ITypeConstraint2 typeConstraint= new SubTypeConstraint2(storedCv1, storedCv2);
 		
 		Object storedTc= fTypeConstraints.get(typeConstraint);
 		if (storedTc == null) {
 			fTypeConstraints.put(typeConstraint, typeConstraint);
 		} else {
-			typeConstraint= (TypeConstraint2) storedTc;
+			typeConstraint= (ITypeConstraint2) storedTc;
 		}
 		
 		registerCvWithTc(storedCv1, typeConstraint);
@@ -221,7 +220,7 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 	
-	private void registerCvWithTc(ConstraintVariable2 storedCv, TypeConstraint2 typeConstraint) {
+	private void registerCvWithTc(ConstraintVariable2 storedCv, ITypeConstraint2 typeConstraint) {
 		Object usedIn= storedCv.getData(USED_IN);
 		if (usedIn == null) {
 			storedCv.setData(USED_IN, typeConstraint);
@@ -240,28 +239,28 @@ public class InferTypeArgumentsTCModel {
 		if (leftElement == null || rightElement == null)
 			return;
 		
-		EquivalenceRepresentative leftRep= leftElement.getRepresentative();
-		EquivalenceRepresentative rightRep= rightElement.getRepresentative();
-		if (leftRep == null) {
-			if (rightRep == null) {
-				EquivalenceRepresentative rep= new EquivalenceRepresentative(leftElement, rightElement);
-				leftElement.setRepresentative(rep);
-				rightElement.setRepresentative(rep);
+		TypeEquivalenceSet leftSet= leftElement.getTypeEquivalenceSet();
+		TypeEquivalenceSet rightSet= rightElement.getTypeEquivalenceSet();
+		if (leftSet == null) {
+			if (rightSet == null) {
+				TypeEquivalenceSet set= new TypeEquivalenceSet(leftElement, rightElement);
+				leftElement.setTypeEquivalenceSet(set);
+				rightElement.setTypeEquivalenceSet(set);
 			} else {
-				rightRep.add(leftElement);
-				leftElement.setRepresentative(rightRep);
+				rightSet.add(leftElement);
+				leftElement.setTypeEquivalenceSet(rightSet);
 			}
 		} else {
-			if (rightRep == null) {
-				leftRep.add(rightElement);
-				rightElement.setRepresentative(leftRep);
-			} else if (leftRep == rightRep) {
+			if (rightSet == null) {
+				leftSet.add(rightElement);
+				rightElement.setTypeEquivalenceSet(leftSet);
+			} else if (leftSet == rightSet) {
 				return;
 			} else {
-				ConstraintVariable2[] rightElements= rightRep.getElements();
-				leftRep.addAll(rightElements);
-				for (int i= 0; i < rightElements.length; i++)
-					rightElements[i].setRepresentative(leftRep);
+				ConstraintVariable2[] cvs= rightSet.getContributingVariables();
+				leftSet.addAll(cvs);
+				for (int i= 0; i < cvs.length; i++)
+					cvs[i].setTypeEquivalenceSet(leftSet);
 			}
 		}
 	}
