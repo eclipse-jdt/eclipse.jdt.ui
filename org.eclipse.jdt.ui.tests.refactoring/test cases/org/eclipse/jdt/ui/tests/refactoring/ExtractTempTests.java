@@ -193,6 +193,10 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(4, 16, 4, 18, false, false, "temp");
 	}
 	
+	public void test25() throws Exception{
+		printTestDisabledMessage("regression test for bug#8895");
+//		helper1(4, 17, 4, 22, true, false, "temp");
+	}
 	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
