@@ -905,6 +905,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void updateView() {
         if ((fShownMethod != null)) {
             showPage(PAGE_VIEWER);
+            updateLocationsView(null);
 
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
@@ -915,8 +916,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 setTitle(CallHierarchyMessages.getString("CallHierarchyViewPart.callsFromMethod")); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
-
-            updateLocationsView(null);
         }
     }
 
