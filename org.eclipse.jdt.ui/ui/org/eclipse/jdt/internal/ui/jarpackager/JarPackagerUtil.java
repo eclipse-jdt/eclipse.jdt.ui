@@ -12,8 +12,11 @@ Contributors:
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -24,8 +27,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -33,6 +38,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -146,5 +152,57 @@ public class JarPackagerUtil {
 	 */
 	static IJavaElement findParentOfKind(IJavaElement element, int kind) {
 		return JavaModelUtil.findParentOfKind(element, kind);
+	}
+	
+	/**
+	 * Tells whether the specified manifest main class is valid.
+	 * 
+	 * @return <code>true</code> if a main class is specified and valid
+	 */
+	public static boolean isMainClassValid(JarPackageData data, IRunnableContext context) {
+		if (data == null)
+			return false;
+		
+		IType mainClass= data.getManifestMainClass();
+		if (mainClass == null)
+			return false;
+
+		try {
+			// Check if main method is in scope
+			IFile file= (IFile)mainClass.getUnderlyingResource();
+			if (file == null || !contains(asResources(data.getElements()), file))
+				return false;
+
+			// Test if it has a main method
+			return JavaModelUtil.hasMainMethod(mainClass);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+		return false;
+	}
+	
+	private static boolean contains(List resources, IFile file) {
+		if (resources == null || file == null)
+			return false;
+			
+		if (resources.contains(file))
+			return true;
+		
+		Iterator iter= resources.iterator();
+		while (iter.hasNext()) {
+			IResource resource= (IResource)iter.next();
+			if (resource != null && resource.getType() != IResource.FILE) {
+				List children= null;
+				try {
+					children= Arrays.asList(((IContainer)resource).members());
+				} catch (CoreException ex) {
+					// ignore this folder
+					continue;
+				}
+				if (children != null && contains(children, file))
+					return true;
+			}
+		}
+		return false;
 	}
 }
