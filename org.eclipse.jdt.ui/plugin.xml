@@ -2641,7 +2641,21 @@
             id="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment">
       </command>
       <keyBinding
-            string=""
+            string="Alt+Shift+J"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+J"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+J"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2778,11 +2792,25 @@
 	        id="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences">
 	  </command>
 	  <keyBinding
-	        string=""
+	        string="Alt+Shift+O"
 	        scope="org.eclipse.jdt.ui.javaEditorScope"
 	        command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
 	        keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
 	  </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+O"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+O"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       
 <!-- refactoring -->
       <command
@@ -3146,8 +3174,22 @@
             id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable">
       </command>
       <keyBinding
-            string=""
-            scope="org.eclipse.ui.globalScope"
+            string="Alt+Shift+F"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+F"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+F"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
             command="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
@@ -3730,7 +3772,7 @@
             id="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences">
       </command>
       <keyBinding
-            string="Alt+Shift+X"
+            string=""
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
