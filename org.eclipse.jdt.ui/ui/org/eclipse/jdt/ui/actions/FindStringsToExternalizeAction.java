@@ -77,8 +77,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  */
 public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
-	private static final String FIND_STRINGS_CHECKBOX= "FindStringAction.checkbox"; //$NON-NLS-1$
-	
 	private NonNLSElement[] fElements;
 	
 	/**
@@ -199,7 +197,10 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		
 		List l= new ArrayList(cus.length);
 		for (int i= 0; i < cus.length; i++){
-			l.add(analyze(cus[i]));
+			
+			NonNLSElement element = analyze(cus[i]);
+			if (element != null)
+				l.add(element);
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -252,7 +253,11 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	} 
 	
 	private NonNLSElement analyze(ICompilationUnit cu) throws JavaModelException{
-		return new NonNLSElement(cu, countNotExternalizedStrings(cu));
+		int count = countNotExternalizedStrings(cu);
+		if (count == 0)
+			return null;
+		else	
+			return new NonNLSElement(cu, count);
 	}
 	
 	private int countNotExternalizedStrings(ICompilationUnit cu){
@@ -301,7 +306,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		
 		private static final int OPEN_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
 		
-		private Button fCheckbox;
 		private Button fOpenButton;
 		
 		NonNLSListDialog(Shell parent, NonNLSElement[] input, int count) {
@@ -337,30 +341,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					openWizard(element.cu);
 				}
 			});
-			addCheckbox(result);
 			getTableViewer().getTable().setFocus();
 			return result;
 		}
-		
-		private void addCheckbox(Composite result) {
-			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText(ActionMessages.getString("FindStringsToExternalizeAction.hide")); //$NON-NLS-1$
-			fCheckbox.setSelection(loadCheckboxState(true));
-			
-			if (fCheckbox.getSelection() && ! NonNLSListDialog.this.hasFilters())
-				getTableViewer().addFilter(new ZeroStringsFilter());
-			
-			fCheckbox.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					storeCheckboxState(NonNLSListDialog.this.fCheckbox.getSelection());
-					boolean showAll= ! NonNLSListDialog.this.fCheckbox.getSelection();
-					if  (showAll && NonNLSListDialog.this.hasFilters())
-						NonNLSListDialog.this.getTableViewer().resetFilters();
-					else if (! showAll && ! NonNLSListDialog.this.hasFilters())	
-						NonNLSListDialog.this.getTableViewer().addFilter(new ZeroStringsFilter());
-				}
-			});
-		}	
 		
 		protected void createButtonsForButtonBar(Composite parent) {
 			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.getString("FindStringsToExternalizeAction.button.label"), true); //$NON-NLS-1$
@@ -391,17 +374,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			}
 		}
 		
-		private static boolean loadCheckboxState(boolean defaultValue){
-			String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
-			if (res == null)
-				return defaultValue;
-			return Boolean.valueOf(res).booleanValue();	
-		}
-	
-		private static void storeCheckboxState(boolean selected){
-			JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
-		}
-		
 		private static LabelProvider createLabelProvider() {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 				public String getText(Object element) {
@@ -429,12 +401,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		NonNLSElement(ICompilationUnit cu, int count){
 			this.cu= cu;
 			this.count= count;
-		}
-	}
-	
-	private static class ZeroStringsFilter extends ViewerFilter{
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			return ((NonNLSElement)element).count != 0;
 		}
 	}
 	
