@@ -765,6 +765,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			 */
 			public void run() {
 				PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, isChecked());
+				if (isChecked() && fEditor != null)
+					fEditor.synchronizeOutlinePage(fEditor.computeHighlightRangeSourceReference(), false);
 			}
 	
 		}

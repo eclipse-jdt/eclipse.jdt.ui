@@ -1346,7 +1346,18 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @param element the java element to select
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element) {
-		if (fOutlinePage != null && element != null && !isJavaOutlinePageActive()) {
+		synchronizeOutlinePage(element, true);
+	}
+
+	/**
+	 * Synchronizes the outliner selection with the given element
+	 * position in the editor.
+	 * 
+	 * @param element the java element to select
+	 * @param checkIfOutlinePageActive <code>true</code> if check for active outline page needs to be done
+	 */
+	protected void synchronizeOutlinePage(ISourceReference element, boolean checkIfOutlinePageActive) {
+		if (fOutlinePage != null && element != null && !(checkIfOutlinePageActive && isJavaOutlinePageActive())) {
 			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage.select(element);
 			fOutlineSelectionChangedListener.install(fOutlinePage);
