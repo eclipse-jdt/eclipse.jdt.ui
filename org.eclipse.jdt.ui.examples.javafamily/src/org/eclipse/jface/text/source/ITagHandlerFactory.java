@@ -22,6 +22,9 @@ public interface ITagHandlerFactory {
 	/**
 	 * Returns a handler that can handle the
 	 * given tag.
+	 * <p>
+	 * Depending on the used handler the factory might
+	 * return a new or a shared instance.</p> 
 	 *
 	 * @param tag the tag for which to return the handler 
 	 * @return a tag handler or <code>null</code> if no handler
@@ -32,6 +35,9 @@ public interface ITagHandlerFactory {
 	/**
 	 * Finds and returns a handler that can handle
 	 * the given text snippet.
+	 * <p>
+	 * Depending on the used handler the factory might
+	 * return a new or a shared instance.</p> 
 	 * 
 	 * @param text the text for which to find a handler
 	 * @return a tag handler or <code>null</code> if no handler
