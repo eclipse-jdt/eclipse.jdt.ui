@@ -616,7 +616,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 		
 			IRegion region= getCurrentTextRegion(viewer);
-			if (region == null) {
+			if (region == null || region.getLength() == 0) {
 				repairRepresentation();
 				return;
 			}
@@ -690,7 +690,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			int offset= fActiveRegion.getOffset() -  region.getOffset();
 			int length= fActiveRegion.getLength();
-				
+			
 			// support for bidi
 			Point minLocation= getMinimumLocation(text, offset, length);
 			Point maxLocation= getMaximumLocation(text, offset, length);
