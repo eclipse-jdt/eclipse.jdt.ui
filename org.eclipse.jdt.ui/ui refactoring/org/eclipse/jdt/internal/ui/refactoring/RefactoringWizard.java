@@ -115,6 +115,18 @@ public class RefactoringWizard extends Wizard {
 		return 80;
 	}
 	
+	protected boolean hasUserInputPages(){
+		return fHasUserInputPages;		
+	}
+	
+	protected boolean hasPreviewPage() {
+		return true;
+	}
+	
+	protected boolean yesNoStyle() {
+		return false;
+	}
+
 	//---- Setter and Getters ------------------------------------------------------------
 	
 	/**
@@ -124,14 +136,6 @@ public class RefactoringWizard extends Wizard {
 		return fRefactoring;
 	}
 	
-	public boolean hasUserInputPages(){
-		return fHasUserInputPages;		
-	}
-	
-	public boolean hasPreviewPage() {
-		return true;
-	}
-
 	/**
 	 * Sets the change object.
 	 */

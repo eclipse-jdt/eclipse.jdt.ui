@@ -548,7 +548,23 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 				}
 			});
 		}
-		super.createButtonsForButtonBar(parent);
+		
+		String OK_LABEL= IDialogConstants.OK_LABEL;
+		String CANCEL_LABEL= IDialogConstants.CANCEL_LABEL;
+		if (fWizard.yesNoStyle()) {
+			OK_LABEL= IDialogConstants.YES_LABEL;
+			CANCEL_LABEL= IDialogConstants.NO_LABEL;
+		}
+		createButton(
+			parent,
+			IDialogConstants.OK_ID,
+			OK_LABEL,
+			true);
+		createButton(
+			parent,
+			IDialogConstants.CANCEL_ID,
+			CANCEL_LABEL,
+			false);
 		Button okButton= getButton(IDialogConstants.OK_ID);
 		okButton.setFocus();
 	}
