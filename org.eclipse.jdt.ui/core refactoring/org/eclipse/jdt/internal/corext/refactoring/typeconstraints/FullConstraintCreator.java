@@ -101,7 +101,9 @@ public class FullConstraintCreator extends ConstraintCreator{
 		ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
 		for (int i= 0; i < expressions.size(); i++) {
 			Expression each= (Expression) expressions.get(i);
-			ITypeConstraint[] c= fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(each, getContext()), typeVariable);
+			ITypeConstraint[] c= fTypeConstraintFactory.createSubtypeConstraint(
+					fConstraintVariableFactory.makeExpressionOrTypeVariable(each, getContext()),
+					typeVariable);
 			constraints.addAll(Arrays.asList(c));
 		}		
 		return (ITypeConstraint[])constraints.toArray(new ITypeConstraint[constraints.size()]);
@@ -111,8 +113,9 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Assignment)
 	 */
 	public ITypeConstraint[] create(Assignment assignment){
-		return fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getRightHandSide(), getContext()), 
-				                                                                  fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getLeftHandSide(), getContext()));
+		return fTypeConstraintFactory.createSubtypeConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getRightHandSide(), getContext()), 
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getLeftHandSide(), getContext()));
 	}
 
 	/* (non-Javadoc)
@@ -232,19 +235,23 @@ public class FullConstraintCreator extends ConstraintCreator{
 		IMethodBinding methodBinding= declaration.resolveBinding();
 		if (methodBinding == null)
 			return new ITypeConstraint[0];
-		ITypeConstraint[] constraints = fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeDeclaringTypeVariable(methodBinding), fConstraintVariableFactory.makeRawBindingVariable(methodBinding.getDeclaringClass()));
+		ITypeConstraint[] constraints = fTypeConstraintFactory.createDefinesConstraint(
+				fConstraintVariableFactory.makeDeclaringTypeVariable(methodBinding),
+				fConstraintVariableFactory.makeRawBindingVariable(methodBinding.getDeclaringClass()));
 		result.addAll(Arrays.asList(constraints));
 		if (! methodBinding.isConstructor() && ! methodBinding.getReturnType().isPrimitive()){
 			ConstraintVariable returnTypeBindingVariable= fConstraintVariableFactory.makeReturnTypeVariable(methodBinding);
 			ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeTypeVariable(declaration.getReturnType());
-			ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(returnTypeBindingVariable, returnTypeVariable);
+			ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
+					returnTypeBindingVariable, returnTypeVariable);
 			result.addAll(Arrays.asList(defines));
 		}
 		for (int i= 0, n= declaration.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration)declaration.parameters().get(i);
 			ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
 			ConstraintVariable parameterNameVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(paramDecl.getName(), getContext());
-			ITypeConstraint[] constraint= fTypeConstraintFactory.createDefinesConstraint(parameterTypeVariable, parameterNameVariable);
+			ITypeConstraint[] constraint= fTypeConstraintFactory.createDefinesConstraint(
+					parameterTypeVariable, parameterNameVariable);
 			result.addAll(Arrays.asList(constraint));
 		}
 		if (MethodChecks.isVirtual(methodBinding)){
@@ -327,17 +334,23 @@ public class FullConstraintCreator extends ConstraintCreator{
 			return new ITypeConstraint[0];
 		
 		ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeReturnTypeVariable(returnStatement);
-		return fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(returnStatement.getExpression(), getContext()), returnTypeVariable);
+		return fTypeConstraintFactory.createSubtypeConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(returnStatement.getExpression(), getContext()),
+				returnTypeVariable);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
 	public ITypeConstraint[] create(SingleVariableDeclaration svd){
-		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()), fConstraintVariableFactory.makeTypeVariable(svd.getType()));
+		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()),
+				fConstraintVariableFactory.makeTypeVariable(svd.getType()));
 		if (svd.getInitializer() == null)
 			return defines;	
-		ITypeConstraint[] constraints = fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getInitializer(), getContext()), fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()));
+		ITypeConstraint[] constraints = fTypeConstraintFactory.createSubtypeConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getInitializer(), getContext()),
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()));
 		if (defines.length == 0 && constraints.length == 0){
 			return new ITypeConstraint[0];
 		} else if (defines.length == 0){
@@ -410,7 +423,9 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(VariableDeclarationFragment vdf){
 		if (vdf.getInitializer() == null)
 			return new ITypeConstraint[0];	
-		return fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getInitializer(), getContext()), fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getName(), getContext()));
+		return fTypeConstraintFactory.createSubtypeConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getInitializer(), getContext()),
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getName(), getContext()));
 	}
 
 	/* (non-Javadoc)
@@ -421,100 +436,112 @@ public class FullConstraintCreator extends ConstraintCreator{
 	}
 
 
-  //--------- private helpers ----------------//
-		
-  private Collection getConstraintsForFieldDeclaringTypes(FieldDeclaration fd) {
-	  Collection result= new ArrayList(fd.fragments().size());
-	  for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
-		  VariableDeclarationFragment varDecl= (VariableDeclarationFragment)iter.next();
-		  IVariableBinding binding= varDecl.resolveBinding();
-		  Assert.isTrue(binding.isField());
-		  result.addAll(Arrays.asList(fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeDeclaringTypeVariable(binding), fConstraintVariableFactory.makeRawBindingVariable(binding.getDeclaringClass()))));
-	  }
-	  return result;
-  }
-
-  private Collection getConstraintsForHiding(FieldDeclaration fd) {
-	  Collection result= new ArrayList();
-	  for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
-		  result.addAll(getConstraintsForHiding((VariableDeclarationFragment)iter.next()));
-	  }
-	  return result;
-  }
-
-  private Collection getConstraintsForHiding(VariableDeclarationFragment fragment) {
-	  Collection result= new ArrayList();
-	  IVariableBinding fieldBinding= fragment.resolveBinding();
-	  Assert.isTrue(fieldBinding.isField());
-	  Set declaringTypes= getDeclaringSuperTypes(fieldBinding);
-	  ConstraintVariable hiddingFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding);
-	  for (Iterator iter= declaringTypes.iterator(); iter.hasNext();) {
-		  ITypeBinding declaringSuperType= (ITypeBinding) iter.next();
-		  IVariableBinding hiddenField= findField(fieldBinding, declaringSuperType);
-		  Assert.isTrue(hiddenField.isField());
-		  ConstraintVariable hiddenFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(hiddenField);
-		  result.addAll(Arrays.asList(fTypeConstraintFactory.createStrictSubtypeConstraint(hiddingFieldVar, hiddenFieldVar)));
-	  }
-	  return result;
-  }
-
-  private ITypeConstraint[] getConstraintsFromFragmentList(List fragments, Type type) {
-	  int size= fragments.size();
-	  ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
-	  List result= new ArrayList((size * (size - 1))/2);
-	  for (int i= 0; i < size; i++) {
-		  VariableDeclarationFragment fragment1= (VariableDeclarationFragment) fragments.get(i);
-		  SimpleName fragment1Name= fragment1.getName();
-		  result.addAll(Arrays.asList(fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment1Name, getContext()), typeVariable)));
-		  for (int j= i + 1; j < size; j++) {
-			  VariableDeclarationFragment fragment2= (VariableDeclarationFragment) fragments.get(j);
-			  result.addAll(Arrays.asList(fTypeConstraintFactory.createEqualsConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment1Name, getContext()), fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment2.getName(), getContext()))));
-		  }
-	  }
-	  return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
-  }
+	//--------- private helpers ----------------//
 	
-  private Collection getConstraintsForOverriding(IMethodBinding overriddingMethod) {
-	  Collection result= new ArrayList();
-	  Set declaringSupertypes= getDeclaringSuperTypes(overriddingMethod);
-	  for (Iterator iter= declaringSupertypes.iterator(); iter.hasNext();) {
-		  ITypeBinding superType= (ITypeBinding) iter.next();
-		  IMethodBinding overriddenMethod= findMethod(overriddingMethod, superType);
-		  Assert.isNotNull(overriddenMethod);//because we asked for declaring types
-		  if (Bindings.equals(overriddingMethod, overriddenMethod)) continue;
-		  ITypeConstraint[] returnTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(fConstraintVariableFactory.makeReturnTypeVariable(overriddenMethod), fConstraintVariableFactory.makeReturnTypeVariable(overriddingMethod));
-		  result.addAll(Arrays.asList(returnTypeConstraint));
-		  Assert.isTrue(overriddenMethod.getParameterTypes().length == overriddingMethod.getParameterTypes().length);
-		  for (int i= 0, n= overriddenMethod.getParameterTypes().length; i < n; i++) {
-			  ITypeConstraint[] parameterTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(fConstraintVariableFactory.makeParameterTypeVariable(overriddenMethod, i), fConstraintVariableFactory.makeParameterTypeVariable(overriddingMethod, i));
-			  result.addAll(Arrays.asList(parameterTypeConstraint));
-		  }
-		  ITypeConstraint[] declaringTypeConstraint= fTypeConstraintFactory.createStrictSubtypeConstraint(fConstraintVariableFactory.makeDeclaringTypeVariable(overriddingMethod), fConstraintVariableFactory.makeDeclaringTypeVariable(overriddenMethod));
-		  result.addAll(Arrays.asList(declaringTypeConstraint));
-	  }
-	  return result;
-  }
+	private Collection getConstraintsForFieldDeclaringTypes(FieldDeclaration fd) {
+		Collection result= new ArrayList(fd.fragments().size());
+		for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
+			VariableDeclarationFragment varDecl= (VariableDeclarationFragment) iter.next();
+			IVariableBinding binding= varDecl.resolveBinding();
+			Assert.isTrue(binding.isField());
+			result.addAll(Arrays.asList(fTypeConstraintFactory.createDefinesConstraint(
+					fConstraintVariableFactory.makeDeclaringTypeVariable(binding),
+					fConstraintVariableFactory.makeRawBindingVariable(binding.getDeclaringClass()))));
+		}
+		return result;
+	}
 	
-  private ITypeConstraint[] getReturnTypeConstraint(Expression invocation, IMethodBinding methodBinding){
-	  if (methodBinding == null || methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
-		  return new ITypeConstraint[0];
-	  ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeReturnTypeVariable(methodBinding);
-	  ConstraintVariable invocationVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(invocation, getContext());
-	  return fTypeConstraintFactory.createDefinesConstraint(invocationVariable, returnTypeVariable);
-  }
+	private Collection getConstraintsForHiding(FieldDeclaration fd) {
+		Collection result= new ArrayList();
+		for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
+			result.addAll(getConstraintsForHiding((VariableDeclarationFragment) iter.next()));
+		}
+		return result;
+	}
 	
-  private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding){
-	  List result= new ArrayList(arguments.size());
-	  for (int i= 0, n= arguments.size(); i < n; i++) {
-		  Expression argument= (Expression) arguments.get(i);
-		  ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
-		  ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
-		  ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
-		  result.addAll(Arrays.asList(argConstraint));
-	  }
-	  return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
-  }
-			
+	private Collection getConstraintsForHiding(VariableDeclarationFragment fragment) {
+		Collection result= new ArrayList();
+		IVariableBinding fieldBinding= fragment.resolveBinding();
+		Assert.isTrue(fieldBinding.isField());
+		Set declaringTypes= getDeclaringSuperTypes(fieldBinding);
+		ConstraintVariable hiddingFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding);
+		for (Iterator iter= declaringTypes.iterator(); iter.hasNext();) {
+			ITypeBinding declaringSuperType= (ITypeBinding) iter.next();
+			IVariableBinding hiddenField= findField(fieldBinding, declaringSuperType);
+			Assert.isTrue(hiddenField.isField());
+			ConstraintVariable hiddenFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(hiddenField);
+			result.addAll(Arrays.asList(fTypeConstraintFactory.createStrictSubtypeConstraint(hiddingFieldVar, hiddenFieldVar)));
+		}
+		return result;
+	}
+	
+	private ITypeConstraint[] getConstraintsFromFragmentList(List fragments, Type type) {
+		int size= fragments.size();
+		ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
+		List result= new ArrayList((size * (size - 1))/2);
+		for (int i= 0; i < size; i++) {
+			VariableDeclarationFragment fragment1= (VariableDeclarationFragment) fragments.get(i);
+			SimpleName fragment1Name= fragment1.getName();
+			result.addAll(Arrays.asList(fTypeConstraintFactory.createDefinesConstraint(
+					fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment1Name, getContext()),
+					typeVariable)));
+			for (int j= i + 1; j < size; j++) {
+				VariableDeclarationFragment fragment2= (VariableDeclarationFragment) fragments.get(j);
+				result.addAll(Arrays.asList(fTypeConstraintFactory.createEqualsConstraint(
+						fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment1Name, getContext()),
+						fConstraintVariableFactory.makeExpressionOrTypeVariable(fragment2.getName(), getContext()))));
+			}
+		}
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
+	}
+	
+	private Collection getConstraintsForOverriding(IMethodBinding overriddingMethod) {
+		Collection result= new ArrayList();
+		Set declaringSupertypes= getDeclaringSuperTypes(overriddingMethod);
+		for (Iterator iter= declaringSupertypes.iterator(); iter.hasNext();) {
+			ITypeBinding superType= (ITypeBinding) iter.next();
+			IMethodBinding overriddenMethod= findMethod(overriddingMethod, superType);
+			Assert.isNotNull(overriddenMethod);//because we asked for declaring types
+			if (Bindings.equals(overriddingMethod, overriddenMethod)) continue;
+			ITypeConstraint[] returnTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(
+					fConstraintVariableFactory.makeReturnTypeVariable(overriddenMethod),
+					fConstraintVariableFactory.makeReturnTypeVariable(overriddingMethod));
+			result.addAll(Arrays.asList(returnTypeConstraint));
+			Assert.isTrue(overriddenMethod.getParameterTypes().length == overriddingMethod.getParameterTypes().length);
+			for (int i= 0, n= overriddenMethod.getParameterTypes().length; i < n; i++) {
+				ITypeConstraint[] parameterTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(
+						fConstraintVariableFactory.makeParameterTypeVariable(overriddenMethod, i),
+						fConstraintVariableFactory.makeParameterTypeVariable(overriddingMethod, i));
+				result.addAll(Arrays.asList(parameterTypeConstraint));
+			}
+			ITypeConstraint[] declaringTypeConstraint= fTypeConstraintFactory.createStrictSubtypeConstraint(
+					fConstraintVariableFactory.makeDeclaringTypeVariable(overriddingMethod),
+					fConstraintVariableFactory.makeDeclaringTypeVariable(overriddenMethod));
+			result.addAll(Arrays.asList(declaringTypeConstraint));
+		}
+		return result;
+	}
+	
+	private ITypeConstraint[] getReturnTypeConstraint(Expression invocation, IMethodBinding methodBinding){
+		if (methodBinding == null || methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
+			return new ITypeConstraint[0];
+		ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeReturnTypeVariable(methodBinding);
+		ConstraintVariable invocationVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(invocation, getContext());
+		return fTypeConstraintFactory.createDefinesConstraint(invocationVariable, returnTypeVariable);
+	}
+	
+	private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding){
+		List result= new ArrayList(arguments.size());
+		for (int i= 0, n= arguments.size(); i < n; i++) {
+			Expression argument= (Expression) arguments.get(i);
+			ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+			ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
+			ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+			result.addAll(Arrays.asList(argConstraint));
+		}
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
+	}
+	
 	private static Type getTypeParent(ArrayInitializer arrayInitializer) {
 		if (arrayInitializer.getParent() instanceof ArrayCreation){
 			return ((ArrayCreation)arrayInitializer.getParent()).getType().getElementType();
@@ -532,108 +559,111 @@ public class FullConstraintCreator extends ConstraintCreator{
 			} else if (parent.getParent() instanceof FieldDeclaration){
 				Type type= ((FieldDeclaration)parent.getParent()).getType();
 				return ASTNodes.getElementType(type);
-		  	}
+			}
 		}
 		Assert.isTrue(false);//array initializers are allowed in only 2 places
 		return null;
 	}
-		
-  private ITypeConstraint[] createOrOrSubtypeConstraint(ConstraintVariable var1, ConstraintVariable var2){
-	  ITypeConstraint[] c1= fTypeConstraintFactory.createSubtypeConstraint(var1, var2);
-	  ITypeConstraint[] c2= fTypeConstraintFactory.createSubtypeConstraint(var2, var1);
-	  if (c1.length == 0 && c2.length == 0){
-	  	return new ITypeConstraint[0];
-	  }
-	  return new ITypeConstraint[]{ fTypeConstraintFactory.createCompositeOrTypeConstraint(new ITypeConstraint[]{c1[0], c2[0]}) };
-  }
 	
-  private ITypeConstraint[] createConstraintsForAccessToField(IVariableBinding fieldBinding, Expression qualifier, Expression accessExpression){
-	  Assert.isTrue(fieldBinding.isField());
-	  ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(accessExpression, getContext()), fConstraintVariableFactory.makeRawBindingVariable(fieldBinding.getType()));
-	  if (qualifier == null)
-		  return defines;
-	  ConstraintVariable declaringTypeVar= fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding);
-	  ITypeConstraint[] subType= fTypeConstraintFactory.createSubtypeConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(qualifier, getContext()), declaringTypeVar);
-	  
-	  if (defines.length == 0){
-	  	return subType;
-	  } else if (subType.length == 0){
-	  	return defines;
-	  } else {
-	    return new ITypeConstraint[]{defines[0], subType[0]};
-	  }
-  }
-	
-  private static IVariableBinding findField(IVariableBinding fieldBinding, ITypeBinding type) {
-	  if (fieldBinding.getDeclaringClass().equals(type))
-		  return fieldBinding;
-	  return Bindings.findFieldInType(type, fieldBinding.getName());
-  }
-
-  /* 
-   * return Set of ITypeBindings
-   */
-  private static Set getDeclaringSuperTypes(IVariableBinding fieldBinding) {
-	  Set allSuperTypes= TypeBindings.getSuperTypes(fieldBinding.getDeclaringClass());
-	  Set result= new HashSet();
-	  for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
-		  ITypeBinding type= (ITypeBinding) iter.next();
-		  if (findField(fieldBinding, type) != null)
-			  result.add(type);
-	  }
-	  return result;
-  }
-	
-  //--- RootDef ----//
-  private static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
-	  Set/*<ITypeBinding>*/ declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
-	  Set/*<IMethodBinding>*/ result= new HashSet();
-	  for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
-		  ITypeBinding type= (ITypeBinding) iter.next();
-		  if (! containsASuperType(type, declaringSuperTypes))
-			  result.add(findMethod(methodBinding, type));
-	  }
-		  
-	  if (result.size() == 0){
-	  		result.add(methodBinding);
-	  }
-	  return (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
-  }
-
-  /* 
-   * @param declaringSuperTypes Set of ITypeBindings
-   */
-  private static boolean containsASuperType(ITypeBinding type, Set declaringSuperTypes) {
-	  for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
-		  ITypeBinding maybeSuperType= (ITypeBinding) iter.next();
-		  if (TypeBindings.isSubtypeBindingOf(type, maybeSuperType) &&
-		  	  !TypeBindings.isEqualTo(type, maybeSuperType))
-			  return true;
-	  }
-	  return false;
-  }
-	
-  /* 
-   * return Set of ITypeBindings
-   */
-  private static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
-	ITypeBinding superClass = methodBinding.getDeclaringClass();
-	Set allSuperTypes= TypeBindings.getSuperTypes(superClass);
-    if (allSuperTypes.isEmpty())
-    	allSuperTypes.add(methodBinding.getDeclaringClass());
-	Set result= new HashSet();
-	for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
-        ITypeBinding type= (ITypeBinding) iter.next();
-	    if (findMethod(methodBinding, type) != null)
-		    result.add(type);
+	private ITypeConstraint[] createOrOrSubtypeConstraint(ConstraintVariable var1, ConstraintVariable var2){
+		ITypeConstraint[] c1= fTypeConstraintFactory.createSubtypeConstraint(var1, var2);
+		ITypeConstraint[] c2= fTypeConstraintFactory.createSubtypeConstraint(var2, var1);
+		if (c1.length == 0 && c2.length == 0){
+			return new ITypeConstraint[0];
+		}
+		return new ITypeConstraint[]{ fTypeConstraintFactory.createCompositeOrTypeConstraint(new ITypeConstraint[]{c1[0], c2[0]}) };
 	}
-	return result;
-  }
-
-  private static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
-	  if (methodBinding.getDeclaringClass().equals(type))
-		  return methodBinding;
-	  return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
-  }
-
+	
+	private ITypeConstraint[] createConstraintsForAccessToField(IVariableBinding fieldBinding, Expression qualifier, Expression accessExpression){
+		Assert.isTrue(fieldBinding.isField());
+		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(accessExpression, getContext()),
+				fConstraintVariableFactory.makeRawBindingVariable(fieldBinding.getType()));
+		if (qualifier == null)
+			return defines;
+		ITypeConstraint[] subType= fTypeConstraintFactory.createSubtypeConstraint(
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(qualifier, getContext()),
+				fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding));
+		
+		if (defines.length == 0){
+			return subType;
+		} else if (subType.length == 0){
+			return defines;
+		} else {
+			return new ITypeConstraint[]{defines[0], subType[0]};
+		}
+	}
+	
+	private static IVariableBinding findField(IVariableBinding fieldBinding, ITypeBinding type) {
+		if (fieldBinding.getDeclaringClass().equals(type))
+			return fieldBinding;
+		return Bindings.findFieldInType(type, fieldBinding.getName());
+	}
+	
+	/* 
+	 * return Set of ITypeBindings
+	 */
+	private static Set getDeclaringSuperTypes(IVariableBinding fieldBinding) {
+		Set allSuperTypes= TypeBindings.getSuperTypes(fieldBinding.getDeclaringClass());
+		Set result= new HashSet();
+		for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
+			ITypeBinding type= (ITypeBinding) iter.next();
+			if (findField(fieldBinding, type) != null)
+				result.add(type);
+		}
+		return result;
+	}
+	
+	//--- RootDef ----//
+	private static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
+		Set/*<ITypeBinding>*/ declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
+		Set/*<IMethodBinding>*/ result= new HashSet();
+		for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
+			ITypeBinding type= (ITypeBinding) iter.next();
+			if (! containsASuperType(type, declaringSuperTypes))
+				result.add(findMethod(methodBinding, type));
+		}
+		
+		if (result.size() == 0){
+			result.add(methodBinding);
+		}
+		return (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
+	}
+	
+	/* 
+	 * @param declaringSuperTypes Set of ITypeBindings
+	 */
+	private static boolean containsASuperType(ITypeBinding type, Set declaringSuperTypes) {
+		for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
+			ITypeBinding maybeSuperType= (ITypeBinding) iter.next();
+			if (TypeBindings.isSubtypeBindingOf(type, maybeSuperType) &&
+					!TypeBindings.isEqualTo(type, maybeSuperType))
+				return true;
+		}
+		return false;
+	}
+	
+	/* 
+	 * return Set of ITypeBindings
+	 */
+	private static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
+		ITypeBinding superClass = methodBinding.getDeclaringClass();
+		Set allSuperTypes= TypeBindings.getSuperTypes(superClass);
+		if (allSuperTypes.isEmpty())
+			allSuperTypes.add(methodBinding.getDeclaringClass());
+		Set result= new HashSet();
+		for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
+			ITypeBinding type= (ITypeBinding) iter.next();
+			if (findMethod(methodBinding, type) != null)
+				result.add(type);
+		}
+		return result;
+	}
+	
+	private static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
+		if (methodBinding.getDeclaringClass().equals(type))
+			return methodBinding;
+		return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
+	}
+	
 }
