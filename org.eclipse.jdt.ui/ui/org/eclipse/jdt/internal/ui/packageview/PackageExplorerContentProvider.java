@@ -537,8 +537,21 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return false;
 	}
 	
-	private void postRefresh(final Object root) {
+	private void postRefresh(Object root) {
+		// JFace doesn't refresh when object isn't part of the viewer
+		// Therefore move the refresh start down to the viewer's input
+		if (isParent(root, fInput)) 
+			root= fInput;
 		postRefresh(root, true);
+	}
+	
+	boolean isParent(Object root, Object child) {
+		Object parent= getParent(child);
+		if (parent == null)
+			return false;
+		if (parent.equals(root))
+			return true;
+		return isParent(root, parent);
 	}
 	
 	private void postRefresh(final Object root, final boolean updateLabels) {
