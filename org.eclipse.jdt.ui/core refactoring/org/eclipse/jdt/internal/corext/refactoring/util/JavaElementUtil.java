@@ -3,6 +3,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -16,6 +17,10 @@ public class JavaElementUtil {
 	
 	public static String createMethodSignature(IMethod method) throws JavaModelException {
 		return Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, true);
+	}
+	
+	public static String createFieldSignature(IField field) throws JavaModelException {
+		return field.getDeclaringType().getFullyQualifiedName() + "." + field.getElementName();
 	}
 	
 	public static IJavaElement[] getElementsOfType(IJavaElement[] elements, int type){
