@@ -72,6 +72,9 @@ public class HTMLPrinter {
 	}
 	
 	public static String convertToHTMLContent(String content) {
+		content= replace(content, '&', "&amp;"); //$NON-NLS-1$
+		content= replace(content, '"', "&quot;"); //$NON-NLS-1$
+		content= replace(content, '\'', "&apos;"); //$NON-NLS-1$
 		content= replace(content, '<', "&lt;"); //$NON-NLS-1$
 		return replace(content, '>', "&gt;"); //$NON-NLS-1$
 	}
