@@ -54,7 +54,7 @@ public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 		SingleNameReference singleNameReference= (SingleNameReference)nameReference;
 		int length= singleNameReference.sourceEnd - singleNameReference.sourceStart + 1;
 		int bracketCount= (length - singleNameReference.token.length) / 2;
-		return nameReference.sourceStart + bracketCount;
+		return singleNameReference.sourceStart + bracketCount;
 	}
 	
 	//------- visit ------
