@@ -26,6 +26,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.search.ui.ISearchResultView;
@@ -90,7 +91,7 @@ public class GotoMarkerAction extends Action {
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		if (editor != null)
-			editor.gotoMarker(marker);
+			IDE.gotoMarker(editor, marker);
 	}
 
 	private void showWithReuse(IMarker marker, IResource resource, IJavaElement javaElement, IWorkbenchPage wbPage) {
@@ -158,7 +159,7 @@ public class GotoMarkerAction extends Action {
 		}
 
 		if (editor != null) {
-			editor.gotoMarker(marker);
+			IDE.gotoMarker(editor, marker);
 		}
 	}
 

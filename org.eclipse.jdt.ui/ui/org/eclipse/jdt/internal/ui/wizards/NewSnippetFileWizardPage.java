@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -74,7 +75,7 @@ public class NewSnippetFileWizardPage extends WizardNewFileCreationPage {
 				});
 			}
 			try {
-				page.openEditor(file);
+				IDE.openEditor(page, file, true);
 				return true;
 			} catch (PartInitException e) {
 				ExceptionHandler.handle(e, shell, NewWizardMessages.getString("NewSnippetFileWizardPage.open_error.message"),  e.getMessage()); //$NON-NLS-1$

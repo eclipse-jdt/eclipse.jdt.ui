@@ -32,6 +32,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.jdt.internal.corext.template.Templates;
@@ -58,7 +59,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 				display.asyncExec(new Runnable() {
 					public void run() {
 						try {
-							activePage.openEditor(resource);
+							IDE.openEditor(activePage, resource, true);
 						} catch (PartInitException e) {
 							JavaPlugin.log(e);
 						}

@@ -10,8 +10,12 @@
 		<project>org.eclipse.jdt.junit.eclipse</project>
 		<project>org.eclipse.jdt.launching</project>
 		<project>org.eclipse.jdt.ui</project>
+		<project>org.eclipse.jface.text</project>
 		<project>org.eclipse.swt</project>
 		<project>org.eclipse.ui</project>
+		<project>org.eclipse.ui.editors</project>
+		<project>org.eclipse.ui.ide</project>
+		<project>org.eclipse.ui.workbench.texteditor</project>
 		<project>org.junit</project>
 	</projects>
 	<buildSpec>

@@ -36,6 +36,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -145,7 +146,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		if (marker == null || !marker.exists())
 			return false;
 			
-		IMarkerHelpRegistry registry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
+		IMarkerHelpRegistry registry= IDE.getMarkerHelpRegistry();
 		return registry != null && registry.hasResolutions(marker);
 	}
 	
@@ -219,7 +220,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				} else {
 					if (annot instanceof MarkerAnnotation) {
 						IMarker marker= ((MarkerAnnotation) annot).getMarker();
-						IMarkerResolution[] res= PlatformUI.getWorkbench().getMarkerHelpRegistry().getResolutions(marker);
+						IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
 						if (res.length > 0) {
 							for (int i= 0; i < res.length; i++) {
 								proposals.add(new MarkerResolutionProposal(res[i], marker));

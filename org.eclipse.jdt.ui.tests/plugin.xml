@@ -18,6 +18,10 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
    </requires>
 
 
@@ -84,9 +88,13 @@
             class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
             id="org.eclipse.jdt.ui.examples.MyQuickFixProcessor">
          <enablement>
-           <adapt type="org.eclipse.core.resources.IResource">
-             <test property="matchesPattern" value="A.java"/>
-           </adapt>
+            <adapt
+                  type="org.eclipse.core.resources.IResource">
+               <test
+                     value="A.java"
+                     property="matchesPattern">
+               </test>
+            </adapt>
          </enablement>
       </quickFixProcessor>
    </extension>

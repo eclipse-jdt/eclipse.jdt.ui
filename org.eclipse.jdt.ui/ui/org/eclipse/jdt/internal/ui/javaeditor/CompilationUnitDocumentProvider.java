@@ -947,9 +947,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 	
 	/*
-	 * @see AbstractDocumentProvider#resetDocument(Object)
+	 * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#doResetDocument(java.lang.Object, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public void resetDocument(Object element) throws CoreException {
+	protected void doResetDocument(Object element, IProgressMonitor monitor) throws CoreException {
 		if (element == null)
 			return;
 			
@@ -969,7 +969,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					IFile file= (IFile) resource;
 					
 					try {
-						refreshFile(file);
+						refreshFile(file, monitor);
 					} catch (CoreException x) {
 						handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.resetDocument")); //$NON-NLS-1$
 					}
@@ -998,7 +998,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			fireElementDirtyStateChanged(element, false);
 			
 		} else {
-			super.resetDocument(element);
+			super.doResetDocument(element, monitor);
 		}
 	}
 	

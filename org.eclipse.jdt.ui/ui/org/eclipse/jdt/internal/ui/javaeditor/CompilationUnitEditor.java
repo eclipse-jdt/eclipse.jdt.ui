@@ -811,17 +811,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
-	 * @see AbstractTextEditor#performSaveOperation(WorkspaceModifyOperation, IProgressMonitor)
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
+	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {
 		IDocumentProvider p= getDocumentProvider();
 		if (p instanceof ICompilationUnitDocumentProvider) {
 			ICompilationUnitDocumentProvider cp= (ICompilationUnitDocumentProvider) p;
 			cp.setSavePolicy(fSavePolicy);
 		}
-		
 		try {
-			super.performSaveOperation(operation, progressMonitor);
+			super.performSave(overwrite, progressMonitor);
 		} finally {
 			if (p instanceof ICompilationUnitDocumentProvider) {
 				ICompilationUnitDocumentProvider cp= (ICompilationUnitDocumentProvider) p;
@@ -885,10 +884,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 			if (unit != null) {
 				synchronized (unit) { 
-					performSaveOperation(createSaveOperation(false), progressMonitor); 
+					performSave(false, progressMonitor); 
 				}
 			} else 
-				performSaveOperation(createSaveOperation(false), progressMonitor);
+				performSave(false, progressMonitor);
 		}
 	}
 	
