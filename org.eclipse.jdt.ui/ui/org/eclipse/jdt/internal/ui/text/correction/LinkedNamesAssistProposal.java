@@ -134,11 +134,15 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
 			
+			int endPos;
 			fSelectedRegion= ui.getSelectedRegion();
 			if (fValueSuggestion != null && fSelectedRegion != null) {
 				document.replace(fSelectedRegion.getOffset(), fSelectedRegion.getLength(), fValueSuggestion);
-				fSelectedRegion= new Region(fSelectedRegion.getOffset(), fValueSuggestion.length());
+				endPos= fSelectedRegion.getOffset() + fValueSuggestion.length();
+			} else {
+				endPos= fSelectedRegion.getOffset() + fSelectedRegion.getLength();
 			}
+			fSelectedRegion= new Region(endPos, 0);
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
