@@ -18,32 +18,21 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -51,9 +40,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
-import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -78,161 +67,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
 	public static final String PACKAGE= 	JdtFlags.VISIBILITY_STRING_PACKAGE;
 	public static final String PRIVATE= 	JdtFlags.VISIBILITY_STRING_PRIVATE;
-
-	private static abstract class ExpressionChecker extends ASTVisitor {
-
-		private final IExpressionFragment fExpression;
-		protected boolean fResult= true;
-
-		public ExpressionChecker(IExpressionFragment ex) {
-			fExpression= ex;
-		}
-		public boolean check() {
-			fResult= true;
-			fExpression.getAssociatedNode().accept(this);
-			return fResult;
-		}
-	}
-
-	private static class LoadTimeConstantChecker extends ExpressionChecker {
-		public LoadTimeConstantChecker(IExpressionFragment ex) {
-			super(ex);
-		}
-
-		public boolean visit(SuperFieldAccess node) {
-			fResult= false;
-			return false;
-		}
-		public boolean visit(SuperMethodInvocation node) {
-			fResult= false;
-			return false;
-		}
-		public boolean visit(ThisExpression node) {
-			fResult= false;
-			return false;
-		}
-		public boolean visit(FieldAccess node) {
-			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
-			return false;
-		}
-		public boolean visit(MethodInvocation node) {
-			if(node.getExpression() == null) {
-				visitName(node.getName());	
-			} else {
-				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
-			}
-			
-			return false;
-		}
-		public boolean visit(QualifiedName node) {
-			return visitName(node);
-		}
-		public boolean visit(SimpleName node) {
-			return visitName(node);
-		}
-		
-		private boolean visitName(Name name) {
-			fResult= checkName(name);
-			return false; //Do not descend further                 
-		}
-		
-		private boolean checkName(Name name) {
-			IBinding binding= name.resolveBinding();
-			if(binding == null)
-				return true;  /* If the binding is null because of compile errors etc., 
-				                  scenarios which may have been deemed unacceptable in
-				                  the presence of semantic information will be admitted. */
-			
-			// If name represents a member:
-			if(binding instanceof IVariableBinding || binding instanceof IMethodBinding)
-				return isMemberReferenceValidInClassInitialization(name);
-			else if(binding instanceof ITypeBinding)
-				return true;	
-			else {
-					/*  IPackageBinding is not expected, as a package name not
-					    used as a type name prefix is not expected in such an
-					    expression.  Other types are not expected either.
-					 */
-					Assert.isTrue(false);
-					return true;		
-			}
-		}
-
-		private boolean isMemberReferenceValidInClassInitialization(Name name) {
-			IBinding binding= name.resolveBinding();
-			Assert.isTrue(binding instanceof IVariableBinding || binding instanceof IMethodBinding);
-
-			if(name instanceof SimpleName)
-				return Modifier.isStatic(binding.getModifiers());
-			else {
-				Assert.isTrue(name instanceof QualifiedName);
-				return checkName(((QualifiedName) name).getQualifier());
-			}
-		}
-	}
-
-	private static class StaticFinalConstantChecker extends ExpressionChecker {
-		public StaticFinalConstantChecker(IExpressionFragment ex) {
-			super(ex);
-		}
-		
-		public boolean visit(SuperFieldAccess node) {
-			fResult= false;
-			return false;
-		}
-		public boolean visit(SuperMethodInvocation node) {
-			fResult= false;
-			return false;
-		}
-		public boolean visit(ThisExpression node) {
-			fResult= false;
-			return false;
-		}
-
-		public boolean visit(QualifiedName node) {
-			return visitName(node);
-		}
-		public boolean visit(SimpleName node) {
-			return visitName(node);
-		}
-		private boolean visitName(Name name) {
-			IBinding binding= name.resolveBinding();
-			if(binding == null) { 
-				/* If the binding is null because of compile errors etc., 
-				   scenarios which may have been deemed unacceptable in
-				   the presence of semantic information will be admitted. 
-				   Descend deeper.
-				 */
-				 return true;
-			}
-			
-			int modifiers= binding.getModifiers();	
-			if(binding instanceof IVariableBinding) {
-				if (!(Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers))) {
-					fResult= false;
-					return false;
-				}		
-			} else if(binding instanceof IMethodBinding) {
-				if (!Modifier.isStatic(modifiers)) {
-					fResult= false;
-					return false;
-				}
-			} else if(binding instanceof ITypeBinding) {
-				return false; // It's o.k.  Don't descend deeper.
-		
-			} else {
-					/*  IPackageBinding is not expected, as a package name not
-					    used as a type name prefix is not expected in such an
-					    expression.  Other types are not expected either.
-					 */
-					Assert.isTrue(false);
-					return false;		
-			}
-			
-			//Descend deeper:
-			return true;
-		}
-	}
 
 	private static final String MODIFIER= "static final"; //$NON-NLS-1$
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
@@ -343,16 +177,19 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", 6); //$NON-NLS-1$
+			pm.beginTask("", 8); //$NON-NLS-1$
 
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu }));
 			if (result.hasFatalError())
 				return result;
+			pm.worked(1);
 
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.syntax_error")); //$NON-NLS-1$
+			pm.worked(1);
 
 			initializeAST();
+			pm.worked(1);
 
 			return checkSelection(new SubProgressMonitor(pm, 5));
 		} catch (CoreException e) {
@@ -370,18 +207,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private void checkAllStaticFinal() 
 		throws JavaModelException
 	{
-		fSelectionAllStaticFinal= isStaticFinalConstant(getSelectedExpression());
+		fSelectionAllStaticFinal= ConstantChecks.isStaticFinalConstant(getSelectedExpression());
 		fAllStaticFinalCheckPerformed= true;
-	}
-
-	private static boolean isStaticFinalConstant(IExpressionFragment ex) {
-		return new StaticFinalConstantChecker(ex).check();
-	}
-	
-	private static boolean isLoadTimeConstant(IExpressionFragment ex) 
-		throws JavaModelException
-	{
-		return new LoadTimeConstantChecker(ex).check();
 	}
 
 	private String getModifier() {
@@ -446,7 +273,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		IExpressionFragment selectedExpression= getSelectedExpression();
 		if (selectedExpression.getAssociatedExpression() instanceof NullLiteral)
 			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.null_literals"))); //$NON-NLS-1$
-		else if (!isLoadTimeConstant(selectedExpression))
+		else if (!ConstantChecks.isLoadTimeConstant(selectedExpression))
 			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.not_load_time_constant"))); //$NON-NLS-1$
 		
 		return result;
