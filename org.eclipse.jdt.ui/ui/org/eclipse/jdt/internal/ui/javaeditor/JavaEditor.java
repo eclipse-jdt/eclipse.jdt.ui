@@ -1283,7 +1283,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					} else
 						Program.launch(fURLString);
 					fURLString= null;
-				
+					return;
 				}
 				
 				// Java element link
