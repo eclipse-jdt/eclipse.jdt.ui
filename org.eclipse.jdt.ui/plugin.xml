@@ -382,6 +382,25 @@
    </page>
 </extension>
 
+<extension point="org.eclipse.search.searchResultSorters">
+	<sorter
+		id="org.eclipse.search.internal.ui.ByElementNameSorter"
+		pageId="org.eclipse.jdt.ui.JavaSearchPage"
+		label="%ByElementNameSorter.label"
+		tooltip="%ByElementNameSorter.tooltip"
+		icon="icons/full/clcl16/search_sortmatch.gif"
+		class="org.eclipse.jdt.internal.ui.search.ByElementNameSorter">
+	</sorter>
+	<sorter
+		id="org.eclipse.search.internal.ui.ByPathSorter"
+		pageId="org.eclipse.jdt.ui.JavaSearchPage"
+		label="%ByPathSorter.label"
+		tooltip="%ByPathSorter.tooltip"
+		icon="icons/full/clcl16/search_sortmatch.gif"
+		class="org.eclipse.jdt.internal.ui.search.ByPathSorter">
+	</sorter>
+</extension>
+
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
 <!-- =========================================================================== -->
