@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class ReorgMoveAction extends SelectionDispatchAction {
@@ -63,6 +64,9 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 				setEnabled(canEnable(resources, javaElements));
 		} catch (JavaModelException e) {
 			//no ui here - this happens on selection changes
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			setEnabled(false);
 		}
 	}

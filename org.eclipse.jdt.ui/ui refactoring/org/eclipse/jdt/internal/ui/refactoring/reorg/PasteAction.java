@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PasteAction extends SelectionDispatchAction{
 
@@ -83,7 +84,9 @@ public class PasteAction extends SelectionDispatchAction{
 			setEnabled(canOperateOn(selection));
 		} catch (JavaModelException e) {
 			//no ui here - this happens on selection changes
-			JavaPlugin.log(e);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			setEnabled(false);
 		}
 	}
