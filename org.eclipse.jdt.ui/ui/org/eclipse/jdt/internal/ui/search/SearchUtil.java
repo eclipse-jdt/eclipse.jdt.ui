@@ -140,8 +140,7 @@ public class SearchUtil extends JavaModelUtil {
 	 * @return an array of all editor parts.
 	 */
 	public static IEditorPart[] getEditors() {
-		Set inputs= new HashSet(7);
-		List result= new ArrayList(0);
+		List result= new ArrayList(7);
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -149,7 +148,8 @@ public class SearchUtil extends JavaModelUtil {
 			for (int x= 0; x < pages.length; x++) {
 				IEditorPart[] editors= pages[x].getDirtyEditors();
 				for (int z= 0; z < editors.length; z++) {
-					result.add(editors[z]);
+					if (!result.contains(editors[z]))
+						result.add(editors[z]);
 				}
 			}
 		}
