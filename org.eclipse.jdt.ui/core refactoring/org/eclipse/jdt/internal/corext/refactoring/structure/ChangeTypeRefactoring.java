@@ -1051,7 +1051,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Gather constraints associated with a set of compilation units.
 	 */
 	private Collection/*<ITypeConstraint>*/ getConstraints(ICompilationUnit[] referringCus, IProgressMonitor pm) {
-		pm.beginTask("Analyzing...", referringCus.length); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), referringCus.length); //$NON-NLS-1$
 		Collection/*<ITypeConstraint>*/ result= new ArrayList();
 		for (int i= 0; i < referringCus.length; i++) {
 			result.addAll(getConstraints(referringCus[i]));
