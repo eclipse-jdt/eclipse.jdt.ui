@@ -15,6 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
@@ -25,16 +29,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 /**
  * Action to open a dialog to configure classpath containers. Added as a <code>objectContribution</code>
@@ -83,7 +83,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 			
 			IRunnableContext context= fPart.getSite().getWorkbenchWindow();
 			if (context == null) {
-				context= new BusyIndicatorRunnableContext();
+				context= PlatformUI.getWorkbench().getProgressService();
 			}
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {

@@ -14,27 +14,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
@@ -88,8 +88,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		Shell shell= getShell();
 		IJarExportRunnable op= jarPackages[0].createJarExportRunnable(jarPackages, shell);
 		try {
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			dialog.run(true, true, op);
+			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 		} catch (InvocationTargetException ex) {
 			if (ex.getTargetException() != null) {
 				ExceptionHandler.handle(ex, shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.title"), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.message")); //$NON-NLS-2$ //$NON-NLS-1$

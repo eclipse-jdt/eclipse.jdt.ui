@@ -137,7 +137,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 */
 	public void run(final IStructuredSelection selection) {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, createRunnable(selection));
+			PlatformUI.getWorkbench().getProgressService().run(true, true, createRunnable(selection));
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$

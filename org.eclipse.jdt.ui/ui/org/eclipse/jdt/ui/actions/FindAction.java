@@ -33,13 +33,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.search.ui.NewSearchUI;
@@ -307,7 +307,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 				}
 			}
 			try {
-				new ProgressMonitorDialog(shell).run(true, true, op);
+				PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 			} catch (InvocationTargetException ex) {
 				ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(InterruptedException e) {
