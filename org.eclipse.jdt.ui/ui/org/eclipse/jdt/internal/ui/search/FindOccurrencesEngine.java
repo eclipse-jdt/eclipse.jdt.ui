@@ -150,7 +150,9 @@ public abstract class FindOccurrencesEngine {
 				IMarker[] markers= fFinder.createMarkers(file, document);
 				for (int i = 0; i < markers.length; i++) {
 					IMarker marker= markers[i];
-					addSpecialAttributes(marker.getAttributes());
+					Map attributes= marker.getAttributes();
+					addSpecialAttributes(attributes);
+					marker.setAttributes(attributes);
 					addMatch(view, file, marker);
 				}
 				searchFinished(view);
