@@ -56,10 +56,6 @@ public class FindDeclarationsAction extends ElementSearchAction {
 		return IJavaSearchConstants.DECLARATIONS;
 	}
 
-	protected IJavaSearchScope getScope(IType type) throws JavaModelException {
-		return getScope();
-	}
-
 	protected boolean shouldUserBePrompted() {
 		return false;
 	}

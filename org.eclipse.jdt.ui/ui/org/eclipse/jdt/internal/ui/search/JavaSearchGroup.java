@@ -26,6 +26,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		fActions= new ElementSearchAction[] {
 			new FindReferencesAction(),
 			new FindDeclarationsAction(),
+			new FindHierarchyReferencesAction(),
 			new FindHierarchyDeclarationsAction(),
 			new FindImplementorsAction()
 		};

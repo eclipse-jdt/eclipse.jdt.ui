@@ -70,12 +70,12 @@ public abstract class ElementSearchAction extends JavaElementAction {
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(), getCollector());
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getCollector());
 	};
 
 	protected abstract int getLimitTo();
 
-	protected IJavaSearchScope getScope() {
+	protected IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
 		return SearchEngine.createWorkspaceScope();
 	}
 
