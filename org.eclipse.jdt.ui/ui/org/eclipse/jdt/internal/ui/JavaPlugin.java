@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 public class JavaPlugin extends AbstractUIPlugin {
 	
 	/** temporarily */
-	public static final boolean USE_WORKING_COPY_OWNERS= false;
+	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	/** temporarily */
 	public static final boolean USE_FILE_BUFFERS= true;
 	
