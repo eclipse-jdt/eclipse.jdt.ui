@@ -349,8 +349,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			}
 			
 			// recurse
-			if (diff instanceof IDiffContainer)
-				rewriteTree(differencer, diff);
+			rewriteTree(differencer, diff);
 		}
 		
 		// now we have to rebuild the diff tree according to the combined

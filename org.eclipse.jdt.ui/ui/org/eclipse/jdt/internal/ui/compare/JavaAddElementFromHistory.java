@@ -79,14 +79,11 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (input != null) {
 				cu= input.getCompilationUnit();
 			
-				if (input instanceof IParent) {
-					parent= (IParent)input;
+				if (input != null) {
+					parent= input;
 					input= null;
-				} else {
-					IJavaElement parentElement= input.getParent();
-					if (parentElement instanceof IParent)
-						parent= (IParent)parentElement;
 				}
+
 			} else {
 				if (selection instanceof IStructuredSelection) {
 					Object o= ((IStructuredSelection)selection).getFirstElement();
