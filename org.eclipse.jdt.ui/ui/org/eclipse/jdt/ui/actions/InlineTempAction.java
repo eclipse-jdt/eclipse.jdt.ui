@@ -26,6 +26,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
+		setEnabled(getCompilationUnit() != null);
 	}
 
 	/* (non-Javadoc)
@@ -48,7 +49,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 	}
 	
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(getCompilationUnit() != null);
 	}
 	
 	private ICompilationUnit getCompilationUnit(){

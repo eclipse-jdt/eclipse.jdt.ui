@@ -73,7 +73,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(TITLE);
 		fEditor= editor;
-		setEnabled(!fEditor.isEditorInputReadOnly());
+		setEnabled(checkEditor());
 	}
 
 	protected void run(ITextSelection selection) {
@@ -107,19 +107,18 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	/* package */ void editorStateChanged() {
-		setEnabled(!fEditor.isEditorInputReadOnly());
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly() && getCompilationUnit() != null);
 	}
 	
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0 && !fEditor.isEditorInputReadOnly());
+		setEnabled(selection.getLength() > 0 && checkEditor());
 	}
 	
 	private final ICompilationUnit getCompilationUnit() {
-		Object editorInput= SelectionConverter.getInput(fEditor);
-		if (editorInput instanceof ICompilationUnit)
-			return (ICompilationUnit)editorInput;
-		else
-			return null;
+		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}
 	
+	private boolean checkEditor() {
+		return fEditor != null && !fEditor.isEditorInputReadOnly() && getCompilationUnit() != null;
+	}
 }

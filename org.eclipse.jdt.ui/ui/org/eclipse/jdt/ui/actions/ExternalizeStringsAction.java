@@ -61,17 +61,21 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	public ExternalizeStringsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(checkEnabledEditor());
 	}
 	
 	/* package */ void editorStateChanged() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+		setEnabled(checkEnabledEditor());
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		// do nothing
+	}
+	
+	private boolean checkEnabledEditor() {
+		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
 	}
 
 	/* (non-Javadoc)

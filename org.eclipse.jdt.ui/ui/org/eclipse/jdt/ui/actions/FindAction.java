@@ -85,6 +85,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	FindAction(JavaEditor editor, String label, Class[] validTypes) {
 		this (editor.getEditorSite(), label, validTypes);
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
 	private boolean canOperateOn(IStructuredSelection sel) {
@@ -261,7 +262,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * Method declared on SelectionChangedAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
 	}
 
 	void run(IJavaElement element) {

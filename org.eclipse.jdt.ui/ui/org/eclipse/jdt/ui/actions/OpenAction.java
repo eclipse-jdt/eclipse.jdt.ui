@@ -86,13 +86,13 @@ public class OpenAction extends SelectionDispatchAction {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setText(ActionMessages.getString("OpenAction.declaration.label")); //$NON-NLS-1$
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)

@@ -42,6 +42,7 @@ public class MoveMembersAction extends SelectionDispatchAction{
 	public MoveMembersAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 		
 	/*
@@ -55,16 +56,8 @@ public class MoveMembersAction extends SelectionDispatchAction{
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	protected void selectionChanged(ITextSelection selection) {
-		//resolving is too expensive to do on selection changes in the editor - just enable here, we'll check it later
-		setEnabled(checkEnabled(selection));
 	}
 	
-	private boolean checkEnabled(ITextSelection selection) {
-		if (fEditor == null)
-			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */

@@ -79,6 +79,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	public AddUnimplementedConstructorsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(checkEnabledEditor());
 	}
 	
 	//---- Structured Viewer -----------------------------------------------------------
@@ -128,7 +129,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		// do nothing
 	}
 	
 	/* (non-Javadoc)
@@ -149,8 +149,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	}
 	
 	/* package */ void editorStateChanged() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+		setEnabled(checkEnabledEditor());
 	}
+	
+	private boolean checkEnabledEditor() {
+		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+	}	
 	
 	//---- Helpers -------------------------------------------------------------------
 	

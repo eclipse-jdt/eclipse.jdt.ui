@@ -30,6 +30,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	public RenameJavaElementAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	public void run(IStructuredSelection selection) {
@@ -91,14 +92,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			return false;
 		}	
 	}
-    //----------
-	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(canOperateOn(selection));
-	}
 	
-	private boolean canOperateOn(ITextSelection selection){
-		if (fEditor == null)
-			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
+	protected void selectionChanged(ITextSelection selection) {
+	}	
 }

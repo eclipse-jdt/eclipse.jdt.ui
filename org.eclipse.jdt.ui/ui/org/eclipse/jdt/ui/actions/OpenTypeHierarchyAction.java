@@ -66,13 +66,13 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	public OpenTypeHierarchyAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)

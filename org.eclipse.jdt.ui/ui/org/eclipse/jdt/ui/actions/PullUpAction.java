@@ -36,6 +36,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	public PullUpAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
 	public PullUpAction(IWorkbenchSite site) {
@@ -51,16 +52,8 @@ public class PullUpAction extends SelectionDispatchAction{
 	}
 
 	protected void selectionChanged(ITextSelection selection) {
-		//resolving is too expensive to do on selection changes in the editor - just enable here, we'll check it later
-		setEnabled(checkEnabled(selection));
 	}
 	
-	private boolean checkEnabled(ITextSelection selection) {
-		if (fEditor == null)
-			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */

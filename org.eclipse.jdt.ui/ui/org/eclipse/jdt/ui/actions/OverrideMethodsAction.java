@@ -83,6 +83,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	public OverrideMethodsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(checkEnabledEditor());
 	}
 	
 	//---- Structured Viewer -----------------------------------------------------------
@@ -127,16 +128,19 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	//---- Java Editior --------------------------------------------------------------
 	
 	/* package */ void editorStateChanged() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+		setEnabled(checkEnabledEditor());
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		// do nothing
 	}
 	
+	private boolean checkEnabledEditor() {
+		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */

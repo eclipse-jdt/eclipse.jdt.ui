@@ -29,6 +29,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable");
+		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}
 	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
@@ -43,7 +44,6 @@ public class RenameTempAction extends SelectionDispatchAction {
 	}
 	
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(getCompilationUnit() != null);
 	}
 	
 	public boolean canRun(ITextSelection selection) {

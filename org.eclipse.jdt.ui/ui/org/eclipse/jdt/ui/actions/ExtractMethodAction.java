@@ -27,6 +27,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
@@ -54,8 +55,8 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {
-		if (selection.getLength() == 0 || fEditor == null)
+		if (selection.getLength() == 0)
 			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 }

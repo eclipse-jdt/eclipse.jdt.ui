@@ -66,19 +66,13 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public SelfEncapsulateFieldAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
-	}
-
-	private boolean checkEnabled(ITextSelection seleciton) {
-		if (fEditor == null)
-			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 
 	/* (non-Javadoc)

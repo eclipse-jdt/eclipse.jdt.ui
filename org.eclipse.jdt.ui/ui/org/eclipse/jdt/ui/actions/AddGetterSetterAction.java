@@ -111,6 +111,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(checkEnabledEditor());
 	}
 	
 	//---- Structured Viewer -----------------------------------------------------------
@@ -321,7 +322,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
      * Method declared on SelectionDispatchAction
      */		
     protected void selectionChanged(ITextSelection selection) {
-    	setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
     }
 	
 	/* (non-Javadoc)
@@ -358,8 +358,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	/* package */ void editorStateChanged() {
-		setEnabled(!fEditor.isEditorInputReadOnly());
+		setEnabled(checkEnabledEditor());
 	}
+	
+	private boolean checkEnabledEditor() {
+		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+	}	
 	
 	private boolean checkCu(IMember member) throws JavaModelException{
 		if (JavaModelUtil.isEditable(member.getCompilationUnit())) 

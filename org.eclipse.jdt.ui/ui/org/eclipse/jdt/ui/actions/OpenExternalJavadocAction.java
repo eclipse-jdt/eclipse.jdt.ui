@@ -81,6 +81,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
@@ -94,7 +95,6 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)

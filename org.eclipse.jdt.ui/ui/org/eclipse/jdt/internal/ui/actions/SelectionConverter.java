@@ -89,6 +89,13 @@ public class SelectionConverter {
 		}
 		return EMPTY_RESULT;
 	}
+
+	public static boolean canOperateOn(JavaEditor editor) {
+		if (editor == null)
+			return false;
+		return getInput(editor) != null;
+		
+	}
 	
 	/**
 	 * Converts the text selection provided by the given editor into an array of
@@ -170,7 +177,7 @@ public class SelectionConverter {
 	}
 	
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
-			return getElementAtOffset(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+		return getElementAtOffset(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
 	
 	public static IType getTypeAtOffset(JavaEditor editor) throws JavaModelException {
@@ -185,6 +192,8 @@ public class SelectionConverter {
 	}
 	
 	public static IJavaElement getInput(JavaEditor editor) {
+		if (editor == null)
+			return null;
 		IEditorInput input= editor.getEditorInput();
 		if (input instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)input).getClassFile();

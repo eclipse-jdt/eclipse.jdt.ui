@@ -78,13 +78,13 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	public ShowInNavigatorViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)

@@ -29,6 +29,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ExtractTempAction.label")); //$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
@@ -57,9 +58,9 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {
-		if (selection.getLength() == 0 || fEditor == null)
+		if (selection.getLength() == 0)
 			return false;
-		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	
 }
