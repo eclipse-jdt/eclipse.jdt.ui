@@ -143,7 +143,7 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			}
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		}
-		String placeHolder= StubUtility.getMethodBodyContent(false, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
+		String placeHolder= StubUtility.getMethodBodyContent(true, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
