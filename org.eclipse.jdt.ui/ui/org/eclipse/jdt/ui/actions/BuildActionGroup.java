@@ -17,6 +17,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -50,12 +51,10 @@ public class BuildActionGroup extends ActionGroup{
 		Shell shell= part.getSite().getShell();
 		ISelectionProvider provider= part.getSite().getSelectionProvider();
 		
-		fBuildAction= new BuildAction(shell,
-				IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
 		
-		fFullBuildAction= new BuildAction(shell,
-			IncrementalProjectBuilder.FULL_BUILD);
+		fFullBuildAction= new BuildAction(shell, IncrementalProjectBuilder.FULL_BUILD);
 		fFullBuildAction.setText(ActionMessages.getString("RebuildAction.label")); //$NON-NLS-1$
 		
 		fRefreshAction= new RefreshAction(shell);
@@ -88,6 +87,9 @@ public class BuildActionGroup extends ActionGroup{
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
+		if (!ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+			appendToGroup(menu, fBuildAction);
+		}
 		appendToGroup(menu, fFullBuildAction);
 		appendToGroup(menu, fRefreshAction);
 	}
