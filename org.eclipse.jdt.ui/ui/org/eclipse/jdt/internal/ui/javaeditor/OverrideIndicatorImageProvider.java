@@ -31,8 +31,8 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 	/*
 	 * @see org.eclipse.ui.texteditor.IAnnotationImageProvider#getManagedImage(org.eclipse.jface.text.source.Annotation)
 	 */
-	private static final String OVERRIDE_IMG_DESC_ID= "JavaPluginImages.DESC_OVR_OVERRIDES"; //$NON-NLS-1$
-	private static final String OVERWRITE_IMG_DESC_ID= "JavaPluginImages.DESC_OVR_IMPLEMENTS"; //$NON-NLS-1$
+	private static final String OVERRIDE_IMG_DESC_ID= "JavaPluginImages.DESC_OBJ_OVERRIDES"; //$NON-NLS-1$
+	private static final String OVERWRITE_IMG_DESC_ID= "JavaPluginImages.DESC_OBJ_IMPLEMENTS"; //$NON-NLS-1$
 	public Image getManagedImage(Annotation annotation) {
 		return null;
 	}
@@ -55,9 +55,9 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 	 */
 	public ImageDescriptor getImageDescriptor(String imageDescritporId) {
 		if (OVERWRITE_IMG_DESC_ID.equals(imageDescritporId))
-			return JavaPluginImages.DESC_OVR_IMPLEMENTS;
+			return JavaPluginImages.DESC_OBJ_IMPLEMENTS;
 		else if (OVERRIDE_IMG_DESC_ID.equals(imageDescritporId))
-			return JavaPluginImages.DESC_OVR_OVERRIDES;
+			return JavaPluginImages.DESC_OBJ_OVERRIDES;
 
 		return null;
 	}
