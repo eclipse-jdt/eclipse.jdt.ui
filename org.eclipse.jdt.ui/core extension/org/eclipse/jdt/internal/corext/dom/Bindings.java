@@ -1252,31 +1252,61 @@ public class Bindings {
 		return true;
 	}
 
+	public static boolean isOverriddenMethod(IMethodBinding[] overridden, IMethodBinding overridable) {
+		for (int index= 0; index < overridden.length; index++) {
+			if (isOverriddenMethod(overridden[index], overridable))
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean isOverriddenConstructor(IMethodBinding[] overridden, IMethodBinding overridable) {
+		for (int index= 0; index < overridden.length; index++) {
+			if (isOverriddenConstructor(overridden[index], overridable))
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean isOverriddenConstructor(IMethodBinding overridden, IMethodBinding overridable) {
+
+		if (!overridden.isConstructor() || !overridable.isConstructor())
+			return false;
+		
+		if (overridden.isDefaultConstructor())
+			return false;
+		
+		return isOverriddenSignature(overridden, overridable);
+	}
+	
 	public static boolean isOverriddenMethod(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))
 			return false;
 
+		return isOverriddenSignature(overridden, overridable);
+	}
+
+	private static boolean isOverriddenSignature(IMethodBinding overridden, IMethodBinding overridable) {
+		
 		if (overridden.getParameterTypes().length != overridable.getParameterTypes().length)
 			return false;
-
+		
 		ITypeBinding overriddenReturn= overridden.getReturnType();
 		ITypeBinding overridableReturn= overridable.getReturnType();
 		if (overriddenReturn == null || overridableReturn == null)
 			return false;
-
+		
 		if (!overriddenReturn.getGenericType().isSubTypeCompatible(overridableReturn.getGenericType()))
 			return false;
-
+		
 		ITypeBinding[] overriddenTypes= overridden.getParameterTypes();
 		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
 		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
-
 		for (int index= 0; index < overriddenTypes.length; index++) {
 			if (!overridableTypes[index].getGenericType().isSubTypeCompatible(overriddenTypes[index].getGenericType()))
 				return false;
 		}
-
 		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();
 		ITypeBinding[] overridableExceptions= overridable.getExceptionTypes();
 		boolean checked= false;
