@@ -224,6 +224,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * Method declared on SelectionChangedAction.
 	 */
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		try {
 			String title= SearchMessages.getString("SearchElementSelectionDialog.title"); //$NON-NLS-1$
 			String message= SearchMessages.getString("SearchElementSelectionDialog.message"); //$NON-NLS-1$

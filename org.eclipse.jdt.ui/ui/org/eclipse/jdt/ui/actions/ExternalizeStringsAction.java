@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -108,6 +109,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}	
 	
 	private void run(ICompilationUnit unit) {
+		if (!ActionUtil.isProcessable(getShell(), unit))
+			return;
 		try {
 			openExternalizeStringsWizard(unit);
 		} catch(JavaModelException e) {

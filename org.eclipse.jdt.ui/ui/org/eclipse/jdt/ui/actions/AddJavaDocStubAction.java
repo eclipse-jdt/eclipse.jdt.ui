@@ -176,6 +176,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (!ActionUtil.isProcessable(getShell(), element))
+				return;
 			int type= element != null ? element.getElementType() : -1;
 			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE) {
 		 		element= SelectionConverter.getTypeAtOffset(fEditor);

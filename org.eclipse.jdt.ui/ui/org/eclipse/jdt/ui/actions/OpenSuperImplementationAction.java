@@ -96,6 +96,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		IJavaElement element= elementAtOffset();
 		if (element == null || !(element instanceof IMethod)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OpenSuperImplementationAction.not_applicable")); //$NON-NLS-1$
