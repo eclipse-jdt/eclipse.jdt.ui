@@ -285,11 +285,7 @@ public class PackageExplorerPart extends ViewPart
 		initFrameActions();
 		initKeyListener();
 			
-		fSelectionListener= new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				handleSelectionChanged(event);
-			}
-		};
+
 		fViewer.addPostSelectionChangedListener(fSelectionListener);
 		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -1131,6 +1127,11 @@ public class PackageExplorerPart extends ViewPart
 	
 	public PackageExplorerPart() { 
 		initLinkingEnabled();
+		fSelectionListener= new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				handleSelectionChanged(event);
+			}
+		};
 	}
 
 	public boolean show(ShowInContext context) {
