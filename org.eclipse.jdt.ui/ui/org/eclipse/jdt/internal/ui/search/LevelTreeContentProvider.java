@@ -11,8 +11,10 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -102,30 +104,29 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			Object[] elements= result.getElements();
 			for (int i= 0; i < elements.length; i++) {
 				if (getPage().getDisplayedMatchCount(elements[i]) > 0) {
-					insert(elements[i], false);
+					insert(null, null, elements[i]);
 				}
 			}
 		}
 	}
 
-	protected void insert(Object child, boolean refreshViewer) {
+	protected void insert(Map toAdd, Set toUpdate, Object child) {
 		Object parent= getParent(child);
-		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 		while (parent != null) {
 			if (insertChild(parent, child)) {
-				if (refreshViewer)
-					viewer.add(parent, child);
+				if (toAdd != null)
+					insertInto(parent, child, toAdd);
 			} else {
-				if (refreshViewer)
-					viewer.refresh(parent);
+				if (toUpdate != null)
+					toUpdate.add(parent);
 				return;
 			}
 			child= parent;
 			parent= getParent(child);
 		}
 		if (insertChild(fResult, child)) {
-			if (refreshViewer)
-				viewer.add(fResult, child);
+			if (toAdd != null)
+				insertInto(fResult, child, toAdd);
 		}
 	}
 
@@ -137,45 +138,57 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	 * @return
 	 */
 	private boolean insertChild(Object parent, Object child) {
-		Set children= (Set) fChildrenMap.get(parent);
+		return insertInto(parent, child, fChildrenMap);
+	}
+
+	private boolean insertInto(Object parent, Object child, Map map) {
+		Set children= (Set) map.get(parent);
 		if (children == null) {
 			children= new HashSet();
-			fChildrenMap.put(parent, children);
+			map.put(parent, children);
 		}
 		return children.add(child);
 	}
 
-	protected void remove(Object element, boolean refreshViewer) {
+	protected void remove(Set toRemove, Set toUpdate, Object element) {
 		// precondition here:  fResult.getMatchCount(child) <= 0
 	
-		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 		if (hasChildren(element)) {
-			if (refreshViewer)
-				viewer.refresh(element);
+			if (toUpdate != null)
+				toUpdate.add(element);
 		} else {
 			if (getPage().getDisplayedMatchCount(element) == 0) {
 				fChildrenMap.remove(element);
 				Object parent= getParent(element);
 				if (parent != null) {
-					removeFromSiblings(element, parent);
-					remove(parent, refreshViewer);
+					if (removeFromSiblings(element, parent)) {
+						remove(toRemove, toUpdate, parent);
+					}
 				} else {
-					removeFromSiblings(element, fResult);
-					if (refreshViewer)
-						viewer.refresh();
+					if (removeFromSiblings(element, fResult)) {
+						if (toRemove != null)
+							toRemove.add(element);
+					}
 				}
 			} else {
-				if (refreshViewer) {
-					viewer.refresh(element);
+				if (toUpdate != null) {
+					toUpdate.add(element);
 				}
 			}
 		}
 	}
 
-	private void removeFromSiblings(Object element, Object parent) {
+	/**
+	 * @param element
+	 * @param parent
+	 * @return returns true if it really was a remove (i.e. element was a child of parent).
+	 */
+	private boolean removeFromSiblings(Object element, Object parent) {
 		Set siblings= (Set) fChildrenMap.get(parent);
 		if (siblings != null) {
-			siblings.remove(element);
+			return siblings.remove(element);
+		} else {
+			return false;
 		}
 	}
 
@@ -191,16 +204,31 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 
 	public synchronized void elementsChanged(Object[] updatedElements) {
+		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 		if (fResult == null)
 			return;
+		Set toRemove= new HashSet();
+		Set toUpdate= new HashSet();
+		Map toAdd= new HashMap();
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0)
-				insert(updatedElements[i], true);
+				insert(toAdd, toUpdate, updatedElements[i]);
 			else
-				remove(updatedElements[i], true);
+				remove(toRemove, toUpdate, updatedElements[i]);
 		}
+		
+		viewer.remove(toRemove.toArray());
+		for (Iterator iter= toAdd.keySet().iterator(); iter.hasNext();) {
+			Object parent= iter.next();
+			HashSet children= (HashSet) toAdd.get(parent);
+			viewer.add(parent, children.toArray());
+		}
+		for (Iterator elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {
+			viewer.refresh(elementsToUpdate.next());
+		}
+		
 	}
-
+	
 	public void clear() {
 		initialize(fResult);
 		getPage().getViewer().refresh();
