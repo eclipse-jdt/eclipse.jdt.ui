@@ -113,6 +113,22 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		int kind= delta.getKind();
 		final IJavaElement element= delta.getElement();
 
+		if (isClassPathChange(delta)) {
+			Object input= fViewer.getInput();
+			if (input != null) {
+				if (fInputIsProject && input.equals(element.getJavaProject())) {
+					postRefresh(input);
+					return;
+				} else if (!fInputIsProject && input.equals(element)) {
+					if (element.exists())
+						postRefresh(input);
+					else
+						postRemove(element);
+					return;
+				}
+			}
+		}
+		
 		if (element instanceof IPackageFragment) {
 			final IPackageFragment frag= (IPackageFragment) element;
 

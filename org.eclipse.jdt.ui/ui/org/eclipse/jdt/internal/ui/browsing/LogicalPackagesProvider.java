@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -53,11 +54,13 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	
 	/**
 	 * Adds the given fragments to the internal map.
-	 * Existing fragments will be replaced by the new ones. 
+	 * Existing fragments will be replaced by the new ones.
+	 *  
+	 * @param packageFragments the package fragments to add
 	 */
-	protected void addFragmentsToMap(IPackageFragment[] children) {
-		for (int i= 0; i < children.length; i++) {
-			IPackageFragment fragment= children[i];
+	protected void addFragmentsToMap(IPackageFragment[] packageFragments) {
+		for (int i= 0; i < packageFragments.length; i++) {
+			IPackageFragment fragment= packageFragments[i];
 			String key= getKey(fragment);
 			fMapToPackageFragments.put(key, fragment);
 		}	
@@ -86,16 +89,19 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	 * Combines packages with same names into a logical package which will
 	 * be added to the resulting array. If a package is not yet in this content
 	 * provider then the package fragment is added to the resulting array.
+	 * 
+	 * @param packageFragments the package fragments to combine
+	 * @return an array with combined (logical) packages and package fragments
 	 */
-	protected Object[] combineSamePackagesIntoLogialPackages(IPackageFragment[] children) {
+	protected Object[] combineSamePackagesIntoLogialPackages(IPackageFragment[] packageFragments) {
 
 		if (!fCompoundState)
-			return children;
+			return packageFragments;
 
 		List newChildren= new ArrayList();
 
-		for (int i= 0; i < children.length; i++) {
-			IPackageFragment fragment=  children[i];
+		for (int i= 0; i < packageFragments.length; i++) {
+			IPackageFragment fragment=  packageFragments[i];
 			
 			if (fragment == null)
 				continue;
@@ -179,6 +185,22 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	}
 	
 	abstract protected void processDelta(IJavaElementDelta delta) throws JavaModelException;
+
+	/*
+	 * @since 3.0
+	 */
+	protected boolean isClassPathChange(IJavaElementDelta delta) {
+		
+		// need to test the flags only for package fragment roots
+		if (delta.getElement().getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			return false;
+		
+		int flags= delta.getFlags();
+		return (delta.getKind() == IJavaElementDelta.CHANGED && 
+			((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0) ||
+			 ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
+			 ((flags & IJavaElementDelta.F_REORDER) != 0));
+	}
 
 	/*
 	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
