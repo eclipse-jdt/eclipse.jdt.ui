@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -535,7 +536,7 @@ public class SourceAttachmentBlock {
 		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
-		ViewerFilter filter= new ArchiveFileFilter(null, false);
+		ViewerFilter filter= new ArchiveFileFilter((List) null, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

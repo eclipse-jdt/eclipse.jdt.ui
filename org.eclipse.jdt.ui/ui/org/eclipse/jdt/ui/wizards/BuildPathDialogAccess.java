@@ -11,20 +11,42 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.net.URL;
+import java.util.ArrayList;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.MultipleFolderSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
@@ -35,10 +57,11 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
  * <ul>
  *  <li> User interface for the configuration of source attachments</li>
  *  <li> User interface for the configuration of Javadoc location</li>
+ *  <li> User interface for the configuration and selection of classpath variable entries</li>
+ *  <li> User interface for the configuration and selection of classpath container entries</li>
  * </ul>
  * <p>
- * This class provides static methods; it is not intended to be
- * instantiated or subclassed by clients.
+ * This class is not intended to be instantiated or subclassed by clients.
  * </p>
  * @since 3.0
  */
@@ -192,4 +215,236 @@ public final class BuildPathDialogAccess {
 		return null;
 	}
 	
+	
+	/**
+	 * Shows the UI to configure a JAR or ZIP archive located in the workspace.
+	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param initialEntry The path of the initial archive entry 
+	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
+	 * selected again.
+	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath configureJAREntry(Shell shell, IJavaProject project, IPath initialEntry, IPath[] usedEntries) {
+		Assert.isNotNull(initialEntry);
+		
+		Class[] acceptedClasses= new Class[] { IFile.class };
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+		
+		ArrayList usedJars= new ArrayList(usedEntries.length);
+		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		for (int i= 0; i < usedEntries.length; i++) {
+			IPath curr= usedEntries[i];
+			if (!curr.equals(initialEntry)) {
+				IResource resource= root.findMember(usedEntries[i]);
+				if (resource instanceof IFile) {
+					usedJars.add(resource);
+				}
+			}
+		}
+		
+		IResource existing= root.findMember(initialEntry);
+		
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		dialog.setValidator(validator);
+		dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.description")); //$NON-NLS-1$
+		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
+		dialog.setInput(root);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setInitialSelection(existing);
+
+		if (dialog.open() == Window.OK) {
+			IResource element= (IResource) dialog.getFirstResult();
+			return element.getFullPath();
+		}
+		return null;
+	}
+	
+	/**
+	 * Shows the UI to select new JAR or ZIP archive entries located in the workspace.
+	 * The dialog returns the selected entries or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
+	 * selected again.
+	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath[] chooseJAREntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+		Class[] acceptedClasses= new Class[] { IFile.class };
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		ArrayList usedJars= new ArrayList(usedEntries.length);
+		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		for (int i= 0; i < usedEntries.length; i++) {
+			IResource resource= root.findMember(usedEntries[i]);
+			if (resource instanceof IFile) {
+				usedJars.add(resource);
+			}
+		}
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		dialog.setValidator(validator);
+		dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.description")); //$NON-NLS-1$
+		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
+		dialog.setInput(root);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setInitialSelection(project.getProject());
+
+		if (dialog.open() == Window.OK) {
+			Object[] elements= dialog.getResult();
+			IPath[] res= new IPath[elements.length];
+			for (int i= 0; i < res.length; i++) {
+				IResource elem= (IResource)elements[i];
+				res[i]= elem.getFullPath();
+			}
+			return res;
+		}
+		return null;
+	}
+	
+	/**
+	 * Shows the UI to configure an external JAR or ZIP archive.
+	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param initialEntry The path of the initial archive entry 
+	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath configureExternalJAREntry(Shell shell, IPath initialEntry) {
+		Assert.isNotNull(initialEntry);
+		
+		String lastUsedPath= initialEntry.removeLastSegments(1).toOSString();
+		
+		FileDialog dialog= new FileDialog(shell, SWT.SINGLE);
+		dialog.setText(NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.edit.title")); //$NON-NLS-1$
+		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
+		dialog.setFilterPath(lastUsedPath);
+		dialog.setFileName(initialEntry.lastSegment());
+		
+		String res= dialog.open();
+		if (res == null) {
+			return null;
+		}
+		String fileNames= dialog.getFileName();	
+		IPath filterPath= new Path(dialog.getFilterPath());
+		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
+
+		return filterPath.append(fileNames).makeAbsolute();	
+	}
+	
+	/**
+	 * Shows the UI to select new external JAR or ZIP archive entries.
+	 * The dialog returns the selected entries or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath[] chooseExternalJAREntries(Shell shell) {
+		String lastUsedPath= JavaPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
+		if (lastUsedPath == null) {
+			lastUsedPath= ""; //$NON-NLS-1$
+		}
+		FileDialog dialog= new FileDialog(shell, SWT.MULTI);
+		dialog.setText(NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.new.title")); //$NON-NLS-1$
+		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
+		dialog.setFilterPath(lastUsedPath);
+		
+		String res= dialog.open();
+		if (res == null) {
+			return null;
+		}
+		String[] fileNames= dialog.getFileNames();
+		int nChosen= fileNames.length;
+			
+		IPath filterPath= new Path(dialog.getFilterPath());
+		IPath[] elems= new IPath[nChosen];
+		for (int i= 0; i < nChosen; i++) {
+			elems[i]= filterPath.append(fileNames[i]).makeAbsolute();	
+		}
+		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
+		
+		return elems;
+	}
+		
+	/**
+	 * Shows the UI to select new class folders.
+	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
+	 * selected again.
+	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath[] chooseClassFolderEntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+		String title= NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.title"); //$NON-NLS-1$
+		String message= NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.description"); //$NON-NLS-1$
+		return internalChooseFolderEntry(shell, project, usedEntries, title, message);
+	}
+	
+	/**
+	 * Shows the UI to select new source folders.
+	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
+	 * selected again.
+	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IPath[] chooseSourceFolderEntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$
+		String message= NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$
+		return internalChooseFolderEntry(shell, project, usedEntries, title, message);
+	}
+	
+		
+	private static IPath[] internalChooseFolderEntry(Shell shell, IJavaProject project, IPath[] usedEntries, String title, String message) {	
+		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
+
+		ArrayList usedContainers= new ArrayList(usedEntries.length);
+		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		for (int i= 0; i < usedEntries.length; i++) {
+			IResource resource= root.findMember(usedEntries[i]);
+			if (resource instanceof IContainer) {
+				usedContainers.add(resource);
+			}
+		}
+		
+		Object[] used= usedContainers.toArray();
+		
+		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		dialog.setExisting(used);
+		dialog.setTitle(title); 
+		dialog.setMessage(message); 
+		dialog.addFilter(new TypedViewerFilter(acceptedClasses, used));
+		dialog.setInput(root);
+		dialog.setInitialFocus(project.getProject());
+		
+		if (dialog.open() == Window.OK) {
+			Object[] elements= dialog.getResult();
+			IPath[] res= new IPath[elements.length];
+			for (int i= 0; i < res.length; i++) {
+				IResource elem= (IResource) elements[i];
+				res[i]= elem.getFullPath();
+			}
+			return res;
+		}
+		return null;		
+	}
 }

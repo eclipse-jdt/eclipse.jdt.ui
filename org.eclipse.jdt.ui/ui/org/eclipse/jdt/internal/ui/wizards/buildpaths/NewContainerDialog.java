@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -41,10 +40,10 @@ public class NewContainerDialog extends StatusDialog {
 	private StatusInfo fContainerFieldStatus;
 	
 	private IFolder fFolder;
-	private IContainer[] fExistingFolders;
+	private IPath[] fExistingFolders;
 	private IProject fCurrProject;
 		
-	public NewContainerDialog(Shell parent, String title, IProject project, IContainer[] existingFolders, CPListElement entryToEdit) {
+	public NewContainerDialog(Shell parent, String title, IProject project, IPath[] existingFolders, CPListElement entryToEdit) {
 		super(parent);
 		setTitle(title);
 		
@@ -136,7 +135,7 @@ public class NewContainerDialog extends StatusDialog {
 	
 	private boolean isFolderExisting(IFolder folder) {
 		for (int i= 0; i < fExistingFolders.length; i++) {
-			if (folder.equals(fExistingFolders[i])) {
+			if (folder.getFullPath().equals(fExistingFolders[i])) {
 				return true;
 			}
 		}

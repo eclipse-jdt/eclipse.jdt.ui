@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ArchiveFileFilter extends ViewerFilter {
 
+	public static final String[] FILTER_EXTENSIONS= new String[] {"*.jar;*.zip"}; //$NON-NLS-1$
+
 	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private List fExcludes;
@@ -39,7 +41,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 	/**
 	 * @param excludedFiles Excluded files will not pass the filter.
 	 * <code>null</code> is allowed if no files should be excluded. 
-	 * @param recusive Folders are only shown if, searched recursivly, contain
+	 * @param recusive Folders are only shown if, searched recursively, contain
 	 * an archive
 	 */
 	public ArchiveFileFilter(IFile[] excludedFiles, boolean recusive) {
@@ -48,6 +50,11 @@ public class ArchiveFileFilter extends ViewerFilter {
 		} else {
 			fExcludes= null;
 		}
+		fRecursive= recusive;
+	}
+	
+	public ArchiveFileFilter(List excludedFiles, boolean recusive) {
+		fExcludes= excludedFiles;
 		fRecursive= recusive;
 	}
 	
