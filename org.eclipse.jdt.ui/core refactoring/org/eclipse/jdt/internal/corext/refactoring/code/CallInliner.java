@@ -67,8 +67,11 @@ public class CallInliner {
 	private TextBuffer fBuffer;
 	private SourceProvider fSourceProvider;
 	
+	private BodyDeclaration fBodyDeclaration;
+	private CodeScopeBuilder.Scope fRootScope;
+	private int fNumberOfLocals;
+	
 	private MethodInvocation fInvocation;
-	private List fUsedNames;
 	private ASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
@@ -76,12 +79,13 @@ public class CallInliner {
 	private ASTNode fTargetNode;
 	private FlowContext fFlowContext;
 	private FlowInfo fFlowInfo;
+	private CodeScopeBuilder.Scope fInvocationScope;
 
-	public CallInliner(ICompilationUnit unit, SourceProvider sourceContext, CodeGenerationSettings settings) throws CoreException {
+	public CallInliner(ICompilationUnit unit, SourceProvider provider, CodeGenerationSettings settings) throws CoreException {
 		super();
 		fCUnit= unit;
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
-		fSourceProvider= sourceContext;
+		fSourceProvider= provider;
 		fImportEdit= new ImportEdit(fCUnit, settings);
 	}
 
@@ -91,6 +95,22 @@ public class CallInliner {
 	
 	public ImportEdit getImportEdit() {
 		return fImportEdit;
+	}
+	
+	public RefactoringStatus initialize(BodyDeclaration declaration) {
+		fBodyDeclaration= declaration;
+		RefactoringStatus result= new RefactoringStatus();
+		fRootScope= CodeScopeBuilder.perform(declaration, fSourceProvider.getDeclaration().resolveBinding());
+		fNumberOfLocals= 0;
+		switch (declaration.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				fNumberOfLocals= LocalVariableIndex.perform((MethodDeclaration)declaration);
+				break;
+			case ASTNode.INITIALIZER:
+				fNumberOfLocals= LocalVariableIndex.perform((Initializer)declaration);
+				break;
+		}
+		return result;
 	}
 	
 	public RefactoringStatus initialize(MethodInvocation invocation) {
@@ -103,20 +123,45 @@ public class CallInliner {
 				JavaSourceContext.create(fCUnit, exp));
 			return result;
 		}
-		initializeState(fSourceProvider.getNumberOfStatements());
+		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
+		ASTNode parent= fInvocation.getParent();
+		int nodeType1= parent.getNodeType();
+		if (nodeType1 == ASTNode.EXPRESSION_STATEMENT || nodeType1 == ASTNode.RETURN_STATEMENT) {
+			fTargetNode= parent;
+		} else {
+			fTargetNode= fInvocation;
+		}
 		int nodeType= fTargetNode.getNodeType();
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
 			if (fSourceProvider.isExecutionFlowInterrupted()) {
 				result.addFatalError(
 					"Can't inline call. Return statement in method declaration interrupts execution flow.", 
-					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()));	
+					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()));
+				return result;	
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
 			if (!(isValidParent(fTargetNode.getParent()) || fSourceProvider.getNumberOfStatements() == 1)) {
 				result.addFatalError(
 					"Can only inline simple functions (consisting of a return statement) or functions used in an assignment.",
 					JavaSourceContext.create(fCUnit, fInvocation));
+				return result;
 			}
+		}
+		fInvocationScope= fRootScope.findScope(fTargetNode.getStartPosition(), fTargetNode.getLength());
+		fInvocationScope.setInvovationOffset(fTargetNode.getStartPosition());
+		fFlowContext= new FlowContext(0, fNumberOfLocals + 1);
+		fFlowContext.setConsiderAccessMode(true);
+		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
+		Selection selection= Selection.createFromStartLength(fInvocation.getStartPosition(), fInvocation.getLength());
+		switch (fBodyDeclaration.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((MethodDeclaration)fBodyDeclaration);
+				break;
+			case ASTNode.INITIALIZER:
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((Initializer)fBodyDeclaration);
+				break;
+			default:
+				Assert.isTrue(false, "Should not happen");			
 		}
 		return result;
 	}
@@ -137,7 +182,7 @@ public class CallInliner {
 	
 	public TextEdit perform() throws CoreException {
 		int callType= fTargetNode.getNodeType();
-		CallContext context= new CallContext(fUsedNames, callType, fImportEdit);
+		CallContext context= new CallContext(fInvocationScope, callType, fImportEdit);
 		
 		List locals= new ArrayList(3);
 		
@@ -165,7 +210,7 @@ public class CallInliner {
 			if ((ASTNodes.isLiteral(expression) && parameter.isReadOnly()) || canInline(expression)) {
 				realArguments[i]= getContent(expression);
 			} else {
-				String name= proposeName(parameter.getName());
+				String name= fInvocationScope.createName(parameter.getName());
 				realArguments[i]= name;
 				locals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name, 
@@ -192,14 +237,14 @@ public class CallInliner {
 				// local.
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
-					proposeName("r"), 
+					fInvocationScope.createName("r"), 
 					(Expression)fRewriter.createCopy(receiver)));
 				return;
 			case 1:
 				context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
 				return;
 			default:
-				String local= proposeName("r");
+				String local= fInvocationScope.createName("r");
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
@@ -240,7 +285,7 @@ public class CallInliner {
 				if (fSourceProvider.mustEvaluateReturnValue()) {
 					node= createLocalDeclaration(
 						fSourceProvider.getReturnType(), 
-						proposeName(fSourceProvider.getMethodName()), 
+						fInvocationScope.createName(fSourceProvider.getMethodName()), 
 						(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
 				} else {
 					node= null;
@@ -300,45 +345,6 @@ public class CallInliner {
 		return decl;
 	}
 
-	private  void initializeState(int sourceStatements) {
-		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
-		fUsedNames= collectUsedNames();
-		ASTNode parent= fInvocation.getParent();
-		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.EXPRESSION_STATEMENT || nodeType == ASTNode.RETURN_STATEMENT) {
-			fTargetNode= parent;
-		} else {
-			fTargetNode= fInvocation;
-		}
-		
-		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
-		int numberOfLocals= 0;
-		switch (decl.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-				numberOfLocals= LocalVariableIndex.perform((MethodDeclaration)decl);
-				break;
-			case ASTNode.INITIALIZER:
-				numberOfLocals= LocalVariableIndex.perform((Initializer)decl);
-				break;
-			default:
-				Assert.isTrue(false, "Should not happen");			
-		}
-		fFlowContext= new FlowContext(0, numberOfLocals + 1);
-		fFlowContext.setConsiderAccessMode(true);
-		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
-		Selection selection= Selection.createFromStartLength(fInvocation.getStartPosition(), fInvocation.getLength());
-		switch (decl.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((MethodDeclaration)decl);
-				break;
-			case ASTNode.INITIALIZER:
-				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((Initializer)decl);
-				break;
-			default:
-				Assert.isTrue(false, "Should not happen");			
-		}
-	}
-
 	private boolean canInline(Expression expression) {
 		if (expression instanceof Name) {
 			IBinding binding= ((Name)expression).resolveBinding();
@@ -357,15 +363,6 @@ public class CallInliner {
 			return canInline(((SuperFieldAccess)expression).getQualifier());
 		}
 		return false;
-	}
-	
-	private String proposeName(String defaultName) {
-		String result= defaultName;
-		int i= 1;
-		while (fUsedNames.contains(result)) {
-			result= result + i++;
-		}
-		return result;
 	}
 	
 	private void initializeInsertionPoint(int nos) {
@@ -428,15 +425,6 @@ public class CallInliner {
 
 	private static IFile getFile(ICompilationUnit cu) throws CoreException {
 		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
-	}
-	
-	private List collectUsedNames() {
-		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
-		NameCollector collector= new NameCollector(fInvocation);
-		decl.accept(collector);
-		List result= collector.getNames();
-		result.remove(fInvocation.getName().getIdentifier());
-		return result;
 	}
 	
 	private boolean isControlStatement(ASTNode node) {

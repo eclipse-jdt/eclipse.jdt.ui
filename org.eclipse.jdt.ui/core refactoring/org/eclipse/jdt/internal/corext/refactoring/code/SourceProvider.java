@@ -161,7 +161,7 @@ public class SourceProvider {
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
 		replaceParameterWithExpression(context.arguments);
 		updateImplicitReceivers(context);
-		makeNamesUnique(context.usedCallerNames);
+		makeNamesUnique(context.scope);
 		
 		List ranges= null;
 		if (hasReturnValue()) {
@@ -221,12 +221,12 @@ public class SourceProvider {
 		}
 	}
 
-	private void makeNamesUnique(List usedCallerNames) {
+	private void makeNamesUnique(CodeScopeBuilder.Scope scope) {
 		Collection usedCalleeNames= fAnalyzer.getUsedNames();
 		for (Iterator iter= usedCalleeNames.iterator(); iter.hasNext();) {
 			SourceAnalyzer.NameData nd= (SourceAnalyzer.NameData) iter.next();
-			if (usedCallerNames.contains(nd.getName())) {
-				String newName= proposeName(usedCallerNames, nd.getName());
+			if (scope.isInUse(nd.getName())) {
+				String newName= scope.createName(nd.getName());
 				List references= nd.references();
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();

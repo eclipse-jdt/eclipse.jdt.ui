@@ -173,7 +173,9 @@ public class InlineMethodRefactoring extends Refactoring {
 				inliner= new CallInliner(unit, fSourceProvider, fCodeGenerationSettings);
 				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
 				for (int b= 0; b < bodies.length; b++) {
-					MethodInvocation[] invocations= fTargetProvider.getInvocations(bodies[b], new SubProgressMonitor(pm, 1));
+					BodyDeclaration body= bodies[b];
+					inliner.initialize(body);
+					MethodInvocation[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
 						MethodInvocation invocation= invocations[i];
 						result.merge(fTargetProvider.checkInvocation(invocation, pm));

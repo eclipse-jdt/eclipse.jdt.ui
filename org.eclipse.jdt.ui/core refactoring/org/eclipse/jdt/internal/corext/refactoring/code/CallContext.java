@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.util.List;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 
 public class CallContext {
@@ -19,13 +17,13 @@ public class CallContext {
 	public String[] arguments;
 	public String receiver; 
 	public boolean receiverIsStatic;
-	public List usedCallerNames;
+	public CodeScopeBuilder.Scope scope;
 	public int callMode;
 	public ImportEdit importer;
 
-	public CallContext(List names, int cm, ImportEdit i) {
+	public CallContext(CodeScopeBuilder.Scope s, int cm, ImportEdit i) {
 		super();
-		usedCallerNames= names;
+		scope= s;
 		callMode= cm;
 		importer= i;
 	}
