@@ -19,9 +19,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -31,15 +28,17 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
-
-import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -50,8 +49,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
@@ -257,14 +254,16 @@ public class QuickAssistLightBulbUpdater {
 			
 			int currLine= document.getLineOfOffset(offset);
 			
-			Iterator iter= new JavaAnnotationIterator(model, true);
+			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
-				IJavaAnnotation annot= (IJavaAnnotation) iter.next();
-				Position pos= model.getPosition((Annotation) annot);
-				if (pos != null) {
-					int startLine= document.getLineOfOffset(pos.getOffset());
-					if (startLine == currLine && JavaCorrectionProcessor.hasCorrections(annot)) {
-						return true;
+				Annotation annot= (Annotation) iter.next();
+				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+					Position pos= model.getPosition(annot);
+					if (pos != null) {
+						int startLine= document.getLineOfOffset(pos.getOffset());
+						if (startLine == currLine && JavaCorrectionProcessor.hasCorrections(annot)) {
+							return true;
+						}
 					}
 				}
 			}

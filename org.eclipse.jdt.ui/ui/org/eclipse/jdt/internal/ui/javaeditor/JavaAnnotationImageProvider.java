@@ -85,7 +85,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	
 	
 	private boolean showQuickFix(IJavaAnnotation annotation) {
-		return fShowQuickFixIcon && annotation.isProblem() && JavaCorrectionProcessor.hasCorrections(annotation);
+		return fShowQuickFixIcon && annotation.isProblem() && JavaCorrectionProcessor.hasCorrections((Annotation) annotation);
 	}
 	
 	private Image getQuickFixImage() {

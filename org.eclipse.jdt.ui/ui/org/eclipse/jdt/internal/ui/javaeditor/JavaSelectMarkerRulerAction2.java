@@ -94,7 +94,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectMarkerRulerAction2 {
 	}
 
 	private boolean isQuickFixTarget(Annotation a) {
-		return a instanceof IJavaAnnotation && JavaCorrectionProcessor.hasCorrections((IJavaAnnotation) a) || a instanceof AssistAnnotation;	
+		return JavaCorrectionProcessor.hasCorrections(a) || a instanceof AssistAnnotation;
 	}
 
 	private void triggerAction(String actionID) {

@@ -41,8 +41,6 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
@@ -194,16 +192,18 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		int invocationOffset= -1;
 		int offsetOfFirstProblem= Integer.MAX_VALUE;
 
-		Iterator iter= new JavaAnnotationIterator(model, true);
+		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
-			IJavaAnnotation annot= (IJavaAnnotation)iter.next();
-			Position pos= model.getPosition((Annotation)annot);
-			if (isIncluded(pos, startOffset, endOffset)) {
-				if (JavaCorrectionProcessor.hasCorrections(annot)) {
-					offsetOfFirstProblem= Math.min(offsetOfFirstProblem, pos.getOffset());
-					invocationOffset= computeBestOffset(invocationOffset, pos, initialOffset);
-					if (initialOffset == invocationOffset)
-						return initialOffset;
+			Annotation annot= (Annotation) iter.next();
+			if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+				Position pos= model.getPosition(annot);
+				if (isIncluded(pos, startOffset, endOffset)) {
+					if (JavaCorrectionProcessor.hasCorrections(annot)) {
+						offsetOfFirstProblem= Math.min(offsetOfFirstProblem, pos.getOffset());
+						invocationOffset= computeBestOffset(invocationOffset, pos, initialOffset);
+						if (initialOffset == invocationOffset)
+							return initialOffset;
+					}
 				}
 			}
 		}

@@ -271,7 +271,7 @@ public class JavadocConfigurationBlock {
 
 			URL location= getJavadocLocation();
 			if (location == null) {
-				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
 				return;
 			}
 
@@ -282,10 +282,10 @@ public class JavadocConfigurationBlock {
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
 					validateFile(location);
 				} else {
-					MessageDialog.openInformation(fShell, fTitle, fUnable); //$NON-NLS-1$
+					MessageDialog.openWarning(fShell, fTitle, fUnable); //$NON-NLS-1$
 				}
 			} catch (MalformedURLException e) {
-				MessageDialog.openInformation(fShell, fTitle, fUnable); //$NON-NLS-1$
+				MessageDialog.openWarning(fShell, fTitle, fUnable); //$NON-NLS-1$
 			}
 
 		}
@@ -308,7 +308,7 @@ public class JavadocConfigurationBlock {
 					}
 				}
 			}
-			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+			MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
 		}
 		
 		private void validateURL(URL location) throws MalformedURLException {
@@ -328,7 +328,7 @@ public class JavadocConfigurationBlock {
 					spawnInBrowser(indexURL);
 
 			} catch (IOException e) {
-				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage);
+				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 			} finally {
 				if (in1 != null) { try { in1.close(); } catch (IOException e) {} }
 				if (in2 != null) { try { in2.close(); } catch (IOException e) {} }

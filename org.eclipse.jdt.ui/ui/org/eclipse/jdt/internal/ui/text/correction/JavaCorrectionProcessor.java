@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
-
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
@@ -50,7 +50,6 @@ import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
@@ -127,17 +126,24 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return false;
 	}
 	
-	public static boolean hasCorrections(IJavaAnnotation annotation) {
-		int problemId= annotation.getId();
-		if (problemId == -1) {
-			if (annotation instanceof MarkerAnnotation) {
-				return hasCorrections(((MarkerAnnotation) annotation).getMarker());
+	public static boolean isQuickFixableType(Annotation annotation) {
+		return (annotation instanceof IJavaAnnotation || annotation instanceof MarkerAnnotation) && !annotation.isMarkedDeleted();
+	}
+	
+	
+	public static boolean hasCorrections(Annotation annotation) {
+		if (annotation instanceof IJavaAnnotation) {
+			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+			int problemId= javaAnnotation.getId();
+			if (problemId == -1) {
+				ICompilationUnit cu= javaAnnotation.getCompilationUnit();
+				if (cu != null) {
+					return hasCorrections(cu, problemId);
+				}
 			}
-		} else {
-			ICompilationUnit cu= annotation.getCompilationUnit();
-			if (cu != null) {
-				return hasCorrections(cu, problemId);
-			}
+		}
+		if (annotation instanceof MarkerAnnotation) {
+			return hasCorrections(((MarkerAnnotation) annotation).getMarker());
 		}
 		return false;
 	}
@@ -189,7 +195,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		fErrorMessage= null;
 		ArrayList proposals= new ArrayList();
 		if (model != null) {
-			processProblemAnnotations(context, model, proposals);
+			processAnnotations(context, model, proposals);
 		}
 		if (proposals.isEmpty()) {
 			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.getString("NoCorrectionProposal.description"), null, 0, null));  //$NON-NLS-1$
@@ -205,28 +211,17 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 
-	private void processProblemAnnotations(IInvocationContext context, IAnnotationModel model, ArrayList proposals) {
+	private void processAnnotations(IInvocationContext context, IAnnotationModel model, ArrayList proposals) {
 		int offset= context.getSelectionOffset();
 		
 		ArrayList problems= new ArrayList();
-		Iterator iter= new JavaAnnotationIterator(model, true);
+		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
-			IJavaAnnotation annot= (IJavaAnnotation) iter.next();
-			Position pos= model.getPosition((Annotation) annot);
-			if (isAtPosition(offset, pos)) {
-				int problemId= annot.getId();
-				if (problemId != -1) {
-					problems.add(new ProblemLocation(pos.getOffset(), pos.getLength(), annot));
-				} else {
-					if (annot instanceof MarkerAnnotation) {
-						IMarker marker= ((MarkerAnnotation) annot).getMarker();
-						IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
-						if (res.length > 0) {
-							for (int i= 0; i < res.length; i++) {
-								proposals.add(new MarkerResolutionProposal(res[i], marker));
-							}
-						}
-					}
+			Annotation annotation= (Annotation) iter.next();
+			if (isQuickFixableType(annotation)) {
+				Position pos= model.getPosition(annotation);
+				if (isAtPosition(offset, pos)) {
+					processAnnotation(annotation, pos, problems, proposals);
 				}
 			}
 		}	
@@ -234,6 +229,26 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		collectCorrections(context, problemLocations, proposals);
 		if (!fAssistant.isUpdatedOffset()) {
 			collectAssists(context, problemLocations, proposals);
+		}
+	}
+	
+	private void processAnnotation(Annotation curr, Position pos, List problems, List proposals) {
+		if (curr instanceof IJavaAnnotation) {
+			IJavaAnnotation javaAnnotation= (IJavaAnnotation) curr;
+			int problemId= javaAnnotation.getId();
+			if (problemId != -1) {
+				problems.add(new ProblemLocation(pos.getOffset(), pos.getLength(), javaAnnotation));
+				return; // java problems all handled by the quick assist processors
+			}
+		}
+		if (curr instanceof MarkerAnnotation) {
+			IMarker marker= ((MarkerAnnotation) curr).getMarker();
+			IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
+			if (res.length > 0) {
+				for (int i= 0; i < res.length; i++) {
+					proposals.add(new MarkerResolutionProposal(res[i], marker));
+				}
+			}
 		}
 	}
 

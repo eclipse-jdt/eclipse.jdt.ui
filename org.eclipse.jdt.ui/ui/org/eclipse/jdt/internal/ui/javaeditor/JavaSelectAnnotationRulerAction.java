@@ -139,7 +139,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 			if (!isReadOnly
 					&& (
 						((hasAssistLightbulb && annotation instanceof AssistAnnotation)
-						|| (annotation instanceof IJavaAnnotation && JavaCorrectionProcessor.hasCorrections((IJavaAnnotation)annotation))))) {
+						|| JavaCorrectionProcessor.hasCorrections(annotation)))) {
 				fPosition= position;
 				fAnnotation= annotation;
 				fHasCorrection= true;
