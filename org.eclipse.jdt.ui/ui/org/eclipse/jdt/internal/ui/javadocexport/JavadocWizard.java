@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventListener;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -151,7 +151,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 				IProcess[] iProcesses= new IProcess[] { iprocess };
 
-				IDebugEventListener listener= new JavadocDebugEventListener();
+				IDebugEventSetListener listener= new JavadocDebugEventListener();
 				DebugPlugin.getDefault().addDebugEventListener(listener);
 				
 				ILaunchConfigurationWorkingCopy wc= null;
@@ -226,30 +226,21 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 	}	
 
-	private class JavadocDebugEventListener implements IDebugEventListener {
-
-		public JavadocDebugEventListener() {
-		}
-
-		public void handleDebugEvent(DebugEvent event) {
-			if (event.getKind() == DebugEvent.TERMINATE) {
-				try {
-//					if (fConfig != null) {
-//						try {
-//							fConfig.delete();
-//						} catch (CoreException e) {
-//							JavaPlugin.log(e);
-//						}
-//					}
-					if (!fWriteCustom) {
-						refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
-						spawnInBrowser();
+	private class JavadocDebugEventListener implements IDebugEventSetListener {
+		public void handleDebugEvents(DebugEvent[] events) {
+			for (int i= 0; i < events.length; i++) {
+				if (events[i].getKind() == DebugEvent.TERMINATE) {
+					try {
+						if (!fWriteCustom) {
+							refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
+							spawnInBrowser();
+						}
+					} finally {
+						DebugPlugin.getDefault().removeDebugEventListener(this);
 					}
-				} finally {
-					DebugPlugin.getDefault().removeDebugEventListener(this);
-				}
+					return;
+				}						
 			}
 		}
 	}
-	//	
 }

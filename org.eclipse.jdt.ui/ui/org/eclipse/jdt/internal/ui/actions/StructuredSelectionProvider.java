@@ -74,7 +74,7 @@ public abstract class StructuredSelectionProvider {
 					ICompilationUnit cu= (ICompilationUnit) assist;
 					if (cu.isWorkingCopy()) {
 						synchronized (cu) {
-							cu.reconcile(null);
+							cu.reconcile();
 						}
 					}
 					IJavaElement ref= ((ICompilationUnit)assist).getElementAt(selection.getOffset());
