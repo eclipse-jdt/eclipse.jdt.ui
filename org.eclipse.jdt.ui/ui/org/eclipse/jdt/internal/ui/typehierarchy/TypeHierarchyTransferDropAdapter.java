@@ -14,16 +14,16 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
-import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 
-public class TypeHierarchyTransferDropAdapter extends JdtTreeViewerDropAdapter implements TransferDropTargetListener {
+public class TypeHierarchyTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
 	private AddMethodStubAction fAddMethodStubAction;
 
 	public TypeHierarchyTransferDropAdapter(AbstractTreeViewer viewer) {
-		super(viewer, SWT.NONE);
+		super(viewer, DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL);
 		
 		fAddMethodStubAction= new AddMethodStubAction();
 	}

@@ -70,21 +70,32 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 */
 	public static final int INSERTION_FEEDBACK= 1 << 1; 
 
-	private int fStyle;
 	private StructuredViewer fViewer;
+	private int fFeedback;
+	private boolean fShowInsertionFeedback;
 	private int fRequestedOperation;
 	private int fLastOperation;
 	private long fLastScroll;
 	protected int fLocation;
 	protected Object fTarget;
 
-	public JdtViewerDropAdapter(StructuredViewer viewer, int style) {
+	public JdtViewerDropAdapter(StructuredViewer viewer, int feedback) {
 		fViewer= viewer;
 		Assert.isNotNull(fViewer);
-		fStyle= style;
+		fFeedback= feedback;
 		fLastOperation= -1;
 	}
 
+	/**
+	 * Controls whether the drop adapter shows insertion feedback or not.
+	 * 
+	 * @param showInsertionFeedback <code>true</code> if the drop adapter is supposed
+	 *	to show insertion feedback. Otherwise <code>false</code>
+	 */
+	public void showInsertionFeedback(boolean showInsertionFeedback) {
+		fShowInsertionFeedback= showInsertionFeedback;
+	}
+	
 	/**
 	 * Returns the viewer this adapter is working on.
 	 */
@@ -154,10 +165,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	
 	public void dragOver(DropTargetEvent event) {
 		Object oldTarget= fTarget;
-		fTarget= scrollIfNeeded(event.x, event.y);
-		// didn't scroll. So use normal target.
-		if (fTarget == null) 
-			fTarget= computeTarget(event);
+		fTarget= computeTarget(event);
 		
 		//set the location feedback
 		int oldLocation= fLocation;
@@ -227,44 +235,13 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 
 	/**
-	 * Scrolls the widget if the given coordinates are within epsilon
-	 * of the widget borders.  If scolling occurs, the viewer selection
-	 * is set to be the newly revealed widget.  Returns true if scrolling
-	 * actually, occurred, and false otherwise.
-	 */
-	protected Object scrollIfNeeded(int x, int y) {
-		long time= System.currentTimeMillis();
-		if (time - fLastScroll < 500)
-			return null;
-		
-		fLastScroll= time;	
-		Control control= fViewer.getControl();
-		Point point= control.toControl(new Point(x, y));
-		Rectangle bounds= control.getBounds();
-		Item item= null;
-		if (point.y < SCROLL_EPSILON) {
-			item= fViewer.scrollUp(x, y);
-		} else {
-			if ((bounds.height - bounds.y - point.y) < SCROLL_EPSILON) {
-				item= fViewer.scrollDown(x, y);
-			}
-		}
-		
-		if (item != null)
-			return item.getData();
-			
-		return null;
-	}
-	
-	/**
 	 * Sets the drag under feedback corresponding to the value of <code>fLocation</code>
 	 * and the <code>INSERTION_FEEDBACK</code> style bit.
 	 */
 	protected void computeFeedback(DropTargetEvent event) {
 		int old= event.feedback;
-		boolean insertionFeedback= (fStyle & INSERTION_FEEDBACK) != 0;
 		
-		if (!insertionFeedback && fLocation != LOCATION_NONE) {
+		if (!fShowInsertionFeedback && fLocation != LOCATION_NONE) {
 			event.feedback= DND.FEEDBACK_SELECT;
 		} else {
 			if (fLocation == LOCATION_BEFORE) {
@@ -273,6 +250,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 				event.feedback= DND.FEEDBACK_INSERT_AFTER;
 			}
 		}
+		event.feedback|= fFeedback;
 	}
 	
 	/**

@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -88,6 +89,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
@@ -117,6 +119,7 @@ import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.help.ViewContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.internal.framelist.BackAction;
 import org.eclipse.ui.views.internal.framelist.ForwardAction;
@@ -613,7 +616,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE;
 		final LocalSelectionTransfer lt= LocalSelectionTransfer.getInstance();
-		Transfer[] transfers= new Transfer[] {lt, FileTransfer.getInstance()};
+		Transfer[] transfers= new Transfer[] {
+			lt, 
+			ResourceTransfer.getInstance(),
+			FileTransfer.getInstance()};
 		
 		// Drop Adapter
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
@@ -626,6 +632,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		Control control= fViewer.getControl();
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(fViewer),
+			new ResourceTransferDragAdapter(fViewer),
 			new FileTransferDragAdapter(fViewer)
 		};
 		DragSource source= new DragSource(control, ops);

@@ -6,36 +6,41 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.reorg.CopyAction;
 import org.eclipse.jdt.internal.ui.reorg.MoveAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 
-public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter implements TransferDropTargetListener {
+public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
 	private List fElements;
 	private MoveRefactoring fMoveRefactoring;
@@ -44,7 +49,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	private int fCanCopyElements;
 
 	public SelectionTransferDropAdapter(AbstractTreeViewer viewer) {
-		super(viewer, SWT.NONE);
+		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
