@@ -13,7 +13,7 @@ public class GotoTypeAction extends OpenJavaElementAction {
 	public GotoTypeAction(PackageExplorerPart part) {
 		super();
 		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
-		setDescription("Searches and selects a given type");
+		setDescription(PackagesMessages.getString("GotoType.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
 	}
 

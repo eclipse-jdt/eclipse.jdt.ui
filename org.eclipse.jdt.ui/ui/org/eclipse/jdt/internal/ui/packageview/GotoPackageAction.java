@@ -13,6 +13,7 @@ public class GotoPackageAction extends JavaUIAction {
 	
 	public GotoPackageAction(PackageExplorerPart part) {
 		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
+		setDescription(PackagesMessages.getString("GotoPackage.action.description")) //$NON-NLS-1$
 		fPackageExplorer= part;
 		fFilter= new EmptyInnerPackageFilter();
 	}
