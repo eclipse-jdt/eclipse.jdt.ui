@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -59,7 +60,7 @@ abstract class TargetProvider {
 	
 	public abstract BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm);
 	
-	public abstract ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
+	public abstract Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
 	
 	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
 	
@@ -91,14 +92,14 @@ abstract class TargetProvider {
 	
 	static class SingleCallTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
-		private ASTNode fInvocation;
+		private Expression fInvocation;
 		private boolean fIterated;
 		public SingleCallTargetProvider(ICompilationUnit cu, ASTNode invocation) {
 			Assert.isNotNull(cu);
 			Assert.isNotNull(invocation);
 			Assert.isTrue(Invocations.isInvocation(invocation));
 			fCUnit= cu;
-			fInvocation= invocation;
+			fInvocation= (Expression)invocation; // cast is ok. Otherwise isInvocation fails
 		}
 		public void initialize() {
 			fIterated= false;
@@ -116,12 +117,12 @@ abstract class TargetProvider {
 			};
 		}
 	
-		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			fastDone(pm);
 			if (fIterated)
 				return null;
 			fIterated= true;
-			return new ASTNode[] { fInvocation };
+			return new Expression[] { fInvocation };
 		}
 		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 			fastDone(pm);
@@ -138,13 +139,13 @@ abstract class TargetProvider {
 		public BodyData(BodyDeclaration declaration) {
 			fBody= declaration;
 		}
-		public void addInvocation(ASTNode node) {
+		public void addInvocation(Expression node) {
 			if (fInvocations == null)
 				fInvocations= new ArrayList(2);
 			fInvocations.add(node);
 		}
-		public ASTNode[] getInvocations() {
-			return (ASTNode[])fInvocations.toArray(new ASTNode[fInvocations.size()]);
+		public Expression[] getInvocations() {
+			return (Expression[])fInvocations.toArray(new Expression[fInvocations.size()]);
 		}
 		public boolean hasInvocations() {
 			return fInvocations != null && !fInvocations.isEmpty();
@@ -247,7 +248,7 @@ abstract class TargetProvider {
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
 	
-		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fBodies.get(declaration);
 			Assert.isTrue(data != null);
 			fastDone(pm);
@@ -296,7 +297,7 @@ abstract class TargetProvider {
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
 	
-		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
+		public Expression[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fCurrentBodies.get(declaration);
 			Assert.isTrue(data != null);
 			fastDone(pm);

@@ -83,7 +83,7 @@ public class CallInliner {
 	private CodeScopeBuilder.Scope fRootScope;
 	private int fNumberOfLocals;
 	
-	private ASTNode fInvocation;
+	private Expression fInvocation;
 	private ASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
@@ -226,7 +226,7 @@ public class CallInliner {
 		return result;
 	}
 	
-	public RefactoringStatus initialize(ASTNode invocation) {
+	public RefactoringStatus initialize(Expression invocation) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
 		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
@@ -423,6 +423,10 @@ public class CallInliner {
 	 * @throws JavaModelException
 	 */
 	private boolean needsExplicitCast() {
+		// if the return type of the method is the same as the type of the
+		// returned expression then we don't need an explicit cast.
+		if (fSourceProvider.returnTypeMatchesReturnExpressions())
+				return false;		 
 		ASTNode parent= fTargetNode.getParent();
 		int nodeType= parent.getNodeType();
 		if (nodeType == ASTNode.METHOD_INVOCATION) {

@@ -321,11 +321,6 @@ public class ASTNodes {
 			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
 	}
 	
-	public static boolean isInvocation(Expression expression) {
-		int type= expression.getNodeType();
-		return type == ASTNode.METHOD_INVOCATION || type == ASTNode.SUPER_METHOD_INVOCATION;
-	}
-	
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {

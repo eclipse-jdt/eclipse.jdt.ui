@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -69,7 +70,7 @@ public class SourceProvider {
 			if (!(ASTNodes.isLiteral(expression) || expression instanceof Name)) {
 				fMustEvalReturnedExpression= true;
 			}
-			if (ASTNodes.isInvocation(expression) || expression instanceof ClassInstanceCreation) {
+			if (Invocations.isInvocation(expression) || expression instanceof ClassInstanceCreation) {
 				fReturnValueNeedsLocalVariable= false;
 			}
 			fReturnExpressions.add(expression);
@@ -151,6 +152,16 @@ public class SourceProvider {
 	
 	public List getReturnExpressions() {
 		return fReturnExpressions;
+	}
+	
+	public boolean returnTypeMatchesReturnExpressions() {
+		ITypeBinding returnType= getReturnType();
+		for (Iterator iter= fReturnExpressions.iterator(); iter.hasNext();) {
+			Expression expression= (Expression)iter.next();
+			if (!Bindings.equals(returnType, expression.resolveTypeBinding()))
+				return false;
+		}
+		return true;
 	}
 	
 	public ParameterData getParameterData(int index) {

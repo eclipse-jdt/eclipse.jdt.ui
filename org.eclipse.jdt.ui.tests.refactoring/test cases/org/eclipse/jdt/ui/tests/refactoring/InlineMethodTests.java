@@ -420,7 +420,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performImportTest();
 	}	
 
-	/************************ Receiver Tests ********************************/
+	/************************ Cast Tests ********************************/
 
 	private void performCastTest() throws Exception {
 		performTest(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");
@@ -455,6 +455,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void testReceiverCast() throws Exception {
+		performCastTest();
+	}
+	
+	public void testNoCast() throws Exception {
 		performCastTest();
 	}
 }

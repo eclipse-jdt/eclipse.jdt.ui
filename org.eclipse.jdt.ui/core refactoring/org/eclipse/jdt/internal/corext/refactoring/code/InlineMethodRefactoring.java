@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -202,9 +204,9 @@ public class InlineMethodRefactoring extends Refactoring {
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
-					ASTNode[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
+					Expression[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
-						ASTNode invocation= invocations[i];
+						Expression invocation= invocations[i];
 						result.merge(inliner.initialize(invocation));
 						if (result.hasFatalError())
 							break;
