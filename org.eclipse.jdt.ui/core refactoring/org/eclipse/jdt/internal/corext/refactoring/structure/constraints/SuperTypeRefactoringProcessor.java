@@ -489,27 +489,44 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				collection.add(current);
 			}
 			final ASTParser parser= ASTParser.newParser(AST.JLS3);
-			for (final Iterator iterator= projects.keySet().iterator(); iterator.hasNext();) {
-				project= (IJavaProject) iterator.next();
-				collection= (Collection) projects.get(project);
-				parser.setWorkingCopyOwner(fOwner);
-				parser.setResolveBindings(true);
-				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.setProject(project);
-				parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+			try {
+				final Set keySet= projects.keySet();
+				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+				subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+				for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
+					project= (IJavaProject) iterator.next();
+					collection= (Collection) projects.get(project);
+					parser.setWorkingCopyOwner(fOwner);
+					parser.setResolveBindings(true);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+					parser.setProject(project);
+					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+					try {
+						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
+						subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
-					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-						try {
-							rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements);
-						} catch (CoreException exception) {
-							status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
-						}
-					}
+							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+								try {
+									rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements);
+								} catch (CoreException exception) {
+									status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+								} finally {
+									subsubMonitor.worked(1);
+								}
+							}
 
-					public final void acceptBinding(final String key, final IBinding binding) {
-						// Do nothing
+							public final void acceptBinding(final String key, final IBinding binding) {
+								// Do nothing
+							}
+						}, subsubMonitor);
+					} finally {
+						subsubMonitor.done();
 					}
-				}, new SubProgressMonitor(monitor, 1));
+				}
+			} finally {
+				subMonitor.done();
 			}
 			try {
 				rewriteTypeOccurrences(manager, sourceRequestor, sourceRewrite, subUnit, subNode, replacements);
@@ -585,64 +602,104 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				Set units= null;
 				final Set processed= new HashSet();
 				processed.add(subUnit);
-				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
-					project= (IJavaProject) outer.next();
-					collection= (Collection) firstPass.get(project);
-					if (collection != null) {
-						units= new HashSet(collection.size());
-						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
-							group= (SearchResultGroup) inner.next();
-							matches= group.getSearchResults();
-							if (matches.length > 0) {
-								element= matches[0].getElement();
-								if (element instanceof IMember)
-									units.add(((IMember) element).getCompilationUnit());
-							}
-						}
-						parser.setWorkingCopyOwner(fOwner);
-						parser.setResolveBindings(true);
-						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-						parser.setProject(project);
-						parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
-
-							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-								monitor.subTask(unit.getElementName());
-								if (!processed.contains(unit)) {
-									performFirstPass(creator, secondPass, groups, unit, node);
-									processed.add(unit);
+				IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+				try {
+					final Set keySet= firstPass.keySet();
+					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+					subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+					for (final Iterator outer= keySet.iterator(); outer.hasNext();) {
+						project= (IJavaProject) outer.next();
+						collection= (Collection) firstPass.get(project);
+						if (collection != null) {
+							units= new HashSet(collection.size());
+							for (final Iterator inner= collection.iterator(); inner.hasNext();) {
+								group= (SearchResultGroup) inner.next();
+								matches= group.getSearchResults();
+								if (matches.length > 0) {
+									element= matches[0].getElement();
+									if (element instanceof IMember)
+										units.add(((IMember) element).getCompilationUnit());
 								}
 							}
+							parser.setWorkingCopyOwner(fOwner);
+							parser.setResolveBindings(true);
+							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+							parser.setProject(project);
+							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+							try {
+								subsubMonitor.beginTask("", units.size()); //$NON-NLS-1$
+								subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+								parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
 
-							public final void acceptBinding(final String key, final IBinding binding) {
-								// Do nothing
+									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+										try {
+											subsubMonitor.subTask(unit.getElementName());
+											if (!processed.contains(unit)) {
+												performFirstPass(creator, secondPass, groups, unit, node);
+												processed.add(unit);
+											}
+										} finally {
+											subsubMonitor.worked(1);
+										}
+									}
+
+									public final void acceptBinding(final String key, final IBinding binding) {
+										// Do nothing
+									}
+								}, subsubMonitor);
+							} finally {
+								subsubMonitor.done();
 							}
-						}, new SubProgressMonitor(monitor, 1));
+						}
 					}
+				} finally {
+					firstPass.clear();
+					subMonitor.done();
 				}
 				performFirstPass(creator, secondPass, groups, subUnit, subNode);
-				for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
-					project= (IJavaProject) iterator.next();
-					if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
-						level= 2;
-					collection= (Collection) secondPass.get(project);
-					if (collection != null) {
-						parser.setWorkingCopyOwner(fOwner);
-						parser.setResolveBindings(true);
-						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-						parser.setProject(project);
-						parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+				subMonitor= new SubProgressMonitor(monitor, 1);
+				try {
+					final Set keySet= secondPass.keySet();
+					subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
+					subMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+					for (final Iterator iterator= keySet.iterator(); iterator.hasNext();) {
+						project= (IJavaProject) iterator.next();
+						if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+							level= 2;
+						collection= (Collection) secondPass.get(project);
+						if (collection != null) {
+							parser.setWorkingCopyOwner(fOwner);
+							parser.setResolveBindings(true);
+							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+							parser.setProject(project);
+							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+							try {
+								subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
+								subsubMonitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+								parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
 
-							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-								monitor.subTask(unit.getElementName());
-								if (!processed.contains(unit))
-									performSecondPass(creator, unit, node);
-							}
+									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+										try {
+											subsubMonitor.subTask(unit.getElementName());
+											if (!processed.contains(unit))
+												performSecondPass(creator, unit, node);
+										} finally {
+											subsubMonitor.worked(1);
+										}
+									}
 
-							public final void acceptBinding(final String key, final IBinding binding) {
-								// Do nothing
+									public final void acceptBinding(final String key, final IBinding binding) {
+										// Do nothing
+									}
+								}, subsubMonitor);
+							} finally {
+								subsubMonitor.done();
 							}
-						}, new SubProgressMonitor(monitor, 1));
+						}
 					}
+				} finally {
+					secondPass.clear();
+					subMonitor.done();
 				}
 			} finally {
 				model.setCompliance(level);
