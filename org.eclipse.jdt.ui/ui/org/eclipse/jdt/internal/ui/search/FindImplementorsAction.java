@@ -35,7 +35,7 @@ public class FindImplementorsAction extends ElementSearchAction {
 			try {
 				return ((IType) element).isInterface();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-1$
 				return false;
 			}
 		// should not happen: handled by super.canOperateOn
