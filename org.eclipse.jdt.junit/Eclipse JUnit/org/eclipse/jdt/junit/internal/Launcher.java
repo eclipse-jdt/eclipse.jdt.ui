@@ -41,7 +41,7 @@ public class Launcher extends BaseLauncher implements IExecutableExtension{
 			"-consolelog",
 			"-port", Integer.toString(port), 
 			"-testPluginName", testPluginID,
-			"-debugging",
+		//	"-debugging",
 			"-classNames"
 		};
 	

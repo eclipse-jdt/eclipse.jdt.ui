@@ -1,0 +1,26 @@
+Description for package org.eclipse.jdt.junit.internal:
+------------------------------------------------------
+
+- JUnitUIPlugin
+	- extension of AbstractUIPlugin
+	- provides only: getDefault(), getActiveShell() and getPluginID()
+
+- Launcher
+	- concrete implementation of the BaseLauncher
+	- implements 'configureVM(...)'
+
+- LauncherUtil
+	- includes a lot of static utility methods for the Launcher
+	- this methods construct the classPath and the '.plugins-path' file 
+		for the VMRunnerConfiguration that is constructed in the Launcher
+
+- TestApplication
+	- An extension of the application 'org.eclipse.ui.workbench'
+	- It overrides the method 'runEventLoop()'; 
+		first all events are dispatched and then the TestRunner is started,
+		at last the workbench is closed.
+
+- TestRunner
+	- Implementation of a TestRunner that extends org.eclipse.junit.internal.TestRunner. 
+	- It overrides the method 'getClassLoader' because the pluginClassLoader has to be used;
+		therefore this TestRunner needs an additional argument -testPluginName.
