@@ -750,12 +750,8 @@ public final class WhiteSpaceOptions {
         createOption(parent, workingValues, "WhiteSpaceOptions.initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
     }
     
-    
-    
-    
-    
-    
-    
+    // syntax element tree
+
     private static InnerNode createClassTree(Map workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.classes"); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.classes.before_opening_brace_of_a_class", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION, CLASS_DECL_PREVIEW); //$NON-NLS-1$
@@ -867,6 +863,7 @@ public final class WhiteSpaceOptions {
         createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.between_empty_brackets", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACKETS_IN_ARRAY_ALLOCATION_EXPRESSION, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
