@@ -39,7 +39,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -162,6 +162,65 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertEqualString(cu.getSource(), buf.toString());			
 			clearRewrite(rewrite);
 		}
+		{  // add after comment 
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        i++; //comment\n");
+			buf.append("        i++; //comment\n");					
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			AST ast= astRoot.getAST();
+		
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+			Block block= methodDecl.getBody();
+			assertTrue("No block" , block != null);
+			
+			MethodInvocation invocation1= ast.newMethodInvocation();
+			invocation1.setName(ast.newSimpleName("foo"));
+			ExpressionStatement statement1= ast.newExpressionStatement(invocation1);
+			
+			rewrite.markAsInserted(statement1);
+			
+			MethodInvocation invocation2= ast.newMethodInvocation();
+			invocation2.setName(ast.newSimpleName("foo"));
+			ExpressionStatement statement2= ast.newExpressionStatement(invocation2);
+			
+			rewrite.markAsInserted(statement2);		
+			
+			List statements= methodDecl.getBody().statements();
+			
+			rewrite.markAsRemoved((ASTNode) statements.get(1));
+			
+			statements.add(2, statement2);
+			statements.add(1, statement1);
+			
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
+			
+			proposal.apply(null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        i++; //comment\n");
+			buf.append("        foo();\n");
+			buf.append("        foo();\n");				
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			
+			assertEqualString(cu.getSource(), buf.toString());			
+			clearRewrite(rewrite);
+		}		
 		
 	}
 	
@@ -255,7 +314,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertEqualString(cu.getSource(), buf.toString());			
 			clearRewrite(rewrite);
 		}
-/*		{  // delete 
+		{  // delete 
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
@@ -294,7 +353,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			assertEqualString(cu.getSource(), buf.toString());			
 			clearRewrite(rewrite);
-		}*/
+		}
 		
 	}
 	

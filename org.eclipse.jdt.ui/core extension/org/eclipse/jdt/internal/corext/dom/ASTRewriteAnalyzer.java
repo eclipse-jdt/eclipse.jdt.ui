@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -491,25 +492,42 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return currPos;
 	}
 	
+	private int getEndLineOffset(int offset) {
+		TextRegion lineRegion= fTextBuffer.getLineInformationOfOffset(offset);
+		int pos= lineRegion.getOffset() + lineRegion.getLength();
+		char prev= ' ';
+		for (int i= offset; i < pos; i++) {
+			char ch= fTextBuffer.getChar(i);
+			if (!Character.isWhitespace(ch)) {
+				if (ch == '/' && i + 1 < pos && fTextBuffer.getChar(i + 1) == '/') {
+					return pos;
+				}
+				return i;
+			}
+		}
+		return pos;
+	}
+	
+	
 	private void removeParagraph(ASTNode elem) {
 		int start= elem.getStartPosition();
 		int end= start + elem.getLength();
 		
-		TextRegion endRegion= fTextBuffer.getLineInformationOfOffset(end);
-		int lineEnd= endRegion.getOffset() + endRegion.getLength();
-		// move end to include all spaces and tabs
-		while (end < lineEnd && Character.isWhitespace(fTextBuffer.getChar(end))) {
-			end++;
-		}
-		if (lineEnd == end) { // if there is no comment / other statement remove the line (indent + new line)
-			int startLine= fTextBuffer.getLineOfOffset(start);
-			if (startLine > 0) {
-				TextRegion prevRegion= fTextBuffer.getLineInformation(startLine - 1);
-				int cutPos= prevRegion.getOffset() + prevRegion.getLength();
-				String str= fTextBuffer.getContent(cutPos, start - cutPos);
-				if (Strings.containsOnlyWhitespaces(str)) {
+		// move end to include all spaces, tabs
+		end= getEndLineOffset(end);
+		
+		int startLine= fTextBuffer.getLineOfOffset(start);
+		if (startLine > 0) {
+			TextRegion prevRegion= fTextBuffer.getLineInformation(startLine - 1);
+			int cutPos= prevRegion.getOffset() + prevRegion.getLength();
+			try {
+				IScanner scanner= getScanner(cutPos);
+				scanner.getNextToken();
+				if (scanner.getCurrentTokenStartPosition() == start) {
 					start= cutPos;
 				}
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		doTextRemoveAndVisit(start, end - start, elem);
@@ -525,13 +543,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 
 	private void insertParagraph(ASTNode elem, ASTNode sibling, int insertPos, int indent, boolean additionalNewLine, boolean useIndentOfSibling) {
+		String description= getDescription(elem);
 		if (sibling != null) {
 			if (useIndentOfSibling) {
 				indent= getIndent(sibling.getStartPosition());
 			}
-			insertPos= sibling.getStartPosition() + sibling.getLength();
+			int end= sibling.getStartPosition() + sibling.getLength();
+			
+			int line= fTextBuffer.getLineOfOffset(end);
+			insertPos= getEndLineOffset(end);
 		}
-		String description= getDescription(elem);
 		doTextInsert(insertPos, fTextBuffer.getLineDelimiter(), description);
 		doTextInsert(insertPos, elem, indent, false, description);
 		if (additionalNewLine) {
