@@ -127,10 +127,13 @@ public final class ASTRewrite {
 	 * is formatted using the standard code formatter.
 	 * @param textBuffer Text buffer which is describing the code of the AST passed in in the
 	 * constructor. This buffer is accessed read-only.
-	 * @param groupDescription All resulting GroupDescription will be added to this collection.
-	 * <code>null</code> can be passed, if no descriptions should be collected.
+	 * @param groupDescription All resulting GroupDescription will be added to this collection. For each used
+	 * description (see last parameter of {@link #markAsInserted}, {@link #markAsModified}, {@link #markAsRemoved}
+	 * and {@link #markAsReplaced)}  a group description is added.
+	 * A group description contains all text edits that resulted from the changes with the group's description.
+	 * <code>null</code> can be passed, if no descriptions should be collected. 
 	 */
-	public void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
+	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
 		HashMap descriptions= resultingGroupDescription == null ? null : new HashMap(5);
 		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this, descriptions);
 		fRootNode.accept(visitor); 
@@ -142,7 +145,7 @@ public final class ASTRewrite {
 	/**
 	 * Removes all modifications applied to the given AST.
 	 */
-	public void removeModifications() {
+	public final void removeModifications() {
 		if (fHasASTModifications) {
 			fRootNode.accept(new ASTRewriteClear(this));
 			fHasASTModifications= false;
@@ -150,17 +153,21 @@ public final class ASTRewrite {
 		fChangedProperties.clear();
 		fCopyCounts.clear();
 	}
-	
+
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
-	 * @param node Description of the change.
+	 * @param boundToPrevious If set, the inserted node is bound to the previous node, that means
+	 * it is inserted directly after the previous node. If set to false the node is inserted before the next.
+	 * This option is only used for nodes in lists.
+	 * @param description Description of the change.
 	 */
-	public final void markAsInserted(ASTNode node, String description) {
+	public final void markAsInserted(ASTNode node, boolean boundToPrevious, String description) {
 		Assert.isTrue(getCollapsedNodes(node) == null, "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
 		insert.description= description;
+		insert.isBoundToPrevious= boundToPrevious;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
 	}
@@ -168,10 +175,37 @@ public final class ASTRewrite {
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
+	 * @param node The node to be marked as inserted.
+	 * @param boundToPrevious If set, the inserted node is bound to the previous node, that means
+	 * it is inserted directly after the previous node. If set to false the node is inserted before the next.
+	 * This option is only used for nodes in lists.
+	 */
+	public final void markAsInserted(ASTNode node, boolean boundToPrevious) {
+		markAsInserted(node, boundToPrevious, null);
+	}
+	
+	/**
+	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
+	 * create a copy target first and insert this target node. ({@link #createCopy})
+	 * @param node The node to be marked as inserted.
+	 * @param description Description of the change.
+	 */
+	public final void markAsInserted(ASTNode node, String description) {
+		markAsInserted(node, getDefaultBoundBehaviour(node), null);
+	}
+
+	/**
+	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
+	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 */
 	public final void markAsInserted(ASTNode node) {
-		markAsInserted(node, null);
+		markAsInserted(node, getDefaultBoundBehaviour(node), null);
 	}
+	
+	private boolean getDefaultBoundBehaviour(ASTNode node) {
+		return (node instanceof Statement || node instanceof FieldDeclaration);
+	}
+	
 	
 	public boolean hasASTModifications() {
 		return fHasASTModifications;
@@ -221,7 +255,7 @@ public final class ASTRewrite {
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
 	 * target node. ({@link #createCopy})
 	 * @param node The node to be marked as replaced.
-	 * @param node The node replacing the node.
+	 * @param replacingNode The node replacing the node.
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode) {
 		markAsReplaced(node, replacingNode, null);
@@ -244,8 +278,8 @@ public final class ASTRewrite {
 	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
 	 * @param node The node to be marked as modified.
-	 * @param node The node of the same type as the modified node but with the new properties.
-	 * @param node Description of the change. 
+	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
+	 * @param description Description of the change. 
 	 */			
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
 		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type"); //$NON-NLS-1$
@@ -286,7 +320,7 @@ public final class ASTRewrite {
 	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
 	 * @param node The node to be marked as modified.
-	 * @param node The node of the same type as the modified node but with the new properties.
+	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
 	 */		
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode) {
 		markAsModified(node, modifiedNode, null);
@@ -472,6 +506,14 @@ public final class ASTRewrite {
 		return null;
 	}
 	
+	public final boolean isInsertBoundToPrevious(ASTNode node) {
+		Object info= getChangeProperty(node);
+		if (info instanceof ASTInsert) {
+			return ((ASTInsert) info).isBoundToPrevious;
+		}
+		return false;
+	}
+	
 	private final void incrementCopyCount(ASTNode node) {
 		int count= getCopyCount(node);
 		fCopyCounts.put(node, new Integer(count + 1));
@@ -499,6 +541,7 @@ public final class ASTRewrite {
 	}		
 	
 	private static final class ASTInsert extends ASTChange {
+		public boolean isBoundToPrevious;
 	}
 	
 	private static final class ASTRemove extends ASTChange {
