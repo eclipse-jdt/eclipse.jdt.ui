@@ -6,22 +6,20 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
 
 	private String fContextType;
+	private ITableLabelProvider fLabelProvider= new TemplateLabelProvider();
 	
 	private ArrayList fProposals= new ArrayList();
 
@@ -69,7 +67,7 @@ public class TemplateEngine {
 		Template[] templates= Templates.getInstance().getMatchingTemplates(context);
 
 		for (int i= 0; i != templates.length; i++)
-			fProposals.add(new TemplateProposal(templates[i], context));
+			fProposals.add(new TemplateProposal(templates[i], context, fLabelProvider.getColumnImage(templates[i], 0)));
 	}
 	
 }

@@ -223,7 +223,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		});
 
 		fExportAllButton= new Button(buttons, SWT.PUSH);
-		fExportAllButton.setLayoutData(getButtonGridData(fExportButton));
+		fExportAllButton.setLayoutData(getButtonGridData(fExportAllButton));
 		fExportAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.export.all")); //$NON-NLS-1$
 		fExportAllButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -258,7 +258,6 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
 
-		// populate table
 		fTableViewer.setInput(fTemplates);		
 		fTableViewer.setAllChecked(false);
 		fTableViewer.setCheckedElements(getEnabledTemplates());		

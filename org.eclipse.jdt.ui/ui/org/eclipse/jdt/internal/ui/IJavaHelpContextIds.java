@@ -54,12 +54,10 @@ public interface IJavaHelpContextIds {
 
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
 
-
 	// view parts
 	public static final String PACKAGE_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
 	public static final String DISPLAY_VIEW= PREFIX + "display_view_context"; //$NON-NLS-1$
-
 
 	// Preference/Property pages
 	public static final String BUILD_PATH_PROPERTY_PAGE= PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
@@ -76,7 +74,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVA_EDITOR_PREFERENCE_PAGE= PREFIX + "java_editor_preference_page_context"; //$NON-NLS-1$
 	public static final String COMPILER_PREFERENCE_PAGE= PREFIX + "compiler_preference_page_context"; //$NON-NLS-1$
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
-
+	public static final String WORK_IN_PROGRESS_PREFERENCE_PAGE= PREFIX + "work_in_progress_preference_page_context"; //$NON-NLS-1$
 
 	// Wizard pages
 	public static final String NEW_JAVAPROJECT_WIZARD_PAGE= PREFIX + "new_javaproject_wizard_page_context"; //$NON-NLS-1$
@@ -123,6 +121,5 @@ public interface IJavaHelpContextIds {
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_BLOCK= PREFIX + "source_attachment_context"; //$NON-NLS-1$
-	
 	
 }

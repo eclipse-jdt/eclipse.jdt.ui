@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
@@ -39,13 +40,14 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private IWorkingCopyManager fManager;
 	private IContextInformationValidator fValidator;
 	private TemplateEngine fTemplateEngine;
-	
+	private ExperimentalResultCollector fExperimentalCollector;	
 	
 	public JavaCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fTemplateEngine= new TemplateEngine(TemplateContext.JAVA);
+		fExperimentalCollector= new ExperimentalResultCollector();
 	}
 		
 	/**
@@ -91,23 +93,47 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		IDocument document= viewer.getDocument();
-		
-		try {
-			if (unit != null) {
-				
-				fCollector.reset(offset, unit.getJavaProject(), unit);
-				Point selection= viewer.getSelectedRange();
-				if (selection.y > 0)
-					fCollector.setReplacementLength(selection.y);
-				
-				unit.codeComplete(offset, fCollector);
-			}
-		} catch (JavaModelException x) {
-			Shell shell= viewer.getTextWidget().getShell();
-			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-		}				
 
-		ICompletionProposal[] results= fCollector.getResults();
+		ICompletionProposal[] results;
+
+		if (WorkInProgressPreferencePage.fillArgumentsOnMethodCompletion()) {
+				
+			try {
+				if (unit != null) {
+	
+					fExperimentalCollector.reset(viewer, offset, unit.getJavaProject(), unit);
+					Point selection= viewer.getSelectedRange();
+					if (selection.y > 0)
+						fExperimentalCollector.setReplacementLength(selection.y);
+					
+					unit.codeComplete(offset, fExperimentalCollector);
+				}
+			} catch (JavaModelException x) {
+				Shell shell= viewer.getTextWidget().getShell();
+				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			}				
+
+			results= fExperimentalCollector.getResults();
+
+		} else {
+
+			try {
+				if (unit != null) {
+	
+					fCollector.reset(offset, unit.getJavaProject(), unit);
+					Point selection= viewer.getSelectedRange();
+					if (selection.y > 0)
+						fCollector.setReplacementLength(selection.y);
+					
+					unit.codeComplete(offset, fCollector);
+				}
+			} catch (JavaModelException x) {
+				Shell shell= viewer.getTextWidget().getShell();
+				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			}
+			
+			results= fCollector.getResults();
+		}
 
 		try {
 			fTemplateEngine.reset();

@@ -21,6 +21,7 @@ public class TemplateProposal implements ICompletionProposal {
 
 	private final Template fTemplate;
 	private final TemplateEvaluator fEvaluator;
+	private final Image fImage;
 
 	private IRegion fSelectedRegion; // initialized by apply()
 		
@@ -28,13 +29,15 @@ public class TemplateProposal implements ICompletionProposal {
 	 * Creates a template proposal with a template and its context.
 	 * @param template  the template
 	 * @param context   the context in which the template was requested.
+	 * @param image     the icon of the proposal.
 	 */	
-	TemplateProposal(Template template, TemplateContext context) {
+	public TemplateProposal(Template template, TemplateContext context, Image image) {
 		Assert.isNotNull(template);
 		Assert.isNotNull(context);
 		
 		fTemplate= template;
 		fEvaluator= new TemplateEvaluator(template, context);
+		fImage= image;
 	}
 
 	/**
@@ -69,7 +72,7 @@ public class TemplateProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		return new TemplateLabelProvider().getColumnImage(fTemplate, 0);
+		return fImage;
 	}
 
 	/**

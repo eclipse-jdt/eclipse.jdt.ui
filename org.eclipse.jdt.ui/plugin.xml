@@ -275,7 +275,7 @@
 		class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
-	<page name= "%editorPrefName"
+	<page name="%editorPrefName"
 		id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
@@ -285,11 +285,21 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
-   <page name="%javaDebugPrefName"
+	<page name="%javaDebugPrefName"
          id="org.eclipse.jdt.ui.JavaDebugPreferencePage"   
 	     class="org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage"
          category="org.eclipse.debug.ui.DebugPreferencePage">
-   </page>	
+	</page>	
+	<page name="%templatePageName"
+		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
+	<page name="%workInProgressPageName"
+		id = "org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
 </extension>
 
 <extension
@@ -574,16 +584,6 @@
 <!-- =========================================================================== -->
 <!-- Java Launching and debugging                                                -->
 <!-- =========================================================================== -->
-
-
-<extension point = "org.eclipse.ui.preferencePages">
-	<page
-		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
-		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
-		name= "%templatePageName"
-		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
-	</page>
-</extension>
 
 <extension
 	point= "org.eclipse.ui.resourceFilters">
