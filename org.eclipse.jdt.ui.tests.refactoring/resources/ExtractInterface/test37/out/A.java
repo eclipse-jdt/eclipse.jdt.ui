@@ -5,6 +5,9 @@ class A implements I {
 	public void m1() {}
 	void test(){
 		I a0= new A();
-		I a1= a0;
+		f(a0);
+	}
+	void f(I a){
+		a.m();
 	}
 }

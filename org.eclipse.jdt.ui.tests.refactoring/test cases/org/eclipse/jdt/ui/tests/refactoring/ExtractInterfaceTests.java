@@ -278,6 +278,18 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", "I", names, signatures, true);
 	}
 
+	public void test36() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test37() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}

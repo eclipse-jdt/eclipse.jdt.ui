@@ -4,7 +4,10 @@ class A implements I {
 	public void m() {}
 	public void m1() {}
 	void test(){
-		I a0= new A();
-		I a1= a0;
+		A a0= new A();
+		f(a0);
+	}
+	void f(A a){
+		a.m1();
 	}
 }
