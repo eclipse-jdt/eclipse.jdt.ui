@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -184,7 +187,7 @@ public class QuickFixTest extends TestCase {
 		
 		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
 		try {
-			wc.reconcile(true, null);
+			wc.reconcile(false, true, wc.getOwner(), null);
 		} finally {
 			wc.discardWorkingCopy();
 		}
@@ -245,7 +248,34 @@ public class QuickFixTest extends TestCase {
 	protected final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
 		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class };
 		return collectAssists(context, filteredTypes);
-	}	
+	}
+	
+	protected CompilationUnit getASTRoot(ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null);
+	}
+	
+	protected void assertNumberOfProposals(List proposals, int expectedProposals) {
+		if (proposals.size() != expectedProposals) {
+			StringBuffer buf= new StringBuffer();
+			buf.append("Wrong number of proposals, is: ").append(proposals.size()). append(", expected: ").append(expectedProposals).append('\n');
+			for (int i= 0; i < proposals.size(); i++) {
+				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				buf.append(" - ").append(curr.getDisplayString()).append('\n');
+				if (curr instanceof CUCorrectionProposal) {
+					appendSource(((CUCorrectionProposal) curr), buf);
+				}
+			}
+			assertTrue(buf.toString(), false);
+		}
+	}
+	
+	private void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
+		
+	}
+	
 	
 	
 }

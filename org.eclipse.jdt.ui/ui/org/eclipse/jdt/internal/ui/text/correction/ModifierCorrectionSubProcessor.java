@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
@@ -38,6 +39,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_VISIBLE= 2;
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
+	public static final int TO_NON_FINAL= 5;
 	
 	public static void addNonAccessibleMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -75,45 +77,56 @@ public class ModifierCorrectionSubProcessor {
 				break;
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				binding= ((SuperConstructorInvocation) selectedNode).resolveConstructorBinding();
-				break;							
+				break;
 			default:
 				return;
 		}
 		ITypeBinding typeBinding= null;
 		String name;
+		boolean isLocalVar= false;
 		if (binding instanceof IMethodBinding) {
 			typeBinding= ((IMethodBinding) binding).getDeclaringClass();
 			name= binding.getName() + "()"; //$NON-NLS-1$
 		} else if (binding instanceof IVariableBinding) {
 			typeBinding= ((IVariableBinding) binding).getDeclaringClass();
 			name= binding.getName();
+			isLocalVar= !((IVariableBinding) binding).isField();
 		} else if (binding instanceof ITypeBinding) {
 			typeBinding= (ITypeBinding) binding;
 			name= binding.getName();
 		} else {
 			return;
 		}
-		if (typeBinding != null && typeBinding.isFromSource()) {
+		if (typeBinding != null && typeBinding.isFromSource() || isLocalVar) {
 			int includedModifiers= 0;
 			int excludedModifiers= 0;
 			String label;
-			if (kind == TO_VISIBLE) {
-				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
-				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
-				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) }); //$NON-NLS-1$
-			} else if (kind == TO_STATIC) {			
-				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name); //$NON-NLS-1$
-				includedModifiers= Modifier.STATIC;
-			} else if (kind == TO_NON_STATIC) {			
-				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertononstatic.description", name); //$NON-NLS-1$
-				excludedModifiers= Modifier.STATIC;
-			} else if (kind == TO_NON_PRIVATE) {			
-				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertodefault.description", name); //$NON-NLS-1$
-				excludedModifiers= Modifier.PRIVATE;
-			} else {
-				return;
+			switch (kind) {
+				case TO_VISIBLE:
+					excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+					includedModifiers= getNeededVisibility(selectedNode, typeBinding);
+					label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) }); //$NON-NLS-1$
+					break;
+				case TO_STATIC:
+					label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name); //$NON-NLS-1$
+					includedModifiers= Modifier.STATIC;
+					break;
+				case TO_NON_STATIC:
+					label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertononstatic.description", name); //$NON-NLS-1$
+					excludedModifiers= Modifier.STATIC;
+					break;
+				case TO_NON_PRIVATE:			
+					label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertodefault.description", name); //$NON-NLS-1$
+					excludedModifiers= Modifier.PRIVATE;
+					break;
+				case TO_NON_FINAL:	
+					label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertononfinal.description", name); //$NON-NLS-1$
+					excludedModifiers= Modifier.FINAL;
+					break;
+				default:
+					return;
 			}
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
+			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
@@ -125,6 +138,36 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 	}
+	
+	public static void addOverridesFinalProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		
+		IMethodBinding method= ((MethodDeclaration) selectedNode).resolveBinding();
+		ITypeBinding curr= method.getDeclaringClass();
+		IMethodBinding overridden= null;
+		while (overridden == null && curr.getSuperclass() != null) {
+			curr= curr.getSuperclass();
+			overridden= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
+		}
+		if (overridden == null) {
+			return;
+		}
+		
+		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), curr);
+		if (targetCU != null) {
+			String methodName= curr.getName() + '.' + overridden.getName();
+			
+			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononfinal.description", methodName); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overridden, selectedNode, 0, Modifier.FINAL, 9, image));
+		}
+	}
+	
 	
 	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();

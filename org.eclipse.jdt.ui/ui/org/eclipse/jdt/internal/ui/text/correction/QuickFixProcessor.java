@@ -117,11 +117,14 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocMissingParamTag:
 			case IProblem.JavadocMissingReturnTag:
 			case IProblem.JavadocMissingThrowsTag:
-			case IProblem.UndefinedType + IProblem.Javadoc:
-			case IProblem.AmbiguousType + IProblem.Javadoc:
-			case IProblem.NotVisibleType + IProblem.Javadoc:
-			//case IProblem.UndefinedMethod + IProblem.Javadoc:
-			//case IProblem.ParameterMismatch + IProblem.Javadoc:
+			case IProblem.JavadocUndefinedType:
+			case IProblem.JavadocAmbiguousType:
+			case IProblem.JavadocNotVisibleType:
+			case IProblem.NonBlankFinalLocalAssignment:
+			case IProblem.DuplicateFinalLocalInitialization:
+			case IProblem.FinalFieldAssignment:
+			case IProblem.DuplicateBlankFinalFieldInitialization:
+			case IProblem.FinalMethodCannotBeOverridden: 
 				return true;
 			default:
 				return false;
@@ -205,7 +208,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SuperclassAmbiguous:
 			case IProblem.InterfaceAmbiguous:
 			case IProblem.AmbiguousType:
-			case IProblem.AmbiguousType + IProblem.Javadoc:
+			case IProblem.JavadocAmbiguousType:
 				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, problem, proposals);
 				break;	
 			case IProblem.PublicClassMustMatchFileName:
@@ -221,7 +224,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SuperclassNotFound:
 			case IProblem.ExceptionTypeNotFound:
 			case IProblem.InterfaceNotFound: 
-			case IProblem.UndefinedType + IProblem.Javadoc:
+			case IProblem.JavadocUndefinedType:
 				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;	
 			case IProblem.TypeMismatch:
@@ -256,7 +259,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
 				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, 5); 
-				break;				
+				break;
+			case IProblem.NonBlankFinalLocalAssignment:
+			case IProblem.DuplicateFinalLocalInitialization:
+			case IProblem.FinalFieldAssignment:
+			case IProblem.DuplicateBlankFinalFieldInitialization:
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, 9); 
+				break;
+			case IProblem.FinalMethodCannotBeOverridden:
+				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals);
+				break;			
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
@@ -268,7 +280,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
-			case IProblem.NotVisibleType + IProblem.Javadoc:
+			case IProblem.JavadocNotVisibleType:
 				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10); 
 				break;
 			case IProblem.BodyForAbstractMethod:
