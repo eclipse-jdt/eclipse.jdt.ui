@@ -128,7 +128,7 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	 */
 	protected void configureResultCollector(IJavaProject project, ITextSelection selection, int editorOffset) {
 		fCollector.reset(project, null);
-		fCollector.setReplacementOffset(editorOffset);	
+		fCollector.setReplacementOffsetDifference(-editorOffset);	
 		if (selection.getLength() != 0) {
 			fCollector.setReplacementLength(selection.getLength());
 		} 

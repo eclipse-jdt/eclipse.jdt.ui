@@ -58,7 +58,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	};
 	
 	private int fUserReplacementLength;
-	private int fUserReplacementOffset;
+	private int fUserReplacementOffsetDiff;
 	
 	
 	/*
@@ -327,8 +327,8 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		} else {
 			length= fUserReplacementLength;
 		}
-		if (fUserReplacementOffset != -1) {
-			start= fUserReplacementOffset;
+		if (fUserReplacementOffsetDiff != 0) {
+			start+= fUserReplacementOffsetDiff;
 		}
 		
 		Image icon= null;
@@ -350,7 +350,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fCompilationUnit= cu;
 		
 		fUserReplacementLength= -1;
-		fUserReplacementOffset= -1;
+		fUserReplacementOffsetDiff= 0;
 		
 		fLastProblem= null;
 		
@@ -368,12 +368,14 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 
 	/**
-	 * If the replacement offset is set, it overrides the offset used for the content assist.
+	 * If the replacement offset diff is set, it is added to the replacement offset for the proposals
 	 * Use this setting if the code assist proposals generated will be applied on a document different than
 	 * the one used for evaluating the code assist.
+	 * If you invoke a code assist at position x but want to have it applied to pos y, the diff would be y - x
+	 * @param diff The offset difference
 	 */
-	public void setReplacementOffset(int offset) {
-		fUserReplacementOffset= offset;
+	public void setReplacementOffsetDifference(int diff) {
+		fUserReplacementOffsetDiff= diff;
 	}
 
 }
