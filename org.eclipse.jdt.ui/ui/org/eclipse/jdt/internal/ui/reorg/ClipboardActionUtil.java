@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -35,7 +34,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -132,17 +130,6 @@ class ClipboardActionUtil {
 		}
 		return result;
 	}	
-
-
-	static boolean canActivate(Refactoring ref){
-		try {
-			return ref.checkActivation(new NullProgressMonitor()).isOK();
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, ReorgMessages.getString("ReorgAction.reorganize"), ReorgMessages.getString("ReorgAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
-			return false;
-		}	
-	}
-
 
 	static MultiStatus perform(Refactoring ref) throws JavaModelException{	
 		PerformChangeOperation op= new PerformChangeOperation(new CreateChangeOperation(ref, CreateChangeOperation.CHECK_NONE));
