@@ -122,7 +122,7 @@ public class WorkingSetFilter extends ViewerFilter {
 		return false;
 	}
 	
-	private boolean isEnclosing(IJavaElement element) {
+	public boolean isEnclosing(IJavaElement element) {
 		IAdaptable[] cachedWorkingSet= fCachedWorkingSet;
 		if (cachedWorkingSet == null)
 			cachedWorkingSet= fWorkingSet.getElements();
@@ -204,4 +204,5 @@ public class WorkingSetFilter extends ViewerFilter {
 		
 		return false;
 	}
+	
 }

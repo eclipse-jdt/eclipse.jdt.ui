@@ -17,6 +17,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -40,14 +41,15 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
 	protected IMember[] fMemberFilter;
-	protected boolean fShowAllTypes;
 	
 	protected TreeViewer fViewer;
+
+	private ViewerFilter fWorkingSetFilter;
 	
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy= lifecycle;
 		fMemberFilter= null;
-		fShowAllTypes= false;
+		fWorkingSetFilter= null;
 	}
 	
 	/**
@@ -68,13 +70,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 	
 	/**
-	 * In member filtering mode, show all types even if they do not contain one
-	 * of the filtered members
+	 * Sets a filter representing a working set or <code>null</code> if working sets are disabled.
 	 */
-	public void showAllTypes(boolean show) {
-		fShowAllTypes= show;
+	public void setWorkingSetFilter(ViewerFilter filter) {
+		fWorkingSetFilter= filter;
 	}
-	
+		
 	
 	protected final ITypeHierarchy getHierarchy() {
 		return fTypeHierarchy.getHierarchy();
@@ -115,6 +116,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 */	
 	protected abstract IType getParentType(IType type);	
 	
+	
+	private boolean isInWorkingSet(Object element) {
+		return fWorkingSetFilter != null && fWorkingSetFilter.select(null, null, element);
+	}
+	
 	/*
 	 * Called for the tree children.
 	 * @see ITreeContentProvider#getChildren
@@ -124,14 +130,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			IType type= (IType)element;
 			IType[] childrenTypes= getTypesInHierarchy(type);
 				
+			List children= new ArrayList();
 			if (fMemberFilter != null) {
-				List children= new ArrayList();
 				addFilteredMembers(type, children);
-				addFilteredTypes(childrenTypes, children);
-				return children.toArray();
-			} else {
-				return childrenTypes;
-			}			
+			}
+			addFilteredTypes(childrenTypes, children);
+			
+			return children.toArray();
 		}
 		return NO_ELEMENTS;
 	}
@@ -141,25 +146,17 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 */
 	public boolean hasChildren(Object element) {
 		if (element instanceof IType) {
-			IType type= (IType)element;
-			if (fMemberFilter != null) {
-				try {
-					return hasFilteredChildren(type);
-				} catch (JavaModelException e) {
-					return false;
-				}
-			} else {
-				IType[] childrenTypes= getTypesInHierarchy(type);
-				return childrenTypes.length > 0;
-			}				
+			try {
+				return hasFilteredChildren((IType) element);
+			} catch (JavaModelException e) {
+				return false;
+			}			
 		}
 		return false;
 	}	
 	
-	private void addFilteredMembers(IType origType, List children) {
-		try {
-			IType parent= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(origType) : origType;
-			
+	private void addFilteredMembers(IType parent, List children) {
+		try {		
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
 				IMember member= fMemberFilter[i];
@@ -192,26 +189,30 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 	}
 	
-	private boolean hasFilteredChildren(IType origType) throws JavaModelException {
-		if (fShowAllTypes) {
-			return true;
-		}
-		IType type= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(origType) : origType;
+
+	private boolean hasFilteredChildren(IType type) throws JavaModelException {
 		
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < fMemberFilter.length; i++) {
-			IMember member= fMemberFilter[i];
-			if (type.equals(member.getDeclaringType())) {
-				return true;
-			} else if (member instanceof IMethod) {
-				IMethod curr= (IMethod)member;
-				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
-				if (meth != null) {
-					return true;
+		if (isInWorkingSet(type)) {
+			if (fMemberFilter != null) {
+				IMethod[] methods= type.getMethods();
+				for (int i= 0; i < fMemberFilter.length; i++) {
+					IMember member= fMemberFilter[i];
+					if (type.equals(member.getDeclaringType())) {
+						return true;
+					} else if (member instanceof IMethod) {
+						IMethod curr= (IMethod)member;
+						IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
+						if (meth != null) {
+							return true;
+						}
+					}
 				}
+			} else {
+				return true;
 			}
 		}
-		IType[] childrenTypes= getTypesInHierarchy(origType);
+		
+		IType[] childrenTypes= getTypesInHierarchy(type);
 		for (int i= 0; i < childrenTypes.length; i++) {
 			if (hasFilteredChildren(childrenTypes[i])) {
 				return true;
@@ -247,5 +248,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return null;
 	}
+
+
 	
 }

@@ -18,14 +18,15 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -34,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilter;
 
 /**
  * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
@@ -64,25 +65,38 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 	private Color fGrayedColor;
 	private Color fSpecialColor;
-	private boolean fShowDefiningType;
+
+	private ViewerFilter fFilter;
+	
 	private TypeHierarchyLifeCycle fHierarchy;
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
-		fShowDefiningType= false;
+		fFilter= null;
 		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
-	
-	public void setShowDefiningType(boolean showDefiningType) {
-		fShowDefiningType= showDefiningType;
+				
+
+	/**
+	 * @return Returns the filter.
+	 */
+	public ViewerFilter getFilter() {
+		return fFilter;
 	}
-	
-	public boolean isShowDefiningType() {
-		return fShowDefiningType;
-	}	
-			
+
+	/**
+	 * @param filter The filter to set.
+	 */
+	public void setFilter(ViewerFilter filter) {
+		fFilter= filter;
+	}
+
 	protected boolean isDifferentScope(IType type) {
+		if (fFilter != null && !fFilter.select(null, null, type)) {
+			return true;
+		}
+		
 		IJavaElement input= fHierarchy.getInputElement();
 		if (input == null || input.getElementType() == IJavaElement.TYPE) {
 			return false;
@@ -99,49 +113,11 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return true;
 	}
 	
-	private IType getDefiningType(Object element) throws JavaModelException {
-		int kind= ((IJavaElement) element).getElementType();
-	
-		if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
-			return null;
-		}
-		IType declaringType= (IType) JavaModelUtil.toOriginal(((IMember) element).getDeclaringType());
-		if (kind != IJavaElement.METHOD) {
-			return declaringType;
-		}
-		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
-		if (hierarchy == null) {
-			return declaringType;
-		}
-		IMethod method= (IMethod) element;
-		int flags= method.getFlags();
-		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
-			return declaringType;
-		}
-		IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), false);
-		if (res == null || method.equals(res)) {
-			return declaringType;
-		}
-		return res.getDeclaringType();
-	}
-
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
 	 */ 	
 	public String getText(Object element) {
 		String text= super.getText(element);
-		if (fShowDefiningType) {
-			try {
-				IType type= getDefiningType(element);
-				if (type != null) {
-					StringBuffer buf= new StringBuffer(super.getText(type));
-					buf.append(JavaElementLabels.CONCAT_STRING);
-					buf.append(text);
-					return buf.toString();			
-				}
-			} catch (JavaModelException e) {
-			}
-		}
 		return decorateText(text, element);
 	}	
 	

@@ -38,6 +38,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.MoveResourceAction;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
@@ -104,6 +105,14 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
+		TreeViewer viewer= part.getViewer();
+		
+		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doWorkingSetChanged(event);
+			}
+		};
+		
 		IWorkbenchPartSite site = fPart.getSite();
 		Shell shell= site.getShell();
 		ISelectionProvider provider= site.getSelectionProvider();
@@ -118,9 +127,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			fBuildActionGroup= new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
-			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater()),
-			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, fPart.getViewer()),
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(JavaUI.ID_PACKAGES, shell, workingSetListener),
+
+			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(part)});
+		
+
+		viewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		FrameList frameList= new FrameList(frameSource);
@@ -149,6 +162,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	public void dispose() {
 		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
 		provider.removeSelectionChangedListener(this);
+		
 		super.dispose();
 	}
 	
@@ -167,15 +181,15 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		IActionBars actionBars= fPart.getViewSite().getActionBars();
 		if (size == 1 && element instanceof IResource) {
 			if (fLastElement != RESOURCE) {		// fLastAction in a work around for http://bugs.eclipse.org/bugs/show_bug.cgi?id=30508
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, fRenameResourceAction);
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, fMoveResourceAction);
+				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), fRenameResourceAction);
+				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), fMoveResourceAction);
 				actionBars.updateActionBars();
 				fLastElement= RESOURCE;
 			}
 		} else {
 			if (fLastElement != REST) {
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
+				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), null);
+				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), null);
 				actionBars.updateActionBars();
 				fLastElement= REST;
 			}
@@ -214,8 +228,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		// Navigate Go Into and Go To actions.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
+		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
+		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForwardAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_TO_RESOURCE, fGotoResourceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
@@ -337,22 +351,26 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		}
 	}
 	
-	private IPropertyChangeListener createTitleUpdater() {
-		return new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				String property= event.getProperty();
-				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-					IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-					String workingSetName= null;
-					if (workingSet != null)
-						workingSetName= workingSet.getName();
-					fPart.setWorkingSetName(workingSetName);
-					fPart.updateTitle();
-				}
-			}
-		};
-	}
+	
+	private void doWorkingSetChanged(PropertyChangeEvent event) {
+		IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
+		
+		String workingSetName= null;
+		if (workingSet != null)
+			workingSetName= workingSet.getName();
+		fPart.setWorkingSetName(workingSetName);
+		fPart.updateTitle();
 
+		String property= event.getProperty();
+		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+			TreeViewer viewer= fPart.getViewer();
+			viewer.getControl().setRedraw(false);
+			viewer.refresh();
+			viewer.getControl().setRedraw(true);
+		}
+		
+	}
+	
 	private boolean doubleClickGoesInto() {
 		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
 	}

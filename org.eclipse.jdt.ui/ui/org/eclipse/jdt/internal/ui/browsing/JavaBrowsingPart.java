@@ -454,6 +454,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 		if (fActionGroups != null)
 			fActionGroups.dispose();
+		
+		if (fWorkingSetFilterActionGroup != null) {
+			fWorkingSetFilterActionGroup.dispose();
+		}
+		
 		super.dispose();
 	}
 	
@@ -535,14 +540,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (fHasWorkingSetFilter) {
 			String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 			Assert.isNotNull(viewId);
-			IPropertyChangeListener titleUpdater= new IPropertyChangeListener() {
+			IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
-					String property= event.getProperty();
-					if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
-						updateTitle();
+					doWorkingSetChanged(event);
 				}
 			};
-			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(fViewer, viewId, getShell(), titleUpdater);
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(viewId, getShell(), workingSetListener);
+			fViewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
 		}
 	
 		// Custom filter group
@@ -551,6 +555,20 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 		fToggleLinkingAction= new ToggleLinkingAction(this);
 	}
+	
+	private void doWorkingSetChanged(PropertyChangeEvent event) {
+		String property= event.getProperty();
+		if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+			updateTitle();
+		else	if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+			updateTitle();
+			fViewer.getControl().setRedraw(false);
+			fViewer.refresh();
+			fViewer.getControl().setRedraw(true);
+		}
+			
+	}
+	
 	
 	/**
 	 * Returns the shell to use for opening dialogs.
@@ -1278,10 +1296,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected void setCustomFiltersActionGroup(CustomFiltersActionGroup customFiltersActionGroup) {
 		fCustomFiltersActionGroup= customFiltersActionGroup;
-	}
-
-	protected void setWorkingSetFilterActionGroup(WorkingSetFilterActionGroup workingSetFilterActionGroup) {
-		fWorkingSetFilterActionGroup= workingSetFilterActionGroup;
 	}
 
 	protected boolean hasCustomFilter() {

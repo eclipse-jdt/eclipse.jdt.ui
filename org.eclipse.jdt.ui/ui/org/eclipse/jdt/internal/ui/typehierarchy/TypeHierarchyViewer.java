@@ -22,6 +22,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -109,10 +110,16 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			return contentProvider.getMemberFilter() != null;
 		}
 		return false;
-		
-		
 	}
-		
+
+	public void setWorkingSetFilter(ViewerFilter filter) {
+		fLabelProvider.setFilter(filter);
+		TypeHierarchyContentProvider contentProvider= getHierarchyContentProvider();
+		if (contentProvider != null) {
+			contentProvider.setWorkingSetFilter(filter);
+		}		
+	}
+	
 	/**
 	 * Returns true if the hierarchy contains elements. Returns one of them
 	 * With member filtering it is possible that no elements are visible

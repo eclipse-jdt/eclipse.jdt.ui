@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IContributionItem;
@@ -27,17 +25,17 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
+
 /**
  * Working set filter actions (set / clear)
  * 
@@ -49,7 +47,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
 	private static final String SEPARATOR_ID= "workingSetGroupSeparator"; //$NON-NLS-1$
 
-	private StructuredViewer fViewer;
 	private WorkingSetFilter fWorkingSetFilter;
 	
 	private IWorkingSet fWorkingSet= null;
@@ -58,24 +55,38 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private SelectWorkingSetAction fSelectWorkingSetAction;
 	private EditWorkingSetAction fEditWorkingSetAction;
 	
-	private IPropertyChangeListener fTitleUpdater;
+	private IPropertyChangeListener fWorkingSetListener;
+	
+	private IPropertyChangeListener fChangeListener;
 	
 	private int fLRUMenuCount;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
 
-	public WorkingSetFilterActionGroup(StructuredViewer viewer, String viewId, Shell shell, IPropertyChangeListener titleUpdater) {
-		Assert.isNotNull(viewer);
+	public WorkingSetFilterActionGroup(String viewId, Shell shell, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(viewId);
 		Assert.isNotNull(shell);
+		Assert.isNotNull(changeListener);
 
-		fViewer= viewer;
-		fTitleUpdater= titleUpdater;
+		fChangeListener= changeListener;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
-		addWorkingSetChangeSupport();
+
+		fWorkingSetListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doPropertyChange(event);
+			}
+		};
+
+		fWorkingSetFilter= new WorkingSetFilter();
+
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		manager.addPropertyChangeListener(fWorkingSetListener);
+		
 	}
+
+
 
 	/**
 	 * Returns the working set which is used by the filter.
@@ -92,23 +103,16 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	 * @param workingSet the working set
 	 * @param refreshViewer Indiactes if the viewer should be refreshed.
 	 */
-	public void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer){
+	public void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer) {
 		// Update action
 		fClearWorkingSetAction.setEnabled(workingSet != null);
 		fEditWorkingSetAction.setEnabled(workingSet != null);
 
 		fWorkingSet= workingSet;
 
-		// Update viewer
-		if (fWorkingSetFilter != null) {
-			fWorkingSetFilter.setWorkingSet(workingSet);	
-			if (refreshViewer) {
-				fViewer.getControl().setRedraw(false);
-				fViewer.refresh();
-				fViewer.getControl().setRedraw(true);
-			}
-			if (fTitleUpdater != null)
-				fTitleUpdater.propertyChange(new PropertyChangeEvent(this, IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE, null, workingSet));
+		fWorkingSetFilter.setWorkingSet(workingSet);
+		if (refreshViewer) {
+			fChangeListener.propertyChange(new PropertyChangeEvent(this, IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE, null, workingSet));
 		}
 	}
 	
@@ -200,52 +204,37 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	public void dispose() {
 		if (fMenuManager != null)
 			fMenuManager.removeMenuListener(fMenuListener);
+		
+		if (fWorkingSetListener != null) {
+			PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(fWorkingSetListener);
+			fWorkingSetListener= null;
+		}
+		fChangeListener= null; // clear the reference to the viewer
+		
 		super.dispose();
 	}
 	
-	private IPropertyChangeListener addWorkingSetChangeSupport() {
-		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
-
-		fWorkingSetFilter= new WorkingSetFilter();
-		fViewer.addFilter(fWorkingSetFilter);
-
-		// Register listener on working set manager
-		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(propertyChangeListener);
-		
-		// Register dispose listener which removes the listeners
-		fViewer.getControl().addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(propertyChangeListener);
-			}
-		});
-		
-		return propertyChangeListener;		
+	/**
+	 * @return Returns viewer filter always confugured with the current working set. 
+	 */
+	public ViewerFilter getWorkingSetFilter() {
+		return fWorkingSetFilter;
 	}
-
-	private IPropertyChangeListener createWorkingSetChangeListener() {
-		return new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				String property= event.getProperty();
-				IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
-				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)) {
-
-					fWorkingSetFilter.setWorkingSet(newWorkingSet);	
-
-					fViewer.getControl().setRedraw(false);
-					fViewer.refresh();
-					if (fTitleUpdater != null)
-						fTitleUpdater.propertyChange(new PropertyChangeEvent(this, IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE, null, newWorkingSet));
-					fViewer.getControl().setRedraw(true);
-				} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-					if (fTitleUpdater != null)
-						fTitleUpdater.propertyChange(event);
-				} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property) 
-						&& newWorkingSet.equals(fWorkingSetFilter.getWorkingSet())) {
-					fViewer.getControl().setRedraw(false);
-					fViewer.refresh();
-					fViewer.getControl().setRedraw(true);
-				}
+		
+	/*
+	 * Called by the working set change listener
+	 */
+	private void doPropertyChange(PropertyChangeEvent event) {
+		String property= event.getProperty();
+		if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+			fChangeListener.propertyChange(event);
+		} else if  (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+			IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
+			if (newWorkingSet.equals(fWorkingSet)) {
+				fChangeListener.propertyChange(event);
 			}
-		};
+		}
 	}
+	
+	
 }

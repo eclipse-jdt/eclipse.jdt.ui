@@ -63,6 +63,7 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
@@ -114,6 +115,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -200,6 +202,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private CCPActionGroup fCCPActionGroup;
 	private SelectAllAction fSelectAllAction;
 	
+	private WorkingSetFilterActionGroup fWorkingSetActionGroup;
+	
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
 		fInputElement= null;
@@ -250,7 +254,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fShowQualifiedTypeNamesAction= new ShowQualifiedTypeNamesAction(this, false);
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
-				
+		
 		fPaneLabelProvider= new JavaUILabelProvider();
 		
 		fAddStubAction= new AddMethodStubAction();
@@ -303,11 +307,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param event
 	 */
 	protected void doPropertyChange(PropertyChangeEvent event) {
+		String property= event.getProperty();
 		if (fMethodsViewer != null) {
-			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
+			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)) {
 				fMethodsViewer.refresh();
 			}
 		}
+		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+			updateHierarchyViewer(true);
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+			
+		}
+		
+		
 	}
 	
 		
@@ -534,6 +546,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		if (fActionGroups != null)
 			fActionGroups.dispose();
+		
+		if (fWorkingSetActionGroup != null) {
+			fWorkingSetActionGroup.dispose();
+		}
+		
 		super.dispose();
 	}
 		
@@ -631,6 +648,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}, cotextHelpId,	getSite());
 		typesViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 		typesViewer.setQualifiedTypeName(isShowQualifiedTypeNames());
+		typesViewer.setWorkingSetFilter(fWorkingSetActionGroup.getWorkingSetFilter());
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
@@ -685,6 +703,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public void createPartControl(Composite container) {
 						
 		fPagebook= new PageBook(container, SWT.NONE);
+		fWorkingSetActionGroup= new WorkingSetFilterActionGroup(JavaUI.ID_TYPE_HIERARCHY, container.getShell(), fPropertyChangeListener);
 						
 		// page 1 of pagebook (viewers)
 
@@ -692,7 +711,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fTypeMethodsSplitter.setVisible(false);
 
 		fTypeViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
-				
+						
 		Control typeViewerControl= createTypeViewerControl(fTypeViewerViewForm);
 		fTypeViewerViewForm.setContent(typeViewerControl);
 				
@@ -746,8 +765,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			viewMenu.add(fViewActions[i]);
 		}
 		viewMenu.add(new Separator());
+		
+		fWorkingSetActionGroup.contributeToMenu(viewMenu);
+		
+		viewMenu.add(new Separator());
+		
+		IMenuManager layoutSubMenu= new MenuManager(TypeHierarchyMessages.getString("TypeHierarchyViewPart.layout.submenu")); //$NON-NLS-1$
+		viewMenu.add(layoutSubMenu);
 		for (int i= 0; i < fToggleOrientationActions.length; i++) {
-			viewMenu.add(fToggleOrientationActions[i]);
+			layoutSubMenu.add(fToggleOrientationActions[i]);
 		}
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		viewMenu.add(fShowQualifiedTypeNamesAction);
@@ -787,6 +813,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		
+		
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new NewWizardsActionGroup(this.getSite()),
 				new OpenEditorActionGroup(this), 
@@ -794,7 +821,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fCCPActionGroup= new CCPActionGroup(this), 
 				new GenerateActionGroup(this),
 				new RefactorActionGroup(this),
-				new JavaSearchActionGroup(this)});
+				new JavaSearchActionGroup(this)
+		});
 		
 		fActionGroups.fillActionBars(actionBars);
 		fSelectAllAction= new SelectAllAction(fMethodsViewer);
@@ -1319,6 +1347,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (selection != null) {
 			memento.putString(TAG_SELECTION, selection.getHandleIdentifier());
 		}
+		
+		fWorkingSetActionGroup.saveState(memento);
 			
 		fMethodsViewer.saveState(memento);
 		
@@ -1334,6 +1364,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void restoreState(IMemento memento, IJavaElement defaultInput) {
 		IJavaElement input= defaultInput;
+		
+		fWorkingSetActionGroup.restoreState(memento);
+		
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
 			input= JavaCore.create(elementId);
@@ -1366,6 +1399,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				bar.setSelection(vScroll.intValue());
 			}
 		}
+		
+
 		
 		//String selectionId= memento.getString(TAG_SELECTION);
 		// do not restore type hierarchy contents

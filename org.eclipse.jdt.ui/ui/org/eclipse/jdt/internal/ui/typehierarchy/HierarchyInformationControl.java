@@ -73,38 +73,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class HierarchyInformationControl extends AbstractInformationControl {
 	
-	private class HierarchyInformationControlLabelProvider extends HierarchyLabelProvider {
-
-		public HierarchyInformationControlLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
-			super(lifeCycle);
-		}
-				
-		protected boolean isDifferentScope(IType type) {
-			if (fFocus == null) {
-				return super.isDifferentScope(type);
-			}
-			IMethod[] methods= type.findMethods(fFocus);
-			if (methods != null && methods.length > 0) {
-				try {
-					// check visibility
-					IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-					for (int i= 0; i < methods.length; i++) {
-						IMethod curr= methods[i];
-						if (JavaModelUtil.isVisibleInHierarchy(curr, pack)) {
-							return false;
-						}
-					}
-				} catch (JavaModelException e) {
-					// ignore
-					JavaPlugin.log(e);
-				}
-			}
-			return true;			
-		}	
-	}
-	
 	private TypeHierarchyLifeCycle fLifeCycle;
-	private HierarchyInformationControlLabelProvider fLabelProvider;
+	private HierarchyLabelProvider fLabelProvider;
 	private Label fHeaderLabel;
 	private Label fStatusTextLabel;
 	private Font fStatusTextFont;
@@ -200,7 +170,12 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		treeViewer.setSorter(new HierarchyViewerSorter(fLifeCycle));
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 
-		fLabelProvider= new HierarchyInformationControlLabelProvider(fLifeCycle);
+		fLabelProvider= new HierarchyLabelProvider(fLifeCycle);
+		fLabelProvider.setFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return hasFocusMethod((IType) element);
+			}
+		});	
 
 		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
 		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
@@ -236,6 +211,30 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		return treeViewer;
 	}
 	
+	protected boolean hasFocusMethod(IType type) {
+		if (fFocus == null) {
+			return true;
+		}
+		IMethod[] methods= type.findMethods(fFocus);
+		if (methods != null && methods.length > 0) {
+			try {
+				// check visibility
+				IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+				for (int i= 0; i < methods.length; i++) {
+					IMethod curr= methods[i];
+					if (JavaModelUtil.isVisibleInHierarchy(curr, pack)) {
+						return true;
+					}
+				}
+			} catch (JavaModelException e) {
+				// ignore
+				JavaPlugin.log(e);
+			}
+		}
+		return false;			
+		
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setForegroundColor(org.eclipse.swt.graphics.Color)
 	 */
