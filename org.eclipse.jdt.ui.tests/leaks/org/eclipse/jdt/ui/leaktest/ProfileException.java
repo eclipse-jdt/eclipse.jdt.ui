@@ -14,6 +14,8 @@ package org.eclipse.jdt.ui.leaktest;
 
 public class ProfileException extends Exception {
 
+	private static final long serialVersionUID = -7189229935014298072L;
+
 	public ProfileException(String msg, Throwable e) {
 		super(msg, e);
 	}
