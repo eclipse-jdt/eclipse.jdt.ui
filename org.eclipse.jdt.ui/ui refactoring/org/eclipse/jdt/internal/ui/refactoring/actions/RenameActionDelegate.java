@@ -13,7 +13,7 @@ public class RenameActionDelegate extends RefactoringActionDelegate {
 
 	public RenameActionDelegate() {
 		super("Rename", "Operation unavailable on the current selection.\n"
-		       + "Select a java project, source folder, resource, package, compilation unit, type, field, method or local variable.");
+		       + "Select a java project, source folder, resource, package, compilation unit, type, field, method, parameter or a local variable.");
 	}
 	
 	/* (non-Javadoc)
@@ -27,9 +27,9 @@ public class RenameActionDelegate extends RefactoringActionDelegate {
 		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new IRefactoringAction[] {
-			//the sequence is important here
-			new RenameAction(provider),
-			rta
+			//the sequence is important here (see bug 12590)
+			rta,
+			new RenameAction(provider)
 		});
 	}
 }

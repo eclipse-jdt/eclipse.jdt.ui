@@ -4,10 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
@@ -51,7 +54,16 @@ class RenameTempAction extends TextSelectionBasedRefactoringAction{
 	protected boolean canOperateOnCurrentSelection(ISelection selection) {
 		if (!(selection instanceof ITextSelection))
 			return false;
-		return true;
+		
+		//must check it here - see bug 12590
+		//if it's not a local variable - we will try to resolve the symbol as a IJavaElement in rename action
+		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
+		try {
+			return (renameTempRefactoring.checkActivation(new NullProgressMonitor()).isOK());
+		} catch(JavaModelException e) {
+			//ignore the exception
+			return false;
+		}
 	}
 	
 }
