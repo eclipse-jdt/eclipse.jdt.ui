@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -221,9 +223,7 @@ public class SelectionConverter {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;
 			if (cunit.isWorkingCopy()) {
-				synchronized (cunit) {
-					cunit.reconcile();
-				}
+				JavaModelUtil.reconcile(cunit);
 			}
 			IJavaElement ref= cunit.getElementAt(selection.getOffset());
 			if (ref == null)

@@ -10,13 +10,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -31,6 +34,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -41,6 +46,51 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Utility methods for the Java Model.
  */
 public class JavaModelUtil {
+	
+	/**
+	 * Reconciles the given working copy by calling IWorkingCopy.reconcile. Ensures that the
+	 * workspace look gets aquired before the working copy gets syncronized. 
+	 */
+	public static void reconcile(final IWorkingCopy wc, final boolean forceProblemDetection, IProgressMonitor pm) throws JavaModelException {
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				synchronized(wc) {
+					wc.reconcile(forceProblemDetection, monitor);
+				}
+			}
+		};
+		try { 
+			JavaCore.run(runnable, pm);
+		} catch (JavaModelException e) {
+			throw e;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
+	}
+		
+	/**
+	 * Reconciles the given working copy by calling IWorkingCopy.reconcile. Ensures that the
+	 * workspace look gets aquired before the working copy gets syncronized. 
+	 */
+	public static IMarker[] reconcile(final IWorkingCopy wc) throws JavaModelException {
+		class ReconcileRunnable implements IWorkspaceRunnable {
+			public IMarker[] result;
+			public void run(IProgressMonitor monitor) throws CoreException {
+				synchronized(wc) {
+					result= wc.reconcile();
+				}
+			}
+		}
+		ReconcileRunnable runnable= new ReconcileRunnable();
+		try {
+			JavaCore.run(runnable, null);
+		} catch (JavaModelException e) {
+			throw e;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
+		return runnable.result;
+	}
 		
 	/** 
 	 * Finds a type by its qualified type name (dot separated).

@@ -158,12 +158,10 @@ public class SearchUtil extends JavaModelUtil {
 	private static IJavaElement findInWorkingCopy(IWorkingCopy workingCopy, IJavaElement element, boolean reconcile) throws JavaModelException {
 		if (workingCopy != null) {
 			if (reconcile) {
-				synchronized (workingCopy) {
-					workingCopy.reconcile();
-					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
-				}
+				JavaModelUtil.reconcile(workingCopy);
+				return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
 			} else {
-					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
+				return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
 			}
 		}
 		return null;

@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class DeleteSourceReferencesAction extends SourceReferenceAction {
@@ -189,7 +190,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			
 	private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
 		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(ref);
-		cu.reconcile();
+		JavaModelUtil.reconcile(cu);
 		return new DeleteSourceReferenceEdit(ref, cu);
 	}
 	

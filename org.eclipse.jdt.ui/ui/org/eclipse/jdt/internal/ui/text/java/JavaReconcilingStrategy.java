@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -68,9 +70,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					extension.setProgressMonitor(fProgressMonitor);
 				
 				// reconcile
-				synchronized (unit) {
-					unit.reconcile(true, fProgressMonitor);
-				}
+				JavaModelUtil.reconcile(unit, true, fProgressMonitor);
 				
 				/* fix for missing cancel flag communication */
 				if (extension != null)

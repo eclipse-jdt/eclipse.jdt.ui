@@ -66,9 +66,7 @@ public class ImportsStructure implements IImportsStructure {
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
-		synchronized (fCompilationUnit) {
-			fCompilationUnit.reconcile();
-		}
+		JavaModelUtil.reconcile(fCompilationUnit);
 	
 		IImportContainer container= cu.getImportContainer();
 		
@@ -555,9 +553,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param textBuffer The textBuffer
 	 */
 	public TextRange getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
-		synchronized (fCompilationUnit) {
-			fCompilationUnit.reconcile();
-		}
+		JavaModelUtil.reconcile(fCompilationUnit);
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();
