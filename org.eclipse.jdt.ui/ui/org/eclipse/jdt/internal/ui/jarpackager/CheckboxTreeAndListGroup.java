@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -39,7 +39,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
  *	Combines a CheckboxTreeViewer and CheckboxListViewer.
  *	All viewer selection-driven interactions are handled within this viewer
  */
-public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelectionChangedListener, ITreeViewerListener {
+class CheckboxTreeAndListGroup implements ICheckStateListener, ISelectionChangedListener, ITreeViewerListener {
 
 	private Object fRoot;
 	private Object fCurrentTreeSelection;

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
 /**
  * Filters out all packages and folders
  */
-public class ContainerFilter  extends PackageFilter {
+class ContainerFilter  extends PackageFilter {
 	
 	private boolean fFilterContainers;
 	
