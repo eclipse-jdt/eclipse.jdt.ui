@@ -68,6 +68,12 @@
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
 	</perspectiveExtension>
+    <perspectiveExtension 
+    	targetID="org.eclipse.debug.ui.DebugPerspective"> 
+    	<view id="org.eclipse.jdt.debug.ui.DisplayView" 
+        	relative="org.eclipse.debug.ui.InspectorView" 
+    		relationship="stack"/> 
+     </perspectiveExtension> 
 </extension>
 
 <extension 
@@ -89,6 +95,13 @@
 		category="org.eclipse.jdt.ui.java"
 	   	icon="icons/full/cview16/class_hi.gif"
 		class="org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart">
+	</view>
+	<view
+		id="org.eclipse.jdt.debug.ui.DisplayView"
+		name="Display"
+		category="org.eclipse.debug.ui"
+	   	icon="icons/full/ctool16/disp_sbook.gif"
+	   	class="org.eclipse.jdt.internal.debug.ui.display.DisplayView">
 	</view>
 </extension>
 
