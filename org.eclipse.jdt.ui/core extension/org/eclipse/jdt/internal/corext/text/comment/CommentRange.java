@@ -212,6 +212,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	
 	/*
 	 * @see java.lang.Object#toString()
+	 * @since 3.1
 	 */
 	public String toString() {
 		List attributes= new ArrayList();
