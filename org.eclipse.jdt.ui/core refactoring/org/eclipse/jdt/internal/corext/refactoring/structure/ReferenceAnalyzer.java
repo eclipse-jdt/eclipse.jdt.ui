@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -79,7 +81,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 		if (isMovedMember(node.resolveBinding())) {
 			if (node.getParent() instanceof ImportDeclaration) {
 				fCuRewrite.getImportRewrite().removeImport(node.resolveTypeBinding());
-				fCuRewrite.getImportRewrite().addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
+				String imp= fCuRewrite.getImportRewrite().addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
+				fCuRewrite.getImportRemover().registerAddedImport(imp);
 			} else {
 				rewrite(node, fTarget);
 			}
@@ -115,5 +118,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 		if (isMovedMember(node.resolveBinding()))
 			rewrite(node, fTarget);
 		return false;
+	}
+
+	public boolean visit(AnnotationTypeDeclaration node) {
+		if (isMovedMember(node.resolveBinding()))
+			return false;
+		return super.visit(node);
+	}
+
+	public boolean visit(EnumDeclaration node) {
+		if (isMovedMember(node.resolveBinding()))
+			return false;
+		return super.visit(node);
 	}
 }

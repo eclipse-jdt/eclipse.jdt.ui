@@ -41,7 +41,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -124,6 +127,16 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				return true;
 			if (!fDefined.contains(binding))
 				fResult.add(binding);
+			return true;
+		}
+
+		public boolean visit(AnnotationTypeDeclaration node) {
+			fDefined.add(node.resolveBinding());
+			return true;
+		}
+
+		public boolean visit(EnumDeclaration node) {
+			fDefined.add(node.resolveBinding());
 			return true;
 		}
 	}
@@ -868,8 +881,8 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers) {
 						ModifierRewrite.create(fSource.getASTRewrite(), fieldDecl).setModifiers(psfModifiers, null);
 					}
-				} else if (declaration instanceof TypeDeclaration) {
-					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
+				} else if (declaration instanceof AbstractTypeDeclaration) {
+					AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						ModifierRewrite.create(fSource.getASTRewrite(), typeDecl).setModifiers(typeDecl.getModifiers() | psModifiers, null);
@@ -913,8 +926,8 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		TypeDeclaration destination= getDestinationDeclaration();
-		ListRewrite containerRewrite= fTarget.getASTRewrite().getListRewrite(destination, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		AbstractTypeDeclaration destination= getDestinationDeclaration();
+		ListRewrite containerRewrite= fTarget.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty());
 		
 		TextEditGroup delete= fSource.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.deleteMembers")); //$NON-NLS-1$
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
@@ -958,10 +971,10 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return result;
 	}
 	
-	private TypeDeclaration getDestinationDeclaration() throws JavaModelException {
-		return (TypeDeclaration)
+	private AbstractTypeDeclaration getDestinationDeclaration() throws JavaModelException {
+		return (AbstractTypeDeclaration)
 			ASTNodes.getParent(
 				NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
-				TypeDeclaration.class);
+				AbstractTypeDeclaration.class);
 	}
 }

@@ -76,8 +76,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			}
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fCuRewrite.getOldRewrite().createCopyTarget(node.getName());
-			fCuRewrite.getOldRewrite().replace(node, replace, null);
+			SimpleName replace= (SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node.getName());
+			fCuRewrite.getASTRewrite().replace(node, replace, null);
+			fCuRewrite.getImportRemover().registerRemovedNode(node);
 			return false;
 		}
 		return super.visit(node);
@@ -93,7 +94,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fCuRewrite.getOldRewrite().remove(node.getExpression(), null);
+			fCuRewrite.getASTRewrite().remove(node.getExpression(), null);
+			fCuRewrite.getImportRemover().registerRemovedNode(node.getExpression());
 		}	
 		return super.visit(node);
 	}
@@ -111,7 +113,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			
 		} else if (isTargetAccess(binding)) {
 			if (node.getExpression() != null) {
-				fCuRewrite.getOldRewrite().remove(node.getExpression(), null);
+				fCuRewrite.getASTRewrite().remove(node.getExpression(), null);
+				fCuRewrite.getImportRemover().registerRemovedNode(node.getExpression());
 			}
 		}	
 		return super.visit(node);
@@ -130,8 +133,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fCuRewrite.getOldRewrite().createCopyTarget(node.getName());
-			fCuRewrite.getOldRewrite().replace(node, replace, null);
+			SimpleName replace= (SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node.getName());
+			fCuRewrite.getASTRewrite().replace(node, replace, null);
+			fCuRewrite.getImportRemover().registerRemovedNode(node);
 		}	
 		return super.visit(node);
 	}
@@ -147,8 +151,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fCuRewrite.getOldRewrite().createCopyTarget(node.getName());
-			fCuRewrite.getOldRewrite().replace(node, replace, null);
+			SimpleName replace= (SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node.getName());
+			fCuRewrite.getASTRewrite().replace(node, replace, null);
+			fCuRewrite.getImportRemover().registerRemovedNode(node);
 		}	
 		return super.visit(node);
 	}
