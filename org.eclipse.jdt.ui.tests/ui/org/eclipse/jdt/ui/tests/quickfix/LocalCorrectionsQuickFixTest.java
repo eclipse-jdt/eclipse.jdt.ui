@@ -22,8 +22,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
@@ -88,11 +88,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -125,11 +125,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -150,7 +150,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.io.File;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static void goo() {\n");
 		buf.append("    }\n");				
@@ -164,11 +163,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -177,7 +176,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.io.File;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static void goo() {\n");
 		buf.append("    }\n");				
@@ -203,16 +201,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -221,10 +219,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        Thread th= (Thread) o;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -233,7 +231,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        Object th= o;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());		
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	
 	public void testCastMissingInVarDecl2() throws Exception {
@@ -262,16 +262,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -281,10 +281,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("         ArrayList[] lists= (ArrayList[]) c.getLists();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");					
@@ -295,7 +295,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("         List[] lists= c.getLists();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());		
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
 	}	
 	
 	
@@ -312,33 +315,35 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    int time= (int) System.currentTimeMillis();\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    long time= System.currentTimeMillis();\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());		
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}	
 	
 	public void testCastMissingInAssignment() throws Exception {
@@ -358,11 +363,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -397,11 +402,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -419,14 +424,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void foo() {
-	}
+
+	private boolean BUG_24773= false;
+
 	
 	public void testUncaughtException() throws Exception {
-		if (true) {
+		if (BUG_24773) {
 			System.err.println("Disabled. (Bug 24773)");
 			return;
-		}
+		}  
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -445,17 +451,17 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 	
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -467,15 +473,17 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        goo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 		 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");			
 		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
 		buf.append("        try {\n");		
 		buf.append("            goo();\n");
@@ -483,8 +491,246 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");						
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());		
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
+	public void testMultipleUncaughtExceptions() throws Exception {
+		if (BUG_24773) {
+			System.err.println("Disabled. (Bug 24773)");
+			return;
+		}  
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");						
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException, ParseException {\n");
+		buf.append("    }\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 2); // 2 uncaught exceptions
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");						
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException, ParseException {\n");
+		buf.append("    }\n");				
+		buf.append("    public void foo() throws IOException {\n");
+		buf.append("        goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException, ParseException {\n");
+		buf.append("    }\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");		
+		buf.append("        }\n");						
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}	
+	
+	public void testUnneededCatchBlock() throws Exception {
+		if (BUG_24773) {
+			System.err.println("Disabled. (Bug 24773)");
+			return;
+		}  
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");				
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");				
+		buf.append("public class E {\n");
+		buf.append("    public void goo() throws IOException {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnneededCatchBlockSingle() throws Exception {
+		if (BUG_24773) {
+			System.err.println("Disabled. (Bug 24773)");
+			return;
+		}  
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnneededCatchBlockWithFinally() throws Exception {
+		if (BUG_24773) {
+			System.err.println("Disabled. (Bug 24773)");
+			return;
+		}  
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } finally {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("    }\n");			
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo();\n");
+		buf.append("        } finally {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
+	
 	
 	
 }

@@ -23,8 +23,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
 public class ReturnTypeQuickFixTest extends QuickFixTest {
 	
@@ -87,10 +87,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -151,10 +151,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -214,10 +214,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -284,10 +284,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 
@@ -326,10 +326,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -385,10 +385,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -446,10 +446,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 			
@@ -501,10 +501,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -553,10 +553,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -606,10 +606,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -641,10 +641,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -667,6 +667,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] E() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -675,10 +676,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -696,6 +697,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	
 	/*
 	only a compiler error, not a reconciled problem
+	*/
 	
 	public void testMissingReturnStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -711,10 +713,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -730,7 +732,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	*/
+	/**/
 	
 	
 }

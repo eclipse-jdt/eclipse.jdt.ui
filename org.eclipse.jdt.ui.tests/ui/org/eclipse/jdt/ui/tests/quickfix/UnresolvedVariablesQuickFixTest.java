@@ -22,10 +22,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
@@ -54,6 +54,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.IGNORE);		
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -88,12 +89,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -164,12 +165,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -210,10 +211,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 
@@ -275,10 +276,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 
@@ -314,10 +315,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 6);
 		assertCorrectLabels(proposals);
 

@@ -11,9 +11,13 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 
 /**
   */
@@ -55,9 +59,44 @@ public class QuickFixTest extends TestCase {
 		assertTrue("Wrong number of " + name + ", is: " + nProblems + ", expected: " + nProblemsExpected, nProblems == nProblemsExpected);
 	}
 	
-	private static final int printRange= 6;
 	
-	public static void assertEqualString(String str1, String str2) {	
+	public static void assertEqualStringsIgnoreOrder(String[] str1, String[] str2) {
+		boolean hasUnmatched= false;
+		
+		loop1: for (int i= 0; i < str1.length; i++) {
+			String s1= str1[i];
+			for (int k= 0; k < str2.length; k++) {
+				String s2= str2[k];
+				if (s2 != null && s2.equals(s1)) {
+					str2[k]= null;
+					str1[i]= null;
+					continue loop1;
+				}
+			}
+			hasUnmatched= true;
+		}
+		if (hasUnmatched) {
+			StringBuffer buf= new StringBuffer();
+			buf.append("Content not as expected: Content is: \n");
+			for (int i= 0; i < str1.length; i++) {
+				String s1= str1[i];
+				if (s1 != null) {
+					buf.append(s1);
+					buf.append("\n");
+				}
+			}
+			buf.append("Expected contents: \n");
+			for (int i= 0; i < str2.length; i++) {
+				String s2= str2[i];
+				if (s2 != null) {
+					buf.append(s2);
+					buf.append("\n");
+				}
+			}
+		}				
+	}
+	
+	private static int getDiffPos(String str1, String str2) {
 		int len1= Math.min(str1.length(), str2.length());
 		
 		int diffPos= -1;
@@ -70,12 +109,18 @@ public class QuickFixTest extends TestCase {
 		if (diffPos == -1 && str1.length() != str2.length()) {
 			diffPos= len1;
 		}
+		return diffPos;
+	}
+	
+	private static final int printRange= 6;
+	
+	public static void assertEqualString(String str1, String str2) {	
+		int diffPos= getDiffPos(str1, str2);
 		if (diffPos != -1) {
 			int diffAhead= Math.max(0, diffPos - printRange);
 			int diffAfter= Math.min(str1.length(), diffPos + printRange);
 			
 			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
-			
 			assertTrue("Content not as expected: is\n" + str1 + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + str2, false);
 		}
 	}
@@ -119,6 +164,13 @@ public class QuickFixTest extends TestCase {
 			}
 		}
 		return null;
-	}	
+	}
+	
+	public static CorrectionContext getCorrectionContext(ICompilationUnit cu, IProblem problem) {
+		CorrectionContext context= new CorrectionContext(cu);
+		context.initialize(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, problem.getID(), problem.getArguments());
+		return context;
+	}
+	
 	
 }

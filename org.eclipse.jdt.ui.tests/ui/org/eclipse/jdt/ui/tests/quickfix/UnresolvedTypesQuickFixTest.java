@@ -22,9 +22,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
 public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	
@@ -83,11 +83,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));		
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -150,11 +150,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));		
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -220,11 +220,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -278,11 +278,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 4);
 		assertCorrectLabels(proposals);
 
@@ -364,11 +364,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -427,10 +427,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -477,10 +477,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -511,10 +511,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -545,10 +545,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		CorrectionContext context= getCorrectionContext(cu1, problems[0]);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -580,44 +580,47 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 1);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 5);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    double vec= 1.0;\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-				
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String expected1= buf.toString();
 		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    float vec= 1.0;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-
-		proposal= (CUCorrectionProposal) proposals.get(2);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    Float vec= 1.0;\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    float vec= 1.0;\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
 
+		
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
 		newCUWizard.setShowDialog(false);
