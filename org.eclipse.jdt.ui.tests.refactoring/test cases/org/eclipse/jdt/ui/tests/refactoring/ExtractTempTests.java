@@ -170,17 +170,17 @@ public class ExtractTempTests extends RefactoringTest {
 	}	
 	
 	public void test20() throws Exception{
-		printTestDisabledMessage("single method call not used as an expression");
+		printTestDisabledMessage("regression test for bug#11474");
 //		helper1(5, 9, 5, 12, false, false, "temp");
 	}	
 	
 	public void test21() throws Exception{
-		printTestDisabledMessage("single method call not used as an expression");	
+		printTestDisabledMessage("regression test for bug#11474");
 //		helper1(5, 16, 5, 17, false, false, "temp");
 	}	
 	
 	public void test22() throws Exception{
-		printTestDisabledMessage("single method call not used as an expression");	
+		printTestDisabledMessage("regression test for bug#11474");
 //		helper1(6, 13, 6, 16, false, false, "temp");
 	}	
 
@@ -228,6 +228,12 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test32() throws Exception{
 		helper1(4, 16, 4, 22, true, false, "temp");
 	}
+	
+	public void test33() throws Exception{
+		printTestDisabledMessage("regression test for bug#11449");
+//		helper1(4, 19, 4, 33, true, false, "temp");
+	}
+	
 	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
