@@ -9,9 +9,6 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 public class TextEditException extends RuntimeException {
 	
-	private TextEdit fParent;
-	private TextEdit fChild;
-	
 	/** 
 	 * Constructs a new text edit exception without any detail
 	 * message.
@@ -27,7 +24,5 @@ public class TextEditException extends RuntimeException {
 	 */
 	public TextEditException(TextEdit parent, TextEdit child, String message) {
 		super(message);
-		fParent= parent;
-		fChild= child;
 	}
 }
