@@ -333,6 +333,10 @@ class InstanceMethodMover {
 		}
 		
 		protected abstract IVariableBinding getVariable();
+		
+		public IBinding getBinding(){
+			return getVariable();
+		}
 
 		protected RefactoringStatus checkVariableNotWrittenInMethod(Method method) {
 //			IVariableBinding variable= getVariable();
@@ -1139,8 +1143,7 @@ class InstanceMethodMover {
 			return fDeclaringCU;
 		}
 
-		IJavaProject getProject() {
-			// TODO: not used
+		private IJavaProject getProject() {
 			return getDeclaringCU().getJavaProject();
 		}
 		
@@ -1325,7 +1328,7 @@ class InstanceMethodMover {
 			Parameter[] parameters= getParameters();
 			for(int i= 0; i < parameters.length; i++) {
 				if(canAddAsPossibleNewReceiver(parameters[i].getType()))
-					target.add(new ParameterNewReceiver(parameters[i], getDeclaringCU().getJavaProject(), fCodeGenSettings));
+					target.add(new ParameterNewReceiver(parameters[i], getProject(), fCodeGenSettings));
 			}
 		}
 
@@ -1334,7 +1337,7 @@ class InstanceMethodMover {
 			IVariableBinding[] fields= findFieldsOfSelfReadButNotWritten();
 			for(int i= 0; i < fields.length; i++) {
 				if (canAddAsPossibleNewReceiver(fields[i].getType()))
-					target.add(new FieldNewReceiver(fields[i], getDeclaringCU().getJavaProject(), fCodeGenSettings));	
+					target.add(new FieldNewReceiver(fields[i], getProject(), fCodeGenSettings));	
 			}
 		}
 

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -37,7 +38,9 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	public static interface INewReceiver {
 		public String getName();
 		
-		public ITypeBinding getType();		
+		public ITypeBinding getType();
+		
+		public IBinding getBinding();
 		
 		public boolean isField();
 		
@@ -59,6 +62,10 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCodeGenerationSettings= codeGenerationSettings;		
+	}
+	
+	public ICompilationUnit getSourceCU(){
+		return fCU;
 	}
 	
 	/*
