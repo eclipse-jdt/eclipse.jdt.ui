@@ -8,6 +8,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
+/**
+ * JavaUILabelProvider that respects settings from the Appearance preference page.
+ * Triggers a viewer update when a preference changes.
+ */
 public class StandardJavaUILabelProvider extends JavaUILabelProvider implements IPropertyChangeListener {
 
 	public final static int DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES |  JavaElementLabels.M_APP_RETURNTYPE;
@@ -18,15 +22,18 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 
 	/**
 	 * Constructor for StandardJavaUILabelProvider.
-	 * @param textFlags possible text flags
-	 * @param imageFlags possible image flags
+	 * @see JavaUILabelProvider#JavaUILabelProvider
 	 */
 	public StandardJavaUILabelProvider(int textFlags, int imageFlags, IAdornmentProvider[] adormentProviders) {
 		super(textFlags, imageFlags, adormentProviders);
 		initMasks();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
-	
+
+	/**
+	 * Creates a StandardJavaUILabelProvider with DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS
+	 * and the ErrorTickAdornmentProvider.
+	 */	
 	public StandardJavaUILabelProvider() {
 		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, new IAdornmentProvider[] { new ErrorTickAdornmentProvider() });
 	}

@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
 public class JavaElementLabelProvider extends LabelProvider {
 	
 	/**
-	 * Flag (bit mask) indicating that methods labels include the method return type. (prepended)
+	 * Flag (bit mask) indicating that methods labels include the method return type. (appended)
 	 */
 	public final static int SHOW_RETURN_TYPE=				0x001;
 	
@@ -187,7 +187,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	private void updateTextProviderFlags() {
 		fTextFlags= 0;
 		if (getFlag(SHOW_RETURN_TYPE)) {
-			fTextFlags |= JavaElementLabels.M_PRE_RETURNTYPE;
+			fTextFlags |= JavaElementLabels.M_APP_RETURNTYPE;
 		}
 		if (getFlag(SHOW_PARAMETERS)) {
 			fTextFlags |= JavaElementLabels.M_PARAMETER_TYPES;
