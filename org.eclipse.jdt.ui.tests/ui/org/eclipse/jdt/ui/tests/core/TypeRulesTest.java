@@ -38,10 +38,8 @@ import org.eclipse.jdt.testplugin.TestOptions;
 public class TypeRulesTest extends CoreTests {
 	
 	private static final Class THIS= TypeRulesTest.class;
-	private static final boolean BUG_82504_core_parser_CCE= true;
 	
 	private IJavaProject fJProject1;
-
 	private IPackageFragmentRoot fSourceFolder;
 
 	public TypeRulesTest(String name) {
@@ -265,10 +263,6 @@ public class TypeRulesTest extends CoreTests {
 	}
 		
 	public void testIsCastCompatible() throws Exception {
-		if (BUG_82504_core_parser_CCE) {
-			System.out.println("TypeRulesTest.testCanCast() disabled (BUG_82504_core_parser_CCE)");
-			return;
-		}
 		StringBuffer errors= new StringBuffer();
 		VariableDeclarationFragment[] targets= createVariables();
 		for (int k= 0; k < targets.length; k++) {
@@ -295,7 +289,6 @@ public class TypeRulesTest extends CoreTests {
 				parser.setUnitName("F.java");
 				
 				CompilationUnit astRoot= null;
-try {
 				astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
@@ -307,13 +300,6 @@ try {
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
 				}
-} catch (ClassCastException e) {
-	//TODO jdt.core bug 82504: [5.0] ClassCastException when parsing a CastExpression from type Object[] to a type variable
-	errors.append(line).append('\n');
-	errors.append(e).append('\n');
-	e.printStackTrace();
-}
-				
 			}	
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
@@ -362,7 +348,6 @@ try {
 					continue;
 
 				CompilationUnit astRoot= null;
-try {
 				astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
@@ -370,13 +355,6 @@ try {
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
 				}
-} catch (ClassCastException e) {
-	//TODO jdt.core bug 82504: [5.0] ClassCastException when parsing a CastExpression from type Object[] to a type variable
-	errors.append(line).append('\n');
-	errors.append(e).append('\n');
-	e.printStackTrace();
-}
-				
 			}	
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
