@@ -50,7 +50,6 @@ public class BuildActionGroup extends ActionGroup {
 	private IWorkbenchSite fSite;
 	
 	private BuildAction fBuildAction;
-	private BuildAction fFullBuildAction;
  	private RefreshAction fRefreshAction;
 
 	/**
@@ -69,15 +68,10 @@ public class BuildActionGroup extends ActionGroup {
 		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
 		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
 		
-		fFullBuildAction= new BuildAction(shell, IncrementalProjectBuilder.FULL_BUILD);
-		fFullBuildAction.setText(ActionMessages.getString("RebuildAction.label")); //$NON-NLS-1$
-		fFullBuildAction.setActionDefinitionId("org.eclipse.ui.project.rebuildProject"); //$NON-NLS-1$
-		
 		fRefreshAction= new RefreshAction(fSite);
 		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
 		
 		provider.addSelectionChangedListener(fBuildAction);
-		provider.addSelectionChangedListener(fFullBuildAction);
 		provider.addSelectionChangedListener(fRefreshAction);
 	}
 	
@@ -117,14 +111,12 @@ public class BuildActionGroup extends ActionGroup {
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		provider.removeSelectionChangedListener(fBuildAction);
-		provider.removeSelectionChangedListener(fFullBuildAction);
 		provider.removeSelectionChangedListener(fRefreshAction);
 		super.dispose();
 	}	
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(IDEActionFactory.BUILD_PROJECT.getId(), fBuildAction);
-		actionBar.setGlobalActionHandler(IDEActionFactory.REBUILD_PROJECT.getId(), fFullBuildAction);
 		actionBar.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
 	}
 	
