@@ -54,7 +54,7 @@ class FieldReferenceFinder {
 		private static boolean areReportedForSameNode(SimpleName node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) != searchResult.getEnd())	
 				return false;
 				
 			return true;	
@@ -63,7 +63,7 @@ class FieldReferenceFinder {
 		private static boolean areReportedForSameNode(FieldAccess node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) != searchResult.getEnd())	
 				return false;
 			if (node.getName().getStartPosition() != searchResult.getStart())
 				return false;
@@ -74,7 +74,7 @@ class FieldReferenceFinder {
 		private static boolean areReportedForSameNode(QualifiedName node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) != searchResult.getEnd())	
 				return false;
 				
 			return true;	
