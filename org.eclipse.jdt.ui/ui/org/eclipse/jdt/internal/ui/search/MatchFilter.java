@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
-
 abstract class  MatchFilter {
 	public abstract boolean isApplicable(JavaSearchQuery query);
 	
@@ -24,6 +23,19 @@ abstract class  MatchFilter {
 	public abstract String getName();
 	
 	public abstract String getDescription();
+	
+	public abstract String getID();
+	
+	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
+			new ImportFilter(),
+			new JavadocFilter(),
+			new ReadFilter(),
+			new WriteFilter()
+		};
+		
+		public static MatchFilter[] allFilters() {
+			return ALL_FILTERS;
+		}
 }
 
 class ImportFilter extends MatchFilter {
@@ -49,6 +61,10 @@ class ImportFilter extends MatchFilter {
 			return patternSpec.getSearchFor() == IJavaSearchConstants.TYPE;
 		}
 		return false;
+	}
+
+	public String getID() {
+		return "filter_imports"; //$NON-NLS-1$
 	}
 }
 
@@ -78,6 +94,9 @@ class WriteFilter extends FieldFilter {
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.description"); //$NON-NLS-1$
 	}
+	public String getID() {
+		return "filter_writes"; //$NON-NLS-1$
+	}
 }
 
 class ReadFilter extends FieldFilter {
@@ -92,6 +111,9 @@ class ReadFilter extends FieldFilter {
 		return SearchMessages.getString("MatchFilter.ReadFilter.description"); //$NON-NLS-1$
 	}
 	
+	public String getID() {
+		return "filter_reads"; //$NON-NLS-1$
+	}
 }
 
 class JavadocFilter extends MatchFilter {
@@ -110,6 +132,10 @@ class JavadocFilter extends MatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
+	public String getID() {
+		return "filter_javadoc"; //$NON-NLS-1$
+	}
+
 }
 
 

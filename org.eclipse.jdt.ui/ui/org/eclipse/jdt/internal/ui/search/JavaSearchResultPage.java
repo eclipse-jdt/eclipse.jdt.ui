@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -56,6 +57,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
+	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
 	
 	
 	private NewSearchViewActionGroup fActionGroup;
@@ -72,11 +74,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private int fCurrentGrouping;
 	
 	private Set fMatchFilters= new HashSet();
-	private FilterAction fFilterImportsAction;
-	private FilterAction fFilterReadsAction;
-	private FilterAction fFilterWritesAction;
-	private FilterAction fFilterJavadocAction;
-	
+	private FilterAction[] fFilterActions;
+
 	public JavaSearchResultPage() {
 		initSortActions();
 		initGroupingActions();
@@ -84,10 +83,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	private void initFilterActions() {
-		fFilterImportsAction= new FilterAction(this, new ImportFilter());
-		fFilterReadsAction= new FilterAction(this, new ReadFilter());
-		fFilterWritesAction= new FilterAction(this, new WriteFilter());
-		fFilterJavadocAction= new FilterAction(this, new JavadocFilter());
+		MatchFilter[] allFilters= MatchFilter.allFilters();
+		fFilterActions= new FilterAction[allFilters.length];
+		for (int i= 0; i < fFilterActions.length; i++) {
+			fFilterActions[i]= new FilterAction(this, allFilters[i]);
+		}
 	}
 
 	private void initSortActions() {
@@ -170,10 +170,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		String filteringGroup= "Filtering"; //$NON-NLS-1$
 		viewMenu.add(new Separator(filteringGroup));
 		MenuManager mgr= new MenuManager(SearchMessages.getString("JavaSearchResultPage.filter.submenu")); //$NON-NLS-1$
-		mgr.add(fFilterImportsAction);
-		mgr.add(fFilterJavadocAction);
-		mgr.add(fFilterReadsAction);
-		mgr.add(fFilterWritesAction);
+		for (int i= 0; i < fFilterActions.length; i++) {
+			mgr.add(fFilterActions[i]);
+		}
 		
 		viewMenu.appendToGroup(filteringGroup, mgr);
 
@@ -310,6 +309,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		} catch (NumberFormatException e) {
 			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 		}
+		String encodedFilters= getSettings().get(KEY_FILTERS);
+		restoreFilters(encodedFilters);
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
@@ -317,9 +318,33 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			value= memento.getInteger(KEY_SORTING);
 			if (value != null)
 				fCurrentSortOrder= value.intValue();
+			encodedFilters= memento.getString(KEY_FILTERS);
+			restoreFilters(encodedFilters);
 		}
 	}
 	
+	private void restoreFilters(String encodedFilters) {
+		if (encodedFilters != null) {
+			fMatchFilters.clear();
+			String[] decodedFilters= decodeFiltersString(encodedFilters);
+			for (int i= 0; i < decodedFilters.length; i++) {
+				MatchFilter filter= findMatchFilter(decodedFilters[i]);
+				if (filter != null)
+					fMatchFilters.add(filter);
+			}
+		}
+		updateFilterActions();
+	}
+
+	private MatchFilter findMatchFilter(String id) {
+		MatchFilter[] allFilters= MatchFilter.allFilters();
+		for (int i= 0; i < allFilters.length; i++) {
+			if (allFilters[i].getID().equals(id))
+				return allFilters[i];
+		}
+		return null;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#saveState(org.eclipse.ui.IMemento)
 	 */
@@ -327,6 +352,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
+		memento.putString(KEY_FILTERS, encodeFilters());
 	}
 	
 	void addMatchFilter(MatchFilter filter) {
@@ -344,14 +370,39 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		JavaSearchContentProvider cp= (JavaSearchContentProvider) viewer.getContentProvider();
 		cp.filtersChanged(getMatchFilters());
 		
-		fFilterImportsAction.updateCheckState();
-		fFilterReadsAction.updateCheckState();
-		fFilterWritesAction.updateCheckState();
-		fFilterJavadocAction.updateCheckState();
+		updateFilterActions();
+		getViewPart().updateLabel();
+		getSettings().put(KEY_FILTERS, encodeFilters());
+	}
+
+	private void updateFilterActions() {
+		for (int i= 0; i < fFilterActions.length; i++) {
+			fFilterActions[i].updateCheckState();
+		}
 		
 		getSite().getActionBars().updateActionBars();
 		getSite().getActionBars().getMenuManager().updateAll(true);
-		getViewPart().updateLabel();
+	}
+
+	private String encodeFilters() {
+		StringBuffer buf= new StringBuffer();
+		MatchFilter[] enabledFilters= getMatchFilters();
+		buf.append(enabledFilters.length);
+		for (int i= 0; i < enabledFilters.length; i++) {
+			buf.append(';');
+			buf.append(enabledFilters[i].getID());
+		}
+		return buf.toString();
+	}
+	
+	private String[] decodeFiltersString(String encodedString) {
+		StringTokenizer tokenizer= new StringTokenizer(encodedString, ";"); //$NON-NLS-1$
+		int count= Integer.valueOf(tokenizer.nextToken()).intValue();
+		String[] ids= new String[count];
+		for (int i= 0; i < count; i++) {
+			ids[i]= tokenizer.nextToken();
+		}
+		return ids;
 	}
 
 	boolean hasMatchFilter(MatchFilter filter) {
@@ -412,14 +463,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		super.setInput(search, viewState);
 	}
 
-	/**
-	 * @param result
-	 */
 	private void updateFilterEnablement(JavaSearchResult result) {
-		fFilterImportsAction.setEnabled(shouldEnable(result, fFilterImportsAction));
-		fFilterReadsAction.setEnabled(shouldEnable(result, fFilterReadsAction));
-		fFilterWritesAction.setEnabled(shouldEnable(result, fFilterWritesAction));
-		fFilterJavadocAction.setEnabled(shouldEnable(result, fFilterJavadocAction));
+		for (int i= 0; i < fFilterActions.length; i++) {
+			fFilterActions[i].setEnabled(shouldEnable(result, fFilterActions[i]));
+		}
 	}
 
 	private boolean shouldEnable(JavaSearchResult result, FilterAction filterAction) {
