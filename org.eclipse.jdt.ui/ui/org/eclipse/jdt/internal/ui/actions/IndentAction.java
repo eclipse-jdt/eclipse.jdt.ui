@@ -244,12 +244,13 @@ public class IndentAction extends TextEditorAction {
 		} 
 		
 		// standard java indentation
-		if (indent == null)
-			indent= indenter.computeIndentation(offset);
-		
-		// default is no indentation
-		if (indent == null)
-			indent= new String();
+		if (indent == null) {
+			StringBuffer computed= indenter.computeIndentation(offset);
+			if (computed != null)
+				indent= computed.toString();
+			else
+				indent= new String();
+		}
 		
 		// change document:
 		// get current white space

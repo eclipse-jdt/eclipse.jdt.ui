@@ -15,6 +15,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -59,6 +61,8 @@ public class JavaIndenter {
 	 * Creates a new instance.
 	 * 
 	 * @param document the document to scan
+	 * @param scanner the {@link JavaHeuristicScanner} to be used for scanning
+	 * the document. It must be installed on the same <code>IDocument</code>.
 	 */
 	public JavaIndenter(IDocument document, JavaHeuristicScanner scanner) {
 		Assert.isNotNull(document);
@@ -67,185 +71,109 @@ public class JavaIndenter {
 		fScanner= scanner;
 	}
 	
-	
 	/**
 	 * Computes the indentation at the reference point of <code>position</code>.
 	 * 
-	 * @param position the position in the document, either at the beginning of
-	 *        a line or in the whitespace at the beginning of a line
+	 * @param offset the offset in the document
 	 * @return a String which reflects the indentation at the line in which the
-	 *         reference position to <code>position</code> resides, or <code>null</code>
-	 *         if it cannot be determined.
+	 *         reference position to <code>offset</code> resides, or <code>null</code>
+	 *         if it cannot be determined
 	 */
-
-	public String getReferenceIndentation(int position) {
+	public StringBuffer getReferenceIndentation(int offset) {
 		
-		try {
-			// account for unindenation characters already typed in, but after position
-			// also account for a dangling else
-			
-			boolean danglingElse= false;
-			boolean matchBrace= false;
-			boolean matchParen= false;
-			
-			if (position < fDocument.getLength()) {
-				IRegion line= fDocument.getLineInformationOfOffset(position);
-				int next= fScanner.nextToken(position, line.getOffset() + line.getLength());
-				switch (next) {
-					case Symbols.TokenEOF:
-					case Symbols.TokenELSE:
-						danglingElse= true;
-						break;
-					case Symbols.TokenRBRACE: // closing braces get unindented
-						matchBrace= true;
-				}
-			} else {
-				danglingElse= true;
-			}
-			
-			// find the base position
-			int unit= findReferencePosition(position, danglingElse, matchBrace, matchParen);
-			
-			// if we were unable to find anything, return null
-			if (unit == JavaHeuristicScanner.NOT_FOUND)
-				return null; //$NON-NLS-1$
-			
-			// get base indent at the reference location
-			IRegion line= fDocument.getLineInformationOfOffset(unit);
-			int offset= line.getOffset();
-			int nonWS= fScanner.findNonWhitespaceForwardInAnyPartition(offset, offset + line.getLength());
-			StringBuffer indent= new StringBuffer(fDocument.get(offset, nonWS - offset));
-			
-			return indent.toString();
-			
-		} catch (BadLocationException e) {
-		}
+		int unit= findReferencePosition(offset, true);
 		
-		return null;
+		// if we were unable to find anything, return null
+		if (unit == JavaHeuristicScanner.NOT_FOUND)
+			return null;
+		
+		return getLeadingWhitespace(unit);
 	}
 	
-	
 	/**
-	 * Computes the indentation at <code>position</code>.
+	 * Computes the indentation at <code>offset</code>.
 	 * 
-	 * @param position the position in the document, either at the beginning of
-	 *        a line or in the whitespace at the beginning of a line
+	 * @param offset the offset in the document
 	 * @return a String which reflects the correct indentation for the line in
-	 *         which position resides, or <code>null</code> if it cannot be
-	 *         determined..
+	 *         which offset resides, or <code>null</code> if it cannot be
+	 *         determined
 	 */
-
-	public String computeIndentation(int position) {
+	public StringBuffer computeIndentation(int offset) {
 		
-		try {
-			// account for unindenation characters already typed in, but after position
-			// also account for a dangling else
-			
-			boolean danglingElse= false;
-			boolean unindent= false;
-			boolean matchBrace= false;
-			boolean matchParen= false;
-			
-			if (position < fDocument.getLength()) {
-				IRegion line= fDocument.getLineInformationOfOffset(position);
-				int next= fScanner.nextToken(position, line.getOffset() + line.getLength());
-				int prevPos= Math.max(position - 1, 0);
-				switch (next) {
-					case Symbols.TokenEOF:
-					case Symbols.TokenELSE:
-						danglingElse= true;
-						break;
-					case Symbols.TokenCASE:
-					case Symbols.TokenDEFAULT:
-						// only if not right after the brace!
-						if (prefAlignCaseWithSwitch() || fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND) != Symbols.TokenLBRACE)
-							unindent= true;
-						break;
-					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
-						if (fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND))
-							unindent= true;
-						break;
-					case Symbols.TokenRBRACE: // closing braces get unindented
-						matchBrace= true;
-						break;
-					case Symbols.TokenWHILE:
-						break;
-					case Symbols.TokenRPAREN:
-						matchParen= true;
-						break;
-				}
-			} else {
-				danglingElse= true; // assume an else could come - align with 'if' 
-			}
-			
-			// find the base position
-			int unit= findReferencePosition(position, danglingElse, matchBrace, matchParen);
-			
-			// handle special alignment
-			if (fAlign != JavaHeuristicScanner.NOT_FOUND) {
+		StringBuffer indent= getReferenceIndentation(offset);
+		
+		// handle special alignment
+		if (fAlign != JavaHeuristicScanner.NOT_FOUND) {
+			try {
 				// a special case has been detected.
 				IRegion line= fDocument.getLineInformationOfOffset(fAlign);
-				int offset= line.getOffset();
-				return createIndent(offset, fAlign);
+				int lineOffset= line.getOffset();
+				return createIndent(lineOffset, fAlign);
+			} catch (BadLocationException e) {
+				return null;
 			}
-			
-			// if we were unable to find anything, return null
-			if (unit == JavaHeuristicScanner.NOT_FOUND)
-				return null; //$NON-NLS-1$
-			
-			// get base indent at the reference location
-			IRegion line= fDocument.getLineInformationOfOffset(unit);
-			int offset= line.getOffset();
-			int nonWS= fScanner.findNonWhitespaceForwardInAnyPartition(offset, offset + line.getLength());
-			StringBuffer indent= new StringBuffer(fDocument.get(offset, nonWS - offset));
-			
-			// add additional indent
-			indent.append(createIndent(fIndent));
-			if (fIndent < 0)
-				unindent= true;
-			
-			if (unindent)
-				unindent(indent);
-				
-			return indent.toString();
-			
-		} catch (BadLocationException e) {
 		}
 		
-		return null; //$NON-NLS-1$
+		if (indent == null)
+			return null;
+		
+		// add additional indent
+		indent.append(createIndent(fIndent));
+		if (fIndent < 0)
+			unindent(indent);
+		
+		return indent;
 	}
 
 	/**
-	 * Reduces indentation in <code>indent</code> by one.
+	 * Returns the indentation of the line at <code>offset</code> as a
+	 * <code>StringBuffer</code>. If the offset is not valid, the empty string
+	 * is returned.
+	 * 
+	 * @param offset the offset in the document
+	 * @return the indentation (leading whitespace) of the line in which
+	 * 		   <code>offset</code> is located
+	 */
+	private StringBuffer getLeadingWhitespace(int offset) {
+		StringBuffer indent= new StringBuffer();
+		try {
+			IRegion line= fDocument.getLineInformationOfOffset(offset);
+			int lineOffset= line.getOffset();
+			int nonWS= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + line.getLength());
+			indent.append(fDocument.get(lineOffset, nonWS - lineOffset));
+			return indent;
+		} catch (BadLocationException e) {
+			return indent;
+		}
+	}
+
+	/**
+	 * Reduces indentation in <code>indent</code> by one indentation unit.
 	 * 
 	 * @param indent the indentation to be modified
 	 */
 	private void unindent(StringBuffer indent) {
-		String oneIndent= createIndent(1);
-		int i= indent.lastIndexOf(oneIndent); //$NON-NLS-1$
+		CharSequence oneIndent= createIndent(1);
+		int i= indent.lastIndexOf(oneIndent.toString()); //$NON-NLS-1$
 		if (i != -1) {
-			indent.deleteCharAt(i);
+			indent.delete(i, i + oneIndent.length());
 		}			
 	}
 
-	
 	/**
 	 * Creates an indentation string of the length indent - start + 1,
 	 * consisting of the content in <code>fDocument</code> in the range
 	 * [start, indent), with every character replaced by a space except for
 	 * tabs, which are kept as such.
 	 * 
+	 * <p>Every run of the number of spaces that make up a tab are replaced
+	 * by a tab character.</p>
+	 * 
 	 * @return the indentation corresponding to the document content specified
 	 *         by <code>start</code> and <code>indent</code>
 	 */
-
-	private String createIndent(int start, int indent) {
-		int tabLen;
-		if (JavaPlugin.getDefault() != null)
-			tabLen= CodeFormatterUtil.getTabWidth();
-		else
-			tabLen= 4;
-		
+	private StringBuffer createIndent(int start, int indent) {
+		int tabLen= prefTabLength();		
 		StringBuffer ret= new StringBuffer();
 		try {
 			int spaces= 0;
@@ -265,6 +193,7 @@ public class JavaIndenter {
 				
 				start++;
 			}
+			// remainder
 			if (spaces == tabLen)
 				ret.append('\t');
 			else
@@ -274,10 +203,9 @@ public class JavaIndenter {
 		} catch (BadLocationException e) {
 		}
 		
-		return ret.toString();
+		return ret;
 	}
 
-	
 	/**
 	 * Creates a string that represents the given number of indents (can be
 	 * spaces or tabs..)
@@ -286,85 +214,118 @@ public class JavaIndenter {
 	 * 
 	 * @return the indentation specified by <code>indent</code>
 	 */
-
-	private String createIndent(int indent) {
+	private CharSequence createIndent(int indent) {
 		// get a sensible default when running without the infrastructure for testing
 		if (JavaPlugin.getDefault() == null) {
 			StringBuffer ret= new StringBuffer();
 			while (indent-- > 0)
 				ret.append('\t');
 			
-			return ret.toString();
+			return ret;
 		}
 			
 		return CodeFormatterUtil.createIndentString(indent);
 	}
 	
-	
 	/**
-	 * Returns the reference position regarding to indentation for <code>position</code>,
-	 * or <code>NOT_FOUND</code>.
+	 * Returns the reference position regarding to indentation for <code>offset</code>,
+	 * or <code>NOT_FOUND</code>. This method calls
+	 * {@link #findReferencePosition(int, boolean) findReferencePosition(offset, false)}
 	 * 
-	 * @param position the position for which the reference is computed
-	 * @return the reference statement relative to which <code>position</code>
+	 * @param offset the offset for which the reference is computed
+	 * @return the reference statement relative to which <code>offset</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-
-	public int findReferencePosition(int position) {
-		return findReferencePosition(position, false, false, false);
+	public int findReferencePosition(int offset) {
+		return findReferencePosition(offset, false);
 	}
 	
-	
 	/**
 	 * Returns the reference position regarding to indentation for <code>position</code>,
 	 * or <code>NOT_FOUND</code>.
 	 * 
-	 * @param position the position for which the reference is computed
-	 * @param peekNextChar whether to account for the next character (closing
-	 *        brace etc.) on the same line as <code>position</code> and
-	 *        handle indentation accordingly
-	 * @return the reference statement relative to which <code>position</code>
+	 * <p>If <code>peekNextChar</code> is <code>true</code>, the next token after
+	 * <code>offset</code> is read and taken into account when computing the
+	 * indentation. Currently, if the next token is the first token on the line
+	 * (i.e. only preceded by whitespace), the following tokens are specially
+	 * handled:
+	 * <ul>
+	 * 	<li><code>switch</code> labels are indented relative to the switch block</li>
+	 * 	<li>opening curly braces are aligned correctly with the introducing code</li>
+	 * 	<li>closing curly braces are aligned properly with the introducing code of
+	 * 		the matching opening brace</li>
+	 * 	<li>closing parenthesis' are aligned with their opening peer</li>
+	 * 	<li>the <code>else</code> keyword is aligned with its <code>if</code>, anything
+	 * 		else is aligned normally (i.e. with the base of any introducing statements).</li>
+	 *  <li>if there is no token on the same line after <code>offset</code>, the indentation
+	 * 		is the same as for an <code>else</code> keyword</li>
+	 * </ul>
+	 * 
+	 * @param offset the offset for which the reference is computed
+	 * @param peekNextChar whether to take the next character (closing
+	 *        brace etc.) on the same line as <code>offset</code> into account
+	 * 		  and handle indentation accordingly
+	 * @return the reference statement relative to which <code>offset</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-
-	public int findReferencePosition(int position, boolean peekNextChar) {
+	public int findReferencePosition(int offset, boolean peekNextChar) {
 		boolean danglingElse= false;
+		boolean unindent= false;
 		boolean matchBrace= false;
 		boolean matchParen= false;
+		boolean matchCase= false;
 		
+			// account for unindenation characters already typed in, but after position
+			// if they are on a line by themselves, the indentation gets adjusted
+			// accordingly
+			//
+			// also account for a dangling else 
 		if (peekNextChar) {
-			try {
-				// account for unindenation characters already typed in, but after position
-				// also account for a dangling else
-				
-				if (position < fDocument.getLength()) {
-					IRegion line= fDocument.getLineInformationOfOffset(position);
-					int next= fScanner.nextToken(position, line.getOffset() + line.getLength());
+			if (offset < fDocument.getLength()) {
+				try {
+					IRegion line= fDocument.getLineInformationOfOffset(offset);
+					int lineOffset= line.getOffset();
+					int next= fScanner.nextToken(offset, lineOffset + line.getLength());
+					int prevPos= Math.max(offset - 1, 0);
+					boolean isFirstTokenOnLine= fDocument.get(lineOffset, prevPos + 1 - lineOffset).trim().length() == 0;
 					switch (next) {
 						case Symbols.TokenEOF:
 						case Symbols.TokenELSE:
 							danglingElse= true;
 							break;
-						case Symbols.TokenRBRACE: // closing braces get unindented
-							matchBrace= true;
+						case Symbols.TokenCASE:
+						case Symbols.TokenDEFAULT:
+							if (isFirstTokenOnLine)
+								matchCase= true;
 							break;
-						case Symbols.TokenWHILE:
+						case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
+							if (fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND))
+								unindent= true;
+							if (fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND) == Symbols.TokenCOLON)
+								unindent= true;
+							break;
+						case Symbols.TokenRBRACE: // closing braces get unindented
+							if (isFirstTokenOnLine)
+								matchBrace= true;
 							break;
 						case Symbols.TokenRPAREN:
-							matchParen= true;
+							if (isFirstTokenOnLine)
+								matchParen= true;
 							break;
 					}
-				} else {
-					danglingElse= true; // assume an else could come - align with 'if' 
+				} catch (BadLocationException e) {
 				}
-				
-			} catch (BadLocationException e) {
+			} else {
+				// assume an else could come if we are at the end of file
+				danglingElse= true; 
 			}
 		}
-		return findReferencePosition(position, danglingElse, matchBrace, matchParen);
 		
+		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase);
+		if (unindent)
+			fIndent--;
+		return ref;
 	}
-	
 	
 	/**
 	 * Returns the reference position regarding to indentation for <code>position</code>,
@@ -378,305 +339,472 @@ public class JavaIndenter {
 	 * @param position the position for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
 	 * @param matchBrace whether the position of the matching brace should be
-	 *        returned instead of doing code analysis
+	 *            returned instead of doing code analysis
 	 * @param matchBrace whether the position of the matching parenthesis
-	 *        should be returned instead of doing code analysis
+	 *            should be returned instead of doing code analysis
+	 * @param matchCase whether the position of a switch statement reference
+	 *            should be returned (either an earlier case statement or the
+	 *            switch block brace)
 	 * @return the reference statement relative to which <code>position</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-
-	private int findReferencePosition(int position, boolean danglingElse, boolean matchBrace, boolean matchParen) {
+	private int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase) {
 		fIndent= 0; // the indentation modification
 		fAlign= JavaHeuristicScanner.NOT_FOUND;
-		fPosition= position;
+		fPosition= offset;
 		
-		boolean indentBlockLess= true; // whether to indent after an if / while / for without block (set false by semicolons and braces)
-		boolean takeNextExit= true; // whether the next possible exit should be taken (instead of looking for the base; see blockless stuff)
-		boolean found= false; // whether we have found anything at all. If we have, we'll trace back to it once we have a hoist point
-		boolean hasBrace= false; // whether we have found a left brace
-		boolean longIndentSet= false; // whehter we have already added a deep indentation (to avoid multiple deep / double indents for multiple calls)
-		int listItemPos= JavaHeuristicScanner.NOT_FOUND; // position of the alignment element in a comma separated list
-		int listItemLine= -1; // line of listItemPos
-		
+		// forward cases
+		// an unindentation happens sometimes if the next token is special, namely on braces, parens and case labels
+		// align braces
 		if (matchBrace) {
-			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
-				fPosition= position;
-				fIndent= -1; // if the opening brace is not there (ie. we are running on a very local fragment, e.g. when pasting code), reduce indent by one.
-			} else {
-				indentBlockLess= false;
-				hasBrace= true;
-				found= true;
-				// cannot return here since the opening brace may be on the last line of a multiline parameter list
-			}
+			skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
+			return skipToStatementStart(true, true);
 		}
 		
+		// align parenthesis'
 		if (matchParen) {
-			if (!skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
-				fPosition= position;
-				fIndent= 0;
-			} else {
-				int pos= fPosition;
-				fPosition= position;
-				nextToken();
-				if (fToken != Symbols.TokenCOMMA)
-					return pos;
-				
-				fPosition= position;
-				fIndent= 0;
-				found= true;
-			}
+			skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
+			return fPosition;
 		}
 		
+		// the only reliable way to get case labels aligned (due to many different styles of using braces in a block)
+		// is to go for another case statement, or the scope opening brace
+		if (matchCase) {
+			return matchCaseAlignment();
+		}
 		
 		nextToken();
-		while (true) {
+		switch (fToken) {
+			case Symbols.TokenRBRACE:
+				// skip the block and fall through
+				skipScope();
+			case Symbols.TokenSEMICOLON:
+				// this is the 90% case: after a statement block 
+				// the end of the previous statement / block previous.end
+				// search to the end of the statement / block before the previous; the token just after that is previous.start
+				return skipToStatementStart(danglingElse, false);
 			
-			switch (fToken) {
-				// skip all scopes introduced by parenthesis' or brackets:
-				case Symbols.TokenRBRACKET:
-					skipScope(Symbols.TokenLBRACKET, Symbols.TokenRBRACKET);
-					nextToken();
-					break;
-					
-				case Symbols.TokenRPAREN:
-					skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
-					
-					// handle special indentations: non-block conditionals
-					nextToken();
-					int pos= fPosition;
-
-					switch (fToken) {
-						case Symbols.TokenWHILE:
-							if (hasMatchingDo()) {
-								nextToken();
-								break;
-							} else {
-								nextToken(pos);
-							}
-						case Symbols.TokenIF:
-							if (danglingElse && fToken == Symbols.TokenIF)
-								takeNextExit= true;
-						case Symbols.TokenFOR:
-							if (indentBlockLess)
-								fIndent++;
-							if (takeNextExit)
-								return pos;
-					}
-
-					break;
+			// scope introduction: special treat who special is
+			case Symbols.TokenLPAREN:
+			case Symbols.TokenLBRACE:
+			case Symbols.TokenLBRACKET:
+				return handleScopeIntroduction(offset + 1);
 				
-				case Symbols.TokenDO: // do blockless special
-					if (indentBlockLess) {
-						fIndent++;
-						return fPosition;
-					} else if (hasBrace) {
-						return fPosition;
-					} else {
-						fIndent= 0; // after a do, there is a mandatory while on the same level
-						return fPosition;
-					}
-					
-				case Symbols.TokenELSE: // else blockless special
-	
-					if (indentBlockLess)
-						fIndent++;
-					
-					if (takeNextExit)
-						return fPosition;
-					
-					// else
-					if (!searchIfForElse())
-						return JavaHeuristicScanner.NOT_FOUND;
-					
-					nextToken();
-					break;
+			case Symbols.TokenEOF:
+				// trap when hitting start of document
+				return 0;
+			
+			case Symbols.TokenEQUAL:
+				// indent assignments
+				fIndent= prefAssignmentIndent();
+				return fPosition;
 				
-				case Symbols.TokenCOLON: // switch statements and labels
-					if (searchCaseGotoDefault()) {
-						fIndent++;
-						return fPosition;
-					}
-					break;
-					
-				case Symbols.TokenQUESTIONMARK: // ternary expressions
-					if (fAlign == JavaHeuristicScanner.NOT_FOUND && takeNextExit && prefTenaryDeepAlign())
-						fAlign= fPosition;
-					nextToken();
-					break;
-				
-				// When we find a semi or lbrace, we have found a hoist point
-				// Take the first start to the right from it. If there is only whitespace
-				// up to position, search one step more.
-				case Symbols.TokenLBRACE:
-				
-					int searchPos= fPreviousPos;
-					
-					// special array handling
-					nextToken();
-					if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
-						int first= fScanner.findNonWhitespaceForwardInAnyPartition(searchPos, position);
-						// ... with a first element already defined - take its offset
-						if (fAlign == JavaHeuristicScanner.NOT_FOUND && listItemLine > fLine) {
-							// there are more list items later on - adjust to current usage
-							int lineOffset;
-							try {
-								lineOffset= fDocument.getLineOffset(listItemLine);
-								fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, listItemPos + 1);
-							} catch (BadLocationException e) {
-							}
-						}
-						if (fAlign == JavaHeuristicScanner.NOT_FOUND && prefArrayDeepIndent() && first != JavaHeuristicScanner.NOT_FOUND) {
-							fAlign= first;
-						} else if (!longIndentSet) {
-							fIndent += prefArrayIndent();
-							longIndentSet= true;
-						}
-					}
-					
-					hasBrace= true;
-					
-					if (found)
-						return fScanner.findNonWhitespaceForward(searchPos, position);
-                    
-					// search start of code forward or continue
-					takeNextExit= true;
-					indentBlockLess= false;
-					
-					// indent when searching over an LBRACE
-					fIndent++;
-					break;
-					
-				case Symbols.TokenSEMICOLON:
-					// search start of code forward or continue
-					if (found)
-						return fScanner.findNonWhitespaceForward(fPreviousPos, position);
-					
-					takeNextExit= false; // search to the bottom of blockless statements
-					indentBlockLess= false; // don't indent at the next blockless introducer
-					
-					nextToken();
-					break;
-				
-				case Symbols.TokenNEW:
-					if (hasBrace && takeNextExit && found) {
-						// we're probably in an array or anonymous class 
-						return fScanner.findNonWhitespaceForward(fPreviousPos, position);
-					}
-					nextToken();
-					break;
-				
-				case Symbols.TokenEOF:
-					if (found)
-						return fScanner.findNonWhitespaceForward(0, position);
-					
-					return JavaHeuristicScanner.NOT_FOUND;
-					
-				// RBRACE is either the end of a statement as SEMICOLON, 
-				// or - if no statement start can be found - must be skipped as RPAREN and RBRACKET
-				case Symbols.TokenRBRACE:
-					if (found && fScanner.nextToken(fPreviousPos, position) != Symbols.TokenSEMICOLON) // don't take it for array initializers
-						return fScanner.findNonWhitespaceForward(fPreviousPos, position);
-
-					skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
-
-					takeNextExit= false; // search to the bottom of blockless statements
-					indentBlockLess= false; // don't indent at the next blockless introducer
-
-					nextToken();
-					break;
-				
-				// use double indentation inside conditions and calls
-				// handle method definitions separately
-				case Symbols.TokenLPAREN:
-					// TODO differentiate between conditional continuation and calls
-					
-					// handle list items.
-					if (listItemLine > fLine && fAlign == JavaHeuristicScanner.NOT_FOUND) {
-						// there are more list items later on - adjust to current usage
-						int lineOffset;
-						try {
-							lineOffset= fDocument.getLineOffset(listItemLine);
-							fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, listItemPos + 1);
-						} catch (BadLocationException e) {
-						}
-					}
-					
-					if (!hasBrace && !longIndentSet) {
-						fIndent += prefCallContinuationIndent();
-						longIndentSet= true;
-					}
-					
-					searchPos= fPreviousPos;
-					
-					if (looksLikeMethodDecl() && found && fAlign == JavaHeuristicScanner.NOT_FOUND && prefMethodDeclDeepIndent()) {
-						fAlign= fScanner.findNonWhitespaceForward(searchPos, position);
-					}
-				
+			case Symbols.TokenCOLON:
+				// TODO handle ternary deep indentation
+				fIndent= prefCaseBlockIndent();
+				return fPosition;
+			
+			case Symbols.TokenQUESTIONMARK:
+				if (prefTernaryDeepAlign()) {
+					setFirstElementAlignment(fPosition, offset + 1);
 					return fPosition;
-
-				// array dimensions
-				case Symbols.TokenLBRACKET:
-					if (fAlign == JavaHeuristicScanner.NOT_FOUND && prefArrayDimensionsDeepIndent() && found)
-						fAlign= fScanner.findNonWhitespaceForward(fPreviousPos, position);
-					
-					if (!longIndentSet) {
-						fIndent+= prefArrayDimensionIndent();
-						longIndentSet= true;
-					}
-						
-					nextToken();
-					break;
+				} else {
+					fIndent= prefTernaryIndent();
+					return fPosition;
+				}
 				
-				case Symbols.TokenCOMMA:
-					// align with comma list except for when in a method declaration
-					if (found && listItemPos == JavaHeuristicScanner.NOT_FOUND) {
-						listItemPos= fScanner.findNonWhitespaceForwardInAnyPartition(fPreviousPos, position);
-						listItemLine= fLine;
+			// indentation for blockless introducers:
+			case Symbols.TokenDO:
+			case Symbols.TokenWHILE:
+			case Symbols.TokenELSE:
+				fIndent= prefSimpleIndent();
+				return fPosition;
+			case Symbols.TokenRPAREN:
+				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
+					nextToken();
+					if (fToken == Symbols.TokenIF || fToken == Symbols.TokenWHILE || fToken == Symbols.TokenFOR) {
+						fIndent= prefSimpleIndent();
+						return fPosition;
 					}
-					
-					nextToken();
-					break;
+				}
+				// else: fall through to default
+				
+			case Symbols.TokenCOMMA:
+				// inside a list of some type
+				// easy if there is already a list item before with its own indentation - we just align
+				// if not: take the start of the list ( LPAREN, LBRACE, LBRACKET ) and either align or
+				// indent by list-indent
+			default:
+				// inside whatever we don't know about: similar to the list case:
+				// if we are inside a continued expression, then either align with a previous line that has indentation
+				// or indent from the expression start line (either a scope introducer or the start of the expr).
+				return skipToPreviousListItemOrListStart();
+				
+		}
+	}
 
-				default:
-					nextToken();
+	/**
+	 * Skips to the start of a statement that ends at the current position.
+	 * 
+	 * @param danglingElse whether to indent aligned with the last <code>if</code>
+	 * @return the reference offset of the start of the statement 
+	 */
+	private int skipToStatementStart(boolean danglingElse, boolean isInBlock) {
+		while (true) {
+			nextToken();
+			
+			if (isInBlock) {
+				switch (fToken) {
+					// exit on all block introducers
+					case Symbols.TokenIF:
+					case Symbols.TokenELSE:
+					case Symbols.TokenSYNCHRONIZED:
+					case Symbols.TokenCOLON:
+					case Symbols.TokenSTATIC:
+					case Symbols.TokenCATCH:
+					case Symbols.TokenDO:
+					case Symbols.TokenWHILE:
+					case Symbols.TokenFINALLY:
+					case Symbols.TokenFOR:
+					case Symbols.TokenTRY:
+						return fPosition;
+						
+					case Symbols.TokenSWITCH:
+						fIndent= prefCaseIndent();
+						return fPosition;
+				}
 			}
 			
-			found= true;
+			switch (fToken) {
+				// scope introduction through: LPAREN, LBRACE, LBRACKET
+				// search stop on SEMICOLON, RBRACE, COLON, EOF
+				// -> the next token is the start of the statement (i.e. previousPos when backward scanning)
+				case Symbols.TokenLPAREN:
+				case Symbols.TokenLBRACE:
+				case Symbols.TokenLBRACKET:
+				case Symbols.TokenSEMICOLON:
+				case Symbols.TokenEOF:
+				case Symbols.TokenCOLON:
+					return fPreviousPos;
+				
+				case Symbols.TokenRBRACE:
+					// RBRACE is a little tricky: it can be the end of an array definition, but
+					// usually it is the end of a previous block
+					int pos= fPreviousPos; // store state
+					if (skipScope() && looksLikeArrayInitializerIntro()) {
+						continue; // its an array
+					} else
+						return pos; // its not - do as with all the above
+					
+				// scopes: skip them
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+					skipScope();
+					break;
+					
+				// IF / ELSE: align the position after the conditional block with the if
+				// so we are ready for an else, except if danglingElse is false
+				// in order for this to work, we must skip an else to its if
+				case Symbols.TokenIF:
+					if (danglingElse)
+						return fPosition;
+					else
+						break;
+				case Symbols.TokenELSE:
+					// skip behind the next if, as we have that one covered
+					skipNextIF();
+					break;
+				
+				case Symbols.TokenDO:
+					// align the WHILE position with its do
+					return fPosition;
+					
+				case Symbols.TokenWHILE:
+					// this one is tricky: while can be the start of a while loop
+					// or the end of a do - while 
+					pos= fPosition;
+					if (hasMatchingDo()) {
+						// continue searching from the DO on 
+						break;
+					} else {
+						// continue searching from the WHILE on
+						fPosition= pos;
+						break;
+					}
+				default:
+					// keep searching
+					
+			}
 
 		}
 	}
 	
-	
 	/**
-	 * Searches for a case, goto, or default after a scanned colon.
-	 * 
-	 * @return <code>true</code> if one of the above keywords can be scanned,
-	 *         possibly separated by an identifier or constant.
+	 * Returns as a reference any previous <code>switch</code> labels (<code>case</code>
+	 * or <code>default</code>) or the offset of the brace that scopes the switch 
+	 * statement. Sets <code>fIndent</code> to <code>prefCaseIndent</code> upon
+	 * a match.
+	 *  
+	 * @return the reference offset for a <code>switch</code> label
 	 */
-
-	private boolean searchCaseGotoDefault() {
-		// after a colon
+	private int matchCaseAlignment() {
 		while (true) {
 			nextToken();
 			switch (fToken) {
-				// number or char literals won't bother us, no scopes allowed
-				case Symbols.TokenOTHER:
-				case Symbols.TokenIDENT:
-					break;
+				// invalid cases: another case label or an LBRACE must come before a case
+				// -> bail out with the current position
+				case Symbols.TokenLPAREN:
+				case Symbols.TokenLBRACKET:
 				case Symbols.TokenEOF:
-					return false;
+					return fPosition;
+				case Symbols.TokenLBRACE:
+					// opening brace of switch statement
+					fIndent= prefCaseIndent();
+					return fPosition;
 				case Symbols.TokenCASE:
 				case Symbols.TokenDEFAULT:
-				case Symbols.TokenGOTO:
-					return true;
+					// align with previous label
+					fIndent= 0;
+					return fPosition;
+				
+				// scopes: skip them
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+					skipScope();
+					break;
+					
 				default:
-					return false;
+					// keep searching
+					continue;
+					
 			}
-			
 		}
 	}
 
+	/**
+	 * Returns the reference position for a list element. The algorithm
+	 * tries to match any previous indentation on the same list. If there is none,
+	 * the reference position returned is determined depending on the type of list:
+	 * The indentation will either match the list scope introducer (e.g. for
+	 * method declarations), so called deep indents, or simply increase the
+	 * indentation by a number of standard indents. See also {@link #handleScopeIntroduction(int)}.
+	 * 
+	 * @return the reference position for a list item: either a previous list item
+	 * that has its own indentation, or the list introduction start.
+	 */
+	private int skipToPreviousListItemOrListStart() {
+		int startLine= fLine;
+		int startPosition= fPosition;
+		while (true) {
+			nextToken();
+			
+			// if any line item comes with its own indentation, adapt to it
+			if (fLine < startLine) {
+				try {
+					int lineOffset= fDocument.getLineOffset(startLine);
+					fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, startPosition + 1);
+				} catch (BadLocationException e) {
+					// ignore and return just the position
+				}
+				return startPosition;
+			}
+			
+			switch (fToken) {
+				// scopes: skip them
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+					skipScope();
+					break;
+				
+				// scope introduction: special treat who special is
+				case Symbols.TokenLPAREN:
+				case Symbols.TokenLBRACE:
+				case Symbols.TokenLBRACKET:
+					return handleScopeIntroduction(startPosition + 1);
+					
+				case Symbols.TokenSEMICOLON:
+					return fPosition;
+				case Symbols.TokenEOF:
+					return 0;
+					
+			}
+		}
+	}
 	
+	/**
+	 * Skips a scope and positions the cursor (<code>fPosition</code>) on the 
+	 * token that opens the scope. Returns <code>true</code> if a matching peer
+	 * could be found, <code>false</code> otherwise. The current token when calling
+	 * must be one out of <code>Symbols.TokenRPAREN</code>, <code>Symbols.TokenRBRACE</code>,
+	 * and <code>Symbols.TokenRBRACKET</code>.  
+	 * 
+	 * @return <code>true</code> if a matching peer was found, <code>false</code> otherwise
+	 */
+	private boolean skipScope() {
+		switch (fToken) {
+			case Symbols.TokenRPAREN:
+				return skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
+			case Symbols.TokenRBRACKET:
+				return skipScope(Symbols.TokenLBRACKET, Symbols.TokenRBRACKET);
+			case Symbols.TokenRBRACE:
+				return skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
+			default:
+				Assert.isTrue(false);
+				return false;
+		}
+	}
+
+	/**
+	 * Handles the introduction of a new scope. The current token must be one out
+	 * of <code>Symbols.TokenLPAREN</code>, <code>Symbols.TokenLBRACE</code>,
+	 * and <code>Symbols.TokenLBRACKET</code>. Returns as the reference position
+	 * either the token introducing the scope or - if available - the first
+	 * java token after that.
+	 * 
+	 * <p>Depending on the type of scope introduction, the indentation will align
+	 * (deep indenting) with the reference position (<code>fAlign</code> will be 
+	 * set to the reference position) or <code>fIndent</code> will be set to 
+	 * the number of indentation units.
+	 * </p>
+	 * 
+	 * @param bound the bound for the search for the first token after the scope 
+	 * introduction.
+	 * @return
+	 */
+	private int handleScopeIntroduction(int bound) {
+		switch (fToken) {
+			// scope introduction: special treat who special is
+			case Symbols.TokenLPAREN:
+				int pos= fPosition; // store
+				
+				// special: method declaration deep indentation
+				if (looksLikeMethodDecl()) {
+					if (prefMethodDeclDeepIndent())
+						return setFirstElementAlignment(pos, bound);
+				} else {
+					fPosition= pos;
+					if (looksLikeMethodCall()) {
+						if (prefMethodCallDeepIndent())
+							return setFirstElementAlignment(pos, bound);
+					} else if (prefParenthesisDeepIndent())
+						return setFirstElementAlignment(pos, bound);
+				}
+				
+				// normal: return the parenthesis as reference
+				fIndent= prefParenthesisIndent();
+				return pos;
+				
+			case Symbols.TokenLBRACE:
+				pos= fPosition; // store
+				
+				// special: array initializer
+				if (looksLikeArrayInitializerIntro())
+					if (prefArrayDeepIndent())
+						return setFirstElementAlignment(pos, bound);
+					else
+						fIndent= prefArrayIndent();
+				else
+					fIndent= prefBlockIndent();
+				
+				// normal: skip to the statement start before the scope introducer
+				// opening braces are often on differently ending indents than e.g. a method definition
+				fPosition= pos; // restore
+				return skipToStatementStart(true, true); // set to true to match the first if
+				
+			case Symbols.TokenLBRACKET:
+				pos= fPosition; // store
+				
+				// special: method declaration deep indentation
+				if (prefArrayDimensionsDeepIndent()) {
+					return setFirstElementAlignment(pos, bound);
+				}
+				
+				// normal: return the bracket as reference
+				fIndent= prefBracketIndent();
+				return pos; // restore
+				
+			default:
+				Assert.isTrue(false);
+				return -1; // dummy
+		}
+	}
+
+	/**
+	 * Sets the deep indent offset (<code>fAlign</code>) to either the offset
+	 * right after <code>scopeIntroducerOffset</code> or - if available - the
+	 * first Java token after <code>scopeIntroducerOffset</code>, but before
+	 * <code>bound</code>.
+	 * 
+	 * @param scopeIntroducerOffset the offset of the scope introducer
+	 * @param bound the bound for the search for another element
+	 * @return the reference position
+	 */
+	private int setFirstElementAlignment(int scopeIntroducerOffset, int bound) {
+		int firstPossible= scopeIntroducerOffset + 1; // align with the first position after the scope intro
+		fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(firstPossible, bound);
+		if (fAlign == JavaHeuristicScanner.NOT_FOUND)
+			fAlign= firstPossible;
+		return fAlign;
+	}
+
+
+	/**
+	 * Returns <code>true</code> if the next token received after calling
+	 * <code>nextToken</code> is either an equal sign or an array designator ('[]').
+	 * 
+	 * @return <code>true</code> if the next elements look like the start of an array definition
+	 */
+	private boolean looksLikeArrayInitializerIntro() {
+		nextToken();
+		if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Skips over the next <code>if</code> keyword. The current token when calling
+	 * this method must be an <code>else</code> keyword. Returns <code>true</code>
+	 * if a matching <code>if</code> could be found, <code>false</code> otherwise.
+	 * The cursor (<code>fPosition</code>) is set to the offset of the <code>if</code>
+	 * token.
+	 * 
+	 * @return <code>true</code> if a matching <code>if</code> token was found, <code>false</code> otherwise
+	 */
+	private boolean skipNextIF() {
+		Assert.isTrue(fToken == Symbols.TokenELSE);
+		
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				// scopes: skip them
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+					skipScope();
+					break;
+					
+				case Symbols.TokenIF:
+					// found it, return
+					return true;
+				case Symbols.TokenELSE:
+					// recursively skip else-if blocks
+					skipNextIF();
+					break;
+				
+				// shortcut scope starts
+				case Symbols.TokenLPAREN:
+				case Symbols.TokenLBRACE:
+				case Symbols.TokenLBRACKET:
+				case Symbols.TokenEOF:
+					return false;
+				}
+		}
+	}
+
+
 	/**
 	 * while(condition); is ambiguous when parsed backwardly, as it is a valid
 	 * statement by its own, so we have to check whether there is a matching
@@ -686,87 +814,26 @@ public class JavaIndenter {
 	 * @return <code>true</code> if the <code>while</code> currently in
 	 *         <code>fToken</code> has a matching <code>do</code>.
 	 */
-
 	private boolean hasMatchingDo() {
 		Assert.isTrue(fToken == Symbols.TokenWHILE);
-		
-		return skipStatementOrBlock() && fToken == Symbols.TokenDO;
-	}
-
-	
-	/**
-	 * Skips a statement or block, the token being the next token after it.
-	 * 
-	 * @return <code>true</code> if a statement or block could be parsed,
-	 *         <code>false</code> otherwise.
-	 */
-
-	private boolean skipStatementOrBlock() {
 		nextToken();
-		
-		switch (fToken) {		
+		switch (fToken) {
 			case Symbols.TokenRBRACE:
-				// do { BLOCK } while
-				if (skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
-					nextToken();
-					return true;
-				}
-				break;
+				skipScope(); // and fall thru
 			case Symbols.TokenSEMICOLON:
-				// do statement; while
-				nextToken();
-				while (true) {
-					switch (fToken) {
-						case Symbols.TokenRBRACE:
-							// array definition
-							skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
-							nextToken();
-									
-							if (skipBrackets())
-								break;
-							else
-								return false;
-						case Symbols.TokenRBRACKET: // array index
-							skipScope(Symbols.TokenLBRACKET, Symbols.TokenRBRACKET);
-							break;
-						case Symbols.TokenRPAREN: // call, if , for, ..., step over
-							skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
-							break;
-						case Symbols.TokenSEMICOLON:
-							return true;
-						case Symbols.TokenLBRACE:
-							return true;
-						case Symbols.TokenLPAREN:
-							return false;
-						case Symbols.TokenLBRACKET:
-							return false;
-						case Symbols.TokenDO:
-							return true;
-						case Symbols.TokenIF:
-							return true;
-						case Symbols.TokenFOR:
-							return true;
-						case Symbols.TokenWHILE:
-							return true;
-						case Symbols.TokenEOF:
-							return false;
-					}
-					nextToken();
-			}
-		}  
-		
-		return false;		
+				skipToStatementStart(false, false);
+				return fToken == Symbols.TokenDO;
+		}
+		return false;
 	}
-	
 	
 	/**
 	 * Skips brackets if the current token is a RBRACKET. There can be nothing
-	 * in between, this is only to be used for <code>[]</code> elements.
+	 * but whitespace in between, this is only to be used for <code>[]</code> elements.
 	 * 
 	 * @return <code>true</code> if a <code>[]</code> could be scanned, the
 	 *         current token is left at the LBRACKET.
 	 */
-
 	private boolean skipBrackets() {
 		if (fToken == Symbols.TokenRBRACKET) {
 			nextToken();
@@ -776,60 +843,21 @@ public class JavaIndenter {
 		}
 		return false;
 	}
-
-	
-	/**
-	 * Searches for the <code>if</code> matching a just scanned else.
-	 * 
-	 * @return <code>true</code> if the matching if can be found, <code>false</code>
-	 *         otherwise
-	 */
-
-	private boolean searchIfForElse() {
-		
-		int depth= 1;
-		while (true) {
-			nextToken();
-			
-			switch (fToken) {
-				case Symbols.TokenRBRACE:
-					skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
-					break;
-				case Symbols.TokenIF:
-					depth--;
-					if (depth == 0)
-						return true;
-					break;
-				case Symbols.TokenELSE:
-					depth++;
-					break;
-				
-				case Symbols.TokenEOF:
-					return false;
-			} 
-		}
-			
-		
-	}
-
 	
 	/**
 	 * Reads the next token in backward direction from the heuristic scanner
 	 * and sets the fields <code>fToken, fPreviousPosition</code> and <code>fPosition</code>
 	 * accordingly.
 	 */
-
 	private void nextToken() {
 		nextToken(fPosition);
 	}
-
 	
 	/**
 	 * Reads the next token in backward direction of <code>start</code> from
 	 * the heuristic scanner and sets the fields <code>fToken, fPreviousPosition</code>
 	 * and <code>fPosition</code> accordingly.
 	 */
-
 	private void nextToken(int start) {
 		fToken= fScanner.previousToken(start - 1, JavaHeuristicScanner.UNBOUND);
 		fPreviousPos= start;
@@ -840,19 +868,24 @@ public class JavaIndenter {
 			fLine= -1;
 		}
 	}
-
 	
 	/**
 	 * Returns <code>true</code> if the current tokens look like a method
-	 * declaration header (i.e. only the return type and method name).
+	 * declaration header (i.e. only the return type and method name). The
+	 * heuristic calls <code>nextToken</code> and expects an identifier
+	 * (method name) and a type declaration (an identifier with optional 
+	 * brackets) which also covers the visibility modifier of constructors; it
+	 * does not recognize package visible constructors. 
 	 * 
 	 * @return <code>true</code> if the current position looks like a method
-	 *         header.
+	 *         declaration header.
 	 */
-
 	private boolean looksLikeMethodDecl() {
 		/*
-		 * TODO does not recognize package private constructors
+		 * TODO This heuristic does not recognize package private constructors
+		 * since those do have neither type nor visibility keywords.
+		 * One option would be to go over the parameter list, but that might
+		 * be empty as well - hard to do without an AST...
 		 */
 		
 		nextToken();
@@ -866,12 +899,27 @@ public class JavaIndenter {
 	}
 	
 	/**
-	 * Scans tokens for the matching parenthesis.
+	 * Returns <code>true</code> if the current tokens look like a method
+	 * call header (i.e. an identifier as opposed to a keyword taking parenthesized
+	 * parameters such as <code>if</code>).
+	 * <p>The heuristic calls <code>nextToken</code> and expects an identifier
+	 * (method name).
+	 * 
+	 * @return <code>true</code> if the current position looks like a method call
+	 *         header.
+	 */
+	private boolean looksLikeMethodCall() {
+		nextToken();
+		return fToken == Symbols.TokenIDENT; // method name
+	}
+	
+	/**
+	 * Scans tokens for the matching opening peer. The internal cursor
+	 * (<code>fPosition</code>) is set to the offset of the opening peer if found.
 	 * 
 	 * @return <code>true</code> if a matching token was found, <code>false</code>
 	 *         otherwise
 	 */
-
 	private boolean skipScope(int openToken, int closeToken) {
 		
 		int depth= 1;
@@ -891,44 +939,85 @@ public class JavaIndenter {
 		}
 	}
 
-	private boolean prefAlignCaseWithSwitch() {
-		// TODO preference lookup
-		return false;
-	}
+	private int prefTabLength() {
+		int tabLen;
+		// TODO adjust once this is a per-project setting
+		JavaPlugin plugin= JavaPlugin.getDefault();
+		if (plugin != null)
+			if (plugin.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS))
+				tabLen= -1; // results in no tabs being substituted for space runs
+			else
+				tabLen= plugin.getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+		else
+			tabLen= 4; // sensible default for testing
 
-	private int prefArrayDimensionIndent() {
-		// TODO preference lookup
-		return 2;
+		return tabLen;
 	}
+	
+	// TODO add preference lookup or probing
 
 	private boolean prefArrayDimensionsDeepIndent() {
-		// TODO preference lookup
-		return true;
-	}
-
-	private boolean prefMethodDeclDeepIndent() {
-		// TODO preference lookup
-		return true;
-	}
-
-	private int prefCallContinuationIndent() {
-		// TODO preference lookup
-		return 2;
+		return true; // no real pref - real option at all?
 	}
 
 	private int prefArrayIndent() {
-		// TODO preference lookup
-		return 2;
+		return 2; // default: double indent arrays
 	}
 
 	private boolean prefArrayDeepIndent() {
-		// TODO preference lookup
-		return false;
+		return true; // sensible default
 	}
 
-	private boolean prefTenaryDeepAlign() {
-		// TODO preference lookup
-		return true;
+	private boolean prefTernaryDeepAlign() {
+		return true; // sensible default
+	}
+
+	private int prefTernaryIndent() {
+		return 2; // default: double indent conditional expressions
+	}
+
+	private int prefCaseIndent() {
+		return 0; // default: sun default is not to indent cases
+	}
+
+	private int prefAssignmentIndent() {
+		return prefBlockIndent();
+	}
+
+	private int prefCaseBlockIndent() {
+		return prefBlockIndent();
+	}
+
+	private int prefSimpleIndent() {
+		return prefBlockIndent();
+	}
+
+	private int prefBracketIndent() {
+		return prefBlockIndent();
+	}
+
+	private boolean prefMethodDeclDeepIndent() {
+		return true; // sensible default
+	}
+
+	private boolean prefMethodCallDeepIndent() {
+		return false; // sensible default
+	}
+
+	private boolean prefParenthesisDeepIndent() {
+		return false; // sensible default
+	}
+
+	private int prefParenthesisIndent() {
+		return prefContinuationIndent();
+	}
+
+	private int prefBlockIndent() {
+		return 1; // sensible default
+	}
+	
+	private int prefContinuationIndent() {
+		return 1; // sensible default
 	}
 
 }

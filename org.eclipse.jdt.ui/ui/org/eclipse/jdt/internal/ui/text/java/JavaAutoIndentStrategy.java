@@ -270,9 +270,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 		JavaIndenter indenter= new JavaIndenter(d, scanner);
-		String indent= indenter.computeIndentation(c.offset);
+		StringBuffer indent= indenter.computeIndentation(c.offset);
 		if (indent == null)
-			indent= ""; //$NON-NLS-1$
+			indent= new StringBuffer(); //$NON-NLS-1$
 
 		int docLength= d.getLength();
 		if (c.offset == -1 || docLength == 0)
@@ -310,8 +310,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				}
 			
 				buf.append(getLineDelimiter(d));
-				String reference= indenter.getReferenceIndentation(c.offset); 
-				buf.append(reference == null ? "" : reference); //$NON-NLS-1$
+				StringBuffer reference= indenter.getReferenceIndentation(c.offset);
+				if (reference != null)
+					buf.append(reference);
 				buf.append('}');
 			}
 			c.text= buf.toString();
@@ -662,7 +663,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					}
 				}
 				
-				String indent= indenter.computeIndentation(lineOffset);
+				StringBuffer indent= indenter.computeIndentation(lineOffset);
 				if (indent == null) // bail out
 					return;
 				
@@ -671,14 +672,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				String type= partition.getType();
 				if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
 					if (partition.getOffset() != lineOffset) // not for first line
-						indent += ' ';
+						indent.append(' ');
 					
 				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + lineLength);
 				if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
 					endOfWS= lineOffset + lineLength;
 				
 				int wsLen= Math.max(endOfWS - lineOffset, 0);
-				temp.replace(lineOffset, wsLen, indent);
+				temp.replace(lineOffset, wsLen, indent.toString());
 			}
 			
 			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);

@@ -160,7 +160,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return;
 
 		String indentation= getLineIndentation(document, command.offset);
-		String delimiter= getLineDelimiter(document, command.offset);
+		String delimiter= TextUtilities.getDefaultLineDelimiter(document);
 
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset());
@@ -174,29 +174,6 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			command.text= getModifiedText(command.text, indentation, delimiter);		
 	}
 	
-	/**
-	 * Returns the line delimiter for the line at <code>offset</code>. If there is none, 
-	 * the method falls back to the first legal line delimiter, or "\n".
-	 * 
-	 * @param document the document to check
-	 * @param offset the current offset
-	 * @return a legal line delimiter, never <code>null</code>
-	 * @throws BadLocationException if the offset is not valid in the document
-	 */
-	private String getLineDelimiter(IDocument document, int offset) throws BadLocationException {
-		int line= document.getLineOfOffset(offset);
-		String delim= document.getLineDelimiter(line);
-		if (delim == null) {
-			String[] delimiters= document.getLegalLineDelimiters();
-			if (delimiters.length > 0)
-				delim= delimiters[0];
-		}
-		if (delim == null)
-			delim= "\n"; //$NON-NLS-1$
-
-		return delim;
-	}
-
 	private boolean isSmartMode() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
