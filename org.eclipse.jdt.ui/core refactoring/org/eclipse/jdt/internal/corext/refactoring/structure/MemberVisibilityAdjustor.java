@@ -68,6 +68,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
+ * 
+ * @since 3.1
  */
 public final class MemberVisibilityAdjustor {
 
