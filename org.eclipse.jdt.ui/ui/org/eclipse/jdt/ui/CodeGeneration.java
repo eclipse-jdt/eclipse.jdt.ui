@@ -22,6 +22,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 public class CodeGeneration {
 	
+	private CodeGeneration() {
+	}
+	
 	/**
 	 * Returns the content for a new compilation unit using the 'new file' code template.
 	 * @param cu The compilation to create the source for. The compilation unit does not need to exist.
