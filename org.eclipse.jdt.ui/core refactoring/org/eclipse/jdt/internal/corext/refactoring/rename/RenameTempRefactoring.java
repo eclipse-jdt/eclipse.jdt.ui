@@ -15,9 +15,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -27,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.TempNameUtil;
-import org.eclipse.jdt.internal.corext.refactoring.code.TempNameUtil2;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -143,7 +145,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private void initNames(){
-		fAlreadyUsedNames= TempNameUtil2.getLocalNameMap(fTempDeclarationNode);
+		fAlreadyUsedNames= TempNameUtil.getLocalNameMap((MethodDeclaration)ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class));;
 		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
 	}
 	
