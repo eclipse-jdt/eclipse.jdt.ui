@@ -709,11 +709,12 @@ public class SourceAttachmentBlock {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
 				try {
+					boolean isExported= fOldEntry != null ? fOldEntry.isExported() : false;
 					IClasspathEntry newEntry;
 					if (fIsVariableEntry) {
-						newEntry= JavaCore.newVariableEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), false);
+						newEntry= JavaCore.newVariableEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
 					} else {
-						newEntry= JavaCore.newLibraryEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), false);
+						newEntry= JavaCore.newLibraryEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
 					}
 					IClasspathEntry[] entries= modifyClasspath(jproject, newEntry, shell);		
 					if (entries != null) {
