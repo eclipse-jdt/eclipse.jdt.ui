@@ -168,6 +168,15 @@ public class JavaElementSorter extends ViewerSorter {
 			return compareWithLabelProvider(viewer, e1, e2);
 		}
 		
+		if (cat1 == METHODS || cat1 == STATIC_METHODS || cat1 == CONSTRUCTORS) {
+			IMethod m1= (IMethod) e1;
+			IMethod m2= (IMethod) e2;
+			int nParamDiff= m1.getParameterTypes().length - m2.getParameterTypes().length;
+			if (nParamDiff != 0) {
+				return nParamDiff;
+			}
+		}
+		
 		// java element are sorted by name (and parameter types)
 		String name1= JavaElementLabels.getTextLabel(e1, JavaElementLabels.M_PARAMETER_TYPES);
 		String name2= JavaElementLabels.getTextLabel(e2, JavaElementLabels.M_PARAMETER_TYPES);
