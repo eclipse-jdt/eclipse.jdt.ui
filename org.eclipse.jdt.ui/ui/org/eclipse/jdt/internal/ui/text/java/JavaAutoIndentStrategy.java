@@ -150,7 +150,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					replaceText.append(d.get(whiteend, c.offset - whiteend));
 					replaceText.append(c.text);
 					// modify document command
-					c.length= c.offset - start;
+					c.length += c.offset - start;
 					c.offset= start;
 					c.text= replaceText.toString();
 				}
