@@ -958,8 +958,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ImportRewrite importRewrite= new ImportRewrite(cu);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
+				//TODO: collect removed type references (SimpleNames) -> do it in ASTData
 				createOccurrenceUpdate(nodes[j], rewrite, importRewrite, result).updateNode();
 			}
+			//TODO: create ImportRemover which looks for other occurrences of removed type references
+			// and removes the import iff none found and no unresolved ref with that name found.
+			// Don't consider refs in javadocs!
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				Set subtypes= (Set)namedSubclassMapping.get(cu);
@@ -1302,7 +1306,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			reshuffleElements();
 			changeMethodName();
 		}
-
+		
+		/** @return {@inheritDoc} (element type: Expression) */
 		protected List getParamguments() {
 			if (fNode instanceof MethodInvocation)	
 				return ((MethodInvocation) fNode).arguments();
@@ -1417,7 +1422,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			
 			checkIfDeletedParametersUsed();
 		}
-	
+		
+		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
 		protected List getParamguments() {
 			return fMethDecl.parameters();
 		}
@@ -1855,7 +1861,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			
 			return null;	
 		}
-
+		
+		/** @return {@inheritDoc} (element type: MethodRefParameter) */
 		protected List getParamguments() {
 			if (fNode instanceof MethodRef)
 				return ((MethodRef) fNode).parameters();

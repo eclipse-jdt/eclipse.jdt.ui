@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 //	  - if originally resolved by qualification -> no problem
 //	  - if originally resolved by import -> must add import in target too (qualify if import ambiguous)
 	
-	public MovedMemberAnalyzer(MoveStaticMembersProcessor.ASTData ast,
+	public MovedMemberAnalyzer(ASTData ast,
 			IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(ast, members, source, target);
 	}
@@ -76,8 +76,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			}
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fAst.rewriter.createCopyTarget(node.getName());
-			fAst.rewriter.replace(node, replace, null);
+			SimpleName replace= (SimpleName)fAst.getRewrite().createCopyTarget(node.getName());
+			fAst.getRewrite().replace(node, replace, null);
 			return false;
 		}
 		return super.visit(node);
@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fAst.rewriter.remove(node.getExpression(), null);
+			fAst.getRewrite().remove(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}
@@ -110,7 +110,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fAst.rewriter.remove(node.getExpression(), null);
+			fAst.getRewrite().remove(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}
@@ -128,8 +128,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fAst.rewriter.createCopyTarget(node.getName());
-			fAst.rewriter.replace(node, replace, null);
+			SimpleName replace= (SimpleName)fAst.getRewrite().createCopyTarget(node.getName());
+			fAst.getRewrite().replace(node, replace, null);
 		}	
 		return super.visit(node);
 	}
@@ -145,8 +145,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 			
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
-			SimpleName replace= (SimpleName)fAst.rewriter.createCopyTarget(node.getName());
-			fAst.rewriter.replace(node, replace, null);
+			SimpleName replace= (SimpleName)fAst.getRewrite().createCopyTarget(node.getName());
+			fAst.getRewrite().replace(node, replace, null);
 		}	
 		return super.visit(node);
 	}

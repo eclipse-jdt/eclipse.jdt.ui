@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -63,7 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor.ASTData;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTData;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -76,7 +75,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private ICompilationUnit fSourceCU;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	private final CodeGenerationSettings fSettings;
 
 	private String fParameterName;
 
@@ -88,15 +86,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private ICompilationUnit[] fAffectedCUs;
 	
 	
-	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(cu != null && cu.exists());
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isNotNull(settings);
 		fSourceCU= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSettings= settings;
 		
 		fParameterName= ""; //$NON-NLS-1$
 	}
@@ -105,8 +101,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return Checks.isExtractableExpression(selectedNodes, coveringNode);
 	}
 
-	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
-		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength, settings);
+	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength);
 	}
 	
 	/* (non-Javadoc)
@@ -126,7 +122,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.syntax_error")); //$NON-NLS-1$
 			pm.worked(1);
 			
-			fSource= new ASTData(fSourceCU, true);
+			fSource= new ASTData(fSourceCU);
 			initializeSelectedExpression();
 			pm.worked(1);
 		
@@ -143,7 +139,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	private void initializeSelectedExpression() throws JavaModelException {
 		IASTFragment fragment= ASTFragmentFactory.createFragmentForSourceRange(
-				new SourceRange(fSelectionStart, fSelectionLength), fSource.root, fSource.unit);
+				new SourceRange(fSelectionStart, fSelectionLength), fSource.getRoot(), fSource.getCu());
 		
 		if (fragment instanceof IExpressionFragment) {
 			//TODO: doesn't handle selection of partial Expressions
@@ -157,7 +153,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private RefactoringStatus checkSelection(IProgressMonitor pm) {
 		if (fSelectedExpression == null){
 			String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
-			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.root, message);
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.getRoot(), message);
 		}	
 		
 		fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
@@ -282,7 +278,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 
 	private void initializeExcludedParameterNames() {
-		IBinding[] bindings= new ScopeAnalyzer(fSource.root).getDeclarationsInScope(
+		IBinding[] bindings= new ScopeAnalyzer(fSource.getRoot()).getDeclarationsInScope(
 				fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		fExcludedParameterNames= new String[bindings.length];
 		for (int i= 0; i < fExcludedParameterNames.length; i++) {
@@ -317,7 +313,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		// TODO: check for name clashes in ripple methods, ...
 		
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
-		fSource.reset(fSettings);
+		fSource.clearRewriteAndImports();
 		changeSource();
 		pm.worked(1);
 		
@@ -326,7 +322,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fChange.add(fSource.createChange()); //ASTData#createChange() should add a GroupDescription "Update imports"
 
 		HashSet cus= new HashSet();
-		cus.add(fSource.unit);
+		cus.add(fSource.getCu());
 		cus.addAll(Arrays.asList(fAffectedCUs));
 		result.merge(
 			Checks.validateModifiesFiles(ResourceUtil.getFiles(
@@ -340,20 +336,20 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private void changeSource() {
-		AST ast= fSource.root.getAST();
+		AST ast= fSource.getRoot().getAST();
 
 		//replace selected expression
 		ASTNode newExpression= ast.newSimpleName(fParameterName);
-		fSource.rewriter.replace(fSelectedExpression, newExpression,
+		fSource.getRewrite().replace(fSelectedExpression, newExpression,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"))); //$NON-NLS-1$
 		
 		//add parameter
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName(fParameterName));
-		String type= fSource.imports.addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) fSource.rewriter.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
+		String type= fSource.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
+		param.setType((Type) fSource.getRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
 		fMethodDeclaration.parameters().add(param);
-		fSource.rewriter.markAsInserted(param,
+		fSource.getRewrite().markAsInserted(param,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"))); //$NON-NLS-1$
 	}
 	
@@ -366,7 +362,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		for (int i= 0; i < fAffectedCUs.length; i++) {
 			ASTData ast= getASTData(fAffectedCUs[i]);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(ast, method, fSelectedExpression);
-			ast.root.accept(analyzer);
+			ast.getRoot().accept(analyzer);
 			if (ast != fSource)
 				fChange.add(ast.createChange());
 			sub.worked(1);
@@ -389,9 +385,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		
 		public boolean visit(MethodInvocation node) {
 			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
-				Expression argument= (Expression) ASTNode.copySubtree(fAst.root.getAST(), fExpression);
+				Expression argument= (Expression) ASTNode.copySubtree(fAst.getRoot().getAST(), fExpression);
 				node.arguments().add(argument);
-				fAst.rewriter.markAsInserted(argument,
+				fAst.getRewrite().markAsInserted(argument,
 						fAst.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"))); //$NON-NLS-1$
 			}
 			return super.visit(node);
@@ -399,9 +395,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private ASTData getASTData(ICompilationUnit unit) throws CoreException {
-		if (fSource.unit.equals(unit))
+		if (fSource.getCu().equals(unit))
 			return fSource;
-		return new ASTData(unit, true, fSettings);
+		return new ASTData(unit);
 	}
 	
 	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {

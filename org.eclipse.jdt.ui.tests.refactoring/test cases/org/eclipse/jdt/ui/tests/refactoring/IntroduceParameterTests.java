@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
@@ -85,8 +83,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
 		ISourceRange selection= getSelection(cu);
 		IntroduceParameterRefactoring refactoring= IntroduceParameterRefactoring.create(
-			cu, selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());		
+			cu, selection.getOffset(), selection.getLength());		
 
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus status= refactoring.checkInitialConditions(pm);

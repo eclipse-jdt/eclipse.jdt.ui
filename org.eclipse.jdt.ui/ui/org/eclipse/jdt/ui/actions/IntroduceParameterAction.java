@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -99,8 +98,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	private static IntroduceParameterRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
 		return IntroduceParameterRefactoring.create(
 			cunit, 
-			selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			selection.getOffset(), selection.getLength());
 	}
 
 	private static RefactoringWizard createWizard(IntroduceParameterRefactoring refactoring) {

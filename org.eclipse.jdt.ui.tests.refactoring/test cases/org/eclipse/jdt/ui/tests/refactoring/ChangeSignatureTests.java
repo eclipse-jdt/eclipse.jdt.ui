@@ -43,6 +43,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
 	private static final boolean RUN_CONSTRUCTOR_TEST = true;
+	private static final boolean BUG_49772= true;
 
 	public ChangeSignatureTests(String name) {
 		super(name);
@@ -1426,10 +1427,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testImport05() throws Exception {
+		if (BUG_49772) {
+			printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
+			return;
+		}
 		String[] signature= {};
-		String[] newNames= {};
-		String[] newTypes= {};
-		String[] newDefaultValues= {};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {};
 
@@ -1444,9 +1449,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testImport06() throws Exception {
 		String[] signature= {"QPermission;", "Qjava.security.acl.Permission;"};
-		String[] newNames= {};
-		String[] newTypes= {};
-		String[] newDefaultValues= {};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {};
 
@@ -1460,5 +1465,26 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	public void testImport07() throws Exception {
+		if (BUG_49772) {
+			printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
+			return;
+		}
+		String[] signature= {"QList;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"list"};
+		String[] newParamNames= oldParamNames;
+		String[] newParamTypeNames= null;
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
 }
 

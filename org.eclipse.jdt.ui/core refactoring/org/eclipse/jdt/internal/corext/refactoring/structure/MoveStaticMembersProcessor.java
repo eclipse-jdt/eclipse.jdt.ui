@@ -39,11 +39,9 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -60,28 +58,23 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
@@ -89,7 +82,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
@@ -112,59 +104,6 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private IBinding[] fMemberBindings;
 	private BodyDeclaration[] fMemberDeclarations;
 
-	public static class ASTData {
-		public ASTData(ICompilationUnit u, boolean resolveBindings) {
-			unit= u;
-			root= new RefactoringASTParser(AST.JLS2).parse(unit, resolveBindings);
-			rewriter= new OldASTRewrite(root);
-		}
-		
-		public ASTData(ICompilationUnit u, boolean resolveBindings, CodeGenerationSettings settings) throws CoreException {
-			this(u, resolveBindings);
-			groups= new ArrayList();
-			imports= new ImportRewrite(unit);
-		}
-		public ICompilationUnit unit;
-		public CompilationUnit root;
-		public OldASTRewrite rewriter;
-		public List groups;
-		public ImportRewrite imports;
-		
-		public TextEditGroup createGroupDescription(String name) {
-			TextEditGroup result= new TextEditGroup(name);
-			groups.add(result);
-			return result;
-		}
-		public void reset(CodeGenerationSettings settings) throws CoreException {
-			clearRewrite();
-			imports= new ImportRewrite(unit);
-		}
-		public void clearRewrite() {
-			rewriter.removeModifications();
-			groups= new ArrayList();
-		}
-		public TextChange createChange() throws CoreException {
-			CompilationUnitChange result= new CompilationUnitChange(unit.getElementName(), unit);
-			TextBuffer buffer= TextBuffer.acquire(getFile(unit));
-			try {
-				MultiTextEdit edit= new MultiTextEdit();
-				rewriter.rewriteNode(buffer, edit);
-				if (!imports.isEmpty())
-					edit.addChild(imports.createEdit(buffer.getDocument()));
-				result.setEdit(edit);
-				for (Iterator iter= groups.iterator(); iter.hasNext();) {
-					result.addTextEditGroup((TextEditGroup)iter.next());
-				}
-			} finally {
-				TextBuffer.release(buffer);
-			}
-			return result;
-		}
-		private static IFile getFile(ICompilationUnit cu) {
-			return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
-		}
-	}
-	
 	private static class TypeReferenceFinder extends ASTVisitor {
 		List fResult= new ArrayList();
 		Set fDefined= new HashSet();
@@ -346,13 +285,13 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			if (result.hasFatalError())
 				return result;			
 			
-			fSource= new ASTData(fMembersToMove[0].getCompilationUnit(), true);
+			fSource= new ASTData(fMembersToMove[0].getCompilationUnit());
 			fSourceBinding= getSourceBinding();
 			fMemberBindings= getMemberBindings();
 			if (fSourceBinding == null || hasUnresolvedMemberBinding()) {
 				result.addFatalError(RefactoringCoreMessages.getFormattedString(
 					"MoveMembersRefactoring.compile_errors", //$NON-NLS-1$
-					fSource.unit.getElementName()));
+					fSource.getCu().getElementName()));
 			}
 			fMemberDeclarations= getASTMembers(result);
 			return result;
@@ -392,7 +331,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			
 			RefactoringStatus result= new RefactoringStatus();	
 			
-			fSource.reset(fPreferences);
+			fSource.clearRewriteAndImports();
 			
 			result.merge(checkDestinationType());			
 			if (result.hasFatalError())
@@ -526,7 +465,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			case IJavaElement.FIELD :
 				if (! (Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
 					return false;
-				VariableDeclarationFragment declaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, fSource.root);
+				VariableDeclarationFragment declaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, fSource.getRoot());
 				return declaration.getInitializer() != null;
 
 			case IJavaElement.TYPE :
@@ -772,7 +711,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 
 	private boolean isWithinMemberToMove(SearchMatch result) throws JavaModelException {
 		ICompilationUnit referenceCU= SearchUtils.getCompilationUnit(result);
-		if (! referenceCU.equals(fSource.unit))
+		if (! referenceCU.equals(fSource.getCu()))
 			return false;
 		int referenceStart= result.getOffset();
 		for (int i= 0; i < fMembersToMove.length; i++) {
@@ -821,7 +760,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		if (targetBinding == null) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString(
 				"MoveMembersRefactoring.compile_errors", //$NON-NLS-1$
-				fTarget.unit.getElementName()));
+				fTarget.getCu().getElementName()));
 			pm.done();
 			return;
 		}
@@ -842,7 +781,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			ASTData ast= getASTData(unit);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
 				ast, fMemberBindings, targetBinding, fSourceBinding);
-			ast.root.accept(analyzer);
+			ast.getRoot().accept(analyzer);
 			status.merge(analyzer.getStatus());
 			status.merge(Checks.validateEdit(unit));
 			if (status.hasFatalError()) {
@@ -850,40 +789,40 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				return;
 			}
 			if (analyzer.needsTargetImport())
-				ast.imports.addImport(targetBinding);
+				ast.getImportRewrite().addImport(targetBinding);
 			if (!isSourceOrTarget(unit))
 				fChange.add(ast.createChange());
 			sub.worked(1);
 		}
 		status.merge(moveMembers(fMemberDeclarations, memberSources));
 		fChange.add(fSource.createChange());
-		status.merge(Checks.validateEdit(fSource.unit));
-		if (! fSource.unit.equals(fTarget.unit)) {
+		status.merge(Checks.validateEdit(fSource.getCu()));
+		if (! fSource.getCu().equals(fTarget.getCu())) {
 			fChange.add(fTarget.createChange());
-			status.merge(Checks.validateEdit(fTarget.unit));
+			status.merge(Checks.validateEdit(fTarget.getCu()));
 		}
 		pm.worked(1);
 	}
 	
-	private ASTData getASTData(ICompilationUnit unit) throws CoreException {
-		if (fSource.unit.equals(unit))
+	private ASTData getASTData(ICompilationUnit unit) {
+		if (fSource.getCu().equals(unit))
 			return fSource;
-		if (fTarget != null && fTarget.unit.equals(unit))
+		if (fTarget != null && fTarget.getCu().equals(unit))
 			return fTarget;
-		return new ASTData(unit, true, fPreferences);
+		return new ASTData(unit);
 	}
 	
 	private boolean isSourceOrTarget(ICompilationUnit unit) {
-		return fSource.unit.equals(unit) || fTarget.unit.equals(unit);
+		return fSource.getCu().equals(unit) || fTarget.getCu().equals(unit);
 	}
 	
 	private ITypeBinding getDestinationBinding() throws JavaModelException {
-		ASTNode node= NodeFinder.perform(fTarget.root, fDestinationType.getNameRange());
+		ASTNode node= NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange());
 		return (ITypeBinding)((SimpleName)node).resolveBinding();
 	}
 	
 	private ITypeBinding getSourceBinding() throws JavaModelException {
-		ASTNode node= NodeFinder.perform(fSource.root, fMembersToMove[0].getDeclaringType().getNameRange());
+		ASTNode node= NodeFinder.perform(fSource.getRoot(), fMembersToMove[0].getDeclaringType().getNameRange());
 		return (ITypeBinding)((SimpleName)node).resolveBinding();
 	}
 	
@@ -891,7 +830,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		IBinding[] result= new IBinding[fMembersToMove.length];
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			IMember member= fMembersToMove[i];
-			SimpleName name= (SimpleName)NodeFinder.perform(fSource.root, member.getNameRange());
+			SimpleName name= (SimpleName)NodeFinder.perform(fSource.getRoot(), member.getNameRange());
 			result[i]= name.resolveBinding();
 		}
 		return result;
@@ -911,35 +850,35 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
-						fSource.rewriter.set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
+						fSource.getRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
 				} else if (declaration instanceof TypeDeclaration) {
 					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
-						fSource.rewriter.set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
+						fSource.getRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
 					}
 				}
 			}
 			TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_declaration")); //$NON-NLS-1$
-			fSource.rewriter.markAsTracked(declaration, group);
+			fSource.getRewrite().markAsTracked(declaration, group);
 			declaration.setProperty("group", group); //$NON-NLS-1$
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
 		}
 		// Adjust imports
 		if (targetNeedsSourceImport && (fTarget != fSource))
-			fTarget.imports.addImport(fSourceBinding);
+			fTarget.getImportRewrite().addImport(fSourceBinding);
 		for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
 			ITypeBinding binding= (ITypeBinding)iter.next();
-			fTarget.imports.addImport(binding);
+			fTarget.getImportRewrite().addImport(binding);
 		}
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
-		TextBuffer buffer= TextBuffer.create(fSource.unit.getSource());
+		TextBuffer buffer= TextBuffer.create(fSource.getCu().getSource());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		MultiTextEdit edit= new MultiTextEdit();
-		fSource.rewriter.rewriteNode(buffer, edit);
+		fSource.getRewrite().rewriteNode(buffer, edit);
 		editor.add(edit);
 		editor.performEdits(new NullProgressMonitor());
 		for (int i= 0; i < members.length; i++) {
@@ -965,9 +904,9 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			fSource.rewriter.remove(declaration, delete);
-			ASTNode node= fTarget.rewriter.createStringPlaceholder(sources[i], declaration.getNodeType());
-			fTarget.rewriter.markAsInserted(node, add);
+			fSource.getRewrite().remove(declaration, delete);
+			ASTNode node= fTarget.getRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
+			fTarget.getRewrite().markAsInserted(node, add);
 			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
 		}
 		return result;
@@ -977,7 +916,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		BodyDeclaration[] result= new BodyDeclaration[fMembersToMove.length];
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			IMember member= fMembersToMove[i];
-			ASTNode node= NodeFinder.perform(fSource.root, member.getNameRange());
+			ASTNode node= NodeFinder.perform(fSource.getRoot(), member.getNameRange());
 			result[i]= (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
 
 			//Fix for bug 42383: exclude multiple VariableDeclarationFragments ("int a=1, b=2")
@@ -1003,7 +942,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private TypeDeclaration getDestinationDeclaration() throws JavaModelException {
 		return (TypeDeclaration)
 			ASTNodes.getParent(
-				NodeFinder.perform(fTarget.root, fDestinationType.getNameRange()),
+				NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
 				TypeDeclaration.class);
 	}
 }

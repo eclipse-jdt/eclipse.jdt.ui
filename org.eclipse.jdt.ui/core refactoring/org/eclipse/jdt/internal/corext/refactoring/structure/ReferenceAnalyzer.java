@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 /* package */ class ReferenceAnalyzer extends MoveStaticMemberAnalyzer {
 	
-	public ReferenceAnalyzer(MoveStaticMembersProcessor.ASTData ast, IBinding[] members, ITypeBinding target, ITypeBinding source) {
+	public ReferenceAnalyzer(ASTData ast, IBinding[] members, ITypeBinding target, ITypeBinding source) {
 		super(ast, members, source, target);
 	}
 	
@@ -78,8 +78,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 	public boolean visit(QualifiedName node) {
 		if (isMovedMember(node.resolveBinding())) {
 			if (node.getParent() instanceof ImportDeclaration) {
-				fAst.imports.removeImport(node.resolveTypeBinding());
-				fAst.imports.addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
+				fAst.getImportRewrite().removeImport(node.resolveTypeBinding());
+				fAst.getImportRewrite().addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
 			} else {
 				rewrite(node, fTarget);
 			}
