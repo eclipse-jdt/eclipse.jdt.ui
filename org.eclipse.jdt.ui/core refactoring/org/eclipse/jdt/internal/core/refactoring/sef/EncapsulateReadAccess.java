@@ -12,7 +12,6 @@ import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
-import sun.awt.OrientableFlowLayout;
 
 public class EncapsulateReadAccess extends SimpleReplaceTextChange {
 

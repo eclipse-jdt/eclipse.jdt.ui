@@ -30,6 +30,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
@@ -92,6 +94,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			}
 		});
 		layouter.perform(label, combo, 1);
+		processValidation();
 		
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.SEF_WIZARD_PAGE));		
 	}
@@ -104,19 +107,21 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 	
 	private void fillWithPossibleInsertPositions(Combo combo, IField field) {
+		int select= 0;
+		combo.add("As first method");
+		JavaTextLabelProvider renderer= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
 		try {
 			IMethod[] methods= field.getDeclaringType().getMethods();
-			combo.add("As first method");
 			for (int i= 0; i < methods.length; i++) {
-				combo.add(methods[i].getElementName());
+				combo.add(renderer.getTextLabel(methods[i]));
 			}
 			if (methods.length > 0)
-				combo.select(1);
-			else
-				combo.select(0);
+				select= 1;
 		} catch (JavaModelException e) {
 			// Fall through
 		}
+		combo.select(select);
+		fRefactoring.setInsertionIndex(select - 1);
 	}
 	
 	private void processValidation() {

@@ -50,6 +50,8 @@ public class ChangeVisibilityChange extends SimpleReplaceTextChange {
 		}
 		setOffset(offset);
 		setLength(length);
+		if (length == 0)
+			setText(getText() + " ");
 		return null;
 	}
 }

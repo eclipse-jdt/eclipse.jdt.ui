@@ -32,14 +32,17 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 				new SelfEncapsulateFieldWizard(refactoring),
 				"Self Encapsulate Field");
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Self Encapsulate Field", "Cannot open Refactroing Wizard. See log for more details.");
+			ExceptionHandler.handle(e, "Self Encapsulate Field", "Cannot perform refactoring. See log for more details.");
 		}
 	}
 	
 	public boolean canOperateOn(IStructuredSelection selection) {
 		Object o= SelectionUtil.getSingleElement(selection);
-		if (o instanceof IField)
-			return true;
+		if (o instanceof IField) {
+			IField field= (IField)o;
+			if (!field.isBinary())
+				return true;
+		}
 		return false;
 	}	
 }

@@ -26,6 +26,12 @@ public class TextBufferChangeManager {
 		fChangeCreator= changeCreator;
 	}
 	
+	/**
+	 * Returns the <code>ITextBufferChange</code> associated with the given compilation unit.
+	 * 
+	 * @param cu the compilation unit for which the text buffer change is requested
+	 * @return the text buffer change associated with the given compilation unit
+	 */
 	public ITextBufferChange get(ICompilationUnit cu) throws JavaModelException{
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit)cu.getOriginalElement();
@@ -38,10 +44,43 @@ public class TextBufferChangeManager {
 		return result;
 	}
 	
+	/**
+	 * Replaces the text [offset, length] with the given text.
+	 * @param cu compilation unit
+	 * @param name the changes name. The name is mainly used to render the change in the 
+	 *  user interface. The name can be <code>null</code> indicating that the change
+	 *  doesn't have a name.
+	 * @param offset the starting offset of the text to be replaced. The offset must not
+	 *  be negative.
+	 * @param length the length of the text to be replaced. The length must not be negative.
+	 * @param text the new text.
+	 */
+	public void addReplace(ICompilationUnit cu, String name, int offset, int length, String text) throws JavaModelException{
+		get(cu).addReplace(name, offset, length, text);
+	}
+	
+	/**
+	 * Adds a simple text change object to this text modifier.
+	 *
+	 * @param cu compilation unit
+	 * @param change the simple text change to add. The change must not be <code>null</code>.
+	 */	
+	public void addSimpleTextChange(ICompilationUnit cu, SimpleTextChange change) throws JavaModelException{
+		get(cu).addSimpleTextChange(change);
+	}	
+	
+	/**
+	 * Returns all text buffer changes managed by this instance.
+	 * 
+	 * @return all text buffer changes managed by this instance
+	 */
 	public ITextBufferChange[] getAllChanges(){
 		return (ITextBufferChange[])fMap.values().toArray(new ITextBufferChange[fMap.values().size()]);
 	}
 	
+	/**
+	 * Clears all associations between compilation units and text buffer changes.
+	 */
 	public void clear() {
 		fMap.clear();
 	}

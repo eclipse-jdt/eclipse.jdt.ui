@@ -4,12 +4,17 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.sef;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -20,6 +25,8 @@ import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -47,7 +54,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private TypeDeclaration fTypeDeclaration;
 
 	private String fGetterName;
+	private List fUsedGetterNames;
 	private String fSetterName;
+	private List fUsedSetterNames;
 	private int fInsertionIndex;
 	
 	public SelfEncapsulateFieldRefactoring(IField field, ITextBufferChangeCreator creator, int tabWidth) {
@@ -61,6 +70,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fGetterName= createGetterProposal(proposal);
 		fSetterName= createSetterProposal(proposal);
 	}
+	
+	//---- Setter and Getter methdos ----------------------------------------------------------
 	
 	public IField getField() {
 		return fField;
@@ -88,6 +99,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fInsertionIndex= index;
 	}
 	
+	//----activation checking ----------------------------------------------------------
+	
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
@@ -110,6 +123,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			result.addFatalError("Self Encapsulate Field is not applicable to base types.");
 			return result;
 		}
+		computeUsedNames();
 		return result;
 	}
 
@@ -125,13 +139,26 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
+	//---- Input checking ----------------------------------------------------------
+	
 	public RefactoringStatus checkMethodNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkFieldName(fGetterName));
-		result.merge(Checks.checkFieldName(fSetterName));
+		checkName(result, fGetterName, fUsedGetterNames);
+		checkName(result, fSetterName, fUsedSetterNames);
 		return result;
 	}
-		
+	
+	private static void checkName(RefactoringStatus status, String name, List usedNames) {
+		status.merge(Checks.checkFieldName(name));
+		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
+			String selector= (String)iter.next();
+			if (selector.equals(name))
+				status.addFatalError(RefactoringCoreMessages.getFormattedString(
+					"SelfEncapsulateField.method_exists",
+					name));
+		}
+	}	
+	
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
@@ -200,6 +227,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return "Self Encapsulate Field";
 	}
 	
+	//---- Helper methods -------------------------------------------------------------
+	
 	private String createProposal() {
 		String name= fField.getElementName();
 		if (name.length() > 1 && name.charAt(0) == 'f' && Character.isUpperCase(name.charAt(1))) {
@@ -216,7 +245,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			proposal);
 	}
 	
-	public String createGetterProposal(String proposal) {
+	private String createGetterProposal(String proposal) {
 		return RefactoringCoreMessages.getFormattedString(
 			"SelfEncapsulateField.getter",
 			proposal);
@@ -234,15 +263,38 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			unit.getElementName()));
 	}
 
+	private void computeUsedNames() {
+		fUsedGetterNames= new ArrayList(0);
+		fUsedSetterNames= new ArrayList(0);
+		TypeBinding type= fFieldDeclaration.binding.type;
+		MethodBinding[] methods= fFieldDeclaration.binding.declaringClass.methods();
+		for (int i= 0; i < methods.length; i++) {
+			MethodBinding method= methods[i];
+			TypeBinding[] parameters= methods[i].parameters;
+			if (parameters == null || parameters.length == 0) {
+				fUsedGetterNames.add(new String(method.selector));
+			} else if (parameters.length == 1 && parameters[0] == type) {
+				fUsedSetterNames.add(new String(method.selector));
+			}
+		}
+	}
+	
 	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws JavaModelException {
-		int insertionIndex= fInsertionIndex;
 		int insertionKind= AddMemberChange.INSERT_AFTER;
-		if (insertionIndex < 0) {
-			insertionIndex= 0;
-			insertionKind= AddMemberChange.INSERT_BEFORE;
+		IMember sibling= null;
+		IMethod[] methods= fField.getDeclaringType().getMethods();
+		if (fInsertionIndex < 0) {
+			if (methods.length > 0) {
+				sibling= methods[0];
+				insertionKind= AddMemberChange.INSERT_BEFORE;
+			} else {
+				IField[] fields= fField.getDeclaringType().getFields();
+				sibling= fields[fields.length - 1];
+			}
+		} else {
+			sibling= methods[fInsertionIndex];
 		}
 							
-		IMethod method= fField.getDeclaringType().getMethods()[insertionIndex];
 		ITextBufferChange change= fChangeManager.get(fField.getCompilationUnit());
 		
 		change.addSimpleTextChange(new ChangeVisibilityChange(fField, "private"));
@@ -250,16 +302,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
 		if (!Flags.isFinal(fField.getFlags()))
-			change.addSimpleTextChange(createSetterMethod(insertionKind, method, modifiers, type));
-		change.addSimpleTextChange(createGetterMethod(insertionKind, method, modifiers, type));
-			
+			change.addSimpleTextChange(createSetterMethod(insertionKind, sibling, modifiers, type));
+		change.addSimpleTextChange(createGetterMethod(insertionKind, sibling, modifiers, type));	
 	}
 
-	private AddMemberChange createSetterMethod(int insertionKind, IMethod method, String modifiers, String type) throws JavaModelException {
+	private AddMemberChange createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
 		String argname= createArgName();
 		return new AddMemberChange(
 			"Add Setter method",
-			method,
+			sibling,
 			insertionKind,
 			new String[] {
 				modifiers + " void " + getSetterName() + "(" + type + " " + argname + ") {",
@@ -271,10 +322,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			fTabWidth);
 	}
 	
-	private AddMemberChange createGetterMethod(int insertionKind, IMethod method, String modifiers, String type) {
+	private AddMemberChange createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
 		return new AddMemberChange(
 			"Add Getter method",
-			method,
+			sibling,
 			insertionKind,
 			new String[] {
 				modifiers + " " + type + " " + getGetterName() + "() {",
