@@ -110,7 +110,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 			Point upperLeft= textWidget.getLocationAtOffset(delta);
 			int width= textWidget.getClientArea().width + textWidget.getHorizontalPixel();
 			int height= textWidget.getLineHeight();
-			textWidget.redraw(upperLeft.x, upperLeft.y, width, height, false);
+			textWidget.redraw(0, upperLeft.y, width, height, false);
 		}
 	}
 
