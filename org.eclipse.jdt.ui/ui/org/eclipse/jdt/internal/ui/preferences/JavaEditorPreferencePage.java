@@ -231,12 +231,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
-		{"Errors", PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR, PreferenceConstants.EDITOR_PROBLEM_INDICATION, PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER },
-		{"Warnings", PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR, PreferenceConstants.EDITOR_WARNING_INDICATION, PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER },
-		{"Tasks", PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, PreferenceConstants.EDITOR_TASK_INDICATION, PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER },
-		{"Search Results", PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER },
-		{"Bookmarks", PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR, PreferenceConstants.EDITOR_BOOKMARK_INDICATION, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER },
-		{"Others", PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, PreferenceConstants.EDITOR_UNKNOWN_INDICATION, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER }
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.errors"), PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR, PreferenceConstants.EDITOR_PROBLEM_INDICATION, PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER }, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.warnings"), PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR, PreferenceConstants.EDITOR_WARNING_INDICATION, PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER }, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.tasks"), PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, PreferenceConstants.EDITOR_TASK_INDICATION, PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER }, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.searchResults"), PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER }, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.bookmarks"), PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR, PreferenceConstants.EDITOR_BOOKMARK_INDICATION, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER }, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.annotations.others"), PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, PreferenceConstants.EDITOR_UNKNOWN_INDICATION, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER } //$NON-NLS-1$
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -676,7 +676,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 				
-		String text= "Analyse &problems while typing";
+		String text= PreferencesMessages.getString("JavaEditorPreferencePage.analyseAnnotationsWhileTyping"); //$NON-NLS-1$
 		addCheckBox(composite, text, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 		
 		text= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
@@ -689,7 +689,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label.setLayoutData(gd);
 		
 		label= new Label(composite, SWT.LEFT);
-		label.setText("&Marker presentation options:");
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationPresentationOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
@@ -718,21 +718,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		optionsComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fShowInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
-        fShowInTextCheckBox.setText("Show in &text");
+        fShowInTextCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInText")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
 		fShowInTextCheckBox.setLayoutData(gd);
 		
 		fShowInOverviewRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
-        fShowInOverviewRulerCheckBox.setText("Show in overview &ruler");
+        fShowInOverviewRulerCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInOverviewRuler")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
 		fShowInOverviewRulerCheckBox.setLayoutData(gd);
 		
 		label= new Label(optionsComposite, SWT.LEFT);
-		label.setText("C&olor:");
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
