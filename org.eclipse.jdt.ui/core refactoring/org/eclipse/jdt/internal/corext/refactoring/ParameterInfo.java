@@ -18,11 +18,11 @@ public class ParameterInfo {
 	private String newName;
 	private Object data;
 	
-	public ParameterInfo(String t, String name, int index){
-		type= t;
-		oldName= name;
-		newName= name;
-		oldIndex= index;
+	public ParameterInfo(String type, String name, int index){
+		this.type= type;
+		this.oldName= name;
+		this.newName= name;
+		this.oldIndex= index;
 	}
 	
 	public String getType() {
