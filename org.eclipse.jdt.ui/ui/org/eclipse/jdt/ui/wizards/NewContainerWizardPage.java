@@ -179,9 +179,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		}
 
 		if (jelem == null || jelem.getElementType() == IJavaElement.JAVA_MODEL) {
-			IProject[] projects= getWorkspaceRoot().getProjects();
-			if (projects.length > 0) {
-				jelem= JavaCore.create(projects[0]);
+			try {
+				IJavaProject[] projects= JavaCore.create(getWorkspaceRoot()).getJavaProjects();
+				if (projects.length == 1) {
+					jelem= projects[0];
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		return jelem;
