@@ -207,20 +207,20 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
 			
-			ASTRewriteAnalyzer.markAsReplaced(superClass, null);
+			ASTRewriteAnalyzer.markAsRemoved(superClass);
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) superInterfaces.get(0), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) superInterfaces.get(0));
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 					
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(1), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) members.get(1));
 			
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
-			ASTRewriteAnalyzer.markAsReplaced(meth, null);
+			ASTRewriteAnalyzer.markAsRemoved(meth);
 		}
 		{ // remove superinterface & method, change to interface & final
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
@@ -233,16 +233,16 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) superInterfaces.get(0), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) superInterfaces.get(0));
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), null);			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) members.get(0));			
 		}			
 		{ // remove class G
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
-			ASTRewriteAnalyzer.markAsReplaced(type, null);		
+			ASTRewriteAnalyzer.markAsRemoved(type);		
 		}				
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
@@ -462,7 +462,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List decls= anonym.bodyDeclarations();
 			assertTrue("Number of bodyDeclarations not 1", decls.size() == 1);
 
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) decls.get(0), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) decls.get(0));
 		}		
 		{	// replace body decl in AnonymousClassDeclaration
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);

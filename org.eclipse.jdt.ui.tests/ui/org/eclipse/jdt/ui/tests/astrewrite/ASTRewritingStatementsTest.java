@@ -15,12 +15,14 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -188,7 +190,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			List statements= block.statements();
 			assertTrue("No statements in block", !statements.isEmpty());
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(0), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(0));
 					
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -219,7 +221,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
-			ASTRewriteAnalyzer.markAsReplaced(expr, null);
+			ASTRewriteAnalyzer.markAsRemoved(expr);
 			
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -311,6 +313,72 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 	}
 	
-	
+	public void testBreakStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        break;\n");
+		buf.append("        break label;\n");
+		buf.append("        break label;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{ // insert label
+			BreakStatement statement= (BreakStatement) statements.get(0);
+			assertTrue("Has label", statement.getLabel() == null);
+			
+			SimpleName newLabel= ast.newSimpleName("label2");	
+			statement.setLabel(newLabel);
+			
+			ASTRewriteAnalyzer.markAsInserted(newLabel);
+		}
+		{ // replace label
+			BreakStatement statement= (BreakStatement) statements.get(1);
+			
+			SimpleName label= statement.getLabel();
+			assertTrue("Has no label", label != null);
+			
+			SimpleName newLabel= ast.newSimpleName("label2");	
+
+			ASTRewriteAnalyzer.markAsReplaced(label, newLabel);
+		}
+		{ // remove label
+			BreakStatement statement= (BreakStatement) statements.get(2);
+			
+			SimpleName label= statement.getLabel();
+			assertTrue("Has no label", label != null);
+			
+			ASTRewriteAnalyzer.markAsRemoved(label);
+		}	
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        break label2;\n");
+		buf.append("        break label2;\n");
+		buf.append("        break;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
 	
 }

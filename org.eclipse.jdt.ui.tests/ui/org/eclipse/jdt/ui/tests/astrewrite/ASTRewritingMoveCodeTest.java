@@ -114,7 +114,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			assertTrue("Cannot find inner class", members.get(0) instanceof TypeDeclaration);
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 			
-			ASTRewriteAnalyzer.markAsReplaced(innerType, null);
+			ASTRewriteAnalyzer.markAsRemoved(innerType);
 			ASTNode movedNode= ASTRewriteAnalyzer.getPlaceholderForExisting(innerType);
 			members.add(movedNode);
 			
@@ -131,7 +131,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				toMove= (Statement) statements.get(1);
 				toCopy= (Statement) statements.get(3);
 				
-				ASTRewriteAnalyzer.markAsReplaced(toMove, null);
+				ASTRewriteAnalyzer.markAsRemoved(toMove);
 			}
 			{
 				MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -206,7 +206,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				TypeDeclaration outerType= findTypeDeclaration(astRoot, "G");
 				assertTrue("G not found", outerType != null);
 				
-				ASTRewriteAnalyzer.markAsReplaced(outerType, null);
+				ASTRewriteAnalyzer.markAsRemoved(outerType);
 				
 				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getPlaceholderForExisting(outerType);
 				innerMembers.add(insertNodeForCopy);
@@ -316,8 +316,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			
 			ASTRewriteAnalyzer.markAsInserted(whileStatement);
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(1), null);
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(2), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(1));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) statements.get(2));
 		}	
 					
 

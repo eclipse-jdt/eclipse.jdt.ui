@@ -179,7 +179,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		}
 		{	// remove the initializer, add a dimension expression
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(1);
-			ASTRewriteAnalyzer.markAsReplaced(arrayCreation.getInitializer(), null);
+			ASTRewriteAnalyzer.markAsRemoved(arrayCreation.getInitializer());
 			
 			List dimensions= arrayCreation.dimensions();
 			assertTrue("Number of dimension expressions not 0", dimensions.size() == 0);
@@ -201,7 +201,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			List dimensions= arrayCreation.dimensions();
 			assertTrue("Number of dimension expressions not 1", dimensions.size() == 1);
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) dimensions.get(0), null);
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) dimensions.get(0));
 			
 			ArrayInitializer initializer= ast.newArrayInitializer();
 			List expressions= initializer.expressions();
@@ -416,6 +416,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+
+
 	
 	
 
