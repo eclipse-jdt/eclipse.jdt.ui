@@ -42,7 +42,7 @@ public class JdtTextTestSuite {
 		suite.addTest(PartitionTokenScannerTest.suite());
 		suite.addTest(StringsTest.suite());
 		suite.addTest(MarkOccurrenceTest.suite());
-		suite.addTest(SearchPluginNotLoadedTest.suite());
+		suite.addTest(PluginsNotLoadedTest.suite());
 		suite.addTest(BracketInserterTest.suite());
 		suite.addTest(SpellingTestSuite.suite());
 		suite.addTest(CommentsTestSuite.suite());

@@ -23,12 +23,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
 
 /**
@@ -37,7 +38,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * 
  * @since 3.1
  */
-public class SearchPluginNotLoadedTest extends TestCase {
+public class PluginsNotLoadedTest extends TestCase {
 	
 	private JavaEditor fEditor;
 
@@ -47,7 +48,7 @@ public class SearchPluginNotLoadedTest extends TestCase {
 	}
 	
 	public static Test suite() {
-		return setUpTest(new TestSuite(SearchPluginNotLoadedTest.class));
+		return setUpTest(new TestSuite(PluginsNotLoadedTest.class));
 	}
 	
 	
@@ -81,6 +82,16 @@ public class SearchPluginNotLoadedTest extends TestCase {
 	}
 	
 	public void testSearchPluginNotLoaded() {
-		assertFalse(org.eclipse.jdt.internal.ui.search.SearchUtil.isSearchPlugInActivated());
+		assertFalse(SearchUtil.isSearchPlugInActivated());
+	}
+	
+	public void testComparePluginNotLoaded() {
+		/*
+		 * FIXME: Can be uncommented once the following bugs:
+		 * 	https://bugs.eclipse.org/bugs/show_bug.cgi?id=78315
+		 *	https://bugs.eclipse.org/bugs/show_bug.cgi?id=78317
+		 * have been fixed.
+		 */
+//		assertFalse(Platform.getBundle("org.eclipse.compare").getState() == Bundle.ACTIVE);
 	}
 }
