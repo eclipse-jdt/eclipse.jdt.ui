@@ -19,6 +19,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -53,6 +55,7 @@ public class ResourceToItemsMapper {
 
 	/**
 	 * Must be called from the UI thread.
+	 * @param changedResource Changed resource
 	 */
 	public void resourceChanged(IResource changedResource) {
 		Object obj= fResourceToItem.get(changedResource);
@@ -87,6 +90,7 @@ public class ResourceToItemsMapper {
 				if (updateLabel.hasNewText()) {
 					item.setText(updateLabel.getText());
 				}
+				applyColorsAndFonts(item, updateLabel);
 			} else {
 				Image oldImage= item.getImage();
 				Image image= lprovider.getImage(data);
@@ -102,6 +106,20 @@ public class ResourceToItemsMapper {
 		}
 	}
 
+	private void applyColorsAndFonts(Item item, ViewerLabel updateLabel) {
+		if (item instanceof TreeItem) {
+			TreeItem treeItem= (TreeItem) item;
+			treeItem.setFont(updateLabel.getFont());
+			treeItem.setForeground(updateLabel.getForeground());
+			treeItem.setBackground(updateLabel.getBackground());
+		} else if (item instanceof TableItem) {
+			TableItem tableItem= (TableItem) item;
+			tableItem.setFont(updateLabel.getFont());
+			tableItem.setForeground(updateLabel.getForeground());
+			tableItem.setBackground(updateLabel.getBackground());
+		}
+	}
+	
 	/**
 	 * Adds a new item to the map.
 	 * @param element Element to map
@@ -131,6 +149,8 @@ public class ResourceToItemsMapper {
 
 	/**
 	 * Removes an element from the map.
+	 * @param element The data element
+	 * @param item The table or tree item
 	 */	
 	public void removeFromMap(Object element, Item item) {
 		IResource resource= getCorrespondingResource(element);
@@ -173,6 +193,7 @@ public class ResourceToItemsMapper {
 	
 	/**
 	 * Tests if the map is empty
+	 * @return Returns if there are mappings
 	 */
 	public boolean isEmpty() {
 		return fResourceToItem.isEmpty();
@@ -181,6 +202,8 @@ public class ResourceToItemsMapper {
 	/**
 	 * Method that decides which elements can have error markers
 	 * Returns null if an element can not have error markers.
+	 * @param element The input element
+	 * @return Returns the corresponding resource or null
 	 */	
 	private static IResource getCorrespondingResource(Object element) {
 		if (element instanceof IJavaElement) {
