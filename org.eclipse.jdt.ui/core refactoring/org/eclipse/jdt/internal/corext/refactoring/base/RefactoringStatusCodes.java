@@ -38,4 +38,8 @@ public class RefactoringStatusCodes {
 	
 	// inline method error codes
 	public static final int INLINE_METHOD_FIELD_INITIALIZER= 						256;
+	public static final int INLINE_METHOD_LOCAL_INITIALIZER= 						257;
+	public static final int INLINE_METHOD_NULL_BINDING= 						   		258;
+	public static final int INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS=				259;
+	public static final int INLINE_METHOD_EXECUTION_FLOW= 							260;
 }

@@ -116,6 +116,13 @@ public class SourceProvider {
 		return fDeclaration.getBody().statements().size();
 	}
 	
+	public boolean isSimpleFunction() {
+		List statements= fDeclaration.getBody().statements();
+		if (statements.size() != 1)
+			return false;
+		return statements.get(0) instanceof ReturnStatement;
+	}
+	
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
 	}

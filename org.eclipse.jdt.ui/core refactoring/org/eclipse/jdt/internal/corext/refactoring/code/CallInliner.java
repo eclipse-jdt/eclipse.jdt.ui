@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,8 +51,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
@@ -98,6 +97,10 @@ public class CallInliner {
 		return fImportEdit;
 	}
 	
+	public ASTNode getTargetNode() {
+		return fTargetNode;
+	}
+	
 	public RefactoringStatus initialize(BodyDeclaration declaration) {
 		fBodyDeclaration= declaration;
 		RefactoringStatus result= new RefactoringStatus();
@@ -117,13 +120,6 @@ public class CallInliner {
 	public RefactoringStatus initialize(MethodInvocation invocation) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
-		Expression exp= fInvocation.getExpression();
-		if (exp != null && exp.resolveTypeBinding() == null) {
-			result.addFatalError(
-				RefactoringCoreMessages.getString("CallInliner.receiver_type"), //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, exp));
-			return result;
-		}
 		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
 		ASTNode parent= fInvocation.getParent();
 		int nodeType1= parent.getNodeType();
@@ -132,22 +128,10 @@ public class CallInliner {
 		} else {
 			fTargetNode= fInvocation;
 		}
-		int nodeType= fTargetNode.getNodeType();
-		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
-			if (fSourceProvider.isExecutionFlowInterrupted()) {
-				result.addFatalError(
-					RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
-					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()));
-				return result;	
-			}
-		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
-			if (!(isValidParent(fTargetNode.getParent()) || fSourceProvider.getNumberOfStatements() == 1)) {
-				result.addFatalError(
-					RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
-					JavaSourceContext.create(fCUnit, fInvocation));
-				return result;
-			}
-		}
+		return result;
+	}
+	
+	private void flowAnalysis() {
 		fInvocationScope= fRootScope.findScope(fTargetNode.getStartPosition(), fTargetNode.getLength());
 		fInvocationScope.setInvovationOffset(fTargetNode.getStartPosition());
 		fFlowContext= new FlowContext(0, fNumberOfLocals + 1);
@@ -164,24 +148,10 @@ public class CallInliner {
 			default:
 				Assert.isTrue(false, "Should not happen");			 //$NON-NLS-1$
 		}
-		return result;
-	}
-	
-	private boolean isValidParent(ASTNode parent) {
-		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.ASSIGNMENT)
-			return true;
-		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			parent= parent.getParent();
-			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-				VariableDeclarationStatement vs= (VariableDeclarationStatement)parent;
-				return vs.fragments().size() == 1;
-			}
-		}
-		return false;
 	}
 	
 	public TextEdit perform() throws CoreException {
+		flowAnalysis();
 		int callType= fTargetNode.getNodeType();
 		CallContext context= new CallContext(fInvocationScope, callType, fImportEdit);
 		

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -50,6 +51,13 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 abstract class TargetProvider {
 
+	protected SourceProvider fSourceProvider;
+
+	public void setSourceProvider(SourceProvider sourceProvider) {
+		Assert.isNotNull(sourceProvider);
+		fSourceProvider= sourceProvider;
+	}
+
 	public abstract void initialize();
 
 	public abstract ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm)  throws JavaModelException;
@@ -60,8 +68,8 @@ abstract class TargetProvider {
 	
 	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
 	
-	public abstract RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException;
-
+	public abstract int getStatusSeverity();
+	
 	public static TargetProvider create(ICompilationUnit cu, MethodInvocation invocation) {
 		return new SingleCallTargetProvider(cu, invocation);
 	}
@@ -74,7 +82,9 @@ abstract class TargetProvider {
 			return new MemberTypeTargetProvider(cu, declaration);
 	}
 
-	static void checkFieldDeclaration(RefactoringStatus result, ICompilationUnit unit, MethodInvocation invocation, int severity) {
+	static void checkIfUsedInDeclaration(RefactoringStatus result, ICompilationUnit unit, MethodInvocation invocation, int severity, SourceProvider sourceProvider) {
+		if (sourceProvider.isSimpleFunction())
+			return;
 		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(invocation, BodyDeclaration.class);
 		if (decl instanceof FieldDeclaration) {
 			result.addEntry(new RefactoringStatusEntry(
@@ -82,6 +92,14 @@ abstract class TargetProvider {
 				severity, 
 				JavaSourceContext.create(unit, invocation),
 				null, RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER));
+		}
+		VariableDeclaration vDecl= (VariableDeclaration)ASTNodes.getParent(invocation, VariableDeclaration.class);
+		if (vDecl != null) {
+			result.addEntry(new RefactoringStatusEntry(
+				RefactoringCoreMessages.getString("TargetProvider.local_initializer"), //$NON-NLS-1$
+				severity, 
+				JavaSourceContext.create(unit, invocation),
+				null, RefactoringStatusCodes.INLINE_METHOD_LOCAL_INITIALIZER));
 		}
 	}
 	
@@ -96,7 +114,6 @@ abstract class TargetProvider {
 	static class SingleCallTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
 		private MethodInvocation fInvocation;
-		private SourceProvider fSourceProvider;
 		private boolean fIterated;
 		public SingleCallTargetProvider(ICompilationUnit cu, MethodInvocation invocation) {
 			Assert.isNotNull(cu);
@@ -131,11 +148,8 @@ abstract class TargetProvider {
 			fastDone(pm);
 			return new RefactoringStatus();
 		}
-		public RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException {
-			RefactoringStatus result= new RefactoringStatus();
-			checkFieldDeclaration(result, fCUnit, node, RefactoringStatus.FATAL);
-			fastDone(pm);
-			return result;
+		public int getStatusSeverity() {
+			return RefactoringStatus.FATAL;
 		}
 	}
 
@@ -260,11 +274,8 @@ abstract class TargetProvider {
 			return new RefactoringStatus();
 		}
 		
-		public RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException {
-			RefactoringStatus result= new RefactoringStatus();
-			checkFieldDeclaration(result, fCUnit, node, RefactoringStatus.ERROR);
-			fastDone(pm);
-			return result;
+		public int getStatusSeverity() {
+			return RefactoringStatus.ERROR;
 		}
 	}
 	
@@ -312,11 +323,8 @@ abstract class TargetProvider {
 			return new RefactoringStatus();
 		}
 		
-		public RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException {
-			RefactoringStatus result= new RefactoringStatus();
-			checkFieldDeclaration(result, fCUnit, node, RefactoringStatus.ERROR);
-			fastDone(pm);
-			return result;
+		public int getStatusSeverity() {
+			return RefactoringStatus.ERROR;
 		}
 	}
 }

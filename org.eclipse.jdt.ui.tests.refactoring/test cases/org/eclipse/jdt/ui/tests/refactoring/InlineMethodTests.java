@@ -71,6 +71,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
+	public void testLocalInitializer() throws Exception {
+		performInvalidTest();
+	}
+	
 	public void testInterruptedStatement() throws Exception {
 		performInvalidTest();
 	}

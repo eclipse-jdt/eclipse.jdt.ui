@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -155,6 +154,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 		}
+		fTargetProvider.setSourceProvider(fSourceProvider);
 		result.merge(fSourceProvider.checkActivation(pm));
 		result.merge(fTargetProvider.checkActivation(pm));
 		return result;
@@ -166,6 +166,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
+		InvocationAnalyzer invocationAnalyzer= new InvocationAnalyzer(fSourceProvider);
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
 		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units)));
 		if (result.hasFatalError())
@@ -190,19 +191,19 @@ public class InlineMethodRefactoring extends Refactoring {
 					MethodInvocation[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
 						MethodInvocation invocation= invocations[i];
-						RefactoringStatus targetStatus= fTargetProvider.checkInvocation(invocation, pm);
+						result.merge(inliner.initialize(invocation));
+						if (result.hasFatalError())
+							break;
+						RefactoringStatus targetStatus= invocationAnalyzer.perform(unit, invocation, inliner.getTargetNode(), fTargetProvider.getStatusSeverity());
 						result.merge(targetStatus);
 						if (result.hasFatalError())
 							break;
-						if (!targetStatus.hasEntryWithCode(RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER)) {
-							result.merge(inliner.initialize(invocation));
-							if (!result.hasFatalError()) {
-								added= true;
-								TextEdit edit= inliner.perform();
-								change.addGroupDescription( 
-									new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
-								root.add(edit);
-							}
+						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
+							added= true;
+							TextEdit edit= inliner.perform();
+							change.addGroupDescription( 
+								new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
+							root.add(edit);
 						} else {
 							fDeleteSource= false;
 						}
@@ -222,7 +223,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		pm.done();
 		return result;
 	}
-		
+
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
 			try {

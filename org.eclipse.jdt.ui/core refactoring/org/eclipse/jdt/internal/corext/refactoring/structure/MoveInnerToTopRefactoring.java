@@ -584,7 +584,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private String createSourceForNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, "", createTypeSource(new SubProgressMonitor(pm, 1)).toString(), getLineSeperator()));
+		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, "", createTypeSource(new SubProgressMonitor(pm, 1)).toString(), getLineSeperator())); //$NON-NLS-1$
 		addImportsToNewCu(newCu, new SubProgressMonitor(pm, 1));
 		pm.done();
 		return newCu.getSource();
