@@ -107,7 +107,7 @@ public class JavadocWriter {
 	//writes ant file, for now only worry about one project
 	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException {
 
-		String destination= getPathString(new Path(store.getDestination()));
+		String destination= getPathString(Path.fromOSString(store.getDestination()));
 
 		xmlJavadocDesc.setAttribute(store.DESTINATION, destination);
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
@@ -138,23 +138,23 @@ public class JavadocWriter {
 		xmlJavadocDesc.setAttribute(store.SOURCEPATH, getPathString(store.getSourcepath()));
 		xmlJavadocDesc.setAttribute(store.CLASSPATH, getPathString(store.getClasspath()));
 
-		String str= store.getOverview();
-		if (str.length() > 0) //$NON-NLS-1$
-			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
+		String overview= store.getOverview();
+		if (overview.length() > 0)
+			xmlJavadocDesc.setAttribute(store.OVERVIEW, overview);
 
-		str= store.getStyleSheet();
-		if (str.length() > 0) //$NON-NLS-1$
-			xmlJavadocDesc.setAttribute(store.STYLESHEETFILE, str);
+		String styleSheet= store.getStyleSheet();
+		if (styleSheet.length() > 0)
+			xmlJavadocDesc.setAttribute(store.STYLESHEETFILE, styleSheet);
 
-		str= store.getTitle();
-		if (str.length() > 0) //$NON-NLS-1$
-			xmlJavadocDesc.setAttribute(store.TITLE, str);
+		String title= store.getTitle();
+		if (title.length() > 0)
+			xmlJavadocDesc.setAttribute(store.TITLE, title);
 
 		
 		String vmArgs= store.getVMParams();
 		String additionalArgs= store.getAdditionalParams();
 		if (vmArgs.length() + additionalArgs.length() > 0) {
-			str= vmArgs + ' ' + additionalArgs;
+			String str= vmArgs + ' ' + additionalArgs;
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 		}
 

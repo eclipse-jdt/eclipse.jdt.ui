@@ -252,7 +252,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 			Object[] selected= dialog.getResult();
 			IPath[] paths= new IPath[selected.length];
 			for (int i= 0; i < selected.length; i++) {
-				IPath filePath= new Path(((File) selected[i]).getPath());
+				IPath filePath= Path.fromOSString(((File) selected[i]).getPath());
 				IPath resPath=  new Path(elem.getName());
 				for (int k= elem.getPath().segmentCount(); k < filePath.segmentCount(); k++) {
 					resPath= resPath.append(filePath.segment(k));

@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
@@ -107,19 +106,18 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 			text.setText(selectedDirectory);
 	}
 
-	protected String handleFolderBrowseButtonPressed(String text, Shell shell, String title, String message) {
-		
-		DirectoryDialog dialog= new DirectoryDialog(shell);
-		dialog.setFilterPath(text);
+	protected String handleFolderBrowseButtonPressed(String dir, String title, String message) {
+		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setFilterPath(dir);
 		dialog.setText(title);
 		dialog.setMessage(message);
 		String res= dialog.open();
 		if (res != null) {
 			File file= new File(res);
-			if (file.exists() && file.isDirectory())
+			if (file.isDirectory())
 				return res;
 		}
-		return text;
+		return dir;
 	}
 
 	protected static class EnableSelectionAdapter extends SelectionAdapter {

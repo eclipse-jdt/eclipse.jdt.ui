@@ -267,24 +267,22 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	protected void setVisibilitySettings() {
-
 		fVisibilitySelection= fStore.getAccess();
 		fPrivateVisibility.setSelection(fVisibilitySelection.equals(fStore.PRIVATE));
 		if (fPrivateVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label")); //$NON-NLS-1$
-		//$NON-NLS-1$
+
 		fProtectedVisibility.setSelection(fVisibilitySelection.equals(fStore.PROTECTED));
 		if (fProtectedVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label")); //$NON-NLS-1$
-		//$NON-NLS-1$
+
 		fPackageVisibility.setSelection(fVisibilitySelection.equals(fStore.PACKAGE));
 		if (fPackageVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label")); //$NON-NLS-1$
-		//$NON-NLS-1$
+
 		fPublicVisibility.setSelection(fVisibilitySelection.equals(fStore.PUBLIC));
 		if (fPublicVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label")); //$NON-NLS-1$
-		//$NON-NLS-1$
 	}
 
 	private void createOptionsSet(Composite composite) {
@@ -325,7 +323,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
 			}
-
 		});
 
 		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.docletpathfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
@@ -354,8 +351,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 		fDestinationBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-										String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), fDestinationText.getShell(), JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.title"), //$NON-NLS-1$
-						    		JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.label")); //$NON-NLS-1$
+				String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.title"), //$NON-NLS-1$
+				   		JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.label")); //$NON-NLS-1$
 				fDestinationText.setText(text);
 			}
 		});
@@ -450,16 +447,18 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			IJavaProject curr= javaProjects[j];
 
 			try {
-				IPath p= curr.getProject().getLocation();
-				if (p == null)
+				IResource outputPathFolder= curr.getProject().findMember(curr.getOutputLocation());
+				if (outputPathFolder == null)
 					continue;
 
-				IPath outputLocation= p.append(curr.getOutputLocation());
-				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(curr);
+				IPath outputLocation= outputPathFolder.getLocation();
+				if (outputLocation == null)
+					continue;
 
+				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(curr);
 				for (int i= 0; i < classPath.length; i++) {
-					IPath path= new Path(classPath[i]);
-					if (!outputLocation.equals(path)) {
+					IPath path= Path.fromOSString(classPath[i]);
+					if (!path.equals(outputLocation)) {
 						res.add(path);
 					}
 				}
@@ -609,15 +608,15 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				if (fStandardButton.getSelection()) {
 					fDestinationStatus= new StatusInfo();
 					fDocletStatus= new StatusInfo();
-					IPath path= new Path(fDestinationText.getText());
-					if (Path.ROOT.equals(path) || Path.EMPTY.equals(path)) {
+					String dest= fDestinationText.getText();
+					if (dest.length() == 0) {
 						fDestinationStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.nodestination.error")); //$NON-NLS-1$
 					}
-					File file= new File(path.toOSString());
-					if (!path.isValidPath(path.toOSString()) || file.isFile()) {
+					File file= new File(dest);
+					if (!Path.ROOT.isValidPath(dest) || file.isFile()) {
 						fDestinationStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.invaliddestination.error")); //$NON-NLS-1$
 					}
-					if ((path.append("package-list").toFile().exists()) || (path.append("index.html").toFile().exists())) //$NON-NLS-1$//$NON-NLS-2$
+					if (new File(dest, "package-list").exists() || new File(dest, "index.html").exists()) //$NON-NLS-1$//$NON-NLS-2$
 						fDestinationStatus.setWarning(JavadocExportMessages.getString("JavadocTreeWizardPage.warning.mayoverwritefiles")); //$NON-NLS-1$
 					updateStatus(findMostSevereStatus());
 				}

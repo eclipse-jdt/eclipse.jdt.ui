@@ -317,7 +317,7 @@ public class JavaDocLocations {
 				URL url= getJavadocBaseLocation(path);
 			
 				Element varElement= document.createElement(NODE_ENTRY);
-				varElement.setAttribute(NODE_PATH, path.toString());
+				varElement.setAttribute(NODE_PATH, path.toPortableString());
 				varElement.setAttribute(NODE_URL, url.toExternalForm());
 				rootElement.appendChild(varElement);
 			}
@@ -365,7 +365,7 @@ public class JavaDocLocations {
 					String varPath = element.getAttribute(NODE_PATH);
 					String varURL = element.getAttribute(NODE_URL);
 					try {
-						setJavadocBaseLocation(new Path(varPath), new URL(varURL), false);
+						setJavadocBaseLocation(Path.fromPortableString(varPath), new URL(varURL), false);
 					} catch (MalformedURLException e) {
 						throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
 					}
@@ -521,7 +521,7 @@ public class JavaDocLocations {
 			if (i != 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			String curr= params[i];
+			String curr= Signature.getTypeErasure(params[i]);
 			String fullName= JavaModelUtil.getResolvedTypeName(curr, declaringType);
 			if (fullName != null) {
 				buf.append(fullName);

@@ -528,10 +528,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						Element childElement= document.createElement(TAG_ARCHIVE); 
 						libraryElement.appendChild(childElement);
 						
-						childElement.setAttribute(TAG_ARCHIVE_PATH, child.getPath().toOSString());
+						childElement.setAttribute(TAG_ARCHIVE_PATH, child.getPath().toPortableString());
 						IPath sourceAttachment= (IPath) child.getAttribute(CPListElement.SOURCEATTACHMENT);
 						if (sourceAttachment != null) {
-							childElement.setAttribute(TAG_SOURCEATTACHMENT, sourceAttachment.toOSString());
+							childElement.setAttribute(TAG_SOURCEATTACHMENT, sourceAttachment.toPortableString());
 	
 						}
 						URL javadocLocation= (URL) child.getAttribute(CPListElement.JAVADOC);
@@ -609,11 +609,11 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					Element archiveElement= (Element) archiveNode;
 					
 					String path= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
-					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, new Path(path), null);
+					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, Path.fromPortableString(path), null);
 					newLibrary.add(newArchive);
 					
 					if (archiveElement.hasAttribute(TAG_SOURCEATTACHMENT)) {
-						IPath sourceAttach= new Path(archiveElement.getAttribute(TAG_SOURCEATTACHMENT));
+						IPath sourceAttach= Path.fromPortableString(archiveElement.getAttribute(TAG_SOURCEATTACHMENT));
 						newArchive.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttach);
 					}
 					if (archiveElement.hasAttribute(TAG_JAVADOC)) {
@@ -1084,7 +1084,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		String[] fileNames= dialog.getFileNames();
 		int nChosen= fileNames.length;
 			
-		IPath filterPath= new Path(dialog.getFilterPath());
+		IPath filterPath= Path.fromOSString(dialog.getFilterPath());
 		CPListElement[] elems= new CPListElement[nChosen];
 		for (int i= 0; i < nChosen; i++) {
 			IPath path= filterPath.append(fileNames[i]).makeAbsolute();	
@@ -1093,7 +1093,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 			elems[i]= curr;
 		}
-		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
+		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
 		
 		return elems;
 	}

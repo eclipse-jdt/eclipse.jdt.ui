@@ -203,7 +203,7 @@ public class SourceAttachmentBlock {
 		if (fFileNameField.getText().length() == 0) {
 			return null;
 		}
-		return new Path(fFileNameField.getText());
+		return getFilePath();
 	}
 
 	/**
@@ -268,7 +268,7 @@ public class SourceAttachmentBlock {
 			// label that shows the resolved path for variable jars
 			DialogField.createEmptySpace(composite, 1);	
 			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
-			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
+			fFullPathResolvedLabel.setText(getResolvedLabelString());
 			fFullPathResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 			DialogField.createEmptySpace(composite, 2);
 			
@@ -353,7 +353,7 @@ public class SourceAttachmentBlock {
 		
 		// set the resolved path for variable jars
 		if (fFullPathResolvedLabel != null) {
-			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
+			fFullPathResolvedLabel.setText(getResolvedLabelString());
 		}
 		
 		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus });
@@ -371,14 +371,10 @@ public class SourceAttachmentBlock {
 		return false;
 	}
 	
-	private String getResolvedLabelString(String path, boolean osPath) {
-		IPath resolvedPath= getResolvedPath(new Path(path));
+	private String getResolvedLabelString() {
+		IPath resolvedPath= getResolvedPath(getFilePath());
 		if (resolvedPath != null) {
-			if (osPath) {
-				return resolvedPath.toOSString();
-			} else {
-				return resolvedPath.toString();
-			}
+			return resolvedPath.toOSString();
 		}
 		return ""; //$NON-NLS-1$
 	}	
@@ -409,7 +405,7 @@ public class SourceAttachmentBlock {
 				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.notvalid")); //$NON-NLS-1$
 				return status;
 			}
-			IPath filePath= new Path(fileName);
+			IPath filePath= Path.fromOSString(fileName);
 			IPath resolvedPath;
 			if (isVariableEntry()) {
 				if (filePath.getDevice() != null) {
@@ -468,8 +464,12 @@ public class SourceAttachmentBlock {
 		return status;
 	}
 	
+	private IPath getFilePath() {
+		return Path.fromOSString(fFileNameField.getText()).makeAbsolute();
+	}
+	
 	private IPath chooseExtension() {
-		IPath currPath= new Path(fFileNameField.getText());
+		IPath currPath= getFilePath();
 		if (currPath.isEmpty()) {
 			currPath= fEntry.getPath();
 		}		
@@ -485,7 +485,7 @@ public class SourceAttachmentBlock {
 		dialog.setInitialSelection(initialSelection);
 		if (dialog.open() == Window.OK) {
 			File result= (File) dialog.getResult()[0];
-			IPath returnPath= new Path(result.getPath()).makeAbsolute();
+			IPath returnPath= Path.fromOSString(result.getPath()).makeAbsolute();
 			return modifyPath(returnPath, currVariable);
 		}
 		return null;
@@ -495,7 +495,7 @@ public class SourceAttachmentBlock {
 	 * Opens a dialog to choose a jar from the file system.
 	 */
 	private IPath chooseExtJarFile() {
-		IPath currPath= new Path(fFileNameField.getText());
+		IPath currPath= getFilePath();
 		if (currPath.isEmpty()) {
 			currPath= fEntry.getPath();
 		}		
@@ -510,13 +510,13 @@ public class SourceAttachmentBlock {
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
-			return new Path(res).makeAbsolute();
+			return Path.fromOSString(res).makeAbsolute();
 		}
 		return null;
 	}
 	
 	private IPath chooseExtFolder() {
-		IPath currPath= new Path(fFileNameField.getText());
+		IPath currPath= getFilePath();
 		if (currPath.isEmpty()) {
 			currPath= fEntry.getPath();
 		}
@@ -529,7 +529,7 @@ public class SourceAttachmentBlock {
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
-			return new Path(res).makeAbsolute();
+			return Path.fromOSString(res).makeAbsolute();
 		}
 		return null;
 	}	

@@ -342,7 +342,7 @@ public class JavadocOptionsManager {
 
 		//Since the selected packages are stored we must locate the project
 		String destination= element.getAttribute(DESTINATION);
-		fDestination= makeAbsolutePathFromRelative(destination).toOSString();
+		fDestination= makeAbsolutePathFromRelative(new Path(destination)).toOSString();
 		fFromStandard= true;
 		fDocletname= ""; //$NON-NLS-1$
 		fDocletpath= ""; //$NON-NLS-1$
@@ -431,11 +431,10 @@ public class JavadocOptionsManager {
 	 * absolute it returns the path. If it encounters any difficulties in
 	 * creating the absolute path, the method returns null.
 	 * 
-	 * @param pathStr
+	 * @param path
 	 * @return IPath
 	 */
-	private IPath makeAbsolutePathFromRelative(String pathStr) {
-		IPath path= new Path(pathStr);
+	private IPath makeAbsolutePathFromRelative(IPath path) {
 		if (!path.isAbsolute()) {
 			if (fXmlfile == null) {
 				return null;
@@ -444,7 +443,7 @@ public class JavadocOptionsManager {
 			if (basePath == null) {
 				return null;
 			}
-			return basePath.append(pathStr);
+			return basePath.append(path);
 		}
 		return path;
 	}
@@ -457,7 +456,7 @@ public class JavadocOptionsManager {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		
 		while (tokenizer.hasMoreTokens()) {
-			IPath path= makeAbsolutePathFromRelative(tokenizer.nextToken().trim());
+			IPath path= makeAbsolutePathFromRelative(new Path(tokenizer.nextToken().trim()));
 			if (path != null) {
 				IContainer[] containers= root.findContainersForLocation(path);
 				for (int i= 0; i < containers.length; i++) {
@@ -502,7 +501,7 @@ public class JavadocOptionsManager {
 			while (tokenizer.hasMoreTokens()) {
 				String name= tokenizer.nextToken().trim();
 				if (name.endsWith(".java")) { //$NON-NLS-1$
-					IPath path= makeAbsolutePathFromRelative(name);
+					IPath path= makeAbsolutePathFromRelative(new Path(name));
 					//if unable to create an absolute path the the resource skip it
 					if (path != null) {
 						IFile[] files= root.findFilesForLocation(path);
@@ -782,7 +781,7 @@ public class JavadocOptionsManager {
 			if (antpath.length() > 0) {
 				File file= new File(antpath);
 
-				IPath antPath= new Path(antpath);
+				IPath antPath= Path.fromOSString(antpath);
 				IPath antDir= antPath.removeLastSegments(1);
 				
 				IPath basePath= null;

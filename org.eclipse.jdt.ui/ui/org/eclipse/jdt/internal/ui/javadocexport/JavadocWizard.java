@@ -163,7 +163,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			return false;
 		}
 
-		fDestination= new Path(fStore.getDestination());
+		fDestination= Path.fromOSString(fStore.getDestination());
 		fDestination.toFile().mkdirs();
 
 		fOpenInBrowser= fStore.doOpenInBrowser();

@@ -132,7 +132,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	private void xmlReadJarLocation(JarPackageData jarPackage, Element element) {
 		if (element.getNodeName().equals(JarPackagerUtil.JAR_EXTENSION))
-			jarPackage.setJarLocation(new Path(element.getAttribute("path"))); //$NON-NLS-1$
+			jarPackage.setJarLocation(Path.fromPortableString(element.getAttribute("path"))); //$NON-NLS-1$
 	}
 
 	private void xmlReadOptions(JarPackageData jarPackage, Element element) throws java.io.IOException {
@@ -143,7 +143,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setExportWarnings(getBooleanAttribute(element, "exportWarnings")); //$NON-NLS-1$
 			jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
 			jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
-			jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
+			jarPackage.setDescriptionLocation(Path.fromPortableString(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
 			jarPackage.setBuildIfNeeded(getBooleanAttribute(element, "buildIfNeeded", jarPackage.isBuildingIfNeeded())); //$NON-NLS-1$
 		}
 	}
@@ -155,7 +155,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setReuseManifest(getBooleanAttribute(element, "reuseManifest")); //$NON-NLS-1$
 			jarPackage.setSaveManifest(getBooleanAttribute(element,"saveManifest")); //$NON-NLS-1$
 			jarPackage.setGenerateManifest(getBooleanAttribute(element, "generateManifest")); //$NON-NLS-1$
-			jarPackage.setManifestLocation(new Path(element.getAttribute("manifestLocation"))); //$NON-NLS-1$
+			jarPackage.setManifestLocation(Path.fromPortableString(element.getAttribute("manifestLocation"))); //$NON-NLS-1$
 			jarPackage.setManifestMainClass(getMainClass(element));
 			xmlReadSealingInfo(jarPackage, element);
 		}
@@ -243,7 +243,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	private void addProject(Set selectedElements, Element element) throws IOException {
 		String name= element.getAttribute("name"); //$NON-NLS-1$
-		if (name.equals("")) //$NON-NLS-1$
+		if (name.length() == 0)
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagNameNotFound")); //$NON-NLS-1$
 		IProject project= JavaPlugin.getWorkspace().getRoot().getProject(name);
 		if (project != null)
@@ -252,14 +252,14 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	private IPath getPath(Element element) throws IOException {
 		String pathString= element.getAttribute("path"); //$NON-NLS-1$
-		if (pathString.equals("")) //$NON-NLS-1$
+		if (pathString.length() == 0)
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagPathNotFound")); //$NON-NLS-1$
-		return new Path(element.getAttribute("path")); //$NON-NLS-1$
+		return Path.fromPortableString(element.getAttribute("path")); //$NON-NLS-1$
 	}
 	
 	private void addJavaElement(Set selectedElements, Element element) throws IOException {
 		String handleId= element.getAttribute("handleIdentifier"); //$NON-NLS-1$
-		if (handleId.equals("")) //$NON-NLS-1$
+		if (handleId.length() == 0)
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagHandleIdentifierNotFoundOrEmpty")); //$NON-NLS-1$
 		IJavaElement je= JavaCore.create(handleId);
 		if (je == null)
@@ -321,7 +321,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	 * Adds a new warning to the list with the passed information.
 	 * Normally the export operation continues after a warning.
 	 * @param	message		the message
-	 * @param	exception	the throwable that caused the warning, or <code>null</code>
+	 * @param	error	      the throwable that caused the warning, or <code>null</code>
 	 */
 	protected void addWarning(String message, Throwable error) {
 		fWarnings.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));

@@ -159,9 +159,9 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
 			monitor.worked(1);
 			classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
-			classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
+			classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
 			for (int index= 2; index < classpath.length; index++)
-				classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(entries[index - 2]));
+				classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(entries[index - 2]));
 			final List mementos= new ArrayList(classpath.length);
 			IRuntimeClasspathEntry entry= null;
 			for (int index= 0; index < classpath.length; index++) {

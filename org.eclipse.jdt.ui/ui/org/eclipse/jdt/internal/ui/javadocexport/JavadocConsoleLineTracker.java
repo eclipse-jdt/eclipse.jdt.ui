@@ -129,7 +129,7 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 					try {
 						String substr= text.substring(index1 + 1, index2);
 						lineNumber= Integer.parseInt(substr);
-						path= new Path(text.substring(0, index1));
+						path= Path.fromOSString(text.substring(0, index1));
 					} catch (NumberFormatException e) {
 						// ignore
 					}

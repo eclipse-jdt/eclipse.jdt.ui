@@ -320,7 +320,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/**
 	 * Creates the JAR sealing specification controls to seal the whole JAR.
 	 *
-	 * @param parent the parent control
+	 * @param sealGroup the parent control
 	 */
 	protected void createSealJarGroup(Composite sealGroup) {
 		fSealJarRadioButton= new Button(sealGroup, SWT.RADIO);
@@ -344,7 +344,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/**
 	 * Creates the JAR sealing specification controls to seal packages.
 	 *
-	 * @param parent the parent control
+	 * @param sealGroup the parent control
 	 */
 	protected void createSealPackagesGroup(Composite sealGroup) {
 		fSealPackagesRadioButton= new Button(sealGroup, SWT.RADIO);

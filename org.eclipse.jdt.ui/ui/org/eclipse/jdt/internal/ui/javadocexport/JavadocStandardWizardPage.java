@@ -25,7 +25,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -303,21 +302,21 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	}
 	
 	final void doValidation(int VALIDATE) {
-		File file= null;
-		String ext= null;
-		Path path= null;
-
 		switch (VALIDATE) {
 			case STYLESHEETSTATUS :
 				fStyleSheetStatus= new StatusInfo();
 				if (fStyleSheetButton.getSelection()) {
-					path= new Path(fStyleSheetText.getText());
-					file= new File(fStyleSheetText.getText());
-					ext= path.getFileExtension();
-					if ((file == null) || !file.exists()) {
-						fStyleSheetStatus.setError(JavadocExportMessages.getString("JavadocStandardWizardPage.stylesheetnopath.error")); //$NON-NLS-1$
-					} else if ((ext == null) || !ext.equalsIgnoreCase("css")) { //$NON-NLS-1$
-						fStyleSheetStatus.setError(JavadocExportMessages.getString("JavadocStandardWizardPage.stylesheetnotcss.error")); //$NON-NLS-1$
+					String filename= fStyleSheetText.getText();
+					if (filename.length() == 0) {
+						fStyleSheetStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.overviewnotfound.error")); //$NON-NLS-1$
+					} else {
+						File file= new File(filename);
+						String ext= filename.substring(filename.lastIndexOf('.') + 1);
+						if (!file.isFile()) {
+							fStyleSheetStatus.setError(JavadocExportMessages.getString("JavadocStandardWizardPage.stylesheetnopath.error")); //$NON-NLS-1$
+						} else if (!ext.equalsIgnoreCase("css")) { //$NON-NLS-1$
+							fStyleSheetStatus.setError(JavadocExportMessages.getString("JavadocStandardWizardPage.stylesheetnotcss.error")); //$NON-NLS-1$
+						}
 					}
 				}
 				break;

@@ -196,7 +196,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		} else if (path.isEmpty()) {
 			return "&"; //$NON-NLS-1$
 		} else {
-			return encode(path.toString());
+			return encode(path.toPortableString());
 		}
 	}
 	
@@ -206,7 +206,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		} else if ("&".equals(str)) { //$NON-NLS-1$
 			return Path.EMPTY;
 		} else {
-			return new Path(decode(str));
+			return Path.fromPortableString(decode(str));
 		}
 	}
 	

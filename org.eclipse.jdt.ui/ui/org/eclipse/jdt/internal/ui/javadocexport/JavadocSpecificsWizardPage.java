@@ -190,18 +190,16 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-
 				String temp= fAntText.getText();
-				IPath path= new Path(temp);
+				IPath path= Path.fromOSString(temp);
 				String file= path.lastSegment();
 				if (file == null)
 					file= "javadoc.xml";//$NON-NLS-1$
 				path= path.removeLastSegments(1);
 
-				temp= handleFolderBrowseButtonPressed(path.toOSString(), fAntText.getShell(), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.title"), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.label")); //$NON-NLS-1$ //$NON-NLS-2$
+				String selected= handleFolderBrowseButtonPressed(path.toOSString(), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.title"), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.label")); //$NON-NLS-1$ //$NON-NLS-2$
 
-				path= new Path(temp);
-				path= path.addTrailingSeparator().append(file);
+				path= Path.fromOSString(selected).append(file);
 				fAntText.setText(path.toOSString());
 
 			}
@@ -209,36 +207,39 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	} //end method createExtraOptionsGroup
 
 	private void doValidation(int val) {
-		File file= null;
-		String ext= null;
-		Path path= null;
-
 		switch (val) {
 
 			case OVERVIEWSTATUS :
 				fOverviewStatus= new StatusInfo();
 				if (fOverViewButton.getSelection()) {
-					path= new Path(fOverViewText.getText());
-					file= path.toFile();
-					ext= path.getFileExtension();
-					if ((file == null) || !file.exists()) {
+					String filename= fOverViewText.getText();
+					if (filename.length() == 0) {
 						fOverviewStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.overviewnotfound.error")); //$NON-NLS-1$
-					} else if ((ext == null) || !ext.equalsIgnoreCase("html")) { //$NON-NLS-1$
-						fOverviewStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.overviewincorrect.error")); //$NON-NLS-1$
+					} else {
+						File file= new File(filename);
+						String ext= filename.substring(filename.lastIndexOf('.') + 1);
+						if (!file.isFile()) {
+							fOverviewStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.overviewnotfound.error")); //$NON-NLS-1$
+						} else if (!ext.equalsIgnoreCase("html")) { //$NON-NLS-1$
+							fOverviewStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.overviewincorrect.error")); //$NON-NLS-1$
+						}
 					}
 				}
 				break;
 			case ANTSTATUS :
 				fAntStatus= new StatusInfo();
 				if (fAntButton.getSelection()) {
-					path= new Path(fAntText.getText());
-					ext= path.getFileExtension();
-					IPath antSeg= path.removeLastSegments(1);
-
-					if ((!antSeg.isValidPath(antSeg.toOSString())) || (ext == null) || !(ext.equalsIgnoreCase("xml"))) //$NON-NLS-1$
-						fAntStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.antfileincorrect.error")); //$NON-NLS-1$
-					else if (path.toFile().exists())
-						fAntStatus.setWarning(JavadocExportMessages.getString("JavadocSpecificsWizardPage.antfileoverwrite.warning")); //$NON-NLS-1$
+					String filename= fAntText.getText();
+					if (filename.length() == 0) {
+						fOverviewStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.antfileincorrect.error")); //$NON-NLS-1$
+					} else {
+						File file= new File(filename);
+						String ext= filename.substring(filename.lastIndexOf('.') + 1);
+						if (file.isDirectory() || !(ext.equalsIgnoreCase("xml"))) //$NON-NLS-1$
+							fAntStatus.setError(JavadocExportMessages.getString("JavadocSpecificsWizardPage.antfileincorrect.error")); //$NON-NLS-1$
+						else if (file.exists())
+							fAntStatus.setWarning(JavadocExportMessages.getString("JavadocSpecificsWizardPage.antfileoverwrite.warning")); //$NON-NLS-1$
+					}
 				}
 				break;
 		}

@@ -116,7 +116,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	private void xmlWriteJarLocation(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element jar= document.createElement(JarPackagerUtil.JAR_EXTENSION);
 		xmlJarDesc.appendChild(jar);
-		jar.setAttribute("path", jarPackage.getJarLocation().toString()); //$NON-NLS-1$
+		jar.setAttribute("path", jarPackage.getJarLocation().toPortableString()); //$NON-NLS-1$
 	}
 
 	private void xmlWriteOptions(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
@@ -127,7 +127,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		options.setAttribute("exportErrors", "" + jarPackage.areErrorsExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved()); //$NON-NLS-2$ //$NON-NLS-1$
-		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString()); //$NON-NLS-1$
+		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toPortableString()); //$NON-NLS-1$
 		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("buildIfNeeded", "" + jarPackage.isBuildingIfNeeded()); //$NON-NLS-2$ //$NON-NLS-1$
 	}
@@ -140,7 +140,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		manifest.setAttribute("reuseManifest", "" + jarPackage.isManifestReused()); //$NON-NLS-2$ //$NON-NLS-1$
 		manifest.setAttribute("saveManifest", "" + jarPackage.isManifestSaved()); //$NON-NLS-2$ //$NON-NLS-1$
 		manifest.setAttribute("generateManifest", "" + jarPackage.isManifestGenerated()); //$NON-NLS-2$ //$NON-NLS-1$
-		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toString()); //$NON-NLS-1$
+		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toPortableString()); //$NON-NLS-1$
 		if (jarPackage.getManifestMainClass() != null)
 			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getManifestMainClass().getHandleIdentifier()); //$NON-NLS-1$
 		xmlWriteSealingInfo(jarPackage, document, manifest);

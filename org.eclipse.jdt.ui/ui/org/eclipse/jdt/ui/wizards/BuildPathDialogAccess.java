@@ -361,11 +361,9 @@ public final class BuildPathDialogAccess {
 		if (res == null) {
 			return null;
 		}
-		String fileNames= dialog.getFileName();	
-		IPath filterPath= new Path(dialog.getFilterPath());
-		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
+		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
 
-		return filterPath.append(fileNames).makeAbsolute();	
+		return Path.fromOSString(res).makeAbsolute();	
 	}
 	
 	/**
@@ -394,12 +392,12 @@ public final class BuildPathDialogAccess {
 		String[] fileNames= dialog.getFileNames();
 		int nChosen= fileNames.length;
 			
-		IPath filterPath= new Path(dialog.getFilterPath());
+		IPath filterPath= Path.fromOSString(dialog.getFilterPath());
 		IPath[] elems= new IPath[nChosen];
 		for (int i= 0; i < nChosen; i++) {
 			elems[i]= filterPath.append(fileNames[i]).makeAbsolute();	
 		}
-		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
+		JavaPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
 		
 		return elems;
 	}

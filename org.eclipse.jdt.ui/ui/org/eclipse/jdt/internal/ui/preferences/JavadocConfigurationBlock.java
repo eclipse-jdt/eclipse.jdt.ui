@@ -542,7 +542,7 @@ public class JavadocConfigurationBlock {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.invalidarchivepath")); //$NON-NLS-1$
 					return status;	
 				}
-				IPath path= new Path(jdocLocation);
+				IPath path= Path.fromOSString(jdocLocation);
 				if (!path.isAbsolute()) {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.archivepathnotabsolute")); //$NON-NLS-1$
 					return status;	

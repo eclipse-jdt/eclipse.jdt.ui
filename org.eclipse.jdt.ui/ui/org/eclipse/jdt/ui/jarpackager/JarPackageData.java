@@ -125,13 +125,13 @@ public class JarPackageData {
 		setUseSourceFolderHierarchy(false);
 		setCompress(true);
 		setSaveDescription(false);
-		setJarLocation(new Path("")); //$NON-NLS-1$
-		setDescriptionLocation(new Path("")); //$NON-NLS-1$
+		setJarLocation(Path.EMPTY);
+		setDescriptionLocation(Path.EMPTY);
 		setUsesManifest(true);
 		setGenerateManifest(true);
 		setReuseManifest(false);
 		setSaveManifest(false);
-		setManifestLocation(new Path("")); //$NON-NLS-1$
+		setManifestLocation(Path.EMPTY);
 		setExportErrors(true);
 		setExportWarnings(true);		
 		setBuildIfNeeded(true);

@@ -758,7 +758,7 @@ public class Bindings {
 	//---- Helper methods to convert a type --------------------------------------------
 	
 	private static IPath getPathToCompilationUnit(IPackageBinding packageBinding, String topLevelTypeName) {
-		IPath result= new Path(""); //$NON-NLS-1$
+		IPath result= Path.EMPTY;
 		String[] packageNames= packageBinding.getNameComponents();
 		for (int i= 0; i < packageNames.length; i++) {
 			result= result.append(packageNames[i]);

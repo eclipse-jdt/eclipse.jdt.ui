@@ -82,7 +82,6 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private CheckboxTreeAndListGroup fInputGroup;
 
 	// widgets
-	private Text	fSourceNameField;	
 	private Button	fExportClassFilesCheckbox;
 	private Button	fExportOutputFoldersCheckbox;
 	private Button	fExportJavaFilesCheckbox;	
@@ -315,7 +314,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			String[] directoryNames= settings.getArray(STORE_DESTINATION_NAMES);
 			if (directoryNames == null)
 				return; // ie.- no settings stored
-			fJarPackage.setJarLocation(new Path(directoryNames[0]));
+			fJarPackage.setJarLocation(Path.fromOSString(directoryNames[0]));
 		}
 	}
 
@@ -338,7 +337,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 		// destination
 		String comboText= fDestinationNamesCombo.getText();
-		IPath path= new Path(comboText);
+		IPath path= Path.fromOSString(comboText);
 
 		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
 			// append .jar
@@ -653,13 +652,6 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		if (getErrorMessage() != null)
 			setErrorMessage(null);
 		return false;
-	}
-
-	/*
-	 * Overwrides method from WizardExportPage
-	 */
-	protected IPath getResourcePath() {
-		return getPathFromText(fSourceNameField);
 	}
 
 	/**

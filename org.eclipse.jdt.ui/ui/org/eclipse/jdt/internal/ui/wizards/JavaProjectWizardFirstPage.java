@@ -183,7 +183,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (isInWorkspace()) {
 				return Platform.getLocation();
 			}
-			return new Path(fLocation.getText().trim());
+			return Path.fromOSString(fLocation.getText().trim());
 		}
 
 		public boolean isInWorkspace() {
@@ -207,7 +207,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (directoryName.length() > 0) {
 				final File path = new File(directoryName);
 				if (path.exists())
-					dialog.setFilterPath(new Path(directoryName).toOSString());
+					dialog.setFilterPath(directoryName);
 			}
 			final String selectedDirectory = dialog.open();
 			if (selectedDirectory != null) {
@@ -386,7 +386,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			}
 
 			// check whether the location has the workspace as prefix
-			IPath projectPath= new Path(location);
+			IPath projectPath= Path.fromOSString(location);
 			if (!fLocationGroup.isInWorkspace() && Platform.getLocation().isPrefixOf(projectPath)) {
 				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.cannotCreateInWorkspace")); //$NON-NLS-1$
 				setPageComplete(false);
