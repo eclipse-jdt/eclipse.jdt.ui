@@ -205,11 +205,11 @@ public class BuildPathsBlock {
 		item.setControl(ordpage.getControl(folder));
 						
 		fVisibilityPage= new VisibilityWorkbookPage(fClassPathList);		
-		//item= new TabItem(folder, SWT.NONE);
-		//item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.visibility")); //$NON-NLS-1$
-		//item.setImage(projectImage);
-		//item.setData(fVisibilityPage);
-		//item.setControl(fVisibilityPage.getControl(folder));		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.visibility")); //$NON-NLS-1$
+		item.setImage(projectImage);
+		item.setData(fVisibilityPage);
+		item.setControl(fVisibilityPage.getControl(folder));		
 				
 		if (fCurrJProject != null) {
 			fSourceContainerPage.init(fCurrJProject);

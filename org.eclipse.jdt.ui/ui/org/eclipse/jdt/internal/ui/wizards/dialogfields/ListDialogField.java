@@ -417,7 +417,7 @@ public class ListDialogField extends DialogField {
 	 * Sets the elements shown in the list.
 	 */
 	public void setElements(List elements) {
-		fElements= elements;
+		fElements= new ArrayList(elements);
 		if (fTable != null) {
 			fTable.refresh();
 		}

@@ -130,15 +130,13 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fVariables.add(createCompletion(start, end, new String(name), null, nameBuffer.toString(), null, false, null));
 	}
 	
-	/**
-	 * @see ICompletionRequestor#acceptMethod
-	 */	
-	public void acceptMethod(
-		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
-		char[][] parameterPackageNames, char[][] parameterTypeNames,
-		char[] returnTypePackageName, char[] returnTypeName,
-		char[] completionName,
-		int modifiers, int start, int end) {
+	/*
+	 * @see ICodeCompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 */
+	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
+		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
+		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
+		int start, int end) {
 	
 		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
 		if (Flags.isPublic(modifiers)) {
@@ -210,6 +208,13 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
 	}
+	
+	/*
+	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 */
+	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		// XXX: To be filled
+	}	
 	
 	public String getErrorMessage() {
 		if (fLastProblem != null)
@@ -343,4 +348,8 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fOffset= offset;
 		fLength= length;
 	}
+
+
+
+
 }
