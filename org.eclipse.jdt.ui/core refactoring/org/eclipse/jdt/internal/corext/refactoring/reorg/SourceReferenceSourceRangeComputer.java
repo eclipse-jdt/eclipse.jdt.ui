@@ -84,21 +84,27 @@ public class SourceReferenceSourceRangeComputer {
 					default:{
 						int currentTokenStartLine= buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
 						int currentTokenEndLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
-						if ((startLine == currentTokenEndLine) || (currentTokenStartLine != currentTokenEndLine))
+						if (endOnCurrentTokenStart(startLine, currentTokenStartLine, currentTokenEndLine))
 							return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
-						TextRegion nextLine= buff.getLineInformation(startLine + 1);
-						if (nextLine != null)
-							return nextLine.getOffset();
+						TextRegion tokenStartLine= buff.getLineInformation(currentTokenStartLine);
+						if (tokenStartLine != null)
+							return tokenStartLine.getOffset();
 						else
 							return end; //fallback	
 					}	
 				}
 				token= scanner.getNextToken();
 			}
-			return end;
+			return end;//fallback
 		} catch (InvalidInputException e){
 			return end;//fallback
 		}
+	}
+
+	private boolean endOnCurrentTokenStart(int startLine, int currentTokenStartLine,int currentTokenEndLine) {
+		if (startLine == currentTokenEndLine)
+			return true;
+		return (startLine == currentTokenStartLine && currentTokenStartLine != currentTokenEndLine);
 	}
 	
 	private int computeOffset() throws CoreException{
