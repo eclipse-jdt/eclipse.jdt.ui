@@ -708,7 +708,8 @@ public class ImportsStructure implements IImportsStructure {
 
 	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
 		String str= "import " + importName + ";\n"; //$NON-NLS-1$ //$NON-NLS-2$
-		buf.append(StubUtility.codeFormat(str, 0, lineDelim));
+		// str= StubUtility.codeFormat(str, 0, lineDelim);
+		buf.append(str);
 	}
 	
 	private int getPackageStatementEndPos(TextBuffer buffer) throws JavaModelException {
