@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -44,7 +48,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -81,10 +85,12 @@ public class QuickAssistLightBulbUpdater {
 		
 	}
 	
-	private Annotation fAnnotation;
+	private final Annotation fAnnotation;
 	private boolean fIsAnnotationShown;
 	private IEditorPart fEditor;
 	private ITextViewer fViewer;
+	
+	private Job fCurrentJob;
 	
 	private ISelectionChangedListener fListener;
 	private IPropertyChangeListener fPropertyChangeListener;
@@ -95,6 +101,8 @@ public class QuickAssistLightBulbUpdater {
 		fAnnotation= new AssistAnnotation();
 		fIsAnnotationShown= false;
 		fPropertyChangeListener= null;
+		
+		fCurrentJob= null;
 	}
 	
 	public boolean isSetInPreferences() {
@@ -119,10 +127,7 @@ public class QuickAssistLightBulbUpdater {
 			IPostSelectionProvider provider= (IPostSelectionProvider) fViewer.getSelectionProvider();
 			provider.removePostSelectionChangedListener(fListener);
 			fListener= null;
-			if (fIsAnnotationShown) {
-				model.removeAnnotation(fAnnotation);
-				fIsAnnotationShown= false;
-			}
+			removeLightBulb(model);
 		}
 	}	
 	
@@ -183,34 +188,44 @@ public class QuickAssistLightBulbUpdater {
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	private void doSelectionChanged() {
-		Point point= fViewer.getSelectedRange();
-		int offset= point.x;
-		int length= point.y;
 		
 		final IAnnotationModel model= getAnnotationModel();
-		if (model == null) {
+		final ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
+		if (model == null || cu == null) {
 			return;
 		}
 		
-		boolean hasQuickFix= hasQuickFixLightBulb(model, offset);
-		ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
-
-		if (hasQuickFix || cu == null) {
-			if (fIsAnnotationShown) {
-				model.removeAnnotation(fAnnotation);
-			}
-			return;			
-		}
+		Point point= fViewer.getSelectedRange();
+		int offset= point.x;
+		int length= point.y;
 		final IInvocationContext context= new AssistContext(cu, offset, length);
-		calculateLightBulb(model, context);
-		//Runnable runnable= new Runnable() {
-		//	public void run() {
-		//		calculateLightBulb(model, context);
-		//	}
-		//};
-		//runnable.run();
-	}
 		
+		boolean hasQuickFix= hasQuickFixLightBulb(model, context.getSelectionOffset());
+		if (hasQuickFix) {
+			removeLightBulb(model);
+			return; // there is already a quick fix light bulb at the new location
+		}
+		
+		if (fCurrentJob != null) {
+			fCurrentJob.cancel();
+			fCurrentJob= null;
+		}
+				
+		fCurrentJob= new Job(CorrectionMessages.getString("QuickAssistLightBulbUpdater.job.title")) { //$NON-NLS-1$
+			public IStatus run(IProgressMonitor monitor) {
+				synchronized (QuickAssistLightBulbUpdater.this) {
+					if (this != fCurrentJob) {
+						return Status.OK_STATUS;
+					}
+
+					calculateLightBulb(model, context);
+					return Status.OK_STATUS;
+				}
+			}
+		};
+		fCurrentJob.setPriority(Job.DECORATE);
+		fCurrentJob.schedule();
+	}
 	
 	private void calculateLightBulb(IAnnotationModel model, IInvocationContext context) {
 		boolean needsAnnotation= JavaCorrectionProcessor.hasAssists(context);
@@ -221,6 +236,15 @@ public class QuickAssistLightBulbUpdater {
 			model.addAnnotation(fAnnotation, new Position(context.getSelectionOffset(), context.getSelectionLength()));
 		}
 		fIsAnnotationShown= needsAnnotation;
+	}	
+		
+	private void removeLightBulb(IAnnotationModel model) {
+		synchronized (this) {
+			if (fIsAnnotationShown) {
+				model.removeAnnotation(fAnnotation);
+				fIsAnnotationShown= false;
+			}
+		}
 	}
 	
 	/*
