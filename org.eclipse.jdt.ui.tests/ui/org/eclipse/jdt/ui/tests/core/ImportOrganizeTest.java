@@ -62,13 +62,12 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		fJProject1= ProjectTestSetup.getProject();
 	}
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
 	private IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
