@@ -249,6 +249,7 @@ public class CallInliner {
 	public RefactoringStatus initialize(ASTNode invocation, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
+		fLocals= new ArrayList(3);
 		
 		checkMethodDeclaration(result, severity);
 		if (result.getSeverity() >= severity)
