@@ -43,7 +43,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.MoveResourceAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
-import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.actions.RenameResourceAction;
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
@@ -72,6 +71,7 @@ import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.actions.RefreshAction;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -316,7 +316,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 	}
 	
 	/* package */ void handleOpen(OpenEvent event) {
-		OpenAction openAction= fNavigateActionGroup.getOpenAction();
+		IAction openAction= fNavigateActionGroup.getOpenAction();
 		if (openAction != null && openAction.isEnabled()) {
 			openAction.run();
 			return;
@@ -328,12 +328,12 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 			return;		
 		
 		if (event.keyCode == SWT.F5) {
-			RefreshAction action= fBuildActionGroup.getRefreshAction();
-			if (action.isEnabled())
-				action.run();
+			IAction refreshAction= fBuildActionGroup.getRefreshAction();
+			if (refreshAction != null && refreshAction.isEnabled())
+				refreshAction.run();
 		} else if (event.character == SWT.DEL) {
 			IAction delete= fCCPActionGroup.getDeleteAction();
-			if (delete.isEnabled())
+			if (delete != null && delete.isEnabled())
 				delete.run();
 		}
 	}

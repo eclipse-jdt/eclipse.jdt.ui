@@ -27,7 +27,6 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
-import org.eclipse.ui.actions.RefreshAction;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -65,7 +64,7 @@ public class BuildActionGroup extends ActionGroup {
 		fFullBuildAction= new BuildAction(shell, IncrementalProjectBuilder.FULL_BUILD);
 		fFullBuildAction.setText(ActionMessages.getString("RebuildAction.label")); //$NON-NLS-1$
 		
-		fRefreshAction= new RefreshAction(shell);
+		fRefreshAction= new RefreshAction(fSite);
 		
 		provider.addSelectionChangedListener(fBuildAction);
 		provider.addSelectionChangedListener(fFullBuildAction);
@@ -78,7 +77,7 @@ public class BuildActionGroup extends ActionGroup {
 	 * @return the refresh action. If this group doesn't manage a refresh action
 	 * 	<code>null</code> is returned.
 	 */
-	public RefreshAction getRefreshAction() {
+	public IAction getRefreshAction() {
 		return fRefreshAction;
 	}
 

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
@@ -52,13 +53,12 @@ public class NavigateActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Returns the <code>OpenAction</code> managed by this action
-	 * group. 
+	 * Returns the open action managed by this action group. 
 	 * 
 	 * @return the open action. Returns <code>null</code> if the group
 	 * 	doesn't provide any open action
 	 */
-	public OpenAction getOpenAction() {
+	public IAction getOpenAction() {
 		return fOpenEditorActionGroup.getOpenAction();
 	}
 	

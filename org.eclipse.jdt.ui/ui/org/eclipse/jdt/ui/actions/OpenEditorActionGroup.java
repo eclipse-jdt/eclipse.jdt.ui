@@ -80,13 +80,12 @@ public class OpenEditorActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Returns the <code>OpenAction</code> managed by this action
-	 * group. 
+	 * Returns the open action managed by this action group. 
 	 * 
 	 * @return the open action. Returns <code>null</code> if the group
 	 * 	doesn't provide any open action
 	 */
-	public OpenAction getOpenAction() {
+	public IAction getOpenAction() {
 		return fOpen;
 	}
 
