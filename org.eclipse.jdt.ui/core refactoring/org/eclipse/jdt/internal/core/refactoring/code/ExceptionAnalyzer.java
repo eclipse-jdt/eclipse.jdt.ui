@@ -4,10 +4,10 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.code;
 
-import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Stack;import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;import org.eclipse.jdt.internal.compiler.ast.Argument;import org.eclipse.jdt.internal.compiler.ast.MessageSend;import org.eclipse.jdt.internal.compiler.ast.TryStatement;import org.eclipse.jdt.internal.compiler.ast.TypeReference;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.eclipse.jdt.internal.compiler.lookup.Scope;import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Stack;import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;import org.eclipse.jdt.internal.compiler.ast.Argument;import org.eclipse.jdt.internal.compiler.ast.MessageSend;import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;import org.eclipse.jdt.internal.compiler.ast.TryStatement;import org.eclipse.jdt.internal.compiler.ast.TypeReference;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.eclipse.jdt.internal.compiler.lookup.Scope;import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 /* package */ class ExceptionAnalyzer {
 
-	private List fCurrentExceptions;
+	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
 	private Stack fTryStack;
 	private HashMap fTypeNames;
 	
@@ -27,6 +27,25 @@ import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;
 			TypeBinding binding= reference.binding;
 			if (binding != null)
 				fTypeNames.put(binding, reference);
+		}
+	}
+	
+	public void visitThrowStatement(ThrowStatement statement, BlockScope scope, int mode) {
+		if (mode != StatementAnalyzer.SELECTED)
+			return;
+			
+		TypeBinding exception= statement.exceptionType;
+		if (exception == null)		// Safety net for null bindings when compiling fails.
+			return;
+		
+		if (!fCurrentExceptions.contains(exception))
+			fCurrentExceptions.add(exception);
+		
+		// Try to use the same type name (qualified or unqualified for the method signature.	
+		if (statement.exception instanceof AllocationExpression) {
+			AllocationExpression allocation= (AllocationExpression)statement.exception;
+			if (allocation.type != null)
+				fTypeNames.put(exception, allocation.type);
 		}
 	}
 	

@@ -117,7 +117,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
-				fMessage= "Cannot extract new method from selection. Only statements from the body of a top level method can be extracted.";
+				fMessage= "Cannot extract new method from selection. Only statements from a method body can be extracted.";
 			if (fMessage != null)
 				status.addFatalError(fMessage);
 		}
@@ -226,7 +226,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				break;
 			case SELECTED:
 				if (fSelection.endsIn(start, end)) { // Selection ends in the middle of a statement
-					invalidSelection("Can't extract selection that ends in the middle of a statement.");
+					invalidSelection("Cannot extract selection that ends in the middle of a statement.");
 					return false;
 				} else if (start > fSelection.end) {
 					fMode= AFTER;
@@ -238,7 +238,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			case AFTER:
 				break;
 		}
-		trackLastEnd(node);
+		trackLastEnd(end);
 		return result;
 	}
 	
@@ -254,11 +254,6 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		fLastSelectedNode= node;
 		if (fParentOfFirstSelectedStatment == getParent())
 			fLastSelectedNodeWithSameParentAsFirst= node;
-	}
-	
-	private void trackLastEnd(AstNode node) {
-		if (node.sourceEnd > fCursorPosition)
-			fCursorPosition= node.sourceEnd;
 	}
 	
 	private void trackLastEnd(int end) {
@@ -354,7 +349,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 					fStatus.addFatalError("Selection contains a " + name + " statement but the corresponding " + name + " target isn't selected.");
 			}
 		} else {
-			fStatus.addFatalError("Can not find break target");
+			fStatus.addFatalError("Cannot find break target.");
 		}
 		return result;
 	}
@@ -420,7 +415,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			if (returnType == TypeIds.T_undefined)
 				returnType= binaryExpression.bits & binaryExpression.ReturnTypeIDMASK;
 			if (returnType == TypeIds.T_undefined) {
-				invalidSelection("Can not determine return type of the expression to be extracted.");
+				invalidSelection("Cannot determine return type of the expression to be extracted.");
 				return false;
 			}
 			fLocalVariableAnalyzer.setExpressionReturnType(TypeReference.baseTypeReference(returnType, 0));
@@ -449,7 +444,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	private void endVisitConditionBlock(AstNode node, String statementName) {
 		Boolean inCondition= (Boolean)fAstNodeData.get(node);
 		if (inCondition != null && inCondition.booleanValue() && fLocalVariableAnalyzer.getExpressionReturnType() == null) {
-			invalidSelection("Can not extract the selected statement(s) from the condition part of " + statementName + " statement");
+			invalidSelection("Cannot extract the selected statement(s) from the condition part of " + statementName + " statement.");
 		}	
 	}
 		
@@ -672,7 +667,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 
 	public void endVisit(Block block, BlockScope scope) {
-		trackLastEnd(block);
+		trackLastEnd(block.sourceEnd);
 		if (fSelection.covers(block))
 			fNeedsSemicolon= false;
 	}
@@ -839,7 +834,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 			if ((fCursorPosition= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
 				return true;
 				
-			invalidSelection("Selection must either cover whole if-then-else statement or parts of then or else block.");
+			invalidSelection("Selection must either cover whole if-then-else statement or parts of then, or else block.");
 			return false;
 		}
 		return true;
@@ -926,7 +921,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 				fStatus.addFatalError(fPotentialReturnMessage);
 				fPotentialReturnMessage= null;
 			}
-			String message= "Can not extract to new method since selection contains a return statement at line " + getLineNumber(returnStatement) + ".";
+			String message= "Cannot extract to new method since selection contains a return statement at line " + getLineNumber(returnStatement) + ".";
 			if (fParentOfFirstSelectedStatment != getParent()) {
 				fStatus.addFatalError(message);
 			} else {
@@ -1011,7 +1006,10 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
-		return visitNode(throwStatement, scope);
+		if (!visitNode(throwStatement, scope))
+			return false;
+		fExceptionAnalyzer.visitThrowStatement(throwStatement, scope, fMode);
+		return true;	
 	}
 
 	public boolean visit(TrueLiteral trueLiteral, BlockScope scope) {

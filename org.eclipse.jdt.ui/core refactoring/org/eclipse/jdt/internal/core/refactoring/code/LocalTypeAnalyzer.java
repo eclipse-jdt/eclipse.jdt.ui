@@ -54,13 +54,13 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 				if (fBeforeTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsBefore, binding))
-					fBeforeTypeReferenced= "Selected block references a local type declared outside the selection";
+					fBeforeTypeReferenced= "Selected block references a local type declared outside the selection.";
 				break;
 			case StatementAnalyzer.AFTER:
 				if (fSelectedTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsSelected, binding))
-					fSelectedTypeReferenced= "A local type declared in the selected block is referenced outside the selection";
+					fSelectedTypeReferenced= "A local type declared in the selected block is referenced outside the selection.";
 				break;
 		}
 	}
