@@ -334,7 +334,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				continue;
 			String text;
 			if (isStatic(vb))
-				text= JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + '.';
+				text= getTypeOfEnclosingInstanceField() + '.';
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= simpleName.getStartPosition();
@@ -357,7 +357,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				continue;
 			String text;
 			if (isStatic(vb))
-				text= JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + '.';
+				text= getTypeOfEnclosingInstanceField() + '.';
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= fieldAccess.getStartPosition();
@@ -380,7 +380,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				continue;
 			String text;
 			if (isStatic(mb))
-				text= JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + '.';
+				text= getTypeOfEnclosingInstanceField() + '.';
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= methodInvocation.getStartPosition();
@@ -440,19 +440,32 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void addConstructor(TextChangeManager manager) throws CoreException {
-		int tabWidth= CodeFormatterUtil.getTabWidth();
-		String constSource= format(fType.getElementName() + '(' + createDeclarationForEnclosingInstance() + "){" +  //$NON-NLS-1$
-		                 		createEnclosingInstanceInitialization() + '}', 0);
-		String[] constLines= Strings.convertIntoLines(constSource);
-		MemberEdit constEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, constLines, tabWidth);
+		String[] constLines= Strings.convertIntoLines(format(getNewConstructorSource(), 0));
+		MemberEdit constEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, constLines, CodeFormatterUtil.getTabWidth());
 		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.add_constructor"), constEdit); //$NON-NLS-1$
 	}
 
+	private String getNewConstructorSource() throws CoreException {
+		String constructorBody= StubUtility.getMethodBodyContent(true, fType.getJavaProject(), fType.getElementName(), fType.getElementName(), createEnclosingInstanceInitialization());
+		if (constructorBody == null)
+			constructorBody= ""; //$NON-NLS-1$
+		return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstance() + "){" +  //$NON-NLS-1$
+						getLineSeperator() + constructorBody + getLineSeperator() + '}';
+	}
+
+	private String getNewConstructorComment() throws CoreException {
+		if (fCodeGenerationSettings.createComments){
+			String comment= StubUtility.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), new String[]{getTypeOfEnclosingInstanceField()}, new String[0], null, null);
+			if (comment == null)
+				return ""; //$NON-NLS-1$
+			return comment;	
+		}else
+			return "";//$NON-NLS-1$
+	}
+
 	private void addEnclosingInstanceDeclaration(TextChangeManager manager) throws CoreException {
-		int tabWidth= CodeFormatterUtil.getTabWidth();
-		
 		String[] fieldSource= new String[]{createEnclosingInstanceAccessModifierStrings() + createDeclarationForEnclosingInstance() + ';'};
-		MemberEdit memberEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, fieldSource, tabWidth);
+		MemberEdit memberEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, fieldSource, CodeFormatterUtil.getTabWidth());
 		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.add_enclosing_instance_declaration"), memberEdit); //$NON-NLS-1$
 	}
 	
@@ -905,7 +918,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String createDeclarationForEnclosingInstance() {
-		return JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + ' ' + fEnclosingInstanceFieldName;
+		return getTypeOfEnclosingInstanceField() + ' ' + fEnclosingInstanceFieldName;
+	}
+
+	private String getTypeOfEnclosingInstanceField() {
+		return JavaModelUtil.getTypeQualifiedName(getEnclosingType());
 	}
 		
 	private static ISearchPattern createConstructorSearchPattern(IType type, int limitTo) throws JavaModelException {
