@@ -34,10 +34,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -51,7 +53,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
 public class LinkedPositionUI implements LinkedPositionListener,
-	ITextInputListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener {
+	ITextInputListener, ITextListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener {
 
 	/**
 	 * A listener for notification when the user cancelled the edit operation.
@@ -80,6 +82,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private int fCaretOffset;
 	
 	private ExitListener fExitListener;
+	
+	private boolean fNeedRedraw;
 	
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
@@ -164,7 +168,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 */
 	public void setCurrentPosition(Position position, int caretOffset) {
 		if (!fFramePosition.equals(position)) {
-			redrawRegion();
+			fNeedRedraw= true;
 			fFramePosition= position;
 		}
 
@@ -194,6 +198,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		}
 
 		fViewer.addTextInputListener(this);
+		fViewer.addTextListener(this);
 				
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.prependVerifyKeyListener(this);
@@ -249,6 +254,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.removeVerifyKeyListener(this);
 
+		fViewer.removeTextListener(this);
 		fViewer.removeTextInputListener(this);
 		
 		try {
@@ -444,7 +450,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		int length= fFramePosition.getLength();
 
 		StyledText text= fViewer.getTextWidget();
-		if (text != null && !text.isDisposed())
+		if (text != null && !text.isDisposed())	
 			text.redrawRange(offset, length, true);
 	}
 
@@ -521,6 +527,17 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		return
 			position.getOffset() >= region.getOffset() &&
 			position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.ITextListener#textChanged(TextEvent)
+	 */
+	public void textChanged(TextEvent event) {
+		if (!fNeedRedraw)
+			return;
+			
+		redrawRegion();
+		fNeedRedraw= false;
 	}
 
 }
