@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -169,6 +170,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
+		if (pm == null) pm= new NullProgressMonitor();
 		pm.beginTask(NN, 2);
 		// This is cheap since the compilation unit is already open in a editor.
 		IPath path= getFile().getFullPath();
