@@ -153,7 +153,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 3); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("MoveRefactoring.searching"), 3); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkReferencesToNotPublicTypes(new SubProgressMonitor(pm, 1)));
@@ -171,58 +171,67 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	}
 
 	private RefactoringStatus checkReferencesToNotPublicTypes(IProgressMonitor pm) throws JavaModelException {
-		if (! (getDestination() instanceof IPackageFragment))
-			return null;
-
-		ICompilationUnit[] movedCus= collectCus();
-		List movedCuList= Arrays.asList(movedCus);
-		IType[] types= ReferenceFinderUtil.getTypesReferencedIn(movedCus, pm);
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < types.length; i++) {
-			IType type= types[i];
-			if (JdtFlags.isPublic(type))
-				continue;
-			if (movedCuList.contains(type.getCompilationUnit()))
-				continue;
-			if (getDestination().equals(type.getPackageFragment()))
-				continue;
-			String[] keys= {JavaElementUtil.createSignature(type)};
-			String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.typeWillNotBeAccessible", keys); //$NON-NLS-1$
-			result.addWarning(message);				
+		pm.beginTask("", 1);//$NON-NLS-1$
+		try{
+			if (! (getDestination() instanceof IPackageFragment))
+				return null;
+	
+			ICompilationUnit[] movedCus= collectCus();
+			List movedCuList= Arrays.asList(movedCus);
+			IType[] types= ReferenceFinderUtil.getTypesReferencedIn(movedCus, new SubProgressMonitor(pm, 1));
+			RefactoringStatus result= new RefactoringStatus();
+			for (int i= 0; i < types.length; i++) {
+				IType type= types[i];
+				if (JdtFlags.isPublic(type))
+					continue;
+				if (movedCuList.contains(type.getCompilationUnit()))
+					continue;
+				if (getDestination().equals(type.getPackageFragment()))
+					continue;
+				String[] keys= {JavaElementUtil.createSignature(type)};
+				String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.typeWillNotBeAccessible", keys); //$NON-NLS-1$
+				result.addWarning(message);				
+			}
+			return result;
+		} finally{
+			pm.done();
 		}
-		return result;
 	}
 
 	private RefactoringStatus checkPackageVisibileClassReferences(IProgressMonitor pm) throws JavaModelException {
-		if (! (getDestination() instanceof IPackageFragment))
-			return null;
-		
-		ICompilationUnit[] movedCus= collectCus();
-		List movedCuList= Arrays.asList(movedCus);
-		IType[] movedPackageVisibleTypes= getMovedPackageVisibleTypes(movedCus);
-		if (movedPackageVisibleTypes.length == 0)
-			return null;
-				
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		ISearchPattern pattern= createSearchPattern(movedPackageVisibleTypes);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
-		
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < groups.length; i++) {
-			SearchResultGroup group= groups[i];
-			ICompilationUnit cu= group.getCompilationUnit();
-			if (cu == null)
-				continue;
-			if (cu.getParent().equals(getDestination()))
-				continue;
-			if (movedCuList.contains(cu))	
-				continue;
-			String[] keys= 	{cu.getElementName()};
-			String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.containsReferencesToTypeThatWillNotBeVisible", keys); //$NON-NLS-1$
-			result.addWarning(message);
-		}
-		pm.done();
-		return result;
+		pm.beginTask("", 1);//$NON-NLS-1$
+		try{
+			if (! (getDestination() instanceof IPackageFragment))
+				return null;
+			
+			ICompilationUnit[] movedCus= collectCus();
+			List movedCuList= Arrays.asList(movedCus);
+			IType[] movedPackageVisibleTypes= getMovedPackageVisibleTypes(movedCus);
+			if (movedPackageVisibleTypes.length == 0)
+				return null;
+					
+			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+			ISearchPattern pattern= createSearchPattern(movedPackageVisibleTypes);
+			SearchResultGroup[] groups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+			
+			RefactoringStatus result= new RefactoringStatus();
+			for (int i= 0; i < groups.length; i++) {
+				SearchResultGroup group= groups[i];
+				ICompilationUnit cu= group.getCompilationUnit();
+				if (cu == null)
+					continue;
+				if (cu.getParent().equals(getDestination()))
+					continue;
+				if (movedCuList.contains(cu))	
+					continue;
+				String[] keys= 	{cu.getElementName()};
+				String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.containsReferencesToTypeThatWillNotBeVisible", keys); //$NON-NLS-1$
+				result.addWarning(message);
+			}
+			return result;
+		} finally{
+			pm.done();
+		}	
 	}
 
 	private static ISearchPattern createSearchPattern(IType[] movedPackageVisibleTypes) {
@@ -485,15 +494,20 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException {
-		if (! fUpdateReferences)
-			return new TextChangeManager();
-			
-		Object dest= getDestinationForCusAndFiles(getDestination());
-		if (dest instanceof IPackageFragment){			
-			MoveCuUpdateCreator creator= new MoveCuUpdateCreator(collectCus(), (IPackageFragment)dest, fSettings);
-			return creator.createChangeManager(new SubProgressMonitor(pm, 1));
-		} else 
-			return new TextChangeManager();
+		pm.beginTask("", 1);//$NON-NLS-1$
+		try{
+			if (! fUpdateReferences)
+				return new TextChangeManager();
+				
+			Object dest= getDestinationForCusAndFiles(getDestination());
+			if (dest instanceof IPackageFragment){			
+				MoveCuUpdateCreator creator= new MoveCuUpdateCreator(collectCus(), (IPackageFragment)dest, fSettings);
+				return creator.createChangeManager(new SubProgressMonitor(pm, 1));
+			} else 
+				return new TextChangeManager();
+		} finally {
+			pm.done();
+		}		
 	}
 	
 	private static void addAllChildren(CompositeChange collector, ICompositeChange composite){
