@@ -174,13 +174,39 @@ public class ChangeTypeWizard extends RefactoringWizard {
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.declCannotBeChanged")); //$NON-NLS-1$
 				} else {
 					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getString("ChangeTypeWizard.pleaseChooseType")); //$NON-NLS-1$
-					//TODO: select one of the most general types
-					// fTreeViewer.getTree().setSelection(new IType[]{ findMostGeneralValidType(fValidTypes) }); // TODO -- what?
+					TreeItem selection= getInitialSelection(fValidTypes);
+					fTreeViewer.getTree().setSelection(new TreeItem[]{ selection });
+					setPageComplete(true);
 				}
 			}			
 		}
 		
-
+		private TreeItem getInitialSelection(Collection/*<IType>*/ types) {
+			
+			// first, find a most general valid type (there may be more than one)
+			IType type= (IType)types.iterator().next();
+			for (Iterator it= types.iterator(); it.hasNext(); ){
+				IType other= (IType)it.next();
+				if (getGeneralizeTypeRefactoring().isSubTypeOf(type, other)){
+					type= other;
+				}
+			}
+			
+			// now find a corresponding TreeItem (there may be more than one)		
+			return findItem(fTreeViewer.getTree().getItems(), type);
+		}
+		
+		private TreeItem findItem(TreeItem[] items, IType type){
+			for (int i=0; i < items.length; i++){
+				if (items[i].getData().equals(type)) return items[i];
+			}
+			for (int i=0; i < items.length; i++){
+				TreeItem item= findItem(items[i].getItems(), type);
+				if (item != null) return item;
+			}
+			return null;
+		}
+		
 		
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);

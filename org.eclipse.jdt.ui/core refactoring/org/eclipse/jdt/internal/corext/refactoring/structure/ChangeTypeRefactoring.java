@@ -305,6 +305,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if (checkOverriddenBinaryMethods())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnBinary")); //$NON-NLS-1$
 			
+			if (typeBinding.isLocal()){
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
+			}
+			
 			fOriginalTypeOfSelection= Bindings.findType(fCv.getBinding(), fCu.getJavaProject());
 			
 			fTypeHierarchy= getTypeHierarchy(fOriginalTypeOfSelection, pm, fCu.getJavaProject());
@@ -691,6 +695,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 			fEffectiveSelectionLength= node.getLength();
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && grandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
+			fParamIndex= -1;
+		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && 
+				   grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
 			fParamIndex= -1;
 		} else if (
 			parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)) {

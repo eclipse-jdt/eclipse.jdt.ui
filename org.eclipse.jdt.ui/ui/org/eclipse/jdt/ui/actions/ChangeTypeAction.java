@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -24,6 +26,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -81,13 +85,49 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		setEnabled(checkEnabled(selection));
 	}
 	
+	public void selectionChanged(IStructuredSelection selection) {
+		if (canEnable(selection)){
+			setEnabled(true);
+		}
+	}
+	
+	private boolean canEnable(IStructuredSelection selection) {
+		if (selection.size() == 1){
+			Object element= selection.getFirstElement();
+			if (element instanceof IMember){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void run(IStructuredSelection selection) {
+		if (canEnable(selection)){
+			Object element= selection.getFirstElement();
+			if (element instanceof IMember){
+				IMember member= (IMember)element;
+				try {
+					ISourceRange range= member.getNameRange();
+					ICompilationUnit icu= member.getCompilationUnit();
+					ITextSelection textSelection= new TextSelection(range.getOffset(), range.getLength());
+					ChangeTypeRefactoring refactoring= createRefactoring(icu, textSelection);
+					if (refactoring == null)
+						return;
+					new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
+				} catch (CoreException e){
+					ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
 	private static ChangeTypeRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
 		return ChangeTypeRefactoring.create(cunit, 
 				selection.getOffset(), selection.getLength());
 	}
 
 	private RefactoringWizard createWizard(ChangeTypeRefactoring refactoring) {
-		String pageTitle= RefactoringMessages.getString("ChangeTypeAction.change_type"); //$NON-NLS-1$
+		String pageTitle= RefactoringMessages.getString("ChangeTypeWizard.title"); //$NON-NLS-1$
 
 		return new ChangeTypeWizard(refactoring);
 	}
