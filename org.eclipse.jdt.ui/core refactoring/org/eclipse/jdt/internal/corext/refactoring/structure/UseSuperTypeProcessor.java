@@ -120,11 +120,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.checking")); //$NON-NLS-1$
 			status.merge(Checks.checkIfCuBroken(fSubType));
-			if (!status.hasError()) {
-				if (Checks.isException(fSubType, new SubProgressMonitor(monitor, 1)))
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("UseSuperTypeProcessor.exception"))); //$NON-NLS-1$
-				fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
-			}
+			fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
