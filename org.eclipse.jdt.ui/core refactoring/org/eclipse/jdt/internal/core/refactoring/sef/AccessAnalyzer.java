@@ -74,7 +74,7 @@ public class AccessAnalyzer extends ParentProvider {
 		FieldBinding binding;
 		int index= qnr.otherBindings.length - 1;
 		binding= qnr.otherBindings[index];
-		if (CharOperation.equals(fFieldIdentifier, ASTUtil.getIdentifier(binding))) {
+		if (considerFieldBinding(binding)) {
 			if (checkParent(node)) {
 				int offset= getOffset(qnr, index);
 				fChange.addSimpleTextChange(new EncapsulateWriteAccess(
@@ -86,7 +86,7 @@ public class AccessAnalyzer extends ParentProvider {
 			return true;
 		}
 	}
-	
+
 	private boolean checkParent(Assignment assignment) {
 		AstNode parent= getParent();
 		if (parent instanceof Assignment) {
@@ -134,7 +134,7 @@ public class AccessAnalyzer extends ParentProvider {
 		for (int i= 0; i < others.length; i++) {
 			FieldBinding other= others[i];
 			int length= node.tokens[i + 1].length;
-			if (CharOperation.equals(fFieldIdentifier, ASTUtil.getIdentifier(other))) {
+			if (considerFieldBinding(other)) {
 				fChange.addSimpleTextChange(new EncapsulateReadAccess(fGetter, start, length));
 			}
 			start+=  length + 1;
@@ -152,10 +152,16 @@ public class AccessAnalyzer extends ParentProvider {
 			
 		FieldBinding result= (FieldBinding)binding;
 		
-		if (CharOperation.equals(fFieldIdentifier, ASTUtil.getIdentifier(result)))
+		if (considerFieldBinding(result))
 			return result;
 			
 		return null;
+	}
+	
+	private boolean considerFieldBinding(FieldBinding binding) {
+		if (binding.declaringClass == null) // case array.length
+			return false;
+		return CharOperation.equals(fFieldIdentifier, ASTUtil.getIdentifier(binding));
 	}
 	
 	private int getOffset(QualifiedNameReference node, int index) {
