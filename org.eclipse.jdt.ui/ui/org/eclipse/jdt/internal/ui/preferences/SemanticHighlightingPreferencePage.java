@@ -50,9 +50,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
  */
 public class SemanticHighlightingPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
-	/** Semantic message key prefix */
-	private static final String PREFIX= "SemanticHighlightingPreferencePage."; //$NON-NLS-1$
-	
 	/** Semantic highlighting enable checkbox */
 	private Button fSemanticEnableCheckBox;
 	/** Semantic highlighting color list */
@@ -86,7 +83,7 @@ public class SemanticHighlightingPreferencePage extends PreferencePage implement
 	public SemanticHighlightingPreferencePage() {
 		fSemanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		
-		setDescription(PreferencesMessages.getString(PREFIX + "description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("SemanticHighlightingPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
 		fKeys= createOverlayStoreKeys();
@@ -128,7 +125,7 @@ public class SemanticHighlightingPreferencePage extends PreferencePage implement
 		Composite colorComposite= new Composite(parent, SWT.NULL);
 		colorComposite.setLayout(new GridLayout());
 
-		fSemanticEnableCheckBox= addCheckBox(colorComposite, PreferencesMessages.getString(PREFIX + "option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
+		fSemanticEnableCheckBox= addCheckBox(colorComposite, PreferencesMessages.getString("SemanticHighlightingPreferencePage.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
 		fSemanticEnableCheckBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				updateSemanticControls();
@@ -136,7 +133,7 @@ public class SemanticHighlightingPreferencePage extends PreferencePage implement
 		});		
 
 		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString(PREFIX + "foreground")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("SemanticHighlightingPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
@@ -162,7 +159,7 @@ public class SemanticHighlightingPreferencePage extends PreferencePage implement
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString(PREFIX + "color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("SemanticHighlightingPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -174,7 +171,7 @@ public class SemanticHighlightingPreferencePage extends PreferencePage implement
 		foregroundColorButton.setLayoutData(gd);
 		
 		fSemanticBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fSemanticBoldCheckBox.setText(PreferencesMessages.getString(PREFIX + "bold")); //$NON-NLS-1$
+		fSemanticBoldCheckBox.setText(PreferencesMessages.getString("SemanticHighlightingPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;

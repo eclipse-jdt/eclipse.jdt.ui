@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
@@ -81,6 +83,17 @@ class JavaEditorHoverConfigurationBlock {
 	private JavaEditorPreferencePage fMainPreferencePage;
 
 	private StatusInfo fStatus;
+	
+	private Map fCheckBoxes= new HashMap();
+	private SelectionListener fCheckBoxListener= new SelectionListener() {
+		public void widgetDefaultSelected(SelectionEvent e) {
+		}
+		public void widgetSelected(SelectionEvent e) {
+			Button button= (Button) e.widget;
+			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
+		}
+	};
+	
 
 	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
@@ -95,6 +108,8 @@ class JavaEditorHoverConfigurationBlock {
 		
 		ArrayList overlayKeys= new ArrayList();
 	
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER));
+
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS));
@@ -120,6 +135,11 @@ class JavaEditorHoverConfigurationBlock {
 		hoverComposite.setLayout(layout);
 		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 		hoverComposite.setLayoutData(gd);
+
+		String rollOverLabel= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.annotationRollover"); //$NON-NLS-1$
+		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); //$NON-NLS-1$
+		
+		addFiller(hoverComposite);
 
 		Label label= new Label(hoverComposite, SWT.NONE);
 		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.hoverPreferences")); //$NON-NLS-1$
@@ -280,6 +300,13 @@ class JavaEditorHoverConfigurationBlock {
 			}
 		});
 		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
+
+		Iterator e= fCheckBoxes.keySet().iterator();
+		while (e.hasNext()) {
+			Button b= (Button) e.next();
+			String key= (String) fCheckBoxes.get(b);
+			b.setSelection(fStore.getBoolean(key));
+		}
 	}
 
 	void performOk() {
@@ -421,5 +448,29 @@ class JavaEditorHoverConfigurationBlock {
 			fMainPreferencePage.setValid(false);
 			StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
 		}
+	}
+	
+	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
+		Button checkBox= new Button(parent, SWT.CHECK);
+		checkBox.setText(label);
+		
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= indentation;
+		gd.horizontalSpan= 2;
+		checkBox.setLayoutData(gd);
+		checkBox.addSelectionListener(fCheckBoxListener);
+		
+		fCheckBoxes.put(checkBox, key);
+		
+		return checkBox;
+	}
+	
+	private void addFiller(Composite composite) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
 	}
 }

@@ -33,8 +33,8 @@ import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.quickdiff.QuickDiff;
 import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
@@ -45,13 +45,6 @@ import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
  * @since 3.0
  */
 class QuickdiffConfigurationBlock {
-	
-	public interface IMessages {
-		String getString(String key);
-	}
-
-	private String fPrefix;
-	private IMessages fMessages;
 	
 	private IPreferenceStore fStore;
 	
@@ -98,12 +91,8 @@ class QuickdiffConfigurationBlock {
 
 	
 
-	public QuickdiffConfigurationBlock(IPreferenceStore store, String prefix, IMessages messages) {
+	public QuickdiffConfigurationBlock(IPreferenceStore store, String prefix) {
 		Assert.isNotNull(store);
-		Assert.isNotNull(prefix);
-		Assert.isNotNull(messages);
-		fPrefix= prefix;
-		fMessages= messages;
 		fStore= store;
 		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fQuickDiffModel= createQuickDiffModel(markerAnnotationPreferences);
@@ -117,11 +106,11 @@ class QuickdiffConfigurationBlock {
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
 			if (info.getAnnotationType().equals("org.eclipse.ui.workbench.texteditor.quickdiffChange")) //$NON-NLS-1$
-				items[0]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), fPrefix + ".quickdiff.changeColor" }; //$NON-NLS-1$
+				items[0]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.changeColor") }; //$NON-NLS-1$
 			else if (info.getAnnotationType().equals("org.eclipse.ui.workbench.texteditor.quickdiffAddition")) //$NON-NLS-1$
-				items[1]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), fPrefix + ".quickdiff.additionColor" }; //$NON-NLS-1$
+				items[1]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.additionColor") }; //$NON-NLS-1$
 			else if (info.getAnnotationType().equals("org.eclipse.ui.workbench.texteditor.quickdiffDeletion")) //$NON-NLS-1$
-				items[2]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), fPrefix + ".quickdiff.deletionColor" }; //$NON-NLS-1$
+				items[2]= new String[] { info.getColorPreferenceKey(), info.getOverviewRulerPreferenceKey(), PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.deletionColor") }; //$NON-NLS-1$
 		}
 		return items;
 	}
@@ -173,13 +162,13 @@ class QuickdiffConfigurationBlock {
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 
-		String label= fMessages.getString(fPrefix + ".quickdiff.showForNewEditors"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.showForNewEditors"); //$NON-NLS-1$
 		addCheckBox(composite, label, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON, 0);
 
-		label= fMessages.getString(fPrefix + ".quickdiff.characterMode"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.characterMode"); //$NON-NLS-1$
 		addCheckBox(composite, label, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE, 0);
 
-		label= fMessages.getString(fPrefix + ".quickdiff.showInOverviewRuler"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.showInOverviewRuler"); //$NON-NLS-1$
 		fQuickDiffOverviewRulerCheckBox= new Button(composite, SWT.CHECK);
 		fQuickDiffOverviewRulerCheckBox.setText(label);
 		
@@ -206,7 +195,7 @@ class QuickdiffConfigurationBlock {
 		l.setLayoutData(gd);
 
 		Group group= new Group(composite, SWT.NONE);
-		group.setText(fMessages.getString(fPrefix + ".quickdiff.colorTitle")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.colorTitle")); //$NON-NLS-1$
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		group.setLayout(layout);
@@ -216,7 +205,7 @@ class QuickdiffConfigurationBlock {
 		
 		fQuickDiffColorEditors= new ColorEditor[3];
 		for (int i= 0; i < fQuickDiffModel.length; i++) {
-			label= fMessages.getString(fQuickDiffModel[i][2]); //$NON-NLS-1$
+			label= fQuickDiffModel[i][2];
 			l= new Label(group, SWT.LEFT);
 			l.setText(label);
 			final ColorEditor editor= new ColorEditor(group);
@@ -246,7 +235,7 @@ class QuickdiffConfigurationBlock {
 		l.setLayoutData(gd);
 		
 		l= new Label(composite, SWT.LEFT);
-		l.setText(fMessages.getString(fPrefix + ".quickdiff.referenceProviderTitle")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.referenceProviderTitle")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -275,7 +264,7 @@ class QuickdiffConfigurationBlock {
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fSetDefaultButton= new Button(stylesComposite, SWT.PUSH);
-		fSetDefaultButton.setText(fMessages.getString(fPrefix + ".quickdiff.setDefault")); //$NON-NLS-1$
+		fSetDefaultButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.setDefault")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -314,7 +303,7 @@ class QuickdiffConfigurationBlock {
 		for (int j= 0; j < fQuickDiffProviderListModel.length; j++) {
 			fQuickDiffProviderList.remove(j);
 			if (defaultProvider.equals(fQuickDiffProviderListModel[j][0])) {
-				fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1] + " " + fMessages.getString(fPrefix + ".quickdiff.defaultlabel"), j);  //$NON-NLS-1$//$NON-NLS-2$
+				fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1] + " " + PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.defaultlabel"), j);  //$NON-NLS-1$//$NON-NLS-2$
 				defaultIndex= j;
 			} else
 				fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1], j);
@@ -329,7 +318,7 @@ class QuickdiffConfigurationBlock {
 		for (int i= 0; i < fQuickDiffProviderListModel.length; i++) {
 			String label= fQuickDiffProviderListModel[i][1];
 			if (fStore.getString(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
-				label += " " + PreferencesMessages.getString(fPrefix + ".quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
+				label += " " + PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
 			fQuickDiffProviderList.add(label);
 		}
 		fQuickDiffProviderList.getDisplay().asyncExec(new Runnable() {

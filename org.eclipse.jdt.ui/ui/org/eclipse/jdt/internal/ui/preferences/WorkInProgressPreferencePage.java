@@ -40,9 +40,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	/** prefix for resources */
-	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
-	
 	public static final String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
 	public static final String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
 	
@@ -96,13 +93,13 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
 
-		addCheckBox(result, PreferencesMessages.getString(PREFIX + "browserWidgetInJavadocView"), PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW); //$NON-NLS-1$
+		addCheckBox(result, PreferencesMessages.getString("WorkInProgress.browserWidgetInJavadocView"), PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW); //$NON-NLS-1$
 		Group group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "search")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.getString("WorkInProgress.search")); //$NON-NLS-1$
 		
-		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString("WorkInProgress.search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;

@@ -55,16 +55,16 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 
 	public SearchParticipantsPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setTitle(PreferenceMessages.getString("SearchParticipantsPreferencePage.title"));		  //$NON-NLS-1$
-		setDescription(PreferenceMessages.getString("SearchParticipantsPreferencePage.description")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.getString("SearchParticipantsPreferencePage.title"));		  //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("SearchParticipantsPreferencePage.description")); //$NON-NLS-1$
 		
 		String[] buttonLabels= new String[] { 
-			PreferenceMessages.getString("SearchParticipantsPreferencePage.select_all"), //$NON-NLS-1$
-			PreferenceMessages.getString("SearchParticipantsPreferencePage.deselect_all"),  //$NON-NLS-1$
+			PreferencesMessages.getString("SearchParticipantsPreferencePage.select_all"), //$NON-NLS-1$
+			PreferencesMessages.getString("SearchParticipantsPreferencePage.deselect_all"),  //$NON-NLS-1$
 		};
 		
 		fParticipantList= new CheckedListDialogField(null, buttonLabels, new ParticipantLabelProvider());
-		fParticipantList.setLabelText(PreferenceMessages.getString("SearchParticipantsPreferencePage.participants.label")); //$NON-NLS-1$
+		fParticipantList.setLabelText(PreferencesMessages.getString("SearchParticipantsPreferencePage.participants.label")); //$NON-NLS-1$
 		fParticipantList.setCheckAllButtonIndex(0);
 		fParticipantList.setUncheckAllButtonIndex(1);
 		

@@ -15,15 +15,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
@@ -44,7 +40,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -68,7 +63,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
@@ -127,8 +121,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionBackgroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
 	};
 	
-	private final String[][] fAnnotationColorListModel;
-
 	private final String[][] fContentAssistColorListModel= new String[][] {
 		{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND }, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND }, //$NON-NLS-1$
@@ -138,18 +130,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } //$NON-NLS-1$
 	};
 	
-	private final String[][] fAnnotationDecorationListModel= new String[][] {
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.NONE"), AnnotationPreference.STYLE_NONE}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.SQUIGGLES"), AnnotationPreference.STYLE_SQUIGGLES}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.UNDERLINE"), AnnotationPreference.STYLE_UNDERLINE}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.BOX"), AnnotationPreference.STYLE_BOX}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.IBEAM"), AnnotationPreference.STYLE_IBEAM} //$NON-NLS-1$
-	};
-
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	private MarkOccurrencesConfigurationBlock fOccurrencesConfigurationBlock;
 	private FoldingConfigurationBlock fFoldingConfigurationBlock;
+	private AnnotationsConfigurationBlock fAnnotationsConfigurationBlock;
 	
 	/**
 	 * Quick diff preferences. 
@@ -187,11 +172,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private List fSyntaxColorList;
 	private List fAppearanceColorList;
 	private List fContentAssistColorList;
-	private List fAnnotationList;
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private ColorEditor fAppearanceColorEditor;
 	private Button fAppearanceColorDefault;
-	private ColorEditor fAnnotationForegroundColorEditor;
 	private ColorEditor fContentAssistColorEditor;
 	private ColorEditor fBackgroundColorEditor;
 	private Button fBackgroundDefaultRadioButton;
@@ -206,11 +189,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Label fAutoInsertDelayLabel;
 	private Label fAutoInsertJavaTriggerLabel;
 	private Label fAutoInsertJavaDocTriggerLabel;
-	private Button fShowInTextCheckBox;
-	private Combo fDecorationStyleCombo;
-	private Button fHighlightInTextCheckBox;
-	private Button fShowInOverviewRulerCheckBox;
-	private Button fShowInVerticalRulerCheckBox;
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
@@ -241,13 +219,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fKeys= createOverlayStoreKeys(markerAnnotationPreferences);
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
-		fAnnotationColorListModel= createAnnotationTypeListModel(markerAnnotationPreferences);
 	}
 	
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(MarkerAnnotationPreferences preferences) {
 		
 		ArrayList overlayKeys= new ArrayList();
-		Iterator e= preferences.getAnnotationPreferences().iterator();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOREGROUND_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR));
@@ -375,25 +351,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER));
-		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER));
-		
 
-		while (e.hasNext()) {
-			AnnotationPreference info= (AnnotationPreference) e.next();
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getColorPreferenceKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getTextPreferenceKey()));
-			if (info.getHighlightPreferenceKey() != null)
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getHighlightPreferenceKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getOverviewRulerPreferenceKey()));
-			if (info.getVerticalRulerPreferenceKey() != null)
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getVerticalRulerPreferenceKey()));
-			if (info.getTextStylePreferenceKey() != null)
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getTextStylePreferenceKey()));
-		}
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
@@ -449,51 +410,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fContentAssistColorEditor.setColorValue(rgb);
 	}
 	
-	private void handleAnnotationListSelection() {
-		int i= fAnnotationList.getSelectionIndex();
-		
-		String key= fAnnotationColorListModel[i][1];
-		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fAnnotationForegroundColorEditor.setColorValue(rgb);
-		
-		key= fAnnotationColorListModel[i][2];
-		boolean showInText = fOverlayStore.getBoolean(key);
-		fShowInTextCheckBox.setSelection(showInText);
-
-		key= fAnnotationColorListModel[i][6];
-		if (key != null) {
-			fDecorationStyleCombo.setEnabled(showInText);
-			for (int j= 0; j < fAnnotationDecorationListModel.length; j++) {
-				String value= fOverlayStore.getString(key);
-				if (fAnnotationDecorationListModel[j][1].equals(value)) {
-					fDecorationStyleCombo.setText(fAnnotationDecorationListModel[j][0]);
-					break;
-				}
-			}
-		} else {
-			fDecorationStyleCombo.setEnabled(false);
-			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[1][0]); // set selection to squiggles if the key is not there (legacy support)
-		}
-		
-		key= fAnnotationColorListModel[i][3];
-		fShowInOverviewRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));
-		
-		key= fAnnotationColorListModel[i][4];
-		if (key != null) {
-			fHighlightInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
-			fHighlightInTextCheckBox.setEnabled(true);
-		} else
-			fHighlightInTextCheckBox.setEnabled(false);
-		
-		key= fAnnotationColorListModel[i][5];
-		if (key != null) {
-			fShowInVerticalRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));
-			fShowInVerticalRulerCheckBox.setEnabled(true);
-		} else {
-			fShowInVerticalRulerCheckBox.setSelection(true);
-			fShowInVerticalRulerCheckBox.setEnabled(false);
-		}
-	}
 	
 	private Control createSyntaxPage(Composite parent) {
 		
@@ -682,15 +598,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
+		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
 		Button master= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
 		Button slave= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
 		createDependency(master, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, slave);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.annotationRollover"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); //$NON-NLS-1$
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -782,249 +698,23 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		return appearanceComposite;
 	}
-	
-	
-	private Control createAnnotationsPage(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); layout.numColumns= 2;
-		composite.setLayout(layout);
-				
-		String text= PreferencesMessages.getString("JavaEditorPreferencePage.analyseAnnotationsWhileTyping"); //$NON-NLS-1$
-		addCheckBox(composite, text, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
-		
-		text= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
-		addCheckBox(composite, text, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
-		
-		addFiller(composite);
-				
-		Label label= new Label(composite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationPresentationOptions")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		label.setLayoutData(gd);
-
-		Composite editorComposite= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
-
-		fAnnotationList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(10);
-		fAnnotationList.setLayoutData(gd);
-						
-		Composite optionsComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		optionsComposite.setLayout(layout);
-		optionsComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		fShowInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
-        fShowInTextCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInText")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-        gd.horizontalSpan= 2;
-		fShowInTextCheckBox.setLayoutData(gd);
-		
-		fDecorationStyleCombo= new Combo(optionsComposite, SWT.READ_ONLY);
-		for(int i= 0; i < fAnnotationDecorationListModel.length; i++)
-			fDecorationStyleCombo.add(fAnnotationDecorationListModel[i][0]);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-        gd.horizontalSpan= 2;
-		gd.horizontalIndent= 20;
-		fDecorationStyleCombo.setLayoutData(gd);
-		
-		fHighlightInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
-		fHighlightInTextCheckBox.setText(PreferencesMessages.getString("TextEditorPreferencePage.annotations.highlightInText")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 2;
-		fHighlightInTextCheckBox.setLayoutData(gd);
-		
-		fShowInOverviewRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
-        fShowInOverviewRulerCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInOverviewRuler")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-        gd.horizontalSpan= 2;
-		fShowInOverviewRulerCheckBox.setLayoutData(gd);
-		
-		fShowInVerticalRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
-		fShowInVerticalRulerCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInVerticalRuler")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 2;
-		fShowInVerticalRulerCheckBox.setLayoutData(gd);
-		
-		label= new Label(optionsComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.color")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
-		label.setLayoutData(gd);
-
-		fAnnotationForegroundColorEditor= new ColorEditor(optionsComposite);
-		Button foregroundColorButton= fAnnotationForegroundColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		foregroundColorButton.setLayoutData(gd);
-
-		fAnnotationList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				handleAnnotationListSelection();
-			}
-		});
-		
-		fShowInTextCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][2];
-				fOverlayStore.setValue(key, fShowInTextCheckBox.getSelection());
-				String decorationKey= fAnnotationColorListModel[i][6];
-				fDecorationStyleCombo.setEnabled(decorationKey != null && fShowInTextCheckBox.getSelection());
-			}
-		});
-		
-		fHighlightInTextCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][4];
-				fOverlayStore.setValue(key, fHighlightInTextCheckBox.getSelection());
-			}
-		});
-		
-		fShowInOverviewRulerCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][3];
-				fOverlayStore.setValue(key, fShowInOverviewRulerCheckBox.getSelection());
-			}
-		});
-		
-		fShowInVerticalRulerCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][5];
-				fOverlayStore.setValue(key, fShowInVerticalRulerCheckBox.getSelection());
-			}
-		});
-		
-		foregroundColorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][1];
-				PreferenceConverter.setValue(fOverlayStore, key, fAnnotationForegroundColorEditor.getColorValue());
-			}
-		});
-		
-		fDecorationStyleCombo.addSelectionListener(new SelectionListener() {
-			/*
-			 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			/*
-			 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
-			public void widgetSelected(SelectionEvent e) {
-				int i= fAnnotationList.getSelectionIndex();
-				String key= fAnnotationColorListModel[i][6];
-				if (key != null) {
-					for (int j= 0; j < fAnnotationDecorationListModel.length; j++) {
-						if (fAnnotationDecorationListModel[j][0].equals(fDecorationStyleCombo.getText())) {
-							fOverlayStore.setValue(key, fAnnotationDecorationListModel[j][1]);
-							break;
-						}
-					}
-				}
-			}
-		});
-		
-		return composite;
-	}
-
-	private String[][] createAnnotationTypeListModel(MarkerAnnotationPreferences preferences) {
-		ArrayList listModelItems= new ArrayList();
-		SortedSet sortedPreferences= new TreeSet(new Comparator() {
-			/*
-			 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-			 */
-			public int compare(Object o1, Object o2) {
-				if (!(o2 instanceof AnnotationPreference))
-					return -1;
-				if (!(o1 instanceof AnnotationPreference))
-					return 1;
-				
-				AnnotationPreference a1= (AnnotationPreference)o1;
-				AnnotationPreference a2= (AnnotationPreference)o2;
-				
-				return Collator.getInstance().compare(a1.getPreferenceLabel(), a2.getPreferenceLabel());
-				
-			}
-		});
-		sortedPreferences.addAll(preferences.getAnnotationPreferences());
-		Iterator e= sortedPreferences.iterator();
-		while (e.hasNext()) {
-			AnnotationPreference info= (AnnotationPreference) e.next();
-			if (info.isIncludeOnPreferencePage())
-				listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey(), info.getTextStylePreferenceKey()});
-		}
-		String[][] items= new String[listModelItems.size()][];
-		listModelItems.toArray(items);
-		return items;
-	}	
 
 	private Control createTypingPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		composite.setLayout(layout);
+		
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.analyseAnnotationsWhileTyping"); //$NON-NLS-1$
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
+		
+		addFiller(composite);
 
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.overwriteMode"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.overwriteMode"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, 1);
 		
 		addFiller(composite);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.subWordNavigation"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
-
-		addFiller(composite);
-
 		Group group= new Group(composite, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -1078,6 +768,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		return composite;
 	}
+	
 	private void addFiller(Composite composite) {
 		Label filler= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -1259,9 +950,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
-				
-		String text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinks"); //$NON-NLS-1$
-		fBrowserLikeLinksCheckBox= addCheckBox(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, 0);
+		
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
+
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.subWordNavigation"); //$NON-NLS-1$
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
+
+		addFiller(composite);
+
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinks"); //$NON-NLS-1$
+		fBrowserLikeLinksCheckBox= addCheckBox(composite, label, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, 0);
 		fBrowserLikeLinksCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean state= fBrowserLikeLinksCheckBox.getSelection();
@@ -1273,8 +972,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		// Text field for modifier string
-		text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
-		fBrowserLikeLinksKeyModifierText= addTextField(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
+		fBrowserLikeLinksKeyModifierText= addTextField(composite, label, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
 		fBrowserLikeLinksKeyModifierText.setTextLimit(Text.LIMIT);
 		
 		if (computeStateMask(fOverlayStore.getString(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)) == -1) {
@@ -1390,6 +1089,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
 		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
+		fAnnotationsConfigurationBlock= new AnnotationsConfigurationBlock(fOverlayStore);
 		
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -1412,7 +1112,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationsTab.title")); //$NON-NLS-1$
-		item.setControl(createAnnotationsPage(folder));
+		item.setControl(fAnnotationsConfigurationBlock.createContents(folder));
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle")); //$NON-NLS-1$
@@ -1432,11 +1132,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.title")); //$NON-NLS-1$
-		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage", new QuickdiffConfigurationBlock.IMessages() { //$NON-NLS-1$
-			public String getString(String key) {
-				return PreferencesMessages.getString(key);
-			}
-		});
+		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage"); //$NON-NLS-1$
 		item.setControl(fQuickDiffBlock.createControl(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
@@ -1475,17 +1171,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
-		for (int i= 0; i < fAnnotationColorListModel.length; i++)
-			fAnnotationList.add(fAnnotationColorListModel[i][0]);
-		fAnnotationList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fAnnotationList != null && !fAnnotationList.isDisposed()) {
-					fAnnotationList.select(0);
-					handleAnnotationListSelection();
-				}
-			}
-		});
-
 		for (int i= 0; i < fContentAssistColorListModel.length; i++)
 			fContentAssistColorList.add(fContentAssistColorListModel[i][0]);
 		fContentAssistColorList.getDisplay().asyncExec(new Runnable() {
@@ -1500,6 +1185,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fQuickDiffBlock.initialize();
 		fOccurrencesConfigurationBlock.initialize();
 		fFoldingConfigurationBlock.initialize();
+		fAnnotationsConfigurationBlock.initialize();
 	}
 	
 	private void initializeFields() {
@@ -1598,6 +1284,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOccurrencesConfigurationBlock.performOk();
 		fQuickDiffBlock.performOk();
 		fFoldingConfigurationBlock.performOk();
+		fAnnotationsConfigurationBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -1615,11 +1302,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		handleSyntaxColorListSelection();
 		handleAppearanceColorListSelection();
-		handleAnnotationListSelection();
 		handleContentAssistColorListSelection();
 
 		fJavaEditorHoverConfigurationBlock.performDefaults();
 		fOccurrencesConfigurationBlock.performDefaults();
+		fAnnotationsConfigurationBlock.performDefaults();
 		fQuickDiffBlock.performDefaults();
 		fFoldingConfigurationBlock.performDefaults();
 
@@ -1767,6 +1454,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}	
 		status= StatusUtil.getMoreSevere(fOccurrencesConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(fJavaEditorHoverConfigurationBlock.getStatus(), status);
+		status= StatusUtil.getMoreSevere(fAnnotationsConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(getBrowserLikeLinksKeyModifierStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
