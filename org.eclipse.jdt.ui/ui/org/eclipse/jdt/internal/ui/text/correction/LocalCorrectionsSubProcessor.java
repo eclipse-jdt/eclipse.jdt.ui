@@ -12,6 +12,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -32,7 +35,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.*;
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -153,12 +156,30 @@ public class LocalCorrectionsSubProcessor {
 			
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			SimpleName name= methodDecl.getName();
+
 			int pos= name.getStartPosition() + name.getLength();
+			
 			StringBuffer insertString= new StringBuffer();
 			if (methodDecl.thrownExceptions().isEmpty()) {
 				insertString.append(" throws "); //$NON-NLS-1$
+				try {
+					IScanner scanner= ASTResolving.createScanner(cu, name.getStartPosition());
+					int nextNoken= scanner.getNextToken();
+					while (nextNoken != ITerminalSymbols.TokenNameRPAREN) {
+						nextNoken= scanner.getNextToken();
+						if (nextNoken == ITerminalSymbols.TokenNameEOF) {
+							return;
+						}
+					}
+					pos= scanner.getCurrentTokenEndPosition() + 1;
+				} catch (InvalidInputException e) {
+					return;
+				}
 			} else {
 				insertString.append(", "); //$NON-NLS-1$
+				List thrownExceptions= methodDecl.thrownExceptions();
+				ASTNode last= (ASTNode) thrownExceptions.get(thrownExceptions.size() - 1);
+				pos= last.getStartPosition() + last.getLength();
 			}
 			insertString.append(Signature.getSimpleName(uncaughtName));
 			
