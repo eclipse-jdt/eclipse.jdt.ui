@@ -3,10 +3,12 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -122,6 +124,36 @@ public class RefactoringAnalyzeUtil {
 		}
 		return subResult;
 	}
+	
+	public static IProblem[] getIntroducedCompileProblems(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
+		Set subResult= new HashSet();				
+		Set oldProblems= getOldProblems(oldCuNode);
+		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
+		for (int i= 0; i < newProblems.length; i++) {
+			IProblem correspondingOld= findCorrespondingProblem(oldProblems, newProblems[i]);
+			if (correspondingOld == null)
+				subResult.add(newProblems[i]);
+		}
+		return (IProblem[]) subResult.toArray(new IProblem[subResult.size()]);
+	}
+	
+	private static IProblem findCorrespondingProblem(Set oldProblems, IProblem iProblem) {
+		for (Iterator iter= oldProblems.iterator(); iter.hasNext();) {
+			IProblem oldProblem= (IProblem) iter.next();
+			if (isCorresponding(oldProblem, iProblem))
+				return oldProblem;
+		}
+		return null;
+	}
+	
+	private static boolean isCorresponding(IProblem oldProblem, IProblem iProblem) {
+		if (oldProblem.getID() != iProblem.getID())		
+			return false;
+		if (oldProblem.getMessage().equals(iProblem.getMessage()))	
+			return false;
+		return true;
+	}
+
 
 	public static String getFullDeclarationBindingKey(TextEdit[] edits, CompilationUnit cuNode) {
 		Name declarationNameNode= getNameNode(getTextRange(getFirstEdit(edits), null), cuNode);
@@ -148,6 +180,10 @@ public class RefactoringAnalyzeUtil {
 			return edit.getTextRange();
 		 else
 			return change.getNewTextRange(edit);
+	}
+
+	private static Set getOldProblems(CompilationUnit oldCuNode) {
+		return new HashSet(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS)));
 	}
 
 	private static Set getOldErrorMessages(CompilationUnit cuNode) {
