@@ -78,9 +78,11 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 			if (element instanceof IMethod) {
 				try {
 					IMethod method= (IMethod) element;
-					int flags= method.getFlags();
-					if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
-						return getOverrideIndicators(method);
+					if (method.exists()) {
+						int flags= method.getFlags();
+						if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
+							return getOverrideIndicators(method);
+						}
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
