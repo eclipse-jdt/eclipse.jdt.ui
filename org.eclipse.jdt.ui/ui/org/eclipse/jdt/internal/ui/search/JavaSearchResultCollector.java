@@ -43,18 +43,22 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private String SPACE_MATCHES= " " + JavaPlugin.getResourceString("SearchResultCollector.matches");
 	
 	private static class ContextMenuContributor implements IContextMenuContributor {
-		private ElementSearchAction[] fActions= new ElementSearchAction[] {
+		private ElementSearchAction[] fSearchActions= new ElementSearchAction[] {
 			new FindReferencesAction(), 
 			new FindDeclarationsAction(),
 			new FindHierarchyDeclarationsAction(),
 			new FindImplementorsAction()};
+		private ShowTypeHierarchyAction fOpenTypeAction= new ShowTypeHierarchyAction();
+			
 			
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
-			for (int i= 0; i < fActions.length; i++) {
-				ElementSearchAction action= fActions[i];
+			for (int i= 0; i < fSearchActions.length; i++) {
+				ElementSearchAction action= fSearchActions[i];
 				if (action.canOperateOn(inputProvider.getSelection()))
 					menu.add(action);
 			}
+			if (fOpenTypeAction.canOperateOn(inputProvider.getSelection()))
+				menu.add(fOpenTypeAction);
 		}
 	}
 	
