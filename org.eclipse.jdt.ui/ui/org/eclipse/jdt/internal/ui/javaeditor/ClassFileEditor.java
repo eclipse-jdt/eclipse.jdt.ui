@@ -52,7 +52,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -694,7 +693,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		return new SourceViewer(parent, ruler, styles) {
+		return new JavaSourceViewer(parent, ruler, null, false, styles) {
 			
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 				if (WorkbenchHelp.isContextHelpDisplayed())

@@ -2278,6 +2278,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 	
+	/**
+	 * Initializes the given viewer's colors.
+	 * 
+	 * @param viewer the viewer to be initialized
+	 * @since 3.0
+	 */
+	protected void initializeViewerColors(ISourceViewer viewer) {
+		// is handled by JavaSourceViewer
+	}
+
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
 	}

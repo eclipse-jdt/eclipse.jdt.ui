@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
@@ -434,18 +435,13 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private SourceViewer createEditor(Composite parent) {
-		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document(fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document);
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);
-		
-		RGB rgb= getBackgroundColor();
-		if (rgb != null) {
-			viewer.getTextWidget().setBackground(tools.getColorManager().getColor(rgb));
-		}
 		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
@@ -495,17 +491,6 @@ public class EditTemplateDialog extends StatusDialog {
 		return viewer;
 	}
 	
-	private RGB getBackgroundColor() {
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		if (!store.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)) {
-			if (store.isDefault(PreferenceConstants.EDITOR_BACKGROUND_COLOR))
-				return PreferenceConverter.getDefaultColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-			else
-				return PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-		}
-		return null;
-	}
-
 	private void handleKeyPressed(KeyEvent event) {
 		if (event.stateMask != SWT.MOD1)
 			return;

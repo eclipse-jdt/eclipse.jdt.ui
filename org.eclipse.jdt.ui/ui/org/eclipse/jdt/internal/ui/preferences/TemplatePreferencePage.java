@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -390,7 +391,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		data.horizontalSpan= 2;
 		label.setLayoutData(data);
 		
-		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocument document= new Document();
 		tools.setupJavaDocumentPartitioner(document);
@@ -398,7 +399,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
-		viewer.getTextWidget().setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);

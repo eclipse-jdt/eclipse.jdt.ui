@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,7 +41,6 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
@@ -52,7 +50,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
@@ -61,7 +58,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IWorkbench;
@@ -82,6 +78,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -522,12 +519,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fJavaTextTools= new JavaTextTools(fOverlayStore, coreStore, false);
 		
-		fPreviewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null));
 		fPreviewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		fPreviewViewer.setEditable(false);
-		
-		initializeViewerColors(fPreviewViewer);
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
@@ -536,13 +531,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				String p= event.getProperty();
-				if (p.equals(PreferenceConstants.EDITOR_BACKGROUND_COLOR) ||
-					p.equals(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR))
-				{
-					initializeViewerColors(fPreviewViewer);
-				}
-				
 				fPreviewViewer.invalidateTextPresentation();
 			}
 		});
@@ -557,53 +545,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		return result;
 	}
-	
-	/**
-	 * Initializes the given viewer's colors.
-	 * 
-	 * @param viewer the viewer to be initialized
-	 */
-	private void initializeViewerColors(ISourceViewer viewer) {
-		
-		IPreferenceStore store= fOverlayStore;
-		if (store != null) {
-			
-			StyledText styledText= viewer.getTextWidget();
-						
-			// ---------- background color ----------------------
-			Color color= store.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)
-				? null
-				: createColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR, styledText.getDisplay());
-			styledText.setBackground(color);
-				
-			if (fBackgroundColor != null)
-				fBackgroundColor.dispose();
-				
-			fBackgroundColor= color;
-		}
-	}
-
-	/**
-	 * Creates a color from the information stored in the given preference store.
-	 * Returns <code>null</code> if there is no such information available.
-	 */
-	private Color createColor(IPreferenceStore store, String key, Display display) {
-	
-		RGB rgb= null;		
-		
-		if (store.contains(key)) {
-			
-			if (store.isDefault(key))
-				rgb= PreferenceConverter.getDefaultColor(store, key);
-			else
-				rgb= PreferenceConverter.getColor(store, key);
-		
-			if (rgb != null)
-				return new Color(display, rgb);
-		}
-		
-		return null;
-	}	
 	
 	private Control createAppearancePage(Composite parent) {
 

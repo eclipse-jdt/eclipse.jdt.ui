@@ -14,8 +14,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -34,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
 
-public class JavaSourceViewer extends SourceViewer {
+public class JavaSourceViewer extends SourceViewer implements IPropertyChangeListener {
 
 	/**
 	 * Text operation code for requesting the outline for the current input.
@@ -54,6 +63,23 @@ public class JavaSourceViewer extends SourceViewer {
 	private IInformationPresenter fOutlinePresenter;
 	private IInformationPresenter fStructurePresenter;
 	private IInformationPresenter fHierarchyPresenter;
+
+	/**
+     * This viewer's foreground color.
+     * @since 3.0
+	 */
+	private Color fForegroundColor;
+	/** 
+	 * The viewer's background color.
+	 * @since 3.0
+	 */
+	private Color fBackgroundColor;
+	/**
+	 * The preference store.
+	 * 
+	 * @since 3.0
+	 */
+	private IPreferenceStore fPreferenceStore;
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
@@ -128,8 +154,72 @@ public class JavaSourceViewer extends SourceViewer {
 		if (configuration instanceof JavaSourceViewerConfiguration) {
 			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
 			fHierarchyPresenter.install(this);
+            
+			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getPreferenceStore();
+			if (fPreferenceStore != null) {
+				fPreferenceStore.addPropertyChangeListener(this);
+				initializeViewerColors();
+			}
 		}
 	}
+	
+    
+	protected void initializeViewerColors() {
+		if (fPreferenceStore != null) {
+			
+			StyledText styledText= getTextWidget();
+			
+			// ----------- foreground color --------------------
+			Color color= fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR)
+			? null
+			: createColor(fPreferenceStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, styledText.getDisplay());
+			styledText.setForeground(color);
+			
+			if (fForegroundColor != null)
+				fForegroundColor.dispose();
+			
+			fForegroundColor= color;
+			
+			// ---------- background color ----------------------
+			color= fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)
+			? null
+			: createColor(fPreferenceStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, styledText.getDisplay());
+			styledText.setBackground(color);
+			
+			if (fBackgroundColor != null)
+				fBackgroundColor.dispose();
+			
+			fBackgroundColor= color;
+		}
+    }
+
+    /**
+     * Creates a color from the information stored in the given preference store.
+     * Returns <code>null</code> if there is no such information available.
+     * 
+     * @param store the store to read from
+     * @param key the key used for the lookup in the preference store
+     * @param display the display used create the color
+     * @return the created color according to the specification in the preference store
+     * @since 3.0
+     */
+    private Color createColor(IPreferenceStore store, String key, Display display) {
+    
+        RGB rgb= null;      
+        
+        if (store.contains(key)) {
+            
+            if (store.isDefault(key))
+                rgb= PreferenceConverter.getDefaultColor(store, key);
+            else
+                rgb= PreferenceConverter.getColor(store, key);
+        
+            if (rgb != null)
+                return new Color(display, rgb);
+        }
+        
+        return null;
+    }
 
 	/*
 	 * @see TextViewer#handleDispose()
@@ -146,7 +236,19 @@ public class JavaSourceViewer extends SourceViewer {
 		if (fHierarchyPresenter != null) {
 			fHierarchyPresenter.uninstall();
 			fHierarchyPresenter= null;
-		}		
+		}
+		if (fForegroundColor != null) {
+			fForegroundColor.dispose();
+			fForegroundColor= null;
+		}
+		if (fBackgroundColor != null) {
+			fBackgroundColor.dispose();
+			fBackgroundColor= null;
+		}
+		if (fPreferenceStore != null) {
+			fPreferenceStore.removePropertyChangeListener(this);
+			fPreferenceStore= null;
+		}
 		super.handleDispose();
 	}
 	
@@ -162,5 +264,19 @@ public class JavaSourceViewer extends SourceViewer {
 	 */
 	public void restoreSelection() {
 		super.restoreSelection();
+	}
+
+	/*
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		String property = event.getProperty();
+		if (PreferenceConstants.EDITOR_FOREGROUND_COLOR.equals(property)
+				|| PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR.equals(property)
+				|| PreferenceConstants.EDITOR_BACKGROUND_COLOR.equals(property)
+				|| PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR.equals(property))
+		{
+			initializeViewerColors();
+		}		
 	}
 }

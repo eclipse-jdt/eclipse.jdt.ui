@@ -21,7 +21,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,7 +31,6 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Document;
@@ -307,11 +305,6 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
 		previewViewer.setDocument(fPreviewDocument);
 		
-		RGB rgb= getBackgroundColor();
-		if (rgb != null) {
-			previewViewer.getTextWidget().setBackground(fTextTools.getColorManager().getColor(rgb));
-		}		
-		
 		Control control= previewViewer.getControl();
 		GridData gdata= new GridData(GridData.FILL_BOTH);
 		gdata.widthHint= fPixelConverter.convertWidthInCharsToPixels(30);
@@ -321,17 +314,6 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		return previewViewer;
 	}
 	
-	private RGB getBackgroundColor() {
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		if (!store.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)) {
-			if (store.isDefault(PreferenceConstants.EDITOR_BACKGROUND_COLOR))
-				return PreferenceConverter.getDefaultColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-			else
-				return PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-		}
-		return null;
-	}	
-
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
