@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class GroupByKeyComputer implements IGroupByKeyComputer {
+public class GroupByKeyComputer implements IGroupByKeyComputer {
 
 	IJavaElement fLastJavaElement= null;;
 	String fLastHandle= null;;

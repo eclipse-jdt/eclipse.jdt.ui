@@ -15,10 +15,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.nls.search.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 public class ExternalizeAction implements IWorkbenchWindowActionDelegate{

@@ -36,6 +36,8 @@ import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.search.GroupByKeyComputer;
+import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class NLSSearchResultCollector implements IJavaSearchResultCollector {
@@ -101,7 +103,7 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		IMarker marker= resource.createMarker(SearchUI.SEARCH_MARKER);
 		HashMap attributes= new HashMap(4);
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);
-		attributes.put(INLSSearchUIConstants.ATT_JE_HANDLE_ID, enclosingElement.getHandleIdentifier());
+		attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, enclosingElement.getHandleIdentifier());
 		attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));
 		attributes.put(IMarker.CHAR_END, new Integer(Math.max(end, 0)));
 		if (enclosingElement instanceof IMember && ((IMember) enclosingElement).isBinary())

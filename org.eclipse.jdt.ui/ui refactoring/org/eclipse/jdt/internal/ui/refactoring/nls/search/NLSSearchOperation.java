@@ -18,7 +18,9 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.ui.refactoring.nls.NLSImages;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.jdt.internal.ui.search.PrettySignature;
 
 public class NLSSearchOperation extends WorkspaceModifyOperation {
 	
@@ -101,6 +103,6 @@ public class NLSSearchOperation extends WorkspaceModifyOperation {
 	}
 	
 	ImageDescriptor getImageDescriptor() {
-		return NLSImages.DESC_OBJS_SEARCH_REF;
+		return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
 }

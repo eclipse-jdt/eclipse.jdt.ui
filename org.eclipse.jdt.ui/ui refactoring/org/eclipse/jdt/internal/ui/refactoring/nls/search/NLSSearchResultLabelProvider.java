@@ -4,19 +4,23 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class NLSSearchResultLabelProvider extends LabelProvider {
 
@@ -31,7 +35,7 @@ public class NLSSearchResultLabelProvider extends LabelProvider {
 
 	public NLSSearchResultLabelProvider() {
 		fImageProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_SMALL_ICONS);
-		fTextProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		fTextProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_QUALIFIED);
 	}	
 
 	public String getText(Object o) {
@@ -69,7 +73,7 @@ public class NLSSearchResultLabelProvider extends LabelProvider {
 	private IJavaElement getJavaElement(IMarker marker) {
 		if (fLastMarker != marker) {
 			try {
-				fLastJavaElement= JavaCore.create((String)marker.getAttribute(INLSSearchUIConstants.ATT_JE_HANDLE_ID));
+				fLastJavaElement= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 			} catch (CoreException ex) {
 				ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				fLastJavaElement= null;

@@ -685,18 +685,16 @@
    </objectContribution>
 </extension>
 
-<!-- Unused Keys Search Page                                                     
- <extension                                                                  
-      point="org.eclipse.search.searchPages">  								 
-   <page 			                                                         
-         tabPosition="2000000000" 											 
-         label="%NLSsearchPageLabel" 										 
-         icon="icons/full/obj16/nls_search_obj.gif" 						 
-         extensions="java:89, properties:90" 								 
-         class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage" 		 
-         sizeHint="460,160" 												 
-         id="org.eclipse.jdt.ui.refactoring.nls.NLSSearchPage"> 						 
-   </page> 																	 
- /extension> 																 -->
-
+<!-- NLS Search Page
+<extension point="org.eclipse.search.searchPages">
+   <page id="org.eclipse.jdt.ui.refactoring.NLSSearchPage"
+         tabPosition="2000000000"
+         label="%NLSsearchPageLabel"
+         icon="icons/full/obj16/nls_search_obj.gif"
+         extensions="java:89, properties:90"
+         class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage"
+         sizeHint="460,160">
+   </page>
+</extension>
+                                                            -->
 </plugin>

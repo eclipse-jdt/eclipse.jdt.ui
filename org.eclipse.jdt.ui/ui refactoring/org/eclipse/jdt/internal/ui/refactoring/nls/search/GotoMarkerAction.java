@@ -21,10 +21,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.search.internal.ui.SearchPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,6 +35,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class GotoMarkerAction extends Action {
 
@@ -98,7 +102,7 @@ class GotoMarkerAction extends Action {
 
 	private IJavaElement getJavaElement(IMarker marker) {
 		try {
-			return JavaCore.create((String)marker.getAttribute(INLSSearchUIConstants.ATT_JE_HANDLE_ID));
+			return JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;

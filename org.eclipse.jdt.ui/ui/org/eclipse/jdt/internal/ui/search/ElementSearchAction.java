@@ -125,7 +125,7 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		return null;
 	}
 
-	static void updateLRUWorkingSet(IWorkingSet workingSet) {
+	public static void updateLRUWorkingSet(IWorkingSet workingSet) {
 		getLRUWorkingSets().add(workingSet);
 
 		// Store LRU working sets

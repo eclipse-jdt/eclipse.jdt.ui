@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-class PrettySignature {
+public class PrettySignature {
 
 	public static String getSignature(IJavaElement element) {
 		if (element == null)

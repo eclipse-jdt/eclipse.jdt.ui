@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -77,15 +76,22 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
+import org.eclipse.jdt.internal.ui.search.ElementSearchAction;
+import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
+import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -147,12 +153,16 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= NLSSearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= getSelectedResourcesScope();
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());				
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
+				// should not happen - just to be sure
+				if (workingSet == null)
+					return false;
 				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
-				scope= SearchEngine.createJavaSearchScope(getContainer().getSelectedWorkingSet().getResources());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSet());
+				ElementSearchAction.updateLRUWorkingSet(getContainer().getSelectedWorkingSet());
 		}
 
 		NLSSearchResultCollector collector= new NLSSearchResultCollector(data.propertyFile);
@@ -451,7 +461,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 	private IJavaElement getJavaElement(IMarker marker) {
 		try {
-			return JavaCore.create((String) marker.getAttribute(INLSSearchUIConstants.ATT_JE_HANDLE_ID));
+			return JavaCore.create((String) marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
@@ -589,7 +599,8 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	}
 
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
-		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
+		ILabelProvider labelProvider= new JavaElementLabelProvider(flags);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setIgnoreCase(true);
 		dialog.setMultipleSelection(false);
@@ -703,26 +714,19 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		}
 
 		dialog.setTitle(NLSSearchMessages.getString("NLSSearchPage.wrapperClassDialog.title")); //$NON-NLS-1$
-		dialog.setInitialSelections(new Object[] { PrettySignature.getUnqualifiedType(getWrapperClassName())});
+		dialog.setInitialSelections(new Object[] { getUnqualifiedType(getWrapperClassName())});
 		dialog.setMessage(NLSSearchMessages.getString("NLSSearchPage.wrapperClassDialog.message")); //$NON-NLS-1$
 		return dialog;
 	}	
 
-	private IJavaSearchScope getSelectedResourcesScope() {
-		ArrayList resources= new ArrayList(10);
-		if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection) {
-			Iterator iter= ((IStructuredSelection)getSelection()).iterator();
-			while (iter.hasNext()) {
-				Object selection= iter.next();
-				if (selection instanceof IResource)
-					resources.add(selection);
-				else if (selection instanceof IAdaptable) {
-					IResource resource= (IResource)((IAdaptable)selection).getAdapter(IResource.class);
-					if (resource != null)
-						resources.add(resource);
-				}
-			}
-		}
-		return SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
+	public static String getUnqualifiedType(String typeName) {
+		if (typeName == null)
+			return null;
+		int lastDotIndex= typeName.lastIndexOf('.');
+		if (lastDotIndex < 0)
+			return typeName;
+		if (lastDotIndex > typeName.length() - 1)
+			return ""; //$NON-NLS-1$
+		return typeName.substring(lastDotIndex + 1);
 	}
 }
