@@ -12,7 +12,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -133,7 +133,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new CommentFormattingContext();
-		Map map= new Hashtable(JavaCore.getOptions());
+		Map map= new HashMap(JavaCore.getOptions());
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 		
 		return context;

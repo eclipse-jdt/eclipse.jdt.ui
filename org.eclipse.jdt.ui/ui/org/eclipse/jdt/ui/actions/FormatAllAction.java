@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -65,7 +66,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -307,16 +307,14 @@ public class FormatAllAction extends SelectionDispatchAction {
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("FormatAllAction.error.title"), ActionMessages.getString("FormatAllAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InterruptedException e) {
-			// cancelled by user
+			// Canceled by user
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("FormatAllAction.error.title"), ActionMessages.getString("FormatAllAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
 	private static Map getFomatterSettings(IJavaProject project) {
-		final Map options= project.getOptions(true);
-		new CommentFormattingContext().storeToMap(PreferenceConstants.getPreferenceStore(), options, false);
-		return options;
+		return new HashMap(project.getOptions(true));
 	}
 	
 	private void doFormat(IDocument document, Map options) {

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
 
@@ -29,7 +30,8 @@ public class ProfileVersioner {
 	public static final int VERSION_4= 4; 
 	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
 	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
-//	public static final int VERSION_7= 7; // after splitting tabSize -> tabLength / indentSize
+	public static final int VERSION_7= 7; // after moving comment formatter to JDT Core
+//	public static final int VERSION_8= 8; // after splitting tabSize -> tabLength / indentSize
 	
 	public static final int CURRENT_VERSION= VERSION_6;
 	
@@ -53,9 +55,12 @@ public class ProfileVersioner {
 		    
 		case VERSION_5:
 		    version5to6(oldSettings);
+			
+		case VERSION_6:
+		    version6to7(oldSettings);
 //		    
 //		case VERSION_6:
-//		    version6to7(oldSettings);
+//		    version7to8(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -519,7 +524,21 @@ public class ProfileVersioner {
 				});
 	}
 	
-//	private static void version6to7(Map oldSettings) {
+	private static void version6to7(Map oldSettings) {
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMAT, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHEADER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATSOURCE, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_LINELENGTH, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEARBLANKLINES, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES);
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHTML, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML);
+	}
+
+	
+//	private static void version7to8(Map oldSettings) {
 //		checkAndReplace(oldSettings,
 //			"org.eclipse.jdt.core.formatter.tabulation.size", //$NON-NLS-1$
 //			new String[] {
@@ -604,4 +623,17 @@ public class ProfileVersioner {
     private static final String FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_NO_ALIGNMENT = "0";//$NON-NLS-1$
+
+	// Old comment formatter constants
+	private static final String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
+	private static final String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
+	
  }

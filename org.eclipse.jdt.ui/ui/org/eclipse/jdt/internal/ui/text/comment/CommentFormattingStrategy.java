@@ -73,7 +73,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (document == null || position == null)
 			return;
 		
-		Map preferences= CommentFormattingContext.mapOptions(getPreferences());
+		Map preferences= getPreferences();
 		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
 		int documentsHeaderEnd= computeHeaderEnd(document);
 		

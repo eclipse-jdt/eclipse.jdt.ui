@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,14 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import org.osgi.service.prefs.BackingStoreException;
-
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -35,7 +31,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 
 /**
@@ -316,7 +313,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * The keys of the options to be saved with each profile
 	 */
-	private final static List fUIKeys= Arrays.asList(new CommentFormattingContext().getPreferenceKeys()); 
+	private final static List fUIKeys= Collections.EMPTY_LIST; 
 	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getJavaConventionsSettings().keySet());
 
 	/**
@@ -370,7 +367,7 @@ public class ProfileManager extends Observable {
 					}
 				}
 				if (matching == null) {
-					// current settings do not currespond to any profile -> create a 'team' profile
+					// current settings do not correspond to any profile -> create a 'team' profile
 					SharedProfile shared= new SharedProfile(map);
 					shared.setManager(this);
 					fProfiles.put(shared.getID(), shared);
@@ -463,7 +460,7 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Update all formatter settings with the settings of the specified profile. 
-	 * @param profile The profilde to write to the preference store
+	 * @param profile The profile to write to the preference store
 	 */
 	private void writeToPreferenceStore(Profile profile, IScopeContext context) {
 		final Map profileOptions= profile.getSettings();
@@ -538,7 +535,6 @@ public class ProfileManager extends Observable {
 	 */	
 	public static Map getEclipse21Settings() {
 		final Map options= DefaultCodeFormatterConstants.getEclipse21Settings();
-		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
 		ProfileVersioner.setLatestCompliance(options);
 		return options;
@@ -549,7 +545,6 @@ public class ProfileManager extends Observable {
 	 */
 	public static Map getJavaSettings() {
 		final Map options= DefaultCodeFormatterConstants.getJavaConventionsSettings();
-		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
 		ProfileVersioner.setLatestCompliance(options);
 		return options;
@@ -568,7 +563,7 @@ public class ProfileManager extends Observable {
 	 * Get an immutable list as view on all profiles, sorted alphabetically. Unless the set 
 	 * of profiles has been modified between the two calls, the sequence is guaranteed to 
 	 * correspond to the one returned by <code>getSortedNames</code>.
-	 * @return Al list of elements of type <code>Profile</code>
+	 * @return a list of elements of type <code>Profile</code>
 	 * 
 	 * @see #getSortedNames()
 	 */
@@ -690,13 +685,5 @@ public class ProfileManager extends Observable {
 
 		notifyObservers(PROFILE_DELETED_EVENT);
 		return true;
-	}
-
-	/**
-	 * Get the UI preference store.
-	 * @return Returns the preference store
-	 */
-	private static IPreferenceStore getUIPreferenceStore() {
-		return PreferenceConstants.getPreferenceStore();
 	}
 }

@@ -3058,17 +3058,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SMART_BACKSPACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMAT, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, false);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, false);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
-		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.JAVA_PROFILE);
 		ProfileStore.checkCurrentOptionsVersion(new InstanceScope());
 		
