@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 public class SearchResultGroup {
 
-	private IResource fResouce;
-	private SearchResult[] fSearchResults;
+	private final IResource fResouce;
+	private final SearchResult[] fSearchResults;
 	
 	public SearchResultGroup(IResource res, SearchResult[] results){
 		fResouce= res;
