@@ -58,9 +58,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorInput;
@@ -75,6 +73,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -470,8 +469,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
 
 	
-	/** The status line clearer */
-	protected ISelectionChangedListener fStatusLineClearer;
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
@@ -745,11 +742,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		ISelectionProvider provider= getSelectionProvider();
 		
-		if (fStatusLineClearer != null) {
-			provider.removeSelectionChangedListener(fStatusLineClearer);
-			fStatusLineClearer= null;
-		}
-		
 		ITextSelection s= (ITextSelection) provider.getSelection();
 		Position errorPosition= new Position(0, 0);
 		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
@@ -796,24 +788,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @param msg message to be set
 	 */
 	protected void setStatusLineErrorMessage(String msg) {
-		// set error message
-		getStatusLineManager().setErrorMessage(msg);
-		// install message remover
-		if (msg == null || msg.trim().length() == 0) {
-			if (fStatusLineClearer != null) {
-				getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
-				fStatusLineClearer= null;
-			}
-		} else if (fStatusLineClearer == null) {
-			fStatusLineClearer= new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
-					fStatusLineClearer= null;
-					getStatusLineManager().setErrorMessage(null);
-				}
-			};
-			getSelectionProvider().addSelectionChangedListener(fStatusLineClearer);
-		}
+		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null);	
 	}
 	
 	private IProblemAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
