@@ -76,8 +76,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations)
 			throws CoreException {
 		ASTNode coveringNode = context.getCoveringNode();
-		ArrayList coveredNodes = getFullyCoveredNodes(context, coveringNode);
 		if (coveringNode != null) {
+			ArrayList coveredNodes = getFullyCoveredNodes(context, coveringNode);
 			ArrayList resultingCollections = new ArrayList();
 			if (noErrorsAtLocation(locations)) {
 				getInverseIfProposals(context, coveringNode, resultingCollections);
