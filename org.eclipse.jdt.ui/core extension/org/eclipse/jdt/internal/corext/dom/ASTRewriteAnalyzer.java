@@ -1110,14 +1110,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AssertStatement)
 	 */
 	public boolean visit(AssertStatement node) {
-		rewriteRequiredNode(node.getExpression());
-		
-		checkNoInsertOrRemove(node.getMessage());
-		Expression message= node.getMessage();
-		if (message != null) {
-			rewriteRequiredNode(message);
-		}
-		return true;
+		int offset= rewriteRequiredNode(node.getExpression());
+		rewriteNode(node.getMessage(), offset, " : "); //$NON-NLS-1$
+		return false;
 	}
 
 	/* (non-Javadoc)
