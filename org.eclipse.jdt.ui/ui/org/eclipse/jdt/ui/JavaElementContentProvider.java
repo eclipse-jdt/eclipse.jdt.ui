@@ -304,7 +304,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
-			ctrl.getDisplay().asyncExec(r);
+			ctrl.getDisplay().syncExec(r);
 		}
 	}
 
@@ -333,7 +333,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 					return true;
 			} catch(JavaModelException e) {
 				//ErrorDialog.openError(Utilities.getFocusShell(), "Children non present", null, e.getStatus());
-				return false;
+				return true;
 			}
 		}
 		Object[] children= getChildren(element);
