@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -12,14 +13,12 @@ import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import 
  */
 public class OpenImportDeclarationAction extends JavaUIAction implements IUpdate {
 
-	private static final String PREFIX= "OpenImportDeclarationAction.";	
-	private final static String ERROR_TITLE= "OpenImportDeclarationAction.error.open_resource.title";
-	private final static String ERROR_MESSAGE= "OpenImportDeclarationAction.error.open_resource.message";
-	
 	private ISelectionProvider fSelectionProvider;
 	
 	public OpenImportDeclarationAction(ISelectionProvider provider) {
-		super(JavaPlugin.getResourceString(PREFIX + "label"));
+		super(JavaUIMessages.getString("OpenImportDeclarationAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("OpenImportDeclarationAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("OpenImportDeclarationAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= provider;
 	}
 	
@@ -53,8 +52,7 @@ public class OpenImportDeclarationAction extends JavaUIAction implements IUpdate
 				EditorUtility.openInEditor(element);
 			} catch (JavaModelException x) {
 				Shell shell= JavaPlugin.getActiveWorkbenchShell();
-				ResourceBundle b= JavaPlugin.getResourceBundle();
-				ErrorDialog.openError(shell, b.getString(ERROR_TITLE), b.getString(ERROR_MESSAGE), x.getStatus());
+				ErrorDialog.openError(shell, JavaUIMessages.getString("OpenImportDeclarationAction.errorTitle"), JavaUIMessages.getString("OpenImportDeclarationAction.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			} catch (PartInitException x) {
 				Shell shell= JavaPlugin.getActiveWorkbenchShell();
 				shell.getDisplay().beep();

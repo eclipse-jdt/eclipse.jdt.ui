@@ -29,7 +29,7 @@ public class TypedElementSelectionValidator implements ISelectionValidator {
 	public TypedElementSelectionValidator(Class[] types, boolean multiple) {
 		fAcceptedTypes= types;
 		fMultiple= multiple;
-		fErrorMessage= "";
+		fErrorMessage= ""; //$NON-NLS-1$
 	}
 	
 	public void setErrorString(String errorMessage) {

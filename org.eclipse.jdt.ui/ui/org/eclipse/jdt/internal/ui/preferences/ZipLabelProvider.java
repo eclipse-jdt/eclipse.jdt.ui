@@ -29,7 +29,7 @@ public class ZipLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof ZipTreeNode)
 			return ((ZipTreeNode) element).getName();
-		else return "";
+		else return ""; //$NON-NLS-1$
 	}
 }
 

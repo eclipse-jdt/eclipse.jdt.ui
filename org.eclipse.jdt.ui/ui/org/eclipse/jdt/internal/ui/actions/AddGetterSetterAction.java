@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Create Getter and Setter for a selected field
@@ -13,17 +14,12 @@ import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;
  */
 public class AddGetterSetterAction extends JavaUIAction {
 
-	private static final String PREFIX= "AddGetterSetterAction.";
-	
-	private static final String NOTINWORKINGCOPY_PREFIX= PREFIX + "NotInWorkingCopyDialog.";
-	private static final String GETSETALREADYEXISTS_PREFIX= PREFIX + "GetterSetterAlreadyExistsDialog.";
-	private static final String SETALREADYEXISTS_PREFIX= PREFIX + "SetterAlreadyExistsDialog.";
-	private static final String GETALREADYEXISTS_PREFIX= PREFIX + "GetterAlreadyExistsDialog.";
-		
 	private ISelectionProvider fSelectionProvider;
 
 	public AddGetterSetterAction(ISelectionProvider selProvider) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("AddGetterSetterAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("AddGetterSetterAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("AddGetterSetterAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.GETTERSETTER_ACTION });
@@ -46,10 +42,10 @@ public class AddGetterSetterAction extends JavaUIAction {
 			if (workingCopyType != null) {
 				field= workingCopyType.getField(field.getElementName());
 				if (!field.exists()) {
-					showSimpleDialog(shell, NOTINWORKINGCOPY_PREFIX);
+					showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				}
 			} else {
-				showSimpleDialog(shell, NOTINWORKINGCOPY_PREFIX);
+				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;				
 			}
 			
@@ -60,11 +56,11 @@ public class AddGetterSetterAction extends JavaUIAction {
 			IMethod getter= op.getCreatedGetter();
 			IMethod setter= op.getCreatedSetter();
 			if (getter == null && setter == null) {
-				showSimpleDialog(shell, GETSETALREADYEXISTS_PREFIX);
+				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.both_exists")); //$NON-NLS-2$ //$NON-NLS-1$
 			} else if (getter == null) {
-				showSimpleDialog(shell, GETALREADYEXISTS_PREFIX);
+				showSimpleDialog(shell,  JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.getter_exists")); //$NON-NLS-2$ //$NON-NLS-1$
 			} else if (setter == null) {
-				showSimpleDialog(shell, SETALREADYEXISTS_PREFIX);
+				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.setter_exists")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			
 			if (editor != null) {
@@ -75,25 +71,20 @@ public class AddGetterSetterAction extends JavaUIAction {
 				}
 			}
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, "AddGetterSetterAction failed", e.getTargetException().getMessage());
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, "AddGetterSetterAction failed", null, e.getStatus());
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by the user.
 		} catch (PartInitException e) {
-			MessageDialog.openError(shell, "AddGetterSetterAction failed", e.getMessage());
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
 		}
 		
 	}
 	
-	private void showSimpleDialog(Shell shell, String resourcePrefix) {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		String okLabel= plugin.getResourceString(IUIConstants.KEY_OK);
-		String message= plugin.getResourceString(resourcePrefix + "message");
-		String title= plugin.getResourceString(resourcePrefix + "title");
-	
+	private void showSimpleDialog(Shell shell, String title, String message) {
 		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { okLabel }, 0);
+	 		new String[] { JavaUIMessages.getString("AddGetterSetterAction.ok") }, 0); //$NON-NLS-1$
 	 	dialog.open();
 	}
 	

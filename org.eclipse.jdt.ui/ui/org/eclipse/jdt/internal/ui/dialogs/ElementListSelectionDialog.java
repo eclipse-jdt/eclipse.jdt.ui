@@ -29,7 +29,7 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	public ElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection);
+		this(parent, "", null, renderer, ignoreCase, multipleSelection); //$NON-NLS-1$
 	}
 
 	/**

@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 
 /**
@@ -15,17 +16,13 @@ import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;
  */
 public class AddMethodStubAction extends JavaUIAction {
 
-	private static final String PREFIX= "AddMethodStubAction.";
-	private static final String NOTHINGADDED_PREFIX= PREFIX + "NothingAddedDialog.";
-	private static final String OVERRIDESFINAL_PREFIX= PREFIX + "OverridesFinalDialog.";
-	private static final String NOTINWORKINGCOPY_PREFIX= PREFIX + "NotInWorkingCopyDialog.";
-	
-	
 	private ISelectionProvider fSelectionProvider;
 	private IType fParentType;
 
 	public AddMethodStubAction(ISelectionProvider selProvider) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("AddMethodStubAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("AddMethodStubAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_METHODSTUB_ACTION });		
@@ -35,9 +32,9 @@ public class AddMethodStubAction extends JavaUIAction {
 	public void setParentType(IType parentType) {
 		fParentType= parentType;
 		if (parentType != null) {
-			setText(JavaPlugin.getFormattedString(PREFIX + "detailedlabel", parentType.getElementName()));
+			setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailedlabel", parentType.getElementName())); //$NON-NLS-1$
 		} else {
-			setText(JavaPlugin.getResourceString(PREFIX + "label"));
+			setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
 		}
 	} 
 
@@ -55,7 +52,7 @@ public class AddMethodStubAction extends JavaUIAction {
 				// work on the working copy
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					showSimpleDialog(shell, NOTINWORKINGCOPY_PREFIX);
+					showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
 			} else {
@@ -93,7 +90,7 @@ public class AddMethodStubAction extends JavaUIAction {
 				
 			int nMethods= newMethods.size();
 			if (nMethods == 0) {
-				showSimpleDialog(shell, NOTHINGADDED_PREFIX);
+				showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.method_exists")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -105,7 +102,7 @@ public class AddMethodStubAction extends JavaUIAction {
 				editor= EditorUtility.openInEditor(fParentType);
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					showSimpleDialog(shell, NOTINWORKINGCOPY_PREFIX);
+					showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}				
 			}
@@ -120,39 +117,30 @@ public class AddMethodStubAction extends JavaUIAction {
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, "AddMethodStubAction failed", e.getTargetException().getMessage());
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, "AddMethodStubAction failed", null, e.getStatus());
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		} catch (PartInitException e) {
-			MessageDialog.openError(shell, "AddMethodStubAction failed", e.getMessage());
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
 		}
 	}
 			
-	private void showSimpleDialog(Shell shell, String resourcePrefix) {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		String okLabel= plugin.getResourceString(IUIConstants.KEY_OK);
-	
-		String title= plugin.getResourceString(resourcePrefix + "title");
-		String message= plugin.getResourceString(resourcePrefix + "message");
+	private void showSimpleDialog(Shell shell, String title, String message) {
 		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { okLabel }, 0);
+	 		new String[] { JavaUIMessages.getString("AddMethodStubAction.ok") }, 0); //$NON-NLS-1$
 	 	dialog.open();
 	}
 	
 	
 	private boolean showOverridesFinalDialog(Shell shell, IMethod overridden) {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		String okLabel= plugin.getResourceString(IUIConstants.KEY_OK);
-		String cancelLabel= plugin.getResourceString(IUIConstants.KEY_CANCEL);
-	
-	 	JavaTextLabelProvider provider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS); 	
+		JavaTextLabelProvider provider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS); 	
 		String methodName= provider.getTextLabel(overridden);
-		String title= plugin.getResourceString(OVERRIDESFINAL_PREFIX + "title");
-		String message= plugin.getFormattedString(OVERRIDESFINAL_PREFIX + "message", methodName);
+		String title= JavaUIMessages.getString("AddMethodStubAction.warning"); //$NON-NLS-1$
+		String message= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesFinalDialog.message", methodName); //$NON-NLS-1$
 		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { okLabel, cancelLabel }, 0);
+	 		new String[] { JavaUIMessages.getString("AddMethodStubAction.ok"), JavaUIMessages.getString("AddMethodStubAction.cancel") }, 0); //$NON-NLS-2$ //$NON-NLS-1$
 	 	return (dialog.open() == dialog.OK);
 	}
 	

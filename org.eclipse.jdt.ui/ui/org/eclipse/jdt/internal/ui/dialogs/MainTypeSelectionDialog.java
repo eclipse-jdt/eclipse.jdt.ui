@@ -16,10 +16,6 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
-	private final static String PREFIX= "type_selector.";
-	private final static String NO_MAPPING_PREFIX= PREFIX+"no_mapping.";
-		
-	
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
 			super(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION |
@@ -38,7 +34,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	public MainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
 		super(
 			shell,
-			"",
+			"", //$NON-NLS-1$
 			null,
 			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
 			new PackageRenderer(),
@@ -70,7 +66,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		
 		IType[] types= (IType[])typesFound.toArray(new IType[typesFound.size()]);
 		setElements(types);
-		setInitialSelection("A");
+		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	

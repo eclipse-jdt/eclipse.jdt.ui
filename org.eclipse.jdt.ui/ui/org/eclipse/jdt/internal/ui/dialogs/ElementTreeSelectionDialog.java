@@ -5,11 +5,10 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Tree;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	
-	private static final String TREE_EMPTY= "ElementTreeSelectionDialog.error.treeempty";
-
 	private String fEmptyListMessage;
 
 	private TreeViewer fViewer;
@@ -49,7 +48,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fValidator= null;
 		setResult(new ArrayList(0));
 		fCurrStatus= new StatusInfo();
-		fEmptyListMessage= JavaPlugin.getResourceString(TREE_EMPTY);
+		fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$
 		setStatusLineAboveButtons(true);
 	}	
 
@@ -69,7 +68,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	 * @param allowMultiple Specify the selection behaviour of the tree widget. Allows multiple selection or not 
 	 */	
 	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, boolean allowMultiple, boolean doubleClickSelects) {
-		this(parent, "", null, labelProvider, contentProvider, allowMultiple, doubleClickSelects);
+		this(parent, "", null, labelProvider, contentProvider, allowMultiple, doubleClickSelects); //$NON-NLS-1$
 	}
 	
 	
@@ -79,7 +78,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	 * @param contentProvider The content provider to evaluate the tree structure
 	 */		
 	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
-        this(parent, "", null, labelProvider, contentProvider, true, true);
+        this(parent, "", null, labelProvider, contentProvider, true, true); //$NON-NLS-1$
 	}
 	
 	

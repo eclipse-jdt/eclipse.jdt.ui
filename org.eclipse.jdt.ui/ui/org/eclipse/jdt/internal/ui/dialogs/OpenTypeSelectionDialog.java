@@ -3,12 +3,13 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 
 	private boolean fShowInTypeHierarchy;
-	private static final String SECTION_NAME= "OpenTypeSelectionDialog";
-	private static final String SHOW_IN_TYPE_HIERARCHY= "showInTypeHierarchy";
+	private static final String SECTION_NAME= "OpenTypeSelectionDialog"; //$NON-NLS-1$
+	private static final String SHOW_IN_TYPE_HIERARCHY= "showInTypeHierarchy"; //$NON-NLS-1$
 
 	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
 		super(parent, context, scope, style, ignoreCase, matchEmtpyString);
@@ -41,7 +42,7 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		Composite contents= (Composite)super.createDialogArea(parent);
 		
 		final Button check= new Button(contents, SWT.CHECK);
-		check.setText("Show in Type Hierarchy");
+		check.setText(JavaUIMessages.getString("OpenTypeSelectionDialog.checkboxtext")); //$NON-NLS-1$
 		check.setSelection(fShowInTypeHierarchy);
 		check.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {

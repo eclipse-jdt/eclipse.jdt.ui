@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.text.MessageFormat;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
 		
@@ -33,7 +34,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection);	
+		this(parent, "", null, renderer, ignoreCase, multipleSelection);	 //$NON-NLS-1$
 	}
 
 	/**
@@ -44,7 +45,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	public MultiElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
 		super(parent, title, image, renderer, ignoreCase, multipleSelection);
-		fPageInfoMessage= "Page {0} of {1}";
+		fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -302,7 +303,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };	
 			return MessageFormat.format(fPageInfoMessage, args);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 		
 	private void initializeResult(int length) {

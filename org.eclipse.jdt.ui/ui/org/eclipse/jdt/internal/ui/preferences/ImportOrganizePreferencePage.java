@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;import java.util.StringTokenizer;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Point;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.jface.dialogs.IInputValidator;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.jface.preference.ListEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /*
  * The page for setting the organize import settings
@@ -12,19 +13,13 @@ import java.util.ArrayList;import java.util.StringTokenizer;import org.eclips
 public class ImportOrganizePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys
-	private static final String PREF_IMPORTORDER= JavaUI.ID_PLUGIN + ".importorder";
-	private static final String PREF_ONDEMANDTHRESHOLD= JavaUI.ID_PLUGIN + ".ondemandthreshold";
+	private static final String PREF_IMPORTORDER= JavaUI.ID_PLUGIN + ".importorder"; //$NON-NLS-1$
+	private static final String PREF_ONDEMANDTHRESHOLD= JavaUI.ID_PLUGIN + ".ondemandthreshold"; //$NON-NLS-1$
 	
-	private static final String IMPORTORDER_LABEL= "ImportOrganizePreferencePage.importorder.label";
-	private static final String ONDEMANDTHRESHOLD_LABEL= "ImportOrganizePreferencePage.ondemandthreshold.label";
-	private static final String PAGE_DESC= "ImportOrganizePreferencePage.description";
-
-	private static final String NEWENTRY_DIALOG= "ImportOrganizePreferencePage.newentrydialog";
-
 	public ImportOrganizePreferencePage() {
 		super(GRID);
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaPlugin.getResourceString(PAGE_DESC));
+		setDescription(JavaUIMessages.getString("ImportOrganizePreferencePage.description")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -38,7 +33,7 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 
 	protected void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
-		ListEditor listEditor= new ListEditor(PREF_IMPORTORDER, JavaPlugin.getResourceString(IMPORTORDER_LABEL), parent) {
+		ListEditor listEditor= new ListEditor(PREF_IMPORTORDER, JavaUIMessages.getString("ImportOrganizePreferencePage.listLabel"), parent) { //$NON-NLS-1$
 			protected String createList(String[] items) {
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < items.length; i++) {
@@ -49,22 +44,22 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 			}
 			
 			protected String getNewInputObject() {
-				String title= JavaPlugin.getResourceString(NEWENTRY_DIALOG + ".title");				
-				String message= JavaPlugin.getResourceString(NEWENTRY_DIALOG + ".message");
-				final String errorMessage= JavaPlugin.getResourceString(NEWENTRY_DIALOG + ".errormessage");
+				String title= JavaUIMessages.getString("ImportOrganizePreferencePage.title"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("ImportOrganizePreferencePage.message"); //$NON-NLS-1$
+				final String errorMessage= JavaUIMessages.getString("ImportOrganizePreferencePage.errorMessage"); //$NON-NLS-1$
 				
 				IInputValidator validator= new IInputValidator() {
 					public String isValid(String newText) {
 						if (JavaConventions.validatePackageName(newText).isOK()) {
 							return null;
-						} else if (!"".equals(newText)) {
+						} else if (!"".equals(newText)) { //$NON-NLS-1$
 							return errorMessage;
 						} else {
-							return "";
+							return ""; //$NON-NLS-1$
 						}
 					}
 				};
-				StringInputDialog dialog= new StringInputDialog(getShell(), title, null, message, "", validator);
+				StringInputDialog dialog= new StringInputDialog(getShell(), title, null, message, "", validator); //$NON-NLS-1$
 				if (dialog.open() == dialog.OK) {
 					return dialog.getValue();
 				} else {
@@ -73,7 +68,7 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 			}
 		
 			protected String[] parseString(String list) {
-				StringTokenizer st= new StringTokenizer(list, ";");
+				StringTokenizer st= new StringTokenizer(list, ";"); //$NON-NLS-1$
 				ArrayList v= new ArrayList();
 				while (st.hasMoreElements()) {
 					v.add(st.nextElement());
@@ -83,14 +78,14 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 		};
 		addField(listEditor);
 	
-		IntegerFieldEditor intEditor= new IntegerFieldEditor(PREF_ONDEMANDTHRESHOLD, JavaPlugin.getResourceString(ONDEMANDTHRESHOLD_LABEL), parent) {
+		IntegerFieldEditor intEditor= new IntegerFieldEditor(PREF_ONDEMANDTHRESHOLD, JavaUIMessages.getString("ImportOrganizePreferencePage.thresholdMessage"), parent) { //$NON-NLS-1$
 			protected void doFillIntoGrid(Composite parent, int numColumns) {
 				super.doFillIntoGrid(parent, numColumns);
 				Control text= getTextControl();
 				GridData gd= (GridData)text.getLayoutData();
 				GC gc = new GC(text);
 				try {
-					Point extent = gc.textExtent("X");
+					Point extent = gc.textExtent("X"); //$NON-NLS-1$
 					gd.widthHint = 5 * extent.x;
 				} finally {
 					gc.dispose();
@@ -110,7 +105,7 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 	 * Will be called on startup of the JavaPlugin
 	 */
 	public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_IMPORTORDER, "java;javax;com");
+		prefs.setDefault(PREF_IMPORTORDER, "java;javax;com"); //$NON-NLS-1$
 		prefs.setDefault(PREF_ONDEMANDTHRESHOLD, 99);
 	}
 		
@@ -120,7 +115,7 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		String str= prefs.getString(PREF_IMPORTORDER);
 		if (str != null) {
-			StringTokenizer tok= new StringTokenizer(str, ";");
+			StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 			int nTokens= tok.countTokens();
 			res= new String[nTokens];
 			for (int i= 0; i < nTokens; i++) {

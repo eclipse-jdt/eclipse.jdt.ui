@@ -39,7 +39,7 @@ public class StatusTool {
 	 */
 	public static String[] getErrorMessages(IStatus status) {
 		String message= status.getMessage();
-		if (status.matches(IStatus.ERROR) && !"".equals(message)) {
+		if (status.matches(IStatus.ERROR) && !"".equals(message)) { //$NON-NLS-1$
 			return new String[] { message, null };
 		} else if (status.matches(IStatus.WARNING | IStatus.INFO)) {
 			return new String[] { null, message };

@@ -120,7 +120,7 @@ public abstract class StatusDialog extends Dialog {
 		fStatusLine= new MessageLine(composite);
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusLine.setMessage("");
+		fStatusLine.setMessage(""); //$NON-NLS-1$
 
 		super.createButtonBar(composite);
 		return composite;
@@ -132,7 +132,7 @@ public abstract class StatusDialog extends Dialog {
 	 * @param title the title
 	 */
 	public void setTitle(String title) {
-		fTitle= title != null ? title : "";
+		fTitle= title != null ? title : ""; //$NON-NLS-1$
 		Shell shell= getShell();
 		if (shell != null && !shell.isDisposed())
 			shell.setText(fTitle);

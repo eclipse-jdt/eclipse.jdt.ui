@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.graphics.Font;import org.eclipse.swt.graphics.FontData;import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.FontFieldEditor;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferenceConverter;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * A preference page to set the font used in the Java editor.
@@ -20,7 +21,7 @@ public class JavaEditorPreferencePage extends FieldEditorPreferencePage implemen
 	public JavaEditorPreferencePage() {
 		super(GRID);
 		
-		setDescription(JavaPlugin.getResourceString("JavaEditorPreferencePage.description"));		
+		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description"));		 //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 	
@@ -38,7 +39,7 @@ public class JavaEditorPreferencePage extends FieldEditorPreferencePage implemen
 	 * @see FieldEditorPreferencePage#createFieldEditors
 	 */
 	public void createFieldEditors() {
-		addField(new FontFieldEditor(AbstractTextEditor.PREFERENCE_FONT, JavaPlugin.getResourceString("JavaEditorPreferencePage.fontEditor"), getFieldEditorParent()));
+		addField(new FontFieldEditor(AbstractTextEditor.PREFERENCE_FONT, JavaUIMessages.getString("JavaEditorPreferencePage.font"), getFieldEditorParent())); //$NON-NLS-1$
 	}
 	
 	/*

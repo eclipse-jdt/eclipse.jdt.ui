@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Open a source reference in an editor
@@ -27,14 +28,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class OpenSourceReferenceAction extends OpenJavaElementAction implements ISelectionChangedListener{
 	
 	
-	private static final String PREFIX= "OpenSourceReferenceAction.";
-	private static final String ERROR_OPEN_PREFIX= PREFIX + "error.open.";
-	
 	protected ISelectionProvider fSelectionProvider;
 	
 	
 	public OpenSourceReferenceAction() {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("OpenSourceReferenceAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("OpenSourceReferenceAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("OpenSourceReferenceAction.tooltip")); //$NON-NLS-1$
 	}
 	
 	public void run() {
@@ -47,7 +47,7 @@ public class OpenSourceReferenceAction extends OpenJavaElementAction implements 
 			try {
 				open((ISourceReference) o);
 			} catch (JavaModelException x) {
-				ExceptionHandler.handle(x, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+				ExceptionHandler.handle(x, JavaUIMessages.getString("OpenSourceReferenceAction.errorTitle"), JavaUIMessages.getString("OpenSourceReferenceAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
 			} catch (PartInitException x) {
 			}
 		}

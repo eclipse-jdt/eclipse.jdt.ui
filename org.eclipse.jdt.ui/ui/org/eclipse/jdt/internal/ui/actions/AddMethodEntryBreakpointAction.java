@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Adds a method entry breakpoint on a single selected element of type IMethod 
@@ -13,11 +14,10 @@ public class AddMethodEntryBreakpointAction extends JavaUIAction implements IUpd
 	
 	private ISelectionProvider fSelectionProvider;
 	
-	private static final String PREFIX= "AddMethodEntryBreakpointAction.";
-	private static final String ERROR_CREATE_BREAKPOINT= PREFIX+"error.create_breakpoint";
-		
 	public AddMethodEntryBreakpointAction(ISelectionProvider selProvider) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("AddMethodEntryBreakpointAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("AddMethodEntryBreakpointAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("AddMethodEntryBreakpointAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_METHODBREAKPOINT_ACTION });
@@ -35,7 +35,7 @@ public class AddMethodEntryBreakpointAction extends JavaUIAction implements IUpd
 			IMarker breakpoint = JDIDebugModel.createMethodEntryBreakpoint(method, 0);
 			DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
 		} catch (DebugException x) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaPlugin.getResourceString(ERROR_CREATE_BREAKPOINT), x.getMessage());
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("AddMethodEntryBreakpointAction.errorTitle"), x.getMessage()); //$NON-NLS-1$
 		}
 	}
 	

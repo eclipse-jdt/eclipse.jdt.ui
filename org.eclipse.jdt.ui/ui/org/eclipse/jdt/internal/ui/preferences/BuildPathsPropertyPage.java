@@ -5,14 +5,10 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.FillLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.PropertyPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
-	
-	private static final String BPP_NOJAVAPROJECT= "BuildPathsPropertyPage.nojavaproject";
-	private static final String BPP_CLOSEDPROJECT= "BuildPathsPropertyPage.closedproject";
-	
-	private static final String OP_ERROR_PREFIX= "BuildPathsPropertyPage.op_error.";
-	
+		
 	private BuildPathsBlock fBuildPathsBlock;
 	private Composite fNoJavaProjectComposite;
 	
@@ -45,7 +41,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	
 	private void createWithoutJava(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(JavaPlugin.getResourceString(BPP_NOJAVAPROJECT));
+		label.setText(JavaUIMessages.getString("BuildPathspropertyPage.notJava")); //$NON-NLS-1$
 		label.setFont(parent.getFont());
 		
 		fBuildPathsBlock= null;
@@ -54,7 +50,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	
 	private void createForClosedProject(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(JavaPlugin.getResourceString(BPP_CLOSEDPROJECT));
+		label.setText(JavaUIMessages.getString("BuildPathspropertyPage.closed")); //$NON-NLS-1$
 		label.setFont(parent.getFont());
 		
 		fBuildPathsBlock= null;
@@ -74,8 +70,9 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			try {
 				new ProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {
-				if (!ExceptionHandler.handle(e.getTargetException(), shell, JavaPlugin.getResourceBundle(), OP_ERROR_PREFIX)) {
-					MessageDialog.openError(shell, "Error", e.getMessage());
+				if (!ExceptionHandler.handle(e.getTargetException(), shell, JavaUIMessages.getString("BuildPathspropertyPage.errorTitle"),  //$NON-NLS-1$
+											JavaUIMessages.getString("BuildPathspropertyPage.errorMessage"))) { //$NON-NLS-1$
+					MessageDialog.openError(shell, JavaUIMessages.getString("BuildPathspropertyPage.error"), e.getMessage()); //$NON-NLS-1$
 				}
 				return false;
 			} catch (InterruptedException e) {
@@ -99,7 +96,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		try {
 			return proj.hasNature(JavaCore.NATURE_ID);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getControl().getShell(), "Error", null, e.getStatus());
+			ErrorDialog.openError(getControl().getShell(), JavaUIMessages.getString("BuildPathspropertyPage.error"), null, e.getStatus()); //$NON-NLS-1$
 		}
 		return false;
 	}				

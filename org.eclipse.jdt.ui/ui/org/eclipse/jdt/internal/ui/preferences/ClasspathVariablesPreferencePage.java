@@ -1,10 +1,11 @@
 /* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String JRELIB_VARIABLE= "JRE_LIB";
-	public static final String JRESRC_VARIABLE= "JRE_SRC";
-	public static final String JRESRCROOT_VARIABLE= "JRE_SRCROOT";
+	public static final String JRELIB_VARIABLE= "JRE_LIB"; //$NON-NLS-1$
+	public static final String JRESRC_VARIABLE= "JRE_SRC"; //$NON-NLS-1$
+	public static final String JRESRCROOT_VARIABLE= "JRE_SRCROOT"; //$NON-NLS-1$
 	
 	private VariableBlock fVariableBlock;
 	
@@ -18,7 +19,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(listener, false, null);		setDescription("A classpath variable can be added to a project's class path. It can be used to define the location of a JAR file that isn't part of the workspace. The reserved class path variables JRE_LIB, JRE_SRC, JRE_SRCROOT are set internally depending on the JRE setting.");	}
+		fVariableBlock= new VariableBlock(listener, false, null);		setDescription(JavaUIMessages.getString("ClasspathViariablesPreferencePagedescription")); //$NON-NLS-1$	}
 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)

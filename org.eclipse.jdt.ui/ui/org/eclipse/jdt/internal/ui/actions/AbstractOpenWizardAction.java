@@ -5,10 +5,9 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Iterator;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.Wizard;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.IWorkbenchWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public abstract class AbstractOpenWizardAction extends Action implements IWorkbenchWindowActionDelegate {
-
-	public static final String WIZARD_TITLE= "AbstractOpenWizardAction.title";
 
 	private Class[] fActivatedOnTypes;
 	private boolean fAcceptEmptySelection;
@@ -89,7 +88,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		}
 		WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
 		dialog.create();
-		dialog.getShell().setText(JavaPlugin.getResourceString(WIZARD_TITLE));
+		dialog.getShell().setText(JavaUIMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
 		dialog.open();
 	}
 	

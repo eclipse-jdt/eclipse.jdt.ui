@@ -16,8 +16,8 @@ import org.eclipse.jdt.core.JavaCore;import org.eclipse.ui.IElementFactory;imp
  */
 public class PersistableJavaElementFactory implements IElementFactory, IPersistableElement {
 
-	private static final String KEY= "elementID";
-	private static final String FACTORY_ID= "org.eclipse.jdt.ui.PersistableJavaElementFactory";
+	private static final String KEY= "elementID"; //$NON-NLS-1$
+	private static final String FACTORY_ID= "org.eclipse.jdt.ui.PersistableJavaElementFactory"; //$NON-NLS-1$
 
 	private IJavaElement fElement;
 	

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -40,7 +41,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		try {
 			resource= element.getUnderlyingResource(); 
 		} catch (JavaModelException e) {
-			JavaPlugin.getDefault().logErrorStatus("Creating ElementInfoPage", e.getStatus());
+			JavaPlugin.getDefault().logErrorStatus("Creating ElementInfoPage", e.getStatus()); //$NON-NLS-1$
 		}
 		
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -50,7 +51,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		Label nameLabel= new Label(composite, SWT.NONE);
-		nameLabel.setText("Name: ");
+		nameLabel.setText(JavaUIMessages.getString("JavaElementInfoPage.nameLabel")); //$NON-NLS-1$
 
 		Label nameValueLabel= new Label(composite, SWT.NONE);
 		nameValueLabel.setText(element.getElementName());
@@ -58,7 +59,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		if (resource != null) {
 			// path label
 			Label pathLabel= new Label(composite, SWT.NONE);
-			pathLabel.setText("Resource path: ");
+			pathLabel.setText(JavaUIMessages.getString("JavaElementInfoPage.resource_path")); //$NON-NLS-1$
 
 			// path value label
 			Label pathValueLabel= new Label(composite, SWT.NONE);
@@ -67,7 +68,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit)element;
 			Label packageLabel= new Label(composite, SWT.NONE);
-			packageLabel.setText("Package: ");
+			packageLabel.setText(JavaUIMessages.getString("JavaElementInfoPage.package")); //$NON-NLS-1$
 			Label packageName= new Label(composite, SWT.NONE);
 			packageName.setText(unit.getParent().getElementName());
 			
@@ -75,44 +76,44 @@ public class JavaElementInfoPage extends PropertyPage {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment packageFragment= (IPackageFragment)element;
 			Label packageContents= new Label(composite, SWT.NONE);
-			packageContents.setText("Package contents: ");
+			packageContents.setText(JavaUIMessages.getString("JavaElementInfoPage.package_contents")); //$NON-NLS-1$
 			Label packageContentsType= new Label(composite, SWT.NONE);
 			try {
 				if (packageFragment.getKind() == IPackageFragmentRoot.K_SOURCE) 
-					packageContentsType.setText("source");
+					packageContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.source")); //$NON-NLS-1$
 				else
-					packageContentsType.setText("binary");
+					packageContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.binary")); //$NON-NLS-1$
 			} catch (JavaModelException e) {
-				packageContentsType.setText("not present");
+				packageContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
 			}
 		}
 		if (element instanceof IPackageFragmentRoot) {
 			Label rootContents= new Label(composite, SWT.NONE);
-			rootContents.setText("Classpath entry kind: ");
+			rootContents.setText(JavaUIMessages.getString("JavaElementInfoPage.classpath_entry_kind")); //$NON-NLS-1$
 			Label rootContentsType= new Label(composite, SWT.NONE);
 			try {
 				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry((IPackageFragmentRoot)element);
 				if (entry != null) {
 					switch (entry.getEntryKind()) {
 						case IClasspathEntry.CPE_SOURCE:
-							rootContentsType.setText("source"); break;
+							rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.source")); break; //$NON-NLS-1$
 						case IClasspathEntry.CPE_PROJECT:
-							rootContentsType.setText("project"); break;
+							rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.project")); break; //$NON-NLS-1$
 						case IClasspathEntry.CPE_LIBRARY:
-							rootContentsType.setText("library"); break;
+							rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.library")); break; //$NON-NLS-1$
 						case IClasspathEntry.CPE_VARIABLE:
-							rootContentsType.setText("variable");
+							rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.variable")); //$NON-NLS-1$
 							Label varPath= new Label(composite, SWT.NONE);
-							varPath.setText("Variable path: ");
+							varPath.setText(JavaUIMessages.getString("JavaElementInfoPage.variable_path")); //$NON-NLS-1$
 							Label varPathVar= new Label(composite, SWT.NONE);
 							varPathVar.setText(entry.getPath().makeRelative().toString());							
 							break;
 					}
 				} else {
-					rootContentsType.setText("not present");
+					rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
-				rootContentsType.setText("not present");
+				rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
 			}
 		}		
 		

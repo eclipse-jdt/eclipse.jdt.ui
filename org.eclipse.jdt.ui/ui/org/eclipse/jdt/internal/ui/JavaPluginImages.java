@@ -18,14 +18,14 @@ import org.eclipse.jface.action.IAction;
  */
 public class JavaPluginImages {
 
-	private static final String NAME_PREFIX= "org.eclipse.jdt.ui.";
+	private static final String NAME_PREFIX= "org.eclipse.jdt.ui."; //$NON-NLS-1$
 	private static final int    NAME_PREFIX_LENGTH= NAME_PREFIX.length();
 
 	// Subdirectory (under the package containing this class) where 16 color images are
 	private static URL fgIconBaseURL= null;
 	static {
 		try {
-			fgIconBaseURL= new URL(JavaPlugin.getDefault().getDescriptor().getInstallURL(), "icons/" );
+			fgIconBaseURL= new URL(JavaPlugin.getDefault().getDescriptor().getInstallURL(), "icons/" ); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// do nothing
 		}
@@ -38,10 +38,10 @@ public class JavaPluginImages {
 	/**
 	 * Available cached Images in the Java plugin image registry.
 	 */	
-	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif";
-	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif";
-	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.gif";
-	public static final String IMG_MISC_DEFAULT= NAME_PREFIX + "methdef_obj.gif";
+	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_MISC_DEFAULT= NAME_PREFIX + "methdef_obj.gif"; //$NON-NLS-1$
 	
 	// public static final String IMG_LCL_FILTER_INTERFACE= NAME_PREFIX + "filter_int.gif";
 	// public static final String IMG_LCL_SHOW_INHERITED= NAME_PREFIX + "inher_co.gif";
@@ -57,49 +57,49 @@ public class JavaPluginImages {
 	// public static final String IMG_MENU_SHIFT_RIGHT= NAME_PREFIX + "shift_r_edit.gif";
 	// public static final String IMG_MENU_SHIFT_LEFT= NAME_PREFIX + "shift_l_edit.gif";
 
-	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif";
-	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif";
-	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.gif";
-	public static final String IMG_OBJS_IMPDECL= NAME_PREFIX + "imp_obj.gif";
-	public static final String IMG_OBJS_IMPCONT= NAME_PREFIX + "impc_obj.gif";
-	public static final String IMG_OBJS_JSEARCH= NAME_PREFIX + "jsearch_obj.gif";
-	public static final String IMG_OBJS_SEARCH_DECL= NAME_PREFIX + "search_decl_obj.gif";
-	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.gif";
-	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.gif";
-	public static final String IMG_OBJS_PCLASS= NAME_PREFIX + "classp_obj.gif";
-	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.gif";
-	public static final String IMG_OBJS_PINTERFACE= NAME_PREFIX + "intp_obj.gif";
-	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif";
-	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif"; 
-	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "classfc_obj.gif"; 
-	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "classfi_obj.gif"; 
-	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif";
-	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif";
-	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_nonexist_obj.gif";
-	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "jar_nonexist_obj.gif";
-	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif";
-	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif";
-	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif";
-	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	
-	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif";
-	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "envvar_nonexist_obj.gif";
+	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_IMPDECL= NAME_PREFIX + "imp_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_IMPCONT= NAME_PREFIX + "impc_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_JSEARCH= NAME_PREFIX + "jsearch_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_DECL= NAME_PREFIX + "search_decl_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PCLASS= NAME_PREFIX + "classp_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PINTERFACE= NAME_PREFIX + "intp_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  //$NON-NLS-1$
+	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "classfc_obj.gif";  //$NON-NLS-1$
+	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "classfi_obj.gif";  //$NON-NLS-1$
+	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_nonexist_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "jar_nonexist_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	 //$NON-NLS-1$
+	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "envvar_nonexist_obj.gif"; //$NON-NLS-1$
 	
-	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif";
+	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif"; //$NON-NLS-1$
 	
-	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif";
-	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif";
+	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif"; //$NON-NLS-1$
 		
-	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.gif";
-	public static final String IMG_OBJS_ERROR= NAME_PREFIX + "jrtexception_obj.gif";
+	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ERROR= NAME_PREFIX + "jrtexception_obj.gif"; //$NON-NLS-1$
 	
-	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif";
+	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_STACK_FRAME_SYNCH= NAME_PREFIX + "jstackframe_synch_obj.gif";
+	public static final String IMG_OBJS_STACK_FRAME_SYNCH= NAME_PREFIX + "jstackframe_synch_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif";
-	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif";
-	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif";
-	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "info_obj.gif";
+	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "info_obj.gif"; //$NON-NLS-1$
 
 	// public static final String IMG_OVR_STATIC= NAME_PREFIX + "static_co.gif";
 	// public static final String IMG_OVR_FINAL= NAME_PREFIX + "final_co.gif";
@@ -129,11 +129,11 @@ public class JavaPluginImages {
 	/**
 	 * Set of predefined Image Descriptors.
 	 */
-	private static final String T_OBJ= "full/obj16";
-	private static final String T_OVR= "full/ovr16";
-	private static final String T_WIZBAN= "full/wizban";
-	private static final String T_LCL= "full/clcl16";
-	private static final String T_CTOOL= "full/ctool16";
+	private static final String T_OBJ= "full/obj16"; //$NON-NLS-1$
+	private static final String T_OVR= "full/ovr16"; //$NON-NLS-1$
+	private static final String T_WIZBAN= "full/wizban"; //$NON-NLS-1$
+	private static final String T_LCL= "full/clcl16"; //$NON-NLS-1$
+	private static final String T_CTOOL= "full/ctool16"; //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -153,8 +153,8 @@ public class JavaPluginImages {
 	//public static final ImageDescriptor DESC_LCL_DELETE= create(T_LCL, "remove_exc.gif");
 	//public static final ImageDescriptor DESC_LCL_DELETE_ALL= create(T_LCL, "removea_exc.gif");
 	
-	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif");
-	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif");
+	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManaged(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManaged(T_OBJ, IMG_OBJS_PACKDECL);
@@ -198,50 +198,50 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_WARNING= createManaged(T_OBJ, IMG_OBJS_REFACTORING_WARNING);
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_INFO= createManaged(T_OBJ, IMG_OBJS_REFACTORING_INFO);
 	
-	public static final ImageDescriptor DESC_OVR_STATIC= create(T_OVR, "static_co.gif");
-	public static final ImageDescriptor DESC_OVR_FINAL= create(T_OVR, "final_co.gif");
-	public static final ImageDescriptor DESC_OVR_ABSTRACT= create(T_OVR, "abstract_co.gif");
-	public static final ImageDescriptor DESC_OVR_SYNCH= create(T_OVR, "synch_co.gif");
-	public static final ImageDescriptor DESC_OVR_RUN= create(T_OVR, "run_co.gif");
-	public static final ImageDescriptor DESC_OVR_WARNING= create(T_OVR, "warning_co.gif");
-	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif");
+	public static final ImageDescriptor DESC_OVR_STATIC= create(T_OVR, "static_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_FINAL= create(T_OVR, "final_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ABSTRACT= create(T_OVR, "abstract_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH= create(T_OVR, "synch_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_RUN= create(T_OVR, "run_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_WARNING= create(T_OVR, "warning_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif"); //$NON-NLS-1$
 		
-	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWINT= create(T_WIZBAN, "newint_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= create(T_WIZBAN, "newmeth_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= create(T_WIZBAN, "newpack_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= create(T_WIZBAN, "newsbook_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= create(T_WIZBAN, "java_app_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= create(T_WIZBAN, "java_attach_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR= create(T_WIZBAN, "refactor_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_METHOD= create(T_WIZBAN, "methrefact_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_TYPE= create(T_WIZBAN, "typerefact_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PACKAGE= create(T_WIZBAN, "packrefact_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CODE= create(T_WIZBAN, "coderefact_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= create(T_WIZBAN, "compunitrefact_wiz.gif");
-	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= create(T_WIZBAN, "jar_pack_wiz.gif");
+	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWINT= create(T_WIZBAN, "newint_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= create(T_WIZBAN, "newmeth_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= create(T_WIZBAN, "newpack_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= create(T_WIZBAN, "newsbook_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= create(T_WIZBAN, "java_app_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= create(T_WIZBAN, "java_attach_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR= create(T_WIZBAN, "refactor_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_METHOD= create(T_WIZBAN, "methrefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_TYPE= create(T_WIZBAN, "typerefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PACKAGE= create(T_WIZBAN, "packrefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CODE= create(T_WIZBAN, "coderefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= create(T_WIZBAN, "compunitrefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= create(T_WIZBAN, "jar_pack_wiz.gif"); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif");
-	public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif");
-	public static final ImageDescriptor DESC_TOOL_INSPSNIPPET= create(T_CTOOL, "insp_sbook.gif");
-	public static final ImageDescriptor DESC_TOOL_PACKSNIPPET= create(T_CTOOL, "pack_sbook.gif");
-	public static final ImageDescriptor DESC_TOOL_TERMSNIPPET= create(T_CTOOL, "term_sbook.gif");
-	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_CTOOL, "show_empty_pkg.gif");
-	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_CTOOL, "segment_edit.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "next_error_nav.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "prev_error_nav.gif");
+	public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_INSPSNIPPET= create(T_CTOOL, "insp_sbook.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_PACKSNIPPET= create(T_CTOOL, "pack_sbook.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_TERMSNIPPET= create(T_CTOOL, "term_sbook.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_CTOOL, "show_empty_pkg.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_CTOOL, "segment_edit.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "next_error_nav.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "prev_error_nav.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_CTOOL, "opentype.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_CTOOL, "newjprj_wiz.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= create(T_CTOOL, "newpack_wiz.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_CTOOL, "newclass_wiz.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_CTOOL, "newint_wiz.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_CTOOL, "newsbook_wiz.gif");
-	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_CTOOL, "newpackfolder_wiz.gif");
+	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_CTOOL, "opentype.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_CTOOL, "newjprj_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= create(T_CTOOL, "newpack_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_CTOOL, "newclass_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_CTOOL, "newint_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_CTOOL, "newsbook_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_CTOOL, "newpackfolder_wiz.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif");
+	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif"); //$NON-NLS-1$
 		
 	public static Image get(String key) {
 		return IMAGE_REGISTRY.get(key);
@@ -282,19 +282,19 @@ public class JavaPluginImages {
 	public static void setImageDescriptors(IAction action, String type, String relPath) {
 		
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/d" + type, relPath));
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/d" + type, relPath)); //$NON-NLS-1$
 			if (id != null)
 				action.setDisabledImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
 	
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/c" + type, relPath));
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/c" + type, relPath)); //$NON-NLS-1$
 			if (id != null)
 				action.setHoverImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
 	
-		action.setImageDescriptor(create("full/e" + type, relPath));
+		action.setImageDescriptor(create("full/e" + type, relPath)); //$NON-NLS-1$
 	}
 }

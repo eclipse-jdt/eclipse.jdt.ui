@@ -5,24 +5,17 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.RadioGroupFieldEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /*
  * The page for setting java plugin preferences.
  */
 public class JavaBasePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String KEY_DESCRIPTION= "JavaBasePreferencePage.description";
-	private static final String KEY_LINKING= "JavaBasePreferencePage.linkSelection";
-	private static final String KEY_USE_SRCBIN_FOLDERS= "JavaBasePreferencePage.useSrcBinFoldersInNewProj";
-	private static final String KEY_DOUBLE_CLICK_GOES_INTO= "JavaBasePreferencePage.doubleClickGoesInto";
-	private static final String KEY_OPEN_TYPE_HIERARCHY= "JavaBasePreferencePage.openTypeHierarchy";
-	private static final String KEY_OPEN_PERSPECTIVE= "JavaBasePreferencePage.openTypeHierarchy.inPerspective";
-	private static final String KEY_OPEN_VIEW_PART= "JavaBasePreferencePage.openTypeHierarchy.inViewPart";
-
 	public JavaBasePreferencePage() {
 		super(GRID);
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaPlugin.getResourceString(KEY_DESCRIPTION));
+		setDescription(JavaUIMessages.getString("JavaBasePreferencePage.description")); //$NON-NLS-1$
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
@@ -47,32 +40,32 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.LINK_PACKAGES_TO_EDITOR,
-			JavaPlugin.getResourceString(KEY_LINKING),
+			JavaUIMessages.getString("JavaBasePreferencePage.link"), //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);
 		
 		boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
-			JavaPlugin.getResourceString(KEY_DOUBLE_CLICK_GOES_INTO),
+			JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), //$NON-NLS-1$
 			parent
 		);
 		addField(boolEditor);
 		
 		boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ,
-			JavaPlugin.getResourceString(KEY_USE_SRCBIN_FOLDERS),
+			JavaUIMessages.getString("JavaBasePreferencePage.folders"), //$NON-NLS-1$
 			parent
 		);
 		addField(boolEditor);
 		
 	 	RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
  			IPreferencesConstants.OPEN_TYPE_HIERARCHY, 
- 			JavaPlugin.getResourceString(KEY_OPEN_TYPE_HIERARCHY), 
+ 			JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy"),  //$NON-NLS-1$
  			1,
  			new String[][] {
- 				{JavaPlugin.getResourceString(KEY_OPEN_PERSPECTIVE), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE},
- 				{JavaPlugin.getResourceString(KEY_OPEN_VIEW_PART), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART}
+ 				{JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE}, //$NON-NLS-1$
+ 				{JavaUIMessages.getString("JavaBasePreferencePage.inView"), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART} //$NON-NLS-1$
  			},
            parent);	
 		addField(editor);

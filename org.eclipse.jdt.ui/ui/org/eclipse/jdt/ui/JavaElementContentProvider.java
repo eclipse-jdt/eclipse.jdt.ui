@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ArrayUtility;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
  
 /**
  * Standard tree content provider for Java elements.
@@ -151,7 +152,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		try {
 			processDelta(delta);
 		} catch(JavaModelException e) {
-			JavaPlugin.getDefault().logErrorStatus("Child non present", e.getStatus());
+			JavaPlugin.getDefault().logErrorStatus(JavaUIMessages.getString("JavaElementContentProvider.errorMessage"), e.getStatus()); //$NON-NLS-1$
 		}
 	}
 	
@@ -400,13 +401,14 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 				for (int k= 0; k < children.length; k++) {
 					list.add(children[k]);
 				}
-				if (list.size() == 0)
-					System.out.println("No children found");	
+				if (list.size() == 0){
+					//System.out.println("No children found");	
+				}	
 			}
 			else if (hasChildren(root)/*root.hasChildren()*/) {
 				list.add(root);
 			} else {
-				System.out.println("Root doesn't have children");
+				//System.out.println("Root doesn't have children");
 			}
 		}
 		if (projectIsRoot)

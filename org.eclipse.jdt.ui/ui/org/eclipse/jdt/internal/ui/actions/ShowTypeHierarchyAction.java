@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Iterator;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Shows the type hierarchy on a single selected element of type IType or IClassFile 
@@ -12,12 +13,11 @@ import java.util.Iterator;import org.eclipse.swt.widgets.Display;import org.e
 public class ShowTypeHierarchyAction extends JavaUIAction implements IUpdate {
 	
 	private ISelectionProvider fSelectionProvider;
-	
-	public static final String PREFIX= "ShowTypeHierarchyAction.";
-	public static final String ERROR_OPEN_VIEW= PREFIX+"error.open_view";
-		
+			
 	public ShowTypeHierarchyAction(ISelectionProvider selProvider) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("ShowTypeHierarchyAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("ShowTypeHierarchyAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("ShowTypeHierarchyAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_HIERARCHYVIEW_ACTION });	
@@ -47,13 +47,12 @@ public class ShowTypeHierarchyAction extends JavaUIAction implements IUpdate {
 		if (types.length == 1)
 			return types[0];
 
-		String title= JavaPlugin.getResourceString(PREFIX + "selectionDialog.title");
-		String message = JavaPlugin.getResourceString(PREFIX + "selectionDialog.message");
+		String title= JavaUIMessages.getString("ShowTypeHierarchyAction.dialogTitle"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 		ElementListSelectionDialog d= new ElementListSelectionDialog(parent, title, null, new JavaElementLabelProvider(flags), true, false);
-		d.setMessage(message);
+		d.setMessage(JavaUIMessages.getString("ShowTypeHierarchyAction.dialogMessage")); //$NON-NLS-1$
 		if (d.open(types, null) == d.OK) {
 			Object[] elements= d.getResult();
 			if (elements != null && elements.length == 1) {
@@ -71,7 +70,7 @@ public class ShowTypeHierarchyAction extends JavaUIAction implements IUpdate {
 			IViewPart view= page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			((TypeHierarchyViewPart) view).setInput(type);
 		} catch (PartInitException x) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaPlugin.getResourceString(ERROR_OPEN_VIEW), x.getMessage());
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("ShowTypeHierarchyAction.errorTitle"), x.getMessage()); //$NON-NLS-1$
 		}			
 	}
 	

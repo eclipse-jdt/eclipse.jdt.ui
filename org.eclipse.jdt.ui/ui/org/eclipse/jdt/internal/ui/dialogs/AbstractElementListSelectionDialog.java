@@ -26,9 +26,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
  */
 public abstract class AbstractElementListSelectionDialog extends SelectionStatusDialog {
 	
-	private static final String LIST_EMPTY= "ElementListSelectionDialog.error.listempty";
-	private static final String NO_SELECTION= "ElementListSelectionDialog.error.noselection";
-	
 	private ILabelProvider fRenderer;
 	private boolean fIgnoreCase;
 	private boolean fIsMultipleSelection;
@@ -50,7 +47,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	protected AbstractElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection);
+		this(parent, "", null, renderer, ignoreCase, multipleSelection); //$NON-NLS-1$
 	}
 
 	/**
@@ -67,13 +64,13 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		fIgnoreCase= ignoreCase;
 		fIsMultipleSelection= multipleSelection;
 		
-		fMessageText= "";
+		fMessageText= ""; //$NON-NLS-1$
 		
 		fCurrStatus= new StatusInfo();
 		
 		fValidator= null;
-		fEmptyListMessage= "";
-		fNothingSelectedMessage= "";
+		fEmptyListMessage= ""; //$NON-NLS-1$
+		fNothingSelectedMessage= ""; //$NON-NLS-1$
 	}
 
 	/**

@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.BufferedReader;import java.io.IOException;import java.io.InputStreamReader;import java.util.ArrayList;import java.util.Enumeration;import java.util.Hashtable;import java.util.Locale;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Group;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.text.Document;import org.eclipse.jface.text.source.SourceViewer;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -19,9 +20,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private static final int TEXT_LIMIT= 3;
 	private static final int TAB_CHECK_OPTION_ID= 9;
 	private static final int TAB_TEXT_OPTION_ID= 10;
-	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt";
-	private static final String ERROR_MESSAGE_EMPTY= "Empty Input";
-	private static final String ERROR_MESSAGE_INVALID= " is not a valid Input";
+	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt"; //$NON-NLS-1$
+	private static final String ERROR_MESSAGE_EMPTY= JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"); //$NON-NLS-1$
+	private static final String ERROR_MESSAGE_INVALID= JavaUIMessages.getString("CodeFormatterPreferencePage.invalid_input"); //$NON-NLS-1$
 	private static final String PREFERENCE_NAME= "CodeFormatterPreferencePage";
 	private static final String WIDGET_DATA_KEY= "OPTION";
 
@@ -62,7 +63,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				if (next == source)
 					valueOK= true;
 			} catch (NumberFormatException nx) {
-				if (text.equals(""))
+				if (text.equals("")) //$NON-NLS-1$
 					fErrorMessage= new String(ERROR_MESSAGE_EMPTY);
 				else
 					fErrorMessage= new String(text + ERROR_MESSAGE_INVALID);
@@ -133,7 +134,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 	private void savePreferences() throws IOException {
 		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID();
+			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID(); //$NON-NLS-1$
 			fgPreferenceStore.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
 		}
 	}
@@ -207,7 +208,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fgPreferenceStore= store;
 		fgCurrentOptions= CodeFormatter.getDefaultOptions(Locale.getDefault());
 		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID();
+			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID(); //$NON-NLS-1$
 			if (fgPreferenceStore.contains(preferenceID))
 				fgCurrentOptions[i].setValueIndex(fgPreferenceStore.getInt(preferenceID));
 
@@ -215,7 +216,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private String loadPreviewFile(String fn) {
-		String separator= System.getProperty("line.separator");
+		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuffer btxt= new StringBuffer(512);
 		try {
 			BufferedReader rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(fn)));
@@ -416,7 +417,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private int parseTextInput(String input) throws NumberFormatException {
-		if (input.equals(""))
+		if (input.equals("")) //$NON-NLS-1$
 			throw new NumberFormatException();
 		int val= Integer.parseInt(input);
 		if (val < 0)

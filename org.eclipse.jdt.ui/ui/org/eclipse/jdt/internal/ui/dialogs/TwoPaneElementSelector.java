@@ -56,7 +56,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		super(parent);
 		setTitle(title);
 		setImage(image);
-		setMessage("");
+		setMessage(""); //$NON-NLS-1$
 		fElementRenderer= elementRenderer;
 		fQualifierRenderer= qualifierRenderer;
 		fIgnoreCase= ignoreCase;
@@ -242,12 +242,12 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	 * @param matchString java.lang.String
 	 */
 	private void rematch(String matchString) {
-		if ("".equals(matchString) && !fMatchEmtpyString) {
+		if ("".equals(matchString) && !fMatchEmtpyString) { //$NON-NLS-1$
 			updateUpperListWidget(fElementMap, 0);
 		} else {
 			int k= 0;
 			String text= fText.getText();
-			StringMatcher matcher= new StringMatcher(text+"*", fIgnoreCase, false);
+			StringMatcher matcher= new StringMatcher(text+"*", fIgnoreCase, false); //$NON-NLS-1$
 			String lastString= null;
 			int length= fElements.length;
 			for (int i= 0; i < length; i++) {
@@ -297,7 +297,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	public void create() {
 		super.create();
 		fText.setFocus();
-		rematch("");
+		rematch(""); //$NON-NLS-1$
 		setResult(null);
 		updateOkState();
 	}	

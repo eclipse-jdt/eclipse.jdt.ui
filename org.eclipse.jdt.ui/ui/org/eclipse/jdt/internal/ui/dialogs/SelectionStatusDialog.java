@@ -88,7 +88,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 */
 	public void setInitialSelection(Object element) {
 		// Allow clients to use set their own initial selection(s)
-		if (fInitialSelectionSet && element != null && element.equals("A"))
+		if (fInitialSelectionSet && element != null && element.equals("A")) //$NON-NLS-1$
 			return;
 
 		if (element != null) {
@@ -193,7 +193,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		fStatusLine= new MessageLine(composite);
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusLine.setMessage("");
+		fStatusLine.setMessage(""); //$NON-NLS-1$
 
 		super.createButtonBar(composite);
 		return composite;

@@ -25,7 +25,7 @@ public final class JavaOverlayDescriptor implements IOverlayDescriptor {
 	public final static int ERROR=		0x040;
 
 	static final int[]  FLAGS= { ABSTRACT, FINAL, SYNCHRONIZED, STATIC, RUNNABLE, WARNING, ERROR  };
-	static final String[] TAGS= { "A", "F", "Sy", "St", "R", "W", "E" };
+	static final String[] TAGS= { "A", "F", "Sy", "St", "R", "W", "E" }; //$NON-NLS-6$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-2$ //$NON-NLS-7$ //$NON-NLS-1$
 	
 	private String fBase;
 	private int fFlags;
@@ -125,7 +125,7 @@ public final class JavaOverlayDescriptor implements IOverlayDescriptor {
 	private String createName() {	
 		StringBuffer b= new StringBuffer();
 		b.append(fBase);
-		b.append("_OVR");
+		b.append("_OVR"); //$NON-NLS-1$
 		for (int i= 0; i < FLAGS.length; i++) {
 			if ((fFlags & FLAGS[i]) != 0) {
 				b.append('_');

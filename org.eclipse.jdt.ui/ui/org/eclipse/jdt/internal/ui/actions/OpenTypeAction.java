@@ -5,15 +5,14 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.viewers.ISelection;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.PartInitException;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchWindowActionDelegate {
 	
-	private static final String PREFIX= "OpenTypeAction.";
-	private static final String DIALOG_PREFIX= PREFIX + "dialog.";
-	private static final String ERROR_OPEN_PREFIX= PREFIX + "error.open.";
-	
 	public OpenTypeAction() {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(JavaUIMessages.getString("OpenTypeAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("OpenTypeAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("OpenTypeAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
 	}
 
@@ -23,8 +22,8 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
 			true, true);				
 	
-		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_PREFIX + "title"));
-		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_PREFIX + "message"));
+		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return;
 		}
@@ -38,9 +37,9 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 				try {
 					open(type);
 				} catch (JavaModelException e) {
-					ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+					ExceptionHandler.handle(e, JavaUIMessages.getString("OpenTypeAction.errorTitle"), JavaUIMessages.getString("OpenTypeAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
 				} catch (PartInitException e) {
-					ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+					ExceptionHandler.handle(e, JavaUIMessages.getString("OpenTypeAction.errorTitle"), JavaUIMessages.getString("OpenTypeAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
 				}
 			}
 		}

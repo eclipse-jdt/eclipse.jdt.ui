@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -16,19 +17,15 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
-	private final static String PREFIX= "type_selector.";
-	private final static String NO_MAPPING_PREFIX= PREFIX+"no_mapping.";
-	
-			
 	public TypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
-		super(parent, "", null, new TypeRefLabelProvider(0), new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX), ignoreCase, matchEmtpyString);		
+		super(parent, "", null, new TypeRefLabelProvider(0), new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX), ignoreCase, matchEmtpyString);		 //$NON-NLS-1$
 		fRunnableContext= context;
 		Assert.isNotNull(fRunnableContext);
 		fScope= scope;
 		Assert.isNotNull(fScope);
 		fStyle= style;
-		setUpperListLabel(JavaPlugin.getResourceString(PREFIX + "typeListLabel"));
-		setLowerListLabel(JavaPlugin.getResourceString(PREFIX + "packageListLabel"));
+		setUpperListLabel(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
+		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -44,7 +41,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			
 		TypeRef[] typeRefs= (TypeRef[])typeList.toArray(new TypeRef[typeList.size()]);
 		setElements(typeRefs);
-		setInitialSelection("A");
+		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	
@@ -57,8 +54,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			try {
 				IType type= ref.resolveType(fScope);
 				if (type == null) {
-					String title= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"title");
-					String message= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"message");
+					String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
+					String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
 					MessageDialog.openError(getShell(), title, message);
 					//XXX: java model
 					setResult(null);
@@ -68,8 +65,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 					setResult(result);
 				}
 			} catch (JavaModelException e) {
-				String title= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"title");
-				String message= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"message");
+				String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);
 				setResult(null);
 			}

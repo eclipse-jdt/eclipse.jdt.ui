@@ -20,11 +20,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 public class StatusBarUpdater implements ISelectionChangedListener {
-	
-	private final static String N_ELEMENTS_SELECTED= "StatusBarUpdater.num_elements_selected";
 	
 	private JavaTextLabelProvider fJavaTextLabelProvider;
 	private IStatusLineManager fStatusLineManager;
@@ -51,7 +50,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	
 	private String formatMessage(ISelection sel) {
 		if (sel ==  null || sel.isEmpty()) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		if (sel instanceof IStructuredSelection) {			
 			Iterator iter= ((IStructuredSelection)sel).iterator();
@@ -62,7 +61,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					nElement++;
 					iter.next();
 				} while (iter.hasNext());
-				return JavaPlugin.getFormattedString(N_ELEMENTS_SELECTED, Integer.toString(nElement));
+				return JavaUIMessages.getFormattedString("StatusBarUpdater.num_elements_selected", Integer.toString(nElement)); //$NON-NLS-1$
 			} else { 
 				if (element instanceof IJavaElement) {
 					return fJavaTextLabelProvider.getTextLabel((IJavaElement)element);
@@ -72,7 +71,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					buf.append(resource.getName());
 					if (resource.getType() != IResource.PROJECT) {
 						if (resource.getParent() != null) {
-							buf.append(" - ");
+							buf.append(" - "); //$NON-NLS-1$
 							buf.append(resource.getParent().getFullPath());
 						}
 					}			
@@ -80,6 +79,6 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 				}
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 }

@@ -20,7 +20,7 @@ import java.util.zip.ZipFile;
 	private List fChildren;
 	private String fName;
 	private boolean fRepresentsZip= false;
-	private static final String SEGMENT_SEPARATOR= "/";
+	private static final String SEGMENT_SEPARATOR= "/"; //$NON-NLS-1$
 
 	private ZipTreeNode(ZipTreeNode parent, List children, String name) {
 		fParent= parent;
@@ -78,7 +78,7 @@ import java.util.zip.ZipFile;
 		if (isRoot()){
 			return ((ZipTreeNode)fChildren.get(0)).findNode(name);
 		}
-		if (representsZipFile() && "".equals(name)){
+		if (representsZipFile() && "".equals(name)){ //$NON-NLS-1$
 			return this;
 		} 
 	
@@ -110,7 +110,7 @@ import java.util.zip.ZipFile;
 	}
 	
 	/*package*/ void insert(String name) {
-		if ("".equals(name) || separatorIndex(name) == -1)
+		if ("".equals(name) || separatorIndex(name) == -1) //$NON-NLS-1$
 			return;
 		String firstSegment= getFirstSegment(name);
 		if (fChildren == null)
@@ -139,7 +139,7 @@ import java.util.zip.ZipFile;
 	public String toString() {
 		//empty package root
 		if (representsZipFile())
-			return "";
+			return ""; //$NON-NLS-1$
 		StringBuffer sb= toStringBuffer();
 		return sb.deleteCharAt(sb.length() - 1).toString();
 	}

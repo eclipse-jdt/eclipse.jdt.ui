@@ -89,7 +89,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IJavaUIStatus.INTERNAL_ERROR, "Internal Error", e));
+		log(new Status(IStatus.ERROR, getPluginId(), IJavaUIStatus.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}
 	
 	// ---------- resource bundle -------------
@@ -107,7 +107,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		} catch (MissingResourceException e) {
 			return key;
 		} catch (NullPointerException e) {
-			return "!" + key + "!";
+			return "!" + key + "!"; //$NON-NLS-2$ //$NON-NLS-1$
 		}
 			
 	}
@@ -154,7 +154,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		super(descriptor);
 		fgJavaPlugin= this;
 		try {
-			fgResourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.internal.ui.JavaPluginResources");
+			fgResourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.internal.ui.JavaPluginResources"); //$NON-NLS-1$
 		} catch (MissingResourceException x) {
 			fgResourceBundle= null;
 		}		
@@ -268,8 +268,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
 		
-		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_PORT, "8000");
-		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_HOST, "localhost");
+		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_PORT, "8000"); //$NON-NLS-1$
+		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_HOST, "localhost"); //$NON-NLS-1$
 		
 		store.setDefault(IPreferencesConstants.EDITOR_SHOW_HOVER, true);
 		store.setDefault(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, false);

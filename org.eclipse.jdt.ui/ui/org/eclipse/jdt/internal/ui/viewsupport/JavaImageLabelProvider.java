@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 
@@ -170,8 +171,8 @@ public class JavaImageLabelProvider {
 					return ISharedImages.IMG_OBJ_PROJECT_CLOSED;
 			}
 			
-			Assert.isTrue(false, "not image for this JavaElement Type");
-			return "";
+			Assert.isTrue(false, JavaUIMessages.getString("JavaImageLabelprovider.assert.wrongImage")); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 		
 		} catch (CoreException x) {
 			return JavaPluginImages.IMG_OBJS_GHOST;

@@ -1,12 +1,9 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Text;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIMessages;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Text;
 public class MinMaxIntegerFieldEditor extends IntegerFieldEditor {
 
 	private int fMinimumValue= Integer.MIN_VALUE;
 	private int fMaximumValue= Integer.MAX_VALUE;
 	
-	private static final String PREFIX= "MinMaxIntegerEditor.";
-	private static final String ERROR_TOO_SMALL= PREFIX+"error.too_small";
-	private static final String ERROR_TOO_LARGE= PREFIX+"error.too_large";
 	/**
 	 * Constructor for MinMaxIntegerFieldEditor
 	 */
@@ -34,11 +31,11 @@ public class MinMaxIntegerFieldEditor extends IntegerFieldEditor {
 		try {
 			Long number = Long.valueOf(numberString);
 			if (number.longValue() > fMaximumValue) {
-				String message= JavaPlugin.getFormattedString(ERROR_TOO_LARGE, String.valueOf(fMaximumValue));
+				String message= JavaUIMessages.getFormattedString("MinMaxIntegerEditor.error.too_large", String.valueOf(fMaximumValue)); //$NON-NLS-1$
 				showErrorMessage(message);
 				return false;
 			} else if (number.longValue() < fMinimumValue) {
-				String message= JavaPlugin.getFormattedString(ERROR_TOO_SMALL, String.valueOf(fMinimumValue));
+				String message= JavaUIMessages.getFormattedString("MinMaxIntegerEditor.error.too_small", String.valueOf(fMinimumValue)); //$NON-NLS-1$
 				showErrorMessage(message);
 			} else {
 				clearErrorMessage();

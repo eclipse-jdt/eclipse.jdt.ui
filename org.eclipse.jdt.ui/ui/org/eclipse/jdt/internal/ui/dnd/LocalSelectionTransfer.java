@@ -8,6 +8,7 @@ import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class LocalSelectionTransfer extends ByteArrayTransfer {
 
@@ -16,7 +17,7 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	// different Eclipse applications use different "types" of
 	// <code>LocalSelectionTransfer</code>
 	static {
-		TYPE_NAME= "local-selection-transfer-format";
+		TYPE_NAME= "local-selection-transfer-format"; //$NON-NLS-1$
 		long time= System.currentTimeMillis();
 		TYPE_NAME= TYPE_NAME + (new Long(time)).toString();
 	}
@@ -58,7 +59,7 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	public Object nativeToJava(TransferData transferData) {
 		Object result= super.nativeToJava(transferData);
 		if (!(result instanceof byte[]) || !TYPE_NAME.equals(new String((byte[])result))) {
-			JavaPlugin.logErrorMessage("Got wrong data in org.eclipse.jdt.internal.ui.dnd.LocalSelectionTranser::nativeToJava");
+			JavaPlugin.logErrorMessage(JavaUIMessages.getString("LocalSelectionTransfer.errorMessage")); //$NON-NLS-1$
 		}
 		return fSelection;
 	}

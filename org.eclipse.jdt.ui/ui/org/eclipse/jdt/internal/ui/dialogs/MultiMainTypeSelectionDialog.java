@@ -51,7 +51,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound);
-		setInitialSelection("A");				
+		setInitialSelection("A");				 //$NON-NLS-1$
 		return super.open();
 	}
 	

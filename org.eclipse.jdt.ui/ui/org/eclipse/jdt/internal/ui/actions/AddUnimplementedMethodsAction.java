@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -14,15 +15,12 @@ import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;
  */
 public class AddUnimplementedMethodsAction extends JavaUIAction {
 
-	private static final String ACTION_PREFIX= "AddUnimplementedMethodsAction.";
-	
-	private static final String NOTHINGADDED_PREFIX= ACTION_PREFIX + "NothingAddedDialog.";
-	private static final String NOTINWORKINGCOPY_PREFIX= ACTION_PREFIX + "NotInWorkingCopyDialog.";
-		
 	private ISelectionProvider fSelectionProvider;
 
 	public AddUnimplementedMethodsAction(ISelectionProvider selProvider) {
-		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);
+		super(JavaUIMessages.getString("AddUnimplementedMethodsAction.lebel")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("AddUnimplementedMethodsAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("AddUnimplementedMethodsAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION });
@@ -41,7 +39,7 @@ public class AddUnimplementedMethodsAction extends JavaUIAction {
 			type= EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
-				showSimpleDialog(shell, NOTINWORKINGCOPY_PREFIX);
+				showSimpleDialog(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -51,30 +49,25 @@ public class AddUnimplementedMethodsAction extends JavaUIAction {
 				dialog.run(false, true, op);
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
-					showSimpleDialog(shell, NOTHINGADDED_PREFIX);
+					showSimpleDialog(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.DialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
 				} else if (editor != null) {
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {
-				MessageDialog.openError(shell, "AddUnimplementedMethodsAction failed", e.getTargetException().getMessage());
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled by user.
 			}
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, "AddUnimplementedMethodsAction failed", null, e.getStatus());
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
 		} catch (PartInitException e) {
-			MessageDialog.openError(shell, "AddMethodStubAction failed", e.getMessage());
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
 		}			
 	}
 	
-	private void showSimpleDialog(Shell shell, String resourcePrefix) {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		String okLabel= plugin.getResourceString(IUIConstants.KEY_OK);
-		String title= plugin.getResourceString(resourcePrefix + "title");	
-		String message= plugin.getResourceString(resourcePrefix + "message");
-		
+	private void showSimpleDialog(Shell shell, String title, String message) {
 		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { okLabel }, 0);
+	 		new String[] { JavaUIMessages.getString("AddUnimplementedMethodsAction.ok") }, 0); //$NON-NLS-1$
 	 	
 	 	dialog.open();
 	}	

@@ -188,7 +188,7 @@ public class SelectionList extends Composite {
 		if (!forceUpdate && text.equals(fRememberedMatchText))
 			return;
 		fRememberedMatchText= text;
-		StringMatcher matcher= new StringMatcher(text+"*", fIgnoreCase, false);
+		StringMatcher matcher= new StringMatcher(text+"*", fIgnoreCase, false); //$NON-NLS-1$
 		for (int i= 0; i < fElements.length; i++) {
 			if (matcher.match(fRenderedStrings[i])) {
 				fFilteredElements[k]= i;

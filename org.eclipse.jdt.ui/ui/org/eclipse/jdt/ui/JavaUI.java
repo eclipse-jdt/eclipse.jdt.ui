@@ -62,42 +62,42 @@ public final class JavaUI {
 	/**
 	 * The id of the Java plugin (value <code>"org.eclipse.jdt.ui"</code>).
 	 */	
-	public static final String ID_PLUGIN= "org.eclipse.jdt.ui";
+	public static final String ID_PLUGIN= "org.eclipse.jdt.ui"; //$NON-NLS-1$
 	
 	/**
 	 * The id of the Java perspective
 	 * (value <code>"org.eclipse.jdt.ui.JavaPerspective"</code>).
 	 */	
-	public static final String ID_PERSPECTIVE= 		"org.eclipse.jdt.ui.JavaPerspective";
+	public static final String ID_PERSPECTIVE= 		"org.eclipse.jdt.ui.JavaPerspective"; //$NON-NLS-1$
 	
 	/**
 	 * The id of the Java hierarchy perspective
 	 * (value <code>"org.eclipse.jdt.ui.JavaHierarchyPerspective"</code>).
 	 */	
-	public static final String ID_HIERARCHYPERSPECTIVE= "org.eclipse.jdt.ui.JavaHierarchyPerspective";
+	public static final String ID_HIERARCHYPERSPECTIVE= "org.eclipse.jdt.ui.JavaHierarchyPerspective"; //$NON-NLS-1$
 	/**
 	 * The id of the Java action set
 	 * (value <code>"org.eclipse.jdt.ui.JavaActionSet"</code>).
 	 */
-	public static final String ID_ACTION_SET= 		"org.eclipse.jdt.ui.JavaActionSet";
+	public static final String ID_ACTION_SET= 		"org.eclipse.jdt.ui.JavaActionSet"; //$NON-NLS-1$
 	
 	/**
 	 * The editor part id of the editor that presents Java compilation units
 	 * (value <code>"org.eclipse.jdt.ui.CompilationUnitEditor"</code>).
 	 */	
-	public static final String ID_CU_EDITOR=			"org.eclipse.jdt.ui.CompilationUnitEditor";
+	public static final String ID_CU_EDITOR=			"org.eclipse.jdt.ui.CompilationUnitEditor"; //$NON-NLS-1$
 	
 	/**
 	 * The editor part id of the editor that presents Java binary class files
 	 * (value <code>"org.eclipse.jdt.ui.ClassFileEditor"</code>).
 	 */
-	public static final String ID_CF_EDITOR=			"org.eclipse.jdt.ui.ClassFileEditor";
+	public static final String ID_CF_EDITOR=			"org.eclipse.jdt.ui.ClassFileEditor"; //$NON-NLS-1$
 	
 	/**
 	 * The editor part id of the code snippet editor
 	 * (value <code>"org.eclipse.jdt.ui.SnippetEditor"</code>).
 	 */
-	public static final String ID_SNIPPET_EDITOR= 		"org.eclipse.jdt.ui.SnippetEditor";
+	public static final String ID_SNIPPET_EDITOR= 		"org.eclipse.jdt.ui.SnippetEditor"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Packages view
@@ -113,7 +113,7 @@ public final class JavaUI {
 	 * @see org.eclipse.ui.IWorkbenchPage#findView
 	 * @see org.eclipse.ui.IWorkbenchPage#showView
 	 */ 
-	public static final String ID_PACKAGES= 			"org.eclipse.jdt.ui.PackageExplorer";
+	public static final String ID_PACKAGES= 			"org.eclipse.jdt.ui.PackageExplorer"; //$NON-NLS-1$
 	
 	/** 
 	 * The view part id of the type hierarchy part.
@@ -129,7 +129,7 @@ public final class JavaUI {
 	 * @see org.eclipse.ui.IWorkbenchPage#findView
 	 * @see org.eclipse.ui.IWorkbenchPage#showView
 	 */ 
-	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy";
+	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy"; //$NON-NLS-1$
 	
 	/**
 	 * The class org.eclipse.debug.core.model.IProcess allows attaching
@@ -140,7 +140,7 @@ public final class JavaUI {
 	 * was launched with.
 	 * @deprecated
 	 */
-	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine";
+	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine"; //$NON-NLS-1$
 
 	/**
 	 * Returns the shared images for the Java UI.

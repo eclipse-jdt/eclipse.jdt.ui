@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -32,9 +33,6 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
-	private final static String PREFIX= "type_selector.";
-	private final static String NO_MAPPING_PREFIX= PREFIX+"no_mapping.";
-		
 	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
 		super(parent, new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX), ignoreCase, true); 
 		fRunnableContext= context;
@@ -55,7 +53,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound);
-		setInitialSelection("A");				
+		setInitialSelection("A");				 //$NON-NLS-1$
 		return super.open();
 	}
 	
@@ -75,16 +73,16 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 				try {
 					IType type= ((TypeRef)selection.get(i)).resolveType(fScope);
 					if (type == null) {
-						String title= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"title");
-						String message= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"message");
+						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
+						String message= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogMessage"); //$NON-NLS-1$
 						MessageDialog.openError(getShell(), title, message);
 						//XXX: java model
 					} else {
 						result.add(type);
 					}
 				} catch (JavaModelException e) {
-					String title= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"title");
-					String message= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"message");
+					String title= JavaUIMessages.getString("MultiTypeSelectionDialog.errorTitle"); //$NON-NLS-1$
+					String message= JavaUIMessages.getString("MultiTypeSelectionDialog.errorMessage"); //$NON-NLS-1$
 					MessageDialog.openError(getShell(), title, message);
 				}
 			}

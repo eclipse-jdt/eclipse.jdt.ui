@@ -68,7 +68,7 @@ public class OverlayIconManager {
 	public OverlayIconManager(IOverlayDescriptorFactory descriptorFactory, Point iconSize) {
 		fDescriptorFactory= descriptorFactory;
 		fIconSize= iconSize;
-		fSizeKey= fIconSize.x+"/"+fIconSize.y;
+		fSizeKey= fIconSize.x+"/"+fIconSize.y; //$NON-NLS-1$
 	}
 	
 	/**
