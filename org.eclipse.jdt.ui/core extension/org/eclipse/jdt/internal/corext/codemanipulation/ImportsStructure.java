@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -393,6 +394,13 @@ public class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
+		if (binding.isAnonymous()) {
+			ITypeBinding[] interfaces= binding.getInterfaces();
+			if (interfaces.length >= 1)
+				binding= interfaces[0];
+			else
+			 	binding= binding.getSuperclass();
+		}
 		String qualifiedName= binding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
 			return addImport(qualifiedName);
