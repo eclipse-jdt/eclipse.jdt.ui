@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -291,6 +292,8 @@ public class SourceAttachmentBlock {
 		}
 				
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
+		
+		Dialog.applyDialogFont(composite);
 				
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
 		return composite;
