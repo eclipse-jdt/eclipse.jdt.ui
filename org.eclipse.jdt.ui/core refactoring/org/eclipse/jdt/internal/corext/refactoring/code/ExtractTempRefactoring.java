@@ -9,19 +9,26 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
+import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
+import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -98,44 +105,74 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		if (fSelectionStart < 0)
-			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
+		try{
+			pm.beginTask("", 7);
+			if (fSelectionStart < 0)
+				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
+			pm.worked(1);
 		
-		if (!(fCu instanceof CompilationUnit))
-			return RefactoringStatus.createFatalErrorStatus("Internal Error");
-	
-		initializeAST();
+			if (!(fCu instanceof CompilationUnit))
+				return RefactoringStatus.createFatalErrorStatus("Internal Error");
+			pm.worked(1);
+
+			initializeAST();
 		
-		return checkSelection();
+			return checkSelection(new SubProgressMonitor(pm, 5));
+		} finally{
+			pm.done();
+		}	
 	}
 	
-	private RefactoringStatus checkSelection() throws JavaModelException {
-		if (fAST.hasProblems()){
-			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
-			if (compileErrors.hasFatalError())
-				return compileErrors;
-		}
+	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
+		try{
+			pm.beginTask("", 9);
+			
+			if (fAST.hasProblems()){
+				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
+				if (compileErrors.hasFatalError())
+					return compileErrors;
+			}
+			pm.worked(1);
+	
+			if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
+				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+			pm.worked(1);
+			
+			if (isUsedInExplicitConstructorCall())
+				return RefactoringStatus.createFatalErrorStatus("Code from explicit constructor calls cannot be extracted to a variable.");
+			pm.worked(1);				
+			
+			if (getSelectedMethodNode() == null)
+				return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
+			pm.worked(1);				
+			
+			if (getSelectedExpression() == null)
+				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+			pm.worked(1);			
+			
+			if (! isSelectionUsedAsExpression()) //XXX should enable at some point
+				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+			pm.worked(1);				
 
-		if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
-			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
-		
-		if (isUsedInExplicitConstructorCall())
-			return RefactoringStatus.createFatalErrorStatus("Code from explicit constructor calls cannot be extracted to a variable.");
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkExpression());
+			if (result.hasFatalError())
+				return result;
+			pm.worked(1);
 			
-		if (getSelectedMethodNode() == null)
-			return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
-			
-		if (getSelectedExpression() == null)
-			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
-		
-		if (! isSelectionUsedAsExpression()) //XXX should enable at some point
-			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
-			
-		if (analyzeSelection().getExpressionTypeBinding() == null)
-			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
-		
-		initializeTempNames(); 
-		return new RefactoringStatus();
+			if (analyzeSelection().getExpressionTypeBinding() == null)
+				result.addFatalError("An expression must be selected to activate this refactoring.");
+			if (result.hasFatalError())
+				return result;
+				
+			pm.worked(1);			
+
+			initializeTempNames(); 
+			pm.worked(1);
+			return result;
+		} finally{
+			pm.done();
+		}		
 	}
 
 	private void initializeTempNames() throws JavaModelException {
@@ -144,6 +181,33 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void initializeAST() throws JavaModelException {
 		fAST= new AST(fCu);
+	}
+
+	private RefactoringStatus checkExpression() throws JavaModelException {
+		NewSelectionAnalyzer analyzer= analyzeSelection();
+		AstNode[] nodes= analyzer.getSelectedNodes();
+		if (nodes == null || nodes.length != 1) 
+			return null;
+		
+		AstNode node= nodes[0];
+		if (node instanceof NullLiteral) {
+			return RefactoringStatus.createFatalErrorStatus("Cannot extract the single keyword null.");
+		} else if (node instanceof ArrayInitializer) {
+			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract an array initializer.");
+		} else if (node instanceof TypeReference) {
+			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single type reference.");
+		} else if (node instanceof Assignment) {
+			AstNode[] parents= findParents(node);
+			if (parents != null && parents.length != 0 && parents[parents.length - 1] instanceof Expression)
+				return RefactoringStatus.createFatalErrorStatus("Cannot extract assignment that is part of another expression.");
+			else
+				return null;
+		} else if (node instanceof ConditionalExpression) {
+			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single conditional expression.");
+		} else if (node instanceof Reference) {
+			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single variable or field reference.");
+		} else
+			return null;
 	}
 
 	public RefactoringStatus checkTempName(String newName) {
