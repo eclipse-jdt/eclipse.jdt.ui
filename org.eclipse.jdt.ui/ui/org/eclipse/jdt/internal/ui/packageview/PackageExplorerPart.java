@@ -1078,6 +1078,12 @@ public class PackageExplorerPart extends ViewPart
 		Object input= context.getInput();
 		if (input instanceof IEditorInput)
 			return showInput(getElementOfInput((IEditorInput)context.getInput()));
+
+		ISelection selection= context.getSelection();
+		if (selection != null) {
+			selectReveal(selection);
+			return true;
+		}
 		return false;
 	}
 
