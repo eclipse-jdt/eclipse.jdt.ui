@@ -178,10 +178,18 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		}
 		
 		public void toggleShowInheritedMembers() {
-			getTreeViewer().getTree().setRedraw(false);
+			Tree tree= getTreeViewer().getTree();
+			
+			tree.setRedraw(false);
 			fShowInheritedMembers= !fShowInheritedMembers;
 			getTreeViewer().refresh();
-			getTreeViewer().getTree().setRedraw(true);
+			getTreeViewer().expandToLevel(2);
+			tree.setRedraw(true);
+			
+			// reveal selection
+			Object selectedElement= getSelectedElement();
+			if (selectedElement != null)
+				getTreeViewer().reveal(selectedElement);
 		}
 		
 		/**
