@@ -33,8 +33,8 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
   reconcile(...). Note that clients requesting an AST when calling reconcile(...) will
   now get null or an empty AST due to bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=76738">76738</a>. Either use the ASTProvider to get the AST or enable
   (and disable later) the problem requestor.
-- the AST provider no longer clears the cache when an editor gets deactivated. This
-  reduces the number of AST creations.
+- fixed bugs in the AST provider
+- found and fixed memory peaks caused by requesting multiple AST's in parallel by Java reconcilers
 - bug fixing
 </pre>
 ========== Eclipse Build Input October 19th 2004 ==========<br>
