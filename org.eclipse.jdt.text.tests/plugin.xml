@@ -3,7 +3,7 @@
 <plugin
    id="org.eclipse.jdt.text.tests"
    name="%Plugin.name"
-   version="3.0.0"
+   version="3.0.1"
    provider-name="%Plugin.providerName"
    class="org.eclipse.jdt.text.tests.JdtTextTestPlugin">
 
