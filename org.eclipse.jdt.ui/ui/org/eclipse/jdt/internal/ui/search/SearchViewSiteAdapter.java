@@ -36,10 +36,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
- * @author dmegert
- *
- * To change this generated comment edit the template variable "typecomment":
- * Workbench>Preferences>Java>Templates.
+ * This class adapts a Search view site.
+ * It converts selection of Search view entries to
+ * be a selection of Java elements.
  */
 class SearchViewSiteAdapter implements IWorkbenchSite {
 	
