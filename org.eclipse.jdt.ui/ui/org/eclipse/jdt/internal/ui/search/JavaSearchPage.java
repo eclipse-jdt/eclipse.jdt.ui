@@ -170,9 +170,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
 		JavaSearchOperation op= null;
-		if (data.javaElement != null && getPattern().equals(fInitialData.pattern))
+		if (data.javaElement != null && getPattern().equals(fInitialData.pattern)) {
 			op= new JavaSearchOperation(workspace, data.javaElement, data.limitTo, scope, scopeDescription, collector);
-		else {
+			if (data.limitTo == IJavaSearchConstants.REFERENCES)
+				SearchUtil.warnIfBinaryConstant(data.javaElement, getShell());
+		} else {
 			data.javaElement= null;
 			op= new JavaSearchOperation(workspace, data.pattern, data.isCaseSensitive, data.searchFor, data.limitTo, scope, scopeDescription, collector);
 		}

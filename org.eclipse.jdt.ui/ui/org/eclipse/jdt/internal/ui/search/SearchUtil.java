@@ -12,6 +12,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.IWorkingSet;
@@ -19,7 +22,9 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -28,6 +33,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -35,6 +41,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.browsing.JavaElementTypeComparator;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -53,6 +60,9 @@ public class SearchUtil extends JavaModelUtil {
 	
 	private static final JavaElementTypeComparator fgJavaElementTypeComparator= new JavaElementTypeComparator();
 	private static IDialogSettings fgSettingsStore;
+
+	private static final String BIN_PRIM_CONST_WARN_DIALOG_ID= "BinaryPrimitiveConstantWarningDialog"; //$NON-NLS-1$
+
 
 	public static IJavaElement getJavaElement(IMarker marker) {
 		if (marker == null || !marker.exists())
@@ -378,5 +388,44 @@ public class SearchUtil extends JavaModelUtil {
 		if (foundLRU)
 			// save in new format
 			saveState();
+	}
+
+	public static void warnIfBinaryConstant(IJavaElement element, Shell shell) {
+		if (isBinaryPrimitveConstantOrString(element))
+			OptionalMessageDialog.open(
+				BIN_PRIM_CONST_WARN_DIALOG_ID,
+				shell,
+				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.title"), //$NON-NLS-1$
+				null,
+				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.message"), //$NON-NLS-1$
+				OptionalMessageDialog.INFORMATION,
+				new String[] { IDialogConstants.OK_LABEL },
+				0);
+	}
+	
+	private static boolean isBinaryPrimitveConstantOrString(IJavaElement element) {
+		if (element.getElementType() == IJavaElement.FIELD) {
+			IField field= (IField)element;
+			int flags;
+			try {
+				flags= field.getFlags();
+			} catch (JavaModelException ex) {
+				return false;
+			}
+			return field.isBinary() && Flags.isStatic(flags) && Flags.isFinal(flags) && isPrimitiveOrString(field);
+		}
+		return false;
+	}
+
+	private static boolean isPrimitiveOrString(IField field) {
+		String fieldType;
+		try {
+			fieldType= field.getTypeSignature();
+		} catch (JavaModelException ex) {
+			return false;
+		}
+		char first= fieldType.charAt(0);
+		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
+			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
 	}
 }
