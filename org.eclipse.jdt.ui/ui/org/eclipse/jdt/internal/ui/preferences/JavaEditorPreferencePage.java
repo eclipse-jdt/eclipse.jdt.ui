@@ -170,7 +170,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS),
 		
@@ -611,9 +610,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
 				
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
-
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
 				
