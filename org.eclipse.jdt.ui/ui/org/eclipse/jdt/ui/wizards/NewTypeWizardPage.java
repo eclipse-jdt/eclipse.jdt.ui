@@ -255,25 +255,25 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Constant to signal that the created type is a class.
 	 * @since 3.1
 	 */
-	protected static final int CLASS_TYPE = 1;
+	public static final int CLASS_TYPE = 1;
 	
 	/**
 	 * Constant to signal that the created type is a interface.
 	 * @since 3.1
 	 */
-	protected static final int INTERFACE_TYPE = 2;
+	public static final int INTERFACE_TYPE = 2;
 	
 	/**
 	 * Constant to signal that the created type is an enum.
 	 * @since 3.1
 	 */
-	protected static final int ENUM_TYPE = 3;
+	public static final int ENUM_TYPE = 3;
 	
 	/**
 	 * Constant to signal that the created type is an annotation.
 	 * @since 3.1
 	 */
-	protected static final int ANNOTATION_TYPE = 4;
+	public static final int ANNOTATION_TYPE = 4;
 
 	/**
 	 * Creates a new <code>NewTypeWizardPage</code>.
