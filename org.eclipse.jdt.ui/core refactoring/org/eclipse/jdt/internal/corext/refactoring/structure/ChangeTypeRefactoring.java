@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -27,9 +30,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
@@ -458,7 +458,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	
 			if (DEBUG)
 				printCollection("valid types:", getValidTypeNames()); //$NON-NLS-1$
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			JavaPlugin.logErrorMessage("Error occurred during computation of valid types: " + e.toString()); //$NON-NLS-1$ 
 			fValidTypes.clear(); // error occurred during computation of valid types
 		}
@@ -857,7 +857,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * any expression that is defines-equal to it, and any expression equal
 	 * to it. 
 	 */
-	private Collection/*<ConstraintVariable>*/ findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws JavaModelException {
+	private Collection/*<ConstraintVariable>*/ findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 150); //$NON-NLS-1$
 		Collection/*<ConstraintVariable>*/ result= new HashSet();
 		result.add(cv);
@@ -907,7 +907,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Select the type constraints that involve the selected ASTNode.
 	 */
 	private Collection/*<ITypeConstraint>*/ findRelevantConstraints(Collection/*<ConstraintVariable>*/ relevantConstraintVars, 
-																	IProgressMonitor pm) throws JavaModelException {
+																	IProgressMonitor pm) throws CoreException {
 
 		ICompilationUnit[] cus= collectAffectedUnits(new SubProgressMonitor(pm, 100));
 		
@@ -1188,7 +1188,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * we are interested in. This involves searching for overriding/overridden methods,
 	 * method calls, field accesses.
 	 */
-	private ICompilationUnit[] collectAffectedUnits(IProgressMonitor pm) throws JavaModelException {
+	private ICompilationUnit[] collectAffectedUnits(IProgressMonitor pm) throws CoreException {
 		// BUG: currently, no type constraints are generated for methods that are related
 		// but that do not override each other. As a result, we may miss certain relevant
 		// variables
@@ -1223,7 +1223,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 				// end code fragment
 				
-				IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(
+				IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(
 						root, new SubProgressMonitor(pm, 15), null);
 				SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
 						rippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);

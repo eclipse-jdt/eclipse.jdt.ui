@@ -159,7 +159,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	private void initializeMethodsToRename(IProgressMonitor pm) throws CoreException {
-		fMethodsToRename= new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(fMethod, pm, null)));
+		fMethodsToRename= new HashSet(Arrays.asList(RippleMethodFinder2.getRelatedMethods(fMethod, pm, null)));
 	}
 	
 	protected Set getMethodsToRename() {
