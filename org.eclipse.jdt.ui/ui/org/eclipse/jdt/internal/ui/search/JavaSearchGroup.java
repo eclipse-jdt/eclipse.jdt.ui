@@ -7,36 +7,32 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Contribute Java search specific menu elements.
- * 
- * @deprecated Use org.eclipse.jdt.ui.actions.JavaSearchActionGroup instead
  */
-public class JavaSearchGroup extends ContextMenuGroup  {
+public class JavaSearchGroup extends ActionGroup  {
 
 	private JavaSearchSubGroup[] fGroups;
 
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
 	public static final String GROUP_NAME= SearchMessages.getString("group.search"); //$NON-NLS-1$
 
+	private boolean fIsGroupForEditor;
 	private boolean fInline;
 
 	public JavaSearchGroup(IWorkbenchSite site) {
 		fInline= true;
+		fIsGroupForEditor= false;
 		fGroups= new JavaSearchSubGroup[] {
 			new ReferencesSearchGroup(site),
 			new DeclarationsSearchGroup(site),
@@ -48,6 +44,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 
 	public JavaSearchGroup(JavaEditor editor) {
 		fInline= false;
+		fIsGroupForEditor= true;
 		fGroups= new JavaSearchSubGroup[] {
 			new ReferencesSearchGroup(editor),
 			new DeclarationsSearchGroup(editor),
@@ -57,7 +54,20 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		};
 	}
 
-	public void fill(IMenuManager manager, GroupContext context) {
+	/* (non-Javadoc)
+	 * Method declared in ActionGroup
+	 */
+	public void setContext(ActionContext context) {
+		super.setContext(context);
+		for (int i= 0; i < fGroups.length; i++)
+			fGroups[i].setContext(context);
+	}
+
+	public void fillContextMenu(IMenuManager manager) {
+		if (fIsGroupForEditor) {
+			fillEditorContextMenu(manager, ITextEditorActionConstants.GROUP_FIND);
+			return;
+		}
 		IMenuManager javaSearchMM;
 		if (fInline)
 			javaSearchMM= manager;
@@ -65,7 +75,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 			javaSearchMM= new MenuManager(GROUP_NAME, GROUP_ID); //$NON-NLS-1$
 
 		for (int i= 0; i < fGroups.length; i++)
-			fGroups[i].fill(javaSearchMM, context);
+			fGroups[i].fillContextMenu(javaSearchMM);
 		
 		if (!fInline && !javaSearchMM.isEmpty())
 			manager.appendToGroup(GROUP_ID, javaSearchMM);
@@ -75,14 +85,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		return GROUP_NAME;
 	}
 	
-	public void fill(IMenuManager manager, String groupId, JavaEditor editor) {
-		IStructuredSelection selection;
-		try {
-			selection= SelectionConverter.getStructuredSelection(editor);
-		} catch (JavaModelException ex) {
-			selection= StructuredSelection.EMPTY;
-		}
-
+	private void fillEditorContextMenu(IMenuManager manager, String groupId) {
 		IMenuManager javaSearchMM;
 		if (fInline) {
 			javaSearchMM= manager;
@@ -93,9 +96,8 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		}
 		
 		for (int i= 0; i < fGroups.length; i++) {
-			IMenuManager subManager= fGroups[i].getMenuManagerForGroup(selection);
-//			if (!subManager.isEmpty())
-				javaSearchMM.appendToGroup(GROUP_ID, subManager);
+			IMenuManager subManager= fGroups[i].getMenuManagerForGroup();
+			javaSearchMM.appendToGroup(GROUP_ID, subManager);
 		}
 		if (!fInline)
 			manager.appendToGroup(groupId, javaSearchMM);

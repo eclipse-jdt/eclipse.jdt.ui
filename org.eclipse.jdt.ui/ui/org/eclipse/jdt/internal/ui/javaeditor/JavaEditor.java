@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 
@@ -245,8 +244,6 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
-		
-		new JavaSearchGroup(this).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);		
 	}			
 	
 	/**
@@ -503,14 +500,14 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	protected void createActions() {
 		super.createActions();
 		
-		ActionGroup oeg, ovg, sg;
+		ActionGroup oeg, ovg, sg, jsg;
 		fActionGroups= new CompositeActionGroup(
 			new ActionGroup[] {
 				oeg= new OpenEditorActionGroup(this),
 				ovg= new OpenViewActionGroup(this),
 				sg= new ShowActionGroup(this),
-				new JavaSearchActionGroup(this)});
-		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg});
+				jsg= new JavaSearchActionGroup(this)});
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
 		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);

@@ -10,17 +10,18 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
  */
-public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
+public abstract class JavaSearchSubGroup extends ActionGroup  {
 
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
 
@@ -40,9 +41,9 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 		return null;
 	}
 	
-	public void fill(IMenuManager manager, GroupContext context) {
+	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);
-		ISelection sel= context.getSelection();
+		ISelection sel= getContext().getSelection();
 		JavaElementSearchAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
 			JavaElementSearchAction action= actions[i];
@@ -54,10 +55,14 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(GROUP_ID, javaSearchMM);
 	}
-	public IMenuManager getMenuManagerForGroup(IStructuredSelection selection) {
+	public IMenuManager getMenuManagerForGroup() {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
 		JavaElementSearchAction[] actions= getActions();
-		if (!selection.isEmpty()) {
+		ActionContext context= getContext();
+		ISelection selection= null;
+		if (context != null)
+			selection= context.getSelection();
+		if (selection != null && !selection.isEmpty()) {
 			for (int i= 0; i < actions.length; i++) {
 				actions[i].update(selection);
 				if (actions[i].isEnabled())

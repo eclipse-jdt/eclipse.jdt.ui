@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -20,10 +20,10 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.FindDeclarationsAction;
 import org.eclipse.jdt.internal.ui.search.FindDeclarationsInHierarchyAction;
@@ -53,8 +53,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
  */
 public class JavaSearchActionGroup extends ActionGroup {
 
-	private JavaSearchGroup fOldGroup;
-	private GroupContext fOldContext;
+	private JavaSearchGroup fInternalSearchGroup;
 	private JavaEditor fEditor;
 	private IWorkbenchSite fSite;
 
@@ -78,73 +77,18 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * Creates a new <code>JavaSearchActionGroup</code>.
 	 * 
 	 * @param part the view part that owns this action group
-	 * <p>
-	 * Note: this constructor will go away. The final constructor will only take
-	 *  an <code>IViewPart</code>
-	 * </p>
 	 */
-	public JavaSearchActionGroup(IViewPart part, IInputSelectionProvider provider) {
+	public JavaSearchActionGroup(IViewPart part) {
 		this(part.getViewSite());
-		fOldContext= new GroupContext(provider);
-	}
-	
-	/**
-	 * Creates a new <code>JavaSearchActionGroup</code>.
-	 * 
-	 * @param part the view part that owns this action group
-	 * <p>
-	 * Note: this constructor will go away. The final constructor will only take
-	 *  an <code>IViewPart</code>
-	 * </p>
-	 */
-	public JavaSearchActionGroup(IViewPart part, ISelectionProvider provider) {
-		this(part.getViewSite());
-		fOldContext= new GroupContext(provider);
 	}
 	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>.
 	 * 
 	 * @param page the page that owns this action group
-	 * <p>
-	 * Note: this constructor will go away. The final constructor will only take
-	 *  an <code>Page</code>
-	 * </p>
 	 */
-	public JavaSearchActionGroup(Page page, IInputSelectionProvider provider) {
+	public JavaSearchActionGroup(Page page) {
 		this(page.getSite());
-		fOldContext= new GroupContext(provider);
-	}
-
-	/**
-	 * Creates a new Java search action group.
-	 * <p>
-	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
-	 */
-	public JavaSearchActionGroup(IWorkbenchSite site) {
-		fFindReferencesAction= new FindReferencesAction(site);
-		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
-		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
-		
-		fFindReadReferencesAction= new FindReadReferencesAction(site);
-		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(site);
-		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(site);
-
-		fFindWriteReferencesAction= new FindWriteReferencesAction(site);
-		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(site);
-		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(site);
-
-		fFindDeclarationsAction= new FindDeclarationsAction(site);
-		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(site);
-		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(site);
-
-		fFindImplementorsAction= new FindImplementorsAction(site);
-		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(site);
-		
-		fOldGroup= new JavaSearchGroup(site);
-		
-		initialize(site, false);
 	}
 
 	/**
@@ -213,8 +157,40 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
 		fEditor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
 
-		fOldGroup= new JavaSearchGroup(fEditor);
+		fInternalSearchGroup= new JavaSearchGroup(fEditor);
 		initialize(fEditor.getEditorSite(), true);
+	}
+
+	/*
+	 * Overrides method declared in ActionGroup
+	 */
+	public void setContext(ActionContext context) {
+		fInternalSearchGroup.setContext(context);
+	}
+
+	private JavaSearchActionGroup(IWorkbenchSite site) {
+		fFindReferencesAction= new FindReferencesAction(site);
+		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
+		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
+		
+		fFindReadReferencesAction= new FindReadReferencesAction(site);
+		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(site);
+		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(site);
+
+		fFindWriteReferencesAction= new FindWriteReferencesAction(site);
+		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(site);
+		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(site);
+
+		fFindDeclarationsAction= new FindDeclarationsAction(site);
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(site);
+		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(site);
+
+		fFindImplementorsAction= new FindImplementorsAction(site);
+		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(site);
+		
+		fInternalSearchGroup= new JavaSearchGroup(site);
+		
+		initialize(site, false);
 	}
 
 	private void initialize(IWorkbenchSite site, boolean isJavaEditor) {
@@ -253,36 +229,36 @@ public class JavaSearchActionGroup extends ActionGroup {
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKSPACE, fFindReferencesAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_HIERARCHY, fFindReferencesInHierarchyAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKING_SET, fFindReferencesInWorkingSetAction);
 		
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInHierarchy", fFindReadReferencesInHierarchyAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet", fFindReadReferencesInWorkingSetAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKSPACE, fFindReadReferencesAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_HIERARCHY, fFindReadReferencesInHierarchyAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_READ_ACCESS_IN_WORKING_SET, fFindReadReferencesInWorkingSetAction);
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInHierarchy", fFindWriteReferencesInHierarchyAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet", fFindWriteReferencesInWorkingSetAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKSPACE, fFindWriteReferencesAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_HIERARCHY, fFindWriteReferencesInHierarchyAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindWriteReferencesInWorkingSetAction);
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKSPACE, fFindDeclarationsAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_HIERARCHY, fFindDeclarationsInHierarchyAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_DECLARATIONS_IN_WORKING_SET, fFindDeclarationsInWorkingSetAction);
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKSPACE, fFindImplementorsAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKING_SET, fFindImplementorsInWorkingSetAction);
 	}
 	
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
+	/* 
+	 * Overrides method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		fOldGroup.fill(menu, fOldContext);
+		fInternalSearchGroup.fillContextMenu(menu);
 	}	
 
-	/*
-	 * @see ActionGroup#dispose()
+	/* 
+	 * Overrides method declared in ActionGroup
 	 */
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();

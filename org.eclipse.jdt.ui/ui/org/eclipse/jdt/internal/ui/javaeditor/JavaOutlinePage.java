@@ -712,7 +712,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				fCCPActionGroup= new CCPActionGroup(this),
 				new RefactorActionGroup(this), 
 				new GenerateActionGroup(this),
-				new JavaSearchActionGroup(this, fOutlineViewer)});
+				new JavaSearchActionGroup(this)});
 				
 		// register global actions
 		IActionBars bars= site.getActionBars();

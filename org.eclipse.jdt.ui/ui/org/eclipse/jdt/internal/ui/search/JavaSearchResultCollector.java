@@ -4,8 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.search.ui.IContextMenuContributor;
 import org.eclipse.search.ui.ISearchResultView;
@@ -33,11 +35,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -63,7 +63,10 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
 			JavaPlugin.createStandardGroups(menu);
-			new JavaSearchGroup(SearchUI.getSearchResultView().getViewSite()).fill(menu, new GroupContext(inputProvider));
+			ActionGroup searchGroup= new JavaSearchActionGroup(SearchUI.getSearchResultView());
+			searchGroup.setContext(new ActionContext(inputProvider.getSelection()));
+			searchGroup.fillContextMenu(menu);
+			searchGroup.setContext(null);
 			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
 		}
 		

@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -61,7 +62,7 @@ public class SearchUtil extends JavaModelUtil {
 			if (cu == null)
 				return null;
 			// Find working copy element
-			IWorkingCopy[] workingCopies= getWorkingCopies();
+			IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
 			int i= 0;
 			while (i < workingCopies.length) {
 				if (workingCopies[i].getOriginalElement().equals(cu)) {

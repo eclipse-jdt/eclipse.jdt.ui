@@ -114,7 +114,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 			new ImportActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			fBuildActionGroup= new BuildActionGroup(fPart),
-			new JavaSearchActionGroup(fPart, fPart.getViewer()),
+			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater())});
 		

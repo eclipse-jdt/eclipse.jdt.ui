@@ -687,7 +687,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fCCPActionGroup= new CCPActionGroup(this), 
 				new RefactorActionGroup(this),
 				new GenerateActionGroup(this),
-				new JavaSearchActionGroup(this, fSelectionProviderMediator)});
+				new JavaSearchActionGroup(this)});
 		
 		fActionGroups.fillActionBars(getViewSite().getActionBars());
 		

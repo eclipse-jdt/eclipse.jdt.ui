@@ -142,7 +142,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Object fPreviousSelectedElement;
-	private Image fOriginalTitleImage;
 			
 	/*
 	 * Ensure selection changed events being processed only if
@@ -420,7 +419,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				new ImportActionGroup(this),
 				new GenerateActionGroup(this),
 				fBuildActionGroup= new BuildActionGroup(this),
-				new JavaSearchActionGroup(this, getViewer())});
+				new JavaSearchActionGroup(this)});
 
 		String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 		Assert.isNotNull(viewId);
@@ -566,17 +565,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 
 	protected void setInput(Object input) {
-		if (input == null)
-			setTitleImage(fOriginalTitleImage);
-		else if (input instanceof Collection) {
-			if (((Collection)input).isEmpty())
-				setTitleImage(fOriginalTitleImage);
-			else {
-				Object firstElement= ((Collection)input).iterator().next();
-				setTitleImage(fTitleProvider.getImage(firstElement));
-			}
-		} else
-			setTitleImage(fTitleProvider.getImage(input));
 		setViewerInput(input);
 		updateTitle();
 	}
@@ -621,18 +609,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (fViewer == null)
 			return super.getTitleToolTip();
 		return getToolTipText(fViewer.getInput());
-	}
-
-	/**
-	 * Sets or clears the title image of this part and
-	 * store the orignal image on the first call.
-	 */
-	protected void setTitleImage(Image titleImage) {
-		if (fOriginalTitleImage == null)
-			fOriginalTitleImage= getTitleImage();
-		if (titleImage == null)
-			titleImage= fOriginalTitleImage;
-		super.setTitleImage(titleImage);
 	}
 
 	protected final StructuredViewer getViewer() {
