@@ -35,9 +35,9 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 
 	public String getDisplayString() {
 		if (fExistingReturn != null) {
-			return CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description"); //$NON-NLS-1$
+			return CorrectionMessages.getString("MissingReturnTypeCorrectionProposal.changereturnstatement.description"); //$NON-NLS-1$
 		} else {
-			return CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description"); //$NON-NLS-1$
+			return CorrectionMessages.getString("MissingReturnTypeCorrectionProposal.addreturnstatement.description"); //$NON-NLS-1$
 		}
 	}
 
