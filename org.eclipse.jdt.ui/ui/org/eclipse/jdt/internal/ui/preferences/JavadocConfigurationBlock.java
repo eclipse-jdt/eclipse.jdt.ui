@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -22,17 +23,32 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.internal.dialogs.ResourceSorter;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -42,24 +58,92 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class JavadocConfigurationBlock {
-	
-	private StringDialogField fJavaDocField;
+	private static final String FILE_IMPORT_MASK= "*.jar;*.zip"; //$NON-NLS-1$
+	private static final String ERROR_DIALOG_TITLE= "Error Dialog"; //$NON-NLS-1$
+
+	private StringDialogField fURLField;
+	private StringDialogField fArchiveField;
+	private StringDialogField fArchivePathField;
 	private URL fInitialURL;
-	private SelectionButtonDialogField fValidateButton;
+	private SelectionButtonDialogField fValidateURLButton;
+	private SelectionButtonDialogField fValidateArchiveButton;
 	private SelectionButtonDialogField fBrowseFolder;
+	private SelectionButtonDialogField fURLRadioButton;
+	private SelectionButtonDialogField fArchiveRadioButton;
+	private SelectionButtonDialogField fBrowseArchive;
+	private SelectionButtonDialogField fBrowseArchivePath;
 	private Shell fShell;
 	private IStatusChangeListener fContext;
 	private URL fJavaDocLocation;
 	
-	public JavadocConfigurationBlock(Shell shell,  IStatusChangeListener context, URL initURL) {
+	private IStatus fURLStatus;
+	private IStatus fArchiveStatus;
+	private IStatus fArchivePathStatus;
+	
+	boolean fIsForSource;
+	
+	
+	public JavadocConfigurationBlock(Shell shell,  IStatusChangeListener context, URL initURL, boolean forSource) {
 		fShell= shell;
 		fContext= context;
 		fInitialURL= initURL;
+		fIsForSource= forSource;
+		
+		JDocConfigurationAdapter adapter= new JDocConfigurationAdapter();
+		
+		if (!forSource) {
+			fURLRadioButton= new SelectionButtonDialogField(SWT.RADIO);
+			fURLRadioButton.setDialogFieldListener(adapter);
+			fURLRadioButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.type.path.label")); //$NON-NLS-1$
+		}
+		
+		fURLField= new StringDialogField();
+		fURLField.setDialogFieldListener(adapter);
+		fURLField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.path.label")); //$NON-NLS-1$
+
+		fBrowseFolder= new SelectionButtonDialogField(SWT.PUSH);
+		fBrowseFolder.setDialogFieldListener(adapter);		
+		fBrowseFolder.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.browse.button")); //$NON-NLS-1$
+
+		fValidateURLButton= new SelectionButtonDialogField(SWT.PUSH);
+		fValidateURLButton.setDialogFieldListener(adapter);		
+		fValidateURLButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.validate.button")); //$NON-NLS-1$
+
+		if (!forSource) {
+			fArchiveRadioButton= new SelectionButtonDialogField(SWT.RADIO);
+			fArchiveRadioButton.setDialogFieldListener(adapter);
+			fArchiveRadioButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.type.jar.label")); //$NON-NLS-1$
+	
+			fArchiveField= new StringDialogField();
+			fArchiveField.setDialogFieldListener(adapter);
+			fArchiveField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.jar.label")); //$NON-NLS-1$
+	
+			fBrowseArchive= new SelectionButtonDialogField(SWT.PUSH);
+			fBrowseArchive.setDialogFieldListener(adapter);		
+			fBrowseArchive.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.browse.button")); //$NON-NLS-1$
+			
+			fArchivePathField= new StringDialogField();
+			fArchivePathField.setDialogFieldListener(adapter);
+			fArchivePathField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.jar.path.label")); //$NON-NLS-1$
+			
+			fBrowseArchivePath= new SelectionButtonDialogField(SWT.PUSH);
+			fBrowseArchivePath.setDialogFieldListener(adapter);		
+			fBrowseArchivePath.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.browse.button")); //$NON-NLS-1$
+	
+			fValidateArchiveButton= new SelectionButtonDialogField(SWT.PUSH);
+			fValidateArchiveButton.setDialogFieldListener(adapter);		
+			fValidateArchiveButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.validate.button")); //$NON-NLS-1$
+		}
+
+		fURLStatus= new StatusInfo();
+		fArchiveStatus= new StatusInfo();
+		fArchivePathStatus= new StatusInfo();
+		
+		initializeSelections();
 	}
 	
 	public Control createContents(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
-		
 		Composite topComp= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
 		topLayout.numColumns= 3;
@@ -67,45 +151,97 @@ public class JavadocConfigurationBlock {
 		topLayout.marginHeight= 0;
 		topComp.setLayout(topLayout);
 
-		JDocConfigurationAdapter adapter= new JDocConfigurationAdapter();
+		// Add the first radio button for the path
+		if (!fIsForSource) {
+			fURLRadioButton.doFillIntoGrid(topComp, 3);
+		}
+	
+		fURLField.doFillIntoGrid(topComp, 2);
+		LayoutUtil.setWidthHint(fURLField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+		LayoutUtil.setHorizontalGrabbing(fURLField.getTextControl(null));		
 
-		fJavaDocField= new StringDialogField();
-		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.label")); //$NON-NLS-1$
-		fJavaDocField.doFillIntoGrid(topComp, 2);
-		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
-		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
-
-		fBrowseFolder= new SelectionButtonDialogField(SWT.PUSH);
-		fBrowseFolder.setDialogFieldListener(adapter);		
-		fBrowseFolder.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.browse.button")); //$NON-NLS-1$
 		fBrowseFolder.doFillIntoGrid(topComp, 1);
 		
-		DialogField.createEmptySpace(topComp, 2);	
-		
-		fValidateButton= new SelectionButtonDialogField(SWT.PUSH);
-		fValidateButton.setDialogFieldListener(adapter);		
-		fValidateButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.validate.button")); //$NON-NLS-1$
-		fValidateButton.doFillIntoGrid(topComp, 1);
+		DialogField.createEmptySpace(topComp, 2);			
+		fValidateURLButton.doFillIntoGrid(topComp, 1);
 
-		setValues();
+		//DialogField.createEmptySpace(topComp, 3);	
+		
+		if (!fIsForSource) {
+			// Add the second radio button for the jar/zip
+			fArchiveRadioButton.doFillIntoGrid(topComp, 3);
+	
+			// Add the jar/zip field
+			fArchiveField.doFillIntoGrid(topComp, 2);
+			LayoutUtil.setWidthHint(fArchiveField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+			LayoutUtil.setHorizontalGrabbing(fArchiveField.getTextControl(null));		
+
+	
+			fBrowseArchive.doFillIntoGrid(topComp, 1);
+			
+			// Add the path chooser for the jar/zip
+			fArchivePathField.doFillIntoGrid(topComp, 2);
+			LayoutUtil.setWidthHint(fArchivePathField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+			LayoutUtil.setHorizontalGrabbing(fArchivePathField.getTextControl(null));	
+
+			
+			fBrowseArchivePath.doFillIntoGrid(topComp, 1);
+			
+			//DialogField.createEmptySpace(topComp, 2);
+			//fValidateArchiveButton.doFillIntoGrid(topComp, 1);
+
+			int indent= converter.convertWidthInCharsToPixels(2);	
+			LayoutUtil.setHorizontalIndent(fArchiveField.getLabelControl(null), indent);
+			LayoutUtil.setHorizontalIndent(fArchivePathField.getLabelControl(null), indent);
+			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null), indent);
+			
+			fURLRadioButton.attachDialogFields(new DialogField[] {fURLField,  fBrowseFolder, fValidateURLButton });
+			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });
+		}
+
 		
 		return topComp;
-	}
+	}	
 	
-	//Sets the default by getting the stored URL setting if it exists
-	//otherwise the text box is left empty.
-	private void setValues() {
+	private void initializeSelections() {
 		String initialValue = fInitialURL != null ? fInitialURL.toExternalForm() : ""; //$NON-NLS-1$
-		fJavaDocField.setText(initialValue);
+		
+		if (fIsForSource) {
+			fURLField.setText(initialValue);
+			return;
+		}
+		String prefix= "jar:file:/"; //$NON-NLS-1$
+		boolean isArchive= initialValue.startsWith(prefix); //$NON-NLS-1$
+		
+		fURLRadioButton.setSelection(!isArchive);
+		fArchiveRadioButton.setSelection(isArchive);
+		
+		if (isArchive) {
+			String jarPath;
+			String insidePath= ""; //$NON-NLS-1$
+			int excIndex= initialValue.indexOf('!');
+			if (excIndex == -1) {
+				jarPath= initialValue.substring(prefix.length());
+			} else {
+				jarPath= initialValue.substring(prefix.length(), excIndex);
+				insidePath= initialValue.substring(excIndex + 1);
+				if (insidePath.length() > 0 && insidePath.charAt(0) == '/') {
+					insidePath= insidePath.substring(1);
+				}
+			}
+			fArchivePathField.setText(insidePath);
+			fArchiveField.setText(jarPath);
+		} else {
+			fURLField.setText(initialValue);
+		}		
 	}
 		
 	public void setFocus() {
-		fJavaDocField.postSetFocusOnDialogField(fShell.getDisplay());
+		fURLField.postSetFocusOnDialogField(fShell.getDisplay());
 	}
 	
 	public void performDefaults() {
-		setValues();
+		initializeSelections();
 	}
 	
 	public URL getJavadocLocation() {
@@ -230,22 +366,123 @@ public class JavadocConfigurationBlock {
 
 
 	private void jdocDialogFieldChanged(DialogField field) {
-		if (field == fJavaDocField) {
-			IStatus status= updateJavaDocLocationStatus();
-			fValidateButton.setEnabled(!status.matches(IStatus.ERROR) && fJavaDocField.getText().length() > 0);
-			fContext.statusChanged(status);
-		} else if (field == fValidateButton) {
+		if (field == fURLField) {
+			fURLStatus= updateURLStatus();
+			statusChanged();
+		} else if (field == fArchiveField) {
+			fArchiveStatus= updateArchiveStatus();
+			statusChanged();
+		} else if (field == fArchivePathField) {
+			fArchivePathStatus= updateArchivePathStatus();
+			statusChanged();
+		} else if (field == fValidateURLButton || field == fValidateArchiveButton) {
 			EntryValidator validator= new EntryValidator();
 			BusyIndicator.showWhile(fShell.getDisplay(), validator);
 		} else if (field == fBrowseFolder) {
-			URL jdocURL= chooseJavaDocFolder();
-			if (jdocURL != null) {
-				fJavaDocField.setText(jdocURL.toExternalForm());
-			}			
+			String url= chooseJavaDocFolder();
+			if (url != null) {
+				fURLField.setText(url);
+			}
+		} else if (field == fBrowseArchive) {
+			String jarPath= chooseArchive();
+			if (jarPath != null) {
+				fArchiveField.setText(jarPath);
+			}
+		} else if (field == fBrowseArchivePath) {
+			String archivePath= chooseArchivePath();
+			if (archivePath != null) {
+				fArchivePathField.setText(archivePath);
+			}		
+		} else if (field == fURLRadioButton || field == fArchiveRadioButton) {
+			statusChanged();							
 		}
 	}
+	
+	private void statusChanged() {
+		IStatus status;
+		boolean isURL= fIsForSource || fURLRadioButton.isSelected();
+		if (isURL) {
+			status= fURLStatus;
+		} else {
+			status= StatusUtil.getMoreSevere(fArchiveStatus, fArchivePathStatus);
+		}
+		fBrowseArchivePath.setEnabled(!isURL && fArchiveStatus.isOK() && fArchiveField.getText().length() > 0);
+		
+		fContext.statusChanged(status);
+	}
 
-	private URL chooseJavaDocFolder() {
+
+	private String chooseArchivePath() {
+		final String[] res= new String[] { null };
+		BusyIndicator.showWhile(fShell.getDisplay(), new Runnable() {
+			public void run() {
+				res[0]= internalChooseArchivePath();
+			}
+		});
+		return res[0];
+	}
+		
+		
+
+	private String internalChooseArchivePath() {		
+		ILabelProvider lp= new ZipDialogLabelProvider();
+		ITreeContentProvider cp= new ZipDialogContentProvider();
+		
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
+		dialog.setValidator(new ZipDialogValidator());
+		dialog.setTitle(PreferencesMessages.getString("JavadocConfigurationBlock.browse_jarorzip_path.title")); //$NON-NLS-1$
+		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.location_in_jarorzip.message")); //$NON-NLS-1$
+		//dialog.addFilter(filter);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		
+		ZipFile zipFile= null;
+		try {
+			zipFile= new ZipFile(fArchiveField.getText());
+
+			dialog.setInput(zipFile);
+			if (dialog.open() == ElementTreeSelectionDialog.OK) {
+				Object element= dialog.getFirstResult();
+				if (element instanceof ZipTreeNode)  {
+					return ((ZipTreeNode) element).toString();
+				}
+			}
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		} finally {
+			if (zipFile != null) {
+				try {
+					zipFile.close();
+				} catch (IOException e1) {
+					// ignore
+				}
+			}
+		}
+		return null;
+	}
+
+	private String chooseArchive() {
+		FileDialog dialog= new FileDialog(fShell, SWT.OPEN);
+		dialog.setFilterExtensions(new String[] { FILE_IMPORT_MASK });
+		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.zipImportSource.title")); //$NON-NLS-1$
+
+		String currentSourceString= fArchiveField.getText();
+		int lastSeparatorIndex=	currentSourceString.lastIndexOf(File.separator);
+		if (lastSeparatorIndex != -1)
+			dialog.setFilterPath(currentSourceString.substring(0, lastSeparatorIndex));
+
+		return dialog.open();
+	}
+	
+	/**
+	 * Display an error dialog with the specified message.
+	 *
+	 * @param message the error message
+	 */
+	protected void displayErrorDialog(String message) {
+		MessageDialog.openError(fShell, ERROR_DIALOG_TITLE, message); //$NON-NLS-1$
+	}
+		
+	private String chooseJavaDocFolder() {
 		String initPath= ""; //$NON-NLS-1$
 		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
 			initPath= (new File(fJavaDocLocation.getFile())).getPath();
@@ -254,51 +491,18 @@ public class JavadocConfigurationBlock {
 		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.label")); //$NON-NLS-1$
 		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
-		String res= dialog.open();
-		if (res != null) {
-			try {
-				return (new File(res)).toURL();
-			} catch (MalformedURLException e) {
-				// should not happen
-				JavaPlugin.log(e);
-			}
-		}
-		return null;
+		return dialog.open();
 	}
-	
-	/*
-	private URL chooseJavaDocArchive() {
-		IPath initPath= Path.EMPTY; //$NON-NLS-1$
-		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
-			initPath= new Path((new File(fJavaDocLocation.getFile())).getPath());
-		}		
-					
-		if (ArchiveFileFilter.isArchivePath(initPath)) {
-			initPath= initPath.removeLastSegments(1);
-		}
-	
-		FileDialog dialog= new FileDialog(fShell);
-		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocArchiveDialog.label")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
-		dialog.setFilterPath(initPath.toOSString());
-		String res= dialog.open();
-		if (res != null) {
-			try {
-				return (new File(res)).toURL();
-			} catch (MalformedURLException e) {
-				// should not happen
-				JavaPlugin.log(e);
-			}
-		}
-		return null;		
-	}	
-	*/
-	private IStatus updateJavaDocLocationStatus() {
+		
+	private IStatus updateURLStatus() {
 		StatusInfo status= new StatusInfo();
 		fJavaDocLocation= null;
-		String jdocLocation= fJavaDocField.getText();
-		if (jdocLocation.length() > 0) {
-			try {
+		try {
+			String jdocLocation= fURLField.getText();
+			if (jdocLocation.length() == 0) {
+				return status;
+			}
+			if (jdocLocation.length() > 0) {
 				URL url= new URL(jdocLocation);
 				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 					if (url.getFile() == null) {
@@ -318,14 +522,193 @@ public class JavadocConfigurationBlock {
 					}
 				}
 				fJavaDocLocation= url;
-			} catch (MalformedURLException e) {
-				status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
-				return status;
-			}
-		} 
-		//else status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.EmptyJavadocLocation.warning")); //$NON-NLS-1$
-		return status;
-	}
+			} 
+		} catch (MalformedURLException e) {
+			status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
+			return status;			
+		}
 
+		return status;
+	}	
+	
+	private IStatus updateArchiveStatus() {
+		try {
+			StatusInfo status= new StatusInfo();
+			String jdocLocation= fArchiveField.getText();
+			if (jdocLocation.length() > 0)  {
+				File jarFile= new File(jdocLocation);
+				if (jarFile.isDirectory())  {
+					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
+					return status;							
+				}
+				if (!jarFile.exists())  {
+					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
+					return status;													
+				}
+				fJavaDocLocation= getArchiveURL();
+			}
+			return status;
+		} catch (MalformedURLException e) {
+			StatusInfo status= new StatusInfo();
+			status.setError(e.getMessage());  //$NON-NLS-1$
+			return status;
+		}
+	}
+	
+	private IStatus updateArchivePathStatus() {
+		// no validation yet
+		try {
+			fJavaDocLocation= getArchiveURL();
+		} catch (MalformedURLException e) {
+			StatusInfo status= new StatusInfo();
+			status.setError(e.getMessage());  //$NON-NLS-1$
+			//status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
+			return status;
+		}
+		return new StatusInfo();
+	
+	}
+	
+	
+	private URL getArchiveURL() throws MalformedURLException {
+		String jarLoc= fArchiveField.getText();
+		String innerPath= fArchivePathField.getText().trim();
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("jar:"); //$NON-NLS-1$
+		buf.append(new File(jarLoc).toURL().toExternalForm());
+		buf.append('!');
+		if (innerPath.length() > 0) {
+			if (innerPath.charAt(0) != '/') {
+				buf.append('/');
+			}
+			buf.append(innerPath);
+		} else {
+			buf.append('/');
+		}
+		return new URL(buf.toString());
+	}
+	
+
+	/**
+	 * An adapter for presenting a zip file in a tree viewer.
+	 */
+	private class ZipDialogContentProvider implements ITreeContentProvider {
+	
+		private ZipTreeNode fTree;
+		private ZipFile fZipFile;
+	
+		ZipTreeNode getSelectedNode(String initialSelection) {
+			ZipTreeNode node= null;
+			if (initialSelection != null) {
+				node= fTree.findNode(initialSelection);
+			}
+			if (node == null) {
+				node= fTree.findNode(""); //$NON-NLS-1$
+			}
+			return node;
+		}
+	
+		void setInitialInput(ZipFile file) {
+			fTree= createTree(file);
+		}
+	
+		private ZipTreeNode createTree(ZipFile zipFile) {
+			if (zipFile.equals(fZipFile))
+				return fTree;
+			fZipFile= zipFile;
+			return ZipTreeNode.newZipTree(zipFile);
+		}
+	
+		/* non java-doc
+		 * @see ITreeContentProvider#inputChanged
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			if (newInput instanceof ZipFile)
+				fTree= createTree((ZipFile) newInput);
+			else {
+				fTree= null;
+				fZipFile= null;
+			}
+		}
+	
+		/* non java-doc
+		  * @see ITreeContentProvider#getParent
+		  */
+		public Object getParent(Object element) {
+			return ((ZipTreeNode) element).getParent();
+		}
+	
+		/* non java-doc
+		 * @see ITreeContentProvider#hasChildren
+		 */
+		public boolean hasChildren(Object element) {
+			return ((ZipTreeNode) element).hasChildren();
+		}
+	
+		/* non java-doc
+		 * @see ITreeContentProvider#getChildren
+		 */
+		public Object[] getChildren(Object element) {
+			return ((ZipTreeNode) element).getChildren();
+		}
+	
+		/* non java-doc
+		 * @see ITreeContentProvider#getElements
+		 */
+		public Object[] getElements(Object zipFile) {
+			if (fTree == null && zipFile instanceof ZipFile) {
+				fTree= createTree((ZipFile) zipFile);
+			}
+			return fTree.getChildren();
+		}
+	
+		/* non java-doc
+		 * @see IContentProvider#dispose
+		 */
+		public void dispose() {
+			fTree= null;
+			fZipFile= null;
+		}
+	}
+	
+	private class ZipDialogLabelProvider extends LabelProvider {
+	
+		private final Image IMG_JAR=
+			JavaUI.getSharedImages().getImage(
+				org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_JAR);
+		private final Image IMG_FOLDER=
+			PlatformUI.getWorkbench().getSharedImages().getImage(
+				ISharedImages.IMG_OBJ_FOLDER);
+	
+		public Image getImage(Object element) {
+			if (element == null || !(element instanceof ZipTreeNode))
+				return super.getImage(element);
+			if (((ZipTreeNode) element).representsZipFile())
+				return IMG_JAR;
+			else
+				return IMG_FOLDER;
+		}
+	
+		public String getText(Object element) {
+			if (element == null || !(element instanceof ZipTreeNode))
+				return super.getText(element);
+			return ((ZipTreeNode) element).getName();
+		}
+	}
+	
+	private static class ZipDialogValidator implements ISelectionStatusValidator {
+		public ZipDialogValidator() {
+			super();
+		}		
+			
+		/*
+		 * @see ISelectionValidator#validate(Object[])
+		 */
+		public IStatus validate(Object[] selection) {
+			String message= ""; //$NON-NLS-1$
+			return new StatusInfo(IStatus.INFO, message);
+		}
+	}	
 
 }

@@ -741,7 +741,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			super(parent);
 			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
 			URL initialLocation= JavaUI.getLibraryJavadocLocation(element.getPath());
-			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation);
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, false);
 		}
 
 		protected Control createDialogArea(Composite parent) {

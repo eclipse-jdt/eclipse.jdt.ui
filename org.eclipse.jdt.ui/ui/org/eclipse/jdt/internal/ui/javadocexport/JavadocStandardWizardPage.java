@@ -567,7 +567,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation);
+			boolean forProject= selection.getElementType() == IJavaElement.JAVA_PROJECT;
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, forProject);
 		}
 
 		protected Control createDialogArea(Composite parent) {

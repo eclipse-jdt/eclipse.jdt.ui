@@ -83,7 +83,8 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			}
 		}
 		
-		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation);
+		boolean isProject= (elem instanceof IJavaProject);
+		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation, isProject);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
 		control.setVisible(elem != null);
 
