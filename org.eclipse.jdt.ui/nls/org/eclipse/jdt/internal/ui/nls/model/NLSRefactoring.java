@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
@@ -47,9 +49,6 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextFileChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextRegion;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.nls.changes.CreateTextFileChange;
 

@@ -1,21 +1,21 @@
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
- */package org.eclipse.jdt.internal.ui.nls;import org.eclipse.jdt.core.ICompilationUnit;
+ */package org.eclipse.jdt.internal.ui.nls;import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.nls.model.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.nls.search.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 public class ExternalizeAction implements IWorkbenchWindowActionDelegate{
 
