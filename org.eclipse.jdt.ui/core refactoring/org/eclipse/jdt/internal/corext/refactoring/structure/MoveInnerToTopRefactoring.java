@@ -602,7 +602,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String getSourceOfImport(ImportDeclaration enclosingImport, IBinding importBinding){
-		String fullyQualifiedTypeName= Bindings.getFullyQualifiedImportName((ITypeBinding)importBinding);
+		String fullyQualifiedTypeName= MoveInnerToTopRefactoring.getFullyQualifiedImportName((ITypeBinding)importBinding);
 		if (enclosingImport.isOnDemand())
 			return fullyQualifiedTypeName +".*"; //$NON-NLS-1$
 		else
@@ -1070,6 +1070,15 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private String format(String src, int indentationLevel){
 		return ToolFactory.createCodeFormatter().format(src, indentationLevel, null, getLineSeperator());
+	}
+
+	private static String getFullyQualifiedImportName(ITypeBinding type) {
+		if (type.isArray())
+			return Bindings.getFullyQualifiedName(type.getElementType());
+		else if (type.isAnonymous())
+			return getFullyQualifiedImportName(type.getSuperclass());
+		else
+			return Bindings.getFullyQualifiedName(type);
 	}
 	
 	private static class MemberAccessNodeCollector extends ASTVisitor{
