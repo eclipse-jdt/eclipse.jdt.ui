@@ -43,7 +43,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
-	private static final boolean BUG_74035= true;
 
 	public ChangeSignatureTests(String name) {
 		super(name);
@@ -720,11 +719,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deleted, newReturnTypeName);
 	}
+	
 	public void test27() throws Exception{
-		if (BUG_74035) {
-			printTestDisabledMessage("see bug 74035");
-			return;
-		}
 		if (! RUN_CONSTRUCTOR_TEST){
 			printTestDisabledMessage("disabled for constructors for now");
 			return;
