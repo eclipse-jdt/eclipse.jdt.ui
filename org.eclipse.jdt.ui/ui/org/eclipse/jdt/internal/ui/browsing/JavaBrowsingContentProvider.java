@@ -241,7 +241,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {
-			postRefresh(element);
+			postRefresh(null);
 			return;
 		}
 		
@@ -345,7 +345,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			// a package fragment might become non empty refresh from the parent
 			if (element instanceof IPackageFragment) {
 				IJavaElement parent= (IJavaElement)internalGetParent(element);
-				// avoid posting a refresh to an unvisible parent
+				// avoid posting a refresh to an invisible parent
 				if (element.equals(fInput)) {
 					postRefresh(element);
 				} else {
@@ -383,30 +383,18 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		});
 	 }
 
-	private void postRefresh(final Object root, boolean updateLabels) {
-		if (!updateLabels) {
-			postRefresh(root);
-			return;
-		}
-
+	private void postRefresh(final Object root, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.refresh(root, true);
+					fViewer.refresh(root, updateLabels);
 			}
 		});
 	}
 		
 	private void postRefresh(final Object root) {
-		postRunnable(new Runnable() {
-
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.refresh(root, false);
-				}
-		});
+		postRefresh(root, false);
 	}
 
 	private void postAdd(final Object parent, final Object element) {
