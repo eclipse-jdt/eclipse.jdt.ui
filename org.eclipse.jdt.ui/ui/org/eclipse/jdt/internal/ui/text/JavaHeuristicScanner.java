@@ -52,6 +52,7 @@ public class JavaHeuristicScanner implements Symbols {
 	private static final char LBRACKET= '[';
 	private static final char RBRACKET= ']';
 	private static final char QUESTIONMARK= '?';
+	private static final char EQUAL= '=';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -242,6 +243,8 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenCOMMA;
 			case QUESTIONMARK:
 				return TokenQUESTIONMARK;
+			case EQUAL:
+				return TokenEQUAL;
 		}
 		
 		// else
@@ -308,6 +311,8 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenCOMMA;
 			case QUESTIONMARK:
 				return TokenQUESTIONMARK;
+			case EQUAL:
+				return TokenEQUAL;
 		}
 		
 		// else

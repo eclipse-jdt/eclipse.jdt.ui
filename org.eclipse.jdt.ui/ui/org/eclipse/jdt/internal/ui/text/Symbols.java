@@ -28,6 +28,7 @@ public interface Symbols {
 	int TokenCOLON= 9;
 	int TokenQUESTIONMARK= 10;
 	int TokenCOMMA= 11;
+	int TokenEQUAL= 12;
 	int TokenIF= 109;
 	int TokenDO= 1010;
 	int TokenFOR= 1011;

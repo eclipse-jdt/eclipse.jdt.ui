@@ -375,7 +375,7 @@ public class JavaIndenter {
 					
 					// special array handling
 					nextToken();
-					if (skipBrackets()) {
+					if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
 						int first= fScanner.findNonWhitespaceForwardInAnyPartition(searchPos, position);
 						// ... with a first element already defined - take its offset
 						if (first != JavaHeuristicScanner.NOT_FOUND)
