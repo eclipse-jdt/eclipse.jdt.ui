@@ -12,9 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
@@ -44,10 +42,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -56,6 +52,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
@@ -122,15 +119,13 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 	private Templates fTemplates;
 
-	private CheckboxTableViewer fTableViewer;
+	private TableViewer fTableViewer;
 	private Button fAddButton;
 	private Button fEditButton;
 	private Button fImportButton;
 	private Button fExportButton;
 	private Button fExportAllButton;
 	private Button fRemoveButton;
-	private Button fEnableAllButton;
-	private Button fDisableAllButton;
 
 	private SourceViewer fPatternViewer;
 	private Button fFormatButton;
@@ -232,12 +227,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});
 
-		fTableViewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				Template template= (Template) event.getElement();
-			}
-		});
-
 		Composite buttons= new Composite(innerParent, SWT.NONE);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout= new GridLayout();
@@ -299,24 +288,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});		
 
-		fEnableAllButton= new Button(buttons, SWT.PUSH);
-		fEnableAllButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.enable.all")); //$NON-NLS-1$
-		fEnableAllButton.setLayoutData(getButtonGridData(fEnableAllButton));
-		fEnableAllButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				enableAll(true);
-			}
-		});
-
-		fDisableAllButton= new Button(buttons, SWT.PUSH);
-		fDisableAllButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.disable.all")); //$NON-NLS-1$
-		fDisableAllButton.setLayoutData(getButtonGridData(fDisableAllButton));
-		fDisableAllButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				enableAll(false);
-			}
-		});
-
 		fPatternViewer= createViewer(parent);
 		
 		fFormatButton= new Button(parent, SWT.CHECK);
@@ -326,8 +297,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
         fFormatButton.setLayoutData(gd1);
 
 		fTableViewer.setInput(fTemplates);
-		fTableViewer.setAllChecked(false);
-		fTableViewer.setCheckedElements(getEnabledTemplates());		
 
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
@@ -377,17 +346,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
         });
     }
     
-	
-	private Template[] getEnabledTemplates() {
-		Template[] templates= fTemplates.getTemplates();
-		
-		List list= new ArrayList(templates.length);
-		
-		for (int i= 0; i != templates.length; i++)
-			list.add(templates[i]);
-				
-		return (Template[]) list.toArray(new Template[list.size()]);
-	}
 	
 	private SourceViewer createViewer(Composite parent) {
 		Label label= new Label(parent, SWT.NONE);
@@ -450,8 +408,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fEditButton.setEnabled(selectionCount == 1);
 		fExportButton.setEnabled(selectionCount > 0);
 		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount <= itemCount);
-		fEnableAllButton.setEnabled(itemCount > 0);
-		fDisableAllButton.setEnabled(itemCount > 0);
 	}
 	
 	private void add() {		
@@ -463,7 +419,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		if (dialog.open() == Window.OK) {
 			fTemplates.add(template);
 			fTableViewer.refresh();
-			fTableViewer.setChecked(template, true);
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
 	}
@@ -499,7 +454,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 				template.setPattern(newTemplate.getPattern());
 				fTableViewer.refresh(template);
 			}
-			fTableViewer.setChecked(template, true);
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
 	}
@@ -517,8 +471,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			fTemplates.addFromFile(new File(path), true, ResourceBundle.getBundle(JavaTemplateMessages.class.getName()));
 			
 			fTableViewer.refresh();
-			fTableViewer.setAllChecked(false);
-			fTableViewer.setCheckedElements(getEnabledTemplates());
 
 		} catch (CoreException e) {			
 			openReadErrorDialog(e);
@@ -600,11 +552,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fTableViewer.refresh();
 	}
 	
-	private void enableAll(boolean enable) {
-		Template[] templates= fTemplates.getTemplates();
-		fTableViewer.setAllChecked(enable);
-	}
-	
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
@@ -634,8 +581,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		
 		// refresh
 		fTableViewer.refresh();
-		fTableViewer.setAllChecked(false);
-		fTableViewer.setCheckedElements(getEnabledTemplates());		
 	}
 
 	/*
