@@ -76,6 +76,14 @@
      </perspectiveExtension> 
 </extension>
 
+<extension point="org.eclipse.ui.projectNatureImages">
+	<image
+		id="org.eclipse.ui.javaProjectNatureImage"
+		natureId="org.eclipse.jdt.core.javanature"
+	        icon="icons/full/ovr16/java_ovr.gif">
+	</image>
+</extension>
+
 <extension 
 	point="org.eclipse.ui.views">
 	<category 
