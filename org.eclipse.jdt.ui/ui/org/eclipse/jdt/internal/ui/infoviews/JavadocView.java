@@ -406,11 +406,13 @@ public class JavadocView extends AbstractInfoView {
 		String javadocHtml= (String)input;
 		
 		if (fIsUsingBrowserWidget) {
-			boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
-			if (javadocHtml != null && RTL) {
-				StringBuffer buffer= new StringBuffer(javadocHtml);
-				HTMLPrinter.insertStyles(buffer, new String[] { "direction:rtl" } ); //$NON-NLS-1$
-				javadocHtml= buffer.toString();
+			if (javadocHtml != null && javadocHtml.length() > 0) {
+				boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
+				if (RTL) {
+					StringBuffer buffer= new StringBuffer(javadocHtml);
+					HTMLPrinter.insertStyles(buffer, new String[] { "direction:rtl" } ); //$NON-NLS-1$
+					javadocHtml= buffer.toString();
+				}
 			}
 			fBrowser.setText(javadocHtml);
 		} else {
