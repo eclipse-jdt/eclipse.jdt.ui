@@ -793,7 +793,7 @@ JavaStructureDiffViewerCreator
 
 
 <!-- =========================================================================== -->
-<!-- Java Action Set (Adding the source, refactor and navigate menu              -->
+<!-- Java and Coding Action Set (Adding the source, refactor and navigate menu)  -->
 <!-- =========================================================================== -->
 
 <extension point="org.eclipse.ui.actionSets">
@@ -811,11 +811,9 @@ JavaStructureDiffViewerCreator
             id="navigate"
             label="%NavigateMenu.label"
             path="edit">
-            <separator name="goGroup" />
          	<separator name="openGroup"/>
-         	<separator name="showGroup"/>
-         	<separator name="problemGroup"/>
       	</menu>
+
 		<action id="openType"
 			menubarPath="navigate/openGroup"
 			toolbarPath="Normal/Java"			
@@ -823,6 +821,28 @@ JavaStructureDiffViewerCreator
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
+	</actionSet>
+</extension>
+
+<extension point="org.eclipse.ui.actionSets">
+	<actionSet
+		id="org.eclipse.jdt.ui.CodingActionSet"
+        label="%CodingActionSet.label"
+		visible="false"
+		description="%CodingActionSet.description">
+
+		<!-- =========================================================================== -->
+		<!-- Navigate Menu                                                               -->
+		<!-- =========================================================================== -->
+			
+      	<menu
+            id="navigate"
+            label="%NavigateMenu.label"
+            path="edit">
+         	<separator name="openGroup"/>
+         	<separator name="showGroup"/>
+         	<separator name="problemGroup"/>
+      	</menu>
 		<action id="openExternalJavadoc"
       		menubarPath="navigate/openGroup"
       		label="%OpenExternalJavadocAction.label"
@@ -1008,7 +1028,7 @@ JavaStructureDiffViewerCreator
 
 <extension point="org.eclipse.ui.actionSetPartAssociations">
 	<actionSetPartAssociation 
-		targetID="org.eclipse.jdt.ui.JavaActionSet">
+		targetID="org.eclipse.jdt.ui.CodingActionSet">
 		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
 		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
 		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
@@ -1020,7 +1040,7 @@ JavaStructureDiffViewerCreator
 	</actionSetPartAssociation>
 </extension>
 
-<!-- Java Action Set (Adding the source, refactor and navigate menu -->
+<!-- End Java Action Set (Adding the source, refactor and navigate menu -->
 
 <extension
 	point="org.eclipse.ui.popupMenus">         

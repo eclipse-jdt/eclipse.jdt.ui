@@ -85,14 +85,23 @@ public final class JavaUI {
 	 * The id of the Java action set
 	 * (value <code>"org.eclipse.jdt.ui.JavaActionSet"</code>).
 	 */
-	public static final String ID_ACTION_SET= 		"org.eclipse.jdt.ui.JavaActionSet"; //$NON-NLS-1$
+	public static final String ID_ACTION_SET= "org.eclipse.jdt.ui.JavaActionSet"; //$NON-NLS-1$
 
 	/**
-	 * The id of the Java Element Creation action set.
+	 * The id of the Java Element Creation action set
+	 * (value <code>"org.eclipse.jdt.ui.JavaElementCreationActionSet"</code>).
 	 * 
 	 * @since 2.0
 	 */
 	public static final String ID_ELEMENT_CREATION_ACTION_SET= "org.eclipse.jdt.ui.JavaElementCreationActionSet"; //$NON-NLS-1$
+	
+	/**
+	 * The id of the Java Coding action set
+	 * (value <code>"org.eclipse.jdt.ui.CodingActionSet"</code>).
+	 * 
+	 * @since 2.0
+	 */
+	public static final String ID_CODING_ACTION_SET= "org.eclipse.jdt.ui.CodingActionSet"; //$NON-NLS-1$
 	
 	/**
 	 * The editor part id of the editor that presents Java compilation units
