@@ -12,10 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.ISourceRange;
@@ -122,9 +120,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/** The type constraint model to solve */
 	private final SuperTypeConstraintsModel fModel;
-
-	/** The original methods (element type: <code>&lt;String, Collection&lt;IMethodBinding&gt;&gt;</code>) */
-	private final Map fOriginalMethods= new HashMap();
 
 	/**
 	 * Creates a new super type constraints creator.
@@ -537,7 +532,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	public final void endVisit(final QualifiedName node) {
 		final ASTNode parent= node.getParent();
 		final Name qualifier= node.getQualifier();
-		 IBinding binding= qualifier.resolveBinding();
+		IBinding binding= qualifier.resolveBinding();
 		if (binding instanceof ITypeBinding) {
 			final ConstraintVariable2 variable= fModel.createTypeVariable((ITypeBinding) binding, new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(node), new ISourceRange() {
 
@@ -703,17 +698,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 */
 	private Collection getOriginalMethods(final IMethodBinding binding) {
 		Assert.isNotNull(binding);
-		final String key= binding.getKey();
-		Collection originals= (Collection) fOriginalMethods.get(key);
-		if (originals == null) {
-			originals= new ArrayList();
-			final ITypeBinding type= binding.getDeclaringClass();
-			getOriginalMethods(binding, type, originals, false);
-			getOriginalMethods(binding, type, originals, true);
-			if (originals.isEmpty())
-				originals.add(binding);
-			fOriginalMethods.put(key, originals);
-		}
+		final Collection originals= new ArrayList();
+		final ITypeBinding type= binding.getDeclaringClass();
+		getOriginalMethods(binding, type, originals, false);
+		getOriginalMethods(binding, type, originals, true);
+		if (originals.isEmpty())
+			originals.add(binding);
 		return originals;
 	}
 
