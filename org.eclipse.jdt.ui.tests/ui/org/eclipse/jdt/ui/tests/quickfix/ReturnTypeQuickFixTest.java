@@ -757,6 +757,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
+		buf.append("    private int[] fArray;\n");		
 		buf.append("    public int getArray()[] {\n");
 		buf.append("        if (true) {\n");		
 		buf.append("        }\n");		
@@ -782,15 +783,57 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
+		buf.append("    private int[] fArray;\n");	
 		buf.append("    public int getArray()[] {\n");
 		buf.append("        if (true) {\n");		
 		buf.append("        }\n");
-		buf.append("        return null;\n");		
+		buf.append("        return fArray;\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 
-	
+	public void testMissingReturnStatementWithCode2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean isVisible() {\n");
+		buf.append("        boolean res= false;\n");			
+		buf.append("        if (true) {\n");
+		buf.append("            res= false;\n");			
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean isVisible() {\n");
+		buf.append("        boolean res= false;\n");			
+		buf.append("        if (true) {\n");
+		buf.append("            res= false;\n");			
+		buf.append("        }\n");
+		buf.append("        return res;\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
 	
 }
