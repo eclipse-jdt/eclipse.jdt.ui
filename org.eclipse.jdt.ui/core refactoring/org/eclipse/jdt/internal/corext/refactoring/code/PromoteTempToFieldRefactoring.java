@@ -397,7 +397,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	try{
     		ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
     		addFieldDeclaration(rewrite);
-    		if (fInitializeIn == INITIALIZE_IN_METHOD)
+    		if (fInitializeIn == INITIALIZE_IN_METHOD && tempHasInitializer())
     			addLocalDeclarationSplit(rewrite);
 			else
 				addLocalDeclarationRemoval(rewrite);
