@@ -109,13 +109,13 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 			}
 			
 			boolean importAdded= updateReplacementString(document, trigger, offset, impStructure);
-			if (importAdded) {
+
+			if (importAdded)
 				setCursorPosition(getReplacementString().length());
-			}
 			
 			super.apply(document, trigger, offset);
 			
-			if (importAdded) {
+			if (importAdded && impStructure != null) {
 				int oldLen= document.getLength();
 				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);

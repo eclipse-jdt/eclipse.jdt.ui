@@ -79,7 +79,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 	private boolean createStubs(StringBuffer buf, ImportsStructure structure) throws CoreException {
-		Assert.isNotNull(structure);
+		if (structure == null)
+			return false;
+		
 		if (fDeclaringType == null)
 			return true;
 		ICompilationUnit workingCopy= null;
