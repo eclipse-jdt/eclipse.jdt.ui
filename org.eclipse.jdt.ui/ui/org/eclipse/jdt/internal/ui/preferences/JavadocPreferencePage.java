@@ -65,11 +65,16 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	/**
-	 * @deprecated Inline to avoid reference to preference page
+	 * Returns the configured Javadoc command or the empty string.
 	 */
 	public static String getJavaDocCommand() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(PREF_JAVADOC_COMMAND);
+		String cmd= store.getString(PREF_JAVADOC_COMMAND);
+		if (cmd.length() == 0 && store.getDefaultString(PREF_JAVADOC_COMMAND).length() == 0) {
+			initJavadocCommandDefault(store);
+			cmd= store.getString(PREF_JAVADOC_COMMAND);
+		}
+		return cmd;
 	}
 
 	public JavadocPreferencePage() {
@@ -124,15 +129,14 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	 */
 	public void init(IWorkbench workbench) {
 	}
-
-	public static void initDefaults(IPreferenceStore store) {
+	
+	private static void initJavadocCommandDefault(IPreferenceStore store) {
 		File file= findJavaDocCommand();
-		if (file != null)
+		if (file != null) {
 			store.setDefault(PREF_JAVADOC_COMMAND, file.getPath());
-		else
-			store.setDefault(PREF_JAVADOC_COMMAND, ""); //$NON-NLS-1$
+		}	
 	}
-
+	
 	private static File findJavaDocCommand() {
 		IVMInstallType[] jreTypes= JavaRuntime.getVMInstallTypes();
 		for (int i= 0; i < jreTypes.length; i++) {
@@ -156,30 +160,26 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	private void initFields() {
-		IPreferenceStore prefs= getPreferenceStore();
-
-		String command= prefs.getString(PREF_JAVADOC_COMMAND);
-		fJavadocSelection.setText(command);
+		fJavadocSelection.setText(getJavaDocCommand());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
+	 */
 	public boolean performOk() {
-		IPreferenceStore prefs= getPreferenceStore();
-		prefs.setValue(PREF_JAVADOC_COMMAND, fJavadocSelection.getText());
+		getPreferenceStore().setValue(PREF_JAVADOC_COMMAND, fJavadocSelection.getText());
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+	 */
 	protected void performDefaults() {
-		IPreferenceStore prefs= getPreferenceStore();
+		IPreferenceStore store= getPreferenceStore();
+		initJavadocCommandDefault(store);
 
-		String str= prefs.getDefaultString(PREF_JAVADOC_COMMAND);
-		File jdocCommand= findJavaDocCommand();
-		if (jdocCommand != null) {
-			str= jdocCommand.getPath();
-			prefs.setDefault(PREF_JAVADOC_COMMAND, str);
-		}
-		fJavadocSelection.setText(str);
-
+		fJavadocSelection.setText(store.getDefaultString(PREF_JAVADOC_COMMAND));
 		super.performDefaults();
 	}
 
