@@ -6,9 +6,9 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.*;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.viewers.*;
 
 import org.eclipse.core.resources.*;
@@ -20,20 +20,41 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
 import org.eclipse.compare.*;
+import org.eclipse.compare.internal.Utilities;
 
 
 /**
  * Provides "Replace from local history" for Java elements.
  */
-public class JavaReplaceWithEditionAction extends JavaHistoryAction {
+public class JavaCompareWithEditionAction extends JavaHistoryAction {
+	
+	static class CompareWithEditionDialog extends EditionSelectionDialog {
+	
+		ResourceBundle fBundle;
+		
+		CompareWithEditionDialog(Shell parent, ResourceBundle bundle) {
+			super(parent, bundle);
+			fBundle= bundle;
+		}
+		
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.CANCEL_ID, Utilities.getString(fBundle, "closeButton.label"), false); //$NON-NLS-1$
+		}
+		
+		/**
+		 * Overidden to disable dismiss on double click (see PR 1GI3KUR).
+		 */
+		protected void okPressed() {
+		}
+	}
 				
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.CompareWithEditionAction"; //$NON-NLS-1$
 	
 	
-	public JavaReplaceWithEditionAction() {
+	public JavaCompareWithEditionAction() {
 	}	
 
-	public JavaReplaceWithEditionAction(ISelectionProvider sp) {
+	public JavaCompareWithEditionAction(ISelectionProvider sp) {
 		super(sp);
 		
 		setText(CompareMessages.getString("ReplaceFromHistory.action.label")); //$NON-NLS-1$
@@ -103,7 +124,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			buffer= TextBuffer.acquire(file);
 
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
-			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			EditionSelectionDialog d= new CompareWithEditionDialog(shell, bundle);
 			
 			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, cu.getElementName()), editions, input);
 						

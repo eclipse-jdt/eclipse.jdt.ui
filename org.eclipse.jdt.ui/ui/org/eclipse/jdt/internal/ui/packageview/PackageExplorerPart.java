@@ -31,8 +31,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
-import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -496,10 +494,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		addOpenToMenu(menu, selection);
 		addRefactoring(menu);
-		if (selection.size() == 1) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fViewer));	
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaAddElementFromHistory(null, fViewer));	
-		}
+
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
 		if (fAddBookmarkAction.canOperateOnSelection())

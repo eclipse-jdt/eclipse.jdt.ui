@@ -14,26 +14,40 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.IActionDelegate;
+import org.eclipse.jface.action.IAction;
+
 
 /**
  * Base class for the "Replace with local history"
  * and "Add from local history" actions.
  */
-public abstract class JavaHistoryAction extends Action implements ISelectionChangedListener, IUpdate {
+public abstract class JavaHistoryAction extends Action
+				implements ISelectionChangedListener, IUpdate, IActionDelegate { 
 	
-	protected ISelectionProvider fSelectionProvider;
+	private ISelectionProvider fSelectionProvider;
+	private ISelection fSelection;
 
 	
+	public JavaHistoryAction() {			
+	}
+		
 	public JavaHistoryAction(ISelectionProvider sp) {			
 		fSelectionProvider= sp;
 		Assert.isNotNull(fSelectionProvider);
+	}
+	
+	ISelection getSelection() {
+		if (fSelectionProvider != null)
+			return fSelectionProvider.getSelection();
+		return fSelection;
 	}
 		
 	/* (non Java doc)
 	 * @see IUpdate#update
 	 */
 	public void update() {
-		setEnabled(isEnabled(fSelectionProvider.getSelection()));
+		setEnabled(isEnabled(getSelection()));
 	}
 	
 	/* (non Java doc)
@@ -49,15 +63,37 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	IMember getEditionElement(ISelection selection) {
 		
 		if (selection instanceof IStructuredSelection) {
-			Object o= ((IStructuredSelection)selection).getFirstElement();
-			if (o instanceof IMember) {
-				IMember m= (IMember) o;
-				if (!m.isBinary() && JavaStructureCreator.hasEdition(m))
-					return m;
+			IStructuredSelection ss= (IStructuredSelection) selection;
+			if (ss.size() == 1) {
+				Object o= ss.getFirstElement();
+				if (o instanceof IMember) {
+					IMember m= (IMember) o;
+					if (!m.isBinary() && JavaStructureCreator.hasEdition(m))
+						return m;
+				}
 			}
 		}
 		return null;
 	}
 			
 	abstract protected boolean isEnabled(ISelection selection);
+	
+	public void run(IAction action) {
+		run();
+	}
+	
+	/**
+	 * Notifies this action delegate that the selection in the workbench has changed.
+	 * <p>
+	 * Implementers can use this opportunity to change the availability of the
+	 * action or to modify other presentation properties.
+	 * </p>
+	 *
+	 * @param action the action proxy that handles presentation portion of the action
+	 * @param selection the current selection in the workbench
+	 */
+	public void selectionChanged(IAction action, ISelection selection) {
+		fSelection= selection;
+		action.setEnabled(isEnabled(selection));
+	}
 }

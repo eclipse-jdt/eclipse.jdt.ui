@@ -35,6 +35,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
 	private JavaEditor fEditor;
 
+	public JavaAddElementFromHistory() {
+	}
+	
 	/**
 	 * The optional argument editor is used iff the selection provider's
 	 * selection is empty. In this case the editor's CU is the container
@@ -63,7 +66,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		IMember input= null;
 		
 		// analyse selection
-		ISelection selection= fSelectionProvider.getSelection();
+		ISelection selection= getSelection();
 		if (selection.isEmpty()) {
 			// no selection: we try to use the editor's input
 			if (fEditor != null) {
