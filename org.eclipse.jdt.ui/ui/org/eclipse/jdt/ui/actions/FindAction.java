@@ -92,9 +92,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (fValidTypes == null || fValidTypes.length == 0)
 			return false;
 
-		if (!ActionUtil.isProcessable(getShell(), element))
-			return false;
-		
 		if (element != null) {
 			for (int i= 0; i < fValidTypes.length; i++) {
 				if (fValidTypes[i].isInstance(element)) {
@@ -262,6 +259,10 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	void run(IJavaElement element) {
+		
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;
+		
 		SearchUI.activateSearchResultView();
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		JavaSearchOperation op= null;
