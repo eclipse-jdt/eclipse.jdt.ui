@@ -161,7 +161,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test01() throws Exception {
-		measure(4, 22, SWT.DEL);
+		measure(4, 22, SWT.DEL, true);
 	}
 
 	/**
@@ -181,7 +181,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test03() throws Exception {
-		measure(4, 32, SWT.DEL);
+		measure(4, 32, SWT.DEL, true);
 	}
 
 	/**
@@ -201,7 +201,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test11() throws Exception {
-		measure(6, 22, SWT.DEL);
+		measure(6, 22, SWT.DEL, true);
 	}
 
 	/**
@@ -221,10 +221,14 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 	 * @throws Exception
 	 */
 	public void test13() throws Exception {
-		measure(6, 40, SWT.DEL);
+		measure(6, 40, SWT.DEL, true);
 	}
 
 	private void measure(int line, int column, char ch) throws Exception {
+		measure(line, column, ch, false);
+	}
+		
+	private void measure(int line, int column, char ch,  boolean sendKeyCode) throws Exception {
 		InvocationCountPerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(new Method[] {
 				AnnotationPainter.class.getMethod("paintControl", new Class[] { PaintEvent.class }),
 		});
@@ -234,7 +238,10 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		Display display= EditorTestHelper.getActiveDisplay();
 		EditorTestHelper.runEventQueue(200);
 		performanceMeter.start();
-		SWTEventHelper.pressKeyChar(display, ch);
+		if (sendKeyCode)
+			SWTEventHelper.pressKeyCode(display, ch);
+		else
+			SWTEventHelper.pressKeyChar(display, ch);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		EditorTestHelper.runEventQueue(200);
 		performanceMeter.stop();

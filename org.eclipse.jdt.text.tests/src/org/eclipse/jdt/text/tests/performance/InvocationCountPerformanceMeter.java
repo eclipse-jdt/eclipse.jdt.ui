@@ -415,6 +415,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		if (fVerbose) {
 			System.out.println("Detailed results:"); //$NON-NLS-1$
 			fResults.print();
+			System.out.println();
+			System.out.println("--------------------------------------------------"); //$NON-NLS-1$
+			System.out.println();
 		}
 	}
 	
