@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -979,10 +981,23 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
 				if (resource instanceof IFile) {
-					IFileEditorInput input= new FileEditorInput((IFile) resource);
+					
+					IFile file= (IFile) resource;
+					IProgressMonitor monitor= new NullProgressMonitor();
+					
+					try {
+						// http://dev.eclipse.org/bugs/show_bug.cgi?id=19014
+						file.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					} catch (CoreException x) {
+						handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.resetDocument")); //$NON-NLS-1$
+					}
+					
+					IFileEditorInput input= new FileEditorInput(file);
 					document= super.createDocument(input);
-				} else
+					
+				} else {
 					document= new Document();
+				}
 					
 			} catch (CoreException x) {
 				document= new Document();
@@ -1019,12 +1034,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			return;
 		
 		if (element instanceof IFileEditorInput) {
-			
 			IFileEditorInput input= (IFileEditorInput) element;
-			InputStream stream= new ByteArrayInputStream(document.get().getBytes());
-			
-			IFile file= input.getFile();
-			file.setContents(stream, overwrite, true, monitor);
+			try {
+				InputStream stream= new ByteArrayInputStream(document.get().getBytes(ResourcesPlugin.getEncoding()));
+				IFile file= input.getFile();
+				file.setContents(stream, overwrite, true, monitor);
+			} catch (IOException x)  {
+				IStatus s= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, x.getMessage(), x);
+				throw new CoreException(s);
+			}
 		}
 	}
 	
