@@ -13,10 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jface.text.BadLocationException;
-
-import org.eclipse.ui.PartInitException;
-
 
 /**
  * @since 3.1
@@ -25,11 +21,7 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 	
 	private static final Class THIS= RevertJavaEditorTest.class;
 
-	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
-	
-	private static final String FILE_PREFIX= "TextLayout";
-	
-	private static final String FILE_SUFFIX= ".java";
+	private static final String FILE= PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
@@ -40,8 +32,11 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 		EditorTestHelper.runEventQueue();
 	}
 
-	public void testRevertJavaEditor() throws PartInitException, BadLocationException {
-		measureRevert(ResourceTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX));
+	public void testRevertJavaEditor() throws Exception {
+		measureRevert(ResourceTestHelper.findFile(FILE));
 	}
 
+	public void test2() throws Exception {
+		measureRevert(ResourceTestHelper.findFile(FILE));
+	}
 }

@@ -63,7 +63,6 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_SMART_PASTE, true);
-		store.setValue(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -71,7 +70,6 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		EditorTestHelper.closeAllEditors();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.EDITOR_SMART_PASTE);
-		store.setToDefault(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE);
 	}
 
 	public void testSmartPaste() throws Exception {

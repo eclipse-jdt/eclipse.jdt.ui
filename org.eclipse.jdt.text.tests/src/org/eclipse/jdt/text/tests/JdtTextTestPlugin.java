@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * The main plugin class to be used in the desktop.
  */
 public class JdtTextTestPlugin extends AbstractUIPlugin {
+	/**
+	 * The plug-in id
+	 * @since 3.1
+	 */
+	public static final String PLUGIN_ID= "org.eclipse.jdt.text.tests";
 	//The shared instance.
 	private static JdtTextTestPlugin plugin;
 	//Resource bundle.

@@ -27,12 +27,14 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 	private PerformanceMeter fPerformanceMeter;
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		EditorTestHelper.runEventQueue();
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		fPerformanceMeter.dispose();
 	}

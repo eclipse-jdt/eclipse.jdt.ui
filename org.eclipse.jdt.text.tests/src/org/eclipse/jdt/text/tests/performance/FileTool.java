@@ -174,7 +174,10 @@ public class FileTool {
 
 	public static File getFileInPlugin(Plugin plugin, IPath path) {
 		try {
-			URL installURL= new URL(plugin.getDescriptor().getInstallURL(), path.toString());
+			String sPath= path.toString();
+			if (sPath.startsWith("/"))
+				sPath= sPath.substring(1);
+			URL installURL= new URL(plugin.getDescriptor().getInstallURL(), sPath);
 			URL localURL= Platform.asLocalURL(installURL);
 			return new File(localURL.getFile());
 		} catch (IOException e) {

@@ -14,13 +14,10 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.IOException;
 import java.util.zip.ZipException;
 
-import org.eclipse.core.runtime.CoreException;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
@@ -47,11 +44,7 @@ public class TextPluginTestSetup extends TestSetup {
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
 	protected void setUp() throws Exception {
-		IWorkbenchPage activePage= EditorTestHelper.getActivePage();
-		
-		IViewReference viewReference= activePage.findViewReference(EditorTestHelper.INTRO_VIEW_ID);
-		if (viewReference != null)
-			activePage.hideView(viewReference);
+		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 		
 		if (fPerspective != null)
 			fPreviousPerspective= EditorTestHelper.showPerspective(fPerspective);
