@@ -14,29 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.ReplaceEdit;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
-import org.eclipse.search.internal.core.text.TextSearchEngine;
-import org.eclipse.search.internal.core.text.TextSearchScope;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
+import org.eclipse.search.internal.core.text.MatchLocator;
+import org.eclipse.search.internal.core.text.TextSearchEngine;
+import org.eclipse.search.internal.core.text.TextSearchScope;
+import org.eclipse.text.edits.ReplaceEdit;
 
 public class QualifiedNameFinder {
 	
@@ -94,7 +90,7 @@ public class QualifiedNameFinder {
 			monitor= new NullProgressMonitor();
 		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector); //$NON-NLS-1$
+		engine.search(ResourcesPlugin.getWorkspace(), createScope(filePatterns, root), collector, new MatchLocator(pattern, "")); //$NON-NLS-1$
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {
