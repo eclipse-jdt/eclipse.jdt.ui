@@ -1221,7 +1221,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			dialog.setInitialSelections(new Object[] { pack });
 		}
 
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementListSelectionDialog.OK) {
 			return (IPackageFragment) dialog.getFirstResult();
 		}
 		return null;
@@ -1240,7 +1240,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
 		
-		if (dialog.open() == dialog.OK) {	
+		if (dialog.open() == TypeSelectionDialog.OK) {	
 			return (IType) dialog.getFirstResult();
 		}
 		return null;
@@ -1260,7 +1260,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.message")); //$NON-NLS-1$
 		dialog.setFilter(getSuperClass());
 
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == TypeSelectionDialog.OK) {
 			return (IType) dialog.getFirstResult();
 		}
 		return null;

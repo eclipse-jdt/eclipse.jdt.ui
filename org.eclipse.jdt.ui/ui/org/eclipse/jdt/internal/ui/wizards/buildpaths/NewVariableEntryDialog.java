@@ -183,7 +183,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == JARFileSelectionDialog.OK) {
 			Object[] selected= dialog.getResult();
 			IPath[] paths= new IPath[selected.length];
 			for (int i= 0; i < selected.length; i++) {

@@ -496,7 +496,7 @@ public class SourceAttachmentBlock {
 			dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
 			dialog.setInput(fFileVariablePath.toFile());
 			dialog.setInitialSelection(initialSelection);
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == JARFileSelectionDialog.OK) {
 				File result= (File) dialog.getResult()[0];
 				IPath returnPath= new Path(result.getPath()).makeAbsolute();
 				return modifyPath(returnPath, currVariable);
@@ -549,7 +549,7 @@ public class SourceAttachmentBlock {
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
 		dialog.setInput(fRoot);
 		dialog.setInitialSelection(initSel);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			IFile file= (IFile) dialog.getFirstResult();
 			return file.getFullPath();
 		}
@@ -581,7 +581,7 @@ public class SourceAttachmentBlock {
 				dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.message")); //$NON-NLS-1$
 				dialog.setInput(zipFile);
 				dialog.setInitialSelection(contentProvider.getSelectedNode(initSelection));
-				if (dialog.open() == dialog.OK) {
+				if (dialog.open() == ElementTreeSelectionDialog.OK) {
 					Object obj= dialog.getFirstResult();
 					IPath path= new Path(obj.toString());
 					if (fIsVariableEntry) {

@@ -379,7 +379,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			try {
 				IBinding binding= ref.resolveBinding();
 				if (binding != null) {
-					if (binding.getKind() == binding.TYPE) {
+					if (binding.getKind() == IBinding.TYPE) {
 						ITypeBinding typeBinding= (ITypeBinding) binding;
 						if (typeBinding.isArray()) {
 							typeBinding= typeBinding.getElementType();

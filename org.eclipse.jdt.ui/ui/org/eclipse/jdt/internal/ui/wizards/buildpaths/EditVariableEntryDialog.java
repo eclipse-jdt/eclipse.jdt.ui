@@ -148,7 +148,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		dialog.setMessage(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.description")); //$NON-NLS-1$
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == JARFileSelectionDialog.OK) {
 			File result= (File) dialog.getResult()[0];
 			IPath returnPath= new Path(result.getPath()).makeAbsolute();
 			return modifyPath(returnPath, currVariable);

@@ -426,7 +426,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private void refresh(IPath path) {
 		if (fRoot.getContainerForLocation(path) != null) {
 			try {
-				fRoot.refreshLocal(fJTWPage.fRoot.DEPTH_INFINITE, null);
+				fRoot.refreshLocal(IWorkspaceRoot.DEPTH_INFINITE, null);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

@@ -320,7 +320,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		*/
 		public Image getImage(Object element) {
 			//access to image registry
-			JavaElementImageProvider provider= new JavaElementImageProvider();
 			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
 			ImageDescriptor descriptor= null;
 
@@ -328,39 +327,39 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 				String s= (String) element;
 				if (s.equals(FIELDS)) {
 					//0 will give the default field image	
-					descriptor= provider.getFieldImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
 					return registry.get(descriptor);
 				} else if (s.equals(CONSTRUCTORS)) {
-					descriptor= provider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
 					//add a constructor adornment to the image descriptor
 					ImageDescriptor adorneddesciptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 					return registry.get(adorneddesciptor);
 				} else if (s.equals(METHODS)) {
-					descriptor= provider.getMethodImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
 					return registry.get(descriptor);
 				} else if (s.equals(STATIC_FIELDS)) {
-					descriptor= provider.getFieldImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
 					//add a constructor adornment to the image descriptor
 					ImageDescriptor adorneddesciptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 					return registry.get(adorneddesciptor);
 				} else if (s.equals(STATIC_METHODS)) {
-					descriptor= provider.getMethodImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
 					//add a constructor adornment to the image descriptor
 					ImageDescriptor adorneddesciptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 					return registry.get(adorneddesciptor);
 				} else if (s.equals(INIT)) {
-					descriptor= provider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
 					return registry.get(descriptor);
 				} else if (s.equals(STATIC_INIT)) {
-					descriptor= provider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
 					ImageDescriptor adorneddesciptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 					return registry.get(adorneddesciptor);
 				} else if (s.equals(TYPES)) {
-					descriptor= provider.getTypeImageDescriptor(false, true, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, true, Flags.AccPublic);
 					return registry.get(descriptor);
 				} else {
 					//@change
-					descriptor= provider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
 					return registry.get(descriptor);
 				}
 

@@ -432,7 +432,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(initElement);
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object element= dialog.getFirstResult();
 			if (element instanceof IJavaProject) {
 				IJavaProject jproject= (IJavaProject)element;

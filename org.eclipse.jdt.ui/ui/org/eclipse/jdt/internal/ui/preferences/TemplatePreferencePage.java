@@ -412,7 +412,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		template.setContext(contextTypeName); //$NON-NLS-1$
 		
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == EditTemplateDialog.OK) {
 			fTemplates.add(template);
 			fTableViewer.refresh();
 			fTableViewer.setChecked(template, template.isEnabled());
@@ -434,7 +434,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	private void edit(Template template) {
 		Template newTemplate= new Template(template);
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == EditTemplateDialog.OK) {
 
 			if (!newTemplate.getName().equals(template.getName()) &&
 				MessageDialog.openQuestion(getShell(),

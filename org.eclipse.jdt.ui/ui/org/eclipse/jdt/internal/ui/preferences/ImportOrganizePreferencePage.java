@@ -243,7 +243,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		if (index == 0) { // add new
 			List existing= fOrderListField.getElements();
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == ImportOrganizeInputDialog.OK) {
 				fOrderListField.addElement(dialog.getResult());
 			}
 		} else if (index == 1) { // edit
@@ -258,7 +258,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
 			dialog.setInitialString(editedEntry);
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == ImportOrganizeInputDialog.OK) {
 				fOrderListField.replaceElement(editedEntry, dialog.getResult());
 			}
 		} else if (index == 8) { // load

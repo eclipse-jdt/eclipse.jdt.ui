@@ -291,8 +291,8 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				
 				// create the project
 				try {
-					fBuildPathsBlock.createProject(getProjectHandle(), getLocationPath(), new SubProgressMonitor(monitor, 2));
-					fBuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
+					BuildPathsBlock.createProject(getProjectHandle(), getLocationPath(), new SubProgressMonitor(monitor, 2));
+					BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
 					fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);

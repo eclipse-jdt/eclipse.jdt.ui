@@ -70,7 +70,7 @@ public class EditorUtility {
 		}
 		
 		if (input != null) {
-			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
+			IWorkbenchPage p= JavaPlugin.getActivePage();
 			if (p != null) {
 				return p.findEditor(input);
 			}
@@ -120,7 +120,7 @@ public class EditorUtility {
 	
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
 		if (file != null) {
-			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
+			IWorkbenchPage p= JavaPlugin.getActivePage();
 			if (p != null) {
 				IEditorPart editorPart= p.openEditor(file, null, activate);
 				initializeHighlightRange(editorPart);
@@ -132,7 +132,7 @@ public class EditorUtility {
 
 	private static IEditorPart openInEditor(IEditorInput input, String editorID, boolean activate) throws PartInitException {
 		if (input != null) {
-			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
+			IWorkbenchPage p= JavaPlugin.getActivePage();
 			if (p != null) {
 				IEditorPart editorPart= p.openEditor(input, editorID, activate);
 				initializeHighlightRange(editorPart);

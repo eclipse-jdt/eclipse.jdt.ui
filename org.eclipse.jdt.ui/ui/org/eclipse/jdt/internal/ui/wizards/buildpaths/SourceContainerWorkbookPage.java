@@ -169,7 +169,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		control.setLayoutData(gd);
 		
 		control= fFoldersList.getButtonBox(composite);
-		gd= new GridData(gd.VERTICAL_ALIGN_FILL + gd.HORIZONTAL_ALIGN_FILL);
+		gd= new GridData(GridData.VERTICAL_ALIGN_FILL + GridData.HORIZONTAL_ALIGN_FILL);
 		control.setLayoutData(gd);
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
@@ -340,7 +340,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		IProject proj= fCurrJProject.getProject();
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, proj, getExistingContainers(existing), existing);
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == NewContainerDialog.OK) {
 			IFolder folder= dialog.getFolder();
 			return newCPSourceElement(folder);
 		}
@@ -389,7 +389,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		} else {
 			dialog.setInitialSelection(existing.getResource());
 		}		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {

@@ -136,7 +136,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 			dialog.setInitialSelections(new Object[] { initialSelection });
 		}
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementListSelectionDialog.OK) {
 			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
 			fNameDialogField.setText(res.getElementName());
 		}

@@ -149,7 +149,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fPageInfoLabel.setText(getPageInfoMessage());
 		
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data.horizontalAlignment= data.END;
+		data.horizontalAlignment= GridData.END;
 		fPageInfoLabel.setLayoutData(data);
 		
 		return messageLabel;

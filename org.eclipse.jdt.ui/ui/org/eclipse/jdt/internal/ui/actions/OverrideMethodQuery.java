@@ -293,7 +293,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		dialog.setSorter(sorter);
 		dialog.setSize(60, 18);
 		dialog.setInput(this); // input does not matter
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == OverrideTreeSelectionDialog.OK) {
 			Object[] checkedElements= dialog.getResult();
 			ArrayList result= new ArrayList(checkedElements.length);
 			for (int i= 0; i < checkedElements.length; i++) {

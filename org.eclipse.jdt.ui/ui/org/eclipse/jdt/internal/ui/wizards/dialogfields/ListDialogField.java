@@ -180,14 +180,14 @@ public class ListDialogField extends DialogField {
 		
 		Label label= getLabelControl(parent);
 		GridData gd= gridDataForLabel(1);
-		gd.verticalAlignment= gd.BEGINNING;
+		gd.verticalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
 		
 		Control list= getListControl(parent);
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
-		gd.verticalAlignment= gd.FILL;
+		gd.verticalAlignment= GridData.FILL;
 		gd.grabExcessVerticalSpace= true;
 		gd.horizontalSpan= nColumns - 2;
 		gd.widthHint= converter.convertWidthInCharsToPixels(50);
@@ -197,9 +197,9 @@ public class ListDialogField extends DialogField {
 		
 		Composite buttons= getButtonBox(parent);
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
-		gd.verticalAlignment= gd.FILL;
+		gd.verticalAlignment= GridData.FILL;
 		gd.grabExcessVerticalSpace= true;
 		gd.horizontalSpan= 1;
 		buttons.setLayoutData(gd);
@@ -280,9 +280,9 @@ public class ListDialogField extends DialogField {
 		button.setText(label);
 		button.addSelectionListener(listener);
 		GridData gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;
-		gd.verticalAlignment= gd.BEGINNING;
+		gd.verticalAlignment= GridData.BEGINNING;
 		gd.heightHint = SWTUtil.getButtonHeigthHint(button);
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 	
@@ -294,8 +294,8 @@ public class ListDialogField extends DialogField {
 		Label separator= new Label(parent, SWT.NONE);
 		separator.setVisible(false);
 		GridData gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
-		gd.verticalAlignment= gd.BEGINNING;
+		gd.horizontalAlignment= GridData.FILL;
+		gd.verticalAlignment= GridData.BEGINNING;
 		gd.heightHint= 4;
 		separator.setLayoutData(gd);
 		return separator;

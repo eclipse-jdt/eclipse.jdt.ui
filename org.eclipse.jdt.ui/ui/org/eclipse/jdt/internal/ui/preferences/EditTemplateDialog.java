@@ -119,8 +119,8 @@ public class EditTemplateDialog extends StatusDialog {
 			assistant.enableAutoInsert(store.getBoolean(ContentAssistPreference.AUTOINSERT));
 			assistant.enableAutoActivation(store.getBoolean(ContentAssistPreference.AUTOACTIVATION));
 			assistant.setAutoActivationDelay(store.getInt(ContentAssistPreference.AUTOACTIVATION_DELAY));
-			assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
-			assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
+			assistant.setProposalPopupOrientation(ContentAssistant.PROPOSAL_OVERLAY);
+			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 
 			Display display= sourceViewer.getTextWidget().getDisplay();
@@ -434,27 +434,27 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void initializeActions() {
-		TextViewerAction action= new TextViewerAction(fPatternEditor, fPatternEditor.UNDO);
+		TextViewerAction action= new TextViewerAction(fPatternEditor, SourceViewer.UNDO);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.undo")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
 
-		action= new TextViewerAction(fPatternEditor, fPatternEditor.CUT);
+		action= new TextViewerAction(fPatternEditor, SourceViewer.CUT);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.cut")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
 
-		action= new TextViewerAction(fPatternEditor, fPatternEditor.COPY);
+		action= new TextViewerAction(fPatternEditor, SourceViewer.COPY);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.copy")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.COPY, action);
 
-		action= new TextViewerAction(fPatternEditor, fPatternEditor.PASTE);
+		action= new TextViewerAction(fPatternEditor, SourceViewer.PASTE);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.paste")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.PASTE, action);
 
-		action= new TextViewerAction(fPatternEditor, fPatternEditor.SELECT_ALL);
+		action= new TextViewerAction(fPatternEditor, SourceViewer.SELECT_ALL);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.select.all")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
 
-		action= new TextViewerAction(fPatternEditor, fPatternEditor.CONTENTASSIST_PROPOSALS);
+		action= new TextViewerAction(fPatternEditor, SourceViewer.CONTENTASSIST_PROPOSALS);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.content.assist")); //$NON-NLS-1$
 		fGlobalActions.put("ContentAssistProposal", action); //$NON-NLS-1$
 

@@ -103,34 +103,34 @@ public class JavadocOptionsManager {
 	private String fDependencies;
 	private String fAntpath;
 
-	public final static String PRIVATE= "private"; //$NON-NLS-1$
-	public final static String PROTECTED= "protected"; //$NON-NLS-1$
-	public final static String PACKAGE= "package"; //$NON-NLS-1$
-	public final static String PUBLIC= "public"; //$NON-NLS-1$
+	public final String PRIVATE= "private"; //$NON-NLS-1$
+	public final String PROTECTED= "protected"; //$NON-NLS-1$
+	public final String PACKAGE= "package"; //$NON-NLS-1$
+	public final String PUBLIC= "public"; //$NON-NLS-1$
 
-	public final static String USE="use"; //$NON-NLS-1$
-	public final static String NOTREE= "notree"; //$NON-NLS-1$
-	public final static String NOINDEX= "noindex"; //$NON-NLS-1$
-	public final static String NONAVBAR= "nonavbar"; //$NON-NLS-1$
-	public final static String NODEPRECATED= "nodeprecated"; //$NON-NLS-1$
-	public final static String NODEPRECATEDLIST= "nodeprecatedlist"; //$NON-NLS-1$
-	public final static String VERSION= "version"; //$NON-NLS-1$
-	public final static String AUTHOR= "author"; //$NON-NLS-1$
-	public final static String SPLITINDEX= "splitindex"; //$NON-NLS-1$
-	public final static String STYLESHEETFILE= "stylesheetfile"; //$NON-NLS-1$
-	public final static String OVERVIEW= "overview"; //$NON-NLS-1$
-	public final static String DOCLETNAME= "docletname"; //$NON-NLS-1$
-	public final static String DOCLETPATH= "docletpath"; //$NON-NLS-1$
-	public final static String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
-	public final static String CLASSPATH= "classpath"; //$NON-NLS-1$
-	public final static String DESTINATION= "destdir"; //$NON-NLS-1$
-	public final static String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$	
+	public final String USE="use"; //$NON-NLS-1$
+	public final String NOTREE= "notree"; //$NON-NLS-1$
+	public final String NOINDEX= "noindex"; //$NON-NLS-1$
+	public final String NONAVBAR= "nonavbar"; //$NON-NLS-1$
+	public final String NODEPRECATED= "nodeprecated"; //$NON-NLS-1$
+	public final String NODEPRECATEDLIST= "nodeprecatedlist"; //$NON-NLS-1$
+	public final String VERSION= "version"; //$NON-NLS-1$
+	public final String AUTHOR= "author"; //$NON-NLS-1$
+	public final String SPLITINDEX= "splitindex"; //$NON-NLS-1$
+	public final String STYLESHEETFILE= "stylesheetfile"; //$NON-NLS-1$
+	public final String OVERVIEW= "overview"; //$NON-NLS-1$
+	public final String DOCLETNAME= "docletname"; //$NON-NLS-1$
+	public final String DOCLETPATH= "docletpath"; //$NON-NLS-1$
+	public final String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
+	public final String CLASSPATH= "classpath"; //$NON-NLS-1$
+	public final String DESTINATION= "destdir"; //$NON-NLS-1$
+	public final String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$	
 
-	public final static String VISIBILITY= "access"; //$NON-NLS-1$
-	public final static String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
-	public final static String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
-	public final static String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
-	public final static String TITLE= "doctitle"; //$NON-NLS-1$
+	public final String VISIBILITY= "access"; //$NON-NLS-1$
+	public final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
+	public final String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
+	public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
+	public final String TITLE= "doctitle"; //$NON-NLS-1$
 	public final String HREF="href"; //$NON-NLS-1$
 
 	public final String NAME= "name"; //$NON-NLS-1$

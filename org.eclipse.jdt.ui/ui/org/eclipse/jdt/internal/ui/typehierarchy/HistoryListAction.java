@@ -156,7 +156,7 @@ public class HistoryListAction extends Action {
 	public void run() {
 		IJavaElement[] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == HistoryListDialog.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
 			fView.setInputElement(dialog.getResult());
 		}

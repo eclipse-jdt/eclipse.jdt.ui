@@ -777,7 +777,7 @@ public class BuildPathsBlock {
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			return (IContainer)dialog.getFirstResult();
 		}
 		return null;

@@ -235,7 +235,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			
 			ContentAssistPreference.configure(assistant, getPreferenceStore());
 			
-			assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
+			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 					
 			return assistant;

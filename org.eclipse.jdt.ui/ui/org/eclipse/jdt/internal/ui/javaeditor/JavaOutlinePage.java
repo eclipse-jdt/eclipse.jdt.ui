@@ -771,7 +771,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		tree.setMenu(fMenu);
 		
 		IPageSite site= getSite();
-		site.registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
+		site.registerContextMenu(JavaPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
 		site.setSelectionProvider(fOutlineViewer);
 
 		// we must create the groups after we have set the selection provider to the site

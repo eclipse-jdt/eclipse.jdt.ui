@@ -624,7 +624,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return unit.getElementAt(offset);
 					
 			} catch (JavaModelException x) {
-				JavaPlugin.getDefault().log(x.getStatus());
+				JavaPlugin.log(x.getStatus());
 				// nothing found, be tolerant and go on
 			}
 		}
@@ -639,7 +639,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		try {
 			return EditorUtility.getWorkingCopy(element, true);
 		} catch (JavaModelException x) {
-			JavaPlugin.getDefault().log(x.getStatus());
+			JavaPlugin.log(x.getStatus());
 			// nothing found, be tolerant and go on
 		}
 		return null;
@@ -1378,7 +1378,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return findings[0];
 			
 			} catch (JavaModelException x) {
-				JavaPlugin.getDefault().log(x.getStatus());
+				JavaPlugin.log(x.getStatus());
 				// nothing found, be tolerant and go on
 			}
 		}

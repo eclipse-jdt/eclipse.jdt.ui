@@ -501,7 +501,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 		} catch (JavaModelException x) {
-			JavaPlugin.getDefault().log(x.getStatus());
+			JavaPlugin.log(x.getStatus());
 		}
 		
 		resetHighlightRange();

@@ -185,7 +185,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		
 		try {
 			IProject project= getJavaProject().getProject();
-			fBuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
+			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
 			fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 5));
 		} finally {
 			monitor.done();

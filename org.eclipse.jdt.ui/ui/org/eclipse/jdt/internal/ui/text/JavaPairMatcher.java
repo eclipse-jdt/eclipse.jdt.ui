@@ -134,7 +134,7 @@ public class JavaPairMatcher {
 		
 		int stack= 1;
 		int c= fReader.read();
-		while (c != fReader.EOF) {
+		while (c != JavaCodeReader.EOF) {
 			if (c == openingPeer && c != closingPeer)
 				stack++;
 			else if (c == closingPeer)
@@ -155,7 +155,7 @@ public class JavaPairMatcher {
 		
 		int stack= 1;
 		int c= fReader.read();
-		while (c != fReader.EOF) {
+		while (c != JavaCodeReader.EOF) {
 			if (c == closingPeer && c != openingPeer)
 				stack++;
 			else if (c == openingPeer)

@@ -199,7 +199,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			break;
 		case IDX_ADDADV: /* addvanced */
 			AdvancedDialog advDialog= new AdvancedDialog(getShell());
-			if (advDialog.open() == advDialog.OK) {
+			if (advDialog.open() == AdvancedDialog.OK) {
 				libentries= advDialog.getResult();
 			}
 			break;
@@ -207,7 +207,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			List selElements= fLibrariesList.getSelectedElements();
 			CPListElement selElement= (CPListElement) selElements.get(0);				
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == SourceAttachmentDialog.OK) {
 				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
 				fLibrariesList.refresh();
 				fClassPathList.refresh();
@@ -334,7 +334,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers(existing), existing);
 		IPath projpath= currProject.getFullPath();
 		dialog.setMessage(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.NewClassFolderDialog.description", projpath.toString())); //$NON-NLS-1$
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == NewContainerDialog.OK) {
 			IFolder folder= dialog.getFolder();
 			return new CPListElement[] { newCPLibraryElement(folder) };
 		}
@@ -368,7 +368,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			dialog.setInitialSelection(existing.getResource());
 		}
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -403,7 +403,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			dialog.setInitialSelection(existing.getResource());
 		}
 
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -507,7 +507,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell());
 			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title"));
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == NewVariableEntryDialog.OK) {
 				List existingElements= fLibrariesList.getElements();
 				
 				IPath[] paths= dialog.getResult();
@@ -533,7 +533,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 			EditVariableEntryDialog dialog= new EditVariableEntryDialog(getShell(), existing.getPath(), existingPaths);
 			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"));
-			if (dialog.open() == dialog.OK) {
+			if (dialog.open() == EditVariableEntryDialog.OK) {
 				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, dialog.getPath(), null);
 				return new CPListElement[] { elem };
 			}
@@ -548,7 +548,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(40), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
 		dialog.getShell().setText(title);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == WizardDialog.OK) {
 			IClasspathEntry created= wizard.getNewEntry();
 			if (created != null) {			
 				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), null);

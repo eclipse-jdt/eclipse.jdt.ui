@@ -218,7 +218,7 @@ public class VariableBlock {
 		List existingEntries= fVariablesList.getElements();
 
 		VariableCreationDialog dialog= new VariableCreationDialog(getShell(), entry, existingEntries);
-		if (dialog.open() != dialog.OK) {
+		if (dialog.open() != VariableCreationDialog.OK) {
 			return;
 		}
 		CPVariableElement newEntry= dialog.getClasspathElement();

@@ -50,7 +50,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	 */
 	protected boolean isAcceptable(IMarker marker) {
 		try {
-			return JavaCore.getJavaCore().isReferencedBy(fClassFile, marker);
+			return JavaCore.isReferencedBy(fClassFile, marker);
 		} catch (CoreException x) {
 			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.isAcceptable")); //$NON-NLS-1$
 			return false;
@@ -59,7 +59,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	
 	protected boolean isAffected(IMarkerDelta markerDelta) {
 		try {
-			return JavaCore.getJavaCore().isReferencedBy(fClassFile, markerDelta);
+			return JavaCore.isReferencedBy(fClassFile, markerDelta);
 		} catch (CoreException x) {
 			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.isAffected")); //$NON-NLS-1$
 			return false;

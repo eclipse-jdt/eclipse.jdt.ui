@@ -98,8 +98,7 @@ public class JavadocConfigurationBlock {
 		fValidateButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
 				  EntryValidator validator= new EntryValidator();
-				  BusyIndicator indicator= new BusyIndicator();
-				  indicator.showWhile(topComp.getDisplay(), validator);
+				  BusyIndicator.showWhile(topComp.getDisplay(), validator);
 			}
 		});
 		setValues();

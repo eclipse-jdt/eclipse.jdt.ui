@@ -42,7 +42,7 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 	
 		
 	protected void openResource(final IFile resource) {
-		final IWorkbenchPage activePage= JavaPlugin.getDefault().getActivePage();
+		final IWorkbenchPage activePage= JavaPlugin.getActivePage();
 		if (activePage != null) {
 			final Display display= getShell().getDisplay();
 			if (display != null) {
