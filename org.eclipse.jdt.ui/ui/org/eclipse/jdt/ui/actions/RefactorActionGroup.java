@@ -442,10 +442,7 @@ public class RefactorActionGroup extends ActionGroup {
 				});
 				refactorSubmenu.add(fNoActionAvailable);
 				menu.appendToGroup(fGroupName, refactorSubmenu);
-			} else {
-				refactorSubmenu.add(fNoActionAvailable);
-				menu.appendToGroup(fGroupName, refactorSubmenu);
-			}
+			} 
 		} else {
 			if (fillRefactorMenu(refactorSubmenu) > 0)
 				menu.appendToGroup(fGroupName, refactorSubmenu);
