@@ -1052,22 +1052,11 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
 			retarget="true"/>
         <action
-        	definitionId="org.eclipse.jdt.ui.edit.text.java.inline.constant"
-            label="%Refactoring.inlineConstantAction.label"
+        	definitionId="org.eclipse.jdt.ui.edit.text.java.inline"
+            label="%Refactoring.inlineAction.label"
             retarget="true"
             menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-            id="org.eclipse.jdt.ui.actions.InlineConstant" />			
-		<action id="org.eclipse.jdt.ui.actions.InlineTemp"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.inlineTempAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.local.variable"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.InlineMethod"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.inlineMethodAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.method"
-			retarget="true" />
+            id="org.eclipse.jdt.ui.actions.Inline" />			
 
 		<action id="org.eclipse.jdt.ui.actions.PromoteTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
@@ -1644,15 +1633,10 @@
 		description= "%ActionDefinition.extractConstant.description"
 	/>
     <actionDefinition
-    	id="org.eclipse.jdt.ui.edit.text.java.inline.constant"
-		name= "%ActionDefinition.inlineConstant.name"
-		description= "%ActionDefinition.inlineConstant.description"
+    	id="org.eclipse.jdt.ui.edit.text.java.inline"
+		name= "%ActionDefinition.inline.name"
+		description= "%ActionDefinition.inline.description"
     />	
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable"
-		name= "%ActionDefinition.inlineVariable.name"
-		description= "%ActionDefinition.inlineVariable.description"
-	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
 		name= "%ActionDefinition.selfEncapsulateField.name"
@@ -1662,11 +1646,6 @@
 		id="org.eclipse.jdt.ui.edit.text.java.extract.method"
 		name= "%ActionDefinition.extractMethod.name"
 		description= "%ActionDefinition.extractMethod.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.inline.method"
-		name= "%ActionDefinition.inlineMethod.name"
-		description= "%ActionDefinition.inlineMethod.description"
 	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.extract.interface"
@@ -1862,11 +1841,9 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
 		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
-        <accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.constant"/>	
-		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+        <accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline"/>	
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
@@ -1946,8 +1923,7 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
 		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
-        <accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.constant" />		
-		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
