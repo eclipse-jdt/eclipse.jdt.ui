@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -12,7 +13,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -98,6 +101,32 @@ class ConstructorReferenceFinder {
 	}
 	
 	private ASTNode[] getImplicitConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		List result= new ArrayList();
+		result.addAll(getImplicitConstructorReferenceNodesFromHierarchy(new SubProgressMonitor(pm, 1)));
+		result.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1)));
+		pm.done();
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+	}
+	
+	//List of ASTNodes
+	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm) throws JavaModelException {
+		//XXX workaround for bug 23112
+		ASTNode[] nodes= ASTNodeSearchUtil.findReferenceNodes(fType, fASTManager, pm);
+		List result= new ArrayList(2);
+		for (int i= 0; i < nodes.length; i++) {
+			ASTNode node= nodes[i];
+			if (node instanceof Name && node.getParent() instanceof ClassInstanceCreation){
+				ClassInstanceCreation cic= (ClassInstanceCreation)node.getParent();
+				if (node.equals(cic.getName()))
+					result.add(cic);
+			}
+		}
+		return result;
+	}
+
+	//List of ASTNodes
+	private List getImplicitConstructorReferenceNodesFromHierarchy(IProgressMonitor pm) throws JavaModelException{
 		ITypeHierarchy hierarchy= fType.newTypeHierarchy(pm);
 		IType[] subTypes= hierarchy.getAllSubtypes(fType);
 		List result= new ArrayList(subTypes.length);
@@ -105,7 +134,7 @@ class ConstructorReferenceFinder {
 			if (! subTypes[i].isBinary())
 				result.addAll(getAllSuperConstructorInvocations(subTypes[i]));
 		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+		return result;
 	}
 
 	//Collection of ASTNodes
