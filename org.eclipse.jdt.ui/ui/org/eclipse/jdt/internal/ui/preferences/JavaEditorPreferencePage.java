@@ -139,12 +139,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.WARNING_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.TASK_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.MARKER_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MARKER_INDICATION),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE),
@@ -210,7 +210,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
 		{"Errors", CompilationUnitEditor.ERROR_INDICATION_COLOR},
 		{"Warnings", CompilationUnitEditor.WARNING_INDICATION_COLOR},
-		{"Tasks", CompilationUnitEditor.TASK_INDICATION_COLOR}
+		{"Markers", CompilationUnitEditor.MARKER_INDICATION_COLOR}
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -318,12 +318,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.WARNING_INDICATION_COLOR, new RGB(244, 200 , 45));
 		
-		store.setDefault(CompilationUnitEditor.TASK_INDICATION, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.TASK_INDICATION_COLOR, new RGB(0, 128, 255));
+		store.setDefault(CompilationUnitEditor.MARKER_INDICATION, true);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.MARKER_INDICATION_COLOR, new RGB(0, 128, 255));
 		
 		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
-		store.setDefault(CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, true);
+		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, true);
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
@@ -786,11 +786,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "Show warnings in overview ruler";
 		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, 0);
 		
-		label= "Highlight tasks in text";
-		addCheckBox(composite, label, CompilationUnitEditor.TASK_INDICATION, 0);
+		label= "Highlight markers in text";
+		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION, 0);
 
-		label= "Show tasks in overview ruler";
-		addCheckBox(composite, label, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, 0);
+		label= "Show markers in overview ruler";
+		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
@@ -802,7 +802,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		l.setLayoutData(gd);
 		
 		l= new Label(composite, SWT.LEFT);
-		l.setText("Problem indication color options:");
+		l.setText("Color options for text highlighting:");
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);

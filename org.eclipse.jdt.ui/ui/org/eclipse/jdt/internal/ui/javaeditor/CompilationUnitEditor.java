@@ -461,10 +461,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String WARNING_INDICATION= "warningIndication"; //$NON-NLS-1$
 	/** Preference key for warning highlight color */
 	public final static String WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
-	/** Preference key for task indication */
-	public final static String TASK_INDICATION= "taskIndication"; //$NON-NLS-1$
-	/** Preference key for task highlight color */
-	public final static String TASK_INDICATION_COLOR= "taskIndicationColor"; //$NON-NLS-1$
+	/** Preference key for marker indication */
+	public final static String MARKER_INDICATION= "markerIndication"; //$NON-NLS-1$
+	/** Preference key for marker highlight color */
+	public final static String MARKER_INDICATION_COLOR= "markerIndicationColor"; //$NON-NLS-1$
 	/** Preference key for linked position color */
 	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
@@ -473,8 +473,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
 	/** Preference key for warning indication in overview ruler */
 	public final static String WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
-	/** Preference key for task indication in overview ruler */
-	public final static String TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for marker indication in overview ruler */
+	public final static String MARKER_INDICATION_IN_OVERVIEW_RULER= "markerIndicationInOverviewRuler"; //$NON-NLS-1$
 	/** Preference key for automatically closing strings */
 	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
 	/** Preference key for automatically wrapping Java strings */
@@ -1047,17 +1047,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fProblemPainter.paintWarnings(true);
 	}
 
-	private void startTaskIndication() {
+	private void startMarkerIndication() {
 		if (fProblemPainter == null) {
 			fProblemPainter= new ProblemPainter(this, getSourceViewer());
 			fPaintManager.addPainter(fProblemPainter);
 		}
-		fProblemPainter.setTaskHighlightColor(getColor(TASK_INDICATION_COLOR));
-		fProblemPainter.paintTasks(true);
+		fProblemPainter.setMarkerHighlightColor(getColor(MARKER_INDICATION_COLOR));
+		fProblemPainter.paintMarkers(true);
 	}
 	
 	private void shutdownProblemIndication() {
-		if ( !(isWarningIndicationEnabled() || isTaskIndicationEnabled() || isErrorIndicationEnabled())) {
+		if ( !(isWarningIndicationEnabled() || isMarkerIndicationEnabled() || isErrorIndicationEnabled())) {
 			fPaintManager.removePainter(fProblemPainter);
 			fProblemPainter.deactivate(true);
 			fProblemPainter.dispose();
@@ -1079,9 +1079,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 
-	private void stopTaskIndication() {
+	private void stopMarkerIndication() {
 		if (fProblemPainter != null) {
-			fProblemPainter.paintTasks(false);
+			fProblemPainter.paintMarkers(false);
 			shutdownProblemIndication();
 		}
 	}
@@ -1096,9 +1096,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(WARNING_INDICATION);
 	}
 	
-	private boolean isTaskIndicationEnabled() {
+	private boolean isMarkerIndicationEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(TASK_INDICATION);
+		return store.getBoolean(MARKER_INDICATION);
 	}
 	
 	private boolean isErrorIndicationInOverviewRulerEnabled() {
@@ -1111,9 +1111,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(WARNING_INDICATION_IN_OVERVIEW_RULER);
 	}
 	
-	private boolean isTaskIndicationInOverviewRulerEnabled() {
+	private boolean isMarkerIndicationInOverviewRulerEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(TASK_INDICATION_IN_OVERVIEW_RULER);
+		return store.getBoolean(MARKER_INDICATION_IN_OVERVIEW_RULER);
 	}
 	
 	private void showErrorIndicationInOverviewRuler(boolean show) {
@@ -1134,11 +1134,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 
-	private void showTaskIndicationInOverviewRuler(boolean show) {
+	private void showMarkerIndicationInOverviewRuler(boolean show) {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		OverviewRuler ruler= asv.getOverviewRuler();
 		if (ruler != null) {
-			ruler.showTasks(show);
+			ruler.showMarkers(show);
 			ruler.update();
 		}
 	}
@@ -1193,8 +1193,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			showErrorIndicationInOverviewRuler(true);
 		if (isWarningIndicationInOverviewRulerEnabled())
 			showWarningIndicationInOverviewRuler(true);
-		if (isTaskIndicationInOverviewRulerEnabled())
-			showTaskIndicationInOverviewRuler(true);
+		if (isMarkerIndicationInOverviewRulerEnabled())
+			showMarkerIndicationInOverviewRuler(true);
 	}
 	
 	private void hideOverviewRuler() {
@@ -1273,8 +1273,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startErrorIndication();
 		if (isWarningIndicationEnabled())
 			startWarningIndication();
-		if (isTaskIndicationEnabled())
-			startTaskIndication();
+		if (isMarkerIndicationEnabled())
+			startMarkerIndication();
 		if (isTabConversionEnabled())
 			startTabConversion();
 		if (isOverviewRulerVisible())
@@ -1558,11 +1558,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if (TASK_INDICATION.equals(p)) {
-					if (isTaskIndicationEnabled())
-						startTaskIndication();
+				if (MARKER_INDICATION.equals(p)) {
+					if (isMarkerIndicationEnabled())
+						startMarkerIndication();
 					else
-						stopTaskIndication();
+						stopMarkerIndication();
 					return;
 				}
 				
@@ -1596,11 +1596,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if (TASK_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
-					if (isTaskIndicationInOverviewRulerEnabled())
-						showTaskIndicationInOverviewRuler(true);
+				if (MARKER_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
+					if (isMarkerIndicationInOverviewRulerEnabled())
+						showMarkerIndicationInOverviewRuler(true);
 					else
-						showTaskIndicationInOverviewRuler(false);
+						showMarkerIndicationInOverviewRuler(false);
 					return;
 				}
 
@@ -1640,7 +1640,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
 		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || 
-									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || TASK_INDICATION_COLOR.equals(p);
+									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || MARKER_INDICATION_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	

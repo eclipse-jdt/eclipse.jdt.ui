@@ -491,7 +491,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public final static String EDITOR_TASK_INDICATION= CompilationUnitEditor.TASK_INDICATION;
+	public final static String EDITOR_TASK_INDICATION= CompilationUnitEditor.MARKER_INDICATION;
 
 	/**
 	 * A named preference that holds the color used to render task indicators.
@@ -504,7 +504,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
-	public final static String EDITOR_TASK_INDICATION_COLOR= CompilationUnitEditor.TASK_INDICATION_COLOR;
+	public final static String EDITOR_TASK_INDICATION_COLOR= CompilationUnitEditor.MARKER_INDICATION_COLOR;
 
 	/**
 	 * A named preference that controls if correction indicators are shown in the UI.

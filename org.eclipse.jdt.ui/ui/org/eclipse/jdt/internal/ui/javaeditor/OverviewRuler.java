@@ -132,27 +132,27 @@ public class OverviewRuler {
 	
 	/** Problem types */
 	private static final int ALL= -1;
-	private static final int COMPILE_WARNING= 0;
-	private static final int COMPILE_ERROR= 1;
-	private static final int COMPILE_TASK= 2;
+	private static final int PERMANENT_WARNING= 0;
+	private static final int PERMANENT_ERROR= 1;
+	private static final int PERMANENT_MARKER= 2;
 	private static final int TEMPORARY_WARNING= 3;
 	private static final int TEMPORARY_ERROR= 4;
-	private static final int TEMPORARY_TASK= 5;
+	private static final int TEMPORARY_MARKER= 5;
 	private static final int UNKNOWN= 6;
 	
 	/** Color table */
 	private static final RGB[][] COLORS= new RGB[][] {
 															/* fill */						/* stroke */
-		/* compile warning */	{ new RGB(248, 218, 114),	new RGB(139, 109, 7) },
-		/* compile error */		{ new RGB(255, 140, 140),	new RGB(255, 0, 0) },
-		/* compile task */			{ new RGB(0, 128, 255),		new RGB(176, 216 , 255) },
-		/* temporary warning */ { new RGB(255, 255, 206),	new RGB(244, 200, 45) },
-		/* temporary error */	{ new RGB(240, 230, 230),	new RGB(200, 100, 100) },
-		/* temporary task */		{ new RGB(159, 207, 255),	new RGB(255, 255, 255) }
+		/* permanent warning */	{ new RGB(248, 218, 114),	new RGB(139, 109, 7) },
+		/* permanent error */		{ new RGB(255, 140, 140),	new RGB(255, 0, 0) },
+		/* permanent marker */		{ new RGB(0, 128, 255),		new RGB(176, 216 , 255) },
+		/* temporary warning */ 	{ new RGB(255, 255, 206),	new RGB(244, 200, 45) },
+		/* temporary error */		{ new RGB(240, 230, 230),	new RGB(200, 100, 100) },
+		/* temporary marker */		{ new RGB(159, 207, 255),	new RGB(255, 255, 255) }
 	};
 	
 	/** drawing layers */
-	private static final int[] LAYERS= new int[] { COMPILE_TASK, TEMPORARY_TASK, COMPILE_WARNING, TEMPORARY_WARNING, COMPILE_ERROR, TEMPORARY_ERROR };
+	private static final int[] LAYERS= new int[] { PERMANENT_MARKER, TEMPORARY_MARKER, PERMANENT_WARNING, TEMPORARY_WARNING, PERMANENT_ERROR, TEMPORARY_ERROR };
 	
 	private static final int INSET= 2;
 	private static final int PROBLEM_HEIGHT_MIN= 4;
@@ -180,8 +180,8 @@ public class OverviewRuler {
 	private boolean fShowErrors= false;
 	/** Flag indicating the presentation of warnings */
 	private boolean fShowWarnings= false;
-	/** Flag indicating the presentation of tasks */
-	private boolean fShowTasks= false;
+	/** Flag indicating the presentation of markers */
+	private boolean fShowMarkers= false;
 	
 	
 	/**
@@ -211,13 +211,13 @@ public class OverviewRuler {
 			if (pa.isProblem()) {
 				
 				if (pa.isError())
-					return pa.isTemporary() ? TEMPORARY_ERROR : COMPILE_ERROR;
+					return pa.isTemporary() ? TEMPORARY_ERROR : PERMANENT_ERROR;
 				
 				if (pa.isWarning())
-					return pa.isTemporary() ? TEMPORARY_WARNING : COMPILE_WARNING;
+					return pa.isTemporary() ? TEMPORARY_WARNING : PERMANENT_WARNING;
 			
 			} else {
-				return pa.isTemporary() ? TEMPORARY_TASK : COMPILE_TASK;
+				return pa.isTemporary() ? TEMPORARY_MARKER : PERMANENT_MARKER;
 			}
 		}
 		
@@ -529,16 +529,16 @@ public class OverviewRuler {
 		fShowWarnings= showWarnings;
 	}
 	
-	public void showTasks(boolean showTasks) {
-		fShowTasks= showTasks;
+	public void showMarkers(boolean showTasks) {
+		fShowMarkers= showTasks;
 	}
 	
 	private boolean skipLayer(int layer) {
-		if (!fShowErrors && (layer == TEMPORARY_ERROR || layer == COMPILE_ERROR))
+		if (!fShowErrors && (layer == TEMPORARY_ERROR || layer == PERMANENT_ERROR))
 			return true;
-		if (!fShowWarnings && (layer == TEMPORARY_WARNING || layer == COMPILE_WARNING))
+		if (!fShowWarnings && (layer == TEMPORARY_WARNING || layer == PERMANENT_WARNING))
 			return true;
-		if (!fShowTasks && (layer == TEMPORARY_TASK || layer == COMPILE_TASK))
+		if (!fShowMarkers && (layer == TEMPORARY_MARKER || layer == PERMANENT_MARKER))
 			return true;
 		return false;
 	}

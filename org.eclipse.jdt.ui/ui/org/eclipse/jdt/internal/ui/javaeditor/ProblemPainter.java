@@ -55,11 +55,11 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private Color fErrorColor;
 	private Color fWarningColor;
-	private Color fTaskColor;
+	private Color fMarkerColor;
 	
 	private boolean fPaintErrors= false;
 	private boolean fPaintWarnings= false;
-	private boolean fPaintTasks= false;
+	private boolean fPaintMarkers= false;
 	
 	private ITextEditor fTextEditor;
 	private ISourceViewer fSourceViewer;
@@ -128,8 +128,8 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 							color= fWarningColor;
 						else if (pa.isError() && fPaintErrors)
 							color= fErrorColor;
-					} else if (pa.isTask() && fPaintTasks) {
-						color= fTaskColor;
+					} else if (fPaintMarkers) {
+						color= fMarkerColor;
 					}
 					
 					if (color != null) {
@@ -179,8 +179,8 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		fWarningColor= color;
 	}
 	
-	public void setTaskHighlightColor(Color color) {
-		fTaskColor= color;
+	public void setMarkerHighlightColor(Color color) {
+		fMarkerColor= color;
 	}
 	
 	public void paintErrors(boolean paintErrors) {
@@ -191,8 +191,8 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		fPaintWarnings= paintWarnings;
 	}
 	
-	public void paintTasks(boolean paintTasks) {
-		fPaintTasks= paintTasks;
+	public void paintMarkers(boolean paintMarkers) {
+		fPaintMarkers= paintMarkers;
 	}
 	
 	/*
@@ -201,7 +201,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	public void dispose() {
 		fErrorColor= null;
 		fWarningColor= null;
-		fTaskColor= null;
+		fMarkerColor= null;
 		fTextWidget= null;
 		fModel= null;
 		fProblemPositions= null;
