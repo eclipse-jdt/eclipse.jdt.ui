@@ -38,7 +38,11 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	protected ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
 	};
-		
+	
+	protected int fOffset;
+	protected int fLength;
+	
+	
 	/**
 	 * @see ICompletionRequestor#acceptClass
 	 */	
@@ -230,8 +234,12 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		int cursorPosition= completion == null ? 0 : completion.length();
 		if (!placeCursorBehindInsertion)
 			-- cursorPosition;
-	
-		return new JavaCompletionProposal(completion, start, end - start, cursorPosition, getIcon(iconName), name, null /* IContentAsisstTip */, proposalInfo);
+		
+		int length= end - start;
+		if (fOffset > -1 && fLength > -1)
+			length= fLength + (fOffset - start);
+		 	
+		return new JavaCompletionProposal(completion, start, length, cursorPosition, getIcon(iconName), name, null /* IContentAsisstTip */, proposalInfo);
 	} 
 		
 	protected int compare(Object o1, Object o2) {
@@ -273,8 +281,22 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	
 	public void reset(IJavaProject jproject) {
 		fJavaProject= jproject;
+		
+		fOffset= -1;
+		fLength= -1;
+		
 		fLastProblem= null;
+		
 		for (int i= 0; i < fResults.length; i++)
 			fResults[i].clear();
+	}
+	
+	/**
+	 * If the region is set, it overrules the range specified by
+	 * the content assist infrastructure.
+	 */
+	public void setRegionToReplace(int offset, int length) {
+		fOffset= offset;
+		fLength= length;
 	}
 }

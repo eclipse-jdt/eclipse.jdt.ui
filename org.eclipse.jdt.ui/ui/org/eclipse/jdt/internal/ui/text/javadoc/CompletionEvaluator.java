@@ -61,14 +61,16 @@ public class CompletionEvaluator {
 	private ICompilationUnit fCompilationUnit;
 	private IDocument fDocument;
 	private int fCurrentPos;
+	private int fCurrentLength;
 	
 	private JavaElementLabelProvider fLabelProvider;
 	private List fResult;
 	
-	public CompletionEvaluator(ICompilationUnit cu, IDocument doc, int pos) {
+	public CompletionEvaluator(ICompilationUnit cu, IDocument doc, int pos, int length) {
 		fCompilationUnit= cu;
 		fDocument= doc;
 		fCurrentPos= pos;
+		fCurrentLength= length;
 		fResult= new ArrayList();
 		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT + JavaElementLabelProvider.SHOW_CONTAINER);
@@ -405,9 +407,12 @@ public class CompletionEvaluator {
 
 
 	private ICompletionProposal createCompletion(String newText, String oldText, String labelText, Image image, String info) {
-		int startpos= fCurrentPos - oldText.length();
-		int endPos= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos);			
-		return new CompletionProposal(newText, startpos, endPos - startpos, newText.length(), image, labelText, null, info);
+		int offset= fCurrentPos - oldText.length();
+		int length= fCurrentLength + oldText.length();
+		if (fCurrentLength == 0)
+			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;			
+		
+		return new CompletionProposal(newText, offset, length, newText.length(), image, labelText, null, info);
 	}
 
 }

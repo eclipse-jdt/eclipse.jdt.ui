@@ -12,6 +12,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -75,12 +76,22 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	/**
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
+	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		try {
 			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 			if (unit != null) {
 				IDocument document= viewer.getDocument();
-				CompletionEvaluator evaluator= new CompletionEvaluator(unit, document, offset);
+				
+				int offset= documentOffset;
+				int length= 0;
+				
+				Point selection= viewer.getSelectedRange();
+				if (selection.y > 0) {
+					offset= selection.x;
+					length= selection.y;
+				}
+				
+				CompletionEvaluator evaluator= new CompletionEvaluator(unit, document, offset, length);
 				return evaluator.computeProposals();
 			}
 		} catch (JavaModelException x) {

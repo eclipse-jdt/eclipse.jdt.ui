@@ -9,6 +9,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -87,7 +88,12 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		
 		try {
 			if (unit != null) {
+				
 				fCollector.reset(unit.getJavaProject());
+				Point selection= viewer.getSelectedRange();
+				if (selection.y > 0)
+					fCollector.setRegionToReplace(selection.x, selection.y);
+				
 				unit.codeComplete(offset, fCollector);
 			}
 		} catch (JavaModelException x) {
