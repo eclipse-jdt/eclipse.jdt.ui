@@ -12,7 +12,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -27,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -226,9 +226,9 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	}
 	
 	private boolean mustAnalyzeAst() throws JavaModelException{
-		if (Flags.isAbstract(fMethod.getFlags()))
+		if (JdtFlags.isAbstract(fMethod))
 			return false;
-		else if (Flags.isNative(fMethod.getFlags()))
+		else if (JdtFlags.isNative(fMethod))
 			return false;
 		else if (fMethod.getDeclaringType().isInterface())
 			return false;

@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -18,6 +17,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 public class RefactoringScopeFactory {
 	
@@ -47,13 +48,13 @@ public class RefactoringScopeFactory {
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement instanceof IMember) {
 			IMember member= (IMember)javaElement;
-			if (Flags.isPrivate(member.getFlags())) {
+			if (JdtFlags.isPrivate(member)) {
 				if (member.getCompilationUnit() != null)
 					return SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getCompilationUnit()});
 				else 	
 					return SearchEngine.createJavaSearchScope(new IJavaElement[]{member});
 			}	
-			if (! Flags.isPublic(member.getFlags()) && !Flags.isProtected(member.getFlags()) && member.getCompilationUnit() != null) {
+			if (! JdtFlags.isPublic(member) && !JdtFlags.isProtected(member) && member.getCompilationUnit() != null) {
 				IPackageFragment pack= (IPackageFragment)member.getCompilationUnit().getParent();
 				return SearchEngine.createJavaSearchScope(new IJavaElement[]{pack});
 			}	

@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,6 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
 class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
@@ -42,7 +42,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
-		if (! Flags.isPrivate(getMethod().getFlags()))
+		if (! JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.only_private")); //$NON-NLS-1$
 		return result;
 	}

@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEd
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -192,7 +192,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		for (int i= 0; i < fMembers.length; i++) {
 			if (fMembers[i].getElementType() != IJavaElement.METHOD)
 				continue;
-			if (! Flags.isNative(fMembers[i].getFlags()))
+			if (! JdtFlags.isNative(fMembers[i]))
 				continue;
 			String msg= "Moved method \'" + JavaElementUtil.createMethodSignature((IMethod)fMembers[i])
 						+ "\' is native. You will need to update native libraries.";
@@ -239,11 +239,11 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private static String createAccessModifierString(IMember member) throws JavaModelException{
-		if (Flags.isPublic(member.getFlags()))
+		if (JdtFlags.isPublic(member))
 			return "public";
-		else if (Flags.isProtected(member.getFlags()))
+		else if (JdtFlags.isProtected(member))
 			return "protected";
-		else if (Flags.isPrivate(member.getFlags()))
+		else if (JdtFlags.isPrivate(member))
 			return "private";
 		else	
 			return "package-visible";
@@ -266,7 +266,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		for (int i= 0; i < accessedMethods.length; i++) {
 			if (movedElementList.contains(accessedMethods[i]))
 				continue;
-			if (! Flags.isStatic(accessedMethods[i].getFlags())) //safely ignore non-static 
+			if (! JdtFlags.isStatic(accessedMethods[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedMethods[i], fDestinationType, accessedMethods[i].getDeclaringType())){
 				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType);
@@ -283,7 +283,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		for (int i= 0; i < accessedTypes.length; i++) {
 			if (movedElementList.contains(accessedTypes[i]))
 				continue;
-			if (! Flags.isStatic(accessedTypes[i].getFlags())) //safely ignore non-static 
+			if (! JdtFlags.isStatic(accessedTypes[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedTypes[i], fDestinationType, accessedTypes[i].getDeclaringType())){
 				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType);					
@@ -300,7 +300,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		for (int i= 0; i < accessedFields.length; i++) {
 			if (movedElementList.contains(accessedFields[i]))
 				continue;
-			if (! Flags.isStatic(accessedFields[i].getFlags())) //safely ignore non-static 
+			if (! JdtFlags.isStatic(accessedFields[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedFields[i], fDestinationType, accessedFields[i].getDeclaringType())){
 				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedFields[i], fDestinationType);					
@@ -311,15 +311,15 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private static boolean isVisibleFrom(IMember member, IType accessingType, IType newMemberDeclaringType) throws JavaModelException{
-		if (Flags.isPrivate(member.getFlags()))
+		if (JdtFlags.isPrivate(member))
 			return newMemberDeclaringType.equals(accessingType); //roughly
-		if (Flags.isPublic(member.getFlags())){
-			if (Flags.isPublic(newMemberDeclaringType.getFlags())) //roughly
+		if (JdtFlags.isPublic(member)){
+			if (JdtFlags.isPublic(newMemberDeclaringType)) //roughly
 				return true;
 			return accessingType.getPackageFragment().equals(newMemberDeclaringType.getPackageFragment());  //roughly
 		}	
-		if (Flags.isProtected(member.getFlags())){ //FIX ME
-			if (Flags.isPublic(newMemberDeclaringType.getFlags()))
+		if (JdtFlags.isProtected(member)){ //FIX ME
+			if (JdtFlags.isPublic(newMemberDeclaringType))
 				return true;
 			return accessingType.getPackageFragment().equals(newMemberDeclaringType.getPackageFragment());
 		}	
@@ -329,7 +329,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private static boolean canDeclareStaticMembers(IType type) throws JavaModelException {
-		return (Flags.isStatic(type.getFlags())) || (type.getDeclaringType() == null);
+		return (JdtFlags.isStatic(type)) || (type.getDeclaringType() == null);
 	}
 
 	private RefactoringStatus checkAllElements() throws JavaModelException{
@@ -355,10 +355,10 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
 				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on interface methods.");
 				
-			if (member.getElementType() == IJavaElement.METHOD && ! Flags.isStatic(member.getFlags()))
+			if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
 				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static methods.");
 
-			if (! member.getDeclaringType().isInterface() && ! Flags.isStatic(member.getFlags()))
+			if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
 				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static elements (and interface fields).");
 			
 			if (member.getElementType() == IJavaElement.METHOD)
@@ -702,7 +702,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		List memberList= Arrays.asList(fMembers);
 		if (memberList.contains(member))
 			return false;
-		if (! Flags.isStatic(member.getFlags())) //convert all static references
+		if (! JdtFlags.isStatic(member)) //convert all static references
 			return false;
 		return true;		
 	}

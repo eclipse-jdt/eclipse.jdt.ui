@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -15,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	
@@ -32,9 +32,9 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
 					
-		if (Flags.isPrivate(getMethod().getFlags()))
+		if (JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_private")); //$NON-NLS-1$
-		if (Flags.isStatic(getMethod().getFlags()))
+		if (JdtFlags.isStatic(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_static"));	 //$NON-NLS-1$
 		if (! getMethod().getDeclaringType().isClass())
 			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.only_class_methods")); //$NON-NLS-1$
@@ -105,7 +105,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			IMethod[] methods= classes[i].getMethods();
 			for (int j= 0; j < methods.length; j++){
 				if ((!methods[j].equals(getMethod()))
-					&& (Flags.isNative(methods[j].getFlags()))
+					&& (JdtFlags.isNative(methods[j]))
 					&& (null != Checks.findMethod(getMethod(), new IMethod[]{methods[j]})))
 						return true;
 			}

@@ -21,13 +21,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
@@ -153,9 +154,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	private boolean needsModifiers() {
 		try {
-			return !Flags.isFinal(fRefactoring.getField().getFlags());
+			return !JdtFlags.isFinal(fRefactoring.getField());
 		} catch(JavaModelException e) {
+			return true;
 		}
-		return true;
 	}	
 }

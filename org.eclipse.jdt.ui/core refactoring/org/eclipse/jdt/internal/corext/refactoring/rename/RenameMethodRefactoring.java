@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -66,10 +66,9 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 * Factory method to create appropriate instances
 	 */
 	public static RenameMethodRefactoring createInstance(IMethod method) throws JavaModelException{
-		 int flags= method.getFlags();
-		 if (Flags.isPrivate(flags))
+		 if (JdtFlags.isPrivate(method))
 		 	return new RenamePrivateMethodRefactoring(method);
-		 else if (Flags.isStatic(flags))
+		 else if (JdtFlags.isStatic(method))
 		 	return new RenameStaticMethodRefactoring(method);
 		 else if (method.getDeclaringType().isClass())	
 		 	return new RenameVirtualMethodRefactoring(method);
@@ -174,7 +173,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		fMethod= orig;
 		
 		RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
-		if (Flags.isNative(fMethod.getFlags()))
+		if (JdtFlags.isNative(fMethod))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
 		return result;
 	}
@@ -296,7 +295,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_binary", msgData)); //$NON-NLS-1$
 			if (method.isReadOnly())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_read_only", msgData));//$NON-NLS-1$
-			if (Flags.isNative(method.getFlags()))
+			if (JdtFlags.isNative(method))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_native_1", msgData));//$NON-NLS-1$
 		}
 		return result;	
@@ -331,7 +330,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		List subtypes= Arrays.asList(hier.getAllSubtypes(type));
 		
 		int parameterCount= method.getParameterTypes().length;
-		boolean isMethodPrivate= Flags.isPrivate(method.getFlags());
+		boolean isMethodPrivate= JdtFlags.isPrivate(method);
 		
 		for (Iterator iter= classes.iterator(); iter.hasNext(); ){
 			IType clazz= (IType) iter.next();
@@ -342,7 +341,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 					continue;
 				if (isSubclass || type.equals(clazz))
 					return true;
-				if ((! isMethodPrivate) && (! Flags.isPrivate(methods[j].getFlags())))
+				if ((! isMethodPrivate) && (! JdtFlags.isPrivate(methods[j])))
 					return true;
 			}
 		}

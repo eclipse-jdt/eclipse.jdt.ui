@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -50,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
@@ -320,12 +320,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 							
 		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
-		if (!Flags.isPrivate(fField.getFlags()))
+		if (!JdtFlags.isPrivate(fField))
 			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, "private")); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
-		if (!Flags.isFinal(fField.getFlags()))
+		if (!JdtFlags.isFinal(fField))
 			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter"), createSetterMethod(insertionKind, sibling, modifiers, type)); //$NON-NLS-1$
 		change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter"), createGetterMethod(insertionKind, sibling, modifiers, type));	 //$NON-NLS-1$
 	}
@@ -362,11 +362,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private String createModifiers() throws JavaModelException {
 		StringBuffer result= new StringBuffer();
-		int flags= fField.getFlags();
-		if (Flags.isPublic(flags))	result.append("public "); //$NON-NLS-1$
-		if (Flags.isProtected(flags)) result.append("protected "); //$NON-NLS-1$
-		if (Flags.isPrivate(flags))	result.append("private "); //$NON-NLS-1$
-		if (Flags.isStatic(flags)) result.append("static "); //$NON-NLS-1$
+		if (JdtFlags.isPublic(fField))	result.append("public "); //$NON-NLS-1$
+		if (JdtFlags.isProtected(fField)) result.append("protected "); //$NON-NLS-1$
+		if (JdtFlags.isPrivate(fField))	result.append("private "); //$NON-NLS-1$
+		if (JdtFlags.isStatic(fField)) result.append("static "); //$NON-NLS-1$
 		return result.toString();
 	}
 	
@@ -377,7 +376,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private String createFieldAccess() throws JavaModelException {
 		String fieldName= fField.getElementName();
 		if (fArgName.equals(fieldName)) {
-			return (Flags.isStatic(fField.getFlags()) 
+			return (JdtFlags.isStatic(fField) 
 				? fField.getDeclaringType().getElementName() + "."  //$NON-NLS-1$
 				: "this.") + fieldName; //$NON-NLS-1$
 		} else {
@@ -389,7 +388,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		String fieldName= fField.getElementName();
 		boolean isStatic= true;
 		try {
-			isStatic= Flags.isStatic(fField.getFlags());
+			isStatic= JdtFlags.isStatic(fField);
 		} catch(JavaModelException e) {
 		}
 		if (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))

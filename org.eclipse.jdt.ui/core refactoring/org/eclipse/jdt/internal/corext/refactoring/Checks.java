@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -41,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.C
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -229,7 +229,7 @@ public class Checks {
 			return null;
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
-			if (Flags.isNative(methods[i].getFlags())){
+			if (JdtFlags.isNative(methods[i])){
 				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
 								new String[]{methods[i].getDeclaringType().getFullyQualifiedName(), methods[i].getElementName()})
 								+ " UnsatisfiedLinkError."; //$NON-NLS-1$

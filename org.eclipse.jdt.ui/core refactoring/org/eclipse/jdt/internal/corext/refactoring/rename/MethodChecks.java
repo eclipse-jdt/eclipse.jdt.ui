@@ -3,7 +3,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -14,6 +13,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MethodChecks {
@@ -25,9 +25,9 @@ public class MethodChecks {
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
 		if (method.getDeclaringType().isInterface())
 			return false;
-		if (Flags.isPrivate(method.getFlags()))	
+		if (JdtFlags.isPrivate(method))	
 			return false;
-		if (Flags.isStatic(method.getFlags()))	
+		if (JdtFlags.isStatic(method))	
 			return false;
 		return true;	
 	}	
@@ -87,7 +87,7 @@ public class MethodChecks {
 						method.getParameterTypes(), 
 						method.isConstructor());
 		
-		boolean overrides= (found != null && (! Flags.isStatic(found.getFlags())) && (! Flags.isPrivate(found.getFlags())));	
+		boolean overrides= (found != null && (! JdtFlags.isStatic(found)) && (! JdtFlags.isPrivate(found)));	
 		if (overrides)
 			return found;
 		else

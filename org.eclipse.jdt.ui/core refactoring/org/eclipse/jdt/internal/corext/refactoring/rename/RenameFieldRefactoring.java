@@ -8,7 +8,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRef
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -360,7 +360,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		if (field.getDeclaringType().isInterface())
 			return false;
 		else 
-			return ! Flags.isStatic(field.getFlags());
+			return ! JdtFlags.isStatic(field);
 	}
 	
 	private RefactoringStatus checkNestedHierarchy(IType type) throws JavaModelException {

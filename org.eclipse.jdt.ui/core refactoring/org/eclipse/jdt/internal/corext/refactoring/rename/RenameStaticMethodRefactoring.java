@@ -8,12 +8,12 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 
@@ -31,9 +31,9 @@ class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
 					
-		if (Flags.isPrivate(getMethod().getFlags()))
+		if (JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.no_private")); //$NON-NLS-1$
-		if (! Flags.isStatic(getMethod().getFlags()))
+		if (! JdtFlags.isStatic(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.only_static"));	 //$NON-NLS-1$
 		return result;
 	}

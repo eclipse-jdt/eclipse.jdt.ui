@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -17,6 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 /**
  * This class is used to find methods along the 'ripple' - e.g. when you rename a method that is declared in an interface,
@@ -32,10 +32,10 @@ public class RippleMethodFinder {
 	//assert(method is defined in the most abstract type that declares it )
 	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		try{
-			if (Flags.isPrivate(method.getFlags()))
+			if (JdtFlags.isPrivate(method))
 				return new IMethod[]{method};
 		
-			if (Flags.isStatic(method.getFlags()))
+			if (JdtFlags.isStatic(method))
 				return new IMethod[]{method};
 		
 			if (method.getDeclaringType().isInterface())
@@ -162,10 +162,9 @@ public class RippleMethodFinder {
 		IMethod found= Checks.findMethod(m, type);
 		if (found == null)
 			return false;
-		int flags= found.getFlags();	
-		if (Flags.isStatic(flags))	
+		if (JdtFlags.isStatic(found))	
 			return false;
-		if (Flags.isPrivate(flags))	
+		if (JdtFlags.isPrivate(found))	
 			return false;	
 		return true;	
 	}

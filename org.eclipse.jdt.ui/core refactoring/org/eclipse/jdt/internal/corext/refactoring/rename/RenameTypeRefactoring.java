@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -552,7 +552,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 
 	private boolean mustRenameCU() throws JavaModelException{
-		return Checks.isTopLevel(fType) && (Flags.isPublic(fType.getFlags()));
+		return Checks.isTopLevel(fType) && (JdtFlags.isPublic(fType));
 	}
 	
 	private static ICompilationUnit getCompilationUnit(IImportDeclaration imp){
@@ -570,7 +570,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private void analyzeImportedTypes(IType[] types, RefactoringStatus result, IImportDeclaration imp) throws JavaModelException{
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
-			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
+			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(fNewName)){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
 																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))});
 				result.addError(msg, JavaSourceContext.create(imp));

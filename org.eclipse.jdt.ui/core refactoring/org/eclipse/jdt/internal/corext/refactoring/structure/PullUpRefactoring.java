@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
@@ -46,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEd
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -333,7 +333,7 @@ public class PullUpRefactoring extends Refactoring {
 			if (! member.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements with unknown structure.");					
 
-			if (Flags.isStatic(member.getFlags())) //for now
+			if (JdtFlags.isStatic(member)) //for now
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on static elements.");
 			
 			if (member.getElementType() == IJavaElement.METHOD)
@@ -346,10 +346,10 @@ public class PullUpRefactoring extends Refactoring {
 		if (method.isConstructor())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on constructors.");			
 			
-		if (Flags.isAbstract(method.getFlags()))
+		if (JdtFlags.isAbstract(method))
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on abstract methods.");
 			
- 		if (Flags.isNative(method.getFlags())) //for now - move to input preconditions
+ 		if (JdtFlags.isNative(method)) //for now - move to input preconditions
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on native methods.");				
 
 		return null;	
@@ -473,14 +473,14 @@ public class PullUpRefactoring extends Refactoring {
 		if (! member.exists())
 			return false;
 			
-		if (Flags.isPrivate(member.getFlags()))
+		if (JdtFlags.isPrivate(member))
 			return false;
 			
 		if (member.getDeclaringType() == null){ //top level
 			if (! (member instanceof IType))
 				return false;
 
-			if (Flags.isPublic(member.getFlags()))
+			if (JdtFlags.isPublic(member))
 				return true;
 				
 			//FIX ME: protected and default treated the same
@@ -493,7 +493,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (member.getDeclaringType().equals(getDeclaringType())) //XXX
 			return false;
 			
-		if (Flags.isPublic(member.getFlags()))
+		if (JdtFlags.isPublic(member))
 			return true;
 		 
 		//FIX ME: protected and default treated the same
@@ -565,7 +565,7 @@ public class PullUpRefactoring extends Refactoring {
 	private void checkMethodAccessModifiers(RefactoringStatus result, IMethod method) throws JavaModelException {
 		Context errorContext= JavaSourceContext.create(method);
 		
-		if (Flags.isStatic(method.getFlags())){
+		if (JdtFlags.isStatic(method)){
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(method) + "' declared in type '" 
 									 + method.getDeclaringType().getFullyQualifiedName()
 									 + "' is 'static', which will result in compile errors if you proceed." ;
@@ -595,7 +595,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static boolean isVisibilityLowerThanProtected(IMember member)throws JavaModelException {
-		return ! (Flags.isPublic(member.getFlags()) || Flags.isProtected(member.getFlags()));
+		return ! (JdtFlags.isPublic(member) || JdtFlags.isProtected(member));
 	}
 	
 	//--- change creation
@@ -704,7 +704,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static boolean needsToChangeVisibility(IMember method) throws JavaModelException {
-		return ! (Flags.isPublic(method.getFlags()) || Flags.isProtected(method.getFlags()));
+		return ! (JdtFlags.isPublic(method) || JdtFlags.isProtected(method));
 	}
 	
 	private static String computeNewSource(IMember member) throws JavaModelException {
@@ -718,7 +718,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (! needsToChangeVisibility(member))
 			return source;
 			
-		if (Flags.isPrivate(member.getFlags()))
+		if (JdtFlags.isPrivate(member))
 			return substitutePrivateWithProtected(source);
 		return "protected " + removeLeadingWhiteSpaces(source);
 	}

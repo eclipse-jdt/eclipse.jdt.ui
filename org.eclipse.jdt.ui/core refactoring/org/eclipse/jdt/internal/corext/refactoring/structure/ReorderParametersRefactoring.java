@@ -8,7 +8,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -33,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -163,7 +163,7 @@ class ReorderParametersRefactoring extends Refactoring {
 	private RefactoringStatus checkNativeMethods() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fRippleMethods.length; i++) {
-			if (Flags.isNative(fRippleMethods[i].getFlags())){
+			if (JdtFlags.isNative(fRippleMethods[i])){
 				String msg= "Method " + JavaElementUtil.createMethodSignature(fRippleMethods[i]) 
 									+ "' declared in type '" 
 									+ fRippleMethods[i].getDeclaringType().getFullyQualifiedName() 
