@@ -63,6 +63,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS_13= new Path("testresources/rtstubs.jar");
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
+	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
 	public static final IPath NLS_LIB= new Path("testresources/nls.jar");
@@ -109,7 +110,8 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Creates a Java project with JUnit source.
+	 * Creates a Java project with JUnit source and rt.jar from
+	 * {@link #addVariableRTJar(IJavaProject, String, String, String)}.
 	 * 
 	 * @param projectName the project name
 	 * @param srcContainerName the source container name
@@ -129,7 +131,7 @@ public class JavaProjectHelper {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
 		
-		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive, JUNIT_SRC_ENCODING);
 		
 		return project;
 	}
@@ -258,39 +260,46 @@ public class JavaProjectHelper {
 		addToClasspath(jproject, cpe);		
 		return root;
 	}
-
-	/**
-	 * @deprecated use addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile) to make sure that the zip file is correctly closed
-	 */	
-	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile) throws InvocationTargetException, CoreException {
-		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
-	}
 	
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
 	 * in the given Zip file.
+	 * <p>Note: use {@link #addSourceContainerWithImport(IJavaProject, String, File, String)}
+	 * to define the encoding of the unzipped files.
 	 */		
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile) throws InvocationTargetException, CoreException, IOException {
 		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
 	}
 
 	/**
-	 * @deprecated use addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, IPath[]) to make sure that the zip file is correctly closed
-	 */
-	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException {
-		IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
-		importFilesFromZip(zipFile, root.getPath(), null);
-		return root;
-	}
-
-	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
 	 * in the given Zip file.
+	 * <p>Note: use {@link #addSourceContainerWithImport(IJavaProject, String, File, String)}
+	 * to define the encoding of the unzipped files.
 	 */		
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
 		ZipFile file= new ZipFile(zipFile);
 		try {
 			IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
+			importFilesFromZip(file, root.getPath(), null);
+			return root;
+		} finally {
+			if (file != null) {
+				file.close();
+			}
+		}
+	}	
+
+	/**
+	 * Adds a source container to a IJavaProject and imports all files contained
+	 * in the given Zip file.
+	 * @param containerEncoding encoding for the generated source container
+	 */		
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, String containerEncoding) throws InvocationTargetException, CoreException, IOException {
+		ZipFile file= new ZipFile(zipFile);
+		try {
+			IPackageFragmentRoot root= addSourceContainer(jproject, containerName);
+			((IContainer) root.getCorrespondingResource()).setDefaultCharset(containerEncoding, null);
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
 		} finally {

@@ -98,7 +98,7 @@ public class AllTypesCacheTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
 
-		fSourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
+		fSourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		
 	}
 

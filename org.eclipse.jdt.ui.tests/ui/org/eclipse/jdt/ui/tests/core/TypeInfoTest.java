@@ -89,8 +89,7 @@ public class TypeInfoTest extends TestCase {
 		// add Junit source to project 2
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
-		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
-	
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);	
 		// source folder
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
@@ -160,7 +159,7 @@ public class TypeInfoTest extends TestCase {
 		// add Junit source to project 2
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
-		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		
 		
 		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
