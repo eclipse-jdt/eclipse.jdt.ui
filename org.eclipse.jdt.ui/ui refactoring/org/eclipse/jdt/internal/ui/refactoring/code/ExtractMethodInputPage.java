@@ -20,13 +20,12 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 	
 	protected void textModified(String text) {
 		super.textModified(text);
-		if (text.length() == 0 && fPreview != null)
-			fPreview.setText("");
+		updatePreview(text);
 	}
 	
 	protected RefactoringStatus validateTextField(String text) {
 		fRefactoring.setMethodName(text);
-		updatePreview();
+		updatePreview(text);
 		return fRefactoring.checkMethodName();
 	}
 	
@@ -91,13 +90,16 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 	
 	private void setVisibility(String s) {
 		fRefactoring.setVisibility(s);
-		updatePreview();
+		updatePreview(getText());
 	}
 	
-	private void updatePreview() {
-		String text= getText();
-		if (text.length() != 0)
-			text= fRefactoring.getSignature();
-		fPreview.setText(text);
+	private void updatePreview(String text) {
+		if (fPreview == null)
+			return;
+			
+		if (text.length() == 0)
+			text= "someMethodName";			
+			
+		fPreview.setText(fRefactoring.getSignature(text));
 	}
 }

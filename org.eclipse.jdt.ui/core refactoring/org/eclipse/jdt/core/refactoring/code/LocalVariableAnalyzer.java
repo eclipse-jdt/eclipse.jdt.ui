@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private String fLhs= "";
 	private String fReturnStatement= null;
 	private String fReturnType= "void";
+	
 	private List fUsedLocals= new ArrayList(2);
 	
 	public LocalVariableAnalyzer(StatementAnalyzer analyzer) {
@@ -150,9 +151,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	//---- Precondition checking ----------------------------------------------------------------
 
 	public void checkActivation(RefactoringStatus status) {
-		checkLocalWrites(status);
 		checkLocalReads(status);
-		checkFollowingLocals(status);
+		List followingLocals= new ArrayList(2);
+		followingLocals.addAll(fFollowingLocalReads);
+		followingLocals.addAll(fFollowingLocalWrites);
+		checkLocalWrites(status, followingLocals);
+		checkFollowingLocals(status, followingLocals);
 	}
 	
 	//---- Code generation ----------------------------------------------------------------------
@@ -214,32 +218,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	
 	//---- Private Helper methods -------------------------------------------------------------
 	
-	private void checkLocalWrites(RefactoringStatus status) {
-		int count= 0;
-		LocalDeclaration returnDeclaration= null;
-		Iterator iter= fSelectedLocalWrites.iterator();
-		while (iter.hasNext()) {
-			LocalVariableBinding binding= (LocalVariableBinding)iter.next();
-			LocalDeclaration declaration= binding.declaration;
-			if (!fStatementAnalyzer.isSelected(declaration)) {
-				count++;
-				if (count > 1) {
-					status.addFatalError("Ambigious return value: selected block contains more than one assignment to local variable");
-					return;
-				} else {
-					returnDeclaration= declaration;
-				}
-				if (fSelectedLocalReads.contains(binding))
-					fUsedLocals.add(binding);
-				else
-					fLocalReturnValueDeclaration= makeDeclaration(declaration); 
-			}
-		}
-		if (returnDeclaration != null) {
-			computeReturnType(returnDeclaration);
-		}
-	}
-	
 	private void checkLocalReads(RefactoringStatus statue) {
 		for (Iterator iter= fSelectedLocalReads.iterator(); iter.hasNext();) {
 			LocalVariableBinding binding= (LocalVariableBinding)iter.next();
@@ -249,10 +227,38 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 	}
 	
-	private void checkFollowingLocals(RefactoringStatus status) {
-		List followingLocals= new ArrayList(10);
-		followingLocals.addAll(fFollowingLocalReads);
-		followingLocals.addAll(fFollowingLocalWrites);
+	private void checkLocalWrites(RefactoringStatus status, List followingLocals) {
+		LocalDeclaration returnDeclaration= null;
+		boolean isHardReturnDeclaration= false;
+		Iterator iter= fSelectedLocalWrites.iterator();
+		while (iter.hasNext()) {
+			LocalVariableBinding binding= (LocalVariableBinding)iter.next();
+			LocalDeclaration declaration= binding.declaration;
+			if (!fStatementAnalyzer.isSelected(declaration)) {
+				boolean isUsedAfterSelection= followingLocals.contains(binding);
+				if (returnDeclaration == null) {
+					returnDeclaration= declaration;
+					isHardReturnDeclaration= isUsedAfterSelection;
+				} else {
+					if (isHardReturnDeclaration) {
+						status.addFatalError("Ambigious return value: selected block contains more than one assignment to local variable");
+						return;
+					} else if (isUsedAfterSelection) {
+						returnDeclaration= declaration;
+						isHardReturnDeclaration= true;
+					}
+				}
+				// The variable is not part of the read accesses. So we have to create a local variable declaration.
+				if (!fUsedLocals.contains(binding))
+					fLocalReturnValueDeclaration= makeDeclaration(declaration); 
+			}
+		}
+		if (returnDeclaration != null) {
+			computeReturnType(returnDeclaration);
+		}
+	}
+	
+	private void checkFollowingLocals(RefactoringStatus status, List followingLocals) {
 		int count= 0;
 		LocalDeclaration returnDeclaration= null;
 		Iterator iter= followingLocals.iterator();
@@ -294,17 +300,5 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private String makeDeclaration(LocalDeclaration declaration) {
 		TypeReference typeRef= declaration.type;
 		return typeRef.toStringExpression(0) + " " + declaration.name() + ";";
-	}
-		
-	private List computeSelectedLocals() {
-		List result= new ArrayList(fSelectedLocalReads.size());
-		result.addAll(fSelectedLocalReads);
-		Iterator iter= fSelectedLocalWrites.iterator();
-		while(iter.hasNext()) {
-			Object element= iter.next();
-			if (!result.contains(element))
-				result.add(element);
-		}
-		return result;
-	}
+	}		
 }

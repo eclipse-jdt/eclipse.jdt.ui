@@ -234,14 +234,24 @@ public class ExtractMethodRefactoring extends Refactoring{
 	/**
 	 * Returns the signature of the new method.
 	 * 
-	 * @param the method name used for the new method.
+	 * @return the signature of the extracted method
 	 */
 	public String getSignature() {
+		return getSignature(fMethodName);
+	}
+	
+	/**
+	 * Returns the signature of the new method.
+	 * 
+	 * @param the method name used for the new method
+	 * @return the signature of the extracted method
+	 */
+	public String getSignature(String name) {
 		String s= "";
 		if (!DEFAULT_VISIBILITY.equals(fVisibility))
 			s= fVisibility;
 			
-		return s + " " + fStatementAnalyzer.getSignature(fMethodName);
+		return s + " " + fStatementAnalyzer.getSignature(name);
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
