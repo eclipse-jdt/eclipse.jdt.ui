@@ -241,7 +241,6 @@ public class SelectionList extends Composite {
 		fList.setRedraw(false);
 		int itemCount= fList.getItemCount();
 		int oldSelectionIndex= fList.getSelectionIndex();
-		boolean fireSelectionChanged= false;
 		if (size < itemCount) {
 			fList.remove(0, itemCount-size-1);
 		}
@@ -261,13 +260,10 @@ public class SelectionList extends Composite {
 		}
 		if (fList.getItemCount() > 0) {
 			fList.setSelection(0);
-			if (oldSelectionIndex != -1)
-				fireSelectionChanged= true;
-		}	
-		fList.setRedraw(true);
-		if (fireSelectionChanged) {
-			Event event= new Event();
-			fList.notifyListeners(SWT.Selection, event);
 		}
+					
+		fList.setRedraw(true);
+		Event event= new Event();
+		fList.notifyListeners(SWT.Selection, event);
 	}			
 }
