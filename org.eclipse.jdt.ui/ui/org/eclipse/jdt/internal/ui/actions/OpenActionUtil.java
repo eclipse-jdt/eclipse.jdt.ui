@@ -96,44 +96,5 @@ public class OpenActionUtil {
 			}
 		}		
 		return null;
-	}
-	
-	public static IJavaElement getElementToOpen(IJavaElement element) throws JavaModelException {
-		if (element == null)
-			return null;
-		switch (element.getElementType()) {
-			case IJavaElement.IMPORT_DECLARATION:
-				// select referenced element: package fragment or cu/classfile of referenced type
-				IImportDeclaration declaration= (IImportDeclaration) element;
-				if (declaration.isOnDemand()) {
-					element= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(element.getElementName()));
-				} else {
-					element= element.getJavaProject().findType(element.getElementName());
-				}
-				if (element instanceof IType) {
-					element= (IJavaElement)element.getOpenable();
-				}
-				break;
-			case IJavaElement.PACKAGE_DECLARATION:
-			case IJavaElement.IMPORT_CONTAINER:
-			case IJavaElement.TYPE:
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
-			case IJavaElement.INITIALIZER:
-				// select parent cu/classfile
-				element= (IJavaElement)element.getOpenable();
-				break;
-			case IJavaElement.JAVA_MODEL:
-				element= null;
-				break;
-			default:
-		}
-		if (element instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit) element;
-			if (cu.isWorkingCopy()) {
-				element= cu.getOriginalElement();
-			}
-		}
-		return element;
-	}		
+	}	
 }

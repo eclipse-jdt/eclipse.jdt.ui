@@ -29,8 +29,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -145,6 +148,7 @@ public class OpenAction extends SelectionDispatchAction {
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			try {
+				element= getElementToOpen(element);
 				OpenActionUtil.open(element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
@@ -176,6 +180,28 @@ public class OpenAction extends SelectionDispatchAction {
 			}		
 		}
 	}
+	
+	public Object getElementToOpen(Object object) throws JavaModelException {
+		if (!(object instanceof IJavaElement))
+			return object;
+		
+		IJavaElement element= (IJavaElement)object;
+		switch (element.getElementType()) {
+			case IJavaElement.IMPORT_DECLARATION:
+				// select referenced element: package fragment or cu/classfile of referenced type
+				IImportDeclaration declaration= (IImportDeclaration) element;
+				if (declaration.isOnDemand()) {
+					element= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(element.getElementName()));
+				} else {
+					element= element.getJavaProject().findType(element.getElementName());
+				}
+				if (element instanceof IType) {
+					element= (IJavaElement)element.getOpenable();
+				}
+				break;
+		}
+		return element;
+	}	
 	
 	private String getDialogTitle() {
 		return ActionMessages.getString("OpenAction.error.title"); //$NON-NLS-1$

@@ -28,7 +28,9 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.views.navigator.ResourceNavigator;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -155,9 +157,14 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	private IResource getResource(IJavaElement element) throws JavaModelException {
 		if (element == null)
 			return null;
-		element= OpenActionUtil.getElementToOpen(element);
-		if (element == null)
-			return null;
+		if (element instanceof IMember) {
+			element= ((IMember)element).getCompilationUnit();
+		}
+		if (element instanceof ICompilationUnit) {
+			ICompilationUnit unit= (ICompilationUnit)element;
+			if (unit.isWorkingCopy())
+				element= unit.getOriginalElement();
+		}
 		return element.getCorrespondingResource();
 	}
 	
