@@ -90,7 +90,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IRefactoring ref= createRefactoring(getScope(), classA, newName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
-		assert("cu does not exist", newcu.exists());
+		assert("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
 	}
 		
@@ -680,8 +680,11 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		
 		IRefactoring ref= new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B");
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 	}
 	
 	public void test21() throws Exception { 
@@ -716,44 +719,58 @@ public class RenameTypeTests extends RefactoringTest {
 		helper2("A", "B");		
 	}
 	
-	/*public void test29() throws Exception { 
-		
+	public void test29() throws Exception { 
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		ICompilationUnit cuC= createCUfromTestFile(packageP1, "C");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		Refactoring ref= new RenameTypeRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());		
-	}*/
+		
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
+		
+	}
 	
 	public void test3() throws Exception { 
 		helper2("A", "B");		
 	}
 	
-/*	public void test30() throws Exception { 
-		//ICompilationUnit cu= Utils.createCUFromFile(getPackageP(), "A.java", PATH + "test30/in/A.java");
-		createCUFromFile(getPackageP(), "AA.java", PATH + "test30/in/AA.java");
+	public void test30() throws Exception { 
+		ICompilationUnit cuAA= createCUfromTestFile(getPackageP(), "AA");
 		
-		//IType classA= Utils.getType(cu, "A");
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType classA= getType(cu, "A");
+				
+		IRefactoring ref= createRefactoring(getScope(), classA, "B");
 		
-		IType classA= getClassFromTestFile(getPackageP(), "A");
-		Result result= new RenameClassRefactoring(fWorkbench, fScope, classA, "B").checkPreconditions();
-		checkPassingTest(result, 3);		
-	}*/
-/*	public void test31() throws Exception { 
-		//ICompilationUnit cu= Utils.createCUFromFile(getPackageP(), "A.java", PATH + "test31/in/A.java");
-		createCUFromFile(getPackageP(), "AA.java", PATH + "test31/in/AA.java");
+		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
-		//IType classA= Utils.getType(cu, "A");
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEquals("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
+	}
+	public void test31() throws Exception {
+		ICompilationUnit cuAA= createCUfromTestFile(getPackageP(), "AA");
 		
-		IType classA= getClassFromTestFile(getPackageP(), "A");
-		Result result= new RenameClassRefactoring(fWorkbench, fScope, classA, "B").checkPreconditions();
-		checkPassingTest(result, 3);		
-	}*/
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType classA= getType(cu, "A");
+				
+		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		
+		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEquals("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
+	}
 	public void test32() throws Exception { 
 		helper2("A", "B");		
 	}
@@ -762,50 +779,49 @@ public class RenameTypeTests extends RefactoringTest {
 		helper2("A", "B");		
 	}
 	
-	//MUST put these in
-	/*public void test34() throws Exception { 
-		helper2_0("A", "B", 3, "B");		
+	public void test34() throws Exception { 
+		helper2("A", "B");		
 	}
 	
 	public void test35() throws Exception { 
-		helper2_0("A", "B", 3, "B");		
+		helper2("A", "B");		
 	}
 	
 	public void test36() throws Exception { 
-		helper2_0("A", "B", 4, "B");		
+		helper2("A", "B");		
 	}
 
 	public void test37() throws Exception { 
-		helper2_0("A", "B", 4, "B");		
-	}*/
+		helper2("A", "B");		
+	}
 	
-	/*public void test38() throws Exception { 
-		helper2_0("A", "B", "B");		
+	public void test38() throws Exception { 
+		helper2("A", "B");			
 	}
 
 	public void test39() throws Exception { 
-		helper2_0("A", "B", "B");		
-	}*/
+		helper2("A", "B");		
+	}
 		
 	public void test4() throws Exception { 
 		helper2("A", "B");		
 	}
 	
-/*	public void test40() throws Exception { 
-		helper2_0("A", "B", "B");		
+	public void test40() throws Exception { 
+		helper2("A", "B");		
 	}
 	
 	public void test41() throws Exception { 
-		helper2_0("A", "B", "B");		
-	}*/
+		helper2("A", "B");		
+	}
 		
 	public void test42() throws Exception { 
 		helper2("A", "B");		
 	}
 	
-	/*public void test43() throws Exception { 
-		helper2_0("A", "B", "B");		
-	}*/
+	public void test43() throws Exception { 
+		helper2("A", "B");		
+	}
 	
 	public void test44() throws Exception { 
 		helper2("A", "B");		
@@ -826,9 +842,9 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
-		ICompilationUnit newcu= getPackageP().getCompilationUnit("A.java");
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), newcu.getSource());
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
 	}
 	
@@ -848,20 +864,23 @@ public class RenameTypeTests extends RefactoringTest {
 		helper2("A", "B");		
 	}
 	
-	/*public void test51() throws Exception { 	
+	public void test51() throws Exception { 
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		ICompilationUnit cuC= createCUfromTestFile(packageP1, "C");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		Refactoring ref= new RenameTypeRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
-		String cuBsource= createCUfromTestFile(getPackageP(), "B").getSource();
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), cuBsource);
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());		
-	}*/
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
+		
+	}
 
 	public void test5() throws Exception { 
 		helper2("A", "B");		

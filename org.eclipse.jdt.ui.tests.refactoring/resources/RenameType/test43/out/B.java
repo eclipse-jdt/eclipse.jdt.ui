@@ -5,6 +5,6 @@ public class B {
 }
 class X extends p.B{
 	void x(){
-		p.B.A= B.A;
+		p.B.A= A.A;//fields come first
 	}
 }

@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -90,6 +90,8 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
+		if (ref instanceof Refactoring)
+			((Refactoring)ref).setUnsavedFileList(new ArrayList(0));
 		RefactoringStatus status= new RefactoringStatus();
 		if (ref instanceof IPreactivatedRefactoring)
 			status.merge(((IPreactivatedRefactoring)ref).checkPreactivation());

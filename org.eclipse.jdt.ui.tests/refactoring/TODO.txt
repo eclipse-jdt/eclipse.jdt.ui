@@ -4,27 +4,14 @@
 . see the comment in RenameProvateMethodRefactoring.isVisible
 	(does it mean the tests are unreliable and we have to test things manually?)
 	(it's a bug, but where?)
-. preconditions must check if all affected files are accessible
 . find better names for renameMethod classes, actions and wizards
-. exception handling policy
-	..in particular: is throwing a javamodelexception the right thing to do?
-		should there be a refactoringexception (and should it be a 
-		subclass of any other exception?)
-. 'crash' recovery policy
-	.try to roll back if there's an exception during change performing
-. make sure that the index is up-to-date before we start perform the refactoring (before precondition checking)
 . nls
 . unify the method names in UndoManager
-. flush the undo/redo stacks after something's changed
-  (but not when another refactoring is done)
-. how do we deal with compiler errors?
-	.we must work with them - present a message to the user
 . support for 'scripts':
 	.after you do a series of refactorings you can dump the refactoring stack
 		and perform the same series on another mashine, for instance, from the generated 'script'
 
 UI
-. disallow actions with multiple selection
 ? add change log action
 ? drag and drop support for move type/method/field
 
@@ -35,7 +22,6 @@ OTHER REFACTORINGS
 		. move type
 		. push down method 
 		. pull up method
-		. rename static method
 		. inner-type rename
 		. split class (insert a new class into the hierarchy)
 		. pull up field
@@ -48,7 +34,6 @@ OTHER REFACTORINGS
 		. push down field
 		. abstract field
 		. reorder type members
-		. rename method parameters
 		. make type non/final
 		
 TESTS
@@ -57,20 +42,11 @@ TESTS
 	.tests showing that StubUtility.findMethod uses declared type names, not fully qualified ones
 	.tests for refactorings performed on multiple files in multiple packages
 	.overloading and methodRename
-	.changes + redo/undo
-		(perform random changes and undo/redo them)
-	.big tests: JUnit, JDK, Eclipse
-
 
 ORG.ECLIPSE.JDT.REFACTORING.CHANGES ISSUES
 . what level of abstraction should the changes be?
    .for instance: should there be RemoveClassChange or only TextSubstitute?
-. try to find a nicer solution than low level file operations (documents?)
-. markers should stay intact (or remove them all)
-	(or remove those that refer to the affected resources)
-. rethink + rework the rename reference hacks (so that filtering is test-able)
 		
-
 SPECIFIC REFACTORING ISSUES
 
 	SAFE DELETE METHOD REFACTORING
@@ -89,9 +65,4 @@ SPECIFIC REFACTORING ISSUES
 		now the logic is duplicated heavily
 	. the working copy business
 	. overloading issues
-	. how do we deal with private static methods (when renaming)?
 	. how do ensure that at most one 'rename method' menu item shows up when ou rightclick?
-
-	RENAME TYPE REFACTORING
-	.if type is top level and not public and there're no other types left in the cu, then
-		the cu should be renamed (an option maybe)
