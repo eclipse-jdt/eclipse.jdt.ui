@@ -18,6 +18,6 @@ public interface IPreviewWizardPage extends IWizardPage {
 	 * 
 	 * @param change the new change.
 	 */
-	public void setChange(IChange change);
+	public void setChange(IChange change);	
 }
 

@@ -5,36 +5,49 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class ChangeElementLabelProvider extends LabelProvider {
 
+	private int fJavaElementFlags;
 	private JavaElementLabelProvider fJavaElementLabelProvider;
-	private Map fChangeImageDescriptorMap;
 	private Map fDescriptorImageMap= new HashMap();
+	private boolean fShowQualification= true;
 
-	public ChangeElementLabelProvider() {
-		fJavaElementLabelProvider= new JavaElementLabelProvider(
-			JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
+	public ChangeElementLabelProvider(int javaElementFlags) {
+		fJavaElementFlags= javaElementFlags;
+		fJavaElementLabelProvider= new JavaElementLabelProvider(javaElementFlags);
 	}
 		
-	public ChangeElementLabelProvider(Map changeImageDescriptorMap) {
-		this();
-		fChangeImageDescriptorMap= changeImageDescriptorMap;
+	public void setShowQualification(boolean showQualification) {
+		fShowQualification= showQualification;
+		LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, null);
+		fireLabelProviderChanged(event);
 	}
-		
+	
 	public Image getImage(Object object) {
 		if (object instanceof DefaultChangeElement) {
 			Object element= ((DefaultChangeElement)object).getChange();
@@ -51,9 +64,29 @@ public class ChangeElementLabelProvider extends LabelProvider {
 	
 	public String getText(Object object) {
 		if (object instanceof DefaultChangeElement) {
-			return ((DefaultChangeElement)object).getChange().getName();
+			IChange change= ((DefaultChangeElement)object).getChange();
+			if (!fShowQualification)
+				return change.getName();
+			
+			if (change instanceof TextFileChange) {
+				IFile file= ((TextFileChange)change).getFile();
+				return RefactoringMessages.getFormattedString(
+					"PreviewWizardPage.changeElementLabelProvider.textFormat", 
+					new String[] {file.getName(), getPath(file)});
+			} else {
+				return change.getName();
+			}
 		} else if (object instanceof TextEditChangeElement) {
-			return ((TextEditChangeElement)object).getTextEditChange().getName();
+			TextEditChangeElement element= (TextEditChangeElement)object;
+			String result= element.getTextEditChange().getName();
+			if ((fJavaElementFlags & JavaElementLabelProvider.SHOW_POST_QUALIFIED) != 0) {
+				ChangeElement parent= getParent(element);
+				if (parent != null) 
+					result= RefactoringMessages.getFormattedString(
+						"PreviewWizardPage.changeElementLabelProvider.textFormatEdit", 
+						new String[] {getText(parent), result});
+			}
+			return result;
 		} else if (object instanceof PseudoJavaChangeElement) {
 			PseudoJavaChangeElement element= (PseudoJavaChangeElement)object;
 			return fJavaElementLabelProvider.getText(element.getJavaElement());
@@ -61,11 +94,16 @@ public class ChangeElementLabelProvider extends LabelProvider {
 		return super.getText(object);
 	}
 	
+	public void dispose() {
+		for (Iterator iter= fDescriptorImageMap.values().iterator(); iter.hasNext(); ) {
+			Image image= (Image)iter.next();
+			image.dispose();
+		}
+		super.dispose();
+	}
+	
 	private Image doGetImage(Object element) {
 		ImageDescriptor descriptor= null;
-		if (fChangeImageDescriptorMap != null) {
-			descriptor= (ImageDescriptor)fChangeImageDescriptorMap.get(element.getClass());
-		}
 		if (descriptor == null) {
 			if (element instanceof TextEditChangeElement) {
 				descriptor= JavaPluginImages.DESC_OBJS_TEXT_EDIT;
@@ -85,6 +123,19 @@ public class ChangeElementLabelProvider extends LabelProvider {
 			fDescriptorImageMap.put(descriptor, image);
 		}
 		return image;
+	}
+	
+	private String getPath(IFile file) {
+		StringBuffer result= new StringBuffer();
+		return file.getProject().getName() + "/" + file.getParent().getProjectRelativePath().toString();
+	}
+	
+	private ChangeElement getParent(TextEditChangeElement element) {
+		ChangeElement parent= element.getParent();
+		while (parent != null && !(parent instanceof PseudoJavaChangeElement) && !(parent instanceof DefaultChangeElement)) {
+			parent= parent.getParent();
+		}
+		return parent;
 	}
 }
 

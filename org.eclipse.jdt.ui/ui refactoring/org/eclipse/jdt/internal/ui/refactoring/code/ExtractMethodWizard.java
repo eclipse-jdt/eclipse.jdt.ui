@@ -21,6 +21,7 @@ public class ExtractMethodWizard extends RefactoringWizard {
 	public ExtractMethodWizard(ExtractMethodRefactoring ref){
 		super(ref, RefactoringMessages.getString("ExtractMethodWizard.extract_method"), 
 					IJavaHelpContextIds.EXTRACT_METHOD_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		setExpandFirstNode(true);
 	}
 
 	public IChange createChange(){
@@ -35,11 +36,5 @@ public class ExtractMethodWizard extends RefactoringWizard {
 		
 	protected void addUserInputPages(){
 		addPage(new ExtractMethodInputPage());
-	}
-
-	protected void addPreviewPage(){
-		PreviewWizardPage page= new PreviewWizardPage();
-		page.setExpandFirstNode(true);
-		addPage(page);
 	}
 }

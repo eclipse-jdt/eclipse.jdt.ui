@@ -7,6 +7,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 	public ExtractTempWizard(ExtractTempRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
+		setExpandFirstNode(true);
 	}
 
 	/* non java-doc

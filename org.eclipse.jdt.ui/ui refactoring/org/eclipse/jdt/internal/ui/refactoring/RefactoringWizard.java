@@ -39,6 +39,7 @@ public class RefactoringWizard extends Wizard {
 	private RefactoringStatus fActivationStatus= new RefactoringStatus();
 	private RefactoringStatus fStatus;
 	private boolean fHasUserInputPages;
+	private boolean fExpandFirstNode;
 	
 	private String fErrorPageContextHelpId;
 	
@@ -197,11 +198,33 @@ public class RefactoringWizard extends Wizard {
 	}
 	 
 	/**
+	 * Defines whether the frist node in the preview page is supposed to be expanded.
+	 * 
+	 * @param expand <code>true</code> if the first node is to be expanded. Otherwise
+	 *  <code>false</code>
+	 */
+	public void setExpandFirstNode(boolean expand) {
+		fExpandFirstNode= true;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the first node in the preview page is supposed to be
+	 * expanded. Otherwise <code>false</code> is returned.
+	 * 
+	 * @return <code>true</code> if the first node in the preview page is supposed to be
+	 * 	expanded; otherwise <code>false</code>
+	 */
+	public boolean getExpandFirstNode() {
+		return fExpandFirstNode;
+	}
+	
+	/**
 	 * Computes the wizard page that should follow the user input page. This is
 	 * either the error page or the proposed changes page, depending on the
 	 * result of the condition checking.
+	 * 
 	 * @return the wizard page that should be shown after the last user input
-	 *  page.
+	 *  page
 	 */
 	public IWizardPage computeUserInputSuccessorPage(IWizardPage caller) {
 		return computeUserInputSuccessorPage(caller, getContainer());

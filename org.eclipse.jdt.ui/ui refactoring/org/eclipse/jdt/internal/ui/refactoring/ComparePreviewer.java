@@ -24,6 +24,8 @@ import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 public class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewViewer {
 	
 	/**
@@ -39,13 +41,17 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 		public InputStream right;
 		/** The input streams' type */
 		public String type;
-		public CompareInput(String l, String r, String t) {
-			this(new ByteArrayInputStream(l.getBytes()), new ByteArrayInputStream(r.getBytes()), t);
+		/** The change element */
+		public ChangeElement element;
+		public CompareInput(ChangeElement e, String l, String r, String t) {
+			this(e, new ByteArrayInputStream(l.getBytes()), new ByteArrayInputStream(r.getBytes()), t);
 		}
-		public CompareInput(InputStream l, InputStream r, String t) {
+		public CompareInput(ChangeElement e, InputStream l, InputStream r, String t) {
+			Assert.isNotNull(e);
 			Assert.isNotNull(l);
 			Assert.isNotNull(r);
 			Assert.isNotNull(t);
+			element= e;
 			left= l;
 			right= r;
 			type= t;
@@ -79,6 +85,8 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 	}
 		
 	private CompareConfiguration fCompareConfiguration;
+	private ChangeElementLabelProvider fLabelProvider;
+	private CompareInput fCompareInput;
 	
 	public ComparePreviewer(Composite parent) {
 		super(parent, SWT.BORDER | SWT.FLAT, true);
@@ -87,24 +95,41 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 		fCompareConfiguration.setLeftLabel("Original Source");
 		fCompareConfiguration.setRightEditable(false);
 		fCompareConfiguration.setRightLabel("Refactored Source");
+		fLabelProvider= new ChangeElementLabelProvider(
+			JavaElementLabelProvider.SHOW_POST_QUALIFIED| JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
+	
 	public Control getControl() {
 		return this;
 	}
+	
 	public void refresh() {
 		getViewer().refresh();
 	}
+	
 	protected Viewer getViewer(Viewer oldViewer, Object input) {
 		return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this, fCompareConfiguration);
 	}
+	
 	public void setInput(Object input) {
 		if (input instanceof CompareInput) {
-			CompareInput compareInput= (CompareInput)input;
+			fCompareInput= (CompareInput)input;
 			super.setInput(new DiffNode(
-				new CompareElement(compareInput.left, compareInput.type),
-				new CompareElement(compareInput.right, compareInput.type)));
+				new CompareElement(fCompareInput.left, fCompareInput.type),
+				new CompareElement(fCompareInput.right, fCompareInput.type)));
 		} else {
+			fCompareInput= null;
 			super.setInput(input);
 		}
+	}
+	
+	public void setText(String text) {
+		if (fCompareInput == null) {
+			super.setText(text);
+			setImage(null);
+			return;
+		}
+		setImage(fLabelProvider.getImage(fCompareInput.element));
+		super.setText(fLabelProvider.getText(fCompareInput.element));
 	}
 }

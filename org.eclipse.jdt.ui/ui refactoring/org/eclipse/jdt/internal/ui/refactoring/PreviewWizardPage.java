@@ -17,6 +17,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -27,6 +30,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.CompareViewerPane;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -46,8 +51,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 /**
  * Presents the changes made by the refactoring.
  * Consists of a tree of changes and a compare viewer that shows the differences. 
@@ -94,10 +102,52 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		}
 	}
 	
+	private class NextChange extends Action {
+		public NextChange() {
+			setImageDescriptor(CompareUI.DESC_ETOOL_NEXT);
+			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_NEXT);
+			setHoverImageDescriptor(CompareUI.DESC_CTOOL_NEXT);
+			setToolTipText("Select Next Change");
+		}
+		public void run() {
+			fTreeViewer.revealNext();	
+		}
+	}
+	
+	private class PreviousChange extends Action {
+		public PreviousChange() {
+			setImageDescriptor(CompareUI.DESC_ETOOL_PREV);
+			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_PREV);
+			setHoverImageDescriptor(CompareUI.DESC_CTOOL_PREV);
+			setToolTipText("Select Previous Change");
+		}	
+		public void run() {
+			fTreeViewer.revealPrevious();
+		}
+	}
+	
+	private class ShowDetailsAction extends Action {
+		private static final String SHOW_QUALIFIED_NAMES= "Show Qualified Names";
+		private static final String HIDE_QUALIFIED_NAMES= "Hide Qualified Names";
+		public ShowDetailsAction() {
+			setImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE);
+			setChecked(true);
+			setToolTipText(HIDE_QUALIFIED_NAMES);
+		}
+		public void run() {
+			boolean isChecked= isChecked();
+			if (isChecked)
+				setToolTipText(HIDE_QUALIFIED_NAMES);
+			else
+				setToolTipText(SHOW_QUALIFIED_NAMES);
+			((ChangeElementLabelProvider)fTreeViewer.getLabelProvider()).setShowQualification(isChecked);
+		}
+		
+	}
+	
 	private IChange fChange;		
-	private boolean fExpandFirstNode;
 	private ChangeElement fCurrentSelection;
-	private CheckboxTreeViewer fTreeViewer;
+	private ChangeElementTreeViewer fTreeViewer;
 	private PageBook fPreviewContainer;
 	private IPreviewViewer fCurrentPreviewViewer;
 	private IPreviewViewer fNullPreviewer;
@@ -136,22 +186,12 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}
 	
 	/**
-	 * Defines whether the frist node in the preview page is supposed to be expanded.
-	 * 
-	 * @param expand <code>true</code> if the first node is to be expanded. Otherwise
-	 *  <code>false</code>
-	 */
-	public void setExpandFirstNode(boolean expand) {
-		fExpandFirstNode= expand;
-	}
-	
-	/**
 	 * Creates the tree viewer to present the hierarchy of changes. Subclasses may override
 	 * to create their own custom tree viewer.
 	 * 
 	 * @return the tree viewer to present the hierarchy of changes
 	 */
-	protected CheckboxTreeViewer createTreeViewer(Composite parent){
+	protected ChangeElementTreeViewer createTreeViewer(Composite parent){
 		return new ChangeElementTreeViewer(parent);
 	}
 	
@@ -172,7 +212,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * @return the label provider used to render the tree of changes
 	 */
 	protected ILabelProvider createTreeLabelProvider() {
-		return new ChangeElementLabelProvider();
+		return new ChangeElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
 	
 	/**
@@ -196,6 +236,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					if (change instanceof CompilationUnitChange)
 						type= ComparePreviewer.JAVA_TYPE;
 					return createCompareInput(
+						element,
 						cuc.getCurrentContent(),
 						cuc.getPreviewContent(),
 						type);
@@ -208,12 +249,14 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					if (sourceReference != null) {
 						CompilationUnitChange cuc= (CompilationUnitChange)change;
 						return createCompareInput(
+							element,
 							cuc.getCurrentContent(sourceReference),
 							cuc.getPreviewContent(sourceReference, new EditChange[] {tec}),
 							ComparePreviewer.JAVA_TYPE);
 					}
 				}
 				return createCompareInput(
+					element,
 					change.getCurrentContent(tec, 2),
 					change.getPreviewContent(tec, 2),
 					ComparePreviewer.TEXT_TYPE);
@@ -225,6 +268,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					CompilationUnitChange change= (CompilationUnitChange)changes[0].getTextChange();
 					ISourceReference sourceReference= (ISourceReference)pjce.getJavaElement();
 					return createCompareInput(
+						element,
 						change.getCurrentContent(sourceReference),
 						change.getPreviewContent(sourceReference, changes),
 						ComparePreviewer.JAVA_TYPE);
@@ -236,10 +280,10 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		return null;
 	}
 	
-	private CompareInput createCompareInput(String left, String right, String type) {
-		if (left == null || right == null || type == null)
+	private CompareInput createCompareInput(ChangeElement element, String left, String right, String type) {
+		if (element == null || left == null || right == null || type == null)
 			return null;
-		return new CompareInput(left, right, type);
+		return new CompareInput(element, left, right, type);
 	}
 	
 	/**
@@ -283,19 +327,30 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		// The composite is needed to limit the width of the SashForm.
+		// XXX The composite is needed to limit the width of the SashForm. See http://bugs.eclipse.org/bugs/show_bug.cgi?id=6854
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0; layout.marginWidth= 0;
 		result.setLayout(layout);
 		
-		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
 		
-		fTreeViewer= createTreeViewer(sashForm);
+		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
+
+		CompareViewerPane pane= new CompareViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
+		pane.setText("Changes to be performed");
+		ToolBarManager tbm= pane.getToolBarManager(pane);
+		// tbm.add(new ShowDetailsAction());
+		// tbm.add(new Separator());
+		tbm.add(new NextChange());
+		tbm.add(new PreviousChange());
+		tbm.update(true);
+		
+		fTreeViewer= createTreeViewer(pane);
 		fTreeViewer.setContentProvider(createTreeContentProvider());
 		fTreeViewer.setLabelProvider(createTreeLabelProvider());
 		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
 		fTreeViewer.addCheckStateListener(createCheckStateListener());
+		pane.setContent(fTreeViewer.getControl());
 		
 		fPreviewContainer= new PageBook(sashForm, SWT.NONE);
 		fComparePreview= new ComparePreviewer(fPreviewContainer);
@@ -324,10 +379,10 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 				Object[] elements= provider.getElements(treeViewerInput);
 				if (elements != null && elements.length > 0) {
 					Object element= elements[0];
-					if (fExpandFirstNode) {
+					if (getRefactoringWizard().getExpandFirstNode()) {
 						Object[] subElements= provider.getElements(element);
 						if (subElements != null && subElements.length > 0) {
-							fTreeViewer.expandToLevel(element, 1);
+							fTreeViewer.expandToLevel(element, 999);
 						}
 					}
 					fTreeViewer.setSelection(new StructuredSelection(element));
