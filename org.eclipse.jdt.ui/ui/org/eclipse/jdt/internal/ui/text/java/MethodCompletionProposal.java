@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.Assert;
@@ -23,6 +24,7 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
@@ -50,7 +52,9 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
-			result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
+			if (!JavaConventions.validateMethodName(prefix).matches(IStatus.ERROR)) {
+				result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
+			}
 		}
 	}
 	
