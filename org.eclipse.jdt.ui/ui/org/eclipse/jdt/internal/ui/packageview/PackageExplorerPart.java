@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -207,35 +208,28 @@ public class PackageExplorerPart extends ViewPart
 	};
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
-		boolean fInChangeInput;
+		// fix for 64372  Projects showing up in Package Explorer twice [package explorer] 
+		List fPendingGetChildren;
 		
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
+			fPendingGetChildren= Collections.synchronizedList(new ArrayList());
 		}
-		
-		protected void inputChanged(Object input, Object oldInput) {
-			fInChangeInput= true;
+		public void add(Object parentElement, Object[] childElements) {
+			if (fPendingGetChildren.contains(parentElement)) 
+				return;
+			super.add(parentElement, childElements);
+		}
+				
+		protected Object[] getRawChildren(Object parent) {
 			try {
-				super.inputChanged(input, oldInput);
+				fPendingGetChildren.add(parent);
+				return super.getRawChildren(parent);				
 			} finally {
-				fInChangeInput= false;
+				fPendingGetChildren.remove(parent);
 			}
 		}
 		
-		public void add(Object parentElement, Object[] childElements) {
-			if (!fInChangeInput)
-				super.add(parentElement, childElements);
-		}
-		
-		public void remove(Object[] elements) {
-			if (!fInChangeInput)
-				super.remove(elements);
-		}
-		
-		public void refresh(Object element, boolean updateLabels) {
-			if (!fInChangeInput)
-				super.refresh(element, updateLabels);
-		}
 		/*
 		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
 		 */
