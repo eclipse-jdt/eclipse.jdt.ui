@@ -18,12 +18,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -32,10 +30,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 
 /**
  * Action to open a dialog to configure classpath containers. Added as a <code>objectContribution</code>
@@ -68,36 +67,24 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 		try {
 			IClasspathEntry[] entries= project.getRawClasspath();
 			
-			ClasspathContainerWizard wizard= new ClasspathContainerWizard(entry, project, entries);
-			wizard.setWindowTitle(ActionMessages.getFormattedString("ConfigureContainerAction.wizard.title", label)); //$NON-NLS-1$
-			if (ClasspathContainerWizard.openWizard(shell, wizard) != Window.OK) {
-				return;
+			IClasspathEntry result= BuildPathDialogAccess.configureContainerEntry(shell, entry, project, entries);
+			if (result == null || result.equals(entry)) {
+				return; // user cancelled or no changes
 			}
-			IRunnableContext context= fPart.getSite().getWorkbenchWindow();
-			if (context == null) {
-				context= new BusyIndicatorRunnableContext();
-			}
-			IClasspathEntry[] res= wizard.getNewEntries();
-			if (res == null) {
-				String title= ActionMessages.getString("ConfigureContainerAction.error.title"); //$NON-NLS-1$
-				String message= ActionMessages.getString("ConfigureContainerAction.error.creationfailed.message"); //$NON-NLS-1$
-				MessageDialog.openError(shell, title, message);
-				return;
-			}
-			if (res.length == 1 && res[0].equals(entry)) {
-				return; // no changes
-			}
-			
+
 			int idx= indexInClasspath(entries, entry);
 			if (idx == -1) {
 				return;
 			}
 			
-			final IClasspathEntry[] newEntries= new IClasspathEntry[entries.length - 1 + res.length];
-			System.arraycopy(entries, 0, newEntries, 0, idx);
-			System.arraycopy(res, 0, newEntries, idx, res.length);
-			System.arraycopy(entries, idx + 1, newEntries, idx + res.length, entries.length - idx - 1);
+			final IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
+			System.arraycopy(entries, 0, newEntries, 0, entries.length);
+			newEntries[idx]= result;
 			
+			IRunnableContext context= fPart.getSite().getWorkbenchWindow();
+			if (context == null) {
+				context= new BusyIndicatorRunnableContext();
+			}
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {			

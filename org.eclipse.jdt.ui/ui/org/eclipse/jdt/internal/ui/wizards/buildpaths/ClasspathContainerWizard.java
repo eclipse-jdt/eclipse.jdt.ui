@@ -58,14 +58,6 @@ public class ClasspathContainerWizard extends Wizard {
 		this(null, pageDesc, currProject, currEntries);	
 	}
 
-	/**
-	 * @deprecated
-	 */	
-	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc) {
-		this(null, pageDesc, null, null);	
-	}
-	
-	
 	private ClasspathContainerWizard(IClasspathEntry entryToEdit, ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		fEntryToEdit= entryToEdit;
 		fPageDesc= pageDesc;
@@ -73,6 +65,14 @@ public class ClasspathContainerWizard extends Wizard {
 		
 		fCurrProject= currProject;
 		fCurrClasspath= currEntries;
+		
+		String title;
+		if (entryToEdit == null) {
+			title= NewWizardMessages.getString("ClasspathContainerWizard.new.title"); //$NON-NLS-1$
+		} else {
+			title= NewWizardMessages.getString("ClasspathContainerWizard.edit.title"); //$NON-NLS-1$
+		}
+		setWindowTitle(title);
 	}
 	
 	/**

@@ -19,8 +19,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
@@ -97,11 +99,11 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI for configuring a variable classpath entry. See {@link IClasspathEntry#CPE_VARIABLE} for
 	 * details about variable classpath entries.
-	 * The dialog returns the configures classpath entry path or <code>null</code> if the dialog has
-	 * been cancelled.
+	 * The dialog returns the configured classpath entry path or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param initialEntryPath The initial variable classpath container path or <code>null</code> to use
+	 * @param initialEntryPath The initial variable classpath variable path or <code>null</code> to use
 	 * an empty path. 
 	 * @param existingPaths An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
@@ -120,7 +122,7 @@ public final class BuildPathDialogAccess {
 	 * Shows the UI for selecting new variable classpath entries. See {@link IClasspathEntry#CPE_VARIABLE} for
 	 * details about variable classpath entries.
 	 * The dialog returns an array of the selected variable entries or <code>null</code> if the dialog has
-	 * been cancelled.
+	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param existingPaths An array of paths that are already on the classpath and therefore should not be
@@ -135,4 +137,59 @@ public final class BuildPathDialogAccess {
 		}
 		return null;
 	}
+	
+	/**
+	 * Shows the UI to configure a classpath container classpath entry. See {@link IClasspathEntry#CPE_CONTAINER} for
+	 * details about variable classpath entries.
+	 * The dialog returns the configured classpath entry or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param initialEntry The initial classpath container entry 
+	 * @param project The project the entry belongs to. The project does not have to exist. 
+	 * Project can be <code>null</code>.
+	 * @param currentClasspath The class path entries currently selected to be set as the projects classpath. This can also
+	 * include the entry to be edited. The dialog uses these entries as information only; The user still can make changes after the
+	 * the classpath container dialog has been closed or decide to cancel the operation. See {@link IClasspathContainerPageExtension} for
+	 * more information.
+	 * @return Returns the configured classpath container entry or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IClasspathEntry configureContainerEntry(Shell shell, IClasspathEntry initialEntry, IJavaProject project, IClasspathEntry[] currentClasspath) {
+		Assert.isNotNull(initialEntry);
+		
+		ClasspathContainerWizard wizard= new ClasspathContainerWizard(initialEntry, project, currentClasspath);
+		if (ClasspathContainerWizard.openWizard(shell, wizard) == Window.OK) {
+			IClasspathEntry[] created= wizard.getNewEntries();
+			if (created != null && created.length == 1) {
+				return created[0];
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Shows the UI to choose new classpath container classpath entries. See {@link IClasspathEntry#CPE_CONTAINER} for
+	 * details about variable classpath entries.
+	 * The dialog returns the selected classpath entries or <code>null</code> if the dialog has
+	 * been cancelled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param project The project the entry belongs to. The project does not have to exist. 
+	 * Project can be <code>null</code>.
+	 * @param currentClasspath The class path entries currently selected to be set as the projects classpath. This can also
+	 * include the entry to be edited. The dialog uses these entries as information only; The user still can make changes after the
+	 * the classpath container dialog has been closed or decide to cancel the operation. See {@link IClasspathContainerPageExtension} for
+	 * more information.
+	 * @return Returns the selected classpath container entry or <code>null</code> if the dialog has
+	 * been cancelled by the user
+	 */
+	public static IClasspathEntry[] chooseContainerEntries(Shell shell, IJavaProject project, IClasspathEntry[] currentClasspath) {
+		ClasspathContainerWizard wizard= new ClasspathContainerWizard((IClasspathEntry) null, project, currentClasspath);
+		if (ClasspathContainerWizard.openWizard(shell, wizard) == Window.OK) {
+			return wizard.getNewEntries();
+		}
+		return null;
+	}
+	
 }

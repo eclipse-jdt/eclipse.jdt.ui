@@ -695,18 +695,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private CPListElement[] openContainerSelectionDialog(CPListElement existing) {
-		IClasspathEntry elem= null;
-		String title;
 		if (existing == null) {
-			title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title"); //$NON-NLS-1$
-		} else {
-			title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.edit.title"); //$NON-NLS-1$
-			elem= existing.getClasspathEntry();
-		}
-		ClasspathContainerWizard wizard= new ClasspathContainerWizard(elem, fCurrJProject, getRawClasspath());
-		wizard.setWindowTitle(title);
-		if (ClasspathContainerWizard.openWizard(getShell(), wizard) == Window.OK) {
-			IClasspathEntry[] created= wizard.getNewEntries();
+			IClasspathEntry[] created= BuildPathDialogAccess.chooseContainerEntries(getShell(), fCurrJProject, getRawClasspath());
 			if (created != null) {
 				CPListElement[] res= new CPListElement[created.length];
 				for (int i= 0; i < res.length; i++) {
@@ -714,7 +704,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 				return res;
 			}
-		}			
+		} else {
+			IClasspathEntry created= BuildPathDialogAccess.configureContainerEntry(getShell(), existing.getClasspathEntry(), fCurrJProject, getRawClasspath());
+			if (created != null) {
+				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), null);
+				return new CPListElement[] { elem };
+			}
+		}		
 		return null;
 	}
 		

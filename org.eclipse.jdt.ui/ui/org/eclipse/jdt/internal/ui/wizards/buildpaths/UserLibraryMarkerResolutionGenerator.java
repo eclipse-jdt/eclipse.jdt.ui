@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
@@ -39,6 +38,8 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -115,26 +116,28 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			if (idx == -1) {
 				return;
 			}
-			IClasspathEntry entry= isNew ? null : entries[idx];
-			ClasspathContainerWizard wizard= new ClasspathContainerWizard(entry, project, entries);
-			wizard.setWindowTitle(NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.wizard.title")); //$NON-NLS-1$
-			if (ClasspathContainerWizard.openWizard(shell, wizard) != Window.OK) {
-				return;
+			IClasspathEntry[] res;
+			if (isNew) {
+				res= BuildPathDialogAccess.chooseContainerEntries(shell, project, entries);
+				if (res == null) {
+					return;
+				}
+			} else {
+				IClasspathEntry resEntry= BuildPathDialogAccess.configureContainerEntry(shell, entries[idx], project, entries);
+				if (resEntry == null) {
+					return;
+				}
+				res= new IClasspathEntry[] { resEntry };
 			}
-			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
-			if (context == null) {
-				context= new BusyIndicatorRunnableContext();
-			}
-			IClasspathEntry[] res= wizard.getNewEntries();
-			if (res == null) {
-				return;
-			}
-			
 			final IClasspathEntry[] newEntries= new IClasspathEntry[entries.length - 1 + res.length];
 			System.arraycopy(entries, 0, newEntries, 0, idx);
 			System.arraycopy(res, 0, newEntries, idx, res.length);
 			System.arraycopy(entries, idx + 1, newEntries, idx + res.length, entries.length - idx - 1);
 			
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+			if (context == null) {
+				context= new BusyIndicatorRunnableContext();
+			}
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
