@@ -10,6 +10,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -45,14 +46,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 		fileName += (canRename ? "canRename/": "cannotRename/");
 		return fileName + getSimpleTestFileName(canRename, input);
 	}
-	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-	
+		
 	//------------
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
@@ -98,8 +92,17 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 	private void helper2(String newName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
-//		IType classA= getType(cu, "A");
 		ISourceRange selection= getSelection(cu);
+		failTestHelper(newName, updateReferences, cu, selection);
+	}
+
+	private void helper2(String newName, boolean updateReferences, int startLine, int startColumn, int endLine, int endColumn)  throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		failTestHelper(newName, updateReferences, cu, selection);
+	}
+
+	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws JavaModelException {
 		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
@@ -471,5 +474,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 //		printTestDisabledMessage("bug#19851");
 		helper2("j");
 	}
-	
+	public void testFail31() throws Exception{
+		helper2("j", true, 3, 9, 3, 13);
+	}	
 }
