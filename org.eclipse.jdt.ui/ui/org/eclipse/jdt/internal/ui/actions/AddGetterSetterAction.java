@@ -221,7 +221,7 @@ public class AddGetterSetterAction extends Action {
 	}
 	
 	/**
-	 * Tests if the acion can be runned using the current selection.
+	 * Tests if the acion can be run using the current selection.
 	 */
 	public boolean canActionBeAdded() {
 		return getSelectedFields() != null;

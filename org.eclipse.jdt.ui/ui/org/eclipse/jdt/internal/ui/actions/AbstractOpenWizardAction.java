@@ -133,7 +133,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	}
 	
 	/**
-	 * Tests if the action can be runned on the current selection.
+	 * Tests if the action can be run on the current selection.
 	 */
 	public boolean canActionBeAdded() {
 		IStructuredSelection selection= getCurrentSelection();
