@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -60,7 +61,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
+
 
 
 
@@ -173,7 +174,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		/**
 		 * Annotation model dealing with java marker annotations.
 		 */
-		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestorExtension {
+		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
 			
 			private List fCollectedProblems= new ArrayList();
 			private List fGeneratedAnnotations= new ArrayList();
@@ -200,7 +201,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see IProblemRequestorExtension#beginReporting()
+			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
 				removeAnnotations(fGeneratedAnnotations, false, true);
@@ -215,7 +216,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 
 			/*
-			 * @see IProblemRequestorExtension#endReporting()
+			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
 				Iterator e= fCollectedProblems.iterator();
@@ -337,9 +338,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
 				}
 				
-				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy(monitor, fBufferFactory);
-				DocumentAdapter a= (DocumentAdapter) c.getBuffer();
 				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
+				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
+				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy(monitor, fBufferFactory, r);
+				DocumentAdapter a= (DocumentAdapter) c.getBuffer();
 				_FileSynchronizer f= new _FileSynchronizer(input); 
 				f.install();
 				
@@ -379,13 +381,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			try {					
 				
-				CompilationUnitMarkerAnnotationModel model= (CompilationUnitMarkerAnnotationModel) info.fModel;
 				// update structure, assumes lock on info.fCopy
-				if (!info.fCopy.isConsistent()) {
-					model.beginReporting();
-					info.fCopy.reconcile(model);
-					model.endReporting();
-				}
+				info.fCopy.reconcile();
 				
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
@@ -404,6 +401,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					fIsAboutToSave= false;
 				}
 				
+				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
 				
 				if (resource != null)

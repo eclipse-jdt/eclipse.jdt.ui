@@ -63,7 +63,7 @@ public class UnresolvedElementsEvaluations {
 		}
 		
 		try {
-			IScanner scanner= ToolFactory.createScanner(false, false, false);
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 			scanner.setSource(buf.getCharacters());
 			scanner.resetTo(problemPos.getOffset() + problemPos.getLength(), buf.getLength());
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameDOT) {

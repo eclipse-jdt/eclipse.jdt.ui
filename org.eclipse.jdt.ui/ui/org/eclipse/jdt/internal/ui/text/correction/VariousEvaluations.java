@@ -108,7 +108,7 @@ public class VariousEvaluations {
 			String cast= '(' + Signature.getSimpleName(args[1]) + ")";
 			int pos= problemPos.getOffset();
 			try {
-				IScanner scanner= ToolFactory.createScanner(false, false, false);
+				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 				IBuffer buf= problemPos.getCompilationUnit().getBuffer();
 				scanner.setSource(buf.getCharacters());
 				scanner.resetTo(problemPos.getOffset() + problemPos.getLength(), buf.getLength());

@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -96,7 +97,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchActio
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
-import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -453,19 +453,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (unit != null) {
 			synchronized (unit) {
 				try {
-					
-					if (!unit.isConsistent()) {
-						IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-						if (model instanceof IProblemRequestorExtension) {
-							IProblemRequestorExtension requestor= (IProblemRequestorExtension) model;
-							requestor.beginReporting();
-							unit.reconcile(requestor);
-							requestor.endReporting();
-						}
-					}
-					
+					unit.reconcile();
 					return unit.getElementAt(offset);
-				
 				} catch (JavaModelException x) {
 				}
 			}

@@ -18,6 +18,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -43,10 +44,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 		fDocumentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 	}
 	
-	IProblemRequestorExtension getProblemRequestor() {
+	IProblemRequestor getProblemRequestor() {
 		IAnnotationModel model= fDocumentProvider.getAnnotationModel(fEditor.getEditorInput());
-		if (model instanceof IProblemRequestorExtension)
-			return (IProblemRequestorExtension) model;
+		if (model instanceof IProblemRequestor)
+			return (IProblemRequestor) model;
 		
 		return null;
 	}
@@ -58,16 +59,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 				try {
 					
 					// reconcile
-					if (!unit.isConsistent()) {
-						IProblemRequestorExtension requestor= getProblemRequestor();
-						if (requestor != null) {
-							requestor.beginReporting();
-							unit.reconcile(requestor);
-							requestor.endReporting();
-						} else {
-							unit.reconcile();
-						}
-					}
+					unit.reconcile();
 					
 					if (fEditor instanceof IReconcilingParticipant) {
 						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
