@@ -34,7 +34,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
-	private static final boolean BUG_moveToLocalType= true;
+	private static final boolean BUG_88865_moveToLocalType= true;
 	
 	private static final Class clazz= MoveInstanceMethodTests.class;
 
@@ -482,9 +482,9 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	// Cannot move to local class
 	public void testFail7() throws Exception {
 		// printTestDisabledMessage("not implemented yet - jcore does not have elements for local types");
-		if (BUG_moveToLocalType) {
+		if (BUG_88865_moveToLocalType) {
 			//TODO: moving to local types should not be a problem any more
-			printTestDisabledMessage("BUG_moveToLocalType");
+			printTestDisabledMessage("BUG_88865_moveToLocalType");
 			return;
 		}
 		failHelper1("p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
