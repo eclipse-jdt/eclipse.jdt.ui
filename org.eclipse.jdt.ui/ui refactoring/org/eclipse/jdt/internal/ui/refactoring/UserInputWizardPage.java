@@ -100,7 +100,6 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		RefactoringStatus inputStatus= null;
 		RefactoringStatus status= new RefactoringStatus();
 		Refactoring refactoring= getRefactoring();
-		IChange change;
 		boolean result= false;
 		
 		if (activationStatus != null && activationStatus.getSeverity() > threshold) {

@@ -261,7 +261,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 2);
-			CompositeChange result= new CompositeChange(getName());
 			Integer[] renamingOffsets= getOccurrenceOffsets();
 			pm.worked(1);
 			

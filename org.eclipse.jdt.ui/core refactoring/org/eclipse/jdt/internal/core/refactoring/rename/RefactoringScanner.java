@@ -106,7 +106,6 @@ public class RefactoringScanner {
 		int start = scanner.startPosition;
 		int index = value.indexOf(fPattern);
 		while (index != -1) {
-			int offset= start + index;
 			if (isWholeWord(value, index, index + fPattern.length()))			
 				result.add(new Integer(start + index));
 			index = value.indexOf(fPattern, index + 1);
