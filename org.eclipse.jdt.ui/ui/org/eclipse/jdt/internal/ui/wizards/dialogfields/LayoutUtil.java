@@ -128,7 +128,7 @@ public class LayoutUtil {
 	}
 	
 	/**
-	 * Sets the horizontal indent of a control. Assumes that GridData is used.
+	 * Sets the horizontal grabbing of a control to true. Assumes that GridData is used.
 	 */
 	public static void setHorizontalGrabbing(Control control) {
 		Object ld= control.getLayoutData();
