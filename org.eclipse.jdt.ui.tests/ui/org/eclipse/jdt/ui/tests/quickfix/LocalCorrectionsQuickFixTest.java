@@ -670,8 +670,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.Iterator;\n");		
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Iterator iter) {\n");
-		buf.append("        String str2;\n");
 		buf.append("        Object str;\n");
+		buf.append("        String str2;\n");
 		buf.append("        str= iter.next();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
