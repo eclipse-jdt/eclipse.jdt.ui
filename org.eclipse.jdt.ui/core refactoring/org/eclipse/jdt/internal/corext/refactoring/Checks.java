@@ -199,14 +199,12 @@ public class Checks {
 		return ResourcesPlugin.getWorkspace().getRoot().findMember(resourcePath) != null;
 	}
 	
-	/**
-	 * Returns <code>true</code> if the parameter is a top-level type, <code>false</code> otherwise.
-	 * 
-	 * @param type
-	 * @return <code>true</code> if the parameter is a top-level type, <code>false</code> otherwise.
-	 */
 	public static boolean isTopLevel(IType type){
 		return type.getDeclaringType() == null;
+	}
+
+	public static boolean isTopLevelType(IMember member){
+		return  member.getElementType() == IJavaElement.TYPE && isTopLevel((IType) member);
 	}
 
 	public static boolean isAlreadyNamed(IJavaElement element, String name){
