@@ -86,7 +86,7 @@ public class MethodStubCompletionProposal extends JavaCompletionProposal {
 					}
 
 					settings.noBody= (definingType != null) && definingType.isInterface();
-					settings.callSuper= declaringType.isClass() && !Flags.isAbstract(method.getFlags());
+					settings.callSuper= declaringType.isClass() && !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags());
 					settings.methodOverwrites= true;
 
 					String stub= StubUtility.genStub(fTypeName, method, settings, fImportStructure);
