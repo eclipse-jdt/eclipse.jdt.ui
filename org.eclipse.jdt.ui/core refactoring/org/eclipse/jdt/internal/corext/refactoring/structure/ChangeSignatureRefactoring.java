@@ -132,7 +132,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return new ChangeSignatureRefactoring(method, codeGenerationSettings);
 	}
 	
-	public static boolean isAvailable(IMethod method) throws JavaModelException{
+	public static boolean isAvailable(IMethod method) throws JavaModelException {
+		if (method == null)
+			return false;
+		IType declaringType= method.getDeclaringType();
+		if (declaringType != null && declaringType.isLocal())
+			return false;
 		return Checks.isAvailable(method);
 	}	
 	
