@@ -22,7 +22,7 @@ public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWi
 	private Refactoring fRefactoring;
 	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
 	
-	public AbstractOpenRefactoringWizardAction(ISelectionProvider viewer, String label, Class activatedOnType) {
+	public AbstractOpenRefactoringWizardAction(String label, Class activatedOnType) {
 		super(label, new Class[] {activatedOnType}, false);
 	}
 	
