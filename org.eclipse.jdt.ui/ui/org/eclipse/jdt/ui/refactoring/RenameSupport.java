@@ -320,47 +320,6 @@ public class RenameSupport {
 		return new RenameSupport(support, field);
 	}
 	
-	/**
-	 * Creates a new <tt>RenameSupport</tt> for the given <tt>IJavaElement</tt>
-	 * by forwarding the creation to one of the concrete create methods
-	 * depending on the type of the given <tt>IJavaElement</tt>.
-	 * @param element the <tt>IJavaElement</tt> to be renamed
-	 * @param newName the Java element's new name. <code>null</code> is a valid
-	 * value indicating that no new name is provided.
-	 * @param flags flags controlling additional parameters. For a list of valid
-	 * flags see the corresponding create methods of this class.
-	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
-	 * the <tt>RenameSupport</tt>.
-	 * 
-	 * @see #create(IJavaProject, int)
-	 * @see #create(IPackageFragmentRoot)
-	 * @see #create(IPackageFragment, int)
-	 * @see #create(ICompilationUnit, int)
-	 * @see #create(IType, int)
-	 * @see #create(IMethod, int)
-	 * @see #create(IField, int)
-	 */
-	public static RenameSupport create(IJavaElement element, String newName, int flags) throws CoreException {
-		switch (element.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-				return create((IJavaProject)element, newName, flags); 
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return create((IPackageFragmentRoot)element, newName); 
-			case IJavaElement.PACKAGE_FRAGMENT:
-				return create((IPackageFragment)element, newName, flags); 
-			case IJavaElement.COMPILATION_UNIT:
-				return create((ICompilationUnit)element, newName, flags); 
-			case IJavaElement.TYPE:
-				return create((IType)element, newName, flags); 
-			case IJavaElement.METHOD:
-				return create((IMethod)element, newName, flags); 
-			case IJavaElement.FIELD:
-				return create((IField)element, newName, flags); 
-		}
-		return null;
-	}
-	
 	private static void setNewName(IRenameRefactoring refactoring, String newName) {
 		if (newName != null)
 			refactoring.setNewName(newName);

@@ -29,9 +29,8 @@ import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -51,8 +50,13 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
 public class JdtMoveAction extends ReorgDestinationAction {
 
+	public static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
+	
 	private boolean fShowPreview= false;
 
 	public JdtMoveAction(IWorkbenchSite site) {
@@ -77,6 +81,19 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		}
 	}
 
+	public static ElementTreeSelectionDialog makeDialog(Shell parent, MoveRefactoring refactoring) {
+		StandardJavaElementContentProvider cp= new StandardJavaElementContentProvider() {
+			public boolean hasChildren(Object element) {
+				// prevent the + from being shown in front of packages
+				return !(element instanceof IPackageFragment) && super.hasChildren(element);
+			}
+		};
+		MoveDestinationDialog dialog= new MoveDestinationDialog(
+			parent,  new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS),
+			cp, refactoring);
+		return dialog;
+	}
+		
 	/* non java-doc
 	 * see @ReorgDestinationAction#isOkToProceed
 	 */
@@ -130,17 +147,25 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		}
 		return false;
 	}
+	
+	protected Object openDialog(ElementTreeSelectionDialog dialog) {
+		Object result= super.openDialog(dialog);
+		if (dialog instanceof MoveDestinationDialog) {
+			fShowPreview= dialog.getReturnCode() == PREVIEW_ID;
+		} else {
+			fShowPreview= false;
+		}
+		return result;
+	}
+
 		
 	/* non java-doc
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
 	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
 		if (fShowPreview){		
-			//XX incorrect help
-			RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
-	        wizard.setChangeCreationCancelable(false);
-			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
-			return;	
+			openWizard(getShell(), refactoring);
+			return;
 		}
 	
         CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
@@ -160,6 +185,14 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		else
 			super.doReorg(refactoring);
 	}
+
+	public static void openWizard(Shell parent, ReorgRefactoring refactoring) {
+		//XX incorrect help
+		RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		wizard.setChangeCreationCancelable(false);
+		new RefactoringWizardDialog(parent, wizard).open();	
+		return;	
+	}
 	
 	private void moveProject(IStructuredSelection selection){
 		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
@@ -169,18 +202,16 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	
 	//--- static inner classes
 		
-	private class MoveDestinationDialog extends ElementTreeSelectionDialog {
-		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
+	private static class MoveDestinationDialog extends ElementTreeSelectionDialog {
 		private MoveRefactoring fRefactoring;
 		private Button fReferenceCheckbox;
 		private Button fQualifiedNameCheckbox;
 		private QualifiedNameComponent fQualifiedNameComponent;
 		private Button fPreview;
 		
-		MoveDestinationDialog(Shell parent, ILabelProvider labelProvider, 	ITreeContentProvider contentProvider, MoveRefactoring refactoring){
+		MoveDestinationDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, MoveRefactoring refactoring) {
 			super(parent, labelProvider, contentProvider);
 			fRefactoring= refactoring;
-			fShowPreview= false;//from outter instance
 			setDoubleClickSelects(false);
 		}
 		
@@ -216,10 +247,11 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		}
 
 		protected void buttonPressed(int buttonId) {
-			fShowPreview= (buttonId == PREVIEW_ID);
 			super.buttonPressed(buttonId);
-			if (buttonId == PREVIEW_ID)
+			if (buttonId == PREVIEW_ID) {
+				setReturnCode(PREVIEW_ID);
 				close();
+			}
 		}
 		
 		protected void configureShell(Shell newShell) {
@@ -242,7 +274,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		private void addUpdateReferenceComponent(Composite result) {
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
 			fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
-			fReferenceCheckbox.setSelection(true);
+			fReferenceCheckbox.setSelection(fRefactoring.getUpdateReferences());
 			fReferenceCheckbox.setEnabled(canUpdateReferences());
 			
 			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {

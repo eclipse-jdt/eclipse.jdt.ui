@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -68,7 +69,7 @@ public class QualifiedNameFinder {
 				fChanges.put(resource, change);
 				fChangesList.add(change);
 			}
-			change.addTextEdit("Update fully qualified name", SimpleTextEdit.createReplace(start, length, fNewValue));
+			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), SimpleTextEdit.createReplace(start, length, fNewValue)); //$NON-NLS-1$
 		}
 
 		public void done() throws CoreException {
@@ -90,15 +91,20 @@ public class QualifiedNameFinder {
 	}
 	
 	public void process(String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
+		if (filePatterns == null || filePatterns.length() == 0) {
+			// Eat progress.
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.worked(1);
+			return;
+		}
 		Assert.isNotNull(pattern);
 		Assert.isNotNull(newValue);
-		Assert.isNotNull(filePatterns);
 		Assert.isNotNull(root);
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		ResultCollector collector= new ResultCollector(newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector);
+		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector); //$NON-NLS-1$
 	}
 	
 	public TextChange[] getAllChanges() {
@@ -112,7 +118,7 @@ public class QualifiedNameFinder {
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {
 		String[] patterns= splitFilePatterns(filePatterns);
-		TextSearchScope result= new TextSearchScope("");
+		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
 		result.add(root);
 		addReferencingProjects(result, root);
 		for (int i= 0; i < patterns.length; i++) {
@@ -123,7 +129,7 @@ public class QualifiedNameFinder {
 	
 	private static String[] splitFilePatterns(String filePatterns) {
 		List result= new ArrayList();
-		StringTokenizer tokenizer= new StringTokenizer(filePatterns, ",");
+		StringTokenizer tokenizer= new StringTokenizer(filePatterns, ","); //$NON-NLS-1$
 		while(tokenizer.hasMoreTokens())
 			result.add(tokenizer.nextToken().trim());
 		return (String[]) result.toArray(new String[result.size()]);	

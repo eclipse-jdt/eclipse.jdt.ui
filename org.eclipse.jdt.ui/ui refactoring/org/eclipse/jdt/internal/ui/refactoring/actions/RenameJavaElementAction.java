@@ -18,7 +18,14 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -79,7 +86,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		RenameSupport support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
+		RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
 		if (support == null)
 			return false;
 		return support.preCheck().isOK();		
@@ -98,7 +105,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try {
 			IJavaElement element= getJavaElement(selection);
 			if (element != null) {
-				RenameSupport support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
+				RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
 				if (support.preCheck().isOK()) {
 					run(element, support);
 					return;
@@ -115,7 +122,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return false;
 		try {
-			return RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES).preCheck().isOK();
+			return createGeneric(element, null, RenameSupport.UPDATE_REFERENCES).preCheck().isOK();
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
@@ -130,7 +137,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		if (support == null) {
-			support= RenameSupport.create(element, null, RenameSupport.UPDATE_REFERENCES);
+			support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
 			if (!support.preCheck().isOK())
 				return;
 		}
@@ -143,4 +150,24 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			return null;
 		return elements[0];
 	}
+	
+	private static RenameSupport createGeneric(IJavaElement element, String newName, int flags) throws CoreException {
+		switch (element.getElementType()) {
+			case IJavaElement.JAVA_PROJECT:
+				return RenameSupport.create((IJavaProject)element, newName, flags); 
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				return RenameSupport.create((IPackageFragmentRoot)element, newName); 
+			case IJavaElement.PACKAGE_FRAGMENT:
+				return RenameSupport.create((IPackageFragment)element, newName, flags); 
+			case IJavaElement.COMPILATION_UNIT:
+				return RenameSupport.create((ICompilationUnit)element, newName, flags); 
+			case IJavaElement.TYPE:
+				return RenameSupport.create((IType)element, newName, flags); 
+			case IJavaElement.METHOD:
+				return RenameSupport.create((IMethod)element, newName, flags); 
+			case IJavaElement.FIELD:
+				return RenameSupport.create((IField)element, newName, flags); 
+		}
+		return null;
+	}	
 }

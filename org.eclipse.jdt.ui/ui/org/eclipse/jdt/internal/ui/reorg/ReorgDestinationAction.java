@@ -305,18 +305,26 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 																																	 new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS	),
 																																	 cp,
 																																	 refactoring);
-		dialog.setTitle(getActionName());
-		dialog.setValidator(new ReorgSelectionValidator(refactoring));
-		dialog.addFilter(new ContainerFilter(refactoring));
-		dialog.setSorter(new JavaElementSorter());
-		dialog.setMessage(getDestinationDialogMessage());
-		dialog.setSize(60, 18);
-		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
-		dialog.setInitialSelection(computeCommonParent(refactoring.getElementsToReorg()));
+		initDialog(dialog, getActionName(), getDestinationDialogMessage(), refactoring);
 		
+		return openDialog(dialog);
+	}
+	
+	protected Object openDialog(ElementTreeSelectionDialog dialog) {
 		if (dialog.open() != Window.CANCEL)
 			return dialog.getFirstResult();
 		return null;
+	}
+
+	public static void initDialog(ElementTreeSelectionDialog dialog, String title, String message, ReorgRefactoring refactoring) {
+		dialog.setTitle(title);
+		dialog.setValidator(new ReorgSelectionValidator(refactoring));
+		dialog.addFilter(new ContainerFilter(refactoring));
+		dialog.setSorter(new JavaElementSorter());
+		dialog.setMessage(message);
+		dialog.setSize(60, 18);
+		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+		dialog.setInitialSelection(computeCommonParent(refactoring.getElementsToReorg()));
 	}
 		
 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
@@ -384,7 +392,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	//-----
-	private static class ContainerFilter extends ViewerFilter {
+	static class ContainerFilter extends ViewerFilter {
 		private ReorgRefactoring fRefactoring;
 	
 		ContainerFilter(ReorgRefactoring refactoring) {
@@ -400,7 +408,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	//-----
-	private static class DestinationRenderer extends JavaElementLabelProvider {
+	static class DestinationRenderer extends JavaElementLabelProvider {
 		public DestinationRenderer(int flags) {
 			super(flags);
 		}
@@ -415,7 +423,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}
 	}
 	//------
-	private static class ReorgSelectionValidator implements ISelectionStatusValidator {
+	static class ReorgSelectionValidator implements ISelectionStatusValidator {
 		private ReorgRefactoring fRefactoring;
 		
 		public ReorgSelectionValidator(ReorgRefactoring refactoring) {

@@ -116,9 +116,13 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		RefactoringStatus preAct= checkPreactivation();
+		if (preAct.hasFatalError())
+			return preAct;
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
+			result.merge(preAct);
 			
 			result.merge(checkDeclaringType());
 			pm.worked(1);

@@ -69,6 +69,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
+		fUpdateReferences= true;
 		fQualifiedNameFinder= new QualifiedNameFinder();
 	}
 		
@@ -395,6 +396,10 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		fUpdateReferences= update;
 	}
 	
+	public boolean getUpdateReferences() {
+		return fUpdateReferences;
+	}
+	
 	//---- changes 
 
 	/* non java-doc
@@ -535,14 +540,14 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 			return;
 		IPackageFragment destination= (IPackageFragment)getDestination();
 		List elements= getElements();
-		pm.beginTask("", elements.size());
-		pm.subTask("Scanning for qualified names in non Java files...");
+		pm.beginTask("", elements.size()); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getString("MoveRefactoring.scanning_qualified_names")); //$NON-NLS-1$
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object element= (Object)iter.next();
 			if (element instanceof ICompilationUnit) {
 				IType[] types= ((ICompilationUnit)element).getTypes();
 				IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
-				typesMonitor.beginTask("", types.length);
+				typesMonitor.beginTask("", types.length); //$NON-NLS-1$
 				for (int i= 0; i < types.length; i++) {
 					handleType(types[i], destination, new SubProgressMonitor(typesMonitor, 1));
 				}
@@ -555,7 +560,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	}
 	
 	private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
-		fQualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(),
+		fQualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
 					fFilePatterns, type.getJavaProject().getProject(), pm);
 	}	
 }

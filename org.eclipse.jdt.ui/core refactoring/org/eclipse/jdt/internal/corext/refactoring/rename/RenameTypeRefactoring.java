@@ -831,7 +831,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
 		IPackageFragment fragment= fType.getPackageFragment();
 		fQualifiedNameFinder= new QualifiedNameFinder();
-		fQualifiedNameFinder.process(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName,
+		fQualifiedNameFinder.process(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName, //$NON-NLS-1$
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}	
 }

@@ -382,7 +382,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				case IDialogConstants.CANCEL_ID:
 				 	setShowPreview(false);
 					return false;
-				case IDialogConstants.YES_ID:
+				case IDialogConstants.OK_ID:
 					setShowPreview(false);
 					return true;
 				case PREVIEW_ID:		 
@@ -467,7 +467,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			private void addUpdateReferenceComponent(Composite result) {
 				fReferenceCheckbox= new Button(result, SWT.CHECK);
 				fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
-				fReferenceCheckbox.setSelection(true);
+				fReferenceCheckbox.setSelection(fRefactoring.getUpdateReferences());
 				fReferenceCheckbox.setEnabled(canUpdateReferences());
 			
 				fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
