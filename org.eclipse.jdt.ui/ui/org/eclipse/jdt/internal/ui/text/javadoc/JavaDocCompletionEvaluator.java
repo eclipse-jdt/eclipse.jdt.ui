@@ -167,6 +167,9 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		
 		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
 		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
+		if (fDocument == null) {
+			return null;
+		}
 		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
 		try {
