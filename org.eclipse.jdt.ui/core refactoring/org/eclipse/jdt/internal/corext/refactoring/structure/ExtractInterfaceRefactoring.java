@@ -36,7 +36,7 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	public static ExtractInterfaceRefactoring create(final IType type, final CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(type);
 		Assert.isNotNull(settings);
-		Assert.isTrue(type.exists() && !type.isAnnotation() && !type.isBinary() && !type.isReadOnly());
+		Assert.isTrue(type.exists() && !type.isAnnotation() && !type.isAnonymous() && !type.isBinary() && !type.isReadOnly());
 		return new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, settings));
 	}
 
@@ -48,7 +48,7 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	 * @throws JavaModelException if the type could not be tested
 	 */
 	public static boolean isAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !type.isBinary() && !type.isReadOnly() && !type.isAnnotation();
+		return Checks.isAvailable(type) && !type.isBinary() && !type.isReadOnly() && !type.isAnnotation() && !type.isAnonymous();
 	}
 
 	/** The processor to use */
