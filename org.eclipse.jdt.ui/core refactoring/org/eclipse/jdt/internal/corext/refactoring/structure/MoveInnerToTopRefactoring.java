@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEd
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -599,10 +598,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String createCuSourcePrefix(IProgressMonitor pm, ICompilationUnit newCu) throws CoreException{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		StringBuffer buffer= new StringBuffer();
-		if (fCodeGenerationSettings.createFileComments){
-			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
-			buffer.append(getLineSeperator());
-		}	
 		if (! getInputTypePackage().isDefaultPackage())	
 			buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource(new SubProgressMonitor(pm, 1)));

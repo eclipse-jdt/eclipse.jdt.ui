@@ -64,7 +64,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -431,14 +430,15 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu) throws CoreException {
 		StringBuffer buffer= new StringBuffer();
-		if (fCodeGenerationSettings.createFileComments)
-			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
 		if (! getInputClassPackage().isDefaultPackage())	
 			buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource());
 		if (fCodeGenerationSettings.createComments){
-			buffer.append(getLineSeperator());
-			buffer.append(TemplateUtil.createTypeCommentSource(newCu));
+			String template= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
+			if (template != null){
+				buffer.append(getLineSeperator());
+				buffer.append(template);
+			}
 		}	
 		buffer.append(createInterfaceSource());
 		return buffer.toString();
