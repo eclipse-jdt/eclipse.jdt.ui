@@ -300,8 +300,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2();
 	}
 	public void test19() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}
 	public void test20() throws Exception{
 		helper2();
@@ -353,8 +352,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2();
 	}
 	public void test34() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}
 	public void test35() throws Exception{
 		helper2();
@@ -372,12 +370,10 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2();
 	}
 	public void test40() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}
 	public void test41() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}
 	public void test42() throws Exception{
 		helper2();
@@ -389,8 +385,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2();
 	}
 	public void test45() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}
 	public void test46() throws Exception{
 		helper2(false);
