@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.leaktest.example;
 
-import java.io.File;
 import java.util.ArrayList;
-
-import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.ui.leaktest.LeakTestCase;
+import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 
 
 public class LeakTestExample extends LeakTestCase {
@@ -41,13 +40,6 @@ public class LeakTestExample extends LeakTestCase {
 	}
 			
 	public void testLeakGlobalReference() throws Exception {
-		System.out.println("xxx" + new File(".").getCanonicalPath());
-		String[] strings= new File(".").list();
-		for (int i= 0; i < strings.length; i++) {
-			System.out.println(strings[i]);
-		}
-		
-		
 		Class cl= MyClass.class;
 
 		// get the count before creating the instance
