@@ -223,6 +223,7 @@ public class CodeTemplateBlock {
 		
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.label")); //$NON-NLS-1$
+		fCreateJavaDocComments.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_JAVADOC_STUBS));
 		
 		fCodeTemplateTree.selectFirstElement();	
 	}
