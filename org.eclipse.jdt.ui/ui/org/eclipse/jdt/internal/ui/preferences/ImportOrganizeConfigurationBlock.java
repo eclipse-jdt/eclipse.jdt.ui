@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -127,7 +127,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private class ImportOrganizeAdapter implements IListAdapter, IDialogFieldListener {
 
 		private boolean canEdit(ListDialogField field) {
-			return field.getSelectedElements().size() == 1;
+			List selected= field.getSelectedElements();
+			return selected.size() == 1;
 		}
 
         public void customButtonPressed(ListDialogField field, int index) {
@@ -150,12 +151,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	}
 	
 	private static final int IDX_ADD= 0;
-	private static final int IDX_EDIT= 1;
-	private static final int IDX_REMOVE= 2;
-	private static final int IDX_UP= 4;
-	private static final int IDX_DOWN= 5;
-	private static final int IDX_LOAD= 7;
-	private static final int IDX_SAVE= 8;
+	private static final int IDX_ADD_STATIC= 1;
+	private static final int IDX_EDIT= 2;
+	private static final int IDX_REMOVE= 3;
+	private static final int IDX_UP= 5;
+	private static final int IDX_DOWN= 6;
+	private static final int IDX_LOAD= 8;
+	private static final int IDX_SAVE= 9;
 
 	private ListDialogField fOrderListField;
 	private StringDialogField fThresholdField;
@@ -168,14 +170,15 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	
 		String[] buttonLabels= new String[] { 
 			/* 0 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.add.button"), //$NON-NLS-1$
-			/* 1 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.edit.button"), //$NON-NLS-1$
-			/* 2 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.remove.button"), //$NON-NLS-1$
-			/* 3 */  null,
-			/* 4 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.up.button"), //$NON-NLS-1$
-			/* 5 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.down.button"), //$NON-NLS-1$
-			/* 6 */  null,
-			/* 7 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.load.button"), //$NON-NLS-1$					
-			/* 8 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.save.button") //$NON-NLS-1$			
+			/* 1 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.add_static.button"), //$NON-NLS-1$
+			/* 2 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.edit.button"), //$NON-NLS-1$
+			/* 3 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.remove.button"), //$NON-NLS-1$
+			/* 4 */  null,
+			/* 5 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.up.button"), //$NON-NLS-1$
+			/* 6 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.down.button"), //$NON-NLS-1$
+			/* 7 */  null,
+			/* 8 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.load.button"), //$NON-NLS-1$					
+			/* 9 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.save.button") //$NON-NLS-1$			
 		};
 				
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
@@ -245,9 +248,9 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	}
 	
 	private void doButtonPressed(int index) {
-		if (index == IDX_ADD) { // add new
+		if (index == IDX_ADD || index == IDX_ADD_STATIC) { // add new
 			List existing= fOrderListField.getElements();
-			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
+			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing, index == IDX_ADD_STATIC);
 			if (dialog.open() == Window.OK) {
 				List selectedElements= fOrderListField.getSelectedElements();
 				if (selectedElements.size() == 1) {
@@ -267,7 +270,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			List existing= fOrderListField.getElements();
 			existing.remove(editedEntry);
 			
-			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
+			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing, editedEntry.isStatic);
 			dialog.setInitialSelection(editedEntry);
 			if (dialog.open() == Window.OK) {
 				fOrderListField.replaceElement(editedEntry, dialog.getResult());
@@ -431,13 +434,18 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	}
 
 	private static ImportOrderEntry[] unpackOrderList(String str) {
-		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
-		int nTokens= tok.countTokens();
-		ImportOrderEntry[] res= new ImportOrderEntry[nTokens];
-		for (int i= 0; i < nTokens; i++) {
-			res[i]= ImportOrderEntry.fromSerialized(tok.nextToken());
-		}
-		return res;
+		ArrayList res= new ArrayList();
+		int start= 0;
+		do {
+			int end= str.indexOf(';', start);
+			if (end == -1) {
+				end= str.length();
+			}
+			res.add(ImportOrderEntry.fromSerialized(str.substring(start, end)));
+			start= end + 1;
+		} while (start < str.length());
+		
+		return (ImportOrderEntry[]) res.toArray(new ImportOrderEntry[res.size()]);
 	}
 	
 	private static String packOrderList(List orderList) {
