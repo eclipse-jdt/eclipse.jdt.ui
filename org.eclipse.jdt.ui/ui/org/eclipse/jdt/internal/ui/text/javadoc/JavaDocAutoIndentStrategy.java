@@ -101,23 +101,33 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					buf.append(" * "); //$NON-NLS-1$
 
 					if (isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, offset)) {
+						c.shiftsCaret= false;
+						c.caretOffset= c.offset + buf.length();
 						String lineDelimiter= TextUtilities.getDefaultLineDelimiter(d);
 						
 						String endTag= lineDelimiter + indentation + " */"; //$NON-NLS-1$
-						d.replace(offset, 0, endTag); //$NON-NLS-1$
-						// evaluate method signature
-						ICompilationUnit unit= getCompilationUnit();
+						
+						if (isPreferenceTrue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS)) {
+							// we need to close the comment before computing 
+							// the tags correct tags.
+							d.replace(offset, 0, endTag);
 
-						if (isPreferenceTrue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS) && unit != null) {
-							try {
-								JavaModelUtil.reconcile(unit);
-								String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
-								if (string != null) {
-									d.replace(offset, 0, string);
+							// evaluate method signature
+							ICompilationUnit unit= getCompilationUnit();
+
+							if (unit != null) {
+								try {
+									JavaModelUtil.reconcile(unit);
+									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
+									if (string != null) {
+										buf.append(string);
+									}
+								} catch (CoreException e) {
+									// ignore
 								}
-							} catch (CoreException e) {
-								// ignore
 							}
+						} else {
+							buf.append(endTag);
 						}
 					}						
 
