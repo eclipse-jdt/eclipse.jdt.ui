@@ -70,7 +70,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.search.ui.ISearchResultView;
@@ -351,6 +353,29 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setHelp();
 	}
 	
+	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInSource.class) {
+			return getShowInSource();
+		}
+		return super.getAdapter(key);
+	}
+
+	/**
+	 * Returns the <code>IShowInSource</code> for this view.
+	 */
+	protected IShowInSource getShowInSource() {
+		return new IShowInSource() {
+			public ShowInContext getShowInContext() {
+				return new ShowInContext(
+					null,
+				getSite().getSelectionProvider().getSelection());
+			}
+		};
+	}
+
 	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 //		XXX: Work in progress for problem decorator being a workbench decorator//
 //		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$

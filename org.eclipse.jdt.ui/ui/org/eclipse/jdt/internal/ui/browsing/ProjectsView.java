@@ -18,7 +18,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -26,6 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -42,6 +45,22 @@ public class ProjectsView extends JavaBrowsingPart {
 	protected StructuredViewer createViewer(Composite parent) {
 		return new ProblemTreeViewer(parent, SWT.MULTI);
 	}
+	
+	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+				}
+
+			};
+		}
+		return super.getAdapter(key);
+	}
+
 	
 	/**
 	 * Creates the the content provider of this part.

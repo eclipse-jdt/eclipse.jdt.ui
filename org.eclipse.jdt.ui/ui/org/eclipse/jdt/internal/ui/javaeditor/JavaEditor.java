@@ -103,6 +103,7 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -113,6 +114,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -159,6 +161,7 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -1313,6 +1316,15 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		if (IEncodingSupport.class.equals(required))
 			return fEncodingSupport;
+
+		if (required == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+				}
+
+			};
+		}
 			
 		return super.getAdapter(required);
 	}

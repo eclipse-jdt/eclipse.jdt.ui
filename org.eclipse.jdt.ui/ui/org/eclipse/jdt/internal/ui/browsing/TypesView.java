@@ -15,8 +15,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
 public class TypesView extends JavaBrowsingPart {
 
 	private SelectAllAction fSelectAllAction;
@@ -47,6 +50,21 @@ public class TypesView extends JavaBrowsingPart {
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		lprovider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));
 		return lprovider;
+	}
+
+	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+				}
+
+			};
+		}
+		return super.getAdapter(key);
 	}
 
 	/**

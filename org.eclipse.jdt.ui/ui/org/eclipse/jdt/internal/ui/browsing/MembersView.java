@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,6 +48,21 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		setHasWorkingSetFilter(false);
 		setHasCustomSetFilter(true);
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+	}
+
+	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { JavaUI.ID_PACKAGES };
+				}
+
+			};
+		}
+		return super.getAdapter(key);
 	}
 
 	/**

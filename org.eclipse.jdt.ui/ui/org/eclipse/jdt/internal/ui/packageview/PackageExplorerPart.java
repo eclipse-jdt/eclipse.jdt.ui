@@ -64,6 +64,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
@@ -74,6 +75,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -462,6 +464,14 @@ public class PackageExplorerPart extends ViewPart
 			return fViewer;
 		if (key == IShowInSource.class) {
 			return getShowInSource();
+		}
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV };
+				}
+
+			};
 		}
 		return super.getAdapter(key);
 	}

@@ -56,6 +56,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.model.WorkbenchAdapter;
@@ -85,6 +86,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -1027,6 +1029,14 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
+		}
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { JavaUI.ID_PACKAGES };
+				}
+
+			};
 		}
 		return null;
 	}

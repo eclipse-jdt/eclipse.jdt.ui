@@ -31,9 +31,12 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -193,6 +197,20 @@ public class PackagesView extends JavaBrowsingPart{
 	
 		((PackageViewerWrapper)fWrappedViewer).setViewer(viewer);
 		return fWrappedViewer;
+	}
+
+	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+				}
+			};
+		}
+		return super.getAdapter(key);
 	}
 
 	protected boolean isInListState() {

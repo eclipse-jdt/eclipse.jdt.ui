@@ -51,6 +51,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -61,6 +62,7 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
@@ -76,6 +78,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -524,6 +527,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
+		}
+		if (key == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+				}
+
+			};
 		}
 		return super.getAdapter(key);
 	}
