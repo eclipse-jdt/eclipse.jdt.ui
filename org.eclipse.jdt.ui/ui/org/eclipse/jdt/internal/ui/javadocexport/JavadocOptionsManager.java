@@ -669,7 +669,7 @@ public class JavadocOptionsManager {
 	
 
 	public void getArgumentArray(List vmArgs, List toolArgs) {
-		
+
 		//bug 38692
 		vmArgs.add(getJavadocCommandHistory()[0]);
 		if (fFromStandard) {
@@ -693,6 +693,7 @@ public class JavadocOptionsManager {
 			toolArgs.add("-docletpath"); //$NON-NLS-1$
 			toolArgs.add(fDocletpath);
 		}
+		
 		toolArgs.add("-sourcepath"); //$NON-NLS-1$
 		toolArgs.add(flatPathList(fSourcepath));
 		toolArgs.add("-classpath"); //$NON-NLS-1$

@@ -258,6 +258,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			try {
 				for (int i= 0; i < progArgs.size(); i++) {
 					String curr= (String) progArgs.get(i);
+					curr= checkForSpaces(curr);
+					
 					writer.write(curr);
 					writer.write(' ');
 				}
@@ -268,7 +270,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			String[] args= (String[]) vmArgs.toArray(new String[vmArgs.size()]);
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
-				// contruct a formatted command line for the process properties
+				// construct a formatted command line for the process properties
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < args.length; i++) {
 					buf.append(args[i]);
@@ -311,6 +313,23 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 		return false;
 
+	}
+
+	private String checkForSpaces(String curr) {
+		if (curr.indexOf(' ') == -1) {
+			return curr;
+		}	
+		StringBuffer buf= new StringBuffer();
+		buf.append('\'');
+		for (int i= 0; i < curr.length(); i++) {
+			char ch= curr.charAt(i);
+			if (ch == '\\' || ch == '\'') {
+				buf.append('\\');				
+			}
+			buf.append(ch);
+		}
+		buf.append('\'');
+		return buf.toString();
 	}
 
 	/**
@@ -422,7 +441,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		description.setAutoBuilding(false);
 		try {
 			workspace.setDescription(description);
-			// This save operation can not be canceled.
+			// This save operation can not be cancelled.
 			try {
 				new ProgressMonitorDialog(getShell()).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
 			} finally {
