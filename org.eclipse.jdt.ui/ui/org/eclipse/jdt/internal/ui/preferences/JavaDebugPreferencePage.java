@@ -110,6 +110,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	private TableEditor fTableEditor;
 	private TableItem fNewTableItem;
 	private StepFilter fNewStepFilter;
+	private Label fTableLabel;
 	
 	// table columns
 	private static final String[] TABLE_COLUMN_PROPERTIES = {"filter_name"}; //$NON-NLS-1$
@@ -406,7 +407,6 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		// use filters checkbox
 		fUseFiltersCheckbox = new Button(container, SWT.CHECK);
 		fUseFiltersCheckbox.setText("Use &step filters");
-		fUseFiltersCheckbox.setToolTipText("Toggle whether step filters are used at all");
 		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
 		fUseFiltersCheckbox.setLayoutData(gd);	
@@ -417,6 +417,13 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 			public void widgetDefaultSelected(SelectionEvent se) {
 			}
 		});	
+		
+		//table label
+		fTableLabel= new Label(container, SWT.NONE);
+		fTableLabel.setText("D&efined step filters:");
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalSpan = 2;
+		fTableLabel.setLayoutData(gd);
 		
 		// filter table
 		fFilterViewer = new CheckboxTableViewer(container, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
@@ -475,7 +482,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		// Add type button
 		fAddTypeButton = new Button(buttonContainer, SWT.PUSH);
 		fAddTypeButton.setText("Add &Type...");
-		fAddTypeButton.setToolTipText("Choose a java type and add it to step filters");
+		fAddTypeButton.setToolTipText("Choose a Java type and add it to step filters");
 		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddTypeButton.setLayoutData(gd);
 		fAddTypeButton.addSelectionListener(new SelectionListener() {
