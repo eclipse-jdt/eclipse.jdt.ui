@@ -99,16 +99,18 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 			IType type= (IType)element;
 			List res= new ArrayList();
 			try {
-				addAll(type.getMethods(), res);
-				addAll(type.getFields(), res);
 				if (fShowInheritedMethods) {
 					ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
 					IType[] allSupertypes= hierarchy.getAllSupertypes(type);
-					for (int i= 0; i < allSupertypes.length; i++) {
+					// sort in from last to first: elements with same name
+					// will show up in hierarchy order 
+					for (int i= allSupertypes.length - 1; i >= 0; i--) {
 						addAll(allSupertypes[i].getMethods(), res);
 						addAll(allSupertypes[i].getFields(), res);
 					}
 				}
+				addAll(type.getMethods(), res);
+				addAll(type.getFields(), res);				
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
 			}

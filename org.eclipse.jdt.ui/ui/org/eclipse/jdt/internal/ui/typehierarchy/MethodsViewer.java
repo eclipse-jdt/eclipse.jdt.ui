@@ -22,12 +22,14 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -41,6 +43,7 @@ import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 
 /**
@@ -49,6 +52,52 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * No dependency to the type hierarchy view
  */
 public class MethodsViewer extends TableViewer {
+	
+	/**
+	 * Sorter that uses the unmodified labelprovider (No declaring class names)
+	 */
+	private static class MethodsViewerSorter extends ViewerSorter {
+		private JavaTextLabelProvider fLabelProvider;
+		
+		public MethodsViewerSorter() {
+			fLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+		}
+		
+		public boolean isSorterProperty(Object element, Object property) {
+			// doesn't matter, only world changed is used.
+			return true;
+		}
+		
+		public int category(Object element) {
+			if (element instanceof IMethod) {
+				try {
+					if (((IMethod)element).isConstructor()) {
+						return 1;
+					} else {
+						return 2;
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
+				}
+			}
+			return 0;
+		}
+		
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			int cat1 = category(e1);
+			int cat2 = category(e2);
+
+			if (cat1 != cat2)
+				return cat1 - cat2;
+
+			// cat1 == cat2
+			String name1= fLabelProvider.getTextLabel((IJavaElement)e1);
+			String name2= fLabelProvider.getTextLabel((IJavaElement)e2);
+			return getCollator().compare(name1, name2);
+		}
+	}
+	
+	
 
 	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
 	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
@@ -127,26 +176,7 @@ public class MethodsViewer extends TableViewer {
 			new JavaSearchGroup(), new GenerateGroup()
 		};
 		
-		setSorter(new ViewerSorter() {
-			public boolean isSorterProperty(Object element, Object property) {
-				// doesn't matter, only world changed is used.
-				return true;
-			}
-			public int category(Object element) {
-				if (element instanceof IMethod) {
-					try {
-						if (((IMethod)element).isConstructor()) {
-							return 1;
-						} else {
-							return 2;
-						}
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus());
-					}
-				}
-				return 0;
-			}
-		});
+		setSorter(new MethodsViewerSorter());
 			
 	}
 	

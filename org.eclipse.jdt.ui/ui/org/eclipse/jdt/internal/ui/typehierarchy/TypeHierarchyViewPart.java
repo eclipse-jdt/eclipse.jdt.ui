@@ -1041,6 +1041,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		if (!JavaBasePreferencePage.linkTypeHierarchySelectionToEditor()) {
 			return;
 		}
+		if (fInput == null) {
+			// no type hierarchy shown
+			return;
+		}
+		
 		IJavaElement elem= (IJavaElement)editor.getEditorInput().getAdapter(IJavaElement.class);
 		try {
 			TypeHierarchyViewer currentViewer= getCurrentViewer();
