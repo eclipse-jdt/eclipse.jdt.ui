@@ -1230,7 +1230,7 @@ public class PullUpRefactoring extends Refactoring {
 			return modifiers;	
 	}
 	
-	private void addMethodStubsToNonAbstractSubclassesOfTargetClass(IProgressMonitor pm) throws JavaModelException {
+	private void addMethodStubsToNonAbstractSubclassesOfTargetClass(IProgressMonitor pm) throws CoreException {
 		IType[] concreteSubclasses= getNonAbstractSubclassesOfTargetClass(pm);
 		IType declaringType= getDeclaringType();
 		IMethod[] methods= getAbstractMethodsAddedToTargetClass();
@@ -1252,7 +1252,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 
-	private void addStub(IType type, IMethod method) throws JavaModelException {
+	private void addStub(IType type, IMethod method) throws CoreException {
 		TypeDeclaration typeDeclaration= getTypeDeclarationNode(type);
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
 		ASTRewrite rewrite= getRewriteFor(typeDeclaration);
@@ -1261,12 +1261,12 @@ public class PullUpRefactoring extends Refactoring {
 		newMethod.setBody(getMethodStubBody(methodDeclaration, ast));
 		newMethod.setConstructor(false);
 		newMethod.setExtraDimensions(methodDeclaration.getExtraDimensions());
-		newMethod.setJavadoc(createJavadocForStub(method, rewrite));
 		newMethod.setModifiers(createModifiersForMethodStubs(method));
 		newMethod.setName(ast.newSimpleName(methodDeclaration.getName().getIdentifier()));
 		copyReturnType(rewrite, methodDeclaration, newMethod);		
 		copyParameters(rewrite, methodDeclaration, newMethod);
 		copyThrownExceptions(methodDeclaration, newMethod);
+		newMethod.setJavadoc(createJavadocForStub(method, typeDeclaration.getName().getIdentifier(), newMethod, rewrite));
 		typeDeclaration.bodyDeclarations().add(newMethod);
 		rewrite.markAsInserted(newMethod);
 	}
@@ -1288,7 +1288,7 @@ public class PullUpRefactoring extends Refactoring {
 		return body;
 	}
 
-	private Javadoc createJavadocForStub(IMethod method, ASTRewrite rewrite) throws JavaModelException {
+	private Javadoc createJavadocForStub(IMethod method, String enclosingTypeName, MethodDeclaration newMethodNode, ASTRewrite rewrite) throws CoreException {
 		if (! fPreferenceSettings.createComments)
 			return null;
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
@@ -1301,17 +1301,9 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i= 0; i < fullParamNames.length; i++) {
 			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 		}
-		StringBuffer buf= new StringBuffer();
-		StubUtility.genJavaDocSeeTag(fullTypeName, binding.getName(), fullParamNames, fPreferenceSettings.createNonJavadocComments, binding.isDeprecated(), buf);
-		String comment= buf.toString();
-		Javadoc javadoc;
-		if (fPreferenceSettings.createNonJavadocComments) {
-			javadoc= (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
-		} else {
-			javadoc= getAST(rewrite).newJavadoc();
-			javadoc.setComment(comment);
-		}
-		return javadoc;
+		ICompilationUnit cu= fAstManager.getCompilationUnit(rewrite.getRootNode());
+		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames);
+		return (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
 	}
 
 	private int createModifiersForMethodStubs(IMethod method) throws JavaModelException {
