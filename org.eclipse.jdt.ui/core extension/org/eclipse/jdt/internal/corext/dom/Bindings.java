@@ -300,6 +300,26 @@ public class Bindings {
 		}
 		return null;
 	}
+	
+	/**
+	 * Finds the method in the given <code>type</code> that is overrideen by the specified <code>method<code> . Returns <code>null</code> if no such method exits.
+	 * @param type The type to search the method in
+	 * @param method The specified method that would override the result
+	 * @return the method binding representing the method oevrriding the specified <code>method<code>
+	 */
+	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
+		return findMethodInType(type, method.getName(), method.getParameterTypes());
+		/* change when IMethodBinding.overrides finally works
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethodBinding curr= methods[i];
+			if (method.overrides(curr)) {
+				return curr;
+			}
+		}
+		return null;
+		*/
+	}
 
 	/**
 	 * Finds the field specified by <code>fieldName</code> in
@@ -360,6 +380,34 @@ public class Bindings {
 	}
 	
 	/**
+	 * Finds a method in the hierarchy of <code>type</code> that is overridden by </code>binding</code>.
+	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the super class is examined and than the implemented interfaces.
+	 * @param type The type to search the method in
+	 * @param binding The method that overrrides
+	 * @return the method binding overridden the method
+	 */
+	public static IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding) {
+		IMethodBinding method= findOverriddenMethodInType(type, binding);
+		if (method != null)
+			return method;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			method= findOverriddenMethodInHierarchy(superClass, binding);
+			if (method != null)
+				return method;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findOverriddenMethodInHierarchy(interfaces[i], binding);
+			if (method != null)
+				return method;
+		}
+		return null;
+	}
+	
+	
+	/**
 	 * Finds the method that is defines the given method. The returned method might not be visible.
 	 * @param method The method to find
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
@@ -367,11 +415,9 @@ public class Bindings {
 	 */
 	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding type= method.getDeclaringClass();
-		String methodName= method.getName();
-		ITypeBinding[] parameters= method.getParameterTypes();
 		
 		if (type.getSuperclass() != null) {
-			IMethodBinding res= findMethodInHierarchy(type.getSuperclass(), methodName, parameters);
+			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), method);
 			if (res != null && !Modifier.isPrivate(res.getModifiers())) {
 				if (!testVisibility || isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
 					return res;
@@ -380,7 +426,7 @@ public class Bindings {
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
-			IMethodBinding res= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], method);
 			if (res != null) {
 				return res; // methods from interfaces are always public and therefore visible
 			}
@@ -433,7 +479,7 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findDeclarationInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
+	public static IMethodBinding findDeclarationInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			ITypeBinding curr= interfaces[i];
