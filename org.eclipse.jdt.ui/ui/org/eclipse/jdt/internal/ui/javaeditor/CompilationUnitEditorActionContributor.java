@@ -58,10 +58,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (editMenu != null) {
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelection);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fNextError);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fPreviousError);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
-			// editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fPreviousError);
-			// editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fNextError);
 		}
 		
 	}

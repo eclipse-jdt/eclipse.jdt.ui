@@ -1,4 +1,6 @@
-package org.eclipse.jdt.ui.text;/*
+package org.eclipse.jdt.ui.text;
+
+/*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
@@ -187,7 +189,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getDefaultPrefix(ISourceViewer, String)
 	 */
 	public String getDefaultPrefix(ISourceViewer sourceViewer, String contentType) {
-		return (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType) ? "//" : null);
+		return "//";
 	}
 
 	/*

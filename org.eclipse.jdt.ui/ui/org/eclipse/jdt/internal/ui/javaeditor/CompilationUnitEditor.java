@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
@@ -206,39 +206,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
-		
-		int distance= forward ? 1 : -1;
-		int offset= s.getOffset();
-		IMarker nextError= null;
-		
-		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= model.getAnnotationIterator();
-		while (e.hasNext()) {
-			Annotation a= (Annotation) e.next();
-			if (a instanceof MarkerAnnotation) {
-				MarkerAnnotation ma= (MarkerAnnotation) a;
-				IMarker marker= ma.getMarker();
-				
-				if (MarkerUtilities.isMarkerType(marker, IMarker.PROBLEM)) {
-					Position p= model.getPosition(a);
-					if (!p.includes(offset)) {
-						int currentDistance= offset - p.getOffset();
-						if (forward) {
-							if (currentDistance < 0 && (distance == 1 || currentDistance > distance)) {
-								distance= currentDistance;
-								nextError= marker;
-							}
-						} else {
-							if (currentDistance > 0 && (distance == -1 || currentDistance < distance)) {
-								distance= currentDistance;
-								nextError= marker;
-							}
-						}
-					}
-				}
-				
-			}
-		}
+		IMarker nextError= getNextError(s.getOffset(), forward);
 		
 		if (nextError != null) {
 			
@@ -267,6 +235,52 @@ public class CompilationUnitEditor extends JavaEditor {
 			getStatusLineManager().setErrorMessage("");
 			
 		}
+	}
+
+	private IMarker getNextError(int offset, boolean forward) {
+		
+		IMarker nextError= null;
+		
+		IDocument document= getDocumentProvider().getDocument(getEditorInput());
+		int endOfDocument= document.getLength(); 
+		int distance= 0;
+		
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		Iterator e= model.getAnnotationIterator();
+		while (e.hasNext()) {
+			Annotation a= (Annotation) e.next();
+			if (a instanceof MarkerAnnotation) {
+				MarkerAnnotation ma= (MarkerAnnotation) a;
+				IMarker marker= ma.getMarker();
+		
+				if (MarkerUtilities.isMarkerType(marker, IMarker.PROBLEM)) {
+					Position p= model.getPosition(a);
+					if (!p.includes(offset)) {
+						
+						int currentDistance= 0;
+						
+						if (forward) {
+							currentDistance= p.getOffset() - offset;
+							if (currentDistance < 0)
+								currentDistance= endOfDocument - offset + p.getOffset();
+						} else {
+							currentDistance= offset - p.getOffset();
+							if (currentDistance < 0)
+								currentDistance= offset + endOfDocument - p.getOffset();
+						}						
+												
+						if (nextError == null || currentDistance < distance) {
+							distance= currentDistance;
+							nextError= marker;
+						}
+
+					}
+				}
+		
+			}
+		}
+		
+		return nextError;
 	}
 	
 	public void doSaveAs() {
