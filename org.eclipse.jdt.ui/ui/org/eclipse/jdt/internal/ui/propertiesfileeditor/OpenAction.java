@@ -72,13 +72,16 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * This action opens a tool (internal editor or view or an external
  * application) for the element at the given location.
- *
+ * <p>
+ * XXX:	This does not work for properties files coming from a JAR due to
+ * 		missing J Core functionality. For details see:
+ * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=22376
+ * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
- * </p> 
+ * </p>
  * <p>
  * FIXME: Work in progress
- * 			- only IFile's are currently supported
  * </p>
  * 
  * @since 3.1
@@ -180,6 +183,9 @@ public class OpenAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setText(PropertiesFileEditorMessages.getString("OpenAction.label")); //$NON-NLS-1$
 		setToolTipText(PropertiesFileEditorMessages.getString("OpenAction.tooltip")); //$NON-NLS-1$
+		
+		 // XXX: Must be removed once support for JARs is available (see class Javadoc for details).
+		setEnabled(fEditor.getEditorInput() instanceof IFileEditorInput);
 	}
 	
 	/*
@@ -193,6 +199,7 @@ public class OpenAction extends SelectionDispatchAction {
 		if (selection == null || selection.isEmpty())
 			return false;
 		
+		 // XXX: Must be changed to IStorageEditorInput once support for	JARs is available (see class Javadoc for details)
 		return fEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 	
@@ -239,11 +246,9 @@ public class OpenAction extends SelectionDispatchAction {
 			
 			// Search the key
 			IResource resource= (IResource)storageEditorInput.getAdapter(IResource.class);
-			KeyReference[] references;
+			KeyReference[] references= null;
 			if (resource != null)
 				references= search(resource.getProject(), key);
-			else
-				references= search(ResourcesPlugin.getWorkspace().getRoot(), key);
 			
 			if (references == null || references.length == 0) {
 				String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageNoResult"); //$NON-NLS-1$
