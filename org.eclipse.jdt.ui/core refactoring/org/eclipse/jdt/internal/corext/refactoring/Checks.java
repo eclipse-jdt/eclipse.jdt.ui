@@ -222,6 +222,10 @@ public class Checks {
 		return type.getDeclaringType() == null;
 	}
 
+	public static boolean isAnonymous(IType type) throws JavaModelException {
+		return type.isAnonymous();
+	}
+
 	public static boolean isTopLevelType(IMember member){
 		return  member.getElementType() == IJavaElement.TYPE && isTopLevel((IType) member);
 	}

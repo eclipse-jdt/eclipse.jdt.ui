@@ -545,7 +545,7 @@ public final class MemberVisibilityAdjustor {
 		Assert.isNotNull(monitor);
 		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
 		if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
-			fAdjustments.put(fReferenced, new IncomingMemberVisibilityAdjustment(fReferenced, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(fReferenced), new String[] { getLabel(fReferenced), getLabel(threshold)}), JavaStatusContext.create(fReferenced), null, RefactoringStatusEntry.NO_CODE, null)));
+			fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(member), new String[] { getLabel(member), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
 	/**
@@ -1043,6 +1043,35 @@ public final class MemberVisibilityAdjustor {
 	private boolean needsVisibilityAdjustment(final IMember member, final ModifierKeyword threshold) {
 		Assert.isNotNull(member);
 		return needsVisibilityAdjustments(member, threshold, fAdjustments);
+	}
+
+	/**
+	 * Rewrites the computed adjustments for the specified compilation unit.
+	 * 
+	 * @param unit the compilation unit to rewrite the adjustments
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if an error occurs during search
+	 */
+	public final void rewriteVisibility(final ICompilationUnit unit, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(unit);
+		Assert.isNotNull(monitor);
+		try {
+			monitor.beginTask("", fAdjustments.keySet().size()); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.adjusting")); //$NON-NLS-1$
+			IMember member= null;
+			IVisibilityAdjustment adjustment= null;
+			for (final Iterator iterator= fAdjustments.keySet().iterator(); iterator.hasNext();) {
+				member= (IMember) iterator.next();
+				if (unit.equals(member.getCompilationUnit())) {
+					adjustment= (IVisibilityAdjustment) fAdjustments.get(member);
+					if (adjustment != null)
+						adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
+				}
+			}
+		} finally {
+			fTypeHierarchies.clear();
+			monitor.done();
+		}
 	}
 
 	/**
