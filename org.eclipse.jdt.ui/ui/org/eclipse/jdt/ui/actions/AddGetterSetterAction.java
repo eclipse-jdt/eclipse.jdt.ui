@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -135,14 +134,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
 			if (canEnableOn(selectedFields)){
-				run(selectedFields, selectedFields);
+				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
 			}	
 			Object firstElement= selection.getFirstElement();
 			if (firstElement instanceof IType)
-				run((IType)firstElement);
+				run((IType)firstElement, new IField[0], true);
 			else if (firstElement instanceof ICompilationUnit)	
-				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement));
+				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0], true);
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
@@ -179,9 +178,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
 	}
 	
-	private void run(IType type) throws CoreException{
+	private void run(IType type, IField[] preselected, boolean filterExistingMethods) throws CoreException{
 		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
-		ITreeContentProvider cp= new AddGetterSetterContentProvider(type);
+		ITreeContentProvider cp= new AddGetterSetterContentProvider(type, filterExistingMethods);
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
@@ -192,16 +191,17 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		dialog.setSize(60, 18);
 		dialog.setInput(type);
 		dialog.setExpandedElements(type.getFields());
+		dialog.setInitialSelections(preselected);
 		dialog.open();
 		Object[] result= dialog.getResult();
 		if (result == null)
 			return;
 		IField[] getterFields= getGetterFields(result);
 		IField[] setterFields= getSetterFields(result);
-		run(getterFields, setterFields);
+		generate(getterFields, setterFields);
 	}
 
-	private ISelectionStatusValidator createValidator() {
+	private static ISelectionStatusValidator createValidator() {
 		return new ISelectionStatusValidator(){
 			public IStatus validate(Object[] selection) {
 				int count= countSelectedMethods(selection);
@@ -212,7 +212,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					
 				String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", String.valueOf(count));//$NON-NLS-1$
 				return new StatusInfo(IStatus.INFO, message);
-					
 			}
 		};
 	}
@@ -264,7 +263,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return CodeGenerationPreferencePage.getGetterStetterSuffixes();
 	}
 	
-	private void run(IField[] getterFields, IField[] setterFields) throws CoreException{
+	private void generate(IField[] getterFields, IField[] setterFields) throws CoreException{
 		if (getterFields.length == 0 && setterFields.length == 0)
 			return;
 		
@@ -330,7 +329,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				IField field= (IField)elements[0];
 				if (! checkCu(field))
 					return;
-				run (new IField[] {field}, new IField[] {field}, fEditor);
+				run(field.getDeclaringType(), new IField[] {field}, false);
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
@@ -340,7 +339,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					if (! checkCu(type))
 						return; //dialog already shown - just return
 					if (type.getFields().length > 0){
-						run(type);	
+						run(type, new IField[0], true);	
 						return;
 					} 
 				}
@@ -528,17 +527,17 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private static class AddGetterSetterContentProvider implements ITreeContentProvider{
 		private static final Object[] EMPTY= new Object[0];
 		private Map fGetterSetterEntries;
-		public AddGetterSetterContentProvider(IType type) throws JavaModelException {
+		public AddGetterSetterContentProvider(IType type, boolean filterExistingMethods) throws JavaModelException {
 			IField[] fields= type.getFields();
 			fGetterSetterEntries= new HashMap();
 			String[] prefixes= AddGetterSetterAction.getGetterSetterPrefixes();
 			String[] suffixes= AddGetterSetterAction.getGetterSetterSuffixes();
 			for (int i= 0; i < fields.length; i++) {
 				List l= new ArrayList(2);
-				if (GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
+				if ((! filterExistingMethods) || GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
 					l.add(new GetterSetterEntry(fields[i], true));
 					
-				if (GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
+				if ((! filterExistingMethods) || GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
 					l.add(new GetterSetterEntry(fields[i], false));	
 
 				if (! l.isEmpty())
