@@ -465,6 +465,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
+		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
+		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_STRING);
 		presenter.setSizeConstraints(30, 20, true, false);
 		return presenter;
 	}

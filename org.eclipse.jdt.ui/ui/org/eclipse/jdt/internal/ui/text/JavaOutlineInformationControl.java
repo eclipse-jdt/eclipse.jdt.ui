@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2000, 2002 IBM Corp. and others..
- * All rights reserved.   This program and the accompanying materials
+ * All rights reserved. ? This program and the accompanying materials
  * are made available under the terms of the Common Public License v0.5
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v05.html
- *
+?*
  * Contributors:
  *     IBM Corporation - initial API and implementation
  */
@@ -397,19 +397,26 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	private void installFilter() {
 		final NamePatternFilter viewerFilter= new NamePatternFilter();
 		fTreeViewer.addFilter(viewerFilter);
-		fFilterText.setText("*"); //$NON-NLS-1$
+		fFilterText.setText(""); //$NON-NLS-1$
 
 		fFilterText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				String pattern= fFilterText.getText();
-				if (pattern != null && pattern.length() > 0)
-					viewerFilter.setPattern(pattern);
-				else
-					viewerFilter.setPattern(null);
+				if (pattern != null) {
+					int length= pattern.length();
+					if (length == 0)
+						pattern= null;
+					else if (pattern.charAt(length -1 ) != '*')
+						pattern= pattern + '*';
+				} else
+					pattern= null;
+				viewerFilter.setPattern(pattern);
 				fStringMatcher= viewerFilter.getMatcher();
+				fTreeViewer.getControl().setRedraw(false);
 				fTreeViewer.refresh();
 				fTreeViewer.expandAll();
 				selectFirstMatch();
+				fTreeViewer.getControl().setRedraw(true);
 			}
 		});
 	}
@@ -470,8 +477,11 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @see IInformationControlExtension2#setInput(Object)
 	 */
 	public void setInput(Object information) {
-		if (information == null || information instanceof String)
+		fFilterText.setText(""); //$NON-NLS-1$
+		if (information == null || information instanceof String) {
+			setInput(null);
 			return;
+		}
 		IJavaElement je= (IJavaElement)information;
 		IJavaElement sel= null;
 		ICompilationUnit cu= (ICompilationUnit)je.getAncestor(IJavaElement.COMPILATION_UNIT);
