@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Image;
@@ -35,9 +34,11 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -153,42 +154,6 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 
-	private class VariableItemsComboBoxCellEditor extends ComboBoxCellEditor {
-
-		private CCombo fComboBox;
-
-		VariableItemsComboBoxCellEditor(Composite parent, String[] items, int style) {
-			super(parent, items, style);
-		}
-
-		protected Control createControl(Composite parent) {
-			Control control= super.createControl(parent);
-			if (control instanceof CCombo)
-				fComboBox= (CCombo)control;
-
-			return control;
-		}
-		
-		protected void doSetFocus() {
-			if (fComboBox != null) {
-				int selectionIndex= fComboBox.getSelectionIndex();
-				fComboBox.removeAll();
-				populateComboBoxItems(getLabelsForHoverCombo());
-				fComboBox.select(selectionIndex);
-			}
-			super.doSetFocus();
-		}
-
-		private void populateComboBoxItems(String[] items) {
-			if (fComboBox != null && items != null) {
-				for (int i = 0; i < items.length; i++)
-					fComboBox.add(items[i], i);
-				setValueValid(true);
-			}
-		}
-	}
-
-
 	private IPreferenceStore fStore;
 	private HoverConfig[] fHoverConfigs;
 	private TableViewer fTableViewer;
@@ -211,7 +176,7 @@ class JavaEditorHoverConfigurationBlock {
 		GridLayout layout= new GridLayout(); layout.numColumns= 1;
 		hoverComposite.setLayout(layout);
 
-		Table table= new Table(hoverComposite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		final Table table= new Table(hoverComposite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		table.setLayoutData(data);
@@ -234,9 +199,17 @@ class JavaEditorHoverConfigurationBlock {
 		fTableViewer.setContentProvider(new HoverConfigContentProvider());
 
 		// Setup cell editing support
-		ComboBoxCellEditor comboBoxCellEditor= new VariableItemsComboBoxCellEditor(table, getLabelsForHoverCombo(), SWT.READ_ONLY);
+		final ComboBoxCellEditor comboBoxCellEditor= new ComboBoxCellEditor();
+		comboBoxCellEditor.setStyle(SWT.READ_ONLY);
 		fTableViewer.setCellEditors(new CellEditor [] {null, comboBoxCellEditor});
-
+		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (comboBoxCellEditor.getControl() == null & !table.isDisposed())
+					comboBoxCellEditor.create(table);
+				comboBoxCellEditor.setItems(getLabelsForHoverCombo());
+			}
+		});
+		
 		ICellModifier cellModifier = new ICellModifier() {
 			public Object getValue(Object element, String property) {
 				if (HOVER.equals(property)) {
