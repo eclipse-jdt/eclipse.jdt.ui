@@ -48,14 +48,11 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkTypeName(String name) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
-		if (name.indexOf(".") != -1){ //$NON-NLS-1$
-			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError(RefactoringCoreMessages.getString("Checks.no_dot")); //$NON-NLS-1$
-			return result;
-		}
-		return checkName(name, JavaConventions.validateJavaTypeName(name));
+		if (name.indexOf(".") != -1) //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.no_dot"));//$NON-NLS-1$
+		else	
+			return checkName(name, JavaConventions.validateJavaTypeName(name));
 	}
-
 	
 	/**
 	 * Checks if the given name is a valid Java package name.
@@ -84,12 +81,14 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkCompilationUnitName(String name) {
 		//XXX fix for1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-		if (name.indexOf(".") != name.lastIndexOf(".")){ //$NON-NLS-2$ //$NON-NLS-1$
-			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError(RefactoringCoreMessages.getString("Checks.no_two_dots")); //$NON-NLS-1$
-			return result;
-		}
-		return checkName(name, JavaConventions.validateCompilationUnitName(name));
+		if (hasTwoDots(name)) //$NON-NLS-2$ //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.no_two_dots"));//$NON-NLS-1$
+		else	
+			return checkName(name, JavaConventions.validateCompilationUnitName(name));
+	}
+
+	private static boolean hasTwoDots(String name) {
+		return name.indexOf(".") != name.lastIndexOf(".");
 	}
 	
 	/**
@@ -97,12 +96,9 @@ public class Checks {
 	 * @param newName just a simple name - no extension.
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
-		IPath newPath= RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName);
-		if (resourceExists(newPath)){
-			RefactoringStatus result= new RefactoringStatus();	
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName)); //$NON-NLS-1$
-			return result;
-		} else
+		if (resourceExists(RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
+		else
 			return null;
 	}
 	

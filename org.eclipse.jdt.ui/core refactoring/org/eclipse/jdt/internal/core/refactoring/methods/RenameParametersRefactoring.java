@@ -149,11 +149,9 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		String[] sorted= getSortedCopy(fNewParameterNames);
 		String last= null;
 		for (int i= 0; i < sorted.length; i++){
-			if (sorted[i].equals(last)){
-				RefactoringStatus result= new RefactoringStatus();
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", last)); //$NON-NLS-1$
-				return result;
-			}
+			if (sorted[i].equals(last))
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", last));//$NON-NLS-1$
+
 			last= sorted[i];
 		}
 		return null;

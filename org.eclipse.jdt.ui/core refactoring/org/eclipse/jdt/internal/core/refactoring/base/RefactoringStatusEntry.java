@@ -3,6 +3,9 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.base;
+
+import org.eclipse.jdt.internal.core.refactoring.Assert;
+
 
 /**
  * An immutable tuple (message, severity) representing an entry in the list in <code>RefactoringStatus</code>.
@@ -19,7 +22,16 @@ public class RefactoringStatusEntry{
 	private String fMessage;
 	private int fSeverity;
 	
-	private RefactoringStatusEntry(String msg, int severity){
+	/**
+	 * Creates an entry with the given severity.
+	 * @param severity severity
+	 * @param msg message
+	 */
+	public RefactoringStatusEntry(String msg, int severity){
+		Assert.isTrue(severity == RefactoringStatus.INFO 
+				   || severity == RefactoringStatus.WARNING
+				   || severity == RefactoringStatus.ERROR
+				   || severity == RefactoringStatus.FATAL);
 		fMessage= msg;
 		fSeverity= severity;
 	}

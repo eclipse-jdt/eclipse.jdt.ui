@@ -38,6 +38,44 @@ public class RefactoringStatus {
 	}
 	
 	/**
+	 * Creates a <code>RefactorngStatus</code> with one INFO entry.
+	 * This is a convenience method.
+	 */
+	public static RefactoringStatus createInfoStatus(String msg){
+		return createStatus(INFO, msg); 
+	}
+	
+	/**
+	 * Creates a <code>RefactorngStatus</code> with one WARNING entry.
+	 * This is a convenience method.
+	 */
+	public static RefactoringStatus createWarningStatus(String msg){
+		return createStatus(WARNING, msg); 
+	}
+	
+	/**
+	 * Creates a <code>RefactorngStatus</code> with one ERROR entry.
+	 * This is a convenience method.
+	 */
+	public static RefactoringStatus createErrorStatus(String msg){
+		return createStatus(ERROR, msg); 
+	}
+	
+	/**
+	 * Creates a <code>RefactorngStatus</code> with one FATAL entry.
+	 * This is a convenience method.
+	 */
+	public static RefactoringStatus createFatalErrorStatus(String msg){
+		return createStatus(FATAL, msg); 
+	}
+	
+	private static RefactoringStatus createStatus(int severity, String msg){
+		RefactoringStatus result= new RefactoringStatus(); 
+		result.fEntries.add(new RefactoringStatusEntry(msg, severity));
+		return result;
+	}
+	
+	/**
 	 * Adds an info to this status.
 	 * If the current severity was <code>OK</code> it will be changed to <code>INFO</code>.
 	 * It will remain unchanged otherwise.
