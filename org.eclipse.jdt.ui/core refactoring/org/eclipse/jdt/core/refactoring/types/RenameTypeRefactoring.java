@@ -158,7 +158,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			//	result.merge(analyzeImportDeclarations(new SubProgressMonitor(pm, 8, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 				
 			pm.worked(1);
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL))));
+			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11))));
 			pm.worked(1);
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 7)));
 		} finally {
@@ -171,6 +171,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
+			pm.subTask("searching for references");	
 			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		}	
 		return fOccurrences;

@@ -144,6 +144,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
+			pm.subTask("searching for references");	
 			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());	
 		}	
 		return fOccurrences;

@@ -235,6 +235,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
+			pm.subTask("searching for references");	
 			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), getScope(), createSearchPattern());
 		}	
 		return fOccurrences;

@@ -120,6 +120,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
+			pm.subTask("searching for references");	
 			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 3), getScope(), createSearchPattern(pm));	
 		}	
 		return fOccurrences;
