@@ -127,7 +127,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface();
+			return type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface() && !type.isEnum();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -177,7 +177,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					}
 					try {
 						final IType declaringType= field.getDeclaringType();
-						if (declaringType.isInterface() || declaringType.isAnnotation()) {
+						if (declaringType.isInterface() || declaringType.isAnnotation() || declaringType.isEnum()) {
 							// no constructors for interfaces
 							return null;
 						}
@@ -199,13 +199,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		Object[] elements= selection.toArray();
 		if (elements.length == 1 && (elements[0] instanceof IType)) {
 			IType type= (IType) elements[0];
-			if (type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation()) {
+			if (type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isEnum()) {
 				return type;
 			}
 		} else if (elements[0] instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) elements[0];
 			IType type= unit.findPrimaryType();
-			if (type != null && !type.isInterface() && !type.isAnnotation())
+			if (type != null && !type.isInterface() && !type.isAnnotation() && !type.isEnum())
 				return type;
 		} else if (elements[0] instanceof IField) {
 			return ((IField) elements[0]).getCompilationUnit().findPrimaryType();
@@ -241,6 +241,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					return;
 				} else if (type.isAnnotation()) {
 					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.annotation_not_applicable")); //$NON-NLS-1$					
+					return;
+				} else if (type.isEnum()) {
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.enum_not_applicable")); //$NON-NLS-1$					
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
