@@ -137,7 +137,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						if (!queryReplaceMethods(existing)) {
 							continue;
 						}	
-						sibling= StubUtility.findSibling(existing);
+						sibling= StubUtility.findNextSibling(existing);
 						existing.delete(false, null);
 					} else if (curr.isConstructor() && existingMethods.length > 0) {
 						// add constructors at the beginning

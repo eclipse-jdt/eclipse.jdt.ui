@@ -10,7 +10,7 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);		fShowResolvedVariables= showResolvedVariables;
 	}
 	
-	/**
+	/*
 	 * @see LabelProvider#getImage(java.lang.Object)
 	 */
 	public Image getImage(Object element) {
@@ -20,7 +20,7 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 		return super.getImage(element);
 	}
 
-	/**
+	/*
 	 * @see LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {

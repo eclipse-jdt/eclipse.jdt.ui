@@ -41,15 +41,15 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;public class Choo
 		return fVariableBlock.getSelectedVariable();
 	}
 	
-	/**
+	/*
  	 * @see IStatusChangeListener#statusChanged(IStatus)
  	 */
 	public void statusChanged(IStatus status) {
 		updateStatus(status);
 		
 	}
-	
-	/**
+
+	/*
  	 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
  	 */
 	public void doubleClick(DoubleClickEvent event) {

@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -88,7 +89,8 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
-		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, 350, 0, 0, 0);
+		int minimalWidth= convertWidthInCharsToPixels(80);
+		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, minimalWidth, 0, 0, 0);
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
 		return composite;

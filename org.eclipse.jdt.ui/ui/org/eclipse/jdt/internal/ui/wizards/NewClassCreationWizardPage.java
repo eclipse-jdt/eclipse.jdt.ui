@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
@@ -129,10 +130,7 @@ public class NewClassCreationWizardPage extends TypePage {
 		int nColumns= 4;
 		
 		MGridLayout layout= new MGridLayout();
-		layout.marginWidth= 4;
-		layout.marginHeight= 4;	
-		layout.minimumWidth= 400;
-		layout.minimumHeight= 0;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
 		

@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.ISharedImages;
@@ -106,6 +107,8 @@ class CPListLabelProvider extends LabelProvider {
 					}
 					return buf.toString();
 				}
+				default:
+					// pass
 			}
 		}
 		return super.getText(element);
@@ -153,7 +156,9 @@ class CPListLabelProvider extends LabelProvider {
 						return fVariableImage;
 					} else {
 						return fMissingVariableImage;
-					}		
+					}
+				default:
+					// pass						
 			}
 		}
 		return null;

@@ -32,6 +32,7 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
+import org.eclipse.jdt.internal.compiler.SourceElementRequestorAdapter;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
@@ -157,7 +158,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private static class TypeReferenceRequestor implements ISourceElementRequestor {
+	private static class TypeReferenceRequestor extends SourceElementRequestorAdapter {
 		
 		private static class RefSourceRange implements ISourceRange {
 			private int fOffset;
@@ -191,29 +192,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				throw new ParsingError(problem);
 			}
 		}
-		
-		public void acceptFieldReference(char[] fieldName, int sourcePosition) {}
-		public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {}
-		public void acceptLineSeparatorPositions(int[] positions) {}
-		public void acceptMethodReference(char[] methodName, int argCount, int sourcePosition) {}
-		public void acceptPackage(int declarationStart, int declarationEnd, char[] name) {}
-		
-		public void enterClass(int declarationStart, int modifiers, char[] name, int nameSourceStart, int nameSourceEnd, char[] superclass, char[][] superinterfaces) {}
-		public void enterCompilationUnit() {}
-		public void enterConstructor(int declarationStart, int modifiers, char[] name, int nameSourceStart, int nameSourceEnd, char[][] parameterTypes, char[][] parameterNames, char[][] exceptionTypes) {}
-		public void enterField(int declarationStart, int modifiers, char[] type, char[] name, int nameSourceStart, int nameSourceEnd) {}
-		public void enterInterface(int declarationStart, int modifiers, char[] name, int nameSourceStart, int nameSourceEnd, char[][] superinterfaces) {}
-		public void enterMethod(int declarationStart, int modifiers, char[] returnType, char[] name, int nameSourceStart, int nameSourceEnd, 
-			char[][] parameterTypes, char[][] parameterNames, char[][] exceptionTypes) {} 
-		public void exitClass(int declarationEnd) {}
-		public void exitCompilationUnit(int declarationEnd) {}
-		public void exitConstructor(int declarationEnd) {}
-		public void exitField(int declarationEnd) {}
-		public void exitInterface(int declarationEnd) {}
-		public void exitMethod(int declarationEnd) {}
-		public void enterInitializer(int declarationStart, int modifiers) {}
-		public void exitInitializer(int declarationEnd) {}		
-				
+					
 		public void acceptConstructorReference(char[] typeName, int argCount, int sourcePosition) {
 			typeRefFound(typeName, sourcePosition);
 		}
@@ -237,10 +216,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		public void acceptUnknownReference(char[] name, int sourcePosition) {
 			typeRefFound(name, sourcePosition);
 		}	
-	
-		public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand) {
-		}
-		
+			
 		private void typeRefFound(char[] typeRef, int pos) {
 			if (pos >= fImportEnd) {
 				int len= getIdLen(typeRef);

@@ -8,7 +8,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -31,6 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -96,7 +96,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 	}
 	
-	/**
+	/*
 	 * @see Windows#configureShell
 	 */
 	protected void configureShell(Shell newShell) {
@@ -109,7 +109,7 @@ public class VariableCreationDialog extends StatusDialog {
 		return new CPVariableElement(fNameField.getText(), new Path(fPathField.getText()), false);
 	}
 
-	/**
+	/*
 	 * @see Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */	
 	protected Control createDialogArea(Composite parent) {
@@ -118,8 +118,7 @@ public class VariableCreationDialog extends StatusDialog {
 		Composite inner= new Composite(composite, SWT.NONE);
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= 380;
-		layout.marginHeight= 0;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
 		inner.setLayout(layout);
@@ -153,7 +152,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 	}
 	
-	protected void doChangeControlPressed(DialogField field) {
+	private void doChangeControlPressed(DialogField field) {
 		if (field == fPathField) {
 			IPath path= chooseExtJarFile();
 			if (path != null) {
@@ -162,7 +161,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 	}
 	
-	protected void doFieldUpdated(DialogField field) {	
+	private void doFieldUpdated(DialogField field) {	
 		if (field == fNameField) {
 			fNameStatus= nameUpdated();
 		} else if (field == fPathField) {
@@ -176,7 +175,7 @@ public class VariableCreationDialog extends StatusDialog {
 		updateStatus(StatusUtil.getMoreSevere(fPathStatus, fNameStatus));
 	}		
 	
-	protected StatusInfo nameUpdated() {
+	private StatusInfo nameUpdated() {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
 		if (name.length() == 0) {
@@ -206,7 +205,7 @@ public class VariableCreationDialog extends StatusDialog {
 	}
 	
 	
-	protected StatusInfo pathUpdated() {
+	private StatusInfo pathUpdated() {
 		StatusInfo status= new StatusInfo();
 		
 		String path= fPathField.getText();
@@ -228,8 +227,7 @@ public class VariableCreationDialog extends StatusDialog {
 			}
 		} else {
 			IPath entryPath= new Path(initPath);
-			String fileExt= entryPath.getFileExtension();
-			if ("zip".equals(fileExt) || "jar".equals(fileExt)) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (ArchiveFileFilter.isArchivePath(entryPath)) {
 				entryPath.removeLastSegments(1);
 			}
 			initPath= entryPath.toOSString();

@@ -20,13 +20,13 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class ProjectsWorkbookPage extends BuildPathBasePage {
@@ -103,8 +103,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fProjectsList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
-	
-		fProjectsList.setButtonsMinWidth(110);
+		
+		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		fProjectsList.setButtonsMinWidth(buttonBarWidth);
 		fProjectsList.getTableViewer().setSorter(new CPListElementSorter());	
 				
 		return composite;
@@ -145,14 +146,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
-	/**
+	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
 	public List getSelection() {
 		return fProjectsList.getSelectedElements();
 	}
 
-	/**
+	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {

@@ -64,11 +64,19 @@ public class CPListElement {
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix, fIsExported);
 		}
 	}
-		
+	
+	/**
+	 * Gets the classpath entry path.
+	 * @see IClasspathEntry#getPath()
+	 */
 	public IPath getPath() {
 		return fPath;
 	}
-	
+
+	/**
+	 * Gets the classpath entry kind.
+	 * @see IClasspathEntry#getEntryKind()
+	 */	
 	public int getEntryKind() {
 		return fEntryKind;
 	}
@@ -84,7 +92,6 @@ public class CPListElement {
 	/**
 	 * Sets the paths for source annotation
 	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#attachSource	
-	 * 
 	 */	
 	public void setSourceAttachment(IPath path, IPath prefix) {
 		fSourceAttachmentPath= path;
@@ -110,7 +117,7 @@ public class CPListElement {
 		return fSourceAttachmentPrefix;
 	}
 
-	/**
+	/*
 	 * @see Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object other) {
@@ -119,6 +126,13 @@ public class CPListElement {
 			return elem.fEntryKind == fEntryKind && elem.fPath == fPath;
 		}
 		return false;
+	}
+	
+	/*
+	 * @see Object#hashCode()
+	 */
+	public int hashCode() {
+		return fPath.hashCode() + fEntryKind;
 	}
 
 	/**
@@ -154,5 +168,7 @@ public class CPListElement {
 			fCachedEntry= null;
 		}
 	}
+
+
 
 }

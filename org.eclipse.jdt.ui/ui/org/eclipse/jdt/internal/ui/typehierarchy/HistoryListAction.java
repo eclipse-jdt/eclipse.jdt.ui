@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,16 +13,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -75,7 +76,8 @@ public class HistoryListAction extends Action {
 		 */
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
-			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, 420, 0, SWT.DEFAULT, SWT.DEFAULT);	
+			int minimalWidth= convertWidthInCharsToPixels(80);
+			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, minimalWidth, 0, SWT.DEFAULT, SWT.DEFAULT);	
 			fHistoryList.getTableViewer().addDoubleClickListener(new IDoubleClickListener() {
 				public void doubleClick(DoubleClickEvent event) {
 					if (fHistoryStatus.isOK()) {

@@ -2,7 +2,7 @@
 
 public class CPListElementSorter extends ViewerSorter {
 	
-	/**
+	/*
 	 * @see ViewerSorter#category(Object)
 	 */
 	public int category(Object obj) {
@@ -20,7 +20,7 @@ public class CPListElementSorter extends ViewerSorter {
 		}
 		return super.category(obj);
 	}
-	
+	/*	 * @see ViewerSorter#compare()	 */	
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		int cat1 = category(e1);
 		int cat2 = category(e2);

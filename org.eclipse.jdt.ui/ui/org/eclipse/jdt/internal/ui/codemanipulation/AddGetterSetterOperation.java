@@ -194,7 +194,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				
 				IJavaElement sibling= null;
 				if (existingGetter != null) {
-					sibling= StubUtility.findSibling(existingGetter);
+					sibling= StubUtility.findNextSibling(existingGetter);
 					existingGetter.delete(false, null);
 				}				
 				
@@ -231,7 +231,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				
 				IJavaElement sibling= null;
 				if (existingSetter != null) {
-					sibling= StubUtility.findSibling(existingSetter);
+					sibling= StubUtility.findNextSibling(existingSetter);
 					existingSetter.delete(false, null);
 				}
 				

@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -56,7 +57,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
@@ -68,12 +68,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private IDialogSettings fDialogSettings;
 	
-	private Shell fShell;
+	private Control fSWTControl;
 		
 	public LibrariesWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList) {
 		fClassPathList= classPathList;
 		fWorkspaceRoot= root;
-		fShell= null;
+		fSWTControl= null;
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
@@ -126,17 +126,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
-		fLibrariesList.setButtonsMinWidth(110);
+		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
 		
-		fShell= parent.getShell();
 		fLibrariesList.getTableViewer().setSorter(new CPListElementSorter());
 		
+		fSWTControl= composite;
 				
 		return composite;
 	}
 	
 	private Shell getShell() {
-		return fShell;
+		if (fSWTControl != null) {
+			return fSWTControl.getShell();
+		}
+		return JavaPlugin.getActiveWorkbenchShell();
 	}
 	
 	
@@ -456,7 +460,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, null, initVar, false);
 		}
 		
-		/**
+		/*
 		 * @see Windows#configureShell
 		 */
 		protected void configureShell(Shell newShell) {
@@ -464,7 +468,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.VARIABLE_SELECTION_DIALOG });
 		}		
 
-		/**
+		/*
 		 * @see StatusDialog#createDialogArea()
 		 */				
 		protected Control createDialogArea(Composite parent) {
@@ -479,7 +483,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return composite;
 		}
 		
-		/**
+		/*
 		 * @see Dialog#okPressed()
 		 */
 		protected void okPressed() {
@@ -487,7 +491,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			super.okPressed();
 		}	
 
-		/**
+		/*
 		 * @see IStatusChangeListener#statusChanged()
 		 */			
 		public void statusChanged(IStatus status) {
@@ -510,7 +514,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fSourceAttachmentBlock= new SourceAttachmentBlock(fWorkspaceRoot, this, entry);
 		}
 		
-		/**
+		/*
 		 * @see Windows#configureShell
 		 */
 		protected void configureShell(Shell newShell) {

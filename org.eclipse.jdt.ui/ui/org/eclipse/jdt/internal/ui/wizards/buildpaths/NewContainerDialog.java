@@ -61,7 +61,7 @@ public class NewContainerDialog extends StatusDialog {
 		
 		Composite inner= new Composite(composite, SWT.NONE);
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= 380;
+		layout.minimumWidth= convertWidthInCharsToPixels(70);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 1;
@@ -94,7 +94,7 @@ public class NewContainerDialog extends StatusDialog {
 		fFolder= null;
 		
 		String pathStr= fContainerDialogField.getText();
-		if ("".equals(pathStr)) { //$NON-NLS-1$
+		if (pathStr.length() == 0) {
 			fContainerFieldStatus.setError(NewWizardMessages.getString("NewContainerDialog.error.enterpath")); //$NON-NLS-1$
 			return;
 		}

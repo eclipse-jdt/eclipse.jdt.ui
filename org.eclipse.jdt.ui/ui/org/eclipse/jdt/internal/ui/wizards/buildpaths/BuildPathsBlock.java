@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -157,9 +158,8 @@ public class BuildPathsBlock {
 		
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
-		layout.marginHeight= 5;	
-		layout.minimumWidth= 450;
-		layout.minimumHeight= 350;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
 		layout.numColumns= 1;		
 		composite.setLayout(layout);
 		
@@ -220,7 +220,7 @@ public class BuildPathsBlock {
 		Composite editorcomp= new Composite(composite, SWT.NONE);	
 	
 		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
-		LayoutUtil.doDefaultLayout(editorcomp, editors, true);
+		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0, 0, 0);
 		
 		editorcomp.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
 		
@@ -240,9 +240,7 @@ public class BuildPathsBlock {
 		if (fSWTWidget != null) {
 			return fSWTWidget.getShell();
 		}
-		// to do: error dialog
-		//return Utilities.getFocusShell(Display.getCurrent());
-		return null;
+		return JavaPlugin.getActiveWorkbenchShell();
 	}
 	
 	

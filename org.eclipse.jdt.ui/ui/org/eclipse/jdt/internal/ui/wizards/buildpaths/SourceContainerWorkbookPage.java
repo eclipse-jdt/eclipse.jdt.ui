@@ -33,8 +33,10 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -53,7 +55,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private IJavaProject fCurrJProject;
 	private IPath fProjPath;
 	
-	private Shell fShell;
+	private Control fSWTControl;
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
@@ -72,7 +74,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fProjectCPEntry= null;
 		fOutputLocationField= outputLocationField;
 		
-		fShell= null;
+		fSWTControl= null;
 				
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 				
@@ -147,8 +149,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= 350;
-		layout.minimumHeight= 0;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
 		layout.numColumns= 2;		
 		composite.setLayout(layout);
 		
@@ -163,13 +164,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		gd= new MGridData(gd.VERTICAL_ALIGN_FILL + gd.HORIZONTAL_ALIGN_FILL);
 		control.setLayoutData(gd);
 		
-		fFoldersList.setButtonsMinWidth(110);
+		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		fFoldersList.setButtonsMinWidth(buttonBarWidth);
 		fFoldersList.getTableViewer().setSorter(new CPListElementSorter());
 		
-		fShell= parent.getShell();
+		fSWTControl= composite;
 		
 		return composite;
 	}
+	
+	private Shell getShell() {
+		if (fSWTControl != null) {
+			return fSWTControl.getShell();
+		}
+		return JavaPlugin.getActiveWorkbenchShell();
+	}
+	
 	
 	private class SourceContainerAdapter implements IListAdapter, IDialogFieldListener {
 	
@@ -279,7 +289,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private CPListElement createNewSourceContainer() {	
 		IProject proj= fCurrJProject.getProject();
 		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.title"); //$NON-NLS-1$
-		NewContainerDialog dialog= new NewContainerDialog(fShell, title, proj, getExistingContainers());
+		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, proj, getExistingContainers());
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {
 			IFolder folder= dialog.getFolder();
@@ -297,7 +307,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			IPath newPath= outputFolder.append("bin");
 			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$
-			if (MessageDialog.openQuestion(fShell, title, message)) {
+			if (MessageDialog.openQuestion(getShell(), title, message)) {
 				fOutputLocationField.setText(newPath.toString());
 			}
 		}
@@ -315,7 +325,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
 		dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.description")); //$NON-NLS-1$
@@ -351,7 +361,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return new CPListElement(IClasspathEntry.CPE_SOURCE, res.getFullPath(), res);
 	}
 	
-	/**
+	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
 	public List getSelection() {
@@ -364,7 +374,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	/**
+	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {

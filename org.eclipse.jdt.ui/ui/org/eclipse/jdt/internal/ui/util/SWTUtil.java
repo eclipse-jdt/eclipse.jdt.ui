@@ -63,56 +63,61 @@ public class SWTUtil {
 		return null;	
 	}
 	
-	private static double fgHorizontalDialogUnitSize= 0.0;
-	private static double fgVerticalDialogUnitSize= 0.0;
-	
-	private static void initializeDialogUnits(Control control) {
+		
+	private static double getVerticalDialogUnitSize(Control control) {
 		GC gc= new GC(control);
-		gc.setFont(control.getFont());
-		int averageWidth= gc.getFontMetrics().getAverageCharWidth();
-		int height = gc.getFontMetrics().getHeight();
-		gc.dispose();
-	
-		fgHorizontalDialogUnitSize = averageWidth * 0.25;
-		fgVerticalDialogUnitSize = height * 0.125;
+		try {
+			int height = gc.getFontMetrics().getHeight();
+			return height * 0.125;
+		} finally {
+			gc.dispose();
+		}
 	}
+	
+	private static double getHorizontalDialogUnitSize(Control control) {
+		GC gc= new GC(control);
+		try {
+			int averageWidth= gc.getFontMetrics().getAverageCharWidth();
+			return averageWidth * 0.25;
+		} finally {
+			gc.dispose();
+		}
+	}	
+	
 	
 	/**
 	 * @see DialogPage#convertHeightInCharsToPixels
 	 */
-	private static int convertHeightInCharsToPixels(int chars) {
-		return convertVerticalDLUsToPixels(chars * 8);
+	public static int convertHeightInCharsToPixels(int chars, Control control) {
+		return convertVerticalDLUsToPixels(chars * 8, control);
 	}
 
 	/**
 	 * @see DialogPage#convertHorizontalDLUsToPixels
 	 */
-	private static int convertHorizontalDLUsToPixels(int dlus) {
-		return (int)Math.round(dlus * fgHorizontalDialogUnitSize);
+	public static int convertHorizontalDLUsToPixels(int dlus, Control control) {
+		return (int)Math.round(dlus * getHorizontalDialogUnitSize(control));
 	}
 
 	/**
 	 * @see DialogPage#convertVerticalDLUsToPixels
 	 */
-	private static int convertVerticalDLUsToPixels(int dlus) {
-		return (int)Math.round(dlus * fgVerticalDialogUnitSize);
+	public static int convertVerticalDLUsToPixels(int dlus, Control control) {
+		return (int)Math.round(dlus * getVerticalDialogUnitSize(control));
 	}
 	
 	/**
 	 * @see DialogPage#convertWidthInCharsToPixels
 	 */
-	private static int convertWidthInCharsToPixels(int chars) {
-		return convertHorizontalDLUsToPixels(chars * 4);
+	public static int convertWidthInCharsToPixels(int chars, Control control) {
+		return convertHorizontalDLUsToPixels(chars * 4, control);
 	}
 	
 	/**
 	 * Returns a width hint for a button control.
 	 */
 	public static int getButtonWidthHint(Button button) {
-		if (fgHorizontalDialogUnitSize == 0.0) {
-			initializeDialogUnits(button);
-		}
-		int widthHint= convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+		int widthHint= convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH, button);
 		return Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
 	}
 
@@ -120,10 +125,7 @@ public class SWTUtil {
 	 * Returns a height hint for a button control.
 	 */		
 	public static int getButtonHeigthHint(Button button) {
-		if (fgHorizontalDialogUnitSize == 0.0) {
-			initializeDialogUnits(button);
-		}
-		return convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+		return convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT, button);
 	}		
 
 	/**
@@ -137,8 +139,8 @@ public class SWTUtil {
 		Assert.isNotNull(button);
 		Object gd= button.getLayoutData();
 		if (gd instanceof GridData) {
-			((GridData)gd).heightHint= SWTUtil.getButtonHeigthHint(button);
-			((GridData)gd).widthHint= SWTUtil.getButtonWidthHint(button);		 
+			((GridData)gd).heightHint= getButtonHeigthHint(button);
+			((GridData)gd).widthHint= getButtonWidthHint(button);		 
 		}
 	}
 }

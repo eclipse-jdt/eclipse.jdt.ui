@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -184,8 +185,8 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
-		layout.minimumWidth= 400;
-		layout.minimumHeight= 350;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
 		layout.numColumns= 3;
 		composite.setLayout(layout);
 		

@@ -64,7 +64,10 @@ public class StubUtility {
 		String retTypeSig= method.getReturnType();
 		
 		int lastParam= paramTypes.length -1;		
-		if (!method.isConstructor()) {
+		if (method.isConstructor()) {
+			String desc= "Constructor for " + parenttype.getElementName(); //$NON-NLS-1$
+			genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
+		} else {			
 			// java doc
 			if (addSeeTag) {
 				genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, buf);
@@ -73,9 +76,6 @@ public class StubUtility {
 				String desc= "Method " + method.getElementName(); //$NON-NLS-1$
 				genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
 			}
-		} else {
-			String desc= "Constructor for " + parenttype.getElementName(); //$NON-NLS-1$
-			genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 		}		
 		int flags= method.getFlags();
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && parenttype.isClass())) {
@@ -98,7 +98,9 @@ public class StubUtility {
 			buf.append("static "); //$NON-NLS-1$
 		}		
 			
-		if (!method.isConstructor()) {
+		if (method.isConstructor()) {
+			buf.append(parenttype.getElementName());
+		} else {
 			String retTypeFrm= Signature.toString(retTypeSig);
 			if (!isBuiltInType(retTypeSig)) {
 				resolveAndAdd(retTypeSig, declaringtype, imports);
@@ -106,8 +108,6 @@ public class StubUtility {
 			buf.append(Signature.getSimpleName(retTypeFrm));
 			buf.append(' ');
 			buf.append(method.getElementName());
-		} else {
-			buf.append(parenttype.getElementName());
 		}
 		buf.append('(');
 		for (int i= 0; i <= lastParam; i++) {
@@ -414,7 +414,7 @@ public class StubUtility {
 	/**
 	 * Returns the element after the give element.
 	 */
-	public static IJavaElement findSibling(IJavaElement member) throws JavaModelException {
+	public static IJavaElement findNextSibling(IJavaElement member) throws JavaModelException {
 		IJavaElement parent= member.getParent();
 		if (parent instanceof IParent) {
 			IJavaElement[] elements= ((IParent)parent).getChildren();

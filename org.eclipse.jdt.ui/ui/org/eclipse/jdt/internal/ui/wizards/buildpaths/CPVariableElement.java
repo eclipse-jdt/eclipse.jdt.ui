@@ -43,14 +43,14 @@ public class CPVariableElement {
 		fName= name;
 	}
 	
-	
+	/*	 * @see Object#equals()	 */	
 	public boolean equals(Object other) {
 		if (other.getClass().equals(getClass())) {
 			CPVariableElement elem= (CPVariableElement)other;
 			return fName.equals(elem.fName);
 		}
 		return false;
-	}	
+	}		/*	 * @see Object#hashCode()	 */	public int hashCode() {		return fName.hashCode();	}		
 	/**
 	 * Returns true if variable is reserved
 	 * @return Returns a boolean
@@ -67,4 +67,4 @@ public class CPVariableElement {
 		fIsReserved= isReserved;
 	}
 
-}
+}

@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;import org.eclipse.jdt.internal.ui.util.SWTUtil;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableSelectionBlock {
 	
@@ -92,8 +92,7 @@ public class VariableSelectionBlock {
 	
 	public Control createControl(Composite parent) {		
 		Composite inner= new Composite(parent, SWT.NONE);
-		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= 420;
+		MGridLayout layout= new MGridLayout();		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, inner);		
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
@@ -132,7 +131,7 @@ public class VariableSelectionBlock {
 		fContext.statusChanged(StatusUtil.getMoreSevere(fVariableStatus, fExistsStatus));
 	}		
 	
-	protected IStatus variableUpdated() {
+	private IStatus variableUpdated() {
 		fVariable= null;
 		
 		StatusInfo status= new StatusInfo();
@@ -189,9 +188,7 @@ public class VariableSelectionBlock {
 	private IPath chooseExtJar() {
 		String lastUsedPath= ""; //$NON-NLS-1$
 		IPath entryPath= getResolvedPath();
-		if (entryPath != null) {
-			String fileExt= entryPath.getFileExtension();
-			if ("zip".equals(fileExt) || "jar".equals(fileExt)) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (entryPath != null) {			if (ArchiveFileFilter.isArchivePath(entryPath)) {
 				lastUsedPath= entryPath.removeLastSegments(1).toOSString();
 			} else {
 				lastUsedPath= entryPath.toOSString();

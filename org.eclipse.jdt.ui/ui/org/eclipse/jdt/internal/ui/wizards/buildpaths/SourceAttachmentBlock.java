@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -198,35 +199,7 @@ public class SourceAttachmentBlock {
 			return new Path(fPrefixField.getText());
 		}
 	}
-	
-	///**
-	// * Gets the Java Doc location chosen by the user
-	// */
-	//public URL getJavaDocLocation() {
-	//	return fJavaDocLocation;
-	//}	
-	
-
-	private Label createHelpText(Composite composite, int style, int widthHint, boolean indented, String text) {
-		if (indented) {
-			DialogField.createEmptySpace(composite, 1);
-		}
-			
-		Label helpTextLabel= new Label(composite, style);
-		helpTextLabel.setText(text);
-		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
-		gd.widthHint= widthHint;
-		helpTextLabel.setLayoutData(gd);
-		if (indented) {
-			DialogField.createEmptySpace(composite, 2);
-			gd.horizontalSpan= 1;
-		} else {
-			gd.horizontalSpan= 4;
-		}
-		return helpTextLabel;
-	}		
-
-	
+		
 	/**
 	 * Creates the control
 	 */
@@ -238,20 +211,33 @@ public class SourceAttachmentBlock {
 		MGridLayout layout= new MGridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.minimumWidth= 450;
-		layout.minimumHeight= 0;
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		createHelpText(composite, SWT.LEFT, SWT.DEFAULT, false, NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment())); //$NON-NLS-1$
+		int widthHint= SWTUtil.convertWidthInCharsToPixels(fIsVariableEntry ? 50 : 60, composite);
 		
+		
+		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 4;
+		
+		Label message= new Label(composite, SWT.LEFT);
+		message.setLayoutData(gd);
+		message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment()));
+				
 		if (fIsVariableEntry) {
-			createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
-		}			
+			DialogField.createEmptySpace(composite, 1);
+			gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+			gd.widthHint= widthHint;
+			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
+			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description"));
+			desc.setLayoutData(gd);
+			DialogField.createEmptySpace(composite, 2);
+		}
 		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
-		MGridData gd= (MGridData)fFileNameField.getTextControl(null).getLayoutData();
-		gd.widthHint= 300;
+		gd= (MGridData)fFileNameField.getTextControl(null).getLayoutData();
+		gd.widthHint= widthHint;
 		
 		if (!fIsVariableEntry) {
 			// aditional 'browse workspace' button for normal jars
@@ -266,13 +252,19 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 2);			
 		}
 		
-		// label
-		createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
+		// prefix description
+		DialogField.createEmptySpace(composite, 1);
+		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.widthHint= widthHint;
+		Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
+		desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.description"));
+		desc.setLayoutData(gd);
+		DialogField.createEmptySpace(composite, 2);		
 		
 		// root path field	
 		fPrefixField.doFillIntoGrid(composite, 4);
 		gd= (MGridData)fPrefixField.getTextControl(null).getLayoutData();
-		gd.widthHint= 300;
+		gd.widthHint= widthHint;
 		
 		if (fIsVariableEntry) {
 			// label that shows the resolved path for variable jars
@@ -557,8 +549,7 @@ public class SourceAttachmentBlock {
 				resolvedPath= Path.EMPTY;
 			}
 		}
-		String ext= resolvedPath.getFileExtension();
-		if ("jar".equals(ext) || "zip".equals(ext)) { //$NON-NLS-2$ //$NON-NLS-1$
+		if (ArchiveFileFilter.isArchivePath(resolvedPath)) {
 			resolvedPath= resolvedPath.removeLastSegments(1);
 		}
 	
