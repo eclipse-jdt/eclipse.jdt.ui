@@ -78,17 +78,17 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		}
 
 		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginReporting()
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
 		 */
-		public void beginReporting() {
+		public void beginCollecting() {
 			if (fRequestor != null)
 				fRequestor.beginReporting();
 		}
 
 		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endReporting()
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endCollecting()
 		 */
-		public void endReporting() {
+		public void endCollecting() {
 			if (fRequestor != null)
 				fRequestor.endReporting();
 		}

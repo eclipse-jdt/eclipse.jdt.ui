@@ -100,16 +100,16 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		}
 
 		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginReporting()
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
 		 */
-		public void beginReporting() {
+		public void beginCollecting() {
 			fAddAnnotations= new HashMap();
 		}
 
 		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endReporting()
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endCollecting()
 		 */
-		public void endReporting() {
+		public void endCollecting() {
 			List removeAnnotations= new ArrayList();
 			for (Iterator iter= fAnnotationModel.getAnnotationIterator(); iter.hasNext();) {
 				Annotation annotation= (Annotation) iter.next();
