@@ -70,12 +70,13 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 			
 		} else if (fPositionOffsets.length > 0) {
 			try {
-				LinkedPositionGroup group= new LinkedPositionGroup();
-				for (int i= 0; i != fPositionOffsets.length; i++)
-					group.createPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
-				
 				LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
-				env.addGroup(group);
+				for (int i= 0; i != fPositionOffsets.length; i++) {
+					LinkedPositionGroup group= new LinkedPositionGroup();
+					group.createPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+					env.addGroup(group);
+				}
+				
 				LinkedUIControl ui= new LinkedUIControl(env, fViewer);
 				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, true);
 				ui.enter();
