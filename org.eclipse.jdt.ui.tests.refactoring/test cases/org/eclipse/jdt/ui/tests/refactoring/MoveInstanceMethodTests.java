@@ -302,8 +302,22 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=40120
 		helper1(new String[] {"p.B"}, "p.B", 11, 17, 11, 22, PARAMETER, "s", false, false);
 	}
-	
 
+	//don't generate parameter for unused field (bug 38310)
+	public void test17() throws Exception {
+		helper1(new String[] {"p.Shape", "p.Rectangle"}, "p.Shape", 7, 16, 7, 20, FIELD, "fBounds", false, false);
+	}	
+
+	//generate parameter for used field (bug 38310)
+	public void test18() throws Exception {
+		helper1(new String[] {"p.Shape", "p.Rectangle"}, "p.Shape", 13, 22, 13, 22, FIELD, "fInnerBounds", false, false);
+	}	
+
+	//generate parameter for used field (bug 38310)
+	public void test19() throws Exception {
+		helper1(new String[] {"p.Shape", "p.Rectangle"}, "p.Shape", 17, 20, 17, 33, PARAMETER, "rect", false, false);
+	}	
+	
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
 		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);	
