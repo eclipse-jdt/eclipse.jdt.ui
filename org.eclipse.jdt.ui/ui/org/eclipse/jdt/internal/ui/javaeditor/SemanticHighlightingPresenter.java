@@ -25,6 +25,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.ITextViewerExtension2;
@@ -550,6 +551,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+		setCanceled(true);
 		releaseDocument(oldInput);
 		resetState();
 	}
@@ -585,7 +587,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		if (document == null)
 			return fIsCanceled;
 		
-		synchronized (document) {
+		synchronized (getLockObject(document)) {
 			return fIsCanceled;
 		}
 	}
@@ -597,9 +599,19 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 */
 	public void setCanceled(boolean isCanceled) {
 		IDocument document= fSourceViewer.getDocument();
-		synchronized (document) {
+		synchronized (getLockObject(document)) {
 			fIsCanceled= isCanceled;
 		}
+	}
+
+	/**
+	 * @param document the document
+	 * @return the document's lock object
+	 */
+	private Object getLockObject(IDocument document) {
+		if (document instanceof ISynchronizable)
+			return ((ISynchronizable)document).getLockObject();
+		return document;
 	}
 
 	/**
