@@ -6,12 +6,17 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
+/**
+ * Action used for the type hierarchy forward / backward buttons
+ */
 public class HistoryAction extends Action {
 
 	private TypeHierarchyViewPart fViewPart;
@@ -22,8 +27,10 @@ public class HistoryAction extends Action {
 		setDescription(getDescription(forward));
 		if (forward) {
 			JavaPluginImages.setLocalImageDescriptors(this, "forward_nav.gif"); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_FORWARD_ACTION });
 		} else {
 			JavaPluginImages.setLocalImageDescriptors(this, "backward_nav.gif"); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_BACKWARD_ACTION });
 		}
 		
 		fViewPart= viewPart;
@@ -83,7 +90,7 @@ public class HistoryAction extends Action {
 	}
 	
 	
-	/**
+	/*
 	 * @see Action#run()
 	 */
 	public void run() {

@@ -26,6 +26,16 @@ public interface IJavaHelpContextIds {
 	public static final String SHOW_IN_HIERARCHYVIEW_ACTION= PREFIX + "show_in_hierarchyview_action_context"; //$NON-NLS-1$
 	public static final String FOCUS_ON_SELECTION_ACTION= PREFIX + "focus_on_selection_action"; //$NON-NLS-1$
 	public static final String FOCUS_ON_TYPE_ACTION= PREFIX + "focus_on_type_action"; //$NON-NLS-1$
+
+	public static final String TYPEHIERARCHY_FORWARD_ACTION= PREFIX + "typehierarchy_forward_action"; //$NON-NLS-1$
+	public static final String TYPEHIERARCHY_BACKWARD_ACTION= PREFIX + "typehierarchy_backward_action"; //$NON-NLS-1$
+	public static final String FILTER_PUBLIC_ACTION= PREFIX + "filter_public_action"; //$NON-NLS-1$
+	public static final String FILTER_FIELDS_ACTION= PREFIX + "filter_fields_action"; //$NON-NLS-1$
+	public static final String FILTER_STATIC_ACTION= PREFIX + "filter_static_action"; //$NON-NLS-1$
+	public static final String SHOW_INHERITED_ACTION= PREFIX + "show_inherited_action"; //$NON-NLS-1$
+	public static final String SHOW_SUPERTYPES= PREFIX + "show_supertypes_action"; //$NON-NLS-1$
+	public static final String SHOW_SUBTYPES= PREFIX + "show_subtypes_action"; //$NON-NLS-1$
+	public static final String SHOW_HIERARCHY= PREFIX + "show_hierarchy_action"; //$NON-NLS-1$
 	
 	public static final String ADD_IMPORT_ON_SELECTION_ACTION= PREFIX + "add_imports_on_selection_action_context"; //$NON-NLS-1$
 	public static final String ORGANIZE_IMPORTS_ACTION= PREFIX + "organize_imports_action_context"; //$NON-NLS-1$

@@ -37,17 +37,17 @@ public class FocusOnTypeAction extends Action {
 		fViewPart= part;
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION });
 	}
-	/**
-	 * Perform the action
+	/*
+	 * @see Action#run
 	 */
 	public void run() {
-		Shell parent= fViewPart.getSite().getWorkbenchWindow().getShell();
+		Shell parent= fViewPart.getSite().getShell();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
 			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
 	
 		dialog.setTitle(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.message")); //$NON-NLS-1$
-		if (dialog.open() == IDialogConstants.CANCEL_ID) {
+		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}
 		

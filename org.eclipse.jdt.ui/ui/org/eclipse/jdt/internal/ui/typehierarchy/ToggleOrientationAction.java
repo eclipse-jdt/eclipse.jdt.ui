@@ -26,14 +26,14 @@ public class ToggleOrientationAction extends Action {
 		setChecked(initHorizontal);
 	}
 
-	/**
+	/*
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
 		fView.setOrientation(isChecked()); // will toggle the checked state
 	}
 
-	/**
+	/*
 	 * @see Action#setChecked
 	 */		
 	public void setChecked(boolean checked) {

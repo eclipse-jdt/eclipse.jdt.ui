@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaSourceElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemItemMapper;
@@ -70,33 +72,13 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	/**
 	 * Sorter that uses the unmodified labelprovider (No declaring class names)
 	 */
-	private static class MethodsViewerSorter extends ViewerSorter {
+	private static class MethodsViewerSorter extends JavaSourceElementSorter {
 		private JavaTextLabelProvider fTextLabelProvider;
 		
 		public MethodsViewerSorter() {
 			fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		}
-		
-		public boolean isSorterProperty(Object element, Object property) {
-			// doesn't matter, only world changed is used.
-			return true;
-		}
-		
-		public int category(Object element) {
-			if (element instanceof IMethod) {
-				try {
-					if (((IMethod)element).isConstructor()) {
-						return 1;
-					} else {
-						return 2;
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-				}
-			}
-			return 0;
-		}
-		
+			
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			int cat1 = category(e1);
 			int cat2 = category(e2);
@@ -164,7 +146,8 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		// fields
 		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
-		MethodsViewerFilterAction hideFields= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, false);
+		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
+		MethodsViewerFilterAction hideFields= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, helpContext, false);
 		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
 		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
 		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
@@ -172,7 +155,8 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		// static
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
-		MethodsViewerFilterAction hideStatic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, false);
+		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
+		MethodsViewerFilterAction hideStatic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, helpContext, false);
 		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
 		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
 		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
@@ -180,7 +164,8 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		// non-public
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
-		MethodsViewerFilterAction hideNonPublic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, false);
+		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
+		MethodsViewerFilterAction hideNonPublic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, helpContext, false);
 		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
 		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
 		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
@@ -188,7 +173,6 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		// order corresponds to order in toolbar
 		fFilterActions= new MethodsViewerFilterAction[] { hideFields, hideStatic, hideNonPublic };
-		
 		
 		addFilter(fFilter);
 		
@@ -200,7 +184,6 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		};
 		
 		setSorter(new MethodsViewerSorter());
-			
 	}
 	
 	/**
@@ -223,7 +206,11 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
-	
+
+
+	/**
+	 * Returns <code>true</code> if inherited methods are shown.
+	 */	
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
 	}
@@ -232,7 +219,11 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	 * Filters the method list
 	 */	
 	public void setMemberFilter(int filterProperty, boolean set) {
-		fFilter.setFilter(filterProperty, set);
+		if (set) {
+			fFilter.addFilter(filterProperty);
+		} else {
+			fFilter.removeFilter(filterProperty);
+		}
 		for (int i= 0; i < fFilterActions.length; i++) {
 			if (fFilterActions[i].getFilterProperty() == filterProperty) {
 				fFilterActions[i].setChecked(set);
@@ -240,14 +231,21 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		}
 		refresh();
 	}
+
+	/**
+	 * Returns <code>true</code> if the given filter is set.
+	 */	
+	public boolean hasMemberFilter(int filterProperty) {
+		return fFilter.hasFilter(filterProperty);
+	}
 	
 	/**
 	 * Saves the state of the filter actions
 	 */
 	public void saveState(IMemento memento) {
-		memento.putString(TAG_HIDEFIELDS, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_FIELDS)));
-		memento.putString(TAG_HIDESTATIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_STATIC)));
-		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
+		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_FIELDS)));
+		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_STATIC)));
+		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
 		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
 
 		ScrollBar bar= getTable().getVerticalBar();
@@ -290,12 +288,6 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		viewSite.registerContextMenu(popupId, menuMgr, this);
 	}	
 		
-	protected void handleDispose(DisposeEvent event) {
-		Menu menu= getTable().getMenu();
-		if (menu != null)
-			menu.dispose();
-		super.handleDispose(event);
-	}
 	
 	/**
 	 * Fills up the context menu with items for the method viewer
@@ -319,7 +311,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	}
 
 
-	/**
+	/*
 	 * @see IProblemChangedListener#problemsChanged
 	 */
 	public void problemsChanged(final Set changed) {
@@ -333,7 +325,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		}
 	}
 		
-	/**
+	/*
 	 * @see StructuredViewer#associate(Object, Item)
 	 */
 	protected void associate(Object element, Item item) {
@@ -343,7 +335,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		super.associate(element, item);		
 	}
 
-	/**
+	/*
 	 * @see StructuredViewer#disassociate(Item)
 	 */
 	protected void disassociate(Item item) {

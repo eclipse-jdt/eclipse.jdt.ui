@@ -24,7 +24,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		super(parent, new SubTypeHierarchyContentProvider(lifeCycle), part);
 	}
 
-	/**
+	/*
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
@@ -35,7 +35,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		}
 	}
 	
-	/**
+	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */
 	public void updateContent() {

@@ -19,7 +19,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), part);
 	}
 	
-	/**
+	/*
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
@@ -30,7 +30,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		}
 	}
 
-	/**
+	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */		
 	public void updateContent() {
@@ -43,7 +43,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	}	
 
 	/**
-	 * Content provider for the supertype hierarchy
+	 * Content provider for the 'traditional' type hierarchy.
 	 */	
 	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider implements ITypeHierarchyLifeCycleListener {
 		
@@ -68,7 +68,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			return 2;
 		}
 	
-		/**
+		/*
 		 * @see TypeHierarchyContentProvider.getElements
 		 */
 		public Object[] getElements(Object parent) {
@@ -80,7 +80,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 		}
 	
-		/**
+		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */	
 		protected final IType[] getTypesInHierarchy(IType type) {
@@ -120,7 +120,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			fInput= hierarchyInput;
 		}		
 		
-		/**
+		/*
 		 * @see ITypeHierarchyLifeCycleListener#typeHierarchyChanged(TypeHierarchyLifeCycle)
 		 */
 		public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider) {

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -36,7 +37,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 public class MethodsContentProvider implements IStructuredContentProvider, IElementChangedListener, ITypeHierarchyLifeCycleListener {
 	
 	private static final String[] UNSTRUCTURED= new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE };
-	protected static final Object[] NO_ELEMENTS = new Object[0];
+	private static final Object[] NO_ELEMENTS = new Object[0];
 		
 	private boolean fShowInheritedMethods;
 	
@@ -91,7 +92,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		}
 	}		
 
-	/**
+	/*
 	 * @see IStructuredContentProvider#getElements
 	 */		
 	public Object[] getElements(Object element) {
@@ -122,15 +123,13 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 	}		
 	
 	
-	/**
+	/*
 	 * @see IContentProvider#inputChanged
 	 */
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
-		if (part instanceof TableViewer) {
-			fViewer= (TableViewer)part;
-		} else {
-			fViewer= null;
-		}
+		Assert.isTrue(part instanceof TableViewer);
+	
+		fViewer= (TableViewer)part;
 		
 		if (oldInput == null && newInput != null) {
 			JavaCore.addElementChangedListener(this); 
@@ -138,12 +137,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 			JavaCore.removeElementChangedListener(this); 
 		}
 		if (newInput instanceof IType) {
-			fInputType= (IType)newInput;
-		} else if (newInput instanceof TypeHierarchyViewPart) {
-			Object input= ((TypeHierarchyViewPart)newInput).getInput();
-			if (input instanceof IType) {
-				fInputType= (IType)input;
-			}
+			fInputType= (IType) newInput;
 		} else {
 			fInputType= null;
 		}	
@@ -157,22 +151,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		}		
 	}
 	
-	/**
-	 * @see IContentProvider#isDeleted
-	 */
-	public boolean isDeleted(Object obj) {
-		try {
-			if (obj instanceof IJavaElement) {
-				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem));
-			}
-		} catch (JavaModelException e) {
-			// dont handle here
-		}			
-		return false;
-	}
-
-	/**
+	/*
 	 * @see IContentProvider#dispose
 	 */	
 	public void dispose() {
@@ -182,7 +161,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		JavaCore.removeElementChangedListener(this);
 	}	
 
-	/**
+	/*
 	 * @see IElementChangedListener#elementChanged
 	 */
 	public void elementChanged(ElementChangedEvent event) {
@@ -193,7 +172,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 						processDeltaWithHierarchy(event.getDelta());
 					}
 				} else {
-					processDeltaNoHierarchy(event.getDelta());
+					processDeltaWithoutHierarchy(event.getDelta());
 				}
 			} catch(JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
@@ -206,7 +185,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 	 * returns true if the problem has been completly handled
 	 * fViewer != null
 	 */		
-	private boolean processDeltaNoHierarchy(IJavaElementDelta delta) throws JavaModelException {
+	private boolean processDeltaWithoutHierarchy(IJavaElementDelta delta) throws JavaModelException {
 		IJavaElement element= delta.getElement();
 		// try to limit the recursive search
 		switch (element.getElementType()) {
@@ -240,7 +219,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		}
 		IJavaElementDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {
-			if (processDeltaNoHierarchy(children[i])) {
+			if (processDeltaWithoutHierarchy(children[i])) {
 				return true;
 			}	
 		}
@@ -321,7 +300,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		return elements;
 	}		
 
-	/**
+	/*
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged
 	 */
 	public void typeHierarchyChanged(TypeHierarchyLifeCycle th) {

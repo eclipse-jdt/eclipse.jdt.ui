@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
- * manages a type hierarchy, to keep it refreshed, and to allow it to be shared
+ * Manages a type hierarchy, to keep it refreshed, and to allow it to be shared.
  */
 public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener {
 	
@@ -136,7 +136,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener {
 	
 	
 	
-	/**
+	/*
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged
 	 */
 	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {

@@ -10,6 +10,9 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
  */
 public interface ITypeHierarchyLifeCycleListener {
 	
+	/**
+	 * The type hierarchy changed.
+	 */
 	void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider);
 
 }

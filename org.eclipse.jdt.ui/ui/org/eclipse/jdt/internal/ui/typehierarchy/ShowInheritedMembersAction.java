@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -28,17 +30,19 @@ public class ShowInheritedMembersAction extends Action {
 
 		fMethodsViewer= viewer;
 		
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_INHERITED_ACTION });
+ 
 		setChecked(initValue);
 	}
 	
-	/**
+	/*
 	 * @see Action#actionPerformed
 	 */	
 	public void run() {
 		fMethodsViewer.showInheritedMethods(isChecked());
 	}	
 
-	/**
+	/*
 	 * @see Action#setChecked
 	 */	
 	public void setChecked(boolean checked) {

@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -51,7 +52,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 	
 	/**
-	 * Sets members to filter the hierarchy for. Set to null to disable member filtering.
+	 * Sets members to filter the hierarchy for. Set to <code>null</code> to disable member filtering.
 	 * When member filtering is enabled, the hierarchy contains only types that contain
 	 * an implementation of one of the filter members and the members themself.
 	 * The hierarchy can be empty as well.
@@ -60,6 +61,9 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		fMemberFilter= memberFilter;
 	}
 	
+	/**
+	 * The members to filter or <code>null</code> if member filtering is disabled.
+	 */
 	public IMember[] getMemberFilter() {
 		return fMemberFilter;
 	}
@@ -81,7 +85,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return fTypeHierarchy.getInput();
 	}
 	
-	/**
+	/*
 	 * Called for the root element
 	 * @see IStructuredContentProvider#getElements	 
 	 */
@@ -107,12 +111,10 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 */	
-	protected IType[] getTypesInHierarchy(IType type) {
-		return new IType[0];
-	}	
+	protected abstract IType[] getTypesInHierarchy(IType type);
 
-	/**
-	 * Called for the tree children
+	/*
+	 * Called for the tree children.
 	 * @see ITreeContentProvider#getChildren
 	 */	
 	public Object[] getChildren(Object element) {
@@ -132,7 +134,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return NO_ELEMENTS;
 	}
 	
-	/**
+	/*
 	 * @see ITreeContentProvider#hasChildren
 	 */
 	public boolean hasChildren(Object element) {
@@ -152,7 +154,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return false;
 	}	
 	
-	protected void addFilteredMembers(IType parent, List children) {
+	private void addFilteredMembers(IType parent, List children) {
 		try {
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
@@ -168,11 +170,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			}		
 		} catch (JavaModelException e) {
-			// ignore
+			JavaPlugin.log(e);
 		}
 	}
 		
-	protected void addFilteredTypes(IType[] types, List children) {
+	private void addFilteredTypes(IType[] types, List children) {
 		try {
 			for (int i= 0; i < types.length; i++) {
 				if (hasFilteredChildren(types[i])) {
@@ -180,11 +182,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			}
 		} catch (JavaModelException e) {
-			// ignore
+			JavaPlugin.log(e);
 		}
 	}
 	
-	protected boolean hasFilteredChildren(IType type) throws JavaModelException {
+	private boolean hasFilteredChildren(IType type) throws JavaModelException {
 		if (fShowAllTypes) {
 			return true;
 		}
@@ -212,15 +214,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 	
 		
-	/**
+	/*
 	 * @see IContentProvider#inputChanged
 	 */
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
-		if (part instanceof TreeViewer) {
-			fViewer= (TreeViewer)part;
-		} else {
-			fViewer= null;
-		}
+		Assert.isTrue(part instanceof TreeViewer);
+		fViewer= (TreeViewer)part;
+
 		if (oldInput == null && newInput != null) {
 			JavaCore.addElementChangedListener(this); 
 		} else if (oldInput != null && newInput == null) {
@@ -228,23 +228,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 	}
 	
-
-	/**
-	 * @see IContentProvider#isDeleted
-	 */
-	public boolean isDeleted(Object obj) {
-		try {
-			if (obj instanceof IJavaElement) {
-				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem));
-			}
-		} catch (JavaModelException e) {
-			// dont handle here
-		}
-		return false;
-	}
-
-	/**
+	/*
 	 * @see IContentProvider#dispose
 	 */	
 	public void dispose() {
@@ -252,14 +236,14 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		JavaCore.removeElementChangedListener(this);
 	}	
 
-	/**
+	/*
 	 * @see ITreeContentProvider#getParent
 	 */
 	public Object getParent(Object element) {
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see IElementChangedListener#elementChanged
 	 */
 	public void elementChanged(ElementChangedEvent event) {

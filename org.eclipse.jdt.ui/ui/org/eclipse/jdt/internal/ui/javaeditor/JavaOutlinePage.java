@@ -38,7 +38,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.Page;
@@ -50,7 +49,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
@@ -73,9 +71,9 @@ import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaSourceElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -532,76 +530,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					return false;
 				}							
 			};
-			
-			class LexicalSorter extends ViewerSorter {
 				
-				private static final int INNER_TYPES=		0;
-				private static final int CONSTRUCTORS=		1;
-				private static final int STATIC_INIT=		2;
-				private static final int STATIC_METHODS=	3;
-				private static final int INIT=				4;
-				private static final int METHODS=			5;
-				private static final int STATIC_FIELDS=		6;
-				private static final int FIELDS=			7;
-				private static final int OTHERS=			8;
-				
-				
-				public boolean isSorterProperty(Object element, Object property) {
-					return true;
-				}
-				
-				public int category(Object element) {
-					
-					try {
-						
-						IJavaElement je= (IJavaElement) element;
-						
-						switch (je.getElementType()) {
-							
-							case IJavaElement.METHOD: {
-								
-								IMethod method= (IMethod) je;
-								if (method.isConstructor())
-									return CONSTRUCTORS;
-									
-								int flags= method.getFlags();
-								return Flags.isStatic(flags) ? STATIC_METHODS : METHODS;
-							}
-							
-							case IJavaElement.FIELD: {
-								int flags= ((IField) je).getFlags();
-								return Flags.isStatic(flags) ? STATIC_FIELDS : FIELDS;
-							}
-							
-							case IJavaElement.INITIALIZER: {
-								int flags= ((IInitializer) je).getFlags();
-								return Flags.isStatic(flags) ? STATIC_INIT : INIT;
-							}
-						}
-						
-						if (isInnerType(je))
-							return INNER_TYPES;
-					
-					} catch (JavaModelException x) {
-					}
-					
-					return OTHERS;
-				}
-				
-				public int compare(Viewer viewer, Object e1, Object e2) {
-					// assumes that both elements are at the same structural level
-					IJavaElement je= (IJavaElement) e1;
-					if (je.getParent().getElementType() == IJavaElement.TYPE)
-						return super.compare(viewer, e1, e2);
-					
-					// don't sort stuff which isn't inside a type
-					return 0;
-				}
-			};
-			
 			class LexicalSortingAction extends Action {
 				
-				private LexicalSorter fSorter= new LexicalSorter();			
+				private JavaSourceElementSorter fSorter= new JavaSourceElementSorter();			
 
 				public LexicalSortingAction() {
 					super();

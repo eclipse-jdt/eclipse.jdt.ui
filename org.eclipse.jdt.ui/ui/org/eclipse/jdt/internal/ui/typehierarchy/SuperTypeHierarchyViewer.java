@@ -24,7 +24,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), part);
 	}
 
-	/**
+	/*
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
@@ -35,7 +35,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		}
 	}
 
-	/**
+	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */	
 	public void updateContent() {
@@ -43,7 +43,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		expandAll();
 	}
 	
-	/**
+	/*
 	 * Content provider for the supertype hierarchy
 	 */
 	private static class SuperTypeHierarchyContentProvider extends TypeHierarchyContentProvider {

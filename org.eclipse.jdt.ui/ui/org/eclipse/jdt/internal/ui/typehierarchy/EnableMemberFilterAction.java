@@ -26,14 +26,14 @@ public class EnableMemberFilterAction extends Action {
 		setChecked(initValue);
 	}
 
-	/**
+	/*
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
 		fView.enableMemberFilter(isChecked());
 	}
 
-	/**
+	/*
 	 * @see Action#actionPerformed
 	 */			
 	public void setChecked(boolean checked) {
