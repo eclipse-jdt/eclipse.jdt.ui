@@ -23,6 +23,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVar
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 /**
@@ -145,7 +147,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param binding the binding to check
 	 * @return <code>true</code> if it is constrained, <code>false</code> otherwise
 	 */
-	private static boolean isConstrainedType(final ITypeBinding binding) {
+	public static boolean isConstrainedType(final ITypeBinding binding) {
 		Assert.isNotNull(binding);
 		return !binding.isPrimitive();
 	}
@@ -326,6 +328,20 @@ public final class SuperTypeConstraintsModel {
 		final ITypeBinding binding= type.resolveBinding();
 		if (isConstrainedType(binding))
 			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
+		return null;
+	}
+
+	/**
+	 * Creates a variable variable.
+	 * 
+	 * @param variable the variable
+	 * @return the created variable variable
+	 */
+	public final ConstraintVariable2 createVariableVariable(final IVariableBinding variable) {
+		Assert.isNotNull(variable);
+		final ITypeBinding binding= variable.getType();
+		if (isConstrainedType(binding))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new VariableVariable2(fEnvironment.create(binding), variable));
 		return null;
 	}
 
