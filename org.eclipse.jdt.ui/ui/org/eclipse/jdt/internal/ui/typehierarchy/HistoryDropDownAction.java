@@ -41,7 +41,6 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		fHierarchyView= null;
 		if (fMenu != null) {
 			fMenu.dispose();
-			System.err.println("dispose");
 			fMenu= null;
 		}
 	}
@@ -53,10 +52,8 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	public Menu getMenu(Control parent) {
 		if (fMenu != null) {
 			fMenu.dispose();
-			System.err.println("dispose");
 		}
 		fMenu= new Menu(parent);
-		System.err.println("create");
 		IJavaElement[] elements= fHierarchyView.getHistoryEntries();
 		boolean checked= addEntries(fMenu, elements);
 		if (elements.length > RESULTS_IN_DROP_DOWN) {
