@@ -237,7 +237,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (type == null || ! type.exists())
 			return null;
 		String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.type_exists", new String[]{fType.getElementName(), getInputTypePackage().getElementName()}); //$NON-NLS-1$
-		return RefactoringStatus.createFatalErrorStatus(message);
+		return RefactoringStatus.createErrorStatus(message);
 	}
 
 	private RefactoringStatus checkConstructorParameterNames(IProgressMonitor pm) throws JavaModelException{
