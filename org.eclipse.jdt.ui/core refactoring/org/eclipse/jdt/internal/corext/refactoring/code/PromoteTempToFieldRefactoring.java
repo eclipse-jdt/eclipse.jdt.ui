@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -67,7 +68,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	private int fAccessModifier; 	/*see JdtFlags*/
 	private boolean fDeclareStatic;
 	private boolean fDeclareFinal;
-	private int fInitializeIn; /*see INITIALIZE_IN* constaints */
+	private int fInitializeIn; /*see INITIALIZE_IN_* constaints */
 
 	//------ fields used for computations ---------//
     private CompilationUnit fCompilationUnitNode;
@@ -248,32 +249,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         return null;
     }
     
-    private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
-    	private final List fLocalTypes= new ArrayList(0);
-    	public List getLocalTypeUsageNodes(){
-    		return fLocalTypes;
-    	}
-    	public boolean visitType(Type node) {
-	  		ITypeBinding typeBinding= node.resolveBinding();
-	  		if (typeBinding != null && typeBinding.isLocal())
-	  			fLocalTypes.add(node);
-	  		return super.visitType(node);	
-		}
-		public boolean visitName(Name node) {
-			ITypeBinding typeBinding= node.resolveTypeBinding();
-			if (typeBinding != null && typeBinding.isLocal())
-				fLocalTypes.add(node);
-			else {
-				IBinding binding= node.resolveBinding();
-				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
-					fLocalTypes.add(node);
-				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
-					fLocalTypes.add(node);
-			}
-            return super.visitName(node);
-        }
-    }
-    
     private RefactoringStatus checkTempTypeForLocalTypeUsage(){
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
     	if (vds == null)
@@ -402,7 +377,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     			addLocalDeclarationSplit(rewrite);
 			else
 				addLocalDeclarationRemoval(rewrite);
-    		
+    		if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
+    			addInitializersToConstructors(rewrite);
             return createChange(rewrite);
     	} catch (CoreException e) {
     		throw new JavaModelException(e);
@@ -410,6 +386,95 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		pm.done();
     	}
     }
+    
+    private void addInitializersToConstructors(ASTRewrite rewrite) throws JavaModelException {
+    	Assert.isTrue(! isDeclaredInAnonymousClass());
+    	TypeDeclaration typeDeclaration= (TypeDeclaration)getMethodDeclaration().getParent();
+    	MethodDeclaration[] allConstructors= getAllConstructors(typeDeclaration);
+    	if (allConstructors.length == 0){
+            addNewConstructorWithInitializing(rewrite, typeDeclaration);
+    	} else {
+    		for (int i= 0; i < allConstructors.length; i++) {
+                MethodDeclaration constructor= allConstructors[i];
+                if (shouldInsertTempInitialization(constructor))
+                    addFieldInitializationToConstructor(rewrite, constructor);
+            }
+    	}
+    }
+    private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws JavaModelException {
+        MethodDeclaration newConstructor= fTempDeclarationNode.getAST().newMethodDeclaration();
+        newConstructor.setConstructor(true);
+        newConstructor.setExtraDimensions(0);
+        newConstructor.setModifiers(getModifiersForDefaultConstructor(typeDeclaration));
+        newConstructor.setName(fTempDeclarationNode.getAST().newSimpleName(typeDeclaration.getName().getIdentifier()));
+        addFieldInitializationToConstructor(rewrite, newConstructor);
+        rewrite.markAsInserted(newConstructor);
+        int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
+        typeDeclaration.bodyDeclarations().add(constructorInsertIndex, newConstructor);
+    }
+    
+    private int computeInsertIndexForNewConstructor(TypeDeclaration typeDeclaration) {
+    	List bodyDeclarations= typeDeclaration.bodyDeclarations();
+    	if (bodyDeclarations.isEmpty())
+	        return 0;
+		int firstMethodIndex= findFirstMethodIndex(typeDeclaration);
+		if (firstMethodIndex == -1)
+			return bodyDeclarations.size();
+		else	
+			return firstMethodIndex;
+    }
+    
+    private int findFirstMethodIndex(TypeDeclaration typeDeclaration) {
+    	for (int i= 0, n= typeDeclaration.bodyDeclarations().size(); i < n; i++) {
+            if (typeDeclaration.bodyDeclarations().get(i) instanceof MethodDeclaration)
+            	return i;
+        }
+        return -1;
+    }
+    
+    private void addFieldInitializationToConstructor(ASTRewrite rewrite, MethodDeclaration constructor) throws JavaModelException {
+    	if (constructor.getBody() == null)
+	    	constructor.setBody(fTempDeclarationNode.getAST().newBlock());
+        List statements= constructor.getBody().statements();
+        ExpressionStatement initialization= createExpressionStatementThatInitializesField(rewrite);
+        rewrite.markAsInserted(initialization);
+        statements.add(initialization);
+    }
+    
+    private static int getModifiersForDefaultConstructor(TypeDeclaration typeDeclaration) {
+    	if (Modifier.isPublic(typeDeclaration.getModifiers()))
+    		return Modifier.PUBLIC;
+    	else if (Modifier.isProtected(typeDeclaration.getModifiers()))
+    		return Modifier.PROTECTED;
+		else if (Modifier.isPrivate(typeDeclaration.getModifiers()))
+    		return Modifier.PRIVATE;
+        else
+			return Modifier.NONE;
+    }
+    
+    private static boolean shouldInsertTempInitialization(MethodDeclaration constructor){
+    	Assert.isTrue(constructor.isConstructor());
+        if (constructor.getBody() == null)
+        	return false;
+        List statements= constructor.getBody().statements();
+        if (statements == null) 
+        	return false;
+        if (statements.size() > 0 && statements.get(0) instanceof ConstructorInvocation)
+        	return false;
+		return true;        
+    }
+    
+    private static MethodDeclaration[] getAllConstructors(TypeDeclaration typeDeclaration){
+    	MethodDeclaration[] allMethods= typeDeclaration.getMethods();
+    	List result= new ArrayList(Math.min(allMethods.length, 1));
+		for (int i= 0; i < allMethods.length; i++) {
+            MethodDeclaration declaration= allMethods[i];
+            if (declaration.isConstructor())
+            	result.add(declaration);
+        }    	
+    	return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+    }
+    
     public IChange createChange(ASTRewrite rewrite) throws CoreException{
         TextChange change= new CompilationUnitChange("", fCu);
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
@@ -420,7 +485,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         return change;
     }
 
-    private void addLocalDeclarationSplit(ASTRewrite rewrite) {
+    private void addLocalDeclarationSplit(ASTRewrite rewrite) throws JavaModelException {
     	VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();
     	Block block= (Block)tempDeclarationStatement.getParent();//XXX can it be anything else?
     	int statementIndex= block.statements().indexOf(tempDeclarationStatement);
@@ -437,12 +502,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
            	rewrite.markAsRemoved(tempDeclarationStatement);
         
         Assert.isTrue(tempHasInitializer());
-        Assignment assignment= fTempDeclarationNode.getAST().newAssignment();
-        SimpleName fieldName= fTempDeclarationNode.getAST().newSimpleName(fFieldName);
-        assignment.setLeftHandSide(fieldName);
-        Expression tempInitializerCopy= (Expression)rewrite.createCopy(getTempInitializer());
-        assignment.setRightHandSide(tempInitializerCopy);
-        ExpressionStatement assignmentStatement= fTempDeclarationNode.getAST().newExpressionStatement(assignment);
+        ExpressionStatement assignmentStatement= createExpressionStatementThatInitializesField(rewrite);
         rewrite.markAsInserted(assignmentStatement);
         block.statements().add(statementIndex + 1, assignmentStatement);
         
@@ -459,6 +519,19 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             rewrite.markAsInserted(statement);
             block.statements().add(statementIndex + 2, statement);
         }
+    }
+    
+    private ExpressionStatement createExpressionStatementThatInitializesField(ASTRewrite rewrite) throws JavaModelException{
+        Assignment assignment= fTempDeclarationNode.getAST().newAssignment();
+        SimpleName fieldName= fTempDeclarationNode.getAST().newSimpleName(fFieldName);
+        assignment.setLeftHandSide(fieldName);
+        String initializerCode= fCu.getBuffer().getText(getTempInitializer().getStartPosition(), getTempInitializer().getLength());
+        Expression tempInitializerCopy= (Expression)rewrite.createPlaceholder(initializerCode, ASTRewrite.EXPRESSION);
+        ///XXX workaround 
+        ///(Expression)rewrite.createCopy(getTempInitializer());
+        assignment.setRightHandSide(tempInitializerCopy);
+        ExpressionStatement assignmentStatement= fTempDeclarationNode.getAST().newExpressionStatement(assignment);
+        return assignmentStatement;
     }
 
     private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
@@ -513,5 +586,30 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		flags |= Modifier.STATIC;
         return flags;
     }
-    
+
+    private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
+    	private final List fLocalTypes= new ArrayList(0);
+    	public List getLocalTypeUsageNodes(){
+    		return fLocalTypes;
+    	}
+    	public boolean visitType(Type node) {
+	  		ITypeBinding typeBinding= node.resolveBinding();
+	  		if (typeBinding != null && typeBinding.isLocal())
+	  			fLocalTypes.add(node);
+	  		return super.visitType(node);	
+		}
+		public boolean visitName(Name node) {
+			ITypeBinding typeBinding= node.resolveTypeBinding();
+			if (typeBinding != null && typeBinding.isLocal())
+				fLocalTypes.add(node);
+			else {
+				IBinding binding= node.resolveBinding();
+				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
+					fLocalTypes.add(node);
+				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
+					fLocalTypes.add(node);
+			}
+            return super.visitName(node);
+        }
+    }    
 }
