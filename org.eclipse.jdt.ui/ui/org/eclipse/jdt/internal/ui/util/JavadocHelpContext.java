@@ -130,9 +130,9 @@ public class JavadocHelpContext implements IContext {
 				fText= context.getText();
 			}
 		}
-		if (fText != null && fText.length() == 0) {
-			fText= null; // see 14207 
-		}
+		
+		if (fText == null)
+			fText= "";  //$NON-NLS-1$
 		
 	}
 
