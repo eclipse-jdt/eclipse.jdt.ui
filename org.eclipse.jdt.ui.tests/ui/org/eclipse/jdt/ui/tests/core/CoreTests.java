@@ -31,7 +31,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(AllTypesCacheTest.allTests());
 		suite.addTest(BindingsNameTest.allTests());
 		suite.addTest(ClassPathDetectorTest.allTests());
-		//suite.addTest(HierarchicalASTVisitorTest.allTests());
+		suite.addTest(HierarchicalASTVisitorTest.allTests());
 		suite.addTest(ImportOrganizeTest.allTests());
 		suite.addTest(JavaModelUtilTest.allTests());
 		suite.addTest(NameProposerTest.allTests());

@@ -22,7 +22,10 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
@@ -35,19 +38,19 @@ import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 public class HierarchicalASTVisitorTest extends TestCase {
 	private static class TestHierarchicalASTVisitor extends HierarchicalASTVisitor {
 
-		//---- BEGIN <REGION TO BE UPDATED IN RESPONSE TO ASTNode HEIRARCHY CHANGES> ---------------------
+		//---- BEGIN <REGION TO BE UPDATED IN RESPONSE TO ASTNode HIERARCHY CHANGES> ---------------------
 		/* ******************************************************************************
 		 * Whereas the other parts of this test should be relatively static,
 		 * this portion of the file must be maintained in response to
-		 * changes that occur in the ASTNode heirarchy (and, thus, the ASTVisitor).
+		 * changes that occur in the ASTNode hierarchy (and, thus, the ASTVisitor).
 		 * Such changes would include addition or removal of node types to or from
-		 * the heirarchy, or changes in the superclass/subclass relationships
+		 * the hierarchy, or changes in the superclass/subclass relationships
 		 * among node classes.  Such changes necessitate, also, changes in the
 		 * HierarchicalASTVisitor itself, whose structure and behaviour this test
 		 * verifies.
 		 * 
 		 * The changes that must be made to this file in response to such changes in
-		 * the ASTNode heirarchy are localized here and limited to maintenance of the
+		 * the ASTNode hierarchy are localized here and limited to maintenance of the
 		 * following set of visit(XX node) implementations and superVisit(XX node).
 		 * There should be one such pair for each non-leaf ASTNode descendant class,
 		 * including ASTNode itself.
@@ -75,6 +78,14 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		public boolean visit(Annotation node) {
+			registerCall(Annotation.class);
+			return false;
+		}
+		public void superVisit(Annotation node) {
+			super.visit(node);
+		}
+
 		public boolean visit(Name node) {
 			registerCall(Name.class);
 			return false;
@@ -88,6 +99,22 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			return false;
 		}
 		public void superVisit(BodyDeclaration node) {
+			super.visit(node);
+		}
+		
+		public boolean visit(AbstractTypeDeclaration node) {
+			registerCall(AbstractTypeDeclaration.class);
+			return false;
+		}
+		public void superVisit(AbstractTypeDeclaration node) {
+			super.visit(node);
+		}
+		
+		public boolean visit(Comment node) {
+			registerCall(Comment.class);
+			return false;
+		}
+		public void superVisit(Comment node) {
 			super.visit(node);
 		}
 
@@ -114,7 +141,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(VariableDeclaration node) {
 			super.visit(node);
 		}
-		//---- END <REGION TO BE UPDATED IN RESPONSE TO ASTNode HEIRARCHY CHANGES> ----------------------
+		//---- END <REGION TO BE UPDATED IN RESPONSE TO ASTNode HIERARCHY CHANGES> ----------------------
 
 		/**
 		 * Verifies that the visit(XX) method in HierarchicalASTVisitor calls
@@ -205,7 +232,10 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		}
 
 		private void registerCall(Class nodeClassForMethod) {
-			assertNull("The invocation of a visit(XX) method in HierarchicalASTVisitor has caused more than one other visit(XX) method to be called.  Every visit(XX) method in HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), where YY is the superclass of XX.", fNodeClassForCalledMethod);
+			assertNull("The invocation of a visit(XX) method in HierarchicalASTVisitor has caused " +
+					"more than one other visit(XX) method to be called.  Every visit(XX) method in " +
+					"HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), " +
+					"where YY is the superclass of XX.", fNodeClassForCalledMethod);
 			fNodeClassForCalledMethod= nodeClassForMethod;
 		}
 	}
@@ -230,7 +260,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		fLeaves= getLeafASTNodeDescendants();
 		Set allASTNodeDescendants= computeAllDescendantsFromLeaves(fLeaves.iterator(), ASTNode.class);
 
-		checkAllMethodsForHeirarchyExist(allASTNodeDescendants.iterator());
+		checkAllMethodsForHierarchyExist(allASTNodeDescendants.iterator());
 		checkMethodsCallSuperclassMethod(allASTNodeDescendants.iterator());
 	}
 
@@ -241,18 +271,18 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	/**
 	 * For both HierarchicalASTVisitor and a subsequent part of this test to be correct,
 	 * HierarchicalASTVisitor and TestHierarchicalASTVisitor must declare certain methods,
-	 * each one corresponding to a class in the ASTNode heirarchy.  Specifically, 
-	 * HierarchicalASTVisitor must declare a method corresponding to each class in the heirarchy,
+	 * each one corresponding to a class in the ASTNode hierarchy.  Specifically, 
+	 * HierarchicalASTVisitor must declare a method corresponding to each class in the hierarchy,
 	 * whereas TestHierarchicalASTVisitor must declare a pair of methods for each non-leaf
-	 * class in the ASTNode heirarchy.
+	 * class in the ASTNode hierarchy.
 	 * 
 	 * This method verifies that these required methods exist, and suggests the updates
 	 * that are needed to properly maintain the set of methods.
 	 */
-	private void checkAllMethodsForHeirarchyExist(Iterator heirarchyClasses) {
-		while (heirarchyClasses.hasNext()) {
-			Class descendant= (Class) heirarchyClasses.next();
-			checkHeirarchicalASTVisitorMethodExistsFor(descendant);
+	private void checkAllMethodsForHierarchyExist(Iterator hierarchyClasses) {
+		while (hierarchyClasses.hasNext()) {
+			Class descendant= (Class) hierarchyClasses.next();
+			checkHierarchicalASTVisitorMethodExistsFor(descendant);
 			if (!isLeaf(descendant))
 				assertTrue("This test must be updated, since TestHierarchicalASTVisitor, a class declared within this test class, is missing a method corresponding to non-leaf node class " + getSimpleName(descendant), TestHierarchicalASTVisitor.hasRequiredMethodsForNonLeaf(descendant));
 		}
@@ -265,21 +295,21 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * reflection and a contrived subclass of HierarchicalASTVisitor,
 	 * TestHierarchicalASTVisitor.
 	 */
-	private void checkMethodsCallSuperclassMethod(Iterator heirarchyClasses) {
-		while (heirarchyClasses.hasNext()) {
-			Class descendant= (Class) heirarchyClasses.next();
+	private void checkMethodsCallSuperclassMethod(Iterator hierarchyClasses) {
+		while (hierarchyClasses.hasNext()) {
+			Class descendant= (Class) hierarchyClasses.next();
 			if (!ASTNode.class.equals(descendant))
 				TestHierarchicalASTVisitor.checkMethodCallsSuperclassMethod(descendant, isLeaf(descendant));
 		}
 	}
 
-	private void checkHeirarchicalASTVisitorMethodExistsFor(Class nodeClass) {
+	private void checkHierarchicalASTVisitorMethodExistsFor(Class nodeClass) {
 		try {
 			Assert.isTrue(ASTNode.class.isAssignableFrom(nodeClass));
 			HierarchicalASTVisitor.class.getDeclaredMethod(getMethodNameFor(nodeClass), new Class[] { nodeClass });
 		} catch (NoSuchMethodException e) {
 			String signature= getMethodNameFor(nodeClass) + "(" + getSimpleName(nodeClass) + ")";
-			assertTrue("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode heirarchy.  No method " + signature + " was found in HierarchicalASTVisitor.", false);
+			assertTrue("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode hierarchy.  No method " + signature + " was found in HierarchicalASTVisitor.", false);
 		}
 	}
 
@@ -330,7 +360,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 
 	/**
 	 * Returns all the leaf node classes (classes with no subclasses) in the
-	 * ASTNode heirarchy. Since every non-leaf ASTNode descendant (incl. ASTNode)
+	 * ASTNode . Since every non-leaf ASTNode descendant (incl. ASTNode)
 	 * is abstract, the set of leaf ASTNode descendants is the set of concrete
 	 * ASTNode descendants.
 	 * 
