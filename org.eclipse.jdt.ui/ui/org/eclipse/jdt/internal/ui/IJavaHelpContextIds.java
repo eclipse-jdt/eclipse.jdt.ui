@@ -127,7 +127,6 @@ public interface IJavaHelpContextIds {
 	public static final String LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG= PREFIX + "advanced_dialog_context"; //$NON-NLS-1$
 	public static final String CONFIRM_SAVE_MODIFIED_RESOURCES_DIALOG= PREFIX + "confirm_save_modified_resources_dialog_context"; //$NON-NLS-1$
 	public static final String NEW_VARIABLE_ENTRY_DIALOG= PREFIX + "new_variable_dialog_context"; //$NON-NLS-1$
-	public static final String COMPARE_DIALOG= PREFIX + "compare_dialog_context"; //$NON-NLS-1$
 	public static final String NONNLS_DIALOG= PREFIX + "nonnls_dialog_context"; //$NON-NLS-1$
 	public static final String MULTI_MAIN_TYPE_SELECTION_DIALOG= PREFIX + "multi_main_type_selection_dialog_context"; //$NON-NLS-1$
 	public static final String MULTI_TYPE_SELECTION_DIALOG= PREFIX + "multi_type_selection_dialog_context"; //$NON-NLS-1$
@@ -147,6 +146,11 @@ public interface IJavaHelpContextIds {
 	public static final String NLS_SEARCH_PAGE= PREFIX + "nls_search_page_context"; //$NON-NLS-1$
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
 	public static final String GOTO_RESOURCE_DIALOG= PREFIX + "goto_resource_dialog";  //$NON-NLS-1$
+	
+	public static final String COMPARE_DIALOG= PREFIX + "compare_dialog_context"; //$NON-NLS-1$
+	public static final String ADD_ELEMENT_FROM_HISTORY_DIALOG= PREFIX + "add_element_from_history_dialog_context"; //$NON-NLS-1$
+	public static final String COMPARE_ELEMENT_WITH_HISTORY_DIALOG= PREFIX + "compare_element_with_history_dialog_context"; //$NON-NLS-1$
+	public static final String REPLACE_ELEMENT_WITH_HISTORY_DIALOG= PREFIX + "replace_element_with_history_dialog_context"; //$NON-NLS-1$
 	
 	// view parts
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$

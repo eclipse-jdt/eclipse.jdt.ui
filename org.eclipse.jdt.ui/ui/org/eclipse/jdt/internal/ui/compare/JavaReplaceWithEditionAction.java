@@ -22,6 +22,7 @@ import org.eclipse.ui.*;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -92,6 +93,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			d.setHelpContextId(IJavaHelpContextIds.REPLACE_ELEMENT_WITH_HISTORY_DIALOG);
 			
 			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
 

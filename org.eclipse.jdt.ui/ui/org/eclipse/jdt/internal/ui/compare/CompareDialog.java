@@ -106,6 +106,4 @@ class CompareDialog extends ResizableDialog {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.COMPARE_DIALOG);
 	}
-
-
 }
