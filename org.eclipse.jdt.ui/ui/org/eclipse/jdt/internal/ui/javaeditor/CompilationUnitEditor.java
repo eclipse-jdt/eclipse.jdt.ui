@@ -97,7 +97,6 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
-import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
@@ -250,7 +249,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy();
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
 			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);			
-			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
 		}
 	};
 	
@@ -465,7 +463,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		public void verifyKey(VerifyEvent event) {			
 
-			if (!event.doit)
+			if (!event.doit || !isSmartTyping())
 				return;
 				
 			final ISourceViewer sourceViewer= getSourceViewer();

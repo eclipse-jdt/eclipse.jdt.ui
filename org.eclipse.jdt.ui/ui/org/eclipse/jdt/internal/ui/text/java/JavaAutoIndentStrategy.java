@@ -12,10 +12,13 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
@@ -24,137 +27,219 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
 /**
  * Auto indent strategy sensitive to brackets.
  */
 public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
+		
+		/**
+		 * Internal line interator working on <code>IDocument</code>.
+		 */
+		private static final class LineIterator implements Iterator {
+			
+			/** The document to iterator over. */
+			private final IDocument fDocument;
+			/** The line index. */
+			private int fLineIndex;
+	
+			/**
+			 * Creates a line iterator.
+			 */
+			public LineIterator(String string) {
+				fDocument= new Document(string);
+			}
+	
+			/*
+			 * @see java.util.Iterator#hasNext()
+			 */
+			public boolean hasNext() {
+				return fLineIndex != fDocument.getNumberOfLines();
+			}
+	
+			/*
+			 * @see java.util.Iterator#next()
+			 */
+			public Object next() {
+				try {
+					IRegion region= fDocument.getLineInformation(fLineIndex++);
+					return fDocument.get(region.getOffset(), region.getLength());
+				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
+					throw new NoSuchElementException();
+				}
+			}
+	
+			/*
+			 * @see java.util.Iterator#remove()
+			 */
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
+		
+		private static class CompilationUnitInfo {
+			
+			public char[] buffer;
+			public int delta;
+			
+			public CompilationUnitInfo(char[] buffer, int delta) {
+				this.buffer= buffer;
+				this.delta= delta;
+			}
+		};
+
 
 	private final static String COMMENT= "//"; //$NON-NLS-1$
-	private int fTabWidth= -1;
+	
+	private int fTabWidth;
 	private boolean fUseSpaces;
-
+	private boolean fCloseBrace;
+	private boolean fIsSmartMode;
+	
 	public JavaAutoIndentStrategy() {
-        fUseSpaces= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);
-	}
+ 	}
 
-	// evaluate the line with the opening bracket that matches the closing bracket on the given line
-	protected int findMatchingOpenBracket(IDocument d, int line, int end, int closingBracketIncrease) throws BadLocationException {
+	/**
+	 * Evaluates the given line for the opening bracket that matches the closing bracket on the given line.
+	 */
+	private int findMatchingOpenBracket(IDocument d, int lineNumber, int endOffset, int closingBracketIncrease) throws BadLocationException {
 
-		int start= d.getLineOffset(line);
-		int brackcount= getBracketCount(d, start, end, false) - closingBracketIncrease;
+		int startOffset= d.getLineOffset(lineNumber);
+		int bracketCount= getBracketCount(d, startOffset, endOffset, false) - closingBracketIncrease;
 
 		// sum up the brackets counts of each line (closing brackets count negative,
 		// opening positive) until we find a line the brings the count to zero
-		while (brackcount < 0) {
-			line--;
-			if (line < 0) {
+		while (bracketCount < 0) {
+			--lineNumber;
+			if (lineNumber < 0)
 				return -1;
-			}
-			start= d.getLineOffset(line);
-			end= start + d.getLineLength(line) - 1;
-			brackcount += getBracketCount(d, start, end, false);
+			startOffset= d.getLineOffset(lineNumber);
+			endOffset= startOffset + d.getLineLength(lineNumber) - 1;
+			bracketCount += getBracketCount(d, startOffset, endOffset, false);
 		}
-		return line;
+		return lineNumber;
 	}
 
-	private int getBracketCount(IDocument d, int start, int end, boolean ignoreCloseBrackets) throws BadLocationException {
+	private int getBracketCount(IDocument d, int startOffset, int endOffset, boolean ignoreCloseBrackets) throws BadLocationException {
 
-		int bracketcount= 0;
-		while (start < end) {
-			char curr= d.getChar(start);
-			start++;
+		int bracketCount= 0;
+		while (startOffset < endOffset) {
+			char curr= d.getChar(startOffset);
+			startOffset++;
 			switch (curr) {
 				case '/' :
-					if (start < end) {
-						char next= d.getChar(start);
+					if (startOffset < endOffset) {
+						char next= d.getChar(startOffset);
 						if (next == '*') {
 							// a comment starts, advance to the comment end
-							start= getCommentEnd(d, start + 1, end);
+							startOffset= getCommentEnd(d, startOffset + 1, endOffset);
 						} else if (next == '/') {
 							// '//'-comment: nothing to do anymore on this line
-							start= end;
+							startOffset= endOffset;
 						}
 					}
 					break;
 				case '*' :
-					if (start < end) {
-						char next= d.getChar(start);
+					if (startOffset < endOffset) {
+						char next= d.getChar(startOffset);
 						if (next == '/') {
 							// we have been in a comment: forget what we read before
-							bracketcount= 0;
-							start++;
+							bracketCount= 0;
+							startOffset++;
 						}
 					}
 					break;
 				case '{' :
-					bracketcount++;
+					bracketCount++;
 					ignoreCloseBrackets= false;
 					break;
 				case '}' :
 					if (!ignoreCloseBrackets) {
-						bracketcount--;
+						bracketCount--;
 					}
 					break;
 				case '"' :
 				case '\'' :
-					start= getStringEnd(d, start, end, curr);
+					startOffset= getStringEnd(d, startOffset, endOffset, curr);
 					break;
 				default :
 					}
 		}
-		return bracketcount;
+		return bracketCount;
 	}
 
 	// ----------- bracket counting ------------------------------------------------------
 
-	private int getCommentEnd(IDocument d, int pos, int end) throws BadLocationException {
-		while (pos < end) {
-			char curr= d.getChar(pos);
-			pos++;
+	private int getCommentEnd(IDocument d, int offset, int endOffset) throws BadLocationException {
+		while (offset < endOffset) {
+			char curr= d.getChar(offset);
+			offset++;
 			if (curr == '*') {
-				if (pos < end && d.getChar(pos) == '/') {
-					return pos + 1;
+				if (offset < endOffset && d.getChar(offset) == '/') {
+					return offset + 1;
 				}
 			}
 		}
-		return end;
+		return endOffset;
 	}
 
-	protected String getIndentOfLine(IDocument d, int line) throws BadLocationException {
+	private String getIndentOfLine(IDocument d, int line) throws BadLocationException {
 		if (line > -1) {
 			int start= d.getLineOffset(line);
 			int end= start + d.getLineLength(line) - 1;
-			int whiteend= findEndOfWhiteSpace(d, start, end);
-			return d.get(start, whiteend - start);
+			int whiteEnd= findEndOfWhiteSpace(d, start, end);
+			return d.get(start, whiteEnd - start);
 		} else {
 			return ""; //$NON-NLS-1$
 		}
 	}
 
-	private int getStringEnd(IDocument d, int pos, int end, char ch) throws BadLocationException {
-		while (pos < end) {
-			char curr= d.getChar(pos);
-			pos++;
+	private int getStringEnd(IDocument d, int offset, int endOffset, char ch) throws BadLocationException {
+		while (offset < endOffset) {
+			char curr= d.getChar(offset);
+			offset++;
 			if (curr == '\\') {
 				// ignore escaped characters
-				pos++;
+				offset++;
 			} else if (curr == ch) {
-				return pos;
+				return offset;
 			}
 		}
-		return end;
+		return endOffset;
 	}
 
-	protected void smartInsertAfterBracket(IDocument d, DocumentCommand c) {
+	private void smartInsertAfterBracket(IDocument d, DocumentCommand c) {
 		if (c.offset == -1 || d.getLength() == 0)
 			return;
 
@@ -185,7 +270,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 	}
 
-	protected void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
+	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
 
 		int docLength= d.getLength();
 		if (c.offset == -1 || docLength == 0)
@@ -212,9 +297,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 				}
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
-				buf.append(d.get(start, whiteend - start));
+				int length= whiteend - start;
+				buf.append(d.get(start, length));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
 					buf.append(createIndent(1, useSpaces()));
+					if (closeBrace() && !isClosed(d, c.offset, c.length)) {
+						c.caretOffset= c.offset + buf.length();
+						c.shiftsCaret= false;
+						buf.append(getLineDelimiter(d));
+						buf.append(d.get(start, length));
+						buf.append('}');
+					}
 				}
 			}
 			c.text= buf.toString();
@@ -222,6 +315,103 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	private boolean isClosed(IDocument document, int offset, int length) {
+		
+		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset);
+		if (info == null)
+			return false;
+		
+		final CompilationUnit compilationUnit= AST.parseCompilationUnit(info.buffer);
+		IProblem[] problems= compilationUnit.getProblems();
+		for (int i= 0; i != problems.length; ++i) {
+			if (problems[i].getID() == IProblem.UnmatchedBracket)
+				return true;
+		}
+		
+		final int relativeOffset= offset - info.delta;
+		
+		ASTNode node= NodeFinder.perform(compilationUnit, relativeOffset, length);
+		if (node == null)
+			return false;
+
+		if (length == 0) {
+			while (node != null && (relativeOffset == node.getStartPosition() || relativeOffset == node.getStartPosition() + node.getLength()))
+				node= node.getParent();
+		}
+		
+		switch (node.getNodeType()) {
+		case ASTNode.BLOCK:
+			return areBlocksConsistent(document, offset);
+
+		case ASTNode.IF_STATEMENT: 
+			{
+				IfStatement ifStatement= (IfStatement) node;
+				Expression expression= ifStatement.getExpression();
+				IRegion expressionRegion= createRegion(expression, info.delta);
+				Statement thenStatement= ifStatement.getThenStatement();
+				IRegion thenRegion= createRegion(thenStatement, info.delta);
+
+				// between expression and then statement
+				if (expressionRegion.getOffset() + expressionRegion.getLength() <= offset && offset + length <= thenRegion.getOffset())
+					return thenStatement != null;
+				
+
+				Statement elseStatement= ifStatement.getElseStatement();
+				IRegion elseRegion= createRegion(elseStatement, info.delta);
+				
+				IRegion elseToken= null;
+				if (elseStatement != null) {
+					int sourceOffset= thenRegion.getOffset() + thenRegion.getLength();
+					int sourceLength= elseRegion.getOffset() - sourceOffset;
+					elseToken= getToken(document, new Region(sourceOffset, sourceLength), ITerminalSymbols.TokenNameelse);
+				}
+				
+				// between 'else' keyword and else statement				
+				if (elseToken.getOffset() + elseToken.getLength() <= offset && offset + length < elseRegion.getOffset())
+					return elseStatement != null;
+			}
+			break;
+
+		case ASTNode.WHILE_STATEMENT:
+		case ASTNode.FOR_STATEMENT:
+			{
+				Expression expression= node.getNodeType() == ASTNode.WHILE_STATEMENT ? ((WhileStatement) node).getExpression() : ((ForStatement) node).getExpression();
+				IRegion expressionRegion= createRegion(expression, info.delta);
+				Statement body= node.getNodeType() == ASTNode.WHILE_STATEMENT ? ((WhileStatement) node).getBody() : ((ForStatement) node).getBody();
+				IRegion bodyRegion= createRegion(body, info.delta);
+				
+				// between expression and body statement
+				if (expressionRegion.getOffset() + expressionRegion.getLength() <= offset && offset + length <= bodyRegion.getOffset())
+					return body != null;
+			}
+			break;
+
+		case ASTNode.DO_STATEMENT:
+			{
+				DoStatement doStatement= (DoStatement) node;
+				IRegion doRegion= createRegion(doStatement, info.delta);
+				Statement body= doStatement.getBody();
+				IRegion bodyRegion= createRegion(body, info.delta);
+
+				if (doRegion.getOffset() + doRegion.getLength() <= offset && offset + length <= bodyRegion.getOffset())
+					return body != null;
+			}
+			break;
+		}
+		
+		return true;
+	}
+
+	private boolean hasUnmatchedBracket(char[] code) {
+		final CompilationUnit compilationUnit= AST.parseCompilationUnit(code);
+		IProblem[] problems= compilationUnit.getProblems();
+		for (int i= 0; i != problems.length; ++i) {
+			if (problems[i].getID() == IProblem.UnmatchedBracket)
+				return true;
+		}
+		return false;
 	}
 
 	private static String getLineDelimiter(IDocument document) {
@@ -235,7 +425,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
 
-
 	private static boolean startsWithClosingBrace(String string) {
 		final int length= string.length();
 		int i= 0;
@@ -246,7 +435,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return string.charAt(i) == '}';
 	}
 
-	protected void smartPaste(IDocument document, DocumentCommand command) {
+	private void smartPaste(IDocument document, DocumentCommand command) {
 
 		String lineDelimiter= getLineDelimiter(document);
 
@@ -271,9 +460,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1, useSpaces()); //$NON-NLS-1$ // add one indent level
 			int insideBlockIndentSize= calculateDisplayedWidth(insideBlockIndent, getTabWidth());
 			int previousIndentSize= getIndentSize(document, command);
-			int newIndentSize= insideBlockIndentSize < previousIndentSize
-				? insideBlockIndentSize
-				: previousIndentSize;
+			int newIndentSize= insideBlockIndentSize < previousIndentSize ? insideBlockIndentSize : previousIndentSize;
 
 			// indent is different if block starts with '}'				
 			if (startsWithClosingBrace(pastedText)) {
@@ -480,48 +667,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return null;
 	}
 
-	private static final class LineIterator implements Iterator {
-		/** The document to iterator over. */
-		private final IDocument fDocument;
-		/** The line index. */
-		private int fLineIndex;
-
-		/**
-		 * Creates a line iterator.
-		 */
-		public LineIterator(String string) {
-			fDocument= new Document(string);
-		}
-
-		/*
-		 * @see java.util.Iterator#hasNext()
-		 */
-		public boolean hasNext() {
-			return fLineIndex != fDocument.getNumberOfLines();
-		}
-
-		/*
-		 * @see java.util.Iterator#next()
-		 */
-		public Object next() {
-			try {
-				IRegion region= fDocument.getLineInformation(fLineIndex++);
-				return fDocument.get(region.getOffset(), region.getLength());
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-				throw new NoSuchElementException();
-			}
-		}
-
-		/*
-		 * @see java.util.Iterator#remove()
-		 */
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
 	private String createIndent(int level, boolean useSpaces) {
 
 		StringBuffer buffer= new StringBuffer();
@@ -546,7 +691,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static String changePrefix(String string, int displayedWidth, boolean useSpaces, int tabWidth) {
 
-		// assumption: string contains no whitspaces
+		// assumption: string contains no whitespace
 		final StringBuffer buffer= new StringBuffer(string);
 		int column= calculateDisplayedWidth(buffer.toString(), tabWidth);
 
@@ -611,7 +756,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					int deltaSize= newIndentSize - firstLineIndentSize;
 					lineIndent= changePrefix(lineIndent.trim(), indentSize + deltaSize, useSpaces(), tabWidth);
 					buffer.append(lineIndent);
-					buffer.append(lineContent);			
+					buffer.append(lineContent);
 				}
 
 			} else {
@@ -647,14 +792,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
+		
+		clearCachedValues();
+		if (!isSmartMode())
+			return;
+		
 		if (c.length == 0 && c.text != null && equalsDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
 		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c);
-			
-		clearCachedValues();
 	}
 	
 	private static IPreferenceStore getPreferenceStore() {
@@ -665,15 +813,188 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return fUseSpaces;
 	}
 	
+	private boolean closeBrace() {
+		return fCloseBrace;
+	}
+
 	private int getTabWidth() {
-		if (fTabWidth == -1)
-			// Fix for bug 29909 contributed by Nikolay Metchev
-			fTabWidth= Integer.parseInt(((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE))); 
 		return fTabWidth;
 	}
 	
+	private boolean isSmartMode() {
+		return fIsSmartMode;
+	}
+	
 	private void clearCachedValues() {
-		fTabWidth= -1;
-        fUseSpaces= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);
+		// Fix for bug 29909 contributed by Nikolay Metchev
+		fTabWidth= Integer.parseInt(((String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE)));
+        
+        IPreferenceStore preferenceStore= getPreferenceStore();
+		fUseSpaces= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);
+		fCloseBrace= preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACES);
+		fIsSmartMode= computeSmartMode();
+	}
+	
+	private boolean computeSmartMode() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null)  {
+			IEditorPart part= page.getActiveEditor(); 
+			if (part instanceof CompilationUnitEditor) {
+				CompilationUnitEditor editor= (CompilationUnitEditor) part;
+				return editor.isSmartTyping();
+			}
+		}
+		return false;
+	}
+
+	private static int searchForClosingPeer(JavaCodeReader reader, int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+
+		reader.configureForwardReader(document, offset + 1, document.getLength(), true, true);
+
+		int stack= 1;
+		int c= reader.read();
+		while (c != JavaCodeReader.EOF) {
+			if (c == openingPeer && c != closingPeer)
+				stack++;
+			else if (c == closingPeer)
+				stack--;
+
+			if (stack == 0)
+				return reader.getOffset();
+
+			c= reader.read();
+		}
+
+		return  -1;
+	}
+
+	private static int searchForOpeningPeer(JavaCodeReader reader, int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+
+		reader.configureBackwardReader(document, offset, true, true);
+
+		int stack= 1;
+		int c= reader.read();
+		while (c != JavaCodeReader.EOF) {
+			if (c == closingPeer && c != openingPeer)
+				stack++;
+			else if (c == openingPeer)
+				stack--;
+
+			if (stack == 0)
+				return reader.getOffset();
+
+			c= reader.read();
+		}
+
+		return -1;
+	}
+
+	private static IRegion getSurroundingBlock(IDocument document, int offset) {
+		JavaCodeReader reader= new JavaCodeReader();
+		try {
+			int begin= searchForOpeningPeer(reader, offset, '{', '}', document);
+			int end= searchForClosingPeer(reader, offset, '{', '}', document);
+			if (begin == -1 || end == -1)
+				return null;
+			return new Region(begin, end + 1 - begin);
+			
+		} catch (IOException e) {
+			return null;	
+		}
+	}
+
+	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset) {
+		try {	
+			
+			IRegion sourceRange= getSurroundingBlock(document, offset);
+			if (sourceRange == null)
+				return null;
+			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
+	
+			StringBuffer contents= new StringBuffer();
+			contents.append("class ____C{void ____m()"); //$NON-NLS-1$
+			final int methodOffset= contents.length();
+			contents.append(source);
+			contents.append('}');
+			
+			char[] buffer= contents.toString().toCharArray();
+	
+			return new CompilationUnitInfo(buffer, sourceRange.getOffset() - methodOffset);
+	
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+	
+		return null;
+	}
+	
+	private static boolean areBlocksConsistent(IDocument document, int offset) {
+		JavaCodeReader reader= new JavaCodeReader();
+		try { 
+			int begin= offset;
+			int end= offset;
+			
+			while (true) {
+				begin= searchForOpeningPeer(reader, begin, '{', '}', document);
+				end= searchForClosingPeer(reader, end, '{', '}', document);
+				if (begin == -1 && end == -1)
+					return true;
+				if (begin == -1 || end == -1)
+					return false;
+			}
+
+		} catch (IOException e) {
+			return false;
+		}		
+	}
+	
+	private static IRegion createRegion(ASTNode node, int delta) {
+		return node == null ? null : new Region(node.getStartPosition() + delta, node.getLength());
+	}
+	
+	private static Statement getNextStatement(Statement statement) {
+
+		ASTNode node= statement.getParent();
+		while (node != null && node.getNodeType() != ASTNode.BLOCK)
+			node= node.getParent();
+
+		if (node == null)
+			return null;
+
+		Block block= (Block) node;
+		List statements= block.statements();
+		for (final Iterator iterator= statements.iterator(); iterator.hasNext(); ) {
+			final Statement nextStatement= (Statement) iterator.next();
+			if (nextStatement.getStartPosition() >= statement.getStartPosition() + statement.getLength())
+				return nextStatement;
+		}
+		return null;
+	}
+	
+	private static IRegion getToken(IDocument document, IRegion scanRegion, int tokenId)  {
+
+		try {
+			
+			final String source= document.get(scanRegion.getOffset(), scanRegion.getLength());
+	
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(source.toCharArray());
+
+			int id= scanner.getNextToken();
+			while (id != ITerminalSymbols.TokenNameEOF && id != tokenId)
+				id= scanner.getNextToken();
+
+			if (id == ITerminalSymbols.TokenNameEOF)
+				return null;
+
+			int tokenOffset= scanner.getCurrentTokenStartPosition();
+			int tokenLength= scanner.getCurrentTokenEndPosition() + 1 - tokenOffset; // inclusive end
+			return new Region(tokenOffset + scanRegion.getOffset(), tokenLength);
+
+		} catch (InvalidInputException x) {
+			return null;
+		} catch (BadLocationException x) {
+			return null;
+		}
 	}
 }
