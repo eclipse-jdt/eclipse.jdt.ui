@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -433,29 +432,10 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		return result;
 	}
 
-	protected static IType getSingleTopLevelType(final IMember[] members) {
-		if (members != null && members.length == 1 && Checks.isTopLevelType(members[0]))
-			return (IType) members[0];
-		return null;
-	}
-
 	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
 		final String[] lines= Strings.convertIntoLines(text);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(declaringCu.getJavaProject()), false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
-	}
-
-	protected static boolean haveCommonDeclaringType(final IMember[] members) {
-		if (members.length == 0)
-			return false;
-		final IType type= members[0].getDeclaringType();
-		if (type == null)
-			return false;
-		for (int index= 0; index < members.length; index++) {
-			if (!type.equals(members[index].getDeclaringType()))
-				return false;
-		}
-		return true;
 	}
 
 	protected final Map fCachedMembersReferences= new HashMap(2);

@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -216,20 +217,13 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		matchingSet.add(matchingMember);
 	}
 
-	private static boolean areAllPullable(IMember[] members) throws JavaModelException {
-		for (int i= 0; i < members.length; i++) {
-			if (!isPullable(members[i]))
-				return false;
-		}
-		return true;
-	}
-
 	public static PullUpRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException {
-		if (!isAvailable(members))
+		if (!RefactoringAvailabilityTester.isPullUpAvailable(members))
 			return null;
-		if (isOneTypeWithPullableMembers(members)) {
+		final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
+		if (type != null && RefactoringAvailabilityTester.getPullUpMembers(type).length != 0) {
 			PullUpRefactoring result= new PullUpRefactoring(new IMember[0], preferenceSettings);
-			result.fDeclaringType= getSingleTopLevelType(members);
+			result.fDeclaringType= RefactoringAvailabilityTester.getTopLevelType(members);
 			return result;
 		}
 		return new PullUpRefactoring(members, preferenceSettings);
@@ -281,59 +275,6 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			result[i]= (IMethod) WorkingCopyUtil.getOriginal(methods[i]);
 		}
 		return result;
-	}
-
-	private static IMember[] getPullableMembers(IType type) throws JavaModelException {
-		List list= new ArrayList(3);
-		IMember[] members= type.getFields();
-		for (int i= 0; i < members.length; i++) {
-			if (isPullable(members[i]))
-				list.add(members[i]);
-		}
-		IMember[] members1= type.getMethods();
-		for (int i= 0; i < members1.length; i++) {
-			if (isPullable(members1[i]))
-				list.add(members1[i]);
-		}
-		IMember[] members2= type.getTypes();
-		for (int i= 0; i < members2.length; i++) {
-			if (isPullable(members2[i]))
-				list.add(members2[i]);
-		}
-		return (IMember[]) list.toArray(new IMember[list.size()]);
-	}
-
-	public static boolean isAvailable(IMember[] members) throws JavaModelException {
-		if (isOneTypeWithPullableMembers(members))
-			return true;
-		return members != null && members.length != 0 && areAllPullable(members) && haveCommonDeclaringType(members);
-	}
-
-	private static boolean isOneTypeWithPullableMembers(IMember[] members) throws JavaModelException {
-		IType singleTopLevelType= getSingleTopLevelType(members);
-		return (singleTopLevelType != null && getPullableMembers(singleTopLevelType).length != 0);
-	}
-
-	private static boolean isPullable(IMember member) throws JavaModelException {
-		if (member.getElementType() != IJavaElement.METHOD && member.getElementType() != IJavaElement.FIELD && member.getElementType() != IJavaElement.TYPE)
-			return false;
-		if (JdtFlags.isEnum(member) && member.getElementType() != IJavaElement.TYPE)
-			return false;
-		if (!Checks.isAvailable(member))
-			return false;
-		if (member instanceof IType) {
-			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member) && !JdtFlags.isAnnotation(member))
-				return false;
-		}
-		if (member instanceof IMethod) {
-			IMethod method= (IMethod) member;
-			if (method.isConstructor())
-				return false;
-
-			if (JdtFlags.isNative(method)) // for now - move to input preconditions
-				return false;
-		}
-		return true;
 	}
 
 	private static void mergeSetsForCommonKeys(Map result, Map map) {
@@ -1346,7 +1287,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	public IMember[] getPullableMembersOfDeclaringType() {
 		try {
-			return getPullableMembers(getDeclaringType());
+			return RefactoringAvailabilityTester.getPullUpMembers(getDeclaringType());
 		} catch (JavaModelException e) {
 			return new IMember[0];
 		}
@@ -1412,7 +1353,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 	private boolean isRequiredPullableMember(List queue, IMember member) throws JavaModelException {
 		if (member.getDeclaringType() == null) // not a member
 			return false;
-		return member.getDeclaringType().equals(getDeclaringType()) && !queue.contains(member) && isPullable(member);
+		return member.getDeclaringType().equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTester.isPullUpAvailable(member);
 	}
 
 	private boolean isVirtualAccessibleFromTargetClass(IMethod method, IProgressMonitor pm) throws JavaModelException {

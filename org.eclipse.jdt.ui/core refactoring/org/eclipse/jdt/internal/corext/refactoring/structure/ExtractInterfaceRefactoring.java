@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 
 /**
  * Refactoring to extract an interface from a type.
@@ -38,17 +37,6 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 		Assert.isNotNull(settings);
 		Assert.isTrue(type.exists() && !type.isAnnotation() && !type.isAnonymous() && !type.isBinary() && !type.isReadOnly());
 		return new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, settings));
-	}
-
-	/**
-	 * Is this refactoring available for the specified type?
-	 * 
-	 * @param type the type to test
-	 * @return <code>true</code> if this refactoring is available, <code>false</code> otherwise
-	 * @throws JavaModelException if the type could not be tested
-	 */
-	public static boolean isAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !type.isBinary() && !type.isReadOnly() && !type.isAnnotation() && !type.isAnonymous();
 	}
 
 	/** The processor to use */

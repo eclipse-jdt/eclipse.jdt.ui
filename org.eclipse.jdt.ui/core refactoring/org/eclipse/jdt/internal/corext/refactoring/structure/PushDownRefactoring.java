@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -214,27 +215,13 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	}
 
-	private static void addAllPushable(IMember[] members, List list) throws JavaModelException {
-		for (int i= 0; i < members.length; i++) {
-			if (isPushable(members[i]))
-				list.add(members[i]);
-		}
-	}
-
-	private static boolean areAllPushable(IMember[] members) throws JavaModelException {
-		for (int i= 0; i < members.length; i++) {
-			if (!isPushable(members[i]))
-				return false;
-		}
-		return true;
-	}
-
 	public static PushDownRefactoring create(IMember[] members) throws JavaModelException {
-		if (!isAvailable(members))
+		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
 			return null;
-		if (isOneTypeWithPushableMembers(members)) {
+		IType type= RefactoringAvailabilityTester.getTopLevelType(members);
+		if (type != null && RefactoringAvailabilityTester.getPushDownMembers(type).length != 0) {
 			PushDownRefactoring result= new PushDownRefactoring(new IMember[0]);
-			result.fDeclaringType= getSingleTopLevelType(members);
+			result.fDeclaringType= RefactoringAvailabilityTester.getTopLevelType(members);
 			return result;
 		}
 		return new PushDownRefactoring(members);
@@ -242,7 +229,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	private static MemberActionInfo[] createInfosForAllPushableFieldsAndMethods(IType type) throws JavaModelException {
 		List result= new ArrayList();
-		IMember[] pushableMembers= getPushableMembers(type);
+		IMember[] pushableMembers= RefactoringAvailabilityTester.getPushDownMembers(type);
 		for (int i= 0; i < pushableMembers.length; i++) {
 			result.add(MemberActionInfo.create(pushableMembers[i]));
 		}
@@ -270,13 +257,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		return rewrite;
 	}
 
-	private static IMember[] getPushableMembers(IType type) throws JavaModelException {
-		List list= new ArrayList(3);
-		addAllPushable(type.getFields(), list);
-		addAllPushable(type.getMethods(), list);
-		return (IMember[]) list.toArray(new IMember[list.size()]);
-	}
-
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(member);
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
@@ -297,40 +277,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
 	}
 
-	public static boolean isAvailable(IMember[] members) throws JavaModelException {
-		if (isOneTypeWithPushableMembers(members))
-			return true;
-		final IType type= getSingleTopLevelType(members);
-		if (type != null && JdtFlags.isEnum(type))
-			return false;
-		return members != null && members.length != 0 && areAllPushable(members) && haveCommonDeclaringType(members);
-	}
-
-	private static boolean isOneTypeWithPushableMembers(IMember[] members) throws JavaModelException {
-		IType singleTopLevelType= getSingleTopLevelType(members);
-		return (singleTopLevelType != null && getPushableMembers(singleTopLevelType).length != 0);
-	}
-
-	private static boolean isPushable(IMember member) throws JavaModelException {
-		if (member.getElementType() != IJavaElement.METHOD && member.getElementType() != IJavaElement.FIELD)
-			return false;
-		if (JdtFlags.isEnum(member))
-			return false;
-		if (!Checks.isAvailable(member))
-			return false;
-		if (JdtFlags.isStatic(member))
-			return false;
-		if (member.getElementType() == IJavaElement.METHOD) {
-			IMethod method= (IMethod) member;
-			if (method.isConstructor())
-				return false;
-
-			if (JdtFlags.isNative(method))
-				return false;
-		}
-		return true;
-	}
-
 	private ITypeHierarchy fCachedClassHierarchy;
 
 	private MemberActionInfo[] fMemberInfos;
@@ -348,14 +294,14 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		sub.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating_required"), requiredMethods.length); //$NON-NLS-1$
 		for (int index= 0; index < requiredMethods.length; index++) {
 			IMethod method= requiredMethods[index];
-			if (!MethodChecks.isVirtual(method) && (method.getDeclaringType().equals(getDeclaringType()) && !queue.contains(method) && isPushable(method)))
+			if (!MethodChecks.isVirtual(method) && (method.getDeclaringType().equals(getDeclaringType()) && !queue.contains(method) && RefactoringAvailabilityTester.isPushDownAvailable(method)))
 				queue.add(method);
 		}
 		sub.done();
 		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { member}, new SubProgressMonitor(monitor, 1));
 		for (int index= 0; index < requiredFields.length; index++) {
 			IField field= requiredFields[index];
-			if (field.getDeclaringType().equals(getDeclaringType()) && !queue.contains(field) && isPushable(field))
+			if (field.getDeclaringType().equals(getDeclaringType()) && !queue.contains(field) && RefactoringAvailabilityTester.isPushDownAvailable(field))
 				queue.add(field);
 		}
 		monitor.done();

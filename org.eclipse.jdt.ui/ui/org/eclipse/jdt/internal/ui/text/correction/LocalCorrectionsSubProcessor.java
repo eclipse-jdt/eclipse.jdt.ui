@@ -247,7 +247,7 @@ public class LocalCorrectionsSubProcessor {
 	
 	public static void addNLSProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
-		if (! NLSRefactoring.isAvailable(cu)){
+		if (cu == null || !cu.exists()){
 			return;
 		}
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$

@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 /**
  * Refactoring to move an instance method to another class.
@@ -40,20 +40,6 @@ public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
 		Assert.isNotNull(settings);
 		Assert.isTrue(method.exists() && !method.isConstructor() && !method.isBinary() && !method.isReadOnly());
 		return new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, settings));
-	}
-
-	/**
-	 * Is this refactoring available for the specified method?
-	 * 
-	 * @param method
-	 *        the method to test
-	 * @return <code>true</code> if this refactoring is available, <code>false</code> otherwise
-	 * @throws JavaModelException
-	 *         if the method could not be tested
-	 */
-	public static boolean isAvailable(final IMethod method) throws JavaModelException {
-		Assert.isNotNull(method);
-		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isLocal() && !method.getDeclaringType().isAnnotation() && !method.isReadOnly() && !JdtFlags.isStatic(method);
 	}
 
 	/**
