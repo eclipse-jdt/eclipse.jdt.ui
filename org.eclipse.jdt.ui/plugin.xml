@@ -617,6 +617,8 @@
             highlightPreferenceValue="true"
             textStylePreferenceKey="linked.focus.text.style"
             textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="linked.focus.verticalruler"
+            verticalRulerPreferenceValue="false"
             overviewRulerPreferenceKey="linked.focus.overviewruler">
       </specification>      
       <specification
@@ -639,6 +641,8 @@
             highlightPreferenceValue="true"
             textStylePreferenceKey="linked.slave.text.style"
             textStylePreferenceValue="NONE"
+            verticalRulerPreferenceKey="linked.slave.verticalruler"
+            verticalRulerPreferenceValue="false"
             overviewRulerPreferenceKey="linked.slave.overviewruler">
       </specification>      
       <specification
@@ -661,6 +665,8 @@
             highlightPreferenceValue="false"
             textStylePreferenceKey="linked.target.text.style"
             textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="linked.target.verticalruler"
+            verticalRulerPreferenceValue="false"
             overviewRulerPreferenceKey="linked.target.overviewruler">
       </specification>
       <specification
@@ -683,6 +689,8 @@
             highlightPreferenceValue="false"
             textStylePreferenceKey="linked.exit.text.style"
             textStylePreferenceValue="IBEAM"
+            verticalRulerPreferenceKey="linked.exit.verticalruler"
+            verticalRulerPreferenceValue="false"
             overviewRulerPreferenceKey="linked.exit.overviewruler">
       </specification>
 	</extension>

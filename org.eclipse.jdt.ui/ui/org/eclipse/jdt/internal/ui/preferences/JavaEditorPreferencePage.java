@@ -86,7 +86,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
-/*
+/**
  * The page for setting the editor options.
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -95,6 +95,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
 
+	/** The keys of the overlay store. */
 	public final OverlayPreferenceStore.OverlayKey[] fKeys;	
 	private final String[][] fSyntaxColorListModel= new String[][] {
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
@@ -206,6 +207,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fCompletionOverwritesRadioButton;
 	private Button fStickyOccurrencesButton;
 	
+	/**
+	 * Creates a new preference page.
+	 */
 	public JavaEditorPreferencePage() {
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -748,6 +752,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
+		gd.horizontalIndent= 20;
 		fDecorationStyleCombo.setLayoutData(gd);
 		
 		fHighlightInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
