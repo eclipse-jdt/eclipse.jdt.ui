@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
  */
 public class ImportsStructure implements IImportsStructure {
 		
+	
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;
 	
@@ -50,6 +51,8 @@ public class ImportsStructure implements IImportsStructure {
 	
 	private int fNumberOfImportsCreated;
 	private boolean fHasChanges= false;
+	
+	private static final String JAVA_LANG= "java.lang";
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
@@ -292,7 +295,7 @@ public class ImportsStructure implements IImportsStructure {
 	}	
 	
 	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
-		if ("java.lang".equals(qualifier)) { //$NON-NLS-1$
+		if (JAVA_LANG.equals(qualifier)) { //$NON-NLS-1$
 			return true;
 		}
 		
@@ -579,7 +582,7 @@ public class ImportsStructure implements IImportsStructure {
 			return;
 		}
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
-		starImportPackages.add("java.lang");
+		starImportPackages.add(JAVA_LANG);
 		
 		ArrayList res= new ArrayList();
 		HashSet typesInPackages= new HashSet();
@@ -785,27 +788,6 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			return (count >= threshold) && containsNew;
 		}
-				
-		/*public boolean doesNeedStarImport(int threshold) {
-			if (isComment()) {
-				return false;
-			}
-			
-			int count= 0;
-			boolean containsNew= false;
-			int nImports= getNumberOfImports();
-			for (int i= 0; i < nImports; i++) {
-				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isOnDemand() && !curr.isNew()) { // already has on demand import
-					return false;
-				}
-				if (!curr.isComment()) {
-					count++;
-					containsNew |= curr.isNew();
-				}
-			}		
-			return (count >= threshold) && containsNew;	
-		}*/
 		
 		public int getNumberOfImports() {
 			return fImportEntries.size();
