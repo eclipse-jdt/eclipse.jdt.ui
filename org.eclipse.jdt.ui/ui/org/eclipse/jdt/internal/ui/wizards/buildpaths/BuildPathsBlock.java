@@ -539,7 +539,7 @@ public class BuildPathsBlock {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
 				}				
-				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 12); //$NON-NLS-1$
+				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 10); //$NON-NLS-1$
 				try {
 					createJavaProject(classPathEntries, path, monitor);
 				} catch (CoreException e) { 
@@ -556,6 +556,8 @@ public class BuildPathsBlock {
 	 * If the project already exists only build paths are updated.
 	 */
 	private void createJavaProject(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
+		// 10 monitor steps to go
+		
 		IProject project= fCurrJProject.getProject();
 		
 		if (!project.exists()) {
@@ -580,9 +582,7 @@ public class BuildPathsBlock {
 			CoreUtility.createFolder(folder, true, true, null);			
 		}
 		monitor.worked(1);
-		
-		fCurrJProject.setOutputLocation(buildPath, new SubProgressMonitor(monitor, 3));
-		
+				
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
 		
@@ -597,7 +597,7 @@ public class BuildPathsBlock {
 		}	
 		monitor.worked(1);
 			
-		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 5));		
+		fCurrJProject.setRawClasspath(classpath, buildPath, new SubProgressMonitor(monitor, 7));		
 	}
 	
 	/**
