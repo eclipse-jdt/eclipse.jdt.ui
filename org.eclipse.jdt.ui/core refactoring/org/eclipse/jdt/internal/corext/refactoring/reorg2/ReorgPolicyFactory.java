@@ -120,12 +120,13 @@ class ReorgPolicyFactory {
 		else
 			NO= new NoMovePolicy();
 	
-		if (  isNothingToCopy(resources, javaElements) || 
-			! canCopyAll(resources, javaElements) ||
-			! haveCommonParent(resources, javaElements) ||
+		if (isNothingToReorg(resources, javaElements) || 
+			containsNull(resources) ||
+			containsNull(javaElements) ||
 			ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT) ||
 			ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL) ||
-			ReorgUtils2.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT))
+			ReorgUtils2.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT) ||
+			! haveCommonParent(resources, javaElements))
 			return NO;
 			
 		if (ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT)){
@@ -171,6 +172,13 @@ class ReorgPolicyFactory {
 		return NO;
 	}
 		
+	private static boolean containsNull(Object[] objects) {
+		for (int i= 0; i < objects.length; i++) {
+			if (objects[i]==null) return  true;
+		}
+		return false;
+	}
+
 	private static boolean hasElementsSmallerThanCuOrClassFile(IJavaElement[] javaElements) {
 		for (int i= 0; i < javaElements.length; i++) {
 			if (ReorgUtils2.isInsideCompilationUnit(javaElements[i]))
@@ -194,36 +202,10 @@ class ReorgPolicyFactory {
 		return new ParentChecker(resources, javaElements).haveCommonParent();
 	}
 
-	private static boolean isNothingToCopy(IResource[] resources, IJavaElement[] javaElements) {
+	private static boolean isNothingToReorg(IResource[] resources, IJavaElement[] javaElements) {
 		return resources.length + javaElements.length == 0;
 	}
 
-	private static boolean canCopyAll(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		for (int i= 0; i < resources.length; i++) {
-			if (! canCopy(resources[i])) return false;
-		}
-		for (int i= 0; i < javaElements.length; i++) {
-			if (! canCopy(javaElements[i])) return false;
-		}
-		return true;
-	}
-
-	private static boolean canCopy(IResource resource) {
-		return resource != null && resource.exists() && ! resource.isPhantom() && resource.isAccessible();
-	}
-
-	private static boolean canCopy(IJavaElement element) throws JavaModelException {
-		if (element == null || ! element.exists())
-			return false;
-		if (element instanceof IMember){
-			IMember member= (IMember) element;
-			//we can copy some binary members, but not all
-			if (member.isBinary() && member.getSourceRange() == null)
-				return false;
-		}
-		return true;
-	}
-	
 	private static abstract class ReorgPolicy implements IReorgPolicy{
 		//invariant: only 1 of these can ever be not null
 		private IResource fResourceDestination;
@@ -264,6 +246,7 @@ class ReorgPolicyFactory {
 			return new IFile[0];
 		}
 		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException{
+			Assert.isNotNull(reorgQueries);
 			return Checks.validateModifiesFiles(getAllModifiedFiles());
 		}
 		public boolean canUpdateReferences() {
@@ -296,6 +279,21 @@ class ReorgPolicyFactory {
 		}
 		public void setUpdateQualifiedNames(boolean update) {
 			Assert.isTrue(false);//should not be called if canEnableQualifiedNameUpdating is not overridden and returns false
+		}
+		public boolean canEnable() throws JavaModelException {
+			IResource[] resources= getResources();
+			for (int i= 0; i < resources.length; i++) {
+				IResource resource= resources[i];
+				if (! resource.exists() || resource.isPhantom() || ! resource.isAccessible())
+					return false;
+			}
+			
+			IJavaElement[] javaElements= getJavaElements();
+			for (int i= 0; i < javaElements.length; i++) {
+				IJavaElement element= javaElements[i];
+				if (!element.exists()) return false;
+			}
+			return true;
 		}
 	}
 
@@ -422,7 +420,8 @@ class ReorgPolicyFactory {
 			return ReorgUtils2.union(fFiles, fFolders);
 		}
 
-		public final boolean canEnable(){
+		public final boolean canEnable() throws JavaModelException{
+			if (! super.canEnable()) return false;
 			for (int i= 0; i < fCus.length; i++) {
 				IResource res= fCus[i].getResource();
 				if (res == null || ! res.exists())
@@ -651,7 +650,20 @@ class ReorgPolicyFactory {
 				return (IType) destination;
 			return (IType)destination.getAncestor(IJavaElement.TYPE);
 		}
-	
+		
+		public boolean canEnable() throws JavaModelException {
+			if (! super.canEnable()) return false;
+			for (int i= 0; i < fJavaElements.length; i++) {
+				if (fJavaElements[i] instanceof IMember){
+					IMember member= (IMember) fJavaElements[i];
+					//we can copy some binary members, but not all
+					if (member.isBinary() && member.getSourceRange() == null)
+						return false;
+				}
+			}
+			return true;
+		}	
+		
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			Assert.isNotNull(destination);
 			Assert.isTrue(destination.exists());
@@ -716,10 +728,11 @@ class ReorgPolicyFactory {
 		}
 			
 		public boolean canEnable() throws JavaModelException {
+			if (! super.canEnable()) return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
 				if (! ReorgUtils2.isSourceFolder(fPackageFragmentRoots[i])) return false;
 			}
-			if (ReorgUtils2.containsLinkedResources(fPackageFragmentRoots))
+			if (ReorgUtils2.containsLinkedResources(fPackageFragmentRoots)) 
 				return false;					
 			return true;
 		}
@@ -785,7 +798,9 @@ class ReorgPolicyFactory {
 
 		public boolean canEnable() throws JavaModelException {
 			for (int i= 0; i < fPackageFragments.length; i++) {
-				if (JavaElementUtil.isDefaultPackage(fPackageFragments[i]))	return false;
+				if (JavaElementUtil.isDefaultPackage(fPackageFragments[i]) || 
+					fPackageFragments[i].isReadOnly())
+					return false;
 			}
 			if (ReorgUtils2.containsLinkedResources(fPackageFragments))
 				return false;
@@ -880,7 +895,8 @@ class ReorgPolicyFactory {
 		}
 			
 		public boolean canEnable() throws JavaModelException {
-			return getSourceCu() != null || getSourceClassFile() != null;
+			return 	super.canEnable() && 
+					(getSourceCu() != null || getSourceClassFile() != null);
 		}
 			
 		public IFile[] getAllModifiedFiles() {
@@ -960,16 +976,10 @@ class ReorgPolicyFactory {
 			try {
 				IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
 				INewNameQuery nameQuery= copyQueries.createNewCompilationUnitNameQuery(cu);
-				return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery); //XXX
+				return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery);
 			} catch(CoreException e) {
 				return simpleCopy; //fallback - no ui here
 			}
-		}
-
-		public IFile[] getAllModifiedFiles() {
-			if (getDestinationAsPackageFragment() != null)
-				return ReorgUtils2.getFiles(ReorgUtils2.getResources(getCus()));
-			return new IFile[0];
 		}
 	}
 	private static class CopyPackageFragmentRootsPolicy extends PackageFragmentRootsReorgPolicy implements ICopyPolicy{
@@ -1186,6 +1196,15 @@ class ReorgPolicyFactory {
 			return false;
 		}
 		
+		public boolean canEnable() throws JavaModelException {
+			if (! super.canEnable()) return false;
+			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (roots[i].isReadOnly())	return  false;
+			}
+			return true;
+		}
+
 		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
 				RefactoringStatus status= super.checkInput(pm, reorgQueries);
@@ -1607,7 +1626,7 @@ class ReorgPolicyFactory {
 		}
 
 		public boolean canEnable() throws JavaModelException {
-			return getSourceCu() != null; //can move only elements from cus
+			return super.canEnable() && getSourceCu() != null; //can move only elements from cus
 		}
 
 		public IFile[] getAllModifiedFiles() {
