@@ -55,7 +55,7 @@
 		label="%ProblemsLabelDecorator.label"
 		state="false"
 		lightweight="true"
-		quadrant="BOTTOM_LEFT"
+		location="BOTTOM_LEFT"
 		class="org.eclipse.jdt.ui.ProblemsLabelDecorator"
 		id="org.eclipse.jdt.ui.problem.decorator">
 		<description>
@@ -76,6 +76,7 @@
 	<decorator
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
+		location="BOTTOM_RIGHT"		
 		state="true"
 		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
 		id="org.eclipse.jdt.ui.override.decorator">
