@@ -117,6 +117,12 @@ public class ASTNodes {
 		return null;
 	}
 	
+	/**
+	 * Returns the type for the given declaration. If the declaration is
+	 * a <code>VariableDeclarationFragment</code> it doesn't
+	 * contain any extra array dimensions. This would require creating
+	 * a new Type node which would invalidate bindings on the AST.
+	 */
 	public static Type getType(VariableDeclaration declaration) {
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).getType();

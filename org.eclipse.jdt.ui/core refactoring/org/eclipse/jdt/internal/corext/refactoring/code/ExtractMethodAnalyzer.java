@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -181,7 +182,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		AST ast= fEnclosingMethod.getAST();
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
-				fReturnType= ASTNodes.getType(ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod));
+				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod);
+				fReturnType= ASTNodes.getType(declaration);
+				if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+					int dim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
+					if (dim > 0) {
+						fReturnType= (Type)ASTNode.copySubtree(ast, fReturnType);
+						for (int i= 0; i < dim; i++) {
+							fReturnType= ast.newArrayType(fReturnType);
+						}
+					}
+				}
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();

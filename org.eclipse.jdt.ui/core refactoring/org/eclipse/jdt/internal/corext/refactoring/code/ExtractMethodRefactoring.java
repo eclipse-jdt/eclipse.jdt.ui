@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlockEdit;
@@ -505,7 +506,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			buffer.append(modifiers);
 			buffer.append(BLANK);
 		}
-		buffer.append(ASTNodes.asString(ASTNodes.getType(declaration)));
+		buffer.append(getType(declaration));
 		buffer.append(BLANK);
 		buffer.append(local.getName());
 	}
@@ -522,5 +523,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 		appendLocalDeclaration(buffer, local);
 		buffer.append(SEMICOLON);
 		return buffer.toString();
+	}
+	
+	private String getType(VariableDeclaration declaration) {
+		Type type= ASTNodes.getType(declaration);
+		StringBuffer result= new StringBuffer();
+		result.append(ASTNodes.asString(type));
+		int extraDim= 0;
+		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT)
+			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
+		for (int i= 0; i < extraDim; i++) {
+			result.append("[]");
+		}
+		return result.toString();
 	}
 }

@@ -102,16 +102,6 @@ public class Bindings {
 		return type;
 	}
 	
-	public static Type getType(IVariableBinding binding, ASTNode root) {
-		ASTNode declaration= ASTNodes.findDeclaration(binding, root);
-		if (declaration instanceof FieldDeclaration) {
-			return ((FieldDeclaration)declaration).getType();
-		} if (declaration instanceof VariableDeclaration) {
-			return ASTNodes.getType((VariableDeclaration)declaration);
-		}
-		return createType(binding.getType(), root.getAST());
-	}
-	
 	public static Type createType(ITypeBinding binding, AST ast) {
 		if (binding.isPrimitive()) {
 			PrimitiveType.Code code= null;
