@@ -544,38 +544,42 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		/*
 		 * XXX: Bug 6584: Need a way to get class files for a java file (or CU)
 		 */
-		org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader cfReader;
+		org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader cfReader= null;
 		IResource[] members= container.members();
 		Map map= new HashMap(members.length);
 		for (int i= 0;  i < members.length; i++) {
 			if (isClassFile(members[i])) {
 				IFile classFile= (IFile)members[i];
-				try {
-					cfReader= org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader.read(classFile.getLocation().toFile());
-				} catch (org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException ex) {
-					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.invalidClassFileFormat", classFile.getLocation().toFile()), ex); //$NON-NLS-1$
-					continue;
-				} catch (IOException ex) {
-					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringClassFileLookup", classFile.getLocation().toFile()), ex); //$NON-NLS-1$
-					continue;
-				}
-				if (cfReader != null) {
-					if (cfReader.sourceFileName() == null) {
-						/*
-						 * Can't fully build the map because one or more
-						 * class file does not contain the name of its 
-						 * source file.
-						 */
-						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileWithoutSourceFileAttribute", classFile.getLocation().toFile()), null); //$NON-NLS-1$
-						return null;
+				IPath location= classFile.getLocation();
+				if (location != null) {
+					File file= location.toFile();
+					try {
+						cfReader= org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader.read(location.toFile());
+					} catch (org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException ex) {
+						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.invalidClassFileFormat", file), ex); //$NON-NLS-1$
+						continue;
+					} catch (IOException ex) {
+						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringClassFileLookup", file), ex); //$NON-NLS-1$
+						continue;
 					}
-					String javaName= new String(cfReader.sourceFileName());
-					Object classFiles= map.get(javaName);
-					if (classFiles == null) {
-						classFiles= new ArrayList(3);
-						map.put(javaName, classFiles);
+					if (cfReader != null) {
+						if (cfReader.sourceFileName() == null) {
+							/*
+							 * Can't fully build the map because one or more
+							 * class file does not contain the name of its 
+							 * source file.
+							 */
+							addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileWithoutSourceFileAttribute", file), null); //$NON-NLS-1$
+							return null;
+						}
+						String javaName= new String(cfReader.sourceFileName());
+						Object classFiles= map.get(javaName);
+						if (classFiles == null) {
+							classFiles= new ArrayList(3);
+							map.put(javaName, classFiles);
+						}
+						((ArrayList)classFiles).add(classFile);
 					}
-					((ArrayList)classFiles).add(classFile);
 				}
 			}		
 		}

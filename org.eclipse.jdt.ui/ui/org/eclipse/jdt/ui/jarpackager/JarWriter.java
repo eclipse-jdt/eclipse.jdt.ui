@@ -141,7 +141,7 @@ public class JarWriter {
 			IPath fileLocation= resource.getLocation();
 			long lastModified= System.currentTimeMillis();
 			if (fileLocation != null) {
-				File file= new File(resource.getLocation().toOSString());
+				File file= new File(fileLocation.toOSString());
 				if (file.exists())
 					lastModified= file.lastModified();
 			}
