@@ -789,9 +789,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private static Map getFormatterOptions() {
-		Map formatterOptions= JavaCore.getOptions();
-		formatterOptions.put(JavaCore.FORMATTER_LINE_SPLIT, "0"); //$NON-NLS-1$
-		return formatterOptions;
+		return JavaCore.getOptions();
 	}
 	
 	private StringBuffer createPackageDeclaration(){
