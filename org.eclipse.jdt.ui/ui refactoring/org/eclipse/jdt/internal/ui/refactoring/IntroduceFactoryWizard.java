@@ -19,9 +19,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class IntroduceFactoryWizard extends RefactoringWizard {
 	/**
 	 * Constructor for IntroduceFactoryWizard.
-	 * @param ref
-	 * @param pageTitle
-	 * @param errorPageContextHelpId
+	 * @param ref the refactoring
+	 * @param pageTitle the page title
 	 */
 	public IntroduceFactoryWizard(IntroduceFactoryRefactoring ref, String pageTitle) {
 		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 

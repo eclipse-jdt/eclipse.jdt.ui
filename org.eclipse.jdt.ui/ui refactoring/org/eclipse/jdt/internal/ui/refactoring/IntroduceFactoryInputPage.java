@@ -56,8 +56,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 
 	/**
 	 * Constructor for IntroduceFactoryInputPage.
-	 * @param name
-	 * @param isLastUserPage
+	 * @param name the name of the page
 	 */
 	public IntroduceFactoryInputPage(String name) {
 		super(name);

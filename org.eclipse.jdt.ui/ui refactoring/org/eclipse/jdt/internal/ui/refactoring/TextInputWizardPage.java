@@ -41,8 +41,8 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	/**
 	 * Creates a new text input page.
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
-	 *  user input page. Otherwise <code>false</code>.
-	 * @param initialSetting the initialSetting.
+	 *  user input page. Otherwise <code>false</code>
+	 * @param initialValue the initial value
 	 */
 	public TextInputWizardPage(String description, boolean isLastUserPage, String initialValue) {
 		super(PAGE_NAME);
