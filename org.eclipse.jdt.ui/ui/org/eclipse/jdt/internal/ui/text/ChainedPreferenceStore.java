@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.javaeditor;
+package org.eclipse.jdt.internal.ui.text;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -75,16 +75,16 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
+import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;

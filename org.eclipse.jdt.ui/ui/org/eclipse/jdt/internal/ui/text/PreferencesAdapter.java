@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.javaeditor;
+package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.core.runtime.Preferences;
 

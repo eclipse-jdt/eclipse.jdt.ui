@@ -58,9 +58,8 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ChainedPreferenceStore;
-import org.eclipse.jdt.internal.ui.javaeditor.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.CompoundContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -70,7 +69,9 @@ import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaCompositeReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.comment.DefaultTextMeasurement;
@@ -330,7 +331,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 
-		PresentationReconciler reconciler= new PresentationReconciler();
+		PresentationReconciler reconciler= new JavaPresentationReconciler();
 		reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
 		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(getCodeScanner());

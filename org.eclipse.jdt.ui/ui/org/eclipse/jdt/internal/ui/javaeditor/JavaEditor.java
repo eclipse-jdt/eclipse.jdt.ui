@@ -111,6 +111,8 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.presentation.IPresentationReconciler;
+import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -205,11 +207,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.CustomSourceInformationControl;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
@@ -2116,6 +2120,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	protected OverrideIndicatorManager fOverrideIndicatorManager;
+	/**
+	 * Semantic highlighting manager
+	 * @since 3.0
+	 */
+	private SemanticHighlightingManager fSemanticManager;
 	
 	
 	/**
@@ -2721,6 +2730,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		uninstallOverrideIndicator();
 		
+		uninstallSemanticReconciler();
+		
 		if (fActivationListener != null) {
 			Shell shell= getEditorSite().getShell();
 			if (shell != null && !shell.isDisposed())
@@ -2901,6 +2912,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
+			if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(property)) {
+				if (isSemanticHighlightingEnabled())
+					installSemanticReconciler();
+				else
+					uninstallSemanticReconciler();
+				return;
+			}
+			if (isSemanticHighlightingEnabled())
+				fSemanticManager.handlePropertyChangeEvent(event);
 			
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 			
@@ -3160,6 +3180,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (fMarkOccurrenceAnnotations)
 			installOccurrencesFinder();
+		
+		if (isSemanticHighlightingEnabled())
+			installSemanticReconciler();
 
 		getEditorSite().getShell().addShellListener(fActivationListener);
 	}
@@ -3547,6 +3570,40 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			|| key.equals(preference.getTextPreferenceKey());
 	}
 
+	/**
+	 * @return <code>true</code> if semantic highlighting is enabled.
+	 * 
+	 * @since 3.0
+	 */
+	private boolean isSemanticHighlightingEnabled() {
+		return this instanceof CompilationUnitEditor && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+	}
+	
+	/**
+	 * Install the Semantic Highlight Reconciler
+	 * 
+	 * @since 3.0
+	 */
+	private void installSemanticReconciler() {
+		if (fSemanticManager == null) {
+			fSemanticManager= new SemanticHighlightingManager();
+			IPresentationReconciler backgroundPresentationReconciler= getSourceViewerConfiguration().getPresentationReconciler(getSourceViewer());
+			fSemanticManager.install((CompilationUnitEditor)this, getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore(), (PresentationReconciler)backgroundPresentationReconciler);
+		}
+	}
+	
+	/**
+	 * Uninstall the Semantic Highlight Reconciler
+	 * 
+	 * @since 3.0
+	 */
+	private void uninstallSemanticReconciler() {
+		if (fSemanticManager != null) {
+			fSemanticManager.uninstall();
+			fSemanticManager= null;
+		}
+	}
+	
 	/**
 	 * Returns the Java element wrapped by this editors input.
 	 * 

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
@@ -1650,6 +1651,46 @@ public class PreferenceConstants {
 	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
 
 	/**
+	 * A named preference prefix for semantic highlighting preferences.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX="semanticHighlighting."; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if semantic highlighting is enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED=EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + "enabled"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference suffix that controls a semantic highlighting's color.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX=".color"; //$NON-NLS-1$
+
+	/**
+	 * A named preference suffix that controls if semantic highlighting is bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX=".bold"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls whether type occurrences are marked. This
 	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
 	 * <p>
@@ -2518,7 +2559,8 @@ public class PreferenceConstants {
 		store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, true);
 		
 		// work in progress
-		WorkInProgressPreferencePage.initDefaults(store);	
+		WorkInProgressPreferencePage.initDefaults(store);
+		SemanticHighlightings.initDefaults(store);
 
 		
 
