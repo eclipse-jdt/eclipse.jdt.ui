@@ -225,7 +225,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 *                   The Java project
 	 */
 	public SpellingConfigurationBlock(final IStatusChangeListener context, final IJavaProject project) {
-		super(context, project);
+		super(context, project, getAllKeys());
 
 		IStatus status= validateAbsoluteFilePath((String)fWorkingValues.get(PREF_SPELLING_USER_DICTIONARY));
 		if (status.getSeverity() != IStatus.OK)
@@ -351,10 +351,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		return composite;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getAllKeys()
-	 */
-	protected final String[] getAllKeys() {
+	private static String[] getAllKeys() {
 		return new String[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_CHECK_SPELLING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
 	}
 
@@ -363,7 +360,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected Map getDefaultOptions() {
 
-		final String[] keys= getAllKeys();
+		final String[] keys= fAllKeys;
 		final Map options= new HashMap();
 		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 
@@ -385,7 +382,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected Map getOptions(final boolean inherit) {
 
-		final String[] keys= getAllKeys();
+		final String[] keys= fAllKeys;
 		final Map options= new HashMap();
 		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 
@@ -415,7 +412,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected void setOptions(final Map options) {
 
-		final String[] keys= getAllKeys();
+		final String[] keys= fAllKeys;
 		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 
 		for (int index= 0; index < keys.length; index++)

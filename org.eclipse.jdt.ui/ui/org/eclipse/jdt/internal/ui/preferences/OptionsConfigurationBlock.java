@@ -108,12 +108,14 @@ public abstract class OptionsConfigurationBlock {
 
 	protected IStatusChangeListener fContext;
 	protected IJavaProject fProject; // project or null
+	protected String[] fAllKeys;
 	
 	private Shell fShell;
 
-	public OptionsConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public OptionsConfigurationBlock(IStatusChangeListener context, IJavaProject project, String[] allKeys) {
 		fContext= context;
 		fProject= project;
+		fAllKeys= allKeys;
 		
 		fWorkingValues= getOptions(true);
 		
@@ -122,8 +124,6 @@ public abstract class OptionsConfigurationBlock {
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
 	}
-	
-	protected abstract String[] getAllKeys();
 	
 	protected Map getOptions(boolean inheritJavaCoreOptions) {
 		if (fProject != null) {
@@ -140,7 +140,7 @@ public abstract class OptionsConfigurationBlock {
 	public final boolean hasProjectSpecificOptions() {
 		if (fProject != null) {
 			Map settings= fProject.getOptions(false);
-			String[] allKeys= getAllKeys();
+			String[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
 				if (settings.get(allKeys[i]) != null) {
 					return true;
@@ -378,7 +378,7 @@ public abstract class OptionsConfigurationBlock {
 
 	
 	public boolean performOk(boolean enabled) {
-		String[] allKeys= getAllKeys();
+		String[] allKeys= fAllKeys;
 		Map actualOptions= getOptions(false);
 		
 		// preserve other options

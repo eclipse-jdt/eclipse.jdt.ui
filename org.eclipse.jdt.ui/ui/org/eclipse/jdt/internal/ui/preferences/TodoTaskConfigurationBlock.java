@@ -104,7 +104,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	private ListDialogField fTodoTasksList;
 
 	public TodoTaskConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
-		super(context, project);
+		super(context, project, getKeys());
 						
 		TaskTagAdapter adapter=  new TaskTagAdapter();
 		String[] buttons= new String[] {
@@ -134,7 +134,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		fTaskTagsStatus= new StatusInfo();		
 	}
 	
-	protected final String[] getAllKeys() {
+	private static String[] getKeys() {
 		return new String[] {
 			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES
 		};	

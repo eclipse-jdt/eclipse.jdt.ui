@@ -285,7 +285,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
-		super(context, project);
+		super(context, project, getAllKeys());
 		
 		NameConventionAdapter adapter=  new NameConventionAdapter();
 		String[] buttons= new String[] {
@@ -332,7 +332,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseIsForBooleanGettersBox.setSelection(preferenceStore.getBoolean(PREF_IS_FOR_GETTERS));		
 	}
 	
-	protected String[] getAllKeys() {
+	private static String[] getAllKeys() {
 		return new String[] {
 			PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES,
 			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES
