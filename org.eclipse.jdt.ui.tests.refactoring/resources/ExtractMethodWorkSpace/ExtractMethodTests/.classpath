@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="src" path=""/>
-    <classpathentry kind="lib" path="D:/apps/ive/lib/jclMax/classes.zip"
-        rootpath="" sourcepath="D:/apps/ive/lib/jclMax/source/source.zip"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

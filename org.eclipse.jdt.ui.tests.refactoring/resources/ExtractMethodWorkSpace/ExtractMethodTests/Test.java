@@ -1,8 +1,7 @@
-import java.util.ArrayList;import java.util.Iterator;import java.util.List;public class Test {
-	public class Inner {	}		public void pre() {		foo();	}
-	public void foo() {		foo();
+public class Test {
+	
+	public Test() {
+		foo();
 	}
 	
-	public void post() {		foo();
-	}
-}
+	public void foo() {		int i= 20;				i= 30;	}}
