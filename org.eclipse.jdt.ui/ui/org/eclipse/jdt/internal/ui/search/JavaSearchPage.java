@@ -304,6 +304,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 		});
 
+		// 1GF90TL: ITPJUI:ALL - Search dialog is missing a width hint
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(30);
 		fPattern.setLayoutData(gd);
