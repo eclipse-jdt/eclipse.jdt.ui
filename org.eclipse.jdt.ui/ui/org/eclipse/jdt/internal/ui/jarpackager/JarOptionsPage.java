@@ -12,7 +12,7 @@ import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;impo
 public class JarOptionsPage extends WizardPage implements Listener, IJarPackageWizardPage {
 
 	// Constants
-	protected static final int SIZING_TEXT_FIELD_WIDTH = 250;
+	protected static final int SIZING_TEXT_FIELD_WIDTH= 250;
 
 	private JarPackage fJarPackage;
 
@@ -46,7 +46,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * Method declared on IDialogPage.
 	 */
 	public void createControl(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NULL);
+		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -289,13 +289,13 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * @return the new label control
 	 */
 	protected Label createLabel(Composite parent, String text, boolean bold) {
-		Label label = new Label(parent, SWT.NONE);
+		Label label= new Label(parent, SWT.NONE);
 		if (bold)
 			label.setFont(JFaceResources.getBannerFont());
 		label.setText(text);
-		GridData data = new GridData();
-		data.verticalAlignment = GridData.FILL;
-		data.horizontalAlignment = GridData.FILL;
+		GridData data= new GridData();
+		data.verticalAlignment= GridData.FILL;
+		data.horizontalAlignment= GridData.FILL;
 		label.setLayoutData(data);
 		return label;
 	}
@@ -305,10 +305,10 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * @param parent the parent control
 	 */
 	protected void createSpacer(Composite parent) {
-		Label spacer = new Label(parent, SWT.NONE);
-		GridData data = new GridData();
-		data.horizontalAlignment = GridData.FILL;
-		data.verticalAlignment = GridData.BEGINNING;
+		Label spacer= new Label(parent, SWT.NONE);
+		GridData data= new GridData();
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.BEGINNING;
 		spacer.setLayoutData(data);
 	}
 	/**
@@ -328,7 +328,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * @return the resource specified by the path or <code>null</code>
 	 */
 	protected IResource findResource(IPath path) {
-		IWorkspace workspace = JavaPlugin.getWorkspace();
+		IWorkspace workspace= JavaPlugin.getWorkspace();
 		IStatus result= workspace.validatePath(
 							path.toString(),
 							IResource.ROOT | IResource.PROJECT | IResource.FOLDER | IResource.FILE);

@@ -92,8 +92,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	
 	private final static String STORE_COMPRESS= PAGE_NAME + ".COMPRESS"; //$NON-NLS-1$
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE"; //$NON-NLS-1$
-	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
-	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION"; //$NON-NLS-1$
 
 	// other constants
 	private final static int SIZING_SELECTION_WIDGET_WIDTH= 400;
@@ -116,7 +114,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		
 		initializeDialogUnits(parent);
 		
-		Composite composite = new Composite(parent, SWT.NULL);
+		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -124,17 +122,13 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		createPlainLabel(composite, JarPackagerMessages.getString("JarPackageWizardPage.whatToExport.label")); //$NON-NLS-1$
 		createInputGroup(composite);
 
-//		createButtonsGroup(composite);
 		createExportTypeGroup(composite);
 
-//		createSpacer(composite);
 		new Label(composite, SWT.NONE); // vertical spacer
 
 
 		createPlainLabel(composite, JarPackagerMessages.getString("JarPackageWizardPage.whereToExport.label")); //$NON-NLS-1$
 		createDestinationGroup(composite);
-
-//		createSpacer(composite);
 
 		createPlainLabel(composite, JarPackagerMessages.getString("JarPackageWizardPage.options.label")); //$NON-NLS-1$
 		createOptionsGroup(composite);
@@ -287,16 +281,16 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			fJarPackage.setSelectedElements(getSelectedResources());
 			fJarPackage.setExportClassFiles(settings.getBoolean(STORE_EXPORT_CLASS_FILES));
 			fJarPackage.setExportJavaFiles(settings.getBoolean(STORE_EXPORT_JAVA_FILES));
+
+			// options
+			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
+			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
 						
 			// destination
 			String[] directoryNames= settings.getArray(STORE_DESTINATION_NAMES);
 			if (directoryNames == null)
 				return; // ie.- no settings stored
 			fJarPackage.setJarLocation(getPathFromString(directoryNames[0]));
-
-			// options
-			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
-			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
 		}
 	}
 	/**
@@ -317,10 +311,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		// options
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
-		/*
-		fJarPackage.setSaveDescription(fSaveDescriptionCheckbox.getSelection());
-		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
-		*/
 	}
 
 	protected IPath getPathFromString(String text) {
@@ -431,7 +421,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * @return the resource specified by the path or <code>null</code>
 	 */
 	protected IResource findResource(IPath path) {
-		IWorkspace workspace = JavaPlugin.getWorkspace();
+		IWorkspace workspace= JavaPlugin.getWorkspace();
 		IStatus result= workspace.validatePath(
 							path.toString(),
 							IResource.ROOT | IResource.PROJECT | IResource.FOLDER | IResource.FILE);
@@ -542,15 +532,12 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 				handleDescriptionFileBrowseButtonPressed();
 			}
 		});
-
-//		new Label(parent, SWT.NONE); // vertical spacer
 	}
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
-//			setErrorMessage("Invalid JAR location.");
 			return false;
 		}
 		if (fJarPackage.getJarLocation().toString().endsWith("/")) { //$NON-NLS-1$
@@ -611,7 +598,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * Overrides method from WizardExportResourcePage
 	 */
 	protected void setupBasedOnInitialSelections() {
-		Iterator enum = fInitialSelection.iterator();
+		Iterator enum= fInitialSelection.iterator();
 		while (enum.hasNext()) {
 			Object selectedElement= enum.next();
 			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IFile)

@@ -113,11 +113,6 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	
 	// Sealing
 	private final static String STORE_SEAL_JAR= PAGE_NAME + ".SEAL_JAR"; //$NON-NLS-1$
-	private final static String STORE_SEALED_PACKAGES= PAGE_NAME + ".SEALED_PACKAGES"; //$NON-NLS-1$
-	private final static String STORE_UNSEALED_PACKAGES= PAGE_NAME + ".UNSEALED_PACKAGES"; //$NON-NLS-1$
-	
-	// Main class
-	private final static String STORE_MAIN_CLASS_NAME= PAGE_NAME + ".MAIN_CLASS_NAME"; //$NON-NLS-1$
 	
 	/**
 	 *	Create an instance of this class
@@ -636,15 +631,15 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	protected void initializeJarPackage() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			if (settings.getArray(STORE_SEALED_PACKAGES) == null)
-				return; // ie.- no settings stored
-
 			// Manifest creation
 			fJarPackage.setGenerateManifest(settings.getBoolean(STORE_GENERATE_MANIFEST));
 			fJarPackage.setSaveManifest(settings.getBoolean(STORE_SAVE_MANIFEST));
 			fJarPackage.setReuseManifest(settings.getBoolean(STORE_REUSE_MANIFEST));
-			fJarPackage.setManifestLocation(new Path(settings.get(STORE_MANIFEST_LOCATION)));
-	
+			String pathStr= settings.get(STORE_MANIFEST_LOCATION);
+			if (pathStr == null)
+				pathStr= ""; //$NON-NLS-1$
+			fJarPackage.setManifestLocation(new Path(pathStr));
+
 			// Sealing
 			fJarPackage.setSealJar(settings.getBoolean(STORE_SEAL_JAR));
 		}
