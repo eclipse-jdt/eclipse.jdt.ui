@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.jface.action.Action;
@@ -29,7 +28,6 @@ public class OpenHierarchyAction extends Action {
 		fElements= elements;
 		fWindow= window;
 		setText(JavaUIMessages.getString("OpenHierarchyPerspectiveItem.menulabel")); //$NON-NLS-1$
-		setAccelerator(SWT.F4);
 	}
 
 	public void runWithEvent(Event event) {
