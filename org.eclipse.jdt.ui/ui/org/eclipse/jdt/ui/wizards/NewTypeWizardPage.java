@@ -1703,7 +1703,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (hierarchy == null) {
 				hierarchy= type.newSupertypeHierarchy(monitor);
 			}			
-			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, null, imports.getImportsStructure());
+			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports.getImportsStructure());
 			if (unimplemented != null) {
 				for (int i= 0; i < unimplemented.length; i++) {
 					newMethods.add(unimplemented[i]);					

@@ -33,10 +33,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		
 	protected final ICompilationUnit fCompilationUnit; 
-	/** The type name. */
-	private final String fTypeName;
-	/** The package name. */
-	private final String fPackageName;
+
 	/** The unqualified type name. */
 	private final String fUnqualifiedTypeName;
 	/** The fully qualified type name. */
@@ -72,15 +69,10 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	{
 		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
 		fCompilationUnit= cu;
-		fTypeName= typeName;
-		fPackageName= packageName;
 		fUnqualifiedTypeName= unqualify(typeName);
 		fFullyQualifiedTypeName= qualify(typeName, packageName);
 	}
 	
-	/**
-	 * To be o
-	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		if (impStructure != null) {
 			IType[] types= impStructure.getCompilationUnit().getTypes();

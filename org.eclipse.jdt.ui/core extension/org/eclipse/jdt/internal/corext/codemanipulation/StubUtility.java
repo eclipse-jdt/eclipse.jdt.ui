@@ -15,27 +15,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
+
+import org.eclipse.swt.SWT;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -50,9 +42,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.swt.SWT;
 
 public class StubUtility {
 	
@@ -767,12 +756,11 @@ public class StubUtility {
 	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
 	 * evaluation is for the type itself.
 	 * @param settings Options for comment generation
-	 * @param selectionQuery If not null will select the methods to implement.
 	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
-				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws CoreException {
+			IImportsStructure imports) throws CoreException {
 					
 		IMethod[] inheritedMethods= getOverridableMethods(type, hierarchy, isSubType);
 		
@@ -784,15 +772,6 @@ public class StubUtility {
 			}
 		}
 		IMethod[] toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);		
-		
-		if (selectionQuery != null) {
-			toImplementArray= selectionQuery.select(inheritedMethods, toImplementArray, hierarchy);
-			if (toImplementArray == null) {
-				//cancel pressed
-				return null;
-			}
-		}		
-		
 		return genOverrideStubs(toImplementArray, type, hierarchy, settings, imports);
 	}
 

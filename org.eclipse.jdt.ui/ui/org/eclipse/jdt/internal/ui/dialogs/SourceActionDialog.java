@@ -15,8 +15,10 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -34,21 +36,43 @@ import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * An advanced version of CheckedTreeSelectionDialog with right-side button layout and
  * extra buttons and composites.
  */
-public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
+public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	private int fInsertionIndex;
 	private CompilationUnitEditor fEditor;
 	private ITreeContentProvider fContentProvider;
+	private boolean fGenerateComment;
+	private IType fType;
+
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+		super(parent, labelProvider, contentProvider);
+		fEditor= editor;
+		fContentProvider= contentProvider;		
+		fType= type;
+		
+		// Take the default from the default for generating comments from the code gen prefs
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		fGenerateComment= genStubSettings.createComments;		
+	}
+	
+	private IType getType() {
+		return fType;
+	}
 	
 	protected ITreeContentProvider getContentProvider() {
 		return fContentProvider;
@@ -73,18 +97,15 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected void setInsertionIndex(int index) {
 		fInsertionIndex = index;
 	}
-
-	/**
-	 * @param parent
-	 * @param labelProvider
-	 * @param contentProvider
-	 */
-	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor) {
-		super(parent, labelProvider, contentProvider);
-		fEditor= editor;
-		fContentProvider= contentProvider;
+	
+	public boolean getGenerateComment() {
+		return fGenerateComment;
 	}
-
+	
+	public void setGenerateComment(boolean comment) {
+		fGenerateComment= comment;
+	}	
+	
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
 
@@ -111,6 +132,20 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 		}
 	}
 	
+	/**
+	 * Returns a composite containing the label created at the top of the dialog. Returns null if there is the
+	 * message for the label is null.
+	 */
+	protected Label createMessageArea(Composite composite) {
+		if (getMessage() != null) {
+			Label label = new Label(composite,SWT.NONE);
+			label.setText(getMessage());
+			label.setFont(composite.getFont());
+			return label;
+		} 
+		return null;
+	}
+	
 	/*
 	 * @see Dialog#createDialogArea(Composite)
 	 */
@@ -119,6 +154,8 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 			
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
+		GridData gd= null;
+		
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
@@ -127,9 +164,11 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 		composite.setFont(parent.getFont());	
 						
 		Label messageLabel = createMessageArea(composite);			
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		messageLabel.setLayoutData(gd);			
+		if (messageLabel != null) {
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= 2;
+			messageLabel.setLayoutData(gd);	
+		}
 			
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout innerLayout = new GridLayout();
@@ -153,6 +192,9 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		Composite entryComposite= createEntryPtCombo(composite);
 		entryComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		
+		Composite commentComposite= createCommentSelection(composite);
+		commentComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));		
 
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
@@ -160,23 +202,58 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return composite;
 	}				
 	
-	protected Composite createEntryPtCombo(Composite composite) {
-
-		Composite selectionComposite = new Composite(composite, SWT.NONE);
+	protected Composite createCommentSelection(Composite composite) {
+		Composite commentComposite = new Composite(composite, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		selectionComposite.setLayout(layout);
-		selectionComposite.setFont(composite.getFont());	
+		commentComposite.setLayout(layout);
+		commentComposite.setFont(composite.getFont());	
+		
+		Button commentButton= new Button(commentComposite, SWT.CHECK);
+		commentButton.setText(ActionMessages.getString("SourceActionDialog.createComment")); //$NON-NLS-1$
+		commentButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+
+		commentButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean isSelected= (((Button) e.widget).getSelection());
+				setGenerateComment(isSelected);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		commentButton.setSelection(getGenerateComment());
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		commentButton.setLayoutData(gd);
+		
+		return commentComposite;
+		
+	}
+	
+	protected Composite createEntryPtCombo(Composite composite) {
+		if (getEditor() != null) {
+			Composite selectionComposite = new Composite(composite, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			selectionComposite.setLayout(layout);
+			selectionComposite.setFont(composite.getFont());	
 						
-		addOrderEntryChoices(selectionComposite);	
+			addOrderEntryChoices(selectionComposite);	
 											
-		return selectionComposite;
+			return selectionComposite;
+
+		}
+		else
+			return composite;
 	}
 	
 	private Composite addOrderEntryChoices(Composite buttonComposite) {
 		Label enterLabel= new Label(buttonComposite, SWT.NONE);
-		enterLabel.setText(ActionMessages.getString("GetterSetterTreeSelectionDialog.enterAt_label")); //$NON-NLS-1$
+		enterLabel.setText(ActionMessages.getString("SourceActionDialog.enterAt_label")); //$NON-NLS-1$
 			
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		enterLabel.setLayoutData(gd);
@@ -210,19 +287,18 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 					presetOffset= 0;		
 				else {				
 					IJavaElement element= (IJavaElement) preselected.get(0);
-					int type= element.getElementType();
+					int type= element.getElementType();					
 					if (type == IJavaElement.FIELD)
 						presetOffset= ((IField)element).getSourceRange().getOffset();									
-					else if (type == IJavaElement.FIELD)
-						presetOffset= ((IField)element).getSourceRange().getOffset();	
+					else if (type == IJavaElement.METHOD)
+						presetOffset= ((IMethod)element).getSourceRange().getOffset();	
 				}
 			}
 			
-			Object allFields[]= getContentProvider().getElements(null);
-			IField field= (IField)allFields[0];
-			combo.add(ActionMessages.getString("GetterSetterTreeSelectionDialog.first_method")); //$NON-NLS-1$
+			IMethod[] methods= getType().getMethods();
+
+			combo.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
 				
-			IMethod[] methods= field.getDeclaringType().getMethods();
 			int bestDiff= Integer.MAX_VALUE;
 			
 			for (int i= 0; i < methods.length; i++) {
@@ -245,5 +321,42 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 		}	
 	}
 	
+	/*
+	 * Determine where in the file to enter the newly created methods.
+	 */
+	public IJavaElement getElementPosition() {
+		IType type= getType();
+		int comboBoxIndex= getInsertionIndex();		
+		
+		if (comboBoxIndex == 0)				// as first method
+			return asFirstMethod(type);
+		else								// method position
+			return atMethodPosition(type, comboBoxIndex);			
+	}
+	
+	private IMethod asFirstMethod(IType type) {
+		if (type != null) {
+			try {
+				IMethod methods[]= type.getMethods();
+				return methods[0];		// reserve position for "as first method" option			
+				
+			} catch (JavaModelException e) {
+			}
+		}
+		return null;
+	}
+	
+	private IMethod atMethodPosition(IType type, int index) {
+		if (type != null) {
+			try {
+				IMethod methods[]= type.getMethods();
+				if (index < methods.length)
+					return methods[index];		// reserve position for "as first method" option			
+				
+			} catch (JavaModelException e) {
+			}
+		}
+		return null;
+	}	
 
 }

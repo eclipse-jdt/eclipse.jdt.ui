@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -29,20 +30,21 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  */
 public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 
+	private IJavaElement fInsertPosition;
+	private IMethod[] fSelected;
 	private IType fType;
 	private IMethod[] fCreatedMethods;
 	private boolean fDoSave;
 	private CodeGenerationSettings fSettings;
 	
-	private IOverrideMethodQuery fSelectionQuery;
-	
-	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IOverrideMethodQuery selectionQuery, boolean save) {
+	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IMethod[] selected, boolean save, IJavaElement insertPosition) {
 		super();
 		fType= type;
 		fDoSave= save;
 		fCreatedMethods= null;
 		fSettings= settings;
-		fSelectionQuery= selectionQuery;
+		fSelected= selected;
+		fInsertPosition= insertPosition;
 	}
 
 	/**
@@ -61,11 +63,7 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 			monitor.worked(1);
 			
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
-			
-			String[] toImplement= StubUtility.evalUnimplementedMethods(fType, hierarchy, false, fSettings, fSelectionQuery, imports);
-			if (toImplement == null) {
-				throw new OperationCanceledException();
-			}
+			String[] toImplement= StubUtility.genOverrideStubs(fSelected, fType, hierarchy, fSettings, imports);
 			
 			int nToImplement= toImplement.length;
 			ArrayList createdMethods= new ArrayList(nToImplement);
@@ -74,11 +72,10 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 				String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 				int indent= StubUtility.getIndentUsed(fType) + 1;
 				
-				IMethod lastMethod= null;
 				for (int i= 0; i < nToImplement; i++) {
 					String formattedContent= StubUtility.codeFormat(toImplement[i], indent, lineDelim) + lineDelim;
-					lastMethod= fType.createMethod(formattedContent, null, true, null);
-					createdMethods.add(lastMethod);
+					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
+					createdMethods.add(curr);
 				}
 				monitor.worked(1);	
 	

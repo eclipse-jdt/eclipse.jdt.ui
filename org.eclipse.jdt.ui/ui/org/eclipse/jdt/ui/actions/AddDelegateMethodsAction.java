@@ -20,9 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -43,20 +41,25 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.Methods2Field;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -66,13 +69,13 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -94,10 +97,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * @since 2.1
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
-
 	private static final String DIALOG_TITLE = ActionMessages.getString("AddDelegateMethodsAction.error.title"); //$NON-NLS-1$
-
-	private CompilationUnitEditor fEditor;
+	private CompilationUnitEditor fEditor;	
 
 	/**
 	 * Creates a new <code>AddDelegateMethodsAction</code>. The action requires
@@ -292,54 +293,62 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	//---- Helpers -------------------------------------------------------------------
 
-	/**build ui */
+	private static class AddDelegateMethodsActionStatusValidator implements ISelectionStatusValidator {
+		private static int fEntries;
+			
+		AddDelegateMethodsActionStatusValidator(int entries) {
+			fEntries= entries;
+		}
+
+		public IStatus validate(Object[] selection) {
+			StatusInfo state = new StatusInfo();
+			if (selection != null && selection.length > 0) {
+				HashSet map = new HashSet(selection.length);
+				int count = 0;
+				for (int i = 0; i < selection.length; i++) {
+					Object key = selection[i];
+					if (selection[i] instanceof Methods2Field) {
+						count++;
+						try {
+							key = createSignatureKey(((Methods2Field) selection[i]).fMethod);
+						} catch (JavaModelException e) {
+							return new StatusInfo(StatusInfo.ERROR, e.toString());
+						}
+					}
+					if (!map.add(key)) { //$NON-NLS-1$
+						state = new StatusInfo(IStatus.ERROR, ActionMessages.getString("AddDelegateMethodsAction.duplicate_methods")); //$NON-NLS-1$
+						break;
+					} else {
+						String message;
+						message = ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.more", //$NON-NLS-1$ 
+																	new Object[] { String.valueOf(count), String.valueOf(fEntries)} );
+						state = new StatusInfo(IStatus.INFO, message);
+					}
+				}
+
+			}
+			return state;
+		}			
+	}
+	
+	private static ISelectionStatusValidator createValidator(int entries) {
+		AddDelegateMethodsActionStatusValidator validator= new AddDelegateMethodsActionStatusValidator(entries);
+		return validator;
+	}
+	
 	private void showUI(IType type, IField[] preselected) {
 		try {
-			FieldContentProvider provider = new FieldContentProvider(type);
+			AddDelegateMethodsContentProvider provider = new AddDelegateMethodsContentProvider(type);
 			Methods2FieldLabelProvider methodLabel = new Methods2FieldLabelProvider();
-			CheckedTreeSelectionDialog dialog = new CheckedTreeSelectionDialog(getShell(), methodLabel, provider);
-			dialog.setValidator(new ISelectionStatusValidator() {
-				public IStatus validate(Object[] selection) {
-					StatusInfo state = new StatusInfo();
-					if (selection != null && selection.length > 0) {
-						HashSet map = new HashSet(selection.length);
-						int count = 0;
-						for (int i = 0; i < selection.length; i++) {
-							Object key = selection[i];
-							if (selection[i] instanceof Methods2Field) {
-								count++;
-								try {
-									key = createSignatureKey(((Methods2Field) selection[i]).fMethod);
-								} catch (JavaModelException e) {
-									return new StatusInfo(StatusInfo.ERROR, e.toString());
-								}
-							}
-							if (!map.add(key)) { //$NON-NLS-1$
-								state = new StatusInfo(IStatus.ERROR, ActionMessages.getString("AddDelegateMethodsAction.duplicate_methods")); //$NON-NLS-1$
-								break;
-							} else {
-								String message;
-								if (count == 1) {
-									message = ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.one", String.valueOf(count)); //$NON-NLS-1$
-								} else {
-									message = ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.more", String.valueOf(count)); //$NON-NLS-1$
-								}
-								state = new StatusInfo(IStatus.INFO, message);
-							}
-						}
-
-					}
-					return state;
-				}
-			});
-
+			SourceActionDialog dialog = new SourceActionDialog(getShell(), methodLabel, provider, fEditor, type);			
+			dialog.setValidator(createValidator(provider.getNumEntries()));
 			dialog.setSorter(new Methods2FieldSorter());
 			dialog.setInput(provider);
 			dialog.setContainerMode(true);
 			dialog.setMessage(ActionMessages.getString("AddDelegateMethodsAction.message")); //$NON-NLS-1$
 			dialog.setTitle(ActionMessages.getString("AddDelegateMethodsAction.title")); //$NON-NLS-1$
 			dialog.setExpandedElements(preselected);
-
+			dialog.setSize(60, 18);
 			int result = dialog.open();
 			if (result == Window.OK) {
 				Object[] o = dialog.getResult();
@@ -362,7 +371,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (target != null) {
 						target.beginCompoundChange();
 					}
-					createdMethods= processResults(methods, type);
+					// pass dialog based information to the operation 
+					IJavaElement elementPosition= dialog.getElementPosition();					
+					CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
+					settings.createComments= dialog.getGenerateComment();										
+					createdMethods= processResults(methods, type, elementPosition, settings);
 				} finally {
 					if (target != null) {
 						target.endCompoundChange();
@@ -381,195 +394,50 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 	}
-	/**Runnable for the operation*/
-	private static class ResultRunner implements IWorkspaceRunnable {
-		/**List with Methods2Field*/
-		List fList = null;
-		/**Type to add methods to*/
-		IType fType = null;
-
-		List fCreatedMethods;
-
-		public ResultRunner(List resultList, IType type) {
-			fList = resultList;
-			fType = type;
-			fCreatedMethods = new ArrayList();
-		}
-
-		public IMethod[] getCreatedMethods() {
-			return (IMethod[]) fCreatedMethods.toArray(new IMethod[fCreatedMethods.size()]);
-		}
-
-		public void run(IProgressMonitor monitor) throws CoreException {
-			String message = ActionMessages.getFormattedString("AddDelegateMethodsAction.monitor.message", String.valueOf(fList.size())); //$NON-NLS-1$
-			monitor.setTaskName(message);
-			monitor.beginTask("", fList.size()); //$NON-NLS-1$
-
-			// the preferences
-			CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
-			boolean addComments = settings.createComments;
-
-			// already existing methods
-			IMethod[] existingMethods = fType.getMethods();
-			//the delemiter used
-			String lineDelim = StubUtility.getLineDelimiterUsed(fType);
-			// the indent used + 1
-			int indent = StubUtility.getIndentUsed(fType) + 1;
-
-			// perhaps we have to add import statements
-			final ImportsStructure imports =
-				new ImportsStructure(fType.getCompilationUnit(), settings.importOrder, settings.importThreshold, true);
-
-			for (int i = 0; i < fList.size(); i++) {
-				//long time=System.currentTimeMillis();
-				//check for cancel each iteration
-				if (monitor.isCanceled()) {
-					if (i > 0) {
-						imports.create(false, null);
-					}
-					return;
-				}
-				
-
-				ITypeHierarchy typeHierarchy = fType.newSupertypeHierarchy(null);
-				String content = null;
-				Methods2Field wrapper = (Methods2Field) fList.get(i);
-				IMethod curr = wrapper.fMethod;
-				IField field = wrapper.fField;
-				
-				monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
-				
-				IMethod overwrittenMethod =
-					JavaModelUtil.findMethodImplementationInHierarchy(
-						typeHierarchy,
-						fType,
-						curr.getElementName(),
-						curr.getParameterTypes(),
-						curr.isConstructor());
-				if (overwrittenMethod == null) {
-					content = createStub(field, curr, addComments, overwrittenMethod, imports);
-				} else {
-					// we could ask before overwriting final methods
-
-					IMethod declaration =
-						JavaModelUtil.findMethodDeclarationInHierarchy(
-							typeHierarchy,
-							fType,
-							curr.getElementName(),
-							curr.getParameterTypes(),
-							curr.isConstructor());
-					content = createStub(field, declaration, addComments, overwrittenMethod, imports);
-				}
-				IJavaElement sibling = null;
-				IMethod existing =
-					JavaModelUtil.findMethod(
-						curr.getElementName(),
-						curr.getParameterTypes(),
-						curr.isConstructor(),
-						existingMethods);
-				if (existing != null) {
-					// we could ask before replacing a method
-					continue;
-				} else if (curr.isConstructor() && existingMethods.length > 0) {
-					// add constructors at the beginning
-					sibling = existingMethods[0];
-				}
-
-				String formattedContent = StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-				IMethod created = fType.createMethod(formattedContent, sibling, true, null);
-				fCreatedMethods.add(created);
-
-				
-				monitor.worked(1);
-				//System.out.println(System.currentTimeMillis()-time +" for #"+i);
-			}
-
-			imports.create(false, null);
-		}
-
-		private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
-			String methodName= curr.getElementName();
-			String[] paramNames= curr.getParameterNames();
-			String returnTypSig= curr.getReturnType();
-
-			StringBuffer buf= new StringBuffer();
-			if (addComment) {
-				String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, overridden, String.valueOf('\n'));
-				if (comment != null) {
-					buf.append(comment);
-					buf.append('\n');
-				}
-			}
-
-			String methodDeclaration= null;
-			if (fType.isClass()) {
-				StringBuffer body= new StringBuffer();
-				if (!Signature.SIG_VOID.equals(returnTypSig)) {
-					body.append("return "); //$NON-NLS-1$
-				}
-				if (JdtFlags.isStatic(curr)) {
-					body.append(resolveTypeOfField(field).getElementName());
-				} else {
-					body.append(field.getElementName());
-				}
-				body.append('.').append(methodName).append('(');
-				for (int i= 0; i < paramNames.length; i++) {
-					body.append(paramNames[i]);
-					if (i < paramNames.length - 1)
-						body.append(',');
-				}
-				body.append(");"); //$NON-NLS-1$
-				methodDeclaration= body.toString();
-			}
-
-			StubUtility.genMethodDeclaration(fType.getElementName(), curr, methodDeclaration, imports, buf);
-
-			return buf.toString();
-		}
-
-	}
-
+	
 	/**creates methods in class*/
-	private IMethod[] processResults(List list, IType type) throws InvocationTargetException {
+	private IMethod[] processResults(List list, IType type, IJavaElement elementPosition, CodeGenerationSettings settings) throws InvocationTargetException {
 		if (list.size() == 0)
 			return null;
-
-		ResultRunner resultRunner = new ResultRunner(list, type);
+				
+		AddDelegateMethodsOperation op = new AddDelegateMethodsOperation(list, settings, type, elementPosition);
 		IRunnableContext runnableContext = new ProgressMonitorDialog(getShell());
 		try {
-			runnableContext.run(false, true, new WorkbenchRunnableAdapter(resultRunner));
+			runnableContext.run(false, true, new WorkbenchRunnableAdapter(op));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;
 		}
-		return resultRunner.getCreatedMethods();
+		return op.getCreatedMethods();
 	}
 
 	/** The  model (content provider) for the field-methods tree */
-	private static class FieldContentProvider implements ITreeContentProvider {
+	private static class AddDelegateMethodsContentProvider implements ITreeContentProvider {
 
-		private Map fTreeMap = null;
-		private Map fFieldMap = null;
-
-		private Map fFilter = null;
+		private Map fTreeMap= null;
+		private Map fFieldMap= null;
+		private Map fFilter= null;
+		private int fNumEntries;
 
 		/**
 		 * Method FieldContentProvider.
 		 * @param type	outer type to insert in (hide final methods in tree))
 		 */
-		FieldContentProvider(IType type) throws JavaModelException {
-			//hiding final methods
-			fFilter = new HashMap();
+		AddDelegateMethodsContentProvider(IType type) throws JavaModelException {
+			fFilter= new HashMap();				//hiding final methods
+			fTreeMap= new TreeMap();			//mapping name to methods
+			fFieldMap= new HashMap();			//mapping name to field
 
-			//mapping name to methods
-			fTreeMap = new TreeMap();
-			//mapping name to field
-			fFieldMap = new HashMap();
-
-			buildModel(type);
+			fNumEntries= buildModel(type);
+		}
+		
+		public int getNumEntries() {
+			return fNumEntries;
 		}
 
-		private void buildModel(IType type) throws JavaModelException {
+		/* Builds the entry list for the tree, and returns the number of entries in it */
+		private int buildModel(IType type) throws JavaModelException {
+			int numEntries= 0;
 			IField[] fields = type.getFields();
 
 			//build map to filter against
@@ -595,8 +463,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					boolean publicField = JdtFlags.isPublic(methods[j]);
 					boolean constructor = methods[j].isConstructor();
 					boolean finalExist = fFilter.get(createSignatureKey(methods[j])) != null;
-					if (publicField && !constructor && !finalExist)
+					if (publicField && !constructor && !finalExist) {
 						accessMethods.add(new Methods2Field(methods[j], fields[i]));
+						numEntries++;
+					}
 				}
 				Object[] m = accessMethods.toArray();
 				Methods2Field[] mf = new Methods2Field[m.length];
@@ -607,6 +477,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				fFieldMap.put(fields[i].getElementName(), fields[i]);
 
 			}
+			return numEntries;
 		}
 
 		public Object[] getChildren(Object parentElement) {
@@ -625,15 +496,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		public Object[] getElements(Object inputElement) {
-			if ((inputElement != null) && (inputElement instanceof FieldContentProvider)) {
-				Object[] o = fTreeMap.keySet().toArray();
-				Object[] fields = new Object[o.length];
-				for (int i = 0; i < o.length; i++) {
-					fields[i] = fFieldMap.get(o[i]);
-				}
-				return fields;
+			Object[] o = fTreeMap.keySet().toArray();
+			Object[] fields = new Object[o.length];
+			for (int i = 0; i < o.length; i++) {
+				fields[i] = fFieldMap.get(o[i]);
 			}
-			return null;
+			return fields;
 		}
 
 		public void dispose() {
@@ -642,19 +510,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
-	}
-
-	/**to map from dialog results to corresponding fields*/
-	private static class Methods2Field {
-
-		public Methods2Field(IMethod method, IField field) {
-			fMethod = method;
-			fField = field;
-		}
-		/**method to wrap*/
-		IMethod fMethod = null;
-		/**field where method is declared*/
-		IField fField = null;
 	}
 
 	/**just to wrap JavaElementLabelProvider using my Methods2Field*/
