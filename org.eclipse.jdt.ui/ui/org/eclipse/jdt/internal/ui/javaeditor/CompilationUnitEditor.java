@@ -721,14 +721,36 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			
 			try {
 				
-				int startOffset= fStartOffset.getOffset();
-				int endOffset= fEndOffset.getOffset();
+				int startOffset, endOffset;
+				int revealStartOffset, revealEndOffset; 
+				if (showsHighlightRangeOnly()) {
+					IJavaElement newStartElement= fStartOffset.getElement();
+					startOffset= fStartOffset.getRememberedOffset(newStartElement);
+					revealStartOffset= fStartOffset.getRevealOffset(newStartElement, startOffset);
+					if (revealStartOffset == -1)
+						startOffset= -1;
+					
+					IJavaElement newEndElement= fEndOffset.getElement();
+					endOffset= fEndOffset.getRememberedOffset(newEndElement);
+					revealEndOffset= fEndOffset.getRevealOffset(newEndElement, endOffset);
+					if (revealEndOffset == -1)
+						endOffset= -1;
+				} else {
+					startOffset= fStartOffset.getOffset();
+					revealStartOffset= startOffset;
+					endOffset= fEndOffset.getOffset();
+					revealEndOffset= endOffset;
+				}
 				
-				if (startOffset == -1)
+				if (startOffset == -1) {
 					startOffset= endOffset; // fallback to caret offset
+					revealStartOffset= revealEndOffset;
+				}
 				
-				if (endOffset == -1)
+				if (endOffset == -1) {
 					endOffset= startOffset; // fallback to other offset
+					revealEndOffset= revealStartOffset;
+				}
 				
 				IJavaElement element;
 				if (endOffset == -1) {
@@ -741,8 +763,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					return;
 				}
 							
-				if (isValidSelection(startOffset, endOffset - startOffset))
-					selectAndReveal(startOffset, endOffset - startOffset);
+				if (isValidSelection(revealStartOffset, revealEndOffset - revealStartOffset) && isValidSelection(startOffset, endOffset - startOffset))
+					selectAndReveal(startOffset, endOffset - startOffset, revealStartOffset, revealEndOffset - revealStartOffset);
 			} finally {
 				fStartOffset.clear();
 				fEndOffset.clear();
@@ -817,8 +839,26 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @return Offset in the document
 		 */
 		public int getOffset() {
+			IJavaElement newElement= getElement();
+			
+			int offset= getRememberedOffset(newElement);
+			
+			if (offset != -1 && !containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
+				return -1;
+			
+			return offset;
+		}
+		
+		/**
+		 * Return offset recomputed from stored visual properties.  
+		 * 
+		 * @param newElement Enclosing element
+		 * @return Offset in the document
+		 * @throws JavaModelException
+		 * @throws BadLocationException
+		 */
+		public int getRememberedOffset(IJavaElement newElement) {
 			try {
-				IJavaElement newElement= getElement();
 				if (newElement == null)
 					return -1;
 				
@@ -847,9 +887,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				else
 					offset= document.getLineOffset(newLine) + fColumn;
 
-				if (!containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
-					return -1;
-				
 				return offset;
 			} catch (BadLocationException e) {
 				// should not happen
@@ -862,6 +899,29 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 		
+		/**
+		 * Returns the offset used to reveal the given element based on the given selection offset.
+		 * @param element the element
+		 * @param offset the selection offset
+		 * @return the offset to reveal the given element based on the given selection offset
+		 */
+		public int getRevealOffset(IJavaElement element, int offset) {
+			if (element == null || offset == -1)
+				return -1;
+
+			if (containsOffset(element, offset)) {
+				if (offset > 0) {
+					IJavaElement alternateElement= getElementAt(offset, false);
+					if (element.getHandleIdentifier().equals(alternateElement.getParent().getHandleIdentifier()))
+						return offset - 1; // Solves test case 2 from https://bugs.eclipse.org/bugs/show_bug.cgi?id=47727#c3
+				}
+				return offset;
+			} else if (offset > 0 && containsOffset(element, offset - 1))
+				return offset - 1; // Solves test case 1 from https://bugs.eclipse.org/bugs/show_bug.cgi?id=47727#c3
+			
+			return -1;
+		}
+
 		/**
 		 * Return Java element recomputed from stored visual properties.  
 		 * 
