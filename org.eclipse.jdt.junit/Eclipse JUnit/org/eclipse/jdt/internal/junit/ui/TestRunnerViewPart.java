@@ -96,7 +96,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	/**
 	 * The launcher that has started the test
 	 */
-	private JUnitBaseLauncherDelegate fLauncher;
+	private IJUnitLauncherDelegate fLauncher;
 	/**
 	 * The client side of the remote test runner
 	 */
@@ -281,7 +281,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});	
 	}
 
-	public void startTestRunListening(JUnitBaseLauncherDelegate launcher) {
+	public void startTestRunListening(IJUnitLauncherDelegate launcher) {
 		fTestType= launcher.getLaunchedType();
 		fLauncher= launcher;
 		String msg= "Launching TestRunner";
@@ -305,7 +305,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		else {
 			MessageDialog.openInformation(getSite().getShell(), 
 				"Rerun Test", 
-				"Can only rerun tests when they are launched under the debugger\nand when the keep JUnit running preference is set"
+				"Can only rerun tests when they are launched under the debugger\nand when the 'keep JUnit running' preference is set."
  			); 
 		}
 	}

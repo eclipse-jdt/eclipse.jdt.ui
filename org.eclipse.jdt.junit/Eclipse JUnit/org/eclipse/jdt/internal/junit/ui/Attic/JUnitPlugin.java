@@ -11,13 +11,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
-
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.debug.ui.actions.RunAction;
+
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -28,8 +29,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -56,7 +55,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		return fgPlugin;
 	}
 	
-	public static Shell getActiveShell() {
+	public static Shell getActiveWorkbenchShell() {
 		if (fgPlugin == null) 
 			return null;
 		IWorkbench workBench= fgPlugin.getWorkbench();
@@ -81,7 +80,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), JavaStatusConstants.INTERNAL_ERROR, "JUnitPlugin internal error", e)); 
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); 
 	}
 
 	public static void log(IStatus status) {
@@ -104,15 +103,16 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
 	public void launchAdded(ILaunch launch) {
-		if (launch.getLauncher().getDelegate() instanceof JUnitBaseLauncherDelegate) {
-			JUnitBaseLauncherDelegate launcher= (JUnitBaseLauncherDelegate)launch.getLauncher().getDelegate();
+		if (launch.getLauncher().getDelegate() instanceof IJUnitLauncherDelegate) {
+			IJUnitLauncherDelegate launcher= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
 			IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPage page= window.getActivePage();
 			TestRunnerViewPart testRunner= null;
+			
 			try {
 				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
 			} catch (PartInitException e) {
-				ErrorDialog.openError(getActiveShell(), 
+				ErrorDialog.openError(getActiveWorkbenchShell(), 
 					"Could not show JUnit Result View", e.getMessage(), e.getStatus()
 				);
 			}
@@ -126,6 +126,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void launchChanged(ILaunch launch) {
 	}
+	
 	/*
 	 * @see Plugin#startup()
 	 */
@@ -143,5 +144,17 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.removeLaunchListener(this);
 	}
+
+	public static Display getDisplay() {
+		Shell shell= getActiveWorkbenchShell();
+		if (shell != null) {
+			return shell.getDisplay();
+		}
+		Display display= Display.getCurrent();
+		if (display == null) {
+			display= Display.getDefault();
+		}
+		return display;
+	}		
 
 }

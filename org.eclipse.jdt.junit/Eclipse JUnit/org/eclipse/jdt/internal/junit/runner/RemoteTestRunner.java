@@ -93,6 +93,9 @@ public class RemoteTestRunner implements TestListener {
 	 * Reader thread that processes messages from the client.
 	 */
 	private class ReaderThread extends Thread {
+		public ReaderThread() {
+			super("ReaderThread");
+		}
 
 		public void run(){
 			try { 

@@ -46,7 +46,7 @@ import org.eclipse.jdt.launching.VMRunnerResult;
  * An abstract base launcher for running JUnit TestSuites.
  * Subclasses have to override: VMRunnerConfiguration configureVM(IType[] testTypes, int port)
  */
-public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
+public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate, IJUnitLauncherDelegate {
 	/**
 	 * The run mode used to invoke the launcher.
 	 */
@@ -82,7 +82,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 			return useWizard(elements, selection, mode, launcher);
 
 		if (elements.length == 0) {
-			MessageDialog.openError(JUnitPlugin.getActiveShell(), 
+			MessageDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), 
 				"JUnit Launcher", "Could not find a JUnit test class"
 			);
 			return true;
@@ -90,7 +90,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		
 		Object runnable= elements[0];
 		if (!(runnable instanceof IType)) {
-			MessageDialog.openError(JUnitPlugin.getActiveShell(), 
+			MessageDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), 
 				"JUnit Launcher", "Could not find a launchable test type"
 			);
 			return true;
@@ -107,14 +107,14 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		try {
 			vmInstall= JavaRuntime.getVMInstall(testType.getJavaProject());
 		} catch (CoreException e) {
-			ErrorDialog.openError(JUnitPlugin.getActiveShell(), "JUnit Launch", e.getMessage(), e.getStatus());
+			ErrorDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), "JUnit Launch", e.getMessage(), e.getStatus());
 			return true;
 		}
 		if (vmInstall == null)
 		   vmInstall= JavaRuntime.getDefaultVMInstall();
 	    
 	    if (vmInstall == null) {
-	    	MessageDialog.openError(JUnitPlugin.getActiveShell(), "JUnit Launch", "No JRE Runtime found");
+	    	MessageDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), "JUnit Launch", "No JRE Runtime found");
 	    	return true;
 	    }
 	    
@@ -137,13 +137,13 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 			}
 		};
 		try {
-			new ProgressMonitorDialog(JUnitPlugin.getActiveShell()).run(true, false, runnable);		
+			new ProgressMonitorDialog(JUnitPlugin.getActiveWorkbenchShell()).run(true, false, runnable);		
 		} catch (InterruptedException e) {
 			// do nothing - user canceled action
 		} catch (InvocationTargetException e) {
 			Throwable te= e.getTargetException();
 			JUnitPlugin.log(te);
-			MessageDialog.openError(JUnitPlugin.getActiveShell(), "Could not launch VM", te.getMessage());			
+			MessageDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), "Could not launch VM", te.getMessage());			
 			return false;
 		}
 		result= returnResult[0];
@@ -197,7 +197,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	 */
 	public IType[] getLaunchableElements(IStructuredSelection selection) {
 		try {
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JUnitPlugin.getActiveShell());
+			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JUnitPlugin.getActiveWorkbenchShell());
 			return TestSearchEngine.findTargets(dialog, selection.toArray());
 		} catch (InvocationTargetException e) {
 			JUnitPlugin.log(e);
@@ -213,7 +213,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	private boolean useWizard(Object[] elements, IStructuredSelection selection, String mode, ILauncher launcher) {
 		JUnitLaunchWizard wizard= new JUnitLaunchWizard(elements);
 		wizard.init(launcher, mode, selection);
-		Shell shell= JUnitPlugin.getActiveShell();
+		Shell shell= JUnitPlugin.getActiveWorkbenchShell();
 		if (shell != null) {
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			int status= dialog.open();
