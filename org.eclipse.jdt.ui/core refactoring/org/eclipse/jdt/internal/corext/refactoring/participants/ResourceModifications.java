@@ -153,7 +153,7 @@ public class ResourceModifications {
 		}
 		if (fCreate != null) {
 			CreateArguments arguments= new CreateArguments();
-			for (Iterator iter= result.iterator(); iter.hasNext();) {
+			for (Iterator iter= fCreate.iterator(); iter.hasNext();) {
 				CreateParticipant[] creates= ParticipantManager.getCreateParticipants(processor, iter.next(), natures, shared);
 				for (int i= 0; i < creates.length; i++) {
 					creates[i].setArguments(arguments);
@@ -162,7 +162,7 @@ public class ResourceModifications {
 			}
 		}
 		if (fMove != null) {
-			for (Iterator iter= result.iterator(); iter.hasNext();) {
+			for (Iterator iter= fMove.iterator(); iter.hasNext();) {
 				MoveParticipant[] moves= ParticipantManager.getMoveParticipants(processor, iter.next(), natures, shared);
 				for (int i= 0; i < moves.length; i++) {
 					moves[i].setArguments(fMoveArguments);
@@ -171,7 +171,7 @@ public class ResourceModifications {
 			}
 		}
 		if (fCopy != null) {
-			for (Iterator iter= result.iterator(); iter.hasNext();) {
+			for (Iterator iter= fCopy.iterator(); iter.hasNext();) {
 				CopyParticipant[] copies= ParticipantManager.getCopyParticipants(processor, iter.next(), natures, shared);
 				for (int i= 0; i < copies.length; i++) {
 					copies[i].setArguments(fCopyArguments);
