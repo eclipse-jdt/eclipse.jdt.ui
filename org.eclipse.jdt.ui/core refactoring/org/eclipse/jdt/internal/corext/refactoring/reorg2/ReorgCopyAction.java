@@ -102,11 +102,9 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
-		//TODO fix the queries
 		refactoring.setNewNameQueries(new NewNameQueries(wizard));
 		refactoring.setReorgQueries(new ReorgQueries(wizard));
-		if (refactoring != null)
-			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
 	private RefactoringWizard createWizard(CopyRefactoring2 refactoring) {
