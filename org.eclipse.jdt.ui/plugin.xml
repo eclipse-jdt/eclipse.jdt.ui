@@ -460,7 +460,7 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page name="Code Templates"
+	<page name="%codeTemplatesPageName"
 		id = "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage">
