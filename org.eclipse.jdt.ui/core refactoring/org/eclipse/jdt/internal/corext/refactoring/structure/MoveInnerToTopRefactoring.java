@@ -811,7 +811,12 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 				final CompilationUnitRewrite targetRewrite= getCompilationUnitRewrite(unit);
 				createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, false, status, monitor);
 				if (unit.equals(fType.getCompilationUnit())) {
-					adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
+					try {
+						adjustor.setStatus(new RefactoringStatus());
+						adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
+					} finally {
+						adjustor.setStatus(status);
+					}
 					fNewSourceOfInputType= createNewSource(targetRewrite, unit);
 					targetRewrite.clearASTAndImportRewrites();
 					createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, fType.getCompilationUnit(), unit, true, status, monitor);
