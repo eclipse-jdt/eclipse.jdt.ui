@@ -449,6 +449,7 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
+      <!--
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compilerPageName"
@@ -469,7 +470,7 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-      <!-- wait for hierarchical property pages
+-->
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
@@ -494,6 +495,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%problemSeveritiesPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
          <filter
                name="nature"
@@ -504,6 +506,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%problemSeveritiesPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
          <filter
                name="nature"
@@ -514,6 +517,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%javadocProblemsPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
          <filter
                name="nature"
@@ -524,6 +528,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%javadocProblemsPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
          <filter
                name="nature"
@@ -534,6 +539,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%builderPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
          <filter
                name="nature"
@@ -544,17 +550,19 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%builderPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-      -->
+
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%todoPageName"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
          <filter
                name="nature"
@@ -565,6 +573,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%todoPageName"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
          <filter
                name="nature"
