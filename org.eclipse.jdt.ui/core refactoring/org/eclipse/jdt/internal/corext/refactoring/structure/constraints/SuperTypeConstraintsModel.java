@@ -71,9 +71,10 @@ public final class SuperTypeConstraintsModel {
 		 * @return An already existing object considered equal to the specified one, or the newly added object
 		 */
 		public final Object addExisting(final Object object) {
-			final Object result= fImplementation.put(object, object);
+			final Object result= fImplementation.get(object);
 			if (result != null)
 				return result;
+			fImplementation.put(object, object);
 			return object;
 		}
 
@@ -223,6 +224,20 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates a declaring type variable.
+	 * <p>
+	 * A declaring type variable stands for a type where something has been declared.
+	 * </p>
+	 * 
+	 * @param type the type binding
+	 * @return the created declaring type variable
+	 */
+	public final ConstraintVariable2 createDeclaringTypeVariable(final ITypeBinding type) {
+		Assert.isNotNull(type);
+		return (ConstraintVariable2) fConstraintVariables.addExisting(new PlainTypeVariable2(fEnvironment.create(type)));
+	}
+
+	/**
 	 * Creates an equality constraint.
 	 * 
 	 * @param left the left typeconstraint variable
@@ -258,7 +273,7 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
-	 * Creates an independant type variable.
+	 * Creates an independent type variable.
 	 * <p>
 	 * An independant type variable stands for an arbitrary type.
 	 * </p>
@@ -266,7 +281,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param type the type binding
 	 * @return the created independant type variable
 	 */
-	public final ConstraintVariable2 createIndependantTypeVariable(final ITypeBinding type) {
+	public final ConstraintVariable2 createIndependentTypeVariable(final ITypeBinding type) {
 		Assert.isNotNull(type);
 		if (isConstrainedType(type))
 			return (ConstraintVariable2) fConstraintVariables.addExisting(new IndependentTypeVariable2(fEnvironment.create(type)));
@@ -283,8 +298,14 @@ public final class SuperTypeConstraintsModel {
 	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
 		Assert.isNotNull(method);
 		final ITypeBinding binding= method.getParameterTypes()[index];
-		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new ParameterTypeVariable2(fEnvironment.create(binding), index, method));
+		if (isConstrainedType(binding)) {
+			ConstraintVariable2 variable= null;
+			if (method.getDeclaringClass().isFromSource())
+				variable= new ParameterTypeVariable2(fEnvironment.create(binding), index, method);
+			else
+				variable= new PlainTypeVariable2(fEnvironment.create(method.getParameterTypes()[index]));
+			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+		}
 		return null;
 	}
 
@@ -329,10 +350,16 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
 		Assert.isNotNull(method);
-		if (!method.isConstructor() && !method.isDefaultConstructor()) {
+		if (!method.isConstructor()) {
 			final ITypeBinding binding= method.getReturnType();
-			if (binding != null && isConstrainedType(binding))
-				return (ConstraintVariable2) fConstraintVariables.addExisting(new ReturnTypeVariable2(fEnvironment.create(binding), method));
+			if (binding != null && isConstrainedType(binding)) {
+				ConstraintVariable2 variable= null;
+				if (method.getDeclaringClass().isFromSource())
+					variable= new ReturnTypeVariable2(fEnvironment.create(binding), method);
+				else
+					variable= new PlainTypeVariable2(fEnvironment.create(binding));
+				return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+			}
 		}
 		return null;
 	}
@@ -371,14 +398,27 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Creates a variable variable.
 	 * 
-	 * @param variable the variable
+	 * @param binding the variable binding
 	 * @return the created variable variable
 	 */
-	public final ConstraintVariable2 createVariableVariable(final IVariableBinding variable) {
-		Assert.isNotNull(variable);
-		final ITypeBinding binding= variable.getType();
-		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new VariableVariable2(fEnvironment.create(binding), variable));
+	public final ConstraintVariable2 createVariableVariable(final IVariableBinding binding) {
+		Assert.isNotNull(binding);
+		final ITypeBinding type= binding.getType();
+		if (isConstrainedType(type)) {
+			ConstraintVariable2 variable= null;
+			if (binding.isField()) {
+				final ITypeBinding declaring= binding.getDeclaringClass();
+				if (!declaring.isFromSource())
+					variable= new PlainTypeVariable2(fEnvironment.create(type));
+			} else {
+				final IMethodBinding declaring= binding.getDeclaringMethod();
+				if (declaring != null && !declaring.getDeclaringClass().isFromSource())
+					variable= new PlainTypeVariable2(fEnvironment.create(type));
+			}
+			if (variable == null)
+				variable= new VariableVariable2(fEnvironment.create(type), binding);
+			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
+		}
 		return null;
 	}
 
