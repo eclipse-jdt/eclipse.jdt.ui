@@ -75,7 +75,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private IField fField;
 	private CodeGenerationSettings fSettings;
 	private TextChangeManager fChangeManager;
-	private CompositeChange fChange;
 	
 	private VariableDeclarationFragment fFieldDeclaration;
 
@@ -99,7 +98,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fField= field;
 		fSettings= settings;
 		fChangeManager= new TextChangeManager();
-		fChange= new CompositeChange(getName());
 		fGetterName= GetterSetterUtil.getGetterName(field, null);
 		fSetterName= GetterSetterUtil.getSetterName(field, null);
 		fEncapsulateDeclaringClass= true;
