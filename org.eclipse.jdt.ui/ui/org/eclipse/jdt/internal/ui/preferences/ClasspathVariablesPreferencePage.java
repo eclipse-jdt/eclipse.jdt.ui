@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -69,12 +68,5 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}		
-	
-	
-	/**
-	 * Initializes the default values of this page in the preference bundle.
-	 * Will be called on startup of the JavaPlugin
-	 */
-	public static void initDefaults(IPreferenceStore prefs) {
-	}	
+
 }

@@ -34,17 +34,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String PREF_USE_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX;
-	public static final String PREF_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX;
+	private static final String PREF_USE_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX;
+	private static final String PREF_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX;
 
-	public static final String PREF_USE_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX;
-	public static final String PREF_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX;
+	private static final String PREF_USE_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX;
+	private static final String PREF_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX;
 
-	public static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
-	public static final String PREF_NON_JAVADOC_COMMENTS= PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS;
-	public static final String PREF_FILE_COMMENTS= PreferenceConstants.CODEGEN__FILE_COMMENTS;
+	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
+	private static final String PREF_NON_JAVADOC_COMMENTS= PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS;
+	private static final String PREF_FILE_COMMENTS= PreferenceConstants.CODEGEN__FILE_COMMENTS;
 
-
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static String[] getGetterStetterPrefixes() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		if (prefs.getBoolean(PREF_USE_GETTERSETTER_PREFIX)) {
@@ -55,7 +57,10 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		}
 		return new String[0];
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static String[] getGetterStetterSuffixes() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		if (prefs.getBoolean(PREF_USE_GETTERSETTER_SUFFIX)) {
@@ -66,17 +71,26 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		}
 		return new String[0];
 	}	
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean doCreateComments() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_JAVADOC_STUBS);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean doNonJavaDocSeeComments() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_NON_JAVADOC_COMMENTS);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static boolean doFileComments() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_FILE_COMMENTS);
@@ -93,19 +107,6 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		}
 		return res;
 	}
-
-	/**
-	 * Initializes the current options (read from preference store)
-	 */
-	/*public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_USE_GETTERSETTER_PREFIX, false);
-		prefs.setDefault(PREF_USE_GETTERSETTER_SUFFIX, false);
-		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
-		prefs.setDefault(PREF_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
-		prefs.setDefault(PREF_JAVADOC_STUBS, true);
-		prefs.setDefault(PREF_NON_JAVADOC_COMMENTS, false);
-		prefs.setDefault(PREF_FILE_COMMENTS, false);
-	}*/
 	
 	private SelectionButtonDialogField fUseGetterSetterPrefix;
 	private SelectionButtonDialogField fUseGetterSetterSuffix;

@@ -26,14 +26,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RefactoringPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String FATAL_SEVERITY= PreferenceConstants.REFACTOR_FATAL_SEVERITY;
-	public static final String ERROR_SEVERITY= PreferenceConstants.REFACTOR_ERROR_SEVERITY;
-	public static final String WARNING_SEVERITY= PreferenceConstants.REFACTOR_WARNING_SEVERITY;
-	public static final String INFO_SEVERITY= PreferenceConstants.REFACTOR_INFO_SEVERITY;
-	public static final String OK_SEVERITY= PreferenceConstants.REFACTOR_OK_SEVERITY;
+	private static final String FATAL_SEVERITY= PreferenceConstants.REFACTOR_FATAL_SEVERITY;
+	private static final String ERROR_SEVERITY= PreferenceConstants.REFACTOR_ERROR_SEVERITY;
+	private static final String WARNING_SEVERITY= PreferenceConstants.REFACTOR_WARNING_SEVERITY;
+	private static final String INFO_SEVERITY= PreferenceConstants.REFACTOR_INFO_SEVERITY;
+	private static final String OK_SEVERITY= PreferenceConstants.REFACTOR_OK_SEVERITY;
 		
-	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
-	public static final String PREF_SAVE_ALL_EDITORS= PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS;
+	private static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
+	private static final String PREF_SAVE_ALL_EDITORS= PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS;
 
 	//public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
 
@@ -41,15 +41,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		super(GRID);
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
-	
-	/*
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PREF_ERROR_PAGE_SEVERITY_THRESHOLD, ERROR_SEVERITY);
-		//store.setDefault(PREF_JAVA_STYLE_GUIDE_CONFORM, true);
-		store.setDefault(PREF_SAVE_ALL_EDITORS, false);
-	}
-	*/
-		
+			
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
@@ -89,7 +81,9 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public void init(IWorkbench workbench) {
 	}
 	
-
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	static public int getCheckPassedSeverity() {	
 		String value= JavaPlugin.getDefault().getPreferenceStore().getString(PREF_ERROR_PAGE_SEVERITY_THRESHOLD);
 		int threshold= RefactoringStatus.ERROR;
@@ -107,11 +101,17 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	}
 	*/
 	
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	static public boolean getSaveAllEditors() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_SAVE_ALL_EDITORS);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	static public void setSaveAllEditors(boolean value) {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PREF_SAVE_ALL_EDITORS, value);

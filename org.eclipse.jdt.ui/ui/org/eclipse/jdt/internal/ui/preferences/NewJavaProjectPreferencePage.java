@@ -62,29 +62,35 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ;
-	public static final String SRCBIN_SRCNAME= PreferenceConstants.SRCBIN_SRCNAME;
-	public static final String SRCBIN_BINNAME= PreferenceConstants.SRCBIN_BINNAME;
+	private static final String SRCBIN_FOLDERS_IN_NEWPROJ= PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ;
+	private static final String SRCBIN_SRCNAME= PreferenceConstants.SRCBIN_SRCNAME;
+	private static final String SRCBIN_BINNAME= PreferenceConstants.SRCBIN_BINNAME;
 
-	public static final String CLASSPATH_JRELIBRARY_INDEX= PreferenceConstants.NEWPROJECT_JRELIBRARY_INDEX;
-	public static final String CLASSPATH_JRELIBRARY_LIST= PreferenceConstants.NEWPROJECT_JRELIBRARY_LIST;
+	private static final String CLASSPATH_JRELIBRARY_INDEX= PreferenceConstants.NEWPROJECT_JRELIBRARY_INDEX;
+	private static final String CLASSPATH_JRELIBRARY_LIST= PreferenceConstants.NEWPROJECT_JRELIBRARY_LIST;
 
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static boolean useSrcAndBinFolders() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(SRCBIN_FOLDERS_IN_NEWPROJ);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static String getSourceFolderName() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(SRCBIN_SRCNAME);
+		return PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_SRCNAME);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static String getOutputLocationName() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(SRCBIN_BINNAME);
+		return PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 	}
-	
+
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		

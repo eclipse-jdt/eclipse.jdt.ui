@@ -2,6 +2,8 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -17,10 +19,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 public class JavaElementLabels {
 	
@@ -618,7 +621,7 @@ public class JavaElementLabels {
 	}	
 
 	private static void refreshPackageNamePattern() {
-		String pattern= AppearancePreferencePage.getPkgNamePatternForPackagesView();
+		String pattern= getPkgNamePatternForPackagesView();
 		if (pattern.equals(fgPkgNamePattern))
 			return;
 		else if (pattern.equals("")) { //$NON-NLS-1$
@@ -647,4 +650,11 @@ public class JavaElementLabels {
 		fgPkgNamePrefix= pattern;
 		fgPkgNameLength= pattern.length();
 	}
+	
+	private static String getPkgNamePatternForPackagesView() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))
+			return ""; //$NON-NLS-1$
+		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
+	}	
 }

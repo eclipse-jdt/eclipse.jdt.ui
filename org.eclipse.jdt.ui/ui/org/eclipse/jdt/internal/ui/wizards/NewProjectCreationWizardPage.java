@@ -34,10 +34,10 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -173,7 +173,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 				
 				if (!sourceFolders.isEmpty()) {
 					int nSourceFolders= sourceFolders.size();
-					IClasspathEntry[] jreEntries= NewJavaProjectPreferencePage.getDefaultJRELibrary();
+					IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 					entries= new IClasspathEntry[nSourceFolders + jreEntries.length];
 					Iterator iter = sourceFolders.iterator();
 					for (int i = 0; i < nSourceFolders; i++) {
@@ -185,7 +185,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 					if (nSourceFolders == 1 && entries[0].getPath().equals(projPath)) {
 						outputLocation= projPath;
 					} else {
-						outputLocation= projPath.append(NewJavaProjectPreferencePage.getOutputLocationName());
+						outputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
 					} 				
 					if (!JavaConventions.validateClasspath(JavaCore.create(project), entries, outputLocation).isOK()) {
 						outputLocation= null;

@@ -179,7 +179,8 @@ public class PreferenceConstants {
 	 * A named preference that holds a list of comma separated package names. The list specifies the import order used by
 	 * the "Organize Imports" opeation.
 	 * <p>
-	 * Value is of type <code>String</code>: comma separated list of package names
+	 * Value is of type <code>String</code>: semicolon separated list of package
+	 * names
 	 * </p>
 	 */
 	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
@@ -1542,7 +1543,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);		
 
 		// MembersOrderPreferencePage
-		store.setDefault(APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
 
 		// JavaEditorPreferencePage
 		/*
@@ -1688,6 +1689,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		
+		// do more complicated stuff
 		JavadocPreferencePage.initDefaults(store);
 		NewJavaProjectPreferencePage.initDefaults(store);	
 	}

@@ -55,14 +55,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  */
 public class ImportOrganizePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	// Preference store keys
-	// Preference store keys
-	public static final String PREF_IMPORTORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
-	public static final String PREF_ONDEMANDTHRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
-	public static final String PREF_IGNORELOWERCASE= PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE;
+	private static final String PREF_IMPORTORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
+	private static final String PREF_ONDEMANDTHRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
+	private static final String PREF_IGNORELOWERCASE= PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE;
 	private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static String[] getImportOrderPreference() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		String str= prefs.getString(PREF_IMPORTORDER);
@@ -71,6 +72,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}
 		return new String[0];
 	}
+	
+	
 	
 	private static String[] unpackOrderList(String str) {
 		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
@@ -91,7 +94,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		return buf.toString();
 	}	
 	
-	
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static int getImportNumberThreshold() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		int threshold= prefs.getInt(PREF_ONDEMANDTHRESHOLD);
@@ -100,21 +105,14 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}		
 		return threshold;
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean doIgnoreLowerCaseNames() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_IGNORELOWERCASE);
 	}
-	
-	
-	/**
-	 * Initializes the default values of this page in the preference bundle.
-	 * Will be called on startup of the JavaPlugin
-	public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
-		prefs.setDefault(PREF_ONDEMANDTHRESHOLD, 99);
-	}
-	 */
 	
 	private static class ImportOrganizeLabelProvider extends LabelProvider {
 		

@@ -606,14 +606,10 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		return super.performCancel();
 	}
 	
-	/**
-	 * Initializes the default values of this page in the preference bundle.
-	 * Will be called on startup of the JavaPlugin
-	 */
-	public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_FORMAT_TEMPLATES, true);
-	}
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static boolean useCodeFormatter() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_FORMAT_TEMPLATES);

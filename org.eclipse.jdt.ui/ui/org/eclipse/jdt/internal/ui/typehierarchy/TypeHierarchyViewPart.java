@@ -100,7 +100,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -194,8 +193,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fSelectedType= null;
 		fInputElement= null;
 		
+		boolean isReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
+
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
-		fHierarchyLifeCycle.setReconciled(JavaBasePreferencePage.reconcileJavaViews());
+		fHierarchyLifeCycle.setReconciled(isReconciled);
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
 				doTypeHierarchyChanged(typeHierarchy, changedTypes);
@@ -1330,7 +1331,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Link selection to active editor.
 	 */
 	private void editorActivated(IEditorPart editor) {
-		if (!JavaBasePreferencePage.linkTypeHierarchySelectionToEditor()) {
+		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR)) {
 			return;
 		}
 		if (fInputElement == null) {

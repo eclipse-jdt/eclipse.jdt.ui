@@ -43,58 +43,79 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String LINK_PACKAGES_TO_EDITOR= PreferenceConstants.LINK_PACKAGES_TO_EDITOR;
-	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR;
-	public static final String OPEN_TYPE_HIERARCHY= PreferenceConstants.OPEN_TYPE_HIERARCHY;
-	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE;
-	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART;
-	public static final String LINK_BROWSING_VIEW_TO_EDITOR= PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR;
+	private static final String LINK_PACKAGES_TO_EDITOR= PreferenceConstants.LINK_PACKAGES_TO_EDITOR;
+	private static final String LINK_TYPEHIERARCHY_TO_EDITOR= PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR;
+	private static final String OPEN_TYPE_HIERARCHY= PreferenceConstants.OPEN_TYPE_HIERARCHY;
+	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE;
+	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART;
+	private static final String LINK_BROWSING_VIEW_TO_EDITOR= PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR;
 
-	public static final String DOUBLE_CLICK= PreferenceConstants.DOUBLE_CLICK;
-	public static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
-	public static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
+	private static final String DOUBLE_CLICK= PreferenceConstants.DOUBLE_CLICK;
+	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
+	private static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
 
-	public static final String UPDATE_JAVA_VIEWS= PreferenceConstants.UPDATE_JAVA_VIEWS;
-	public static final String UPDATE_ON_SAVE= PreferenceConstants.UPDATE_ON_SAVE;
-	public static final String UPDATE_WHILE_EDITING= PreferenceConstants.UPDATE_WHILE_EDITING;
+	private static final String UPDATE_JAVA_VIEWS= PreferenceConstants.UPDATE_JAVA_VIEWS;
+	private static final String UPDATE_ON_SAVE= PreferenceConstants.UPDATE_ON_SAVE;
+	private static final String UPDATE_WHILE_EDITING= PreferenceConstants.UPDATE_WHILE_EDITING;
 
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+     */
 	public static boolean linkBrowsingViewSelectionToEditor() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JavaBasePreferencePage.LINK_BROWSING_VIEW_TO_EDITOR);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR);
 	}
-		
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */		
 	public static boolean linkPackageSelectionToEditor() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(LINK_PACKAGES_TO_EDITOR);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean linkTypeHierarchySelectionToEditor() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(LINK_TYPEHIERARCHY_TO_EDITOR);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
 	}	
-		
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean openTypeHierarchyInPerspective() {
-		return OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(
-			JavaPlugin.getDefault().getPreferenceStore().getString(OPEN_TYPE_HIERARCHY));
+		return PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(
+			PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY));
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean openTypeHierarchInViewPart() {
-		return OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
-			JavaPlugin.getDefault().getPreferenceStore().getString(OPEN_TYPE_HIERARCHY));
+		return PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
+			PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY));
 	}
-	
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
 	public static boolean reusePerspectiveForTypeHierarchy() {
 		return false;
-		//return JavaPlugin.getDefault().getPreferenceStore().getBoolean(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
-	}
-	
-	public static boolean doubleClickGoesInto() {
-		return DOUBLE_CLICK_GOES_INTO.equals(JavaPlugin.getDefault().getPreferenceStore().getString(DOUBLE_CLICK));
+		//return PreferenceConstants.getPreferenceStore().getBoolean(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
 	}
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */	
+	public static boolean doubleClickGoesInto() {
+		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(DOUBLE_CLICK));
+	}
+
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static boolean reconcileJavaViews() {
-		String update= JavaPlugin.getDefault().getPreferenceStore().getString(UPDATE_JAVA_VIEWS);
-		return UPDATE_WHILE_EDITING.equals(update);
+		return PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
 
 	private ArrayList fCheckBoxes;
@@ -127,19 +148,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			}
 		};
 	}
-
-	/*
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(LINK_BROWSING_VIEW_TO_EDITOR, true);
-		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
-		//store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
-
-		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
-		store.setDefault(UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);
-	}
-	*/
 
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)

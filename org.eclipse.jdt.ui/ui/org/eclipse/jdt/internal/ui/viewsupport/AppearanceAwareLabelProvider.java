@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -37,11 +38,12 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	}
 	
 	private void initMasks() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		fTextFlagMask= -1;
-		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)) {
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_RETURNTYPE;
 		}
-		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		

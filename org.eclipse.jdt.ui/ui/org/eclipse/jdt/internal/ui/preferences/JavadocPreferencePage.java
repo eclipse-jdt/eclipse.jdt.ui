@@ -44,7 +44,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
-	public static final String PREF_JAVADOC_COMMAND= PreferenceConstants.JAVADOC_COMMAND;
+	private static final String PREF_JAVADOC_COMMAND= PreferenceConstants.JAVADOC_COMMAND;
 
 	private class JDocDialogFieldAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
@@ -64,6 +64,9 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 
 	}
 
+	/**
+	 * @deprecated Inline to avoid reference to preference page
+	 */
 	public static String getJavaDocCommand() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getString(PREF_JAVADOC_COMMAND);

@@ -17,10 +17,10 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 /**
  * Content provider used for the method view.
@@ -39,7 +39,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 		fHierarchyLifeCycle= lifecycle;
 		fShowInheritedMethods= false;
 		fViewer= null;
-		fIsReconciled= JavaBasePreferencePage.reconcileJavaViews();
+		fIsReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
 	
 	/**

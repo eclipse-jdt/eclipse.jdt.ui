@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -33,9 +32,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(JavaUIMessages.getString("CompilerPreferencePage.description")); //$NON-NLS-1$
 		fConfigurationBlock= new CompilerConfigurationBlock(this, null);
-	}
-
-	public static void initDefaults(IPreferenceStore store) {
 	}
 		
 	/*

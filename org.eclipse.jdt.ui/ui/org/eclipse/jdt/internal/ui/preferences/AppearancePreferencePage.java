@@ -30,9 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class AppearancePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	// used by PackageExplorerPart to listen for changes
 	private static final String SHOW_CU_CHILDREN= PreferenceConstants.SHOW_CU_CHILDREN;
-
 	private static final String PREF_METHOD_RETURNTYPE= PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE;
 	private static final String PREF_OVERRIDE_INDICATOR= PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR;
 	private static final String PREF_COMPRESS_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES;
@@ -40,54 +38,49 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 
+	/**
+	 * @deprecated Inline to remove reference to preference page
+	*/
 	public static boolean stackBrowsingViewsHorizontally() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return !store.getBoolean(STACK_BROWSING_VIEWS_VERTICALLY);
-	}
-
-	public static boolean showMethodReturnType() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_METHOD_RETURNTYPE);
+		return !PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.BROWSING_STACK_VERTICALLY);
 	}
 	
+	/**
+	 * @deprecated Inline to remove reference to preference page
+	*/
+	public static boolean showMethodReturnType() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE);
+	}
+
+	/**
+	 * @deprecated Inline to remove reference to preference page
+	*/
 	public static boolean showOverrideIndicators() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_OVERRIDE_INDICATOR);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR);
 	}	
 
+	/**
+	 * @deprecated Inline to remove reference to preference page
+	*/
 	public static boolean showCompilationUnitChildren() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(SHOW_CU_CHILDREN);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 	}
 
 	/**
-	 * @since 2.1	 */
+	 * @deprecated Inline to remove reference to preference page
+	*/
 	public static boolean arePackagesFoldedInHierarchicalLayout(){
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);	
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);	
 	}
 
-	public static String getPkgNamePatternForPackagesView() {
-		if (! isCompressingEnabled())
-			return ""; //$NON-NLS-1$
-		return JavaPlugin.getDefault().getPreferenceStore().getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
-	}
-
-	public static boolean isCompressingPkgNameInPackagesView() {
-		return isCompressingEnabled() && getPkgNamePatternForPackagesView().length() > 0;
-	}
-
-	private static boolean isCompressingEnabled() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_COMPRESS_PACKAGE_NAMES);
-	}
-	
 	/**
-	 * Initializes the current options (read from preference store)
-	 */
-	public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_COMPRESS_PACKAGE_NAMES, false);
-		prefs.setDefault(PREF_METHOD_RETURNTYPE, false);
-		prefs.setDefault(PREF_OVERRIDE_INDICATOR, true);
-		prefs.setDefault(SHOW_CU_CHILDREN, true);
-		prefs.setDefault(STACK_BROWSING_VIEWS_VERTICALLY, false);
-		prefs.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
-		prefs.setDefault(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+	 * @deprecated Inline to remove reference to preference page
+	*/
+	public static String getPkgNamePatternForPackagesView() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))
+			return ""; //$NON-NLS-1$
+		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 	}
 	
 	private SelectionButtonDialogField fShowMethodReturnType;
@@ -140,7 +133,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	}	
 
 	private void initFields() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getBoolean(PREF_METHOD_RETURNTYPE));
 		fShowOverrideIndicator.setSelection(prefs.getBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getBoolean(SHOW_CU_CHILDREN));
@@ -228,7 +221,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore prefs= getPreferenceStore();
 		prefs.setValue(PREF_METHOD_RETURNTYPE, fShowMethodReturnType.isSelected());
 		prefs.setValue(PREF_OVERRIDE_INDICATOR, fShowOverrideIndicator.isSelected());
 		prefs.setValue(SHOW_CU_CHILDREN, fShowMembersInPackageView.isSelected());
@@ -244,7 +237,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getDefaultBoolean(PREF_METHOD_RETURNTYPE));
 		fShowOverrideIndicator.setSelection(prefs.getDefaultBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getDefaultBoolean(SHOW_CU_CHILDREN));

@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -36,15 +36,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 public class OpenTypeHierarchyUtil {
 	
@@ -74,7 +74,7 @@ public class OpenTypeHierarchyUtil {
 			return null;
 			
 		try {
-			if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
+			if (PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY))) {
 				return openInPerspective(window, input);
 			} else {
 				return openInViewPart(window, input);

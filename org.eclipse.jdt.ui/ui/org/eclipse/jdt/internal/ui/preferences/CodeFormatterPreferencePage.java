@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
@@ -92,6 +91,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 	/**
 	 * Gets the currently configured tab size
+	 * @deprecated Inline to avoid reference to preference page
 	 */
 	public static int getTabSize() {
 		String string= (String) JavaCore.getOptions().get(PREF_TAB_SIZE);
@@ -100,6 +100,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 	/**
 	 * Gets the current compating assignement configuration
+	 * @deprecated Inline to avoid reference to preference page
 	 */	
 	public static boolean isCompactingAssignment() {
 		return COMPACT.equals(JavaCore.getOptions().get(PREF_STYLE_COMPACT_ASSIGNEMENT));
@@ -107,6 +108,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 	/**
 	 * Gets the current compating assignement configuration
+	 * @deprecated Inline to avoid reference to preference page
 	 */	
 	public static boolean useSpaces() {
 		return SPACE.equals(JavaCore.getOptions().get(PREF_TAB_CHAR));
@@ -124,13 +126,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return dflt;
 	}	
 		
-	
-	/**
-	 * Initializes the current options (read from preference store)
-	 */
-	public static void initDefaults(IPreferenceStore store) {
-	}
-
 	private static class ControlData {
 		private String fKey;
 		private String[] fValues;
