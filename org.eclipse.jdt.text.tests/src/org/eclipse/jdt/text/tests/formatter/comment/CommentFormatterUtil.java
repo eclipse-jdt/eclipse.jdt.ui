@@ -176,10 +176,20 @@ public class CommentFormatterUtil {
 		return 4;
 	}
 	
+	/**
+	 * @param key the preference key
+	 * @return <code>true</code> iff the corresponding preference is of boolean type
+	 * @since 3.1
+	 */
 	private static boolean isBooleanPreference(String key) {
 		return !key.equals(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH);
 	}
 
+	/**
+	 * @param key the preference key
+	 * @return <code>true</code> iff the corresponding preference is of integer type
+	 * @since 3.1
+	 */
 	private static boolean isIntegerPreference(String key) {
 		return key.equals(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH);
 	}
