@@ -129,8 +129,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			URL newURL= fDestination.toFile().toURL();
 
 			if (fStore.fromStandard() && ((currURL == null) || !(currURL.equals(newURL)))) {
-				String message=  JavadocExportMessages.getString("JavadocWizard.updatejavadoclocation.message"); //$NON-NLS-1$
-				if (MessageDialog.openQuestion(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) { //$NON-NLS-1$
+				String message=  JavadocExportMessages.getFormattedString("JavadocWizard.updatejavadoclocation.message", new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }); //$NON-NLS-1$
+				if (MessageDialog.openQuestion(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), message)) { //$NON-NLS-1$
 					JavaDocLocations.setProjectJavadocLocation(fStore.getJavaProject(), newURL);
 				}
 			}
@@ -173,7 +173,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				ILaunchConfigurationWorkingCopy wc= null;
 				try {
 					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-					String name= "Javadoc Export Wizard";// + System.currentTimeMillis(); //$NON-NLS-1$
+					String name= JavadocExportMessages.getString("JavadocWizard.launchconfig.name"); //$NON-NLS-1$
 					wc= lcType.newInstance(null, name);
 					wc.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String) null);
 					wc.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
@@ -185,7 +185,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
 				} catch (CoreException e) {
-					JavaPlugin.logErrorMessage(e.getMessage());
+					JavaPlugin.log(e);
 				}
 
 				return true;
@@ -305,7 +305,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return new IRunnableWithProgress() {
 			public void run(final IProgressMonitor pm) {
 				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
-				pm.beginTask("Saving modified resources", editorsToSave.length); //$NON-NLS-1$
+				String name= JavadocExportMessages.getString("JavadocWizard.savetask.name"); //$NON-NLS-1$
+				pm.beginTask(name, editorsToSave.length);
 				try {
 					List dirtyFilesList= Arrays.asList(dirtyFiles);
 					for (int i= 0; i < editorsToSave.length; i++) {

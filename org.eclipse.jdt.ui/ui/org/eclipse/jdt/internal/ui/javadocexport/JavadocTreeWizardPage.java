@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -178,10 +179,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			JavaPlugin.logErrorMessage(e.getMessage());
 		}
 		
-
-		if (fStore.getJavaProject() != null) {
-			fInputGroup.expandTreeToLevel(fStore.getJavaProject(), 4);
-		}
 		fInputGroup.aboutToOpen();
 	}
 
@@ -656,5 +653,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	public List getResources() {
 		return resources;
 	}
-
+	
+	public IWizardPage getNextPage() {
+		return super.getNextPage();       
+	}
+	
 } //end Class
