@@ -25,6 +25,7 @@ public class PerformanceTestSuite {
 		suite.addTestSuite(OpenEditorTestSetup.class);
 		suite.addTestSuite(RevertTextEditorTest.class);
 		suite.addTestSuite(RevertJavaEditorTest.class);
+		suite.addTestSuite(ScrollJavaEditorTest.class);
 		//$JUnit-END$
 		return suite;
 	}
