@@ -78,7 +78,7 @@ public class AllTypesSearchEngine extends SearchEngine {
 				kind,
 				scope,
 				requestor,
-				IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH,
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				pm);
 		} catch(CoreException e){
 		}
