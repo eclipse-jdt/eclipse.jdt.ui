@@ -40,29 +40,34 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 		 */
 		public void run(IMarker marker) {
 			FileEditorInput input= new FileEditorInput((IFile) marker.getResource());
-			Position pos= findProblemPosition(input, marker);
-			if (pos != null) {
-				IDocument doc= JavaUI.getDocumentProvider().getDocument(input);
-				try {
-					String str= doc.get(pos.getOffset(), pos.getLength());
-					doc.replace(pos.getOffset(), pos.getLength(), str.toUpperCase());
-				} catch (BadLocationException e) {
-					e.printStackTrace();
+			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
+			if (model != null) {
+				// resource is open in editor
+				
+				Position pos= findProblemPosition(model, marker);
+				if (pos != null) {
+					IDocument doc= JavaUI.getDocumentProvider().getDocument(input);
+					try {
+						String str= doc.get(pos.getOffset(), pos.getLength());
+						doc.replace(pos.getOffset(), pos.getLength(), str.toUpperCase());
+					} catch (BadLocationException e) {
+						e.printStackTrace();
+					}
 				}
+			} else {
+				// resource is not open in editor
+				// to do: work on the resource
 			}
 		}
 		
-		private Position findProblemPosition(IEditorInput input, IMarker marker) {
-			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
-			if (model != null) {
-				Iterator iter= model.getAnnotationIterator();
-				while (iter.hasNext()) {
-					Object curr= iter.next();
-					if (curr instanceof MarkerAnnotation) {
-						MarkerAnnotation annot= (MarkerAnnotation) curr;
-						if (marker.equals(annot.getMarker())) {
-							return model.getPosition(annot);
-						}
+		private Position findProblemPosition(IAnnotationModel model, IMarker marker) {
+			Iterator iter= model.getAnnotationIterator();
+			while (iter.hasNext()) {
+				Object curr= iter.next();
+				if (curr instanceof MarkerAnnotation) {
+					MarkerAnnotation annot= (MarkerAnnotation) curr;
+					if (marker.equals(annot.getMarker())) {
+						return model.getPosition(annot);
 					}
 				}
 			}
