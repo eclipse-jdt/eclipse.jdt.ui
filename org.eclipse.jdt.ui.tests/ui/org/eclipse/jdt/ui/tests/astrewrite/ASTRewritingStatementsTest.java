@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
@@ -39,31 +41,33 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	public ASTRewritingStatementsTest(String name) {
 		super(name);
 	}
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+	
 	public static Test suite() {
-		if (false) {
-			return new TestSuite(THIS);
+		if (true) {
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testSwitchStatement"));
-			return suite;
+			suite.addTest(new ASTRewritingStatementsTest("testRemove3"));
+			return new ProjectTestSetup(suite);
 		}
 	}
-
-
+	
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			
 		
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-
+		fJProject1= ProjectTestSetup.getProject();
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
-
+	
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
 	public void testInsert1() throws Exception {

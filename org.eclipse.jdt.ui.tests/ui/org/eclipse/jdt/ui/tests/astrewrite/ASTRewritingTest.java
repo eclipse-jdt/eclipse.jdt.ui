@@ -36,11 +36,12 @@ public class ASTRewritingTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(new TestSuite(ASTRewritingMethodDeclTest.class));
-		suite.addTest(new TestSuite(ASTRewritingStatementsTest.class));
-		suite.addTest(new TestSuite(ASTRewritingTypeDeclTest.class));
-		suite.addTest(new TestSuite(ASTRewritingMoveCodeTest.class));
-		suite.addTest(new TestSuite(ASTRewritingExpressionsTest.class));
+		suite.addTest(ASTRewritingInsertBoundTest.allTests());
+		suite.addTest(ASTRewritingMethodDeclTest.allTests());
+		suite.addTest(ASTRewritingStatementsTest.allTests());
+		suite.addTest(ASTRewritingTypeDeclTest.allTests());
+		suite.addTest(ASTRewritingMoveCodeTest.allTests());
+		suite.addTest(ASTRewritingExpressionsTest.allTests());
 		return new ProjectTestSetup(suite);
 	}
 

@@ -16,26 +16,16 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
@@ -51,35 +41,34 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+	
 	public static Test suite() {
-		if (false) {
-			return new TestSuite(THIS);
+		if (true) {
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testMoveStatements"));
-			return suite;
+			suite.addTest(new ASTRewritingMoveCodeTest("testRemove3"));
+			return new ProjectTestSetup(suite);
 		}
 	}
-
-
+	
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			
 		
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-
+		fJProject1= ProjectTestSetup.getProject();
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
-
-
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
-	}
 	
-
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+	}
 	
 	public void testMoveDeclSameLevel() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

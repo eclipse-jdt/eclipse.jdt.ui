@@ -34,9 +34,15 @@ public class ProjectTestSetup extends TestSetup {
 		return JavaCore.create(project);
 	}
 	
+	public static IClasspathEntry[] getDefaultClasspath() {
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar();
+		assertTrue("rt not found", rtJarPath != null);		
+		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
+	}
 	
+		
 	private IJavaProject fJProject;
-	private long fTimeCreated;
+//	private long fTimeCreated;
 	
 	public ProjectTestSetup(Test test) {
 		super(test);
@@ -47,19 +53,15 @@ public class ProjectTestSetup extends TestSetup {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		fTimeCreated= System.currentTimeMillis();
+//		fTimeCreated= System.currentTimeMillis();
 		
 		IJavaProject project= getProject();
-		if (project.exists()) { // can already be created 
+		if (project.exists()) { // allow nesting of ProjectTestSetup's
 			return;
 		}
 		
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar();
-		assertTrue("rt not found", rtJarPath != null);		
-		
-		IClasspathEntry cpe= JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true);
-		JavaProjectHelper.addToClasspath(fJProject, cpe);		
+		fJProject.setRawClasspath(getDefaultClasspath(), null);	
 	}
 
 	protected void tearDown() throws Exception {
@@ -67,7 +69,7 @@ public class ProjectTestSetup extends TestSetup {
 			JavaProjectHelper.delete(fJProject);
 		}
 		
-		long taken= System.currentTimeMillis() -fTimeCreated;
+//		long taken= System.currentTimeMillis() -fTimeCreated;
 //		System.out.println(getTest().toString() + ": " + taken);
 	}
 

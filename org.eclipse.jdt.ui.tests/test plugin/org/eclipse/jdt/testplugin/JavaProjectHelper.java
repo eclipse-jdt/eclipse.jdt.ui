@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -106,25 +107,53 @@ public class JavaProjectHelper {
 	/**
 	 * Removes a IJavaProject.
 	 */		
-	public static void delete(IJavaProject jproject) throws CoreException {
-		performDummySearch();
-		jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
-		for (int i= 0; i < MAX_RETRY; i++) {
-			try {
-				jproject.getProject().delete(true, true, null);
-				i= MAX_RETRY;
-			} catch (CoreException e) {
-				if (i == MAX_RETRY - 1) {
-					JavaPlugin.log(e);
-					throw e;
+	public static void delete(final IJavaProject jproject) throws CoreException {
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				performDummySearch();
+				jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
+				for (int i= 0; i < MAX_RETRY; i++) {
+					try {
+						jproject.getProject().delete(true, true, null);
+						i= MAX_RETRY;
+					} catch (CoreException e) {
+						if (i == MAX_RETRY - 1) {
+							JavaPlugin.log(e);
+							throw e;
+						}
+						try {
+							Thread.sleep(1000); // sleep a second
+						} catch (InterruptedException e1) {
+						} 
+					}
 				}
-				try {
-					Thread.sleep(1000); // sleep a second
-				} catch (InterruptedException e1) {
-				} 
 			}
-		}
+		};
+		ResourcesPlugin.getWorkspace().run(runnable, null);	
+		
 	}
+
+	/**
+	 * Removes all files in the project and sets the given classpath
+	 */			
+	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws CoreException {
+		performDummySearch();
+		
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				jproject.setRawClasspath(entries, null);
+		
+				IResource[] resources= jproject.getProject().members();
+				for (int i= 0; i < resources.length; i++) {
+					if (!resources[i].getName().startsWith(".")) {
+						resources[i].delete(true, null);
+					}
+				}
+			}
+		};
+		ResourcesPlugin.getWorkspace().run(runnable, null);
+	}
+	
 
 	public static void performDummySearch() throws JavaModelException {
 		new SearchEngine().searchAllTypeNames(
