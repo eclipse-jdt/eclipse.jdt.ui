@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -33,9 +32,11 @@ public interface IOccurrencesFinder {
 		}
 	}
 	
-	public List perform(CompilationUnit root, Name name);
+	public String initialize(CompilationUnit root, int offset, int length);
+	
+	public List perform();
 	
 	public IMarker[] createMarkers(IResource file, IDocument document) throws CoreException;
 	
-	public void searchStarted(ISearchResultView view, String inputName, Name name);
+	public void searchStarted(ISearchResultView view, String inputName);
 }

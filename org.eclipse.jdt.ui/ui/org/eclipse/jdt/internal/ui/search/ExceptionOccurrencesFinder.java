@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -53,37 +54,38 @@ import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
+
+	public static final String IS_EXCEPTION= "isException"; //$NON-NLS-1$
+	
+	private AST fAST;
+	private Name fSelectedName;
 	
 	private ITypeBinding fException;
-	private AST fAST;
+	private ASTNode fStart;
 	private List fResult;
 	
 	public ExceptionOccurrencesFinder() {
 		fResult= new ArrayList();
 	}
 	
-	public static List perform(Name name) {
-		ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
-		return finder.perform((CompilationUnit) name.getRoot(), name);
-	}
-	
-	public List perform(CompilationUnit root, Name name) {
+	public String initialize(CompilationUnit root, int offset, int length) {
 		fAST= root.getAST();
-		ITypeBinding typeBinding= null;
-		ASTNode start= null;
-		ASTNode reference= null;
-		Name topMost= ASTNodes.getTopMostName(name);
-		ASTNode parent= topMost.getParent();
+		ASTNode node= NodeFinder.perform(root, offset, length);
+		if (!(node instanceof Name)) {
+			return SearchMessages.getString("ExceptionOccurrencesFinder.no_exception");  //$NON-NLS-1$
+		}
+		fSelectedName= ASTNodes.getTopMostName((Name)node);
+		ASTNode parent= fSelectedName.getParent();
 		if (parent instanceof MethodDeclaration) {
 			MethodDeclaration decl= (MethodDeclaration)parent;
-			if (decl.thrownExceptions().contains(topMost)) {
-				typeBinding= topMost.resolveTypeBinding();
-				reference= topMost;
-				start= decl.getBody();
+			if (decl.thrownExceptions().contains(fSelectedName)) {
+				fException= fSelectedName.resolveTypeBinding();
+				fStart= decl.getBody();
 			}
 		} else if (parent instanceof Type) {
 			parent= parent.getParent();
@@ -93,19 +95,21 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 				if (tryStatement != null) {
 					IVariableBinding var= catchClause.getException().resolveBinding();
 					if (var != null && var.getType() != null) {
-						typeBinding= var.getType();
-						start= tryStatement.getBody();
-						reference= catchClause.getException().getType();
+						fException= var.getType();
+						fStart= tryStatement.getBody();
 					}
 				}
 			}
 		}
-		if (start == null || typeBinding == null)
-			return new ArrayList();
-		fException= typeBinding;
-		start.accept(this);
-		if (fResult.size() > 0 && reference != null) {
-			fResult.add(reference);
+		if (fException == null || fStart == null)
+			return SearchMessages.getString("ExceptionOccurrencesFinder.no_exception");  //$NON-NLS-1$
+		return null;
+	}
+	
+	public List perform() {
+		fStart.accept(this);
+		if (fResult.size() > 0 && fSelectedName != null) {
+			fResult.add(fSelectedName);
 		}
 		return fResult;
 	}
@@ -122,13 +126,17 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return (IMarker[]) result.toArray(new IMarker[result.size()]);
 	}
  	
-	private static IMarker createMarker(IResource file, IDocument document, ASTNode node) throws CoreException {
+	private IMarker createMarker(IResource file, IDocument document, ASTNode node) throws CoreException {
 		Map attributes= new HashMap(10);
 		IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
 	
 		int startPosition= node.getStartPosition();
 		MarkerUtilities.setCharStart(attributes, startPosition);
 		MarkerUtilities.setCharEnd(attributes, startPosition + node.getLength());
+		
+		if (node == fSelectedName) {
+			attributes.put(IS_EXCEPTION, Boolean.TRUE);
+		}
 		
 		try {
 			int line= document.getLineOfOffset(startPosition);
@@ -142,15 +150,19 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return marker;
 	}
 	
-	public void searchStarted(ISearchResultView view, String inputName, Name name) {
-		String elementName= ASTNodes.asString(name);
+	public void searchStarted(ISearchResultView view, String inputName) {
+		String elementName= ASTNodes.asString(fSelectedName);
 		view.searchStarted(
 			null,
-			"Occurrences of " + elementName + " - {0} match in " + inputName,
-			"Occurrences of " + elementName + " - {0} matches in " + inputName,
+			SearchMessages.getFormattedString(
+				"ExceptionOccurrencesFinder.label.singular", //$NON-NLS-1$
+				new Object[] { elementName, "{0}", inputName}), //$NON-NLS-1$
+			SearchMessages.getFormattedString(
+				"ExceptionOccurrencesFinder.label.plural", //$NON-NLS-1$
+				new Object[] { elementName, "{0}", inputName}), //$NON-NLS-1$
 			JavaPluginImages.DESC_OBJS_SEARCH_REF,
 			"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
-			new OccurrencesInFileLabelProvider(),
+			new ExceptionOccurrencesLabelProvider(),
 			new GotoMarkerAction(), 
 			new SearchGroupByKeyComputer(),
 			null
@@ -203,17 +215,35 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return super.visit(node);
 	}
 	
+	public boolean visit(ThrowStatement node) {
+		if (matches(node.getExpression().resolveTypeBinding())) {
+			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
+			name.setSourceRange(node.getStartPosition(), 5);
+			fResult.add(name);
+			
+		}
+		return super.visit(node);
+	}
+	
 	private boolean matches(IMethodBinding binding) {
 		if (binding == null)
 			return false;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		for (int i = 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
-			while (exception != null) {
-				if (Bindings.equals(fException, exception))
-					return true;
-				exception= exception.getSuperclass();
-			}
+			if(matches(exception))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean matches(ITypeBinding exception) {
+		if (exception == null)
+			return false;
+		while (exception != null) {
+			if (Bindings.equals(fException, exception))
+				return true;
+			exception= exception.getSuperclass();
 		}
 		return false;
 	}

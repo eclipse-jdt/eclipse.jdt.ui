@@ -26,10 +26,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
@@ -41,7 +38,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
 
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -140,20 +136,16 @@ public abstract class FindOccurrencesEngine {
 		if (root == null) {
 			return SearchMessages.getString("FindOccurrencesEngine.cannotParse.text"); //$NON-NLS-1$
 		}
-		final Name name= getNameNode(root, offset, length);
-		if (name == null) 
-			return SearchMessages.getString("FindOccurrencesEngine.noJavaElement.text"); //$NON-NLS-1$
+		String message= fFinder.initialize(root, offset, length);
+		if (message != null)
+			return message;
 		
-		final IBinding target= name.resolveBinding();
 		final IDocument document= new Document(getSourceReference().getSource());
-		
-		if (target == null)
-			return null;
 		
 		final IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				ISearchResultView view= startSearch(name);
-				fFinder.perform(root, name);
+				ISearchResultView view= startSearch();
+				fFinder.perform();
 				IResource file= getMarkerOwner();				
 				IMarker[] markers= fFinder.createMarkers(file, document);
 				for (int i = 0; i < markers.length; i++) {
@@ -168,19 +160,12 @@ public abstract class FindOccurrencesEngine {
 		return null;
 	}
 
-	public Name getNameNode(CompilationUnit root, int offset, int length) {
-		ASTNode node= NodeFinder.perform(root, offset, length);
-		if (node instanceof Name)
-			return (Name)node;
-		return null;
-	}
-	
-	private ISearchResultView startSearch(final Name name) {
+	private ISearchResultView startSearch() {
 		SearchUI.activateSearchResultView();
 		ISearchResultView view= SearchUI.getSearchResultView();
 		IJavaElement element= getInput();
 		if (view != null) {
-			fFinder.searchStarted(view, element.getElementName(), name);
+			fFinder.searchStarted(view, element.getElementName());
 		}
 		return view;
 	}

@@ -50,6 +50,7 @@ import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -58,6 +59,8 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
 	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
 	
+	private CompilationUnit fRoot;
+	private Name fSelectedNode;
 	private IBinding fTarget;
 	private List fUsages= new ArrayList();
 	private List fWriteUsages= new ArrayList();
@@ -71,11 +74,20 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		
 	}
 	
-	public List perform(CompilationUnit root, Name name) {
-		fTarget= name.resolveBinding();
+	public String initialize(CompilationUnit root, int offset, int length) {
+		ASTNode node= NodeFinder.perform(root, offset, length);
+		if (!(node instanceof Name))
+			return SearchMessages.getString("OccurrencesFinder.no_element"); //$NON-NLS-1$
+		fRoot= root;
+		fSelectedNode= (Name)node;
+		fTarget= fSelectedNode.resolveBinding();
 		if (fTarget == null)
-			return new ArrayList();
-		root.accept(this);
+			return SearchMessages.getString("OccurrencesFinder.no_binding"); //$NON-NLS-1$
+		return null;
+	}
+	
+	public List perform() {
+		fRoot.accept(this);
 		return fUsages;
 	}
 	
@@ -115,8 +127,8 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return marker;
 	}
 	
-	public void searchStarted(ISearchResultView view, String inputName, Name name) {
-		String elementName= ASTNodes.asString(name);
+	public void searchStarted(ISearchResultView view, String inputName) {
+		String elementName= ASTNodes.asString(fSelectedNode);
 		view.searchStarted(
 			null,
 			getSingularLabel(elementName, inputName),

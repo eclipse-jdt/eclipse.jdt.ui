@@ -50,8 +50,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -165,8 +163,6 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -178,8 +174,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
@@ -2782,24 +2778,23 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
-		
-		ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-		if (!(node instanceof Name))
-			return;
-		
-		IBinding binding= ((Name)node).resolveBinding();
-		if (binding == null)
-			return;
-		
+				
 		if (fOccurrencesFinderJob != null)
 			fOccurrencesFinderJob.cancel();
 		
-		List matches= ExceptionOccurrencesFinder.perform((Name)node);
+		ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
+		String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
+		List matches= new ArrayList();
+		if (message == null) {
+			matches= exceptionFinder.perform();
+		}
 		if (matches.size() == 0) {
 			// Find the matches && extract positions so we can forget the AST
-			OccurrencesFinder finder = new OccurrencesFinder(binding);
-			astRoot.accept(finder);
-			matches= finder.getUsages();
+			OccurrencesFinder finder = new OccurrencesFinder();
+			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= finder.perform();
+			}
 		}
 		
 		Position[] positions= new Position[matches.size()];
