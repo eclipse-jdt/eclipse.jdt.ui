@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -432,12 +433,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private void createButtonComposite(Composite parent){
 		Composite buttonComp= new Composite(parent, SWT.NONE);
-		buttonComp.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		buttonComp.setLayout(gl);
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
 		Button translateSelected= new Button(buttonComp, SWT.PUSH);
 		translateSelected.setText(NLSUIMessages.getString("wizardPage.Translate_Selected")); //$NON-NLS-1$
 		translateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(translateSelected);
 		translateSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				setSelectedTasks(NLSSubstitution.TRANSLATE);
@@ -447,6 +451,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Button noTranslateSelected= new Button(buttonComp, SWT.PUSH);
 		noTranslateSelected.setText(NLSUIMessages.getString("wizardPage.Never_Translate_Selected")); //$NON-NLS-1$
 		noTranslateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(noTranslateSelected);
 		noTranslateSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				setSelectedTasks(NLSSubstitution.NEVER_TRANSLATE);
@@ -456,6 +461,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Button skipSelected= new Button(buttonComp, SWT.PUSH);
 		skipSelected.setText(NLSUIMessages.getString("wizardPage.Skip_Selected")); //$NON-NLS-1$
 		skipSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(skipSelected);
 		skipSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				setSelectedTasks(NLSSubstitution.SKIP);
