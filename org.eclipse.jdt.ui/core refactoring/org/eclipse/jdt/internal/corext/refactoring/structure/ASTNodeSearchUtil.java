@@ -158,7 +158,7 @@ public class ASTNodeSearchUtil {
 		if (iType.isAnonymous())
 			return getClassInstanceCreationNode(iType, cuNode).getAnonymousClassDeclaration().bodyDeclarations();
 		else
-			return getTypeDeclarationNode(iType, cuNode).bodyDeclarations();
+			return getAbstractTypeDeclarationNode(iType, cuNode).bodyDeclarations();
 	}
 	
 	//returns an array because of the import container, which does not represent 1 node but many
@@ -178,7 +178,7 @@ public class ASTNodeSearchUtil {
 			case IJavaElement.PACKAGE_DECLARATION:
 				return new ASTNode[]{ASTNodeSearchUtil.getPackageDeclarationNode((IPackageDeclaration)element, cuNode)};
 			case IJavaElement.TYPE:
-				return new ASTNode[]{getTypeDeclarationNode((IType) element, cuNode)};
+				return new ASTNode[]{getAbstractTypeDeclarationNode((IType) element, cuNode)};
 			default:
 				Assert.isTrue(false, String.valueOf(element.getElementType()));
 				return null;

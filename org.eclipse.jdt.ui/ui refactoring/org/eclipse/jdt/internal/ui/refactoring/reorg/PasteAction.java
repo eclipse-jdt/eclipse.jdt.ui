@@ -58,7 +58,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -564,10 +563,10 @@ public class PasteAction extends SelectionDispatchAction{
 					source= fSources[i];
 					final ASTNode destination= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
 					if (destination != null) {
-						if (destination.getNodeType() == ASTNode.COMPILATION_UNIT)
+						if (destination instanceof CompilationUnit)
 							insertToCu(rewrite, createNewNodeToInsertToCu(source, rewrite), (CompilationUnit) destination);
-						else if (destination.getNodeType() == ASTNode.TYPE_DECLARATION)
-							insertToType(rewrite, createNewNodeToInsertToType(source, rewrite), (TypeDeclaration) destination);
+						else if (destination instanceof AbstractTypeDeclaration)
+							insertToType(rewrite, createNewNodeToInsertToType(source, rewrite), (AbstractTypeDeclaration) destination);
 					}
 				}
 				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
