@@ -441,14 +441,15 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 			if (fActiveRegion == null)
 				return;
+			
+			int offset= fActiveRegion.getOffset();
+			int length= fActiveRegion.getLength();
+			fActiveRegion= null;
 				
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer != null) {
 				resetCursor(viewer);
-
-				int offset= fActiveRegion.getOffset();
-				int length= fActiveRegion.getLength();
-
+				
 				// remove style
 				if (!redrawAll && viewer instanceof ITextViewerExtension2)
 					((ITextViewerExtension2) viewer).invalidateTextPresentation(offset, length);
@@ -470,8 +471,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					JavaPlugin.log(x);
 				}
 			}
-			
-			fActiveRegion= null;
 		}
 
 		// will eventually be replaced by a method provided by jdt.core		
@@ -781,7 +780,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					event.getDocument().addPosition(fRememberedPosition);
 				} catch (BadLocationException x) {
 					fRememberedPosition= null;
-		}
+				}
 			}
 		}
 
@@ -789,21 +788,29 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentChanged(DocumentEvent event) {
-			if (fRememberedPosition != null && !fRememberedPosition.isDeleted()) {
-				event.getDocument().removePosition(fRememberedPosition);
-				fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
-			}
-			fRememberedPosition= null;
-
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer != null) {
-				StyledText widget= viewer.getTextWidget();
-				if (widget != null && !widget.isDisposed()) {
-					widget.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							deactivate();
+			if (fRememberedPosition != null) {
+				if (!fRememberedPosition.isDeleted()) {
+					
+					event.getDocument().removePosition(fRememberedPosition);
+					fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
+					fRememberedPosition= null;
+					
+					ISourceViewer viewer= getSourceViewer();
+					if (viewer != null) {
+						StyledText widget= viewer.getTextWidget();
+						if (widget != null && !widget.isDisposed()) {
+							widget.getDisplay().asyncExec(new Runnable() {
+								public void run() {
+									deactivate();
+								}
+							});
 						}
-					});
+					}
+					
+				} else {
+					fActiveRegion= null;
+					fRememberedPosition= null;
+					deactivate();
 				}
 			}
 		}

@@ -25,8 +25,6 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.ConfigurableLineTracker;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension;
-import org.eclipse.jface.text.IDocumentExtension2;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -173,10 +171,16 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * @param offset Offset measured in comment region coordinates where to apply the changed content
 	 * @param length Length of the content to be changed
 	 */
-	protected void applyText(final String change, final int offset, final int length) {
+	protected final void applyText(final String change, final int offset, final int length) {
 
 		try {
-			fDocument.replace(getOffset() + offset, length, change);
+
+			final int base= getOffset() + offset;
+			final String content= fDocument.get(base, length);
+
+			if (!change.equals(content))
+				fDocument.replace(getOffset() + offset, length, change);
+
 		} catch (BadLocationException exception) {
 			// Should not happen
 		}
@@ -234,23 +238,6 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		}
 		margin= Math.max(COMMENT_PREFIX_LENGTH + 1, margin - stringToLength(indentation) - COMMENT_PREFIX_LENGTH);
 
-		IDocumentExtension extension= null;
-		IDocumentExtension2 extension2= null;
-
-		if (document instanceof IDocumentExtension) {
-
-			extension= (IDocumentExtension)document;
-
-			extension.startSequentialRewrite(false);
-			extension.stopPostNotificationProcessing();
-		}
-
-		if (document instanceof IDocumentExtension2) {
-
-			extension2= (IDocumentExtension2)document;
-			extension2.stopListenerNotification();
-		}
-
 		document.addPositionCategory(COMMENT_POSITION_CATEGORY);
 
 		final IPositionUpdater positioner= new DefaultPositionUpdater(COMMENT_POSITION_CATEGORY);
@@ -276,15 +263,6 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 			} catch (BadPositionCategoryException exception) {
 				// Should not happen
-			}
-
-			if (extension2 != null)
-				extension2.resumeListenerNotification();
-
-			if (extension != null) {
-
-				extension.resumePostNotificationProcessing();
-				extension.stopSequentialRewrite();
 			}
 		}
 	}
