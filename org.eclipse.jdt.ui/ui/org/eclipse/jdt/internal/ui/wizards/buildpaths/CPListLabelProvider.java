@@ -69,7 +69,7 @@ class CPListLabelProvider extends LabelProvider {
 	}
 	
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
-		String notAvailable= "(Not Configured)";
+		String notAvailable= "(None)";
 		StringBuffer buf= new StringBuffer();
 		String key= attrib.getKey();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
@@ -101,12 +101,12 @@ class CPListLabelProvider extends LabelProvider {
 				buf.append(notAvailable);
 			}
 		} else if (key.equals(CPListElement.OUTPUT)) {
-			buf.append("Output location: ");
+			buf.append("Output folder: ");
 			IPath path= (IPath) attrib.getValue();
 			if (path != null) {
 				buf.append(path.makeRelative().toString());
 			} else {
-				buf.append("(Project Default)");
+				buf.append("(Default output folder)");
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
 			buf.append("Exclusion filter: ");

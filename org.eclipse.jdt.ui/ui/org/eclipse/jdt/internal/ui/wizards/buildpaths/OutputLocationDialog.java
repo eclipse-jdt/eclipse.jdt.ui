@@ -139,7 +139,7 @@ public class OutputLocationDialog extends StatusDialog {
 			return;
 		}
 				
-		IPath path= new Path(pathStr);
+		IPath path= new Path(pathStr).makeAbsolute();
 		IStatus pathValidation= workspace.validatePath(path.toString(), IResource.PROJECT | IResource.FOLDER);
 		if (!pathValidation.isOK()) {
 			fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidpath", pathValidation.getMessage())); //$NON-NLS-1$
