@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83607
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -175,6 +176,12 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		String expected= " This is a <a href=\"/test.html\">test link</a>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
+    
+    public void test16() {
+        String string= "/**\n *@param foo {@link Bar bar}*/"; //$NON-NLS-1$
+        String expected= "<dl><dt>Parameters:</dt><dd><b>foo</b> bar</dd></dl>"; //$NON-NLS-1$
+        verify(string, expected);
+    }
 }
 
 class MockBuffer implements IBuffer{

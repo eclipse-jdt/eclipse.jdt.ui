@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=20644 
+ *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83607 
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
@@ -86,9 +87,16 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	
 	private int getContentUntilNextTag(StringBuffer buffer) throws IOException {
 		int c= nextChar();
-		boolean tagStarterRead= (c == '@'); //optimization - don't look for tags if @ not read 
+		boolean tagStarterRead= (c == '@'); //optimization - don't look for tags if @ not read
+        boolean blockStartRead= false;
 		while (c != -1) {
-			buffer.append((char) c);
+            if (blockStartRead) {
+                buffer.append(processBlockTag());
+                blockStartRead= false;
+            } else {
+                buffer.append((char) c);
+            }
+
 			int endingTagIndex= tagStarterRead ? findEndingTag(buffer) : -1;
 			if (endingTagIndex != -1) {
 				unread(TAGS[endingTagIndex], buffer);
@@ -96,6 +104,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			}	
 			c= nextChar();
 			tagStarterRead= tagStarterRead || (c == '@');
+            blockStartRead= c == '{';
 		}
 		return c;
 	}
@@ -257,7 +266,6 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			
 			buffer.setLength(0);
 			if (c != -1) {
-				buffer.append((char) c);
 				c= getContentUntilNextTag(buffer);
 			}
 			
