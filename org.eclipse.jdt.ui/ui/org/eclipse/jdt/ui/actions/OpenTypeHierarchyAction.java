@@ -18,14 +18,14 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 /**
@@ -54,7 +54,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("OpenTypeHierarchyAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenTypeHierarchyAction.tooltip")); //$NON-NLS-1$
-		setDescription(ActionMessages.getString("OpenTypeHierarchyAction.description")); //$NON-NLS-1$		
+		setDescription(ActionMessages.getString("OpenTypeHierarchyAction.description")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_TYPE_HIERARCHY_ACTION);
 	}
 	
 	/**

@@ -174,8 +174,8 @@ public interface IJavaHelpContextIds {
 	public static final String MOVE_CU_ERROR_WIZARD_PAGE= PREFIX + "move_cu_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PARAMS_WIZARD_PAGE= PREFIX + "rename_params_wizard_page"; //$NON-NLS-1$
 	public static final String RENAME_PARAMS_ERROR_WIZARD_PAGE= PREFIX + "rename_params_error_wizard_page"; //$NON-NLS-1$
-	public static final String EXTERNALIZE_WIZARD_PAGE= PREFIX + "externalize_wizard_page_context"; //$NON-NLS-1$
-	public static final String EXTERNALIZE_WIZARD_PAGE_2= PREFIX + "externalize_wizard_page_context"; //$NON-NLS-1$
+	public static final String EXTERNALIZE_WIZARD_KEYVALUE_PAGE= PREFIX + "externalize_wizard_keyvalue_page_context"; //$NON-NLS-1$
+	public static final String EXTERNALIZE_WIZARD_PROPERTIES_FILE_PAGE= PREFIX + "externalize_wizard_properties_file_page_context"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_ERROR_WIZARD_PAGE= PREFIX + "externalize_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String EXTRACT_METHOD_WIZARD_PAGE= PREFIX + "extract_method_wizard_page_context"; //$NON-NLS-1$
 	public static final String EXTRACT_METHOD_ERROR_WIZARD_PAGE= PREFIX + "extract_temp_error_wizard_page_context"; //$NON-NLS-1$
