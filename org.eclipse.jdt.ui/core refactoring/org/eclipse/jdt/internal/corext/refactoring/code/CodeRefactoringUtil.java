@@ -1,7 +1,5 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
@@ -32,8 +30,8 @@ public class CodeRefactoringUtil {
 			return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage); 
 
 		MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
-		String key= RefactoringCoreMessages.getString("CodeRefactoringUtil.error.message"); //$NON-NLS-1$
-		String message= MessageFormat.format(key, new String[]{methodDecl.getName().getIdentifier()});
+		String[] keys= {methodDecl.getName().getIdentifier()};
+		String message= RefactoringCoreMessages.getFormattedString("CodeRefactoringUtil.error.message", keys); //$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message);	
 	}
 	

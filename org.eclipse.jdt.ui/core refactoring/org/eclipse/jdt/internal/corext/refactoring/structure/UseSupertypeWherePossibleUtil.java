@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -734,8 +743,8 @@ class UseSupertypeWherePossibleUtil {
 	private void addSupertypeImport(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
 		ImportEdit importEdit= new ImportEdit(cu, fCodeGenerationSettings);
 		importEdit.addImport(getFullyQualifiedSupertypeName());
-		String pattern= RefactoringCoreMessages.getString("UseSupertypeWherePossibleUtil.adding_import"); //$NON-NLS-1$
-		String editName= MessageFormat.format(pattern, new String[]{getFullyQualifiedSupertypeName()});
+		String[] keys= {getFullyQualifiedSupertypeName()};
+		String editName= RefactoringCoreMessages.getFormattedString("UseSupertypeWherePossibleUtil.adding_import", keys); //$NON-NLS-1$
 		manager.get(cu).addTextEdit(editName, importEdit);
 	}
 

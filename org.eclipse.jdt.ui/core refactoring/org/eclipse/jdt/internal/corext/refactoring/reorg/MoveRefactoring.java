@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -186,8 +185,8 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 				continue;
 			if (getDestination().equals(type.getPackageFragment()))
 				continue;
-			String key= RefactoringCoreMessages.getString("MoveRefactoring.warning.typeWillNotBeAccessible"); //$NON-NLS-1$
-			String message= MessageFormat.format(key, new String[]{JavaElementUtil.createSignature(type)});
+			String[] keys= {JavaElementUtil.createSignature(type)};
+			String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.typeWillNotBeAccessible", keys); //$NON-NLS-1$
 			result.addWarning(message);				
 		}
 		return result;
@@ -217,8 +216,8 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 				continue;
 			if (movedCuList.contains(cu))	
 				continue;
-			String key= RefactoringCoreMessages.getString("MoveRefactoring.warning.containsReferencesToTypeThatWillNotBeVisible"); //$NON-NLS-1$
-			String message= MessageFormat.format(key, new String[]{cu.getElementName()});
+			String[] keys= 	{cu.getElementName()};
+			String message= RefactoringCoreMessages.getFormattedString("MoveRefactoring.warning.containsReferencesToTypeThatWillNotBeVisible", keys); //$NON-NLS-1$
 			result.addWarning(message);
 		}
 		pm.done();
