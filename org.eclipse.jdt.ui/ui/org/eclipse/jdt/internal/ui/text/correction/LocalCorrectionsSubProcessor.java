@@ -596,7 +596,7 @@ public class LocalCorrectionsSubProcessor {
 			rewrite.markAsRemoved(nodeToRemove);
 
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);			
 		}
