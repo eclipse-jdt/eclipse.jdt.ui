@@ -9,11 +9,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Literal;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
@@ -22,10 +20,9 @@ import org.eclipse.jdt.internal.compiler.ast.PostfixExpression;
 import org.eclipse.jdt.internal.compiler.ast.PrefixExpression;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -34,8 +31,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.rename.*;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class InlineTempRefactoring extends Refactoring {
 
@@ -73,10 +72,12 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 1);
-			/* left empty - all checking is done in checkInput
-			 * that way we get a preview for compile errors
-			*/ 
-			return new RefactoringStatus();
+			if (!(fCu instanceof CompilationUnit))
+				return RefactoringStatus.createFatalErrorStatus("Internal Error");
+				
+			initializeAST();
+							
+			return checkSelection();			
 		} finally {
 			pm.done();
 		}	
@@ -87,34 +88,15 @@ public class InlineTempRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Checking preconditions", 1);
-			fAST= new AST(fCu);
-			
-			if (fAST.hasProblems()){
-				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
-				if (compileErrors.hasFatalError())
-					return compileErrors;
-			}
-			initializeSelection(); //cannot initialize earlier
-			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus("Syntax errors in this compilation unit prevent local variable inlining. Fix the errors first.");						
-			RefactoringStatus result= new RefactoringStatus();
-			
-			result.merge(checkSelection());
-			if (result.hasFatalError())
-				return result;
-			
-			if (! isTempInitializedAtDeclaration())
-				return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName() + "' is not initialized at declaration.");
-						
-			if (canInitializerHaveSideEffects())
-				result.addWarning("Local variable '" + getTempName() + "' is initialized with an expression that can have side effects.");
-			
-			result.merge(checkAssignments());
-			return result;
+			pm.beginTask("", 1);
+			return new RefactoringStatus();
 		} finally{
 			pm.done();
 		}	
+	}
+
+	private void initializeAST() throws JavaModelException {
+		fAST= new AST(fCu);
 	}
 	
 	private void initializeSelection() throws JavaModelException {
@@ -122,25 +104,31 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
+		if (fAST.hasProblems()){
+			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
+			if (compileErrors.hasFatalError())
+				return compileErrors;
+		}
+		initializeSelection(); //cannot initialize earlier
+		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
-		else
-			return new RefactoringStatus();	
+		
+		if (! isTempInitializedAtDeclaration())
+			return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName() + "' is not initialized at declaration.");
+		
+		return checkAssignments();
 	}
 	
 	private boolean isTempInitializedAtDeclaration(){
 		return fTempDeclaration.initialization != null;
 	}
 	
-	private boolean canInitializerHaveSideEffects(){
-		return canHaveSideEffects(fTempDeclaration.initialization);
-	}
-	
 	private RefactoringStatus checkAssignments() throws JavaModelException {
 		TempAssignmentFinder assignmentFinder= new TempAssignmentFinder(fTempDeclaration);
 		fAST.accept(assignmentFinder);
 		if (! assignmentFinder.hasAssignments())
-			return null;
+			return new RefactoringStatus();
 		int start= assignmentFinder.getFirstAssignment().sourceStart;
 		int end= assignmentFinder.getFirstAssignment().sourceEnd;
 		ISourceRange range= new SourceRange(start, end - start + 1);
@@ -148,11 +136,6 @@ public class InlineTempRefactoring extends Refactoring {
 		return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName()+ "' is assigned to more than once", context);
 	}
 	
-	private static boolean canHaveSideEffects(Expression exp){
-		//TO DO
-		return false;
-	}
-
 	//----- changes
 	
 	/*
