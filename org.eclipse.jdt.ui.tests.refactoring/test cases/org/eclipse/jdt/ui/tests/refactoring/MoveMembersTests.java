@@ -170,6 +170,7 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 	
 	public void test8() throws Exception{
+//		printTestDisabledMessage("36835");
 		IPackageFragment packageForB= null;
 		try{
 			packageForB= getRoot().createPackageFragment("r", false, null);
