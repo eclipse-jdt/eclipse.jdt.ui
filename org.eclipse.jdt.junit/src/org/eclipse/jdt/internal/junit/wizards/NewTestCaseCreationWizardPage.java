@@ -709,7 +709,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 	}
 	
 	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
-		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit");
+		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit"); //$NON-NLS-1$
 		IClasspathEntry entry;
 		if (junitProject.exists()) {
 			entry= JavaCore.newProjectEntry(junitProject.getFullPath());
@@ -717,7 +717,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
 			IPath sourceHome= new Path("ECLIPSE_HOME"); //$NON-NLS-1$
 			entry= JavaCore.newVariableEntry(
-				junitHome.append("junit.jar"),  //$NON-NLS-1$
+				junitHome.append("junit.jar"),   //$NON-NLS-1$
 				//TODO: find a better solution than declaring a classpath variable
 				sourceHome.append("plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
 				null
@@ -751,7 +751,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof CoreException) {	
-				ErrorDialog.openError(shell, WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), ((CoreException)t).getStatus());
+				ErrorDialog.openError(shell, WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), ((CoreException)t).getStatus());  //$NON-NLS-1$//$NON-NLS-2$
 			}
 		} catch (InterruptedException e) {
 			return;
