@@ -53,6 +53,8 @@ public class SearchUtil extends JavaModelUtil {
 	private static IDialogSettings fgSettingsStore;
 
 	public static IJavaElement getJavaElement(IMarker marker) {
+		if (marker == null || !marker.exists())
+			return null;
 		try {
 			String handleId= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 			IJavaElement je= JavaCore.create(handleId);
