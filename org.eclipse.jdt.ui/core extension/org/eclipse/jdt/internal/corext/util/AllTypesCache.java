@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
@@ -529,11 +530,10 @@ public class AllTypesCache {
 			if (monitor == null)
 				monitor= fDelegatedProgressMonitor;
 		
-			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
+			new SearchEngine().searchAllTypeNames(
 				null,
 				null,
-				IJavaSearchConstants.PATTERN_MATCH,
-				IJavaSearchConstants.CASE_INSENSITIVE,
+				SearchPattern.R_PATTERN_MATCH, // case insensitive
 				IJavaSearchConstants.TYPE,
 				SearchEngine.createWorkspaceScope(),
 				requestor,

@@ -226,11 +226,9 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
 
 		searchEngine.searchAllTypeNames(
-			JavaPlugin.getWorkspace(), 
 			null, 
 			simpleTypeName.toCharArray(), 
-			SearchPattern.R_EXACT_MATCH, 
-			true, 
+			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
 			IJavaSearchConstants.TYPE, 
 			searchScope, 
 			requestor, 
