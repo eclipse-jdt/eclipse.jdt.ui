@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2002.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
 import java.util.ArrayList;
@@ -427,7 +433,12 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			genStubSettings.fMethodOverwrites= true;
 			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			constr += "public "+getTypeName()+"(String name) {" + //$NON-NLS-1$  //$NON-NLS-2$ 					getLineDelimiter() +					"super(name);" + //$NON-NLS-1$ 					getLineDelimiter() +					"}" + //$NON-NLS-1$ 					getLineDelimiter() + getLineDelimiter();
+			constr += "public "+getTypeName()+"(String name) {" + //$NON-NLS-1$  //$NON-NLS-2$ 
+					getLineDelimiter() +
+					"super(name);" + //$NON-NLS-1$ 
+					getLineDelimiter() +
+					"}" + //$NON-NLS-1$ 
+					getLineDelimiter() + getLineDelimiter();
 		}
 		type.createMethod(constr, null, true, null);	
 		fIndexOfFirstTestMethod++;
@@ -464,8 +475,18 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			setUp= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
 			if (settings.createComments)
-				setUp= "/**" + //$NON-NLS-1$					getLineDelimiter() + 					" * Sets up the fixture, for example, open a network connection." + //$NON-NLS-1$					getLineDelimiter() +					" * This method is called before a test is executed." + //$NON-NLS-1$					getLineDelimiter() +					" * @throws Exception" + //$NON-NLS-1$					getLineDelimiter() +					" */" + //$NON-NLS-1$					getLineDelimiter(); 
-			setUp+= "protected void "+SETUP+"() throws Exception {}" + //$NON-NLS-1$ //$NON-NLS-2$				getLineDelimiter() + getLineDelimiter(); 
+				setUp= "/**" + //$NON-NLS-1$
+					getLineDelimiter() + 
+					" * Sets up the fixture, for example, open a network connection." + //$NON-NLS-1$
+					getLineDelimiter() +
+					" * This method is called before a test is executed." + //$NON-NLS-1$
+					getLineDelimiter() +
+					" * @throws Exception" + //$NON-NLS-1$
+					getLineDelimiter() +
+					" */" + //$NON-NLS-1$
+					getLineDelimiter(); 
+			setUp+= "protected void "+SETUP+"() throws Exception {}" + //$NON-NLS-1$ //$NON-NLS-2$
+				getLineDelimiter() + getLineDelimiter(); 
 		}
 		type.createMethod(setUp, null, false, null);	
 		fIndexOfFirstTestMethod++;
@@ -589,7 +610,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		String returnType= Signature.toString(method.getReturnType());
 		String body= WizardMessages.getFormattedString("NewTestClassWizPage.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
 		newMethod.append("/*");//$NON-NLS-1$
-		newMethod.append(getLineDelimiter());		newMethod.append(" * ");//$NON-NLS-1$
+		newMethod.append(getLineDelimiter());
+		newMethod.append(" * ");//$NON-NLS-1$
 		newMethod.append(body);
 		newMethod.append("(");//$NON-NLS-1$
 		String[] paramTypes= method.getParameterTypes();
@@ -603,7 +625,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 		newMethod.append(")");//$NON-NLS-1$
 		newMethod.append(getLineDelimiter());
-		newMethod.append(" */");//$NON-NLS-1$		newMethod.append(getLineDelimiter()); 
+		newMethod.append(" */");//$NON-NLS-1$
+		newMethod.append(getLineDelimiter()); 
 	}
 
 	private List getOveloadedMethods(List allMethods) {
