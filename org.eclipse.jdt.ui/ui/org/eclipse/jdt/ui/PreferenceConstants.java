@@ -3092,7 +3092,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, true);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
-		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, false);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, true);
 		
 		// properties file editor
 		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0));

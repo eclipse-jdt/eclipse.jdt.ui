@@ -158,7 +158,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private boolean fCollapseImportContainer= true;
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMethods= false;
-	private boolean fCollapseHeaderComments= false;
+	private boolean fCollapseHeaderComments= true;
 	
 	public DefaultJavaFoldingStructureProvider() {
 	}
