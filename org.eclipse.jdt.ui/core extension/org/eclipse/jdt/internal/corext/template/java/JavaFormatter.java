@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.text.edits.DeleteEdit;
@@ -33,6 +34,7 @@ import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -171,7 +173,13 @@ public class JavaFormatter {
 
 		int[] offsets= variablesToOffsets(variables, start);
 		
-		string= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, doc.get(), start, string.length(), 0, offsets, fLineDelimiter, context.getCompilationUnit().getJavaProject().getOptions(true));
+		Map options;
+		if (context.getCompilationUnit() != null)
+			options= context.getCompilationUnit().getJavaProject().getOptions(true); 
+		else
+			options= JavaCore.getOptions();
+		
+		string= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, doc.get(), start, string.length(), 0, offsets, fLineDelimiter, options);
 		
 		offsetsToVariables(offsets, variables, start);
 
