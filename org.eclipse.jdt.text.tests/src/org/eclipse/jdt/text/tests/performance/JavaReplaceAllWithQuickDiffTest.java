@@ -26,9 +26,9 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  * 
  * @since 3.1
  */
-public class JavaReplaceAllTest extends TextPerformanceTestCase {
+public class JavaReplaceAllWithQuickDiffTest extends TextPerformanceTestCase {
 	
-	private static final Class THIS= JavaReplaceAllTest.class;
+	private static final Class THIS= JavaReplaceAllWithQuickDiffTest.class;
 	
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 	
@@ -49,7 +49,7 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
-		fEditor.showChangeInformation(false);
+		fEditor.showChangeInformation(true);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
