@@ -12,9 +12,21 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
@@ -33,7 +45,6 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		layout.numColumns= 2;
 		layout.verticalSpacing= 8;
 		result.setLayout(layout);
-		RowLayouter layouter= new RowLayouter(2);
 		
 		Label label= new Label(result, SWT.NONE);
 		label.setText("Interface name:");
@@ -42,16 +53,78 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		text.selectAll();
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
-		layouter.perform(label, text, 1);
-		
-		addReplaceAllCheckbox(result, layouter);
+		addReplaceAllCheckbox(result);
+		addMemberListComposite(result);
 	}
 
-	private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-		String key= "Change references to the class \'{0}\' into references to the interface (where possible)"; 
+	private void addMemberListComposite(Composite result) {
+		Composite composite= new Composite(result, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan= 2;
+		composite.setLayoutData(gd);
+		
+		final CheckboxTableViewer tableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		tableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		tableViewer.setLabelProvider(new JavaElementLabelProvider());
+		tableViewer.setContentProvider(createContentProvider());
+		try {
+			tableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, "Extract Interface", "Internal Error"); //XXX
+			tableViewer.setInput(new IMember[0]);
+		}
+
+		Composite buttonComposite= new Composite(composite, SWT.NONE);
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		gl.marginWidth= 0;
+		buttonComposite.setLayout(gl);
+		gd= new GridData(GridData.FILL_VERTICAL);
+		buttonComposite.setLayoutData(gd);
+		
+		Button selectAll= new Button(buttonComposite, SWT.PUSH);
+		selectAll.setText("Select All");
+		selectAll.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(selectAll);
+		selectAll.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				tableViewer.setAllChecked(true);
+			}
+		});
+
+		Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
+		deSelectAll.setText("Deselect All");
+		deSelectAll.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(deSelectAll);
+		deSelectAll.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				tableViewer.setAllChecked(false);
+			}
+		});
+	}
+
+	private IStructuredContentProvider createContentProvider() {
+		return new IStructuredContentProvider(){
+			public void dispose() {
+			}
+			public Object[] getElements(Object inputElement) {
+				return (IMember[])inputElement;
+			}
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+		};
+	}
+
+
+	private void addReplaceAllCheckbox(Composite result) {
+		String key= "Change references to the class ''{0}'' into references to the interface (where possible)"; 
 		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputClass().getElementName()});
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
-		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+		final Button checkBox= createCheckbox(result,  title, defaultValue);
 		getExtractInterfaceRefactoring().setReplaceOccurrences(checkBox.getSelection());
 		checkBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -60,11 +133,14 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		});		
 	}
 
-	private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
+	private static Button createCheckbox(Composite parent, String title, boolean value){
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(title);
 		checkBox.setSelection(value);
-		layouter.perform(checkBox);
+		GridData layoutData= new GridData();
+		layoutData.horizontalSpan= 2;
+
+		checkBox.setLayoutData(layoutData);
 		return checkBox;		
 	}
 
