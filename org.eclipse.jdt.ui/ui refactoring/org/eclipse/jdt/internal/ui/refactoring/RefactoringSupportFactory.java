@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
@@ -47,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
 
@@ -279,8 +280,9 @@ public class RefactoringSupportFactory {
 	private static RenameSupport createFieldRename(){
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element) {
-				String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
-				String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+				String[] prefixes= settings.fieldPrefixes;
+				String[] suffixes= settings.fieldSuffixes;
 				return new RenameFieldRefactoring((IField)element, prefixes, suffixes);
 			}
 			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
