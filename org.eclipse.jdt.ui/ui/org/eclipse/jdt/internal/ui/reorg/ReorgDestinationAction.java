@@ -1,7 +1,3 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,7 +26,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -48,40 +43,37 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
-abstract class ReorgDestinationAction extends RefactoringAction {
+public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 
-	public ReorgDestinationAction(String name, ISelectionProvider provider) {
-		super(name, provider);
-	}
-	
-	public ReorgDestinationAction(String name, StructuredSelectionProvider provider) {
-		super(name, provider);
+	protected ReorgDestinationAction(UnifiedSite site) {
+		super(site);
 	}
 
-	protected boolean hasOnlyProjects(){
-		return ClipboardActionUtil.hasOnlyProjects(getStructuredSelection());
-	}	
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
+	}
 
-	/*
-	 * @see Action#run()
-	 */
-	public void run() {
-		List elements= getStructuredSelection().toList();
+	protected boolean canOperateOn(IStructuredSelection selection) {
+		return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
+	}
+
+	protected void run(IStructuredSelection selection) {
+		List elements= selection.toList();
 		if (!ensureSaved(elements, getActionName()))
 			return;
 		ReorgRefactoring refactoring= createRefactoring(elements);
@@ -343,13 +335,6 @@ abstract class ReorgDestinationAction extends RefactoringAction {
 			return null;
 		}		
 	}
-
-	/* non java-doc
-	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
-	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
-		return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
-	}
 	
 	//-----
 	private static class ContainerFilter extends PackageFilter {
@@ -409,4 +394,3 @@ abstract class ReorgDestinationAction extends RefactoringAction {
 		}
 	}
 }
-
