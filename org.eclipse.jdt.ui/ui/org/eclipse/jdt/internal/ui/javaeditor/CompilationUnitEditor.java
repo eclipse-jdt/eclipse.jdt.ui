@@ -6,24 +6,234 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.Dialog;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextOperationTarget;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.Position;import org.eclipse.jface.text.source.Annotation;import org.eclipse.jface.text.source.IAnnotationModel;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerAnnotation;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import org.eclipse.ui.views.tasklist.TaskList;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.views.tasklist.TaskList;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
  * Java specific text editor.
  */
 public class CompilationUnitEditor extends JavaEditor {
 	
+	/**
+	 * Responsible for highlighting matching pairs of brackets.
+	 */
+	class BracketHighlighter implements KeyListener, MouseListener {		
 		
+		/**
+		 * Closure to be posted into the event queue to highlight brackets.
+		 */
+		class HighlightBrackets implements Runnable {
+			
+			/** Indicates whether this closure has been posted. */ 
+			private boolean fPosted= false;
+			
+			/**
+			 * @see Runnable#run()
+			 */
+			public void run() {
+				if (fDoubleClicked) {
+					fDoubleClicked= false;
+					fPosted= false;
+					return;
+				}
+				
+				int offset= fSourceViewer.getSelectedRange().x;
+				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), offset);
+				if (pair != null) {
+					fLeftPeer.start= pair.getOffset();
+					fLeftPeer.length= 1;
+					fLeftPeer.fontStyle= SWT.BOLD;
+					fRightPeer.start= pair.getOffset() + pair.getLength() -1;
+					fRightPeer.fontStyle= SWT.BOLD;
+					fRightPeer.length= 1;
+					fSourceViewer.changeTextPresentation(fPresentation, true);
+					fUndoable= true;
+				} else {
+					fUndoable= false;
+				}				
+				fPosted= false;
+			}
+			
+			/**
+			 * Posts this closure into the event queue.
+			 */
+			public void post() {
+				Control c= fSourceViewer.getTextWidget();
+				if (c != null && !c.isDisposed()) {
+					if (!fPosted) {
+						fPosted= true;
+						Display d= c.getDisplay();
+						d.asyncExec(this);
+					}
+				}
+			}
+		};
+		
+		private ISourceViewer fSourceViewer;
+		private JavaPairMatcher fMatcher;
+		private TextPresentation fPresentation;
+		private StyleRange fLeftPeer;
+		private StyleRange fRightPeer;
+		private boolean fUndoable= false;
+		private boolean fDoubleClicked= false;
+		private HighlightBrackets fHighlightBrackets= new HighlightBrackets();
+		
+		public BracketHighlighter(ISourceViewer sourceViewer) {
+			
+			fSourceViewer= sourceViewer;
+			fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+			
+			fPresentation= new TextPresentation();
+			fPresentation.addStyleRange(fLeftPeer= new StyleRange());
+			fPresentation.addStyleRange(fRightPeer= new StyleRange());
+		}
+		
+		public void dispose() {
+			fSourceViewer= null;
+			if (fPresentation != null) {
+				fPresentation.clear();
+				fPresentation= null;
+			}
+			
+			if (fMatcher != null) {
+				fMatcher.dispose();
+				fMatcher= null;
+			}
+		}
+		
+		private void resetBracketHighlighting() {
+			if (fUndoable) {
+				fLeftPeer.fontStyle= SWT.NORMAL;
+				fRightPeer.fontStyle= SWT.NORMAL;
+				fSourceViewer.changeTextPresentation(fPresentation, true);
+				fUndoable= false;
+			}
+		}
+		
+		/*
+		 * @see KeyListener#keyPressed(KeyEvent)
+		 */
+		public void keyPressed(KeyEvent arg0) {
+			resetBracketHighlighting();
+		}
+
+		/*
+		 * @see KeyListener#keyReleased(KeyEvent)
+		 */
+		public void keyReleased(KeyEvent arg0) {
+			fHighlightBrackets.post();
+		}
+
+		/*
+		 * @see MouseListener#mouseDoubleClick(MouseEvent)
+		 */
+		public void mouseDoubleClick(MouseEvent arg0) {
+			fDoubleClicked= true;
+		}
+
+		/*
+		 * @see MouseListener#mouseDown(MouseEvent)
+		 */
+		public void mouseDown(MouseEvent arg0) {
+			resetBracketHighlighting();
+		}
+
+		/*
+		 * @see MouseListener#mouseUp(MouseEvent)
+		 */
+		public void mouseUp(MouseEvent arg0) {
+			fHighlightBrackets.post();
+		}
+	};
+	
+	
 	/** The status line clearer */
 	protected ISelectionChangedListener fStatusLineClearer;
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
+	/** Listener to annotation model changes that updates the error tick in the tab image */
+	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
+	/** The editor's bracket highlighter */
+	private BracketHighlighter fBracketHighlighter;
 	
-	/* listener to annotation model changes that updates the error tick in the tab image */
-	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;	
 	
 	/**
-	 * Default constructor.
+	 * Creates a new compilation unit editor.
 	 */
 	public CompilationUnitEditor() {
 		super();
@@ -36,7 +246,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#createActions
 	 */
 	protected void createActions() {
@@ -57,7 +267,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#getJavaSourceReferenceAt
 	 */
 	protected ISourceReference getJavaSourceReferenceAt(int position) {
@@ -80,7 +290,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see AbstractEditor#editorContextMenuAboutToChange
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
@@ -95,7 +305,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#rulerContextMenuAboutToShow
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
@@ -103,7 +313,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#createOutlinePage
 	 */
 	protected JavaOutlinePage createOutlinePage() {
@@ -120,7 +330,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return page;
 	}
 
-	/**
+	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
@@ -130,7 +340,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#performSaveOperation(WorkspaceModifyOperation, IProgressMonitor)
 	 */
 	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
@@ -150,7 +360,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
@@ -196,6 +406,9 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
+	/**
+	 * Jumps to the error next according to the given direction.
+	 */
 	public void gotoError(boolean forward) {
 		
 		ISelectionProvider provider= getSelectionProvider();
@@ -282,7 +495,10 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		return nextError;
 	}
-		
+	
+	/*
+	 * @see AbstractTextEditor#isSaveAsAllowed() 
+	 */
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
@@ -442,7 +658,8 @@ public class CompilationUnitEditor extends JavaEditor {
 				progressMonitor.setCanceled(!success);
 		}
 	}
-	/**
+	
+	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -450,7 +667,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#dispose()
 	 */
 	public void dispose() {
@@ -458,7 +675,26 @@ public class CompilationUnitEditor extends JavaEditor {
 			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
 			fJavaEditorErrorTickUpdater= null;
 		}
+		
+		if (fBracketHighlighter != null) {
+			fBracketHighlighter.dispose();
+			fBracketHighlighter= null;
+		}
+		
 		super.dispose();
-	}	
-
+	}
+	
+	/*
+	 * @see AbstractTextEditor#createPartControl(Composite)
+	 */
+	public void createPartControl(Composite parent) {
+		super.createPartControl(parent);
+		
+		// create and install bracket highlighter
+		ISourceViewer sourceViewer= getSourceViewer();
+		fBracketHighlighter= new BracketHighlighter(sourceViewer);
+		StyledText styledText= sourceViewer.getTextWidget();
+		styledText.addKeyListener(fBracketHighlighter);
+		styledText.addMouseListener(fBracketHighlighter);
+	}
 }

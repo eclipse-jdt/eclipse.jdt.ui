@@ -42,7 +42,7 @@ public abstract class SingleCharReader extends Reader {
 	}
 	
 	/**
-	 * Gets the comment as a String
+	 * Gets the content as a String
 	 */
 	public String getString() throws IOException {
 		StringBuffer buf= new StringBuffer();
