@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Refocuses the type hierarchy on the currently selection type.
@@ -59,7 +60,10 @@ public class FocusOnSelectionAction extends Action {
 	public boolean canActionBeAdded() {
 		Object element= SelectionUtil.getSingleElement(getSelection());
 		if (element instanceof IType) {
-			setText(TypeHierarchyMessages.getFormattedString("FocusOnSelectionAction.label", ((IType)element).getElementName())); //$NON-NLS-1$
+			IType type= (IType)element;
+			setText(TypeHierarchyMessages.getFormattedString(
+					"FocusOnSelectionAction.label", //$NON-NLS-1$
+					JavaElementLabels.getTextLabel(type, 0))); 
 			return true;
 		}
 		return false;
