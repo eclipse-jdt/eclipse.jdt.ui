@@ -66,19 +66,4 @@ public class NameMatcher {
 		return Character.toLowerCase(ch1) == Character.toLowerCase(ch2);
 	}
 	
-	private static void test(String name1, String name2) {
-		int sim= getSimilarity(name1, name2);
-		System.out.println(name1 + " - " + name2 + " : " + sim); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	public static void main(String[] arguments) {
-		test("XXX", "XSecurity"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		test("runner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
-		test("rundner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
-		test("rundner", "rund"); //$NON-NLS-1$ //$NON-NLS-2$
-		test("test", "rund"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-
 }
