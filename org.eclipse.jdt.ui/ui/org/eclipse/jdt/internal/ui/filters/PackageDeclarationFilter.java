@@ -13,30 +13,18 @@ package org.eclipse.jdt.internal.ui.filters;
 
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IPackageDeclaration;
 
 
 /**
  * Filters empty non-leaf package fragments
  */
-public class EmptyInnerPackageFilter extends AbstractFilter {
+public class PackageDeclarationFilter extends AbstractFilter {
 
 	/*
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof IPackageFragment) {
-			IPackageFragment pkg= (IPackageFragment)element;
-			try {
-				if (pkg.isDefaultPackage())
-					return pkg.hasChildren();
-				return !pkg.hasSubpackages() || pkg.hasChildren() || (pkg.getNonJavaResources().length > 0);
-			} catch (JavaModelException e) {
-				return false;
-			}
-		}
-
-		return true;
+		return !(element instanceof IPackageDeclaration);
 	}
 }

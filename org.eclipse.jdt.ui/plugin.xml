@@ -1618,7 +1618,6 @@ JavaStructureDiffViewerCreator
 		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
 		enabled= "false">
 	</filter>
-
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter"
 		name= "%HideJavaFiles.label"
@@ -1626,6 +1625,14 @@ JavaStructureDiffViewerCreator
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
 		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.PackageDeclarationFilter"
+		name= "%HidePackageDeclaration.label"
+		description= "%HidePackageDeclaration.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
+		enabled= "true">
 	</filter>
 
 	<!-- Packages view -->
