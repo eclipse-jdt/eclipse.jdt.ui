@@ -18,6 +18,12 @@
 		<import plugin="org.eclipse.jdt.core"/>
 	</requires>
 
+<runtime>
+  <library name="jdtvcm.jar">  
+     <export name = "*"/>
+  </library> 
+</runtime>
+
 <extension point="org.eclipse.vcm.core.ignore">
 	<ignore pattern = "*.class" selected = "true"/>
 </extension>
