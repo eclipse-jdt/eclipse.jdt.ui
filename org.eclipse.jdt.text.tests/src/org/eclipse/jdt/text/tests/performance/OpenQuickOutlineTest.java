@@ -13,7 +13,9 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.IOException;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -30,6 +32,8 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 public class OpenQuickOutlineTest extends TestCase {
 	
+	private static final Class THIS= OpenQuickOutlineTest.class;
+	
 	private static final String PATH= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/";
 	
 	private static final String ORIG_NAME= "StyledText";
@@ -45,6 +49,10 @@ public class OpenQuickOutlineTest extends TestCase {
 	private static final String OUTLINE_VIEW= "org.eclipse.ui.views.ContentOutline";
 
 	private boolean fWasOutlineViewShown;
+	
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
 	
 	protected void setUp() throws Exception {
 		Performance performance= Performance.getDefault();
