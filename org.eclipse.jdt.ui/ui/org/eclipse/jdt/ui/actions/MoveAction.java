@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.IMember;
@@ -64,12 +65,12 @@ public class MoveAction extends SelectionDispatchAction{
 	}
 	
 	/*
-	 * @see IUpdate#update()
+	 * @see SelectionDispatchAction#update(ISelection)
 	 */
-	public void update() {
-		fMoveMembersAction.update();
+	public void update(ISelection selection) {
+		fMoveMembersAction.update(selection);
 		if (fJdtMoveAction != null)
-			fJdtMoveAction.update();
+			fJdtMoveAction.update(selection);
 		setEnabled(computeEnableState());
 	}
 	

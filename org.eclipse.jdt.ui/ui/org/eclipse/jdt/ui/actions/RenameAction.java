@@ -2,6 +2,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
@@ -45,13 +46,13 @@ public class RenameAction extends SelectionDispatchAction {
 	}
 
 	/*
-	 * @see IUpdate#update()
+	 * @see SelectionDispatchAction#update(ISelection)
 	 */
-	public void update() {
-		fRenameJavaElement.update();
+	public void update(ISelection selection) {
+		fRenameJavaElement.update(selection);
 		
 		if (fRenameTemp != null)
-			fRenameTemp.update();
+			fRenameTemp.update(selection);
 	
 		setEnabled(computeEnabledState());		
 	}
