@@ -23,7 +23,7 @@
 	<extension
 		point="org.eclipse.ui.startup"
 		id="fakejspstarter"
-		name="Fake JSP Starter">
+		name="%startupName">
 	</extension>
 
 	<extension point="org.eclipse.jdt.ui.renameParticipants">
