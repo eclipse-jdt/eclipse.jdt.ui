@@ -194,7 +194,11 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		if (workbench == null)
 			return null;
 			
-		IWorkbenchPage page= getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IWorkbenchWindow activeWorkbenchWindow= workbench.getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null)
+			return null;
+			
+		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		if (page == null)
 			return null;
 			
