@@ -199,7 +199,26 @@
             label="%JUnitActionSet.label"
             visible="false"
             id="org.eclipse.jdt.junit.JUnitActionSet">
-         <action
+         <menu
+               label="Search"
+               path="navigate"
+               id="org.eclipse.search.menu">
+            <groupMarker
+                  name="internalDialogGroup">
+            </groupMarker>
+<!-- not to be used by clients  -->
+            <groupMarker
+                  name="dialogGroup">
+            </groupMarker>
+<!-- to be used by clients      -->
+            <separator
+                  name="contextMenuActionsGroup">
+            </separator>
+            <separator
+                  name="internalOccurrencesGroup">
+            </separator>
+         </menu>
+		<action
                definitionId="org.eclipse.jdt.junit.gotoTest"
                label="%GotoTestAction.label"
                helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
@@ -209,6 +228,39 @@
                id="junit.actions.GotoTestAction">
          </action>
       </actionSet>
+   </extension>
+      <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.jdt.junit.JUnitActionSet">
+         <part
+               id="org.eclipse.jdt.ui.PackageExplorer">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.TypeHierarchy">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.CompilationUnitEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ClassFileEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ProjectsView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.PackagesView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.TypesView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.MembersView">
+         </part>
+         <part
+               id="org.eclipse.search.SearchResultView">
+         </part>
+      </actionSetPartAssociation>
    </extension>
    <extension
          id="junit_task"
