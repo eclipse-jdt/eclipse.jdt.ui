@@ -13,12 +13,15 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -32,7 +35,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 
 /**
  * Configures Java Editor typing preferences.
@@ -215,19 +217,18 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	private void createMessage(final Composite composite) {
 		// TODO create a link with an argument, so the formatter preference page can open the 
 		// current profile automatically.
-		String before= PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.message.before"); //$NON-NLS-1$
-		String linkText= PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.message.linktext"); //$NON-NLS-1$
-		String linkTooltip= PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.message.linktooltip"); //$NON-NLS-1$
-		String after= PreferencesMessages.getFormattedString("SmartTypingConfigurationBlock.tabs.message.after", new String[] {Integer.toString(getIndentSize()), getIndentChar()}); //$NON-NLS-1$
+		String linkTooltip= PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.message.tooltip"); //$NON-NLS-1$
+		String text= PreferencesMessages.getFormattedString("SmartTypingConfigurationBlock.tabs.message.text", new String[] {Integer.toString(getIndentSize()), getIndentChar()}); //$NON-NLS-1$
 		
-		final CHyperLinkText link= new CHyperLinkText(composite, SWT.NONE);
-		link.setText(before + " {org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage," + linkText + "," + linkTooltip + "}" + after ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		final Link link= new Link(composite, SWT.NONE);
+		link.setText(text);
+		link.setToolTipText(linkTooltip);
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.widthHint= 300; // don't get wider initially
 		link.setLayoutData(gd);
-		link.addLinkListener(new ILinkListener() {
-			public void linkSelected(String url) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), url, null, null);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage", null, null); //$NON-NLS-1$
 			}
 		});
 		

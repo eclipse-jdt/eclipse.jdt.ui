@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -28,6 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
@@ -47,7 +49,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -289,16 +290,17 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	}
 	
 	private void createHeader(Composite contents) {
-		String text= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.link", "org.eclipse.ui.preferencePages.GeneralTextEditor"); //$NON-NLS-1$ //$NON-NLS-2$
-		// TODO move to platform hyperlink widget when it becomes available
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=79419
-		CHyperLinkText link= new CHyperLinkText(contents, SWT.NONE);
+		String text= PreferencesMessages.getString("JavaEditorPreferencePage.link"); //$NON-NLS-1$ //$NON-NLS-2$
+		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
-		link.addLinkListener(new ILinkListener() {
-			public void linkSelected(String url) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), url, null, null);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.ui.preferencePages.GeneralTextEditor", null, null); //$NON-NLS-1$
 			}
 		});
+		// TODO replace by link-specific tooltips when
+		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
+		link.setToolTipText(PreferencesMessages.getString("JavaEditorPreferencePage.link.tooltip")); //$NON-NLS-1$
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
