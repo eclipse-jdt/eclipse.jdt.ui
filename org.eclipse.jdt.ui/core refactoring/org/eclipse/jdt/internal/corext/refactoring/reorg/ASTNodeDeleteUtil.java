@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 public class ASTNodeDeleteUtil {
 
 	private static ASTNode[] getNodesToDelete(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
+		// fields are different because you don't delete the whole declaration but only a fragment of it
 		if (element.getElementType() == IJavaElement.FIELD)
 			return new ASTNode[] { ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) element, cuNode)};
 		if (element.getElementType() == IJavaElement.TYPE && ((IType) element).isLocal()) {
@@ -42,6 +43,7 @@ public class ASTNodeDeleteUtil {
 				return new ASTNode[] { ASTNodeSearchUtil.getClassInstanceCreationNode(type, cuNode)};
 			} else {
 				ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);
+				// we have to delete the TypeDeclarationStatement
 				nodes[0]= nodes[0].getParent();
 				return nodes;
 			}
