@@ -452,5 +452,10 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	public void testFail29() throws Exception{
 		helper2("j");
 	}
+
+	public void testFail30() throws Exception{
+		printTestDisabledMessage("bug#19851");
+//		helper2("j");
+	}
 	
 }
