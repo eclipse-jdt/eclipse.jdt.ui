@@ -14,53 +14,58 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+/**
+ * Measure the time spent while scrolling in the Java editor.
+ * 
+ * @since 3.1
+ */
 public class ScrollJavaEditorTest extends ScrollEditorTest {
 	
 	private static final Class THIS= ScrollJavaEditorTest.class;
 	
-	private static final String PAGE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-
-	private static final String LINE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
-
-	private static final int WARM_UP_RUNS= 3;
-
-	private static final int MEASURED_RUNS= 3;
-
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		setWarmUpRuns(WARM_UP_RUNS);
-		setMeasuredRuns(MEASURED_RUNS);
+	protected String getEditor() {
+		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
 
-	public void testScrollJavaEditorLineWise2() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, false);
-	}
-
+	/**
+	 * Measure the time spent while scrolling page wise in the Java editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollJavaEditorPageWise() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, false);
+		measure(PAGE_WISE);
 	}
 
-	public void testScrollJavaEditorLineWisePreloaded2() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, true);
-	}
-
-	public void testScrollJavaEditorPageWisePreloaded2() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, true);
-	}
-
+	/**
+	 * Measure the time spent while scrolling line wise in the Java editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollJavaEditorLineWiseMoveCaret2() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, false);
+		measure(LINE_WISE);
 	}
 
-	public void testScrollJavaEditorLineWiseMoveCaretPreloaded2() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, true);
-	}
-
+	/**
+	 * Measure the time spent while scrolling and selecting line wise in the
+	 * Java editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollJavaEditorLineWiseSelect2() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT, false);
+		measure(LINE_WISE_SELECT);
+	}
+
+	/**
+	 * Measure the time spent while scrolling line wise without moving the
+	 * caret in the Java editor.
+	 * 
+	 * @throws Exception
+	 */
+	public void testScrollJavaEditorLineWise2() throws Exception {
+		measure(LINE_WISE_NO_CARET_MOVE);
 	}
 }

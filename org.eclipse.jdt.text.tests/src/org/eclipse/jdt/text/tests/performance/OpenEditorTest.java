@@ -11,15 +11,24 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.util.Arrays;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 
 public abstract class OpenEditorTest extends TextPerformanceTestCase {
 	
+	private static final Class THIS= OpenEditorTest.class;
+
 	public OpenEditorTest() {
 		super();
 	}
@@ -28,25 +37,36 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 		super(name);
 	}
 
-	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeAll) throws PartInitException {
-		try {
-			for (int i= 0, n= files.length; i < n; i++) {
-				if (performanceMeter != null)
-					performanceMeter.start();
-				EditorTestHelper.openInEditor(files[i], true);
-				if (performanceMeter != null)
-					performanceMeter.stop();
-				EditorTestHelper.runEventQueue(2000);
+	public static Test suite() {
+		TestSuite suite= new TestSuite(THIS.getName());
+		suite.addTest(OpenJavaEditorTest.suite());
+		suite.addTest(OpenTextEditorTest.suite());
+		return suite;
+	}
+	
+	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeEach) throws PartInitException {
+		for (int i= 0, n= files.length; i < n; i++) {
+			performanceMeter.start();
+			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(files[i], true);
+			performanceMeter.stop();
+			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editor), 100, 10000, 100);
+			if (closeEach) {
+				EditorTestHelper.closeEditor(editor);
+				EditorTestHelper.runEventQueue(100);
 			}
-			if (performanceMeter != null) {
-				performanceMeter.commit();
-				Performance.getDefault().assertPerformance(performanceMeter);
-			}
-		} finally {
-			if (performanceMeter != null)
-				performanceMeter.dispose();
-			if (closeAll)
-				EditorTestHelper.closeAllEditors();
 		}
+		performanceMeter.commit();
+		assertPerformance(performanceMeter);
+	}
+
+	protected void measureOpenInEditor(String file, PerformanceMeter performanceMeter) throws PartInitException {
+		measureOpenInEditor(arrayOf(file, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter(), true);
+		measureOpenInEditor(arrayOf(file, getMeasuredRuns()), performanceMeter, true);
+	}
+
+	private IFile[] arrayOf(String file, int n) {
+		IFile[] files= new IFile[n];
+		Arrays.fill(files, ResourceTestHelper.findFile(file));
+		return files;
 	}
 }

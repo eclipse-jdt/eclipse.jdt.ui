@@ -16,10 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.test.performance.PerformanceMeter;
 
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -54,18 +51,13 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 		fEditor.showChangeInformation(false);
 		ISourceViewer viewer= EditorTestHelper.getSourceViewer(fEditor);
 		IDocument document= EditorTestHelper.getDocument(fEditor);
-		DocumentRewriteSession rewriteSession= null;
 		try {
 			if (viewer instanceof ITextViewerExtension)
 				((ITextViewerExtension) viewer).getRewriteTarget().beginCompoundChange();
-			if (document instanceof IDocumentExtension4)
-				rewriteSession= ((IDocumentExtension4) document).startRewriteSession(DocumentRewriteSessionType.STRICTLY_SEQUENTIAL);
 			for (int i= 0; i < document.getNumberOfLines(); i += 2) {
 				document.replace(document.getLineOffset(i), 0, " ");
 			}
 		} finally {
-			if (document instanceof IDocumentExtension4)
-				((IDocumentExtension4) document).stopRewriteSession(rewriteSession);
 			if (viewer instanceof ITextViewerExtension)
 				((ITextViewerExtension) viewer).getRewriteTarget().endCompoundChange();
 		}

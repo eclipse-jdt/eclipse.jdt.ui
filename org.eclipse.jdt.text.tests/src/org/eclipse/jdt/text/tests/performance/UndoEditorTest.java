@@ -19,7 +19,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 public abstract class UndoEditorTest extends TextPerformanceTestCase {
@@ -27,18 +27,20 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 	private PerformanceMeter fPerformanceMeter;
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		EditorTestHelper.runEventQueue();
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		fPerformanceMeter.dispose();
 	}
 	
 	protected void measureUndo(IFile file) throws PartInitException {
-		AbstractDecoratedTextEditor editor= (AbstractDecoratedTextEditor) EditorTestHelper.openInEditor(file, true);
+		AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(file, true);
 		editor.showChangeInformation(false); // TODO: remove when undo does no longer trigger timing issue
 		
 		IAction selectAll= editor.getAction(ITextEditorActionConstants.SELECT_ALL);

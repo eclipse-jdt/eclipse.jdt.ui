@@ -25,12 +25,14 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
- * Measures the time to type in one single method into a large file. Abstract implementation.
+ * Measures the time to type in one single method into a large file. Abstract
+ * implementation.
+ * 
  * @since 3.1
  */
 public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final char[] METHOD= ("public int foobar(int iParam, Object oParam) {\r" +
 			"return 42;\r" +
@@ -44,13 +46,11 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	
 	protected PerformanceMeter fMeter;
 
-	private KeyboardProbe fKeyboardProbe;
-
 	protected void setUp() throws Exception {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), getEditorId(), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
-		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
 		Performance performance= Performance.getDefault();
 		fMeter= performance.createPerformanceMeter(getScenarioId());
@@ -77,19 +77,25 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		sleep(1000);
 		
 		Display display= EditorTestHelper.getActiveDisplay();
-		fKeyboardProbe.pressChar('{', display);
+		getKeyboardProbe().pressChar('{', display);
 		EditorTestHelper.runEventQueue();
 		SWTEventHelper.pressKeyCode(display, SWT.BS);
 		sleep(1000);
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		sleep(1000);
 		fMeter.dispose();
 		EditorTestHelper.revertEditor(fEditor, true);
 		EditorTestHelper.closeAllEditors();
 	}
 
+	/**
+	 * Measures the time to type in one single method into a large file.
+	 * 
+	 * @throws BadLocationException
+	 */
 	public void testTypeAMethod() throws BadLocationException {
 		Display display= EditorTestHelper.getActiveDisplay();
 		int offset= getInsertPosition();
@@ -100,10 +106,11 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
 			EditorTestHelper.runEventQueue(1000);
 			
+			KeyboardProbe keyboardProbe= getKeyboardProbe();
 			if (i >= warmUpRuns)
 				fMeter.start();
 			for (int j= 0; j < METHOD.length; j++) {
-				fKeyboardProbe.pressChar(METHOD[j], display);
+				keyboardProbe.pressChar(METHOD[j], display);
 				EditorTestHelper.runEventQueue();
 			}
 			if (i >= warmUpRuns)

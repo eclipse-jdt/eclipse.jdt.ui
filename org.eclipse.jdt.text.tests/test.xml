@@ -35,34 +35,57 @@
 
   <!-- This target defines the performance tests that need to be run. -->
   <target name="performance-suite">
-    <property name="jdt-text-performance-folder" 
-              value="${eclipse-home}/jdt_text_performance_folder"/>
+    <property name="jdt-text-performance-folder" value="${eclipse-home}/jdt_text_performance_folder"/>
     <delete dir="${jdt-text-performance-folder}" quiet="true"/>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="timeout" value="5400000"/>
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" value="org.eclipse.jdt.text.tests.performance.OpenJavaEditorTest"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite2"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" value="org.eclipse.jdt.text.tests.performance.OpenTextEditorTest"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite3"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.text.tests.performance.EventDrivenTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite4"/>
+    </ant>
+    
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="vmargs" value="-Xms250M -Xmx250M"/>
+      <property name="data-dir" value="${jdt-text-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite5"/>
+    </ant>
+    
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="vmargs" value="-Xms250M -Xmx250M"/>
+      <property name="data-dir" value="${jdt-text-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.EventDrivenTestSuite"/>
+    </ant>
+    
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="vmargs" value="-Xms250M -Xmx250M -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Declipse.perf.debugPort=7777"/>
+      <property name="data-dir" value="${jdt-text-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.DebuggingPerformanceTestSuite"/>
     </ant>
   </target>
 

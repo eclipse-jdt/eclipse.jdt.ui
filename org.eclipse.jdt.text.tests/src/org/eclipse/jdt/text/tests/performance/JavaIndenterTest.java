@@ -17,7 +17,6 @@ import junit.framework.TestSuite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -27,13 +26,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 public class JavaIndenterTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaIndenterTest.class;
 
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
+	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
 	private static final int WARM_UP_RUNS= 2;
 
@@ -41,8 +38,6 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 
 	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
 	
-	private PerformanceMeter fPerformanceMeter;
-
 	private ITextEditor fEditor;
 
 	public static Test suite() {
@@ -50,9 +45,8 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
-		Performance performance= Performance.getDefault();
-		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -66,48 +60,40 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
-		fPerformanceMeter.dispose();
 	}
 	
 	public void testJavaIndenter2() {
-		// cold run
-		measureJavaIndenter(getWarmUpRuns(), false);
-		// warm run
-		measureJavaIndenter(getMeasuredRuns(), true);
+		measureJavaIndenter(getNullPerformanceMeter(), getWarmUpRuns());
+		measureJavaIndenter(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
 	}
 
-	private void measureJavaIndenter(int runs, boolean measure) {
-		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
+	private void measureJavaIndenter(PerformanceMeter performanceMeter, int runs) {
+		IDocument document= EditorTestHelper.getDocument(fEditor);
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < runs; i++) {
-			if (measure)
-				fPerformanceMeter.start();
-			SWTEventHelper.pressKeyCode(display, SWT.CR);
-			if (measure)
-				fPerformanceMeter.stop();
+			performanceMeter.start();
+			SWTEventHelper.pressKeyCode(display, SWT.CR, false);
+			long timeout= System.currentTimeMillis() + 5000;			
+			while (originalNumberOfLines + 1 != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
+			performanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
 			runAction(undo);
+			timeout= System.currentTimeMillis() + 1000;
+			while (originalNumberOfLines != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
-			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-		}
-		if (measure) {
-			fPerformanceMeter.commit();
-			Performance.getDefault().assertPerformance(fPerformanceMeter);
 		}
 	}
 
 	private void runAction(IAction action) {
 		action.run();
 		EditorTestHelper.runEventQueue();
-	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
 	}
 }
