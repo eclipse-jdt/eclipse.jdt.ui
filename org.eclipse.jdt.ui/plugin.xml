@@ -549,6 +549,8 @@
          	<separator name="reorgGroup"/>
          	<separator name="codingGroup"/>
       	</menu>
+      	
+      	<!-- undo/redo group  -->		
 		<action id="RedoAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.redoAction.label"
@@ -557,6 +559,8 @@
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
+		
+		<!-- reorg group  -->		
 		<action id="MoveAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.moveAction.label"
@@ -565,26 +569,37 @@
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameParametersAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameParametersActionDelegate"/>
-		<action id="RenameTempAction"
+		<action id="ReorderParametersAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.renameTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction"/>	
-		<action id="InlineTempAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.inlineTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction"/>		
+			label="%Refactoring.reorderParametersAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ReorderParametersActionDelegate"/>
 		<action id="RenameAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
-		<action id="SelfEncapsulateFieldAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.selfEncapsulateFieldAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.SelfEncapsulateFieldActionDelegate"/>
+		<action id="PullUpMethodsAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
+			label="%Refactoring.pullUpMethodsAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.PullUpMethodsActionDelegate"/>	
+		
+		<!-- coding group  -->	
 		<action id="ExtractMethodAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractMethodAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction"/>
+		<action id="SelfEncapsulateFieldAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
+			label="%Refactoring.selfEncapsulateFieldAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.SelfEncapsulateFieldActionDelegate"/>	
+		<action id="InlineTempAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
+			label="%Refactoring.inlineTempAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction"/>
+		<action id="RenameTempAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
+			label="%Refactoring.renameTempAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction"/>		
+		
      </actionSet>
 </extension>
 
