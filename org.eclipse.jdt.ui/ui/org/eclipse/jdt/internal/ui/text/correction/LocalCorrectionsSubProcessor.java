@@ -447,5 +447,24 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void addUndefinedConstructorProposal(ICorrectionContext context, List proposals) {
+		ASTNode selectedNode= context.getCoveringNode();
+		if (!(selectedNode instanceof Name && selectedNode.getParent() instanceof TypeDeclaration)) {
+			return;
+		}
+		TypeDeclaration typeDeclaration= (TypeDeclaration) selectedNode.getParent();
+		ITypeBinding binding= typeDeclaration.resolveBinding();
+		if (binding == null || binding.getSuperclass() == null) {
+			return;
+		}
+		ICompilationUnit cu= context.getCompilationUnit();
+		IMethodBinding[] methods= binding.getSuperclass().getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethodBinding curr= methods[i];
+			if (curr.isConstructor()) {
+				proposals.add(new MissingConstructorCompletionProposal(cu, typeDeclaration, curr, 2));
+			}
+		}
+	}
 
 }

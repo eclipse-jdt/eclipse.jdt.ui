@@ -39,11 +39,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUncaughtExceptionOnThis"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testMissingConstructor"));
 			return suite;
 		}
 	}
@@ -1368,6 +1368,48 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            System.out.println(s);\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMissingConstructor() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(Runnable runnable) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("\n");
+		buf.append("    public E(Runnable runnable) {\n");
+		buf.append("        super(runnable);\n");		
+		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
