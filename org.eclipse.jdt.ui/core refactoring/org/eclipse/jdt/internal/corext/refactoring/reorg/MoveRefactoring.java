@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -21,6 +22,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -35,13 +38,13 @@ import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator
 
 public class MoveRefactoring extends ReorgRefactoring {
 	
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
+	private CodeGenerationSettings fSettings;
 	
-	public MoveRefactoring(List elements, ITextBufferChangeCreator changeCreator){
+	public MoveRefactoring(List elements, CodeGenerationSettings settings){
 		super(elements);
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;
+		Assert.isNotNull(settings);
+		fSettings= settings;
 	}
 	
 	/* non java-doc
@@ -216,7 +219,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 			};
 			Object dest= getDestinationForCusAndFiles(getDestination());
 			if (dest instanceof IPackageFragment){			
-				MoveCuUpdateCreator creator= new MoveCuUpdateCreator(fTextBufferChangeCreator, collectCus(), (IPackageFragment)dest);
+				MoveCuUpdateCreator creator= new MoveCuUpdateCreator(collectCus(), (IPackageFragment)dest, fSettings);
 				addAllChildren(composite, creator.createUpdateChange(new SubProgressMonitor(pm, 1)));
 			}
 			IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));

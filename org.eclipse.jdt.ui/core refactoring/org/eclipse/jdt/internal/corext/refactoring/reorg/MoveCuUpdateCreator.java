@@ -5,17 +5,20 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -24,6 +27,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -31,131 +36,180 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Utils;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.corext.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.SimpleTextChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class MoveCuUpdateCreator {
 	
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
+	private CodeGenerationSettings fSettings;
 	
-	public MoveCuUpdateCreator(ITextBufferChangeCreator changeCreator, ICompilationUnit cu, IPackageFragment pack){
-		this(changeCreator, new ICompilationUnit[]{cu}, pack);
+	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack, CodeGenerationSettings settings){
+		this(new ICompilationUnit[]{cu}, pack, settings);
 	}
 	
-	public MoveCuUpdateCreator(ITextBufferChangeCreator changeCreator, ICompilationUnit[] cus, IPackageFragment pack){
-		Assert.isNotNull(changeCreator);
+	public MoveCuUpdateCreator(ICompilationUnit[] cus, IPackageFragment pack, CodeGenerationSettings settings){
 		Assert.isNotNull(cus);
 		Assert.isNotNull(pack);
-		fCus= cus;
+		Assert.isNotNull(settings);
+		fCus= convertToOriginals(cus);
 		fDestination= pack;
-		fTextBufferChangeCreator= changeCreator;
+		fSettings= settings;
 	}
 	
-	public ICompositeChange createUpdateChange(IProgressMonitor pm)throws JavaModelException{
-		pm.beginTask("", 2 * fCus.length);
+	private static ICompilationUnit[] convertToOriginals(ICompilationUnit[] cus){
+		ICompilationUnit[] result= new ICompilationUnit[cus.length];
+		for (int i= 0; i < cus.length; i++) {
+			result[i]= convertToOriginal(cus[i]);
+		}
+		return result;
+	}
+	
+	private static ICompilationUnit convertToOriginal(ICompilationUnit cu){
+		if (! cu.isWorkingCopy())
+			return cu;
+		return (ICompilationUnit)cu.getOriginalElement();	
+	}
+	
+	public ICompositeChange createUpdateChange(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 2);
 		try{
-			CompositeChange composite= new CompositeChange("reorganize elements", fCus.length);
-			
-			TextBufferChangeManager changeManager= new TextBufferChangeManager(fTextBufferChangeCreator);
-			for (int i= 0; i < fCus.length; i++){
-				if (pm.isCanceled())
-					throw new OperationCanceledException();
-					
-				addUpdateChanges(changeManager, fCus[i], new SubProgressMonitor(pm, 1));
-			}
-			
-			ITextBufferChange[] allChanges= changeManager.getAllChanges();
-			for (int i= 0; i < allChanges.length; i++){
-				if (pm.isCanceled())
-					throw new OperationCanceledException();
-				
-				composite.add(allChanges[i]);
-				pm.worked(1);
-			}
-			return composite;
+			TextChangeManager changeManager= new TextChangeManager();
+			addUpdates(changeManager, new SubProgressMonitor(pm, 1));
+			addImportsToDestinationPackage(changeManager, new SubProgressMonitor(pm, 1));
+			return new CompositeChange("reorganize elements", changeManager.getAllChanges());
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
 	}
+
+	private void addUpdates(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", fCus.length); 
+		for (int i= 0; i < fCus.length; i++){
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+		
+			addUpdates(changeManager, fCus[i], new SubProgressMonitor(pm, 1));
+		}
+	}
 	
-	private void addUpdateChanges(TextBufferChangeManager changeManager, ICompilationUnit unit, IProgressMonitor pm)throws JavaModelException{
+	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
 		try{
 			pm.beginTask("", 1); 
-		  	pm.subTask("searching for references to types in " + unit.getElementName());
+		  	pm.subTask("searching for references to types in " + movedUnit.getElementName());
 		  	
-		  	addImport(changeManager, getPackage(unit), unit);
-			SearchResultGroup[] references = getReferences(unit, pm);
-		  	
+		  	//must force this import - otherwise it'd be fitered out
+		  	addImport(true, changeManager, getPackage(movedUnit), movedUnit, fSettings);
+			
+			SearchResultGroup[] references = getReferences(movedUnit, pm);
 			for (int i= 0; i < references.length; i++){
-				ICompilationUnit cu= (ICompilationUnit)JavaCore.create(references[i].getResource());
-				boolean hasSimpleReference= false;
+				ICompilationUnit referencingCu= (ICompilationUnit)JavaCore.create(references[i].getResource());
 				SearchResult[] results= references[i].getSearchResults();
 				for (int j= 0; j < results.length; j++){
-					boolean isQualified= isQualifiedReference(results[j]);
-					hasSimpleReference= hasSimpleReference || (!isQualified);
-					if (isQualified)
-						changeManager.addSimpleTextChange(cu, createTextChange(results[j], unit));
+					if (isQualifiedReference(results[j])){
+						TextEdit edit= new UpdateTypeReferenceEdit(results[j], getPackage(movedUnit), fDestination);
+						changeManager.get(referencingCu).addTextEdit("update references", edit);
+					}	
 				}
-				if (hasSimpleReference 
-					&& (!cu.equals(unit)) 
-					&& (!Arrays.asList(fCus).contains(cu))
-					&& (!cu.getImport(Utils.getPublicType(unit).getFullyQualifiedName()).exists())){
-						addImport(changeManager, fDestination, cu);
-				}	
-		  }
-		  
+			}
 		} finally{
 			pm.done();
 		}
 	}
+	
+	private void addImportsToDestinationPackage(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException{
+		pm.beginTask("", fCus.length);
+		ICompilationUnit[] cusThatNeedIt= collectCusThatWillImportDestinationPackage(pm);
+		for (int i= 0; i < cusThatNeedIt.length; i++) {
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
+			ICompilationUnit iCompilationUnit= cusThatNeedIt[i];
+			addImport(false, changeManager, fDestination, iCompilationUnit, fSettings);
+			pm.worked(1);
+		}
+	}
+	
+	private static boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu, CodeGenerationSettings settings) throws JavaModelException {		
+		try{
+			if (cu.getImport(pack.getElementName() + ".*").exists()) 
+				return false;
+	
+			ImportEdit importEdit= new ImportEdit(cu, settings);
+			importEdit.addImport(pack.getElementName() + ".*");
+			importEdit.setFilterImplicitImports(!force);
+			changeManager.get(cu).addTextEdit("add import", importEdit);
+			return true;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
+		}	
+	}
+	
+	private ICompilationUnit[] collectCusThatWillImportDestinationPackage(IProgressMonitor pm) throws JavaModelException{
+		Set collected= new HashSet(); //use set to remove dups
+		pm.beginTask("", fCus.length);
+		for (int i= 0; i < fCus.length; i++) {
+			collected.addAll(collectCusThatWillImportDestinationPackage(fCus[i], new SubProgressMonitor(pm, 1)));
+		}
+		return (ICompilationUnit[]) collected.toArray(new ICompilationUnit[collected.size()]);
+	}
+	
+	private Set collectCusThatWillImportDestinationPackage(ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+		SearchResultGroup[] references = getReferences(movedUnit, pm);
+		Set result= new HashSet();
+		List cuList= Arrays.asList(fCus);
+		for (int i= 0; i < references.length; i++) {
+			SearchResultGroup searchResultGroup= references[i];
+			ICompilationUnit referencingCu= (ICompilationUnit)JavaCore.create(references[i].getResource());
+			if (hasSimpleReference(searchResultGroup) 
+				&& (!referencingCu.equals(movedUnit)) 
+				&& (!cuList.contains(referencingCu))
+				&& (!referencingCu.getImport(Utils.getPublicType(movedUnit).getFullyQualifiedName()).exists())){
+					result.add(referencingCu);
+				}	
+		}
+		return result;
+	}
+	
+	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) throws JavaModelException{
+		SearchResult[] results= searchResultGroup.getSearchResults();
+		for (int i= 0; i < results.length; i++) {
+			if (! isQualifiedReference(results[i]))
+				return true;
+		}
+		return false;
+	}
 
-	private SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws org.eclipse.jdt.core.JavaModelException {
+	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws org.eclipse.jdt.core.JavaModelException {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		ISearchPattern pattern= createSearchPattern(unit);
-		SearchResultGroup[] references= RefactoringSearchEngine.customSearch(new SubProgressMonitor(pm, 1), scope, pattern);
+		SearchResultGroup[] references= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
 		return references;
 	}
-	
-	/* non java doc
-	 * returns <code>true</code> if the import declaration has been added and <code>false</code> otherwise.
-	 */
-	private static boolean addImport(TextBufferChangeManager changeManager, final IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
-		return AddImportUtil.addImport(changeManager, pack, cu);
-	}
 
-	private static boolean isQualifiedReference(SearchResult searchResult){
-		if (searchResult.isQualified())
-			return true;
+	private static boolean isQualifiedReference(SearchResult searchResult) throws JavaModelException{
 		if (searchResult.getEnclosingElement() instanceof IImportDeclaration)
 			return true;
+
+		//XXX very nasty
+		IResource resource= searchResult.getResource();
+		IJavaElement element= JavaCore.create(resource);
+		if (element == null || ! (element instanceof ICompilationUnit))
+			return false;
+			
+		int offset= searchResult.getStart();
+		int end= searchResult.getEnd();
+		String source= ((ICompilationUnit)element).getBuffer().getText(offset, end - offset);
+		if (source.indexOf(".") != -1)
+			return true;
+		//--
 		return false;	
-	}
-	
-	private SimpleReplaceTextChange createTextChange(SearchResult searchResult, final ICompilationUnit cu) throws JavaModelException{
-		return new SimpleReplaceTextChange("update reference", searchResult.getStart(), 
-											searchResult.getEnd() - searchResult.getStart(),
-											fDestination.getElementName()) {
-			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String oldText= buffer.getContent(getOffset(), getLength());
-				String packageName= getPackage(cu).getElementName();
-				if (getPackage(cu).isDefaultPackage()){
-					setLength(0);
-				} else if (! oldText.startsWith(packageName)){
-					//no action - simple reference
-					setLength(0);
-					setText(""); //$NON-NLS-1$
-				} else{
-					setLength(packageName.length());					
-				}
-				return null;
-			}
-		};
 	}
 	
 	private static IPackageFragment getPackage(ICompilationUnit cu){
@@ -169,6 +223,42 @@ public class MoveCuUpdateCreator {
 		else
 			return SearchEngine.createSearchPattern(publicType, IJavaSearchConstants.REFERENCES);
 	}
-	
+
+	private static class UpdateTypeReferenceEdit extends SimpleTextEdit{
+		
+		private SearchResult fSearchResult;
+		private IPackageFragment fDestination;
+		private IPackageFragment fSource;
+		
+		UpdateTypeReferenceEdit(SearchResult searchResult, IPackageFragment source, IPackageFragment destination){
+			fSearchResult= searchResult;
+			fDestination= destination;
+			fSource= source;
+		}
+		
+		public TextEdit copy() throws CoreException {
+			return new UpdateTypeReferenceEdit(fSearchResult, fSource, fDestination);
+		}
+
+		public void connect(TextBufferEditor editor) throws CoreException {
+			int length= fSearchResult.getEnd() - fSearchResult.getStart();
+			int offset= fSearchResult.getStart();
+			String newText= fDestination.getElementName();
+			String oldText= editor.getTextBuffer().getContent(offset, length);
+			String currectPackageName= fSource.getElementName();
+			
+			if (fSource.isDefaultPackage()){
+				length= 0;
+			} else if (! oldText.startsWith(currectPackageName)){
+				//no action - simple reference
+				length= 0;
+				newText= "";
+			} else{
+				length= currectPackageName.length();
+			}
+			setText(newText);
+			setTextRange(new TextRange(offset, length));
+		}
+	}
 }
 
