@@ -297,7 +297,7 @@ public class VariableBlock {
 			}
 			
 			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements, needsBuild);
-			Job buildJob = new Job("Setting variables"){ 
+			Job buildJob = new Job(NewWizardMessages.getString("VariableBlock.job.description")) {  //$NON-NLS-1$
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						runnable.setVariables(monitor);
