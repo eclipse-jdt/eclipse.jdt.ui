@@ -39,6 +39,8 @@ public class MemberEdit extends SimpleTextEdit {
 	private int fTabWidth;
 	private boolean fUseFormatter= false;
 	private int fEmptyLinesBetweenMembers= 1;
+	private boolean fAddLineSeparators= true;
+	
 
 	public MemberEdit(IJavaElement member, int insertionKind, String[] source, int tabWidth) {
 		Assert.isNotNull(member);
@@ -56,6 +58,10 @@ public class MemberEdit extends SimpleTextEdit {
 	
 	public void setUseFormatter(boolean useFormatter) {
 		fUseFormatter= useFormatter;
+	}
+	
+	public void setAddLineSeparators(boolean addLineSeparators) {
+		fAddLineSeparators= addLineSeparators;
 	}
 	
 	/* non Java-doc
@@ -266,7 +272,7 @@ public class MemberEdit extends SimpleTextEdit {
 					fill(buffer, initialIndentationLevel, "\t");
 			}
 			buffer.append(fSource[i]);
-			if (i < last)
+			if (i < last && fAddLineSeparators)
 				buffer.append(lineDelimiter);
 		}		
 
