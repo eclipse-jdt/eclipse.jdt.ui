@@ -352,20 +352,30 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	private static boolean canDelete(IJavaElement element){
-		if (! element.exists())
-		    return false;
-		if (element instanceof IImportDeclaration || 
-			element instanceof IImportContainer ||
-		    element instanceof IMember)
-	  		return false;
-		IResource res= element.getResource();
-		if (res == null)
-			return false;
-		if (!res.getProject().equals(element.getJavaProject().getProject()))
-			return false;
-		IJavaElement parent= element.getParent();
-		return parent == null || !parent.isReadOnly();
+		try {
+			if (! element.exists())
+			    return false;
+			if (element instanceof IImportDeclaration || element instanceof IImportContainer || element instanceof IMember)
+		  		return false;
+			if (element instanceof IPackageFragment && isEmptySuperPackage((IPackageFragment)element) )
+			    return false;
+			IResource res= element.getResource();
+			if (res == null)
+				return false;
+			if (!res.getProject().equals(element.getJavaProject().getProject()))
+				return false;
+			IJavaElement parent= element.getParent();
+			return parent == null || !parent.isReadOnly();
+ 		} catch (JavaModelException e) {
+ 			return false;
+  		}
 	}
+	
+    private static boolean isEmptySuperPackage(IPackageFragment iPackageFragment) throws JavaModelException {
+    	return(iPackageFragment.hasSubpackages() &&
+    			iPackageFragment.getNonJavaResources().length == 0 &&
+    			iPackageFragment.getChildren().length == 0);
+    }
 	
 	private static boolean canDelete(IFile file){
 		Object parent= ReorgUtils.getJavaParent(file);
