@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -560,7 +561,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			SingleVariableDeclaration	argDecl= ast.newSingleVariableDeclaration();
 
 			argDecl.setName(ast.newSimpleName(fFormalArgNames[i]));
-			argDecl.setType(ASTNodeFactory.newType(ast, fArgTypes[i], true));
+			argDecl.setType(typeForArgType(fArgTypes[i], ast));
 			argTypes.add(argDecl);
 		}
 
@@ -571,6 +572,26 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			String	excName= fImportRewriter.addImport(ctorExcepts[i]);
 
 			exceptions.add(ASTNodeFactory.newName(ast, excName));
+		}
+	}
+
+	/**
+	 * Returns a Type that describes the given ITypeBinding. If the binding
+	 * refers to an object type, use the import rewriter to determine whether
+	 * the reference requires a new import, or instead needs to be qualified.<br>
+	 * Like ASTNodeFactory.newType(), but for the handling of imports.
+	 */
+	private Type typeForArgType(ITypeBinding argType, AST ast) {
+		if (argType.isPrimitive())
+			return ASTNodeFactory.newType(ast, argType, false);
+		else if (argType.isArray()) {
+			Type elementType= typeForArgType(argType.getElementType(), ast);
+
+			return ast.newArrayType(elementType, argType.getDimensions());
+		} else {
+			String typeName= fImportRewriter.addImport(argType);
+
+			return ast.newSimpleType(ASTNodeFactory.newName(ast, typeName));
 		}
 	}
 

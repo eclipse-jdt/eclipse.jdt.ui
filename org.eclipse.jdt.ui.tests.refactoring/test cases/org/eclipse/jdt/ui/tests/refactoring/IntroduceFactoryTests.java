@@ -195,7 +195,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		String newSource = cu.getSource();
 
-		assertEqualLines(getName() + ": ", newSource, getFileContents(outputFileName));
+		assertEqualLines(getName() + ": ", getFileContents(outputFileName), newSource);
 	}
 
 	/**
@@ -516,6 +516,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	public void test46608() throws Exception {
 		multiUnitBugHelper(true, new String[] { "p1/TT", "p2/TT" }, null);
+	}
+
+	public void test59284() throws Exception {
+		singleUnitBugHelper("ArgTypeImport", true);
 	}
 
 	public void test59280() throws Exception {
