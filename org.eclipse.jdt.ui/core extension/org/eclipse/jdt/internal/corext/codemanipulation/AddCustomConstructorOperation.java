@@ -88,8 +88,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, closingParenIndex));
 			String[] params= new String[fSelected.length];
-			for (int i= 0; i < fSelected.length; i++) {
+			if (fSuperMethod[0].getParameterNames().length > 0)
 				buf.append(", "); //$NON-NLS-1$
+			for (int i= 0; i < fSelected.length; i++) {
 				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
 				buf.append(" "); //$NON-NLS-1$
 				IJavaProject project= fSelected[i].getJavaProject();
@@ -103,7 +104,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 				String paramName= StubUtility.guessArgumentName(project, accessName, new String[0]);
 				
-				buf.append(params[i]= paramName);				
+				buf.append(params[i]= paramName);
+				if (i < fSelected.length - 1)
+					buf.append(", "); //$NON-NLS-1$				
 			}
 			
 			buf.append(defaultConstructor.substring(closingParenIndex, closingBraceIndex));
