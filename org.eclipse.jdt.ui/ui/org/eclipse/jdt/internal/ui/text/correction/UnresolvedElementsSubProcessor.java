@@ -11,6 +11,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -361,17 +362,29 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		String methodName= nameNode.getIdentifier();
-		
+			
 		// corrections
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, nameNode, SimilarElementsRequestor.METHODS);
+		
+		ArrayList parameterMismatchs= new ArrayList();
+		
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
 			if (curr.equals(methodName) && needsNewName) {
+				//parameterMismatchs.add(elements[i]);
 				continue;
 			}
 			
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
+		}
+		
+		if (parameterMismatchs.size() == 1) {
+			SimilarElement elem= (SimilarElement) parameterMismatchs.get(0);
+			String[] paramTypes= elem.getParameterTypes();
+			ITypeBinding[] argTypes= getArgumentTypes(arguments);
+			if (paramTypes != null && argTypes != null) {
+			}
 		}
 		
 		// new method
@@ -414,6 +427,22 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
+	private static ITypeBinding[] getArgumentTypes(List arguments) {
+		ITypeBinding[] res= new ITypeBinding[arguments.size()];
+		for (int i= 0; i < res.length; i++) {
+			Expression expression= (Expression) arguments.get(i);
+ 			ITypeBinding curr= expression.resolveTypeBinding();
+			if (curr == null) {
+				return null;
+			}
+			curr= ASTResolving.normalizeTypeBinding(curr);
+			if (curr == null) {
+				curr= expression.getAST().resolveWellKnownType("java.lang.Object");
+			}
+			res[i]= curr;
+		}
+		return res;
+	}
 
 	public static void getConstructorProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
