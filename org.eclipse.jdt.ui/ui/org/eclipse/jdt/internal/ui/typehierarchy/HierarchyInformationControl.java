@@ -70,11 +70,13 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			
 	}
 	
+
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyInformationControlLabelProvider fLabelProvider;
 	private Label fLabel;
 	
 	private IMethod fFocus;
+	private boolean fDoFilter= true;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
 		super(parent, shellStyle, treeStyle);
@@ -209,17 +211,29 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		
 		fFocus= locked;
 		
+		Object[] topLevelObjects= contentProvider.getElements(fLifeCycle);
+		if (topLevelObjects.length > 0 && contentProvider.getChildren(topLevelObjects[0]).length > 40) {
+			fDoFilter= false;
+		} else {
+			getTreeViewer().addFilter(new NamePatternFilter());
+		}
+
 		Object selection= null;
 		if (input instanceof IMember) {
 			selection=  input;
-		} else {
-			Object[] objects= contentProvider.getElements(fLifeCycle);
-			if (objects.length > 0) {
-				selection=  objects[0];
-			}
+		} else if (topLevelObjects.length > 0) {
+			selection=  topLevelObjects[0];
 		}
 		inputChanged(fLifeCycle, selection);
 	}
+	
+	protected void stringMatcherUpdated() {
+		if (fDoFilter) {
+			super.stringMatcherUpdated(); // refresh the view
+		} else {
+			selectFirstMatch();
+		}
+	}	
 	
 	private String getHeaderLabel(IJavaElement input) {
 		if (input instanceof IMethod) {

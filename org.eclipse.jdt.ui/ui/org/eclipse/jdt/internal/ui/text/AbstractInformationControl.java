@@ -69,32 +69,25 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/**
 	 * The NamePatternFilter selects the elements which
 	 * match the given string patterns.
-	 * <p>
-	 * The following characters have special meaning:
-	 *   ? => any character
-	 *   * => any string
-	 * </p>
 	 *
 	 * @since 2.0
 	 */
-	private static class NamePatternFilter extends ViewerFilter {
-		private String fPattern;
-		private StringMatcher fMatcher;
+	protected class NamePatternFilter extends ViewerFilter {
 		
-		public StringMatcher getMatcher() {
-			return fMatcher;
+		public NamePatternFilter() {
 		}
-	
+		
 		/* (non-Javadoc)
 		 * Method declared on ViewerFilter.
 		 */
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (fMatcher == null || !(viewer instanceof TreeViewer))
+			StringMatcher matcher= getMatcher();
+			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
 			TreeViewer treeViewer= (TreeViewer) viewer;
 	
 			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
-			if (matchName != null && fMatcher.match(matchName))
+			if (matchName != null && matcher.match(matchName))
 				return true;
 	
 			return hasUnfilteredChild(treeViewer, element);
@@ -108,24 +101,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 						return true;
 			}
 			return false;
-		}
-	
-		/**
-		 * Sets the patterns to filter out for the receiver.
-		 * <p>
-		 * The following characters have special meaning:
-		 *   ? => any character
-		 *   * => any string
-		 * </p>
-		 */
-		public void setPattern(String pattern) {
-			fPattern= pattern;
-			if (fPattern == null) {
-				fMatcher= null;
-				return;
-			}
-			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-			fMatcher= new StringMatcher(pattern, ignoreCase, false);
 		}
 	}
 
@@ -191,6 +166,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	}
 
 
+
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
 	/** Right margin in pixels. */
@@ -205,10 +181,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
 	/** The control width constraint */
-	private int fMaxWidth= -1;
+	//private int fMaxWidth= -1;
 	/** The control height constraint */
-	private int fMaxHeight= -1;
-
+	//private int fMaxHeight= -1;
+	/** The current string matcher */
 	private StringMatcher fStringMatcher;
 
 	/**
@@ -258,7 +234,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		tree.addMouseMoveListener(new MouseMoveListener()	 {
 			TreeItem fLastItem= null;
 			public void mouseMove(MouseEvent e) {
-				if (fTreeViewer.getTree().equals(e.getSource())) {
+				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
 					if (o instanceof TreeItem) {
 						if (!o.equals(fLastItem)) {
@@ -359,35 +335,58 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		setForegroundColor(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		setBackgroundColor(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
-
+	
 	private void installFilter() {
-		final NamePatternFilter viewerFilter= new NamePatternFilter();
-		fTreeViewer.addFilter(viewerFilter);
 		fFilterText.setText(""); //$NON-NLS-1$
 
 		fFilterText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				String pattern= fFilterText.getText();
-				if (pattern != null) {
-					int length= pattern.length();
-					if (length == 0)
-						pattern= null;
-					else if (pattern.charAt(length -1 ) != '*')
-						pattern= pattern + '*';
-				} else
-					pattern= null;
-				viewerFilter.setPattern(pattern);
-				fStringMatcher= viewerFilter.getMatcher();
-				fTreeViewer.getControl().setRedraw(false);
-				fTreeViewer.refresh();
-				fTreeViewer.expandAll();
-				selectFirstMatch();
-				fTreeViewer.getControl().setRedraw(true);
+				String text= ((Text) e.widget).getText();
+				int length= text.length();
+				if (length > 0 && text.charAt(length -1 ) != '*') {
+					text= text + '*';
+				}				
+				setMatcherString(text);
 			}
 		});
 	}
 	
-	protected Object getSelectedElement() {
+	/**
+	 * The string matcher has been modified. The default implementation
+	 * refreshes the view and selects the first macthed element
+	 */
+	protected void stringMatcherUpdated() {
+		// refresh viewer to refilter
+		fTreeViewer.getControl().setRedraw(false);
+		fTreeViewer.refresh();
+		fTreeViewer.expandAll();
+		selectFirstMatch();
+		fTreeViewer.getControl().setRedraw(true);
+	}
+	
+	/**
+	 * Sets the patterns to filter out for the receiver.
+	 * <p>
+	 * The following characters have special meaning:
+	 *   ? => any character
+	 *   * => any string
+	 * </p>
+	 */
+	protected void setMatcherString(String pattern) {
+		if (pattern.length() == 0) {
+			fStringMatcher= null;
+		} else {
+			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
+			fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
+		}
+		stringMatcherUpdated();
+	}
+	
+	protected StringMatcher getMatcher() {
+		return fStringMatcher;
+	}
+	
+	private Object getSelectedElement() {
 		return ((IStructuredSelection)fTreeViewer.getSelection()).getFirstElement();
 	}
 
@@ -407,7 +406,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * Selects the first element in the tree which
 	 * matches the current filter pattern.
 	 */
-	private void selectFirstMatch() {
+	protected void selectFirstMatch() {
 		Tree tree= fTreeViewer.getTree();
 		Object element= findElement(tree.getItems());
 		if (element != null)
@@ -488,8 +487,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
-		fMaxWidth= maxWidth;
-		fMaxHeight= maxHeight;
+		//fMaxWidth= maxWidth;
+		//fMaxHeight= maxHeight;
 	}
 
 	/* 

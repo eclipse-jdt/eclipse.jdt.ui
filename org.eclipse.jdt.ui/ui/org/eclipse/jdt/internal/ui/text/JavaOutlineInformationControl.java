@@ -53,6 +53,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				return !(element instanceof IImportDeclaration);
 			}
 		});
+		treeViewer.addFilter(new NamePatternFilter());
 	
 		treeViewer.setContentProvider(new StandardJavaElementContentProvider(true, true));
 		treeViewer.setSorter(new JavaElementSorter());
@@ -63,6 +64,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
+
 		return treeViewer;
 	}
 
