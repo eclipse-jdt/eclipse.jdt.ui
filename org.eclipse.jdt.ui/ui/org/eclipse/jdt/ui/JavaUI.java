@@ -178,6 +178,26 @@ public final class JavaUI {
 	 */ 
 	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy"; //$NON-NLS-1$
 
+	/** 
+	 * The view part id of the source (declaration) view.
+	 * (value <code>"org.eclipse.jdt.ui.SourceView"</code>).
+	 *
+	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
+	 * @see org.eclipse.ui.IWorkbenchPage#showView(java.lang.String)
+	 * @since 3.0
+	 */ 
+	public static final String ID_SOURCE_VIEW=	"org.eclipse.jdt.ui.SourceView"; //$NON-NLS-1$
+	
+	/** 
+	 * The view part id of the Javadoc view.
+	 * (value <code>"org.eclipse.jdt.ui.JavadocView"</code>).
+	 *
+	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
+	 * @see org.eclipse.ui.IWorkbenchPage#showView(java.lang.String)
+	 * @since 3.0
+	 */ 
+	public static final String ID_JAVADOC_VIEW=	"org.eclipse.jdt.ui.JavadocView"; //$NON-NLS-1$
+	
 	/**
 	 * The id of the Java Browsing Perspective
 	 * (value <code>"org.eclipse.jdt.ui.JavaBrowsingPerspective"</code>).
