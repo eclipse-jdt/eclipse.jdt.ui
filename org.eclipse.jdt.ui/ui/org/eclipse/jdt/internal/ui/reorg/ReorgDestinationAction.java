@@ -54,8 +54,6 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -350,7 +348,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	
 	//overriden by d'n'd - must be protected
 	protected Object selectDestination(ReorgRefactoring refactoring) {
-		StandardJavaElementContentProvider cp= new DestinationDialogContentProvider();
+		StandardJavaElementContentProvider cp= new DestinationContentProvider();
 		ElementTreeSelectionDialog dialog= createDestinationSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS), cp, refactoring);
 		initDialog(dialog, getActionName(), getDestinationDialogMessage(), refactoring, null);
 		
@@ -440,30 +438,6 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}		
 	}
 	
-	final static class DestinationDialogContentProvider extends StandardJavaElementContentProvider {
-		public boolean hasChildren(Object element) {
-			// prevent the + from being shown in front of packages
-			return !(element instanceof IPackageFragment) && super.hasChildren(element);
-		}
-		
-		public Object[] getChildren(Object parentElement) {
-			try {
-				if (parentElement instanceof IJavaModel) 
-					return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
-				else
-					return super.getChildren(parentElement);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return new Object[0];
-			}
-		}
-
-		private static Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
-			return model.getNonJavaResources();
-		}
-
-	}
-
 	//-----
 	private static class ContainerFilter extends ViewerFilter {
 		private ReorgRefactoring fRefactoring;

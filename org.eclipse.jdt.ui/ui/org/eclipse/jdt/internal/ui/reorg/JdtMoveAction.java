@@ -84,7 +84,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	}
 
 	public static ElementTreeSelectionDialog makeDialog(Shell parent, MoveRefactoring refactoring) {
-		StandardJavaElementContentProvider cp= new DestinationDialogContentProvider(); 
+		StandardJavaElementContentProvider cp= new DestinationContentProvider(); 
 		MoveDestinationDialog dialog= new MoveDestinationDialog(
 			parent,  new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS),
 			cp, refactoring);
