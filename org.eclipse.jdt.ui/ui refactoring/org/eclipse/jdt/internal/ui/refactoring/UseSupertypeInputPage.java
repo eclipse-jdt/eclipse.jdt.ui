@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -88,7 +89,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTableLabelProvider= new UseSupertypeLabelProvider(fFileCount);
 		fTableViewer.setLabelProvider(fTableLabelProvider);
-		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
+		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection ss= (IStructuredSelection)event.getSelection();

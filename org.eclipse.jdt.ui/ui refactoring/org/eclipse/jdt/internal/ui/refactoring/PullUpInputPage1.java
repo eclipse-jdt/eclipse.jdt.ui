@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -548,7 +549,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		
 		fTableViewer= new PullUpCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
-		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
+		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {

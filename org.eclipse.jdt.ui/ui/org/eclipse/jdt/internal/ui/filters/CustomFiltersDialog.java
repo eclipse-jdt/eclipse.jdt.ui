@@ -34,21 +34,19 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class CustomFiltersDialog extends SelectionDialog {
@@ -172,7 +170,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fCheckBoxList.getTable().setLayoutData(data);
 
 		fCheckBoxList.setLabelProvider(createLabelPrivder());
-		fCheckBoxList.setContentProvider(createContentPrivder());
+		fCheckBoxList.setContentProvider(new ArrayContentProvider());
 
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections(getEnabledFilterDescriptors());
@@ -265,22 +263,6 @@ public class CustomFiltersDialog extends SelectionDialog {
 						return ((FilterDescriptor)element).getName();
 					else
 						return null;
-				}
-			};
-	}
-
-	private IStructuredContentProvider createContentPrivder() {
-		return
-			new IStructuredContentProvider() {
-				public Object[] getElements(Object inputElement) {
-					if (inputElement instanceof Object[])
-						return (Object[])inputElement;
-					else
-						return new Object[0];
-				}
-				public void dispose() {
-				}
-				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				}
 			};
 	}

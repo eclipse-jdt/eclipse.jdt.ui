@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -87,7 +88,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		fTableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTableViewer.setLabelProvider(createLabelProvider());
-		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
+		fTableViewer.setContentProvider(new ArrayContentProvider());
 		try {
 			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
 		} catch (JavaModelException e) {
