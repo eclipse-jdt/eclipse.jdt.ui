@@ -141,7 +141,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 	private ResourceWorkingSetFilter fWorkingSetFilter;	
 	
-	private PackageExplorerActions fActionSet;
+	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
 	private StandardJavaUILabelProvider fJavaElementLabelProvider;
 	private Menu fContextMenu;		
@@ -423,7 +423,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	private void makeActions() {
-		fActionSet= new PackageExplorerActions(this);
+		fActionSet= new PackageExplorerActionGroup(this);
 	}
 	
 	private boolean isSelectionOfType(ISelection s, Class clazz, boolean considerUnderlyingResource) {

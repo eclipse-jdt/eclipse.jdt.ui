@@ -59,7 +59,7 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
-public class PackageExplorerActions extends CompositeActionGroup {
+public class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private PackageExplorerPart fPart;
 
@@ -79,7 +79,7 @@ public class PackageExplorerActions extends CompositeActionGroup {
  	private ShowLibrariesAction fShowLibrariesAction;
   	private FilterSelectionAction fFilterAction;
 	
-	public PackageExplorerActions(PackageExplorerPart part) {
+	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
 		Shell shell= fPart.getSite().getShell();
