@@ -32,6 +32,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
+
 	public LocalCorrectionsQuickFixTest(String name) {
 		super(name);
 	}
@@ -42,7 +43,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleTypeRequestedFromSuperClass"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods"));
 			return suite;
 		}
 	}
@@ -488,6 +489,73 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	
+	public void testUncaughtException2() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        goo().substring(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");			
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");				
+		buf.append("    public void foo() throws IOException {\n");
+		buf.append("        goo().substring(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");			
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("        goo().substring(2);\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");						
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}	
+	
 	public void testMultipleUncaughtExceptions() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -527,7 +595,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void goo() throws IOException, ParseException {\n");
 		buf.append("    }\n");				
-		buf.append("    public void foo() throws IOException {\n");
+		buf.append("    public void foo() throws IOException, ParseException {\n");
 		buf.append("        goo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -706,23 +774,29 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+
+	private boolean BUG_25183= true;
 	
 	public void testUnimplementedMethods() throws Exception {
+		if (BUG_25183) {
+			return ;
+		}
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    int getCount(Object[] o) throws IOException;\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Inter.java", buf.toString(), false, null);
+
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E implements MouseListener{\n");
-		buf.append("    public void goo() {\n");
-		buf.append("    }\n");			
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");		
-		buf.append("            goo();\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        } finally {\n");
-		buf.append("        }\n");		
-		buf.append("    }\n");
+		buf.append("import test2.Inter;\n");		
+		buf.append("public class E implements Inter{\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
@@ -735,27 +809,36 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-	
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.Inter;\n");		
+		buf.append("public abstract class E implements Inter{\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void goo() {\n");
-		buf.append("    }\n");			
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");		
-		buf.append("            goo();\n");
-		buf.append("        } finally {\n");
-		buf.append("        }\n");		
+		buf.append("\n");		
+		buf.append("import test2.Inter;\n");
+		buf.append("public class E implements Inter{\n");
+		buf.append("    public int getCount(Object[] o) throws IOException {\n");
+		buf.append("        return 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		
 	}	
 	
 	

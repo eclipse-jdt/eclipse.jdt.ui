@@ -66,7 +66,7 @@ public class QuickFixTest extends TestCase {
 	
 	
 	public static void assertEqualStringsIgnoreOrder(String[] str1, String[] str2) {
-		boolean hasUnmatched= false;
+		int nUnmatched= 0;
 		
 		loop1: for (int i= 0; i < str1.length; i++) {
 			String s1= str1[i];
@@ -78,9 +78,21 @@ public class QuickFixTest extends TestCase {
 					continue loop1;
 				}
 			}
-			hasUnmatched= true;
+			nUnmatched++;
 		}
-		if (hasUnmatched) {
+		if (nUnmatched > 0) {
+			if (nUnmatched == 1) {
+				for (int i= 0; i < str1.length; i++) {
+					if (str1[i] != null) {
+						for (int k= 0; k < str2.length; k++) {
+							if (str2[k] != null) {
+								assertEqualString(str1[i], str2[k]);
+							}
+						}
+					}
+				}
+			}
+			
 			StringBuffer buf= new StringBuffer();
 			buf.append("Content not as expected: Content is: \n");
 			for (int i= 0; i < str1.length; i++) {
@@ -98,6 +110,7 @@ public class QuickFixTest extends TestCase {
 					buf.append("\n");
 				}
 			}
+			assertTrue(buf.toString(), false);
 		}				
 	}
 	
