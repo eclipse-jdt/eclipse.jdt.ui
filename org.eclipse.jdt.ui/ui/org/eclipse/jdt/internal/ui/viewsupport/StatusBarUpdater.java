@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IStatusLineManager;
@@ -66,7 +67,11 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	}
 		
 	private String formatResourceMessage(IResource element) {
-		return element.getFullPath().toString();
+		IContainer parent= element.getParent();
+		if (parent != null)
+			return element.getName() + JavaElementLabels.CONCAT_STRING + parent.getFullPath().makeRelative().toString();
+		else
+			return element.getName();
 	}	
 
 }
