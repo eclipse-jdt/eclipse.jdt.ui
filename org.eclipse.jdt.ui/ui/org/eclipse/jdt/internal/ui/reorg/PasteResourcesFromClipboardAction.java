@@ -104,9 +104,8 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	private void pasteProject(IProject project){
 		CopyProjectAction cpa= new CopyProjectAction(getShell());
 		cpa.selectionChanged(new StructuredSelection(project));
-		if (! cpa.isEnabled())
-			return;
-		cpa.run();
+		if (cpa.isEnabled())
+			cpa.run();
 	}
 
 	//- enablement ---
