@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -201,6 +202,9 @@ public class TestSearchEngine {
 		if (!Flags.isStatic(method.getFlags()) ||	
 			!Flags.isPublic(method.getFlags()) ||			
 			!Flags.isPublic(method.getDeclaringType().getFlags())) { 
+			return false;
+		}
+		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitPlugin.SIMPLE_TEST_INTERFACE_NAME)) {
 			return false;
 		}
 		return true;
