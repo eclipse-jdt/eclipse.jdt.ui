@@ -6,11 +6,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -19,12 +14,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -33,12 +33,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
@@ -57,6 +57,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	 * @see PreferencePage#createContents
 	 */
 	protected Control createContents(Composite composite) {
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
+
 		fJarRoot= getJARPackageFragmentRoot();
 		if (fJarRoot != null) {
 			try {
@@ -72,12 +74,16 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				JavaPlugin.log(e.getStatus());
 			}		
 		}
-		Label label= new Label(composite, SWT.LEFT + SWT.WRAP);
-		label.setText(JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message")); //$NON-NLS-1$
-		label.setFont(composite.getFont());
+		Composite inner= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;		
+		inner.setLayout(layout);
 		
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
-		return label;
+		Label label= new Label(inner, SWT.LEFT + SWT.WRAP);
+		label.setText(JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message")); //$NON-NLS-1$
+		label.setLayoutData(new GridData());
+		return inner;
 	}
 
 	/*
