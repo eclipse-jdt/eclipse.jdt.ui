@@ -317,7 +317,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				TextRange oldRange= getOldRange(edits, new TextRange(cuRange.getSourceRange()), change);
 				String typeName= fInputType.getElementName();
 				TextEdit edit= new UpdateTypeReferenceEdit(oldRange.getOffset(), oldRange.getLength(), fNewInterfaceName, typeName);
-				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit("update", edit);
+				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"), edit); //$NON-NLS-1$
 			}
 			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent();
 			manager.remove(newCuWC);
@@ -383,8 +383,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		//TODO fix the descriptions
-		String message= "update";
+		String message= RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"); //$NON-NLS-1$
 		textChange.addTextEdit(message, resultingEdits);
 		rewrite.removeModifications();
 		return textChange;

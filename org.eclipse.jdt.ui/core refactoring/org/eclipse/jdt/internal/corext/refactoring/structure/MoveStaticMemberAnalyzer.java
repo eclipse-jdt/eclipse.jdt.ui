@@ -136,7 +136,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 	}
 	
 	protected void nonStaticAccess(ASTNode node) {
-		fStatus.addWarning("Replacing non-static access to static member with static access", 
+		fStatus.addWarning(RefactoringCoreMessages.getString("MoveStaticMemberAnalyzer.nonStatic"),  //$NON-NLS-1$
 			JavaStatusContext.create(fAst.unit, node));
 	}
 	

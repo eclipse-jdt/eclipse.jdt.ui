@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +43,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -122,7 +122,7 @@ public class DeleteRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("Analyzing...", 1);
+		pm.beginTask(RefactoringCoreMessages.getString("DeleteRefactoring.1"), 1); //$NON-NLS-1$
 		try{
 			fWasCanceled= false;
 			RefactoringStatus result= new RefactoringStatus();
@@ -171,7 +171,7 @@ public class DeleteRefactoring extends Refactoring{
 	
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
-		String queryTitle= "Confirm Referenced Archive Delete";
+		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.2"); //$NON-NLS-1$
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);
 		removeUnconfirmedReferencedPackageFragmentRoots(query);
 		removeUnconfirmedReferencedArchiveFiles(query);
@@ -216,13 +216,12 @@ public class DeleteRefactoring extends Refactoring{
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String pattern= "Archive file ''{0}'' is referenced by the following project(s). Do you still want to delete it?";
-		String question= MessageFormat.format(pattern, new String[]{root.getElementName()});
+		String question= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.3", root.getElementName()); //$NON-NLS-1$
 		return ! query.confirm(question, referencingProjects.toArray());
 	}
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
-		String queryTitle= "Confirm Folder Delete";
+		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.4"); //$NON-NLS-1$
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
 		List foldersToSkip= new ArrayList(0);
 		for (int i= 0; i < fResources.length; i++) {
@@ -230,8 +229,7 @@ public class DeleteRefactoring extends Refactoring{
 			if (resource instanceof IFolder){
 				IFolder folder= (IFolder)resource;
 				if (containsSourceFolder(folder)){
-					String pattern= "Folder ''{0}'' contains a Java source folder. Deleting it will delete the source folder as well. Do you still wish to delete it?";
-					String question= MessageFormat.format(pattern, new String[]{folder.getName()});
+					String question= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.5", folder.getName()); //$NON-NLS-1$
 					if (! query.confirm(question))
 						foldersToSkip.add(folder);
 				}
@@ -273,7 +271,7 @@ public class DeleteRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.done();
 		return fDeleteChange;
 	}
@@ -282,7 +280,7 @@ public class DeleteRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Delete";
+		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
 	}
 	
 	private void addToSetToDelete(IJavaElement[] newElements){
@@ -316,14 +314,12 @@ public class DeleteRefactoring extends Refactoring{
 
 	private List getGettersSettersToDelete(Map getterSetterMapping) {
 		List gettersSettersToAdd= new ArrayList(getterSetterMapping.size());
-		String queryTitle= "Confirm Delete of Getters/Setters";
+		String queryTitle= RefactoringCoreMessages.getString("DeleteRefactoring.8"); //$NON-NLS-1$
 		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_GETTER_SETTER);
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
-			String pattern= "Do you also want to delete getter/setter methods for field ''{0}''?";
-			Object[] args= {JavaElementUtil.createFieldSignature(field)};
-			String deleteGetterSetter= MessageFormat.format(pattern, args);
+			String deleteGetterSetter= RefactoringCoreMessages.getFormattedString("DeleteRefactoring.9", JavaElementUtil.createFieldSignature(field)); //$NON-NLS-1$
 			if (getterSetterQuery.confirm(deleteGetterSetter)){
 				if (hasGetter(getterSetterMapping, field))
 					gettersSettersToAdd.add(getGetter(getterSetterMapping, field));
