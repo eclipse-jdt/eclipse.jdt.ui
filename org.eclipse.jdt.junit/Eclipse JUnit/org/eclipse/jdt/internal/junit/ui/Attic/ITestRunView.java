@@ -8,11 +8,9 @@ package org.eclipse.jdt.internal.junit.ui;
 /**
  * A TestRunView is shown as a page in a tabbed folder.
  * It contributes the page contents and can return
- * the currently selected tests. A TestRunView is 
- * notified about the start and finish of a run.
+ * the currently selected test.
  */
 interface ITestRunView {
-	
 	/**
 	 * Returns the name of the currently selected Test in the View
 	 */
@@ -39,7 +37,17 @@ interface ITestRunView {
 	public void setSelectedTest(String testName);
 	
 	/**
-	 * Updates the View after reRun Button has been pressed
+	 * A test has ended
 	 */
-	public void updateTest(String testName);
+	public void endTest(String testName);
+	
+	/**
+	 * The status of a test has changed
+	 */
+	public void testStatusChanged(TestRunInfo newInfo);
+	/**
+	 * A new tree entry got posted.
+	 */
+	public void newTreeEntry(String treeEntry);
+
 }

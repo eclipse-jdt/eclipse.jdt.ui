@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.swt.widgets.Composite;
@@ -7,6 +11,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 
+/**
+ * A dialog to enter a filter pattern. 
+ */
 public class FilterPatternsDialog extends InputDialog {	
     
     static class NonEmptyValidator implements IInputValidator {
@@ -33,4 +40,3 @@ public class FilterPatternsDialog extends InputDialog {
 		return result;
 	}
 }
-

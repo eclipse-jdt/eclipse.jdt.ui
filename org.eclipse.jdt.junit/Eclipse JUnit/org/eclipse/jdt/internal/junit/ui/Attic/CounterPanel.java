@@ -11,11 +11,9 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-
 
 /**
  * A panel with counters for the number of Runs, Errors and Failures.
@@ -25,6 +23,7 @@ public class CounterPanel extends Composite {
 	private Label fNumberOfFailures;
 	private Label fNumberOfRuns;
 	private int fTotal;
+	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass());
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass());
 	private final Image fRunIcon= TestRunnerViewPart.createImage("icons/run_exc.gif", getClass());
@@ -72,35 +71,35 @@ public class CounterPanel extends Composite {
 		return label;
 	}
 
-	protected void reset() {
-		fNumberOfErrors.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
-		fNumberOfFailures.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+	public void reset() {
+		fNumberOfErrors.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
+		fNumberOfFailures.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		fNumberOfErrors.setText(" 0 ");
 		fNumberOfFailures.setText(" 0 ");
 		fNumberOfRuns.setText(" 0/0  ");
 		fTotal= 0;
 	}
 	
-	protected void setTotal(int value) {
+	public void setTotal(int value) {
 		fTotal= value;
 	}
 	
-	protected int getTotal(){
+	public int getTotal(){
 		return fTotal;
 	}
 	
-	protected void setRunValue(int value) {
+	public void setRunValue(int value) {
 		fNumberOfRuns.setText(Integer.toString(value) + "/" + fTotal);
 		fNumberOfRuns.redraw();
 		redraw();
 	}
 	
-	protected void setErrorValue(int value) {
+	public void setErrorValue(int value) {
 		fNumberOfErrors.setText(Integer.toString(value));
 		redraw();
 	}
 	
-	protected void setFailureValue(int value) {
+	public void setFailureValue(int value) {
 		fNumberOfFailures.setText(Integer.toString(value));
 		redraw();
 	}

@@ -24,15 +24,16 @@
 		<jar 
 			jarfile="./junitsupport.jar"
 			basedir="bin"
-		/>
+		/> 
 				
 		<jar 		
-			jarfile="${dest}/srcjunitsupport.jar"
+			jarfile="${dest}/junitsupportsrc.jar"
 			basedir="Eclipse JUnit"
 		/>
 		
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
+		<copy file="about.html" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>		

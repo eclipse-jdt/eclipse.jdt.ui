@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Random;
-import org.eclipse.jdt.internal.junit.ui.*;
-import org.eclipse.jdt.internal.junit.runner.*;
 
-
+/**
+ * Socket utilities.
+ */
 public class SocketUtil {
 
 	private static final Random fgRandom= new Random(System.currentTimeMillis());

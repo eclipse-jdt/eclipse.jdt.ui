@@ -4,13 +4,20 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-// internals !!
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
-
-import java.util.List;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -24,17 +31,11 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
  * The main page in a <code>JUnitApplicationWizard</code>. Presents the
@@ -45,17 +46,14 @@ public class JUnitLaunchWizardPage extends WizardPage {
 	 * Viewer for the elements to launch
 	 */
 	protected TableViewer fElementsList;
-
 	/**
 	 * A text field to perform pattern matching
 	 */
 	protected Text fPatternText;
-
 	/**
 	 * The filtered array
 	 */
 	protected Object[] fFilteredElements;
-
 	/**
 	 * The selection from which to determine the elements to launch
 	 */
@@ -73,10 +71,8 @@ public class JUnitLaunchWizardPage extends WizardPage {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
-
 		public void dispose() {
 		}
-
 
 		public Object[] getElements(Object parent) {
 			return fElements;
@@ -85,7 +81,6 @@ public class JUnitLaunchWizardPage extends WizardPage {
 
 	private class PatternFilter extends ViewerFilter {
 		protected StringMatcher fMatcher= null;
-
 		/*
 		 * @see ViewerFilter
 		 */
@@ -236,7 +231,6 @@ public class JUnitLaunchWizardPage extends WizardPage {
 		super.setMessage(message);
 	}
 
-
 	/**
 	 * Convenience method to set the error line
 	 */
@@ -272,6 +266,6 @@ public class JUnitLaunchWizardPage extends WizardPage {
 				fPatternText.setFocus();
 			}
 		};
-		Display.getCurrent().asyncExec(runnable);
+		getShell().getDisplay().asyncExec(runnable);
 	}
 }

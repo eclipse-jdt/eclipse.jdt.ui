@@ -4,24 +4,13 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.text.NumberFormat;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -30,45 +19,28 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 
-// !!internal import
-
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-
-import org.eclipse.jdt.internal.junit.runner.*;
+import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -76,49 +48,63 @@ import org.eclipse.jdt.internal.junit.runner.*;
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.viewpart";
-
- 	public static final int IS_SUITE= -1;	
- 		
+ 	/**
+ 	 * Number of executed tests during a test run
+ 	 */
 	protected int fExecutedTests;
+ 	/**
+ 	 * Number of errors during this test run
+ 	 */
 	protected int fErrors;
-	protected int fFailures;
-		
-	private Vector fTestInfo= new Vector();
-	private Display fDisplay;
+ 	/**
+ 	 * Number of failures during this test run
+ 	 */
+	protected int fFailures;	
+	/**
+	 * Map storing TestInfos for each executed test keyed by
+	 * the test name.
+	 */
+	private Map fTestInfos= new HashMap();
+	/**
+	 * The first failure of a test run. Used to reveal the
+	 * first failed tests at the end of a run.
+	 */
+	private TestRunInfo fFirstFailure;
+	
 	private ProgressBar fProgressBar;
 	private CounterPanel fCounterPanel;
-	private IStatusLineManager fStatusLine;
-	private FailureDetailView fFailureView;
-	private CTabFolder fTabFolder;
-	
+	/** 
+	 * The view that shows the stack trace of a failure
+	 */
+	private FailureTraceView fFailureView;
+	/** 
+	 * The collection of ITestRunViews
+	 */
 	private Vector fTestRunViews= new Vector();
+	/**
+	 * The currently active run view
+	 */
 	private ITestRunView fActiveRunView;
-	private ITestRunView fFailureRunView;
-	private ITestRunView fTestHierarchyRunView;
-	private Tree fHierarchyTree;
-	private Vector fTreeItems= new Vector();
-	private boolean fActive= true;
+	/**
+	 * Is the UI disposed
+	 */
+	private boolean fIsDisposed= false;
+	/**
+	 * The launched test type
+	 */
+	private IType fTestType;
+	/**
+	 * The launcher that has started the test
+	 */
+	private JUnitBaseLauncherDelegate fLauncher;
+	/**
+	 * The client side of the remote test runner
+	 */
+	private RemoteTestRunnerClient fTestRunnerClient;
 	
-	private IType fType;
-	private JUnitBaseLauncherDelegate fCurrentLauncher;
-	private boolean fInReRun;
-	
-	protected final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass());
 	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
 	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
 
-	protected RemoteTestRunnerClient fTestRunner;
-	
-	private static class SuiteInfo {
-		public int fTestCount;
-		public TreeItem fTreeItem;
-		
-		public SuiteInfo(TreeItem treeItem, int testCount){
-			fTreeItem= treeItem;
-			fTestCount= testCount;
-		}
-	}
-	
 	private class StopAction extends Action{
 		public StopAction() {
 			setText("Stop JUnit Test");
@@ -131,77 +117,88 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		}
 	}
 	
+	/**
+	 * Stops the currently running test and shuts down the RemoteTestRunner
+	 */
 	public void stopTest() {
-		if (fTestRunner != null)
-			fTestRunner.stopTest();
+		if (fTestRunnerClient != null)
+			fTestRunnerClient.stopTest();
 	}
 			
+	/*
+	 * @see ITestRunListener#testRunStarted(testCount)
+	 */
 	public void testRunStarted(final int testCount){
-		if (fInReRun) {
-			fDisplay.asyncExec(new Runnable() {				
-				public void run() {
-					if(!isActive()) 
-						return;				
-					resetProgressBar(testCount);
-					fCounterPanel.setTotal(fCounterPanel.getTotal() + testCount);
-				}
-			});
-			return;
-		}
 		reset(testCount);
 		fExecutedTests++;
 	}
 	
+	/*
+	 * @see ITestRunListener#testRunEnded
+	 */
 	public void testRunEnded(long elapsedTime){
-		postInfo("Finished: " + TestRunnerViewPart.elapsedTimeAsString(elapsedTime) + " seconds");
-		fDisplay.asyncExec(new Runnable() {				
+		fExecutedTests--;
+		postInfo("Finished: " + elapsedTimeAsString(elapsedTime) + " seconds");
+		postAsyncRunnable(new Runnable() {				
 			public void run() {
-				if(!isActive()) 
+				if(isDisposed()) 
 					return;	
-				Enumeration enum= fTestInfo.elements();
-				TestInfo testInfo= null;
-				while(enum.hasMoreElements()){
-					testInfo= (TestInfo) enum.nextElement();
-					if(testInfo != null && testInfo.fTrace != null)
-						for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
-							ITestRunView v= (ITestRunView) e.nextElement();
-								v.setSelectedTest(testInfo.fTestName);
-						}
+				if (fFirstFailure != null) {
+					fActiveRunView.setSelectedTest(fFirstFailure.fTestName);
+					handleTestSelected(fFirstFailure.fTestName);
 				}
 			}
 		});	
-		fInReRun= false;
-		stopTest();
 	}
 	
-	public void testRunStopped(final long elapsedTime){
-		String msg= "Stopped after " + TestRunnerViewPart.elapsedTimeAsString(elapsedTime) + " seconds";
+	/*
+	 * @see ITestRunListener#testRunStopped
+	 */
+	public void testRunStopped(final long elapsedTime) {
+		String msg= "Stopped after " + elapsedTimeAsString(elapsedTime) + " seconds";
+		showMessage(msg);
+	}
+
+	/*
+	 * @see ITestRunListener#testRunTerminated
+	 */
+	public void testRunTerminated() {
+		String msg= "Terminated";
+		showMessage(msg);
+	}
+
+	private void showMessage(String msg) {
 		showInformation(msg);
 		postError(msg);
-		fInReRun= false;
-		stopTest();
-		fTestRunner.shutDown();
 	}
-	
-	public void testStarted(String testName){
-		postInfo("Started: " + testName);
-		TestInfo testInfo= getTestInfo(testName);
+		
+	/*
+	 * @see ITestRunListener#testStarted
+	 */
+	public void testStarted(String testName) {
+		//postInfo("Started: " + testName);
+		TestRunInfo testInfo= getTestInfo(testName);
 		if (testInfo == null) {
-			testInfo= new TestInfo(testName);
-			fTestInfo.addElement(testInfo);
+			fTestInfos.put(testName, new TestRunInfo(testName));
 		}
 	}
 	
+	/*
+	 * @see ITestRunListener#testEnded
+	 */
 	public void testEnded(String testName){
-		endTest(testName);
+		postEndTest(testName);
 		fExecutedTests++;
 	}
 	
+	/*
+	 * @see ITestRunListener#testFailed
+	 */
 	public void testFailed(int status, String testName, String trace){
-		TestInfo testInfo= getTestInfo(testName);
+		TestRunInfo testInfo= getTestInfo(testName);
 		if (testInfo == null) {
-			testInfo= new TestInfo(testName);
-			fTestInfo.addElement(testInfo);
+			testInfo= new TestRunInfo(testName);
+			fTestInfos.put(testName, testInfo);
 		}
 		testInfo.fTrace= trace;
 		testInfo.fStatus= status;
@@ -209,118 +206,113 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fErrors++;
 		else
 			fFailures++;
+		if (fFirstFailure == null)
+			fFirstFailure= testInfo;
 	}
 	
-	public void testTreeStart(){
-		if (fInReRun) 
+	/*
+	 * @see ITestRunListener#testReran
+	 */
+	public void testReran(String className, String testName, int status, String trace) {
+		String test= testName+"("+className+")";
+		if (status == ITestRunListener.STATUS_ERROR)
+			postError(test + " had an error");
+		else if (status == ITestRunListener.STATUS_FAILURE)
+			postError(test + " had a failure");
+		else 
+			postInfo(test + " was successful");
+		TestRunInfo info= getTestInfo(test);
+		updateTest(info, status);
+		if (info.fTrace == null || !info.fTrace.equals(trace)) {
+			info.fTrace= trace;
+			showFailure(info.fTrace);
+		}
+	}
+	
+	private void updateTest(TestRunInfo info, final int status) {
+		if (status == info.fStatus)
 			return;
-		fDisplay.syncExec(new Runnable() {
-			public void run(){
-				if(!isActive()) 
+		if (info.fStatus == ITestRunListener.STATUS_OK) {
+			if (status == ITestRunListener.STATUS_FAILURE) 
+				fFailures++;
+			else if (status == ITestRunListener.STATUS_ERROR)
+				fErrors++;
+		} else if (info.fStatus == ITestRunListener.STATUS_ERROR) {
+			if (status == ITestRunListener.STATUS_OK) 
+				fErrors--;
+			else if (status == ITestRunListener.STATUS_FAILURE) {
+				fErrors--;
+				fFailures++;
+			}
+		} else if (info.fStatus == ITestRunListener.STATUS_FAILURE) {
+			if (status == ITestRunListener.STATUS_OK) 
+				fFailures--;
+			else if (status == ITestRunListener.STATUS_ERROR) {
+				fFailures--;
+				fErrors++;
+			}
+		}			
+		info.fStatus= status;	
+		final TestRunInfo finalInfo= info;
+		postAsyncRunnable(new Runnable() {
+			public void run() {
+				refreshCounters();
+				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
+					ITestRunView v= (ITestRunView) e.nextElement();
+					v.testStatusChanged(finalInfo);
+				}
+			}
+		});
+		
+	}
+	
+	/*
+	 * @see ITestRunListener#testTreeEntry
+	 */
+	public void testTreeEntry(final String treeEntry){
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				if(isDisposed()) 
 					return;
-				fHierarchyTree.removeAll();
-				fTreeItems.removeAllElements();
+				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
+					ITestRunView v= (ITestRunView) e.nextElement();
+					v.newTreeEntry(treeEntry);
+				}
 			}
 		});	
 	}
-	
-	public void testTreeEntry(final String treeEntry){
-		if (fInReRun) 
-			return;
-		fDisplay.syncExec(new Runnable() {
-			public void run(){
-				if(!isActive()) 
-					return;
-				int index0= treeEntry.indexOf(',');
-				int index1= treeEntry.lastIndexOf(',');
-				String label= treeEntry.substring(0, index0).trim();
-				TestInfo testInfo= new TestInfo(label);
-				fTestInfo.addElement(testInfo);
-				int index2;
-				if((index2= label.indexOf('(')) > 0)
-					label= label.substring(0, index2);
-				if((index2= label.indexOf('@')) > 0)
-					label= label.substring(0, index2);
-				
-				String isSuite= treeEntry.substring(index0 + 1, index1);
-				int testCount= Integer.parseInt(treeEntry.substring(index1 + 1));
-				TreeItem treeItem;
-			
-				while((fTreeItems.size() > 0) && (((SuiteInfo) fTreeItems.lastElement()).fTestCount == 0))	{
-						fTreeItems.removeElementAt(fTreeItems.size() - 1);
-				}
-
-				if(fTreeItems.size() == 0){
-					testInfo.fStatus= IS_SUITE;
-					treeItem= new TreeItem(fHierarchyTree, SWT.NONE);
-					treeItem.setImage(fHierarchyIcon);
-					fTreeItems.addElement(new SuiteInfo(treeItem, testCount));
-				}
-				else if(isSuite.equals("true")) {
-					testInfo.fStatus= IS_SUITE;
-					treeItem= new TreeItem(((SuiteInfo) fTreeItems.lastElement()).fTreeItem, SWT.NONE);
-					treeItem.setImage(fHierarchyIcon);
-					((SuiteInfo) fTreeItems.lastElement()).fTestCount -= 1;
-					fTreeItems.addElement(new SuiteInfo(treeItem, testCount));
-				}
-				else {
-					treeItem= new TreeItem(((SuiteInfo) fTreeItems.lastElement()).fTreeItem, SWT.NONE);
-					treeItem.setImage(fTestIcon);
-					((SuiteInfo) fTreeItems.lastElement()).fTestCount -= 1;
-				}
-				treeItem.setText(label);
-				treeItem.setData(testInfo);
-			}
-		});		
-	}
 
 	public void startTestRunListening(IType type, int port, JUnitBaseLauncherDelegate launcher) {
-		fType= type;
-		fCurrentLauncher= launcher;
+		fTestType= type;
+		fLauncher= launcher;
 		String msg= "Launching TestRunner";
 		showInformation(msg);
 		postInfo(msg);
-		fTestRunner= new RemoteTestRunnerClient();
-		fTestRunner.startListening(this, port);
-	}
-
-	public void reRunTest(String[] classNames) {
-		stopTest();
-			
-		fInReRun= true;
-		IType[] testTypes= new IType[classNames.length];
 		
-		for (int i= 0; i < classNames.length; i ++) {
-			testTypes[i]= getType(fType.getJavaProject(), classNames[i]);
-			removeFromInfo(classNames[i]);
-		}
+		if (fTestRunnerClient != null) 
+			stopTest();
+		fTestRunnerClient= new RemoteTestRunnerClient();
+		fTestRunnerClient.startListening(this, port);
 		
-		fDisplay.asyncExec(new Runnable() {
-			public void run() {
-				if (!isActive()) 
-					return;	
-				fFailureView.clear();
-			}
-		});
-		fCurrentLauncher.redoLaunch(testTypes);
+		setTitle("JUnit ("+type.getElementName()+")");
+		setTitleToolTip(type.getFullyQualifiedName());
 	}
-
-	protected void removeFromInfo(String className) {
-		Iterator iter= fTestInfo.iterator();
-		while (iter.hasNext()) {
-			TestInfo testInfo= (TestInfo) iter.next();
-			if (testInfo.fTestName.indexOf(className) > 0) {
-				if (testInfo.fStatus == ITestRunListener.STATUS_ERROR)
-					fErrors--;
-				else if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE)
-					fFailures--;
-				iter.remove();
-			}
+	
+	public void rerunTest(String className, String testName) {
+		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() 
+			&& fLauncher != null && ILaunchManager.DEBUG_MODE.equals(fLauncher.getRunMode())
+		)
+			fTestRunnerClient.rerunTest(className, testName);
+		else {
+			MessageDialog.openInformation(getSite().getShell(), 
+				"Rerun Test", 
+				"Can only rerun tests when they are launched under the debugger\nand when the keep JUnit running preference is set"
+ 			); 
 		}
 	}
 
 	public synchronized void dispose(){
-		fActive= false;
+		fIsDisposed= true;
 		stopTest();
 	}
 	
@@ -333,14 +325,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private void resetProgressBar(final int total) {
 		fProgressBar.setMinimum(0);
 		fProgressBar.setSelection(0);
-		fProgressBar.setForeground(fDisplay.getSystemColor(SWT.COLOR_GREEN));
+		fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_GREEN));
 		fProgressBar.setMaximum(total);
 	}
 
-	protected void aboutToStart() {
-		fDisplay.syncExec(new Runnable() {
+	private void postSyncRunnable(Runnable r) {
+		if (!isDisposed())
+			getDisplay().syncExec(r);
+	}
+		
+	private void postAsyncRunnable(Runnable r) {
+		if (!isDisposed())
+			getDisplay().asyncExec(r);
+	}
+	
+	private void aboutToStart() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
-				if (isActive()) {
+				if (!isDisposed()) {
 					for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 						ITestRunView v= (ITestRunView) e.nextElement();
 						v.aboutToStart();
@@ -350,77 +352,84 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});
 	}
 	
-	protected void endTest(final String testName) {
-		fDisplay.syncExec(new Runnable() {
+	private void postEndTest(final String testName) {
+		postSyncRunnable(new Runnable() {
 			public void run() {
-				if(!isActive()) 
+				if(isDisposed()) 
 					return;
-				postEndTest();
+				handleEndTest();
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
-					v.updateTest(testName);
+					v.endTest(testName);
 				}
 			}
 		});	
 	}
 	
-	protected void postEndTest() {
+	private void handleEndTest() {
+		refreshCounters();
+		updateProgressColor(fFailures+fErrors);
+		fProgressBar.setSelection(fProgressBar.getSelection() + 1);
+	}
+
+	private void updateProgressColor(int failures) {
+		if (failures > 0)
+			fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_RED));
+		else 
+			fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_GREEN));
+	}
+
+	private void refreshCounters() {
 		fCounterPanel.setErrorValue(fErrors);
 		fCounterPanel.setFailureValue(fFailures);
 		fCounterPanel.setRunValue(fExecutedTests);
-	
-		if(fErrors + fFailures > 0)
-			fProgressBar.setForeground(fDisplay.getSystemColor(SWT.COLOR_RED));
-		fProgressBar.setSelection(fProgressBar.getSelection() + 1);
+		updateProgressColor(fErrors + fFailures);
 	}
 	
 	protected void postInfo(final String message) {
-		fDisplay.asyncExec(new Runnable() {
+		postAsyncRunnable(new Runnable() {
 			public void run() {
-				if (!isActive()) 
+				if (isDisposed()) 
 					return;
-				fStatusLine.setErrorMessage(null);
-				fStatusLine.setMessage(message);
+				getStatusLine().setErrorMessage(null);
+				getStatusLine().setMessage(message);
 			}
 		});
 	}
 	
 	protected void postError(final String message) {
-		fDisplay.asyncExec(new Runnable() {
+		postAsyncRunnable(new Runnable() {
 			public void run() {
-				if (!isActive()) 
+				if (isDisposed()) 
 					return;
-				fStatusLine.setMessage(null);
-				fStatusLine.setErrorMessage(message);
+				getStatusLine().setMessage(null);
+				getStatusLine().setErrorMessage(message);
 			}
 		});
 	}
 
 	protected void showInformation(final String info){
-		fDisplay.syncExec(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
-				if(isActive())
+				if(!isDisposed())
 					fFailureView.setInformation(info);
 			}
 		});
 	}
 
-	protected CTabFolder createTestRunViews(Composite parent) {
+	private CTabFolder createTestRunViews(Composite parent) {
 		CTabFolder tabFolder= new CTabFolder(parent, SWT.TOP);
 		GridData gridData= new GridData();
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
-		fFailureRunView= new FailureRunView(tabFolder, this); 
-		fTestHierarchyRunView= new HierarchyRunView(tabFolder, this);
-		fHierarchyTree= ((HierarchyRunView) fTestHierarchyRunView).getTree();
-		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-		fHierarchyTree.setLayoutData(gridData);
+		ITestRunView failureRunView= new FailureRunView(tabFolder, this); 
+		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, this);
 		
-		fTestRunViews.addElement(fTestHierarchyRunView);
-		fTestRunViews.addElement(fFailureRunView);
+		fTestRunViews.addElement(failureRunView);
+		fTestRunViews.addElement(testHierarchyRunView);
 		
 		tabFolder.setSelection(0);				
-		fActiveRunView= fFailureRunView;		
+		fActiveRunView= (ITestRunView)fTestRunViews.firstElement();		
 				
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -430,41 +439,49 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		return tabFolder;
 	}
 
-	protected void testViewChanged(SelectionEvent event) {
+	private void testViewChanged(SelectionEvent event) {
 		for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 			ITestRunView v= (ITestRunView) e.nextElement();
 			if (((CTabFolder) event.widget).getSelection().getText() == v.getName()){
 				v.setSelectedTest(fActiveRunView.getTestName());
 				fActiveRunView= v;
-				v.activate();
+				fActiveRunView.activate();
 			}
 		}
 	}
 
-	protected SashForm createSashForm(Composite parent) {
+	private SashForm createSashForm(Composite parent) {
 		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);		
 		ViewForm top= new ViewForm(sashForm, SWT.NONE);
-		fTabFolder= createTestRunViews(top);
-		fTabFolder.setLayoutData(new TabFolderLayout());
-		top.setContent(fTabFolder);
+		CTabFolder tabFolder= createTestRunViews(top);
+		tabFolder.setLayoutData(new TabFolderLayout());
+		top.setContent(tabFolder);
 		
 		ViewForm bottom= new ViewForm(sashForm, SWT.NONE);
-		fFailureView= new FailureDetailView(bottom, this);
+		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
+		bottom.setTopCenter(failureToolBar);
+		
+		fFailureView= new FailureTraceView(bottom, this);
 		bottom.setContent(fFailureView.getComposite()); 
 		CLabel label= new CLabel(bottom, SWT.NONE);
 		label.setText("Failure Trace");
 		label.setImage(fStackViewIcon);
 		bottom.setTopLeft(label);
 
-		Composite traceView= fFailureView.getComposite();		
+		Composite traceView= fFailureView.getComposite();
+		// fill the failure trace viewer toolbar
+		ToolBarManager failureToolBarmanager= new ToolBarManager(failureToolBar);
+		failureToolBarmanager.add(new EnableStackFilterAction(fFailureView));			
+		failureToolBarmanager.update(true);
+		
 		sashForm.setWeights(new int[]{50, 50});
 		return sashForm;
 	}
-	
-	protected void reset(final int testCount) {
-		fDisplay.asyncExec(new Runnable() {
+		
+	private void reset(final int testCount) {
+		postAsyncRunnable(new Runnable() {
 			public void run() {
-				if (!isActive()) 
+				if (isDisposed()) 
 					return;
 				fCounterPanel.reset();
 				fFailureView.clear();
@@ -476,22 +493,20 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fFailures= 0;
 		fErrors= 0;
 		aboutToStart();
-		fTestInfo.removeAllElements();
+		fTestInfos.clear();
+		fFirstFailure= null;
 	}
 	
-	protected void clearStatus() {
-		fStatusLine.setMessage(null);
-		fStatusLine.setErrorMessage(null);
+	private void clearStatus() {
+		getStatusLine().setMessage(null);
+		getStatusLine().setErrorMessage(null);
 	}
 
     public void setFocus() {
     	fProgressBar.setFocus();
     }
 	
-    public void createPartControl(Composite parent) {
-		fDisplay= parent.getDisplay();
-		fStatusLine= getViewSite().getActionBars().getStatusLineManager();
-		
+    public void createPartControl(Composite parent) {		
 		GridLayout gridLayout= new GridLayout();
 		gridLayout.marginWidth= 0;
 		parent.setLayout(gridLayout);
@@ -507,212 +522,60 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 	}
 
-	protected Composite createProgressCountPanel(Composite parent) {
+	private IStatusLineManager getStatusLine() {
+		return getViewSite().getActionBars().getStatusLineManager();
+	}
+
+	private Composite createProgressCountPanel(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		fProgressBar= new ProgressBar(composite, SWT.HORIZONTAL);
 		fProgressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		
 		fCounterPanel= new CounterPanel(composite);
 		fCounterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		return composite;
 	}
 
-	public TestInfo getTestInfo(String testName){
-		Enumeration enum= fTestInfo.elements();
-		TestInfo testInfo= null;
-		while (enum.hasMoreElements()){
-			testInfo= (TestInfo) enum.nextElement();
-			if(testInfo.fTestName.equals(testName))
-				return testInfo;
-		}
-		return null;
+	public TestRunInfo getTestInfo(String testName) {
+		return (TestRunInfo) fTestInfos.get(testName);
 	}
 
-	public void handleTestSelected(final String testName) {
-		final TestInfo testInfo= getTestInfo(testName);
+	public void handleTestSelected(String testName) {
+		TestRunInfo testInfo= getTestInfo(testName);
 
 		if (testInfo == null) {
-			fDisplay.syncExec(new Runnable() {
-				public void run() {
-					if(isActive())
-						fFailureView.showFailure("");
-				}
-			});		
+			showFailure("");
 		} else {
-			fDisplay.syncExec(new Runnable() {
-				public void run() {
-					if(isActive())
-						fFailureView.showFailure(TestRunnerViewPart.filterStack(testInfo.fTrace));
-				}
-			});	
+			showFailure(testInfo.fTrace);
 		}
 	}
 
-	protected void goToFile(String traceLine){	
-		try{
-			// hack works only for JDK stack trace
-			String testName= traceLine;
-			testName= testName.substring(testName.indexOf("at "));
-			testName= testName.substring(3, testName.indexOf('(')).trim();
-			testName= testName.substring(0, testName.lastIndexOf('.'));
-			String lineNumber= traceLine;
-		
-			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(")"));
-			goToTest(testName, Integer.valueOf(lineNumber).intValue());
-		} catch (NumberFormatException e) {
-			ITestRunView view= (ITestRunView) fTestRunViews.elementAt(fTabFolder.getSelectionIndex());
-			goToTest(view.getTestName(), 0);
-		}
-		catch(IndexOutOfBoundsException e){	
-			ITestRunView view= (ITestRunView) fTestRunViews.elementAt(fTabFolder.getSelectionIndex());
-			goToTest(view.getTestName(), 0);
-		}	
-	}
-
-	public void goToTest(String testName, int lineNumber){
-		IType type= TestRunnerViewPart.getType(fType.getJavaProject(), testName);
-		if (type == null) {
-			fDisplay.beep();
-			return;
-		}
-		ITextEditor textEditor= openInEditor(type);
-		if (textEditor == null) 
-			return;
-		
-		try {
-			IDocument document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
-			textEditor.selectAndReveal(document.getLineOffset(lineNumber - 1), document.getLineLength(lineNumber - 1));
-		} catch (BadLocationException x) {
-			// marker refers to invalid text position -> do nothing
-		}
-	}
-
-
-	public void goToTestMethod(String testName, String methodName){
-		try{
-			IType type= getType(fType.getJavaProject(), testName);
-			if (type == null) {
-				fDisplay.beep();
-				return;
+	private void showFailure(final String failure) {
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				if(!isDisposed())
+					fFailureView.showFailure(failure);
 			}
-			ITypeHierarchy typeHierarchy= type.newSupertypeHierarchy(null);
-			IType[] types= typeHierarchy.getAllClasses();
-			IMethod method= null;
-			
-			for (int i= 0; i < types.length; i++) {
-				type= types[i];
-				method= type.getMethod(methodName, new String[0]);
-				if (method != null && method.exists())
-					break;
-			}
-			ITextEditor textEditor= openInEditor(method);
-			if (textEditor == null) 
-				return;
-			
-			ISourceRange range= method.getNameRange();
-			textEditor.selectAndReveal(range.getOffset() , range.getLength());
-				
-		} catch (Exception e){
-			fDisplay.beep();
-			// can not goToFile
-			String msg= "Warning: could not open test: " +  testName + ":" + methodName;
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginId(), IStatus.OK, msg, e);
-			JUnitPlugin.log(status);
-		}
-	}
-		
-	protected static ITextEditor openInEditor(IJavaElement javaElement) {
-		if (javaElement == null || !javaElement.exists()) {
-			Display.getCurrent().beep();
-			return null;
-		}		
-		IEditorPart editor= null;
-		try {	
-			editor= EditorUtility.openInEditor(javaElement, false);			
-		} catch (CoreException e){
-			return null;
-		}						
-		if(!(editor instanceof ITextEditor)) {
-			Display.getCurrent().beep();
-			return null;
-		}			
-		return (ITextEditor) editor;
-	}	
-
-	public static IType getType(IJavaProject project, String str) {
-		if (project == null || str == null) 
-			return null;
-		String pathStr= str.replace('.', '/') + ".java"; //$NON-NLS-1$
-		IJavaElement element= null;
-		try {
-			element= project.findElement(new Path(pathStr));
-		} catch (JavaModelException e) {
-			// an illegal path -> no element found
-		}
-		IType resType= null;
-		if (element instanceof ICompilationUnit) {
-			String simpleName= Signature.getSimpleName(str);
-			resType= ((ICompilationUnit)element).getType(simpleName);
-		} else if (element instanceof IClassFile) {
-			try {
-				resType= ((IClassFile)element).getType();
-			} catch (JavaModelException e) {
-				// Fall through and return null.
-			}
-		}
-		return resType;
+		});		
 	}
 
-	/**
-	 * Returns the formatted string of the elapsed time.
-	 */
-	protected static String elapsedTimeAsString(long runTime) {
+	public IJavaProject getLaunchedProject() {
+		return fTestType.getJavaProject();
+	}
+
+	private String elapsedTimeAsString(long runTime) {
 		return NumberFormat.getInstance().format((double)runTime/1000);
-	}
-
-	protected static String filterStack(String stackTrace) {	
-		if (!JUnitPreferencePage.getFilterStack() || stackTrace == null) 
-			return stackTrace;
-			
-		StringWriter stringWriter= new StringWriter();
-		PrintWriter printWriter= new PrintWriter(stringWriter);
-		StringReader stringReader= new StringReader(stackTrace);
-		BufferedReader bufferedReader= new BufferedReader(stringReader);		
-		String line;
-		String[] patterns= JUnitPreferencePage.getFilterPatterns();
-		try {	
-			while ((line= bufferedReader.readLine()) != null) {
-				if (!filterLine(patterns, line))
-					printWriter.println(line);
-			}
-		} catch (IOException e) {
-			return stackTrace; // return the stack unfiltered
-		}
-		return stringWriter.toString();
-	}
-	
-	protected static boolean filterLine(String[] patterns, String line) {
-		for (int i= 0; i < patterns.length; i++) {
-			if (line.indexOf(patterns[i]) > 0)
-				return true;
-		}		
-		return false;
 	}
 	
 	protected static Image createImage(String fName, Class clazz) {
-		try {
-			return (new Image(Display.getCurrent(), clazz.getResourceAsStream(fName)));
-		}
-		catch (Exception e) {
-			String msg= "Warning: could not load image!";
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginId(), IStatus.OK, msg, e);
-			JUnitPlugin.getDefault().getLog().log(status);
-			return new Image(Display.getCurrent(), 1, 1);
-		}
+		return (new Image(Display.getCurrent(), clazz.getResourceAsStream(fName)));
 	}
 	
-	protected boolean isActive() {
-		return fActive && !fCounterPanel.isDisposed();
+	private boolean isDisposed() {
+		return fIsDisposed || fCounterPanel.isDisposed();
+	}
+	
+	private Display getDisplay() {
+		return fCounterPanel.getDisplay();
 	}
 }

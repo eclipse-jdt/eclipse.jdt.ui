@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -16,6 +15,7 @@ import org.eclipse.swt.widgets.Layout;
  * Layout that fixes an SWT limitation on Motif
  */
 public class TabFolderLayout extends Layout {
+	
 	protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
 		if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT)
 			return new Point(wHint, hHint);
@@ -39,7 +39,7 @@ public class TabFolderLayout extends Layout {
 	}
 	
 	protected void layout (Composite composite, boolean flushCache) {
-		Rectangle rect= composite.getClientArea();
+		Rectangle rect = composite.getClientArea();
 	
 		Control[] children = composite.getChildren();
 		for (int i = 0; i < children.length; i++) {

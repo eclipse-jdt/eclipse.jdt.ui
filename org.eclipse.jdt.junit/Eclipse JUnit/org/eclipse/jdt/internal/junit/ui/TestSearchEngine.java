@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 /**
  * Custom Search engine for suite() methods
  */
-public class TestSearchEngine /*extends SearchEngine*/ {
+public class TestSearchEngine {
 
 	private class JUnitSearchResultCollector implements IJavaSearchResultCollector {
 		IProgressMonitor fProgressMonitor;

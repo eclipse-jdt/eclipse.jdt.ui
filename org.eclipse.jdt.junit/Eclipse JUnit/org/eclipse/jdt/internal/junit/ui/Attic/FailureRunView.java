@@ -4,9 +4,6 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.util.Arrays;
-import java.util.Iterator;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -26,29 +23,29 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
+import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
+
 
 /**
- * A view presenting the test failures as a list.
+ * A view presenting the failed tests in a table.
  */
-class FailureRunView implements ITestRunView {
+class FailureRunView implements ITestRunView, IMenuListener {
 	private Table fTable;
-	private TestRunnerViewPart fRunViewContext;
+	private TestRunnerViewPart fRunnerViewPart;
 	private boolean fPressed= false;
-	private static final String fgName= "Failures";
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass());
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass());
 	
-	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart context) {
-		fRunViewContext= context;
+	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
+		fRunnerViewPart= runner;
 		
 		CTabItem failureTab= new CTabItem(tabFolder, SWT.NONE);
-		failureTab.setText(fgName);
+		failureTab.setText(getName());
 		fFailureIcon.setBackground(tabFolder.getBackground());
 		failureTab.setImage(fFailureIcon);
 
@@ -77,40 +74,28 @@ class FailureRunView implements ITestRunView {
 		fErrorIcon.setBackground(fTable.getBackground());
 		fFailureIcon.setBackground(fTable.getBackground());
 		
-		setMenuListener();
+		initMenu();
 		addListeners();	
 	}
 
 	void disposeIcons() {
-		if (fErrorIcon != null && !fErrorIcon.isDisposed()) {
+		if (fErrorIcon != null && !fErrorIcon.isDisposed()) 
 			fErrorIcon.dispose();
-		}
-		if (fFailureIcon != null && !fFailureIcon.isDisposed()) {
+			
+		if (fFailureIcon != null && !fFailureIcon.isDisposed()) 
 			fFailureIcon.dispose();
-		}
 	}
 
-	private void setMenuListener() {
+	private void initMenu() {
 		MenuManager menuMgr= new MenuManager();
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager){
-				if (fTable.getSelectionCount() > 0) {
-					manager.add(new Action("&Rerun Suite"){ 
-						public void run(){ 
-							fRunViewContext.reRunTest(new String[] {getClassName()});
-						} 
-					});
-					manager.add(new Action("&Goto File"){ public void run(){ fRunViewContext.goToTestMethod(getClassName(), getMethodName());} });
-				}
-			}		
-		});
+		menuMgr.addMenuListener(this);
 		Menu menu= menuMgr.createContextMenu(fTable);
 		fTable.setMenu(menu);
 	}
 	
 	public String getName() {
-		return fgName;
+		return "Failures";
 	}
 	
 	public String getTestName() {
@@ -120,76 +105,74 @@ class FailureRunView implements ITestRunView {
 		return fTable.getItem(index).getText();
 	}
 	
-	public String getClassName() {
-		int index= fTable.getSelectionIndex();
-		if (index == -1)
-			return null;
-		String className= fTable.getItem(index).getText();
+	private String getClassName() {
+		String className= getSelectedText();
 		className= className.substring(className.indexOf('(') + 1);
-		className= className.substring(0, className.indexOf(')'));
-		return className;
+		return className.substring(0, className.indexOf(')'));
 	}
 	
-	public String getMethodName() {
+	private String getMethodName() {
+		String methodName= getSelectedText();
+		return methodName.substring(0, methodName.indexOf('('));
+	}
+
+	public void menuAboutToShow(IMenuManager manager){
+		if (fTable.getSelectionCount() > 0) {
+			manager.add(new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()));
+			manager.add(new RerunAction(fRunnerViewPart, getClassName(), getMethodName()));
+		}
+	}		
+	
+	private String getSelectedText() {
 		int index= fTable.getSelectionIndex();
 		if (index == -1)
 			return null;
-		String methodName= fTable.getItem(index).getText();
-		methodName= methodName.substring(0, methodName.indexOf('('));
-		return methodName;		
+		return fTable.getItem(index).getText();
 	}
 	
 	public void setSelectedTest(String testName){
-		Iterator iter= Arrays.asList(fTable.getItems()).iterator();
-		TableItem tableItem;
-		TestInfo testInfo= fRunViewContext.getTestInfo(testName);
-		while (iter.hasNext()) {
-			tableItem= (TableItem)iter.next();
-
+		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
+		TableItem[] items= fTable.getItems();
+		for (int i= 0; i < items.length; i++) {
+			TableItem tableItem= items[i]; 			
 			if (tableItem.getText().equals(testName)){
 				fTable.setSelection(new TableItem[] { tableItem });
 				fTable.showItem(tableItem);
+				return;
 			}
 		}
 	}
 	
-	public void updateTest(String testName){
-		if (testName == null) return;
-		TestInfo testInfo= fRunViewContext.getTestInfo(testName);
-		TableItem tableItem= findItemByTest(testName);
-		
-		if(testInfo == null || testInfo.fTrace == null) { 
-			if(tableItem != null)
-				fTable.remove(fTable.indexOf(tableItem));
+	public void endTest(String testName){
+		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
+		if(testInfo.fStatus == ITestRunListener.STATUS_OK) 
 			return;
-		}
-		if (tableItem == null)
-			tableItem= new TableItem(fTable, SWT.NONE);
 
-		tableItem.setText(testName);
+		TableItem tableItem= new TableItem(fTable, SWT.NONE);
+		updateTableItem(testInfo, tableItem);
+		fTable.showItem(tableItem);
+	}
+
+	private void updateTableItem(TestRunInfo testInfo, TableItem tableItem) {
+		tableItem.setText(testInfo.fTestName);
 		if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE)
 			tableItem.setImage(fFailureIcon);
 		else
 			tableItem.setImage(fErrorIcon);
-			
 		tableItem.setData(testInfo);
 	}
 
 	private TableItem findItemByTest(String testName) {
 		TableItem[] items= fTable.getItems();
-		for (int i=0; i < items.length; i++) {
+		for (int i= 0; i < items.length; i++) {
 			if (items[i].getText().equals(testName))
 				return items[i];
 		}
 		return null;
 	}
 
-
 	public void activate() {
-		try {
-			testSelected();
-		} catch (Exception e) {
-		}
+		testSelected();
 	}
 
 	public void aboutToStart() {
@@ -197,7 +180,7 @@ class FailureRunView implements ITestRunView {
 	}
 
 	protected void testSelected() {
-		fRunViewContext.handleTestSelected(getTestName());
+		fRunnerViewPart.handleTestSelected(getTestName());
 	}
 	
 	protected void addListeners() {
@@ -218,7 +201,7 @@ class FailureRunView implements ITestRunView {
 
 		fTable.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e){
-				fRunViewContext.goToTestMethod(getClassName(), getMethodName());
+				handleDoubleClick(e);
 			}
 			public void mouseDown(MouseEvent e) {
 				fPressed= true;
@@ -229,6 +212,7 @@ class FailureRunView implements ITestRunView {
 				activate();
 			}
 		});
+		
 		fTable.addMouseMoveListener(new MouseMoveListener() {
 			public void mouseMove(MouseEvent e) {
 				TableItem tableItem= ((Table) e.getSource()).getItem(new Point(e.x, e.y));
@@ -251,5 +235,32 @@ class FailureRunView implements ITestRunView {
 				}
 			}
 		});
+	}
+	
+	public void handleDoubleClick(MouseEvent e) {
+		new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
+	}
+	
+	public void newTreeEntry(String treeEntry) {
+	}
+	
+	/*
+	 * @see ITestRunView#testStatusChanged(TestRunInfo)
+	 */
+	public void testStatusChanged(TestRunInfo info) {
+		TableItem item= findItemByTest(info.fTestName);
+		if (item != null) {
+			if (info.fStatus == ITestRunListener.STATUS_OK) {
+				item.dispose();
+				return;
+			}
+			updateTableItem(info, item);
+		} 
+		if (item == null && info.fStatus != ITestRunListener.STATUS_OK) {
+			item= new TableItem(fTable, SWT.NONE);
+			updateTableItem(info, item);
+		}
+		if (item != null)
+			fTable.showItem(item);
 	}
 }

@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -21,15 +24,22 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
-public final class JUnitPlugin extends AbstractUIPlugin {	
+public class JUnitPlugin extends AbstractUIPlugin {	
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
 	private static JUnitPlugin fgPlugin= null;
-
+	private static URL fgIconBaseURL;
+	
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
 		fgPlugin= this;
+		String pathSuffix= "icons/"; //$NON-NLS-1$
+		try {
+			fgIconBaseURL= new URL(getDescriptor().getInstallURL(), pathSuffix);
+		} catch (MalformedURLException e) {
+			// do nothing
+		}
 	}
 		
 	public static JUnitPlugin getDefault() {
@@ -67,4 +77,11 @@ public final class JUnitPlugin extends AbstractUIPlugin {
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
+	
+	public static URL makeIconFileURL(String name) throws MalformedURLException {
+		if (JUnitPlugin.fgIconBaseURL == null)
+			throw new MalformedURLException();
+		return new URL(JUnitPlugin.fgIconBaseURL, name);
+	}
+
 }

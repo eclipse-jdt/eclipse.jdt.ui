@@ -7,9 +7,12 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.debug.core.ILauncher;
 import org.eclipse.debug.ui.ILaunchWizard;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -53,7 +56,9 @@ public class JUnitLaunchWizard extends Wizard implements ILaunchWizard {
 		} catch (InterruptedException e) {
 			// do nothing user canceled 
 		} catch (InvocationTargetException e) {
-			JUnitBaseLauncherDelegate.handleException("JUnit wizard error", e);
+			Throwable te= e.getTargetException();
+			JUnitPlugin.log(te);
+			MessageDialog.openError(getShell(), "Could not launch JUnit", te.getMessage());			
 		}
 		return fSuccess;
 	}

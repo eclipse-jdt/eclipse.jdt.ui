@@ -9,51 +9,114 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
 
-import junit.extensions.TestSetup;
+import java.util.List;
+import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
-import junit.framework.TestCase;
+import junit.framework.TestFailure;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.eclipse.jdt.internal.junit.ui.*;
-import org.eclipse.jdt.internal.junit.runner.*;
 
 /**
- * RemoteTestRunner that reports results via a socket connection.
+ * A TestRunner that reports results via a socket connection.
+ * See MessageIds for more information about the protocl.
  */
 public class RemoteTestRunner implements TestListener {
-	private String[] fTestClassNames= null;
-	private TestResult fTestResult;
-
-	private Socket fClientSocket;
-	private PrintWriter fWriter;
-	private BufferedReader fReader;
+	/**
+	 * Holder for information for a rerun request
+	 */
+	private static class RerunRequest {
+		String fClassName;
+		String fTestName;
+		
+		public RerunRequest(String className, String testName) {
+			fClassName= className;
+			fTestName= testName;
+		}
+	}
 	
 	private static final String SUITE_METHODNAME= "suite";	
-	
+	/**
+	 * The name of the test classes to be executed
+	 */
+	private String[] fTestClassNames;
+	/**
+	 * The current test result
+	 */
+	private TestResult fTestResult;
+
+	/**
+	 * The client socket.
+	 */
+	private Socket fClientSocket;
+	/**
+	 * Print writer for sending messages
+	 */
+	private PrintWriter fWriter;
+	/**
+	 * Reader for incoming messages
+	 */
+	private BufferedReader fReader;
+	/**
+	 * Host to connect to, default is the localhost
+	 */
 	private String fHost= "127.0.0.1";
+	/**
+	 * Port to connect to.
+	 */
 	private int fPort= -1;
-	private long fStartTime;
+	/**
+	 * Is the debug mode enabled?
+	 */
 	private boolean fDebugMode= false;	
-	
-	private class StopThread extends Thread {
-		/**
-		 * listening for a MessageIds.TEST_STOP command
-		 */
+	/**
+	 * Keep the test run server alive after a test run has finished.
+	 * This allows to rerun tests.
+	 */
+	private boolean fKeepAlive= false;
+	/**
+	 * Has the server been stopped
+	 */
+	private boolean fStopped= false;
+	/**
+	 * Queue of rerun requests.
+	 */
+	private List fRerunRequests= new ArrayList(10);
+	/**
+	 * Reader thread that processes messages from the client.
+	 */
+	private class ReaderThread extends Thread {
+
 		public void run(){
 			try { 
-				String line= null; 
-				if ((line= fReader.readLine()) != null) {
-					if (line.startsWith(MessageIds.TEST_STOP)){
-						RemoteTestRunner.this.stop();
+				String message= null; 
+				while (true) { 
+					if ((message= fReader.readLine()) != null) {
+						
+						if (message.startsWith(MessageIds.TEST_STOP)){
+							fStopped= true;
+							RemoteTestRunner.this.stop();
+							synchronized(RemoteTestRunner.this) {
+								RemoteTestRunner.this.notifyAll();
+							}
+							break;
+						}
+						
+						else if (message.startsWith(MessageIds.TEST_RERUN)) {
+							String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
+							int c= arg.indexOf(" ");
+							synchronized(RemoteTestRunner.this) {
+								fRerunRequests.add(new RerunRequest(arg.substring(0, c), arg.substring(c+1)));
+								RemoteTestRunner.this.notifyAll();
+							}
+						}
 					}
 				} 
 			} catch (Exception e) {
@@ -62,26 +125,48 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}	
 	
-	public static void main(String[] args) throws InvocationTargetException{
+	/** 
+	 * The main entry point.
+	 * Parameters<pre>
+	 * -classnames: the name of the test suite class
+     * -host: the host to connect to - default local host
+     * -port: the port to connect to, mandatory argument
+     * -keepalive: keep the process alive after a test run
+     * </pre>
+     */
+	public static void main(String[] args) {
+		// hack to pass the AllTests of JUnit
+		// force static initialization of BaseTestRunner 
+		// by creating a junit.textui.TestRunner and free
+		// it immediately.
+		junit.runner.BaseTestRunner runner= new junit.textui.TestRunner();
+		runner= null;
+		
 		RemoteTestRunner testRunServer= new RemoteTestRunner();
 		testRunServer.init(args);
 		testRunServer.run();
 	}
 	
-	protected void init(String[] args) throws InvocationTargetException{
-		defaultInit(args);		// overriding classes should call this
+	/**
+	 * Parse command line arguments. Hook for subclasses to process
+	 * additional arguments.
+	 */
+	protected void init(String[] args) {
+		defaultInit(args);		
 	}	
 	
-	protected ClassLoader getClassLoader() throws InvocationTargetException {
+	/**
+	 * The class loader to be used for loading tests.
+	 * Subclasses may override to use another class loader.
+	 */
+	protected ClassLoader getClassLoader() {
 		return getClass().getClassLoader();
 	}
 	
 	/**
-	 * parses the arguments passed by run(String[] args) 
-	 * testClassNames, host, port, listeners 
-	 * and debugMode are set
+	 * Process the default arguments.
 	 */
-	protected final void defaultInit(String[] args) throws InvocationTargetException {
+	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
 			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){
 				ArrayList list= new ArrayList();
@@ -92,174 +177,218 @@ public class RemoteTestRunner implements TestListener {
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
 			}		
-			if(args[i].toLowerCase().equals("-port")){
+			else if(args[i].toLowerCase().equals("-port")) {
 				fPort= Integer.parseInt(args[i+1]);
 			}
-			if(args[i].toLowerCase().equals("-host")){
+			else if(args[i].toLowerCase().equals("-host")) {
 				fHost= args[i+1];
 			}
-			if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){
+			else if(args[i].toLowerCase().equals("-keepalive")) {
+				fKeepAlive= true;
+			}
+			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){
 				fDebugMode= true;
 			}
 		}
 		if(fTestClassNames == null || fTestClassNames.length == 0)
-			throw new InvocationTargetException(new Exception("Error: parameter '-classNames' or '-className' not specified"));
+			throw new IllegalArgumentException("Error: parameter '-classNames' or '-className' not specified");
+
+		if (fPort == -1)
+			throw new IllegalArgumentException("Error: parameter '-port' not specified");
+		if (fDebugMode)
+			System.out.println("keepalive "+fKeepAlive);
 	}
 	
-	protected final void run() throws InvocationTargetException {
-		if(fPort != -1)
-			connect();
+	/**
+	 * Connects to the remote ports and runs the tests.
+	 */
+	protected void run() {
+		if (!connect()) {
+			return;
+		} 
 			
 		fTestResult= new TestResult();
 		fTestResult.addListener(this);
-		
 		runTests(fTestClassNames);
-				
 		fTestResult.removeListener(this);
+		
 		if (fTestResult != null) {
 			fTestResult.stop();
 			fTestResult= null;
 		}
+		if (fKeepAlive)
+			waitForReruns();
+			
+		shutDown();
+	}
+
+	/**
+	 * Waits for rerun requests until an explicit stop request
+	 */
+	private synchronized void waitForReruns() {
+		while (!fStopped) {
+			try {
+				wait();
+				if (!fStopped && fRerunRequests.size() > 0) {
+					RerunRequest r= (RerunRequest)fRerunRequests.remove(0);
+					rerunTest(r.fClassName, r.fTestName);
+				}
+			} catch (InterruptedException e) {
+			}
+		}
 	}
 	
 	/**
-	 * Returns the Test corresponding to to the given className
+	 * Returns the Test corresponding to the given suite. 
 	 */
-	private final Test getTest(String className) throws InvocationTargetException{
-		if (className == null) {
+	private Test getTest(String suiteClassName) {
+		Class testClass= null;
+		try {
+			testClass= loadSuiteClass(suiteClassName);
+		} catch (ClassNotFoundException e) {
+			String clazz= e.getMessage();
+			if (clazz == null) 
+				clazz= suiteClassName;
+			runFailed("Class not found \""+clazz+"\"");
+			return null;
+		} catch(Exception e) {
+			runFailed("Error: "+e.toString());
 			return null;
 		}
+		Method suiteMethod= null;
 		try {
-			Class clazz= getClassLoader().loadClass(className);
-			return getTest(clazz);
-		} catch (ClassNotFoundException e) {
-			if (fDebugMode)
-				e.printStackTrace();
-			throw new InvocationTargetException(e);
+			suiteMethod= testClass.getMethod(SUITE_METHODNAME, new Class[0]);
+	 	} catch(Exception e) {
+	 		// try to extract a test suite automatically
+			return new TestSuite(testClass);
 		}
+		Test test= null;
+		try {
+			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
+		} 
+		catch (InvocationTargetException e) {
+			runFailed("Failed to invoke suite():" + e.getTargetException().toString());
+			return null;
+		}
+		catch (IllegalAccessException e) {
+			runFailed("Failed to invoke suite():" + e.toString());
+			return null;
+		}
+		return test;
 	}
 
-
-	private final Test getTest(Class clazz) throws InvocationTargetException {
-		try { 
-			Object obj= clazz.newInstance();
-			if (obj instanceof TestSuite)
-				return (TestSuite) obj;
-		} catch (Exception e) {
-			if (fDebugMode) {
-				System.out.println();
-				System.out.println("ClassLoader info:");
-				System.out.println("could not instantiate " + clazz.getName() + " with default constructor.");
-				e.printStackTrace();
-			}
-		}
-		try { 
-			Method suiteMethod= clazz.getMethod(SUITE_METHODNAME, new Class[0]);
-			Object obj= suiteMethod.invoke(null, new Class[0]);
-			return (Test) obj;
-		} catch (Exception e) {
-			if (fDebugMode) {
-				System.out.println();
-				System.out.println("ClassLoader info:");
-				System.out.println(clazz.getName() + " has no static method suite() that returns a Test.");
-				e.printStackTrace();
-			}
-		}
-		try {
-			return new TestSuite(clazz);
-		} catch (Exception e) {
-			// print always, this should not happen.
-			System.out.println();
-			System.out.println("ClassLoader error:");
-			System.out.println("could not load " + clazz.getName());
-			e.printStackTrace();			
-		}
-		return null;
+	protected void runFailed(String message) {
+		System.err.println(message);
+	}
+	
+	/**
+	 * Loads the test suite class.
+	 */
+	private Class loadSuiteClass(String className) throws ClassNotFoundException {
+		if (className == null) 
+			return null;
+		return getClassLoader().loadClass(className);
 	}
 			
 	/**
-	 * @param testClassNames String array of full qualified class names of test classes
+	 * Runs a set of tests.
 	 */
-	private final void runTests(String[] testClassNames) throws InvocationTargetException {
+	private void runTests(String[] testClassNames) {
 		// instantiate all tests
 		Test[] suites= new Test[testClassNames.length];
-		for (int i= 0; i < suites.length; i++)
+		for (int i= 0; i < suites.length; i++) {
 			suites[i]= getTest(testClassNames[i]);
+		}
 		
 		// count all testMethods and inform ITestRunListeners		
 		int count= countTests(suites);
 		notifyTestRunStarted(count);
-
-
-		notifyTestTreeStart();
+		
+		long startTime= System.currentTimeMillis();
+		if (fDebugMode)
+			System.out.println("start send tree");
 		sendTree(suites[0]);
-	
-		long fgStartTime= System.currentTimeMillis();
+		if (fDebugMode)
+			System.out.println("done send tree"+(System.currentTimeMillis()-startTime));
+
+		long testStartTime= System.currentTimeMillis();
 		for (int i= 0; i < suites.length; i++) {
-			if (suites[i] instanceof Test) {
-				if (suites[i] instanceof TestCase) 
-					suites[i]= new TestSuite(suites[i].getClass().getName());
-				suites[i].run(fTestResult);
-			}
-			else
-				System.err.println("Could not run " + suites[i] + " - no instanceof Test");
+			suites[i].run(fTestResult);
 		}
 		// inform ITestRunListeners of test end
 		if (fTestResult == null || fTestResult.shouldStop())
-			notifyTestRunStopped(System.currentTimeMillis() - fgStartTime);
+			notifyTestRunStopped(System.currentTimeMillis() - testStartTime);
 		else
-			notifyTestRunEnded(System.currentTimeMillis() - fgStartTime);
+			notifyTestRunEnded(System.currentTimeMillis() - testStartTime);
 	}
 	
-	private final int countTests(Test[] tests) {
+	private int countTests(Test[] tests) {
 		int count= 0;
 		for (int i= 0; i < tests.length; i++) {
 			count= count + tests[i].countTestCases();
 		}
 		return count;
 	}
-
-
+	
 	/**
+	 * Reruns a test as defined by the fully qualified class name and
+	 * the name of the test.
+	 */
+	public void rerunTest(String className, String testName) {
+		Test reloadedTest= null;
+		try {
+			Class reloadedTestClass= getClassLoader().loadClass(className);
+			Class[] classArgs= { String.class };
+			Constructor constructor= reloadedTestClass.getConstructor(classArgs);
+			Object[] args= new Object[]{testName};
+			reloadedTest=(Test)constructor.newInstance(args);
+		} catch(Exception e) {
+			System.err.println("Could not load " + reloadedTest);
+			return;
+		}
+		TestResult result= new TestResult();
+		reloadedTest.run(result);
+		notifyTestReran(result, className, testName);
+	}
+
+
+	/*
 	 * @see TestListener#addError(Test, Throwable)
 	 */
 	public final void addError(Test test, Throwable throwable) {
-		notifyTestFailed(ITestRunListener.STATUS_ERROR, test.toString(), getTrace(throwable));
+		notifyTestFailed(MessageIds.TEST_ERROR, test.toString(), getTrace(throwable));
 	}
 
-
-	/**
+	/*
 	 * @see TestListener#addFailure(Test, AssertionFailedError)
 	 */
 	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
-		notifyTestFailed(ITestRunListener.STATUS_FAILURE, test.toString(), getTrace(assertionFailedError));
+		notifyTestFailed(MessageIds.TEST_FAILED, test.toString(), getTrace(assertionFailedError));
 	}
 
-
-	/**
+	/*
 	 * @see TestListener#endTest(Test)
 	 */
-	public final void endTest(Test test) {
+	public void endTest(Test test) {
 		notifyTestEnded(test.toString());
 	}
 
-	/**
+	/*
 	 * @see TestListener#startTest(Test)
 	 */
-	public final void startTest(Test test) {
+	public void startTest(Test test) {
 		notifyTestStarted(test.toString());
 	}
 	
-	private final void sendTree(Test test){
-		if(fPort == -1) return;
-		if(test instanceof TestSetup){
-			TestSetup testSetup= (TestSetup) test;
-			sendTree(testSetup.getTest());		
+	private void sendTree(Test test){
+		if(test instanceof TestDecorator){
+			TestDecorator decorator= (TestDecorator) test;
+			sendTree(decorator.getTest());		
 		}
 		else if(test instanceof TestSuite){
 			TestSuite suite= (TestSuite) test;
 			notifyTestTreeEntry(suite.toString().trim() + ',' + true + ',' + suite.testCount());
-			for(int i=0; i< suite.testCount(); i++){	
+			for(int i=0; i < suite.testCount(); i++){	
 				sendTree(suite.testAt(i));		
 			}				
 		}
@@ -269,9 +398,9 @@ public class RemoteTestRunner implements TestListener {
 	}
 	
 	/**
-	 * Returns a filtered stack trace
+	 * Returns the stack trace for the given throwable.
 	 */
-	private static String getTrace(Throwable t) { 
+	private String getTrace(Throwable t) { 
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter writer= new PrintWriter(stringWriter);
 		t.printStackTrace(writer);
@@ -279,7 +408,9 @@ public class RemoteTestRunner implements TestListener {
 		return buffer.toString();
 	}	
 
-
+	/**
+	 * Stop the current test run.
+	 */
 	protected void stop() {
 		if (fTestResult != null) {
 			fTestResult.stop();
@@ -287,26 +418,28 @@ public class RemoteTestRunner implements TestListener {
 	}
 	
 	/**
-	 * connect to fgHost on fgPort
+	 * Connect to the remote test listener.
 	 */
-	protected boolean connect(){
+	private boolean connect() {
+		if (fDebugMode)
+			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort);
 		try{
 			fClientSocket= new Socket(fHost, fPort);
-			fWriter= new PrintWriter(fClientSocket.getOutputStream(), true);
+			fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
 			fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
-			new StopThread().start();
+			new ReaderThread().start();
 			return true;
 		} catch(IOException e){
-			// print always
-			System.err.println("could not connect to: " + fHost + ":" + fPort);			
+			System.err.println("Could not connect to: " + fHost + ":" + fPort);			
 			e.printStackTrace();
 		}
 		return false;
 	}
 
-
-	protected void shutDown() {
-		
+	/**
+	 * Shutsdown the connection to the remote test listener.
+	 */
+	private void shutDown() {
 		if (fWriter != null) {
 			fWriter.close();
 			fWriter= null;
@@ -334,70 +467,75 @@ public class RemoteTestRunner implements TestListener {
 	}
 
 
-	protected void sendMessage(String msg) {
-		try {
-			if(msg == null && fWriter == null) return;
-			fWriter.println(msg);
-		} catch (NullPointerException e) {
-			if (fDebugMode)
-				e.printStackTrace();
+	private void sendMessage(String msg) {
+		if(fWriter == null) 
+			return;
+		fWriter.println(msg);
+	}
+
+
+	private void notifyTestRunStarted(int testCount) {
+		sendMessage(MessageIds.TEST_RUN_START + testCount);
+	}
+
+
+	private void notifyTestRunEnded(long elapsedTime) {
+		sendMessage(MessageIds.TEST_RUN_END + elapsedTime);
+		fWriter.flush();
+		//shutDown();
+	}
+
+
+	private void notifyTestRunStopped(long elapsedTime) {
+		sendMessage(MessageIds.TEST_STOPPED + elapsedTime );
+		fWriter.flush();
+		//shutDown();
+	}
+
+	private void notifyTestStarted(String testName) {
+		sendMessage(MessageIds.TEST_START + testName);
+	}
+
+	private void notifyTestEnded(String testName) {
+		sendMessage(MessageIds.TEST_END + testName);
+	}
+
+	private void notifyTestFailed(String status, String testName, String trace) {
+		sendMessage(status + testName);
+		sendMessage(MessageIds.TRACE_START);
+		sendMessage(trace);
+		sendMessage(MessageIds.TRACE_END);
+		fWriter.flush();
+	}
+
+	private void notifyTestTreeEntry(String treeEntry) {
+		sendMessage(MessageIds.TEST_TREE + treeEntry);
+	}
+	
+	private void notifyTestReran(TestResult result, String testClass, String testName) {
+		TestFailure failure= null;
+		if (result.errorCount() > 0) {
+			failure= (TestFailure)result.errors().nextElement();
 		}
-	}
-
-
-	public void notifyTestRunStarted(int testCount) {
-		if (fPort != -1) {	
-			sendMessage(MessageIds.TEST_COUNT + testCount);
-			fStartTime= System.currentTimeMillis();
+		if (result.failureCount() > 0) {
+			failure= (TestFailure)result.failures().nextElement();
 		}
-	}
-
-
-	public void notifyTestRunEnded(long elapsedTime) {
-		if (fPort != -1) {	
-			sendMessage(MessageIds.TEST_ELAPSED_TIME + elapsedTime);
-			shutDown();
-		}
-	}
-
-
-	public void notifyTestRunStopped(long elapsedTime) {
-		if (fPort != -1) {
-			sendMessage(MessageIds.TEST_STOPPED + elapsedTime);
-			shutDown();
-		}
-	}
-
-	public void notifyTestStarted(String testName) {
-		if (fPort != -1)
-			sendMessage(MessageIds.TEST_START + testName);
-	}
-
-	public void notifyTestEnded(String testName) {
-		if (fPort != -1)
-			sendMessage(MessageIds.TEST_END + testName);
-	}
-
-	public void notifyTestFailed(int status, String testName, String trace) {
-		if (fPort != -1) {		
-			if(status == ITestRunListener.STATUS_FAILURE)
-				sendMessage(MessageIds.TEST_FAILED + testName);
-			else
-				sendMessage(MessageIds.TEST_ERROR + testName);
-
-			sendMessage(MessageIds.TRACE_START);
+		if (failure != null) {
+			Throwable t= failure.thrownException();
+			String trace= getTrace(t);
+			sendMessage(MessageIds.RTRACE_START);
 			sendMessage(trace);
-			sendMessage(MessageIds.TRACE_END);
+			sendMessage(MessageIds.RTRACE_END);
+			fWriter.flush();
 		}
-	}
-
-	public void notifyTestTreeStart() {
-		if (fPort != -1)
-			sendMessage(MessageIds.TEST_TREE_START); 
-	}
-
-	public void notifyTestTreeEntry(String treeEntry) {
-		if (fPort != -1)
-			sendMessage(MessageIds.TEST_TREE + treeEntry);
+		String status= "OK";
+		if (result.errorCount() > 0)
+			status= "ERROR";
+		else if (result.failureCount() > 0)
+			status= "FAILURE";
+		if (fPort != -1) {
+			sendMessage(MessageIds.TEST_RERAN + testClass+" "+testName+" "+status);
+			fWriter.flush();
+		}
 	}
 }	

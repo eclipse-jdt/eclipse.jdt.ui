@@ -4,9 +4,6 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -16,10 +13,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -40,6 +38,7 @@ public class JUnitPreferencePage extends PreferencePage
 	public static String STACK_FILTER_ENTRIES_COUNT= "NOF_STACK_FILTER_ENTRIES";
 	public static String STACK_FILTER_ENTRY_= "STACK_FILTER_ENTRY_";
 	public static String DO_FILTER_STACK= "DO_FILTER_STACK";
+	public static String DO_KEEP_JUNITVM_ALIVE= "KEEP_ALIVE";
 
 	private static String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner",
@@ -74,8 +73,19 @@ public class JUnitPreferencePage extends PreferencePage
 		return store.getBoolean(DO_FILTER_STACK);
 	}
 	
+	public static boolean getKeepJUnitAlive() {
+		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(DO_KEEP_JUNITVM_ALIVE);
+	}
+	
+	public static void setFilterStack(boolean filter) {
+		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
+		store.setValue(DO_FILTER_STACK, filter);
+	}
+	
 	public static void initializeDefaults(IPreferenceStore store) {
 		store.setDefault(JUnitPreferencePage.DO_FILTER_STACK, true); 
+		store.setDefault(JUnitPreferencePage.DO_KEEP_JUNITVM_ALIVE, true); 
 		int count= store.getInt(STACK_FILTER_ENTRIES_COUNT);
 		if (count == 0) {
 			store.setValue(STACK_FILTER_ENTRIES_COUNT, fgDefaultFilterPatterns.length);
@@ -133,10 +143,10 @@ public class JUnitPreferencePage extends PreferencePage
 		fFilterCheckBox= new Button(checkPanel, SWT.CHECK);
 		GridData gridData= new GridData();
 		fFilterCheckBox.setLayoutData(gridData);		
-		fFilterCheckBox.setSelection(store.getBoolean(DO_FILTER_STACK));
+		fFilterCheckBox.setSelection(getKeepJUnitAlive());
 
-		Label label= new Label(checkPanel, SWT.NONE);
-		label.setText("&Filter stack trace entries of failed tests");
+		Label label= new Label(checkPanel, SWT.WRAP);
+		label.setText("&Keep JUnit running after a test run when debugging.\nThis allows to fix a test and to run it again (requires hot code replace support)");
 		gridData= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gridData);
 	}

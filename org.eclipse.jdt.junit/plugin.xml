@@ -1,54 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- File written by PDE 1.0 -->
 <plugin
-   id="org.eclipse.jdt.junit"
-   name="org.eclipse.jdt.junit"
-   version="1.0.0"
-   class="org.eclipse.jdt.internal.junit.ui.JUnitPlugin">
-   <requires>
-	   <import plugin="org.eclipse.ui"/>
-	   <import plugin="org.eclipse.core.resources"/>
-	   <import plugin="org.eclipse.core.boot"/>
-	   <import plugin="org.eclipse.debug.core"/>
-	   <import plugin="org.eclipse.debug.ui"/>
-	   <import plugin="org.eclipse.jdt.core"/>
-	   <import plugin="org.eclipse.jdt.ui"/>
-	   <import plugin="org.eclipse.jdt.debug"/>
-	   <import plugin="org.eclipse.swt"/>
-	   <import plugin="org.eclipse.core.runtime"/>
-	   <import plugin="org.eclipse.jdt.launching"/>
-	   <import plugin="org.junit"/>     
+	id="org.eclipse.jdt.junit"
+	name="org.eclipse.jdt.junit"
+	version="1.0.1"
+	class="org.eclipse.jdt.internal.junit.ui.JUnitPlugin"
+	provider-name="Object Technology International, Inc.">
+
+	<requires>
+		<import plugin="org.eclipse.ui"/>
+		<import plugin="org.eclipse.core.resources"/>
+		<import plugin="org.eclipse.core.boot"/>
+		<import plugin="org.eclipse.debug.core"/>
+		<import plugin="org.eclipse.debug.ui"/>
+		<import plugin="org.eclipse.jdt.core"/>
+		<import plugin="org.eclipse.jdt.ui"/>
+		<import plugin="org.eclipse.jdt.debug"/>
+		<import plugin="org.eclipse.swt"/>
+		<import plugin="org.eclipse.core.runtime"/>
+		<import plugin="org.eclipse.jdt.launching"/>
+		<import plugin="org.junit"/>     
 	</requires>
 	
 	<runtime>
-	   <library name="junitsupport.jar">
-	         <export name="*"/>
-	    </library>
+		<library name="junitsupport.jar">
+			<export name="*"/>
+		</library>
 	</runtime>
 
 	<extension
-	   point="org.eclipse.ui.views">
-	   <view
-	         name="%JUnit.label"
-	         icon="icons/smalllogo.gif"
-	         category="org.eclipse.jdt.ui.java"
-	         class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
-	         id="org.eclipse.jdt.junit.viewpart">
-	   </view>
+		point="org.eclipse.ui.views">
+		<view
+			name="%JUnitView.label"
+			icon="icons/smalllogo.gif"
+			category="org.eclipse.jdt.ui.java"
+			class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
+			id="org.eclipse.jdt.junit.viewpart">
+		</view>
 	</extension>
 
 	<extension 
-      point = "org.eclipse.debug.core.launchers"> 
-         <launcher 
-             id = "org.eclipse.jdt.junit.launcher"
-             class = "org.eclipse.jdt.internal.junit.ui.JUnitLauncher" 
-             modes = "run, debug"
-  	     	 label = "%LocalLauncher.label"
-	     	 wizard = "org.eclipse.jdt.internal.junit.ui.JUnitLaunchWizard"     
-	     	 public = "true"
-	     	 description = "%LocalLauncher.description"/>
-   	</extension> 
+		point = "org.eclipse.debug.core.launchers"> 
+		<launcher 
+			id = "org.eclipse.jdt.junit.launcher"
+			class = "org.eclipse.jdt.internal.junit.ui.JUnitLauncher" 
+			modes = "run, debug"
+			label = "%JUnitLauncher.label"
+			wizard = "org.eclipse.jdt.internal.junit.ui.JUnitLaunchWizard"     
+	  		icon = "icons/smalllogo.gif"
+			public = "true"
+			description = "%JUnitLauncher.description"/>
+	</extension> 
    	
 	<extension
 		point="org.eclipse.ui.preferencePages">
@@ -56,5 +58,5 @@
 			id="org.eclipse.jdt.junit.preferences"
 			class="org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage">
 		</page>
-   	</extension>
+	</extension>
 </plugin>

@@ -8,18 +8,13 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILauncher;
-import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.ILauncherDelegate;
-import org.eclipse.debug.core.model.IStreamMonitor;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -52,14 +47,19 @@ import org.eclipse.jdt.launching.VMRunnerResult;
  * Subclasses have to override: VMRunnerConfiguration configureVM(IType[] testTypes, int port)
  */
 public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
-	private String fRunMode;
-	private ILauncher fLauncher;
-	
 	/**
-	 * Configure a VM for the given types.
+	 * The run mode used to invoke the launcher.
 	 */
- 	protected abstract VMRunnerConfiguration configureVM(IType[] testTypes, int port) throws CoreException;
-
+	private String fRunMode;
+	/**
+	 * The launcher
+	 */
+	private ILauncher fLauncher;
+	/**
+	 * Configure a VM for the given test types.
+	 */
+ 	protected abstract VMRunnerConfiguration configureVM(IType[] testTypes, int port, String mode) throws CoreException;
+	
 	/*
 	 * @see ILauncherDelegate#launch(Object[], String, ILauncher)
 	 */
@@ -71,13 +71,17 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 			return useWizard(elements, selection, mode, launcher);
 
 		if (elements.length == 0) {
-			showNoSuiteDialog();
+			MessageDialog.openError(JUnitPlugin.getActiveShell(), 
+				"JUnit Launcher", "Could not find a JUnit test class"
+			);
 			return true;
 		}
 		
 		Object runnable= elements[0];
 		if (!(runnable instanceof IType)) {
-			showNoSuiteDialog();
+			MessageDialog.openError(JUnitPlugin.getActiveShell(), 
+				"JUnit Launcher", "Could not find a launchable test type"
+			);
 			return true;
 		}
 		IType[] testTypes= new IType[] {(IType)runnable};
@@ -90,7 +94,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		try {
 			vmInstall= JavaRuntime.getVMInstall(testType.getJavaProject());
 		} catch (CoreException e) {
-			handleException(e, "JUnit Launch");
+			ErrorDialog.openError(JUnitPlugin.getActiveShell(), "JUnit Launch", e.getMessage(), e.getStatus());
 			return true;
 		}
 		if (vmInstall == null)
@@ -105,16 +109,15 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		final VMRunnerResult returnResult[]= new VMRunnerResult[1];
 		VMRunnerResult result;
 		
-		final int port= SocketUtil.findUnusedLocalPort(4000, 5000);
+		final int port= SocketUtil.findUnusedLocalPort(4000, 5000);  
 
 		IWorkbenchWindow window= JUnitPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
-
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				pm.beginTask("Starting VM ...", IProgressMonitor.UNKNOWN);
 				try {
-					VMRunnerConfiguration vmConfig= configureVM(testTypes, port);
+					VMRunnerConfiguration vmConfig= configureVM(testTypes, port, runMode);
 					returnResult[0]= vmRunner.run(vmConfig);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -126,11 +129,14 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		} catch (InterruptedException e) {
 			// do nothing - user canceled action
 		} catch (InvocationTargetException e) {
-			handleException("Launch of VM failed", e);
+			Throwable te= e.getTargetException();
+			JUnitPlugin.log(te);
+			MessageDialog.openError(JUnitPlugin.getActiveShell(), "Could not launch VM", te.getMessage());			
 			return false;
 		}
 		result= returnResult[0];
 		if (result != null && launcher != null) {
+			// TO DO should use JavaUISourceLocator, but this would break 1.0 compatibility
 			Launch newLaunch= new Launch(launcher, runMode, testType.getCompilationUnit(), new ProjectSourceLocator(testType.getJavaProject()), result.getProcesses(), result.getDebugTarget());
 			registerLaunch(newLaunch);
 		}
@@ -139,21 +145,15 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		
 		TestRunnerViewPart testRunner;
 		try {
-			testRunner= (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
 		} catch (PartInitException e) {
-			handleException("Could not show JUnit Result View", e);
+			ErrorDialog.openError(JUnitPlugin.getActiveShell(), 
+				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+			);
 			return false;
 		}
-		// TODO revisit this tangled interaction
 		testRunner.startTestRunListening(testType, port, this);	
 		return true;
-	}
-
-	/*
-	 * called by TestRunnerViewPart
-	 */
-	protected boolean redoLaunch(final IType[] testTypes) {
-		return doLaunch(testTypes, fRunMode, fLauncher);
 	}
 
 	/*
@@ -169,10 +169,14 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	 * @see ILauncherDelegate#getLaunchObject(String)
 	 */
 	public Object getLaunchObject(String memento) {
-		IJavaElement e = JavaCore.create(memento);
+		IJavaElement e= JavaCore.create(memento);
 		if (e.exists()) 
 			return e;
 		return null;
+	}
+	
+	public String getRunMode() {
+		return fRunMode;
 	}
 	
 	/**
@@ -202,12 +206,11 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		Shell shell= JUnitPlugin.getActiveShell();
 		if (shell != null) {
 			WizardDialog dialog= new WizardDialog(shell, wizard);
-			int status = dialog.open();
+			int status= dialog.open();
 			return (status == dialog.OK || status == dialog.CANCEL);
 		}
 		return false;
 	}
-
 
 	/**
 	 * Registers the Process in the Debug View
@@ -218,33 +221,5 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 				DebugPlugin.getDefault().getLaunchManager().registerLaunch(launch);
 			}
 		});
-	}
-
-	private void handleException(CoreException e, String title) {
-		IStatus status= e.getStatus();
-		Shell shell= JUnitPlugin.getActiveShell();
-		if (status != null) 
-			ErrorDialog.openError(shell, title, e.getMessage(), status);
-	}
-	
-	/**
-	 * Handles an exception by logging it to the error log and
-	 * by showing a dialog to the user.
-	 */
-	public static void handleException(String title, Exception e) {
-		Throwable ex= e;
-		if (e instanceof InvocationTargetException) 
-			ex= ((InvocationTargetException) e).getTargetException();
-		Status status= new Status(IStatus.ERROR, JUnitPlugin.getPluginId(), IStatus.OK, title, ex);
-		JUnitPlugin.log(status);
-		Shell shell= JUnitPlugin.getActiveShell();
-		if (shell != null)
-			MessageDialog.openError(shell, title, ex.getMessage());			
-	}
-	
-	private void showNoSuiteDialog() {
-		String title= "JUnit Launcher"; 
-		Shell shell= JUnitPlugin.getActiveShell();
-		MessageDialog.openError(shell, title, "Could not find a JUnit test class");
 	}
 }
