@@ -43,6 +43,8 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
+		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
+		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 		
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
 		
@@ -54,8 +56,8 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.SourceView"); //$NON-NLS-1$
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.JavadocView"); //$NON-NLS-1$
+		layout.addShowViewShortcut(JavaUI.ID_SOURCE_VIEW);
+		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);

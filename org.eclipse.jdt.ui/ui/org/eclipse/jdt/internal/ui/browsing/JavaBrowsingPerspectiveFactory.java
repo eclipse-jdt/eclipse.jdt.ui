@@ -60,8 +60,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_TYPES_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_MEMBERS_VIEW);
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.SourceView"); //$NON-NLS-1$
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.JavadocView"); //$NON-NLS-1$
+		layout.addShowViewShortcut(JavaUI.ID_SOURCE_VIEW);
+		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search		
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
@@ -109,6 +109,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
+		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
+		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 	}
 
 	private void createHorizontalLayout(IPageLayout layout) {
@@ -140,6 +142,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
+		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
+		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 	}
 	
 	private boolean shouldShowProjectsView() {
