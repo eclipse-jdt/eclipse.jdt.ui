@@ -204,4 +204,8 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		helper1(5, 15, 5, 17, true, true, "Inner", Modifier.PRIVATE);
 	}
 
+	public void test19() throws Exception{
+		helper1(5, 12, 6, 21, true, true, "Inner", Modifier.PRIVATE);
+	}
+
 }
