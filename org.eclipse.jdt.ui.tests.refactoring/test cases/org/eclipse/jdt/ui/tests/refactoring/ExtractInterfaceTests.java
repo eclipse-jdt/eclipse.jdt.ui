@@ -196,6 +196,50 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[][] signatures= new String[][]{new String[0], new String[0]};
 		validatePassingTest("A", "I", names, signatures, true);
 	}
+	
+	public void test21() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test22() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test23() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test24() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test25() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test26() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test27() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test28() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test29() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
 
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
