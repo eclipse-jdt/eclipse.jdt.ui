@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class ChangeCorrectionProposal implements IJavaCompletionProposal {
@@ -63,6 +64,9 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		try {
 			change= getChange();
 			if (change != null) {
+				// close any open linked mode before applying our changes
+				LinkedEnvironment.closeEnvironment(document);
+				
 				ChangeContext context= new ChangeContext(new CorrectionChangeExceptionHandler());
 				change.aboutToPerform(context, new NullProgressMonitor());
 				change.perform(context, new NullProgressMonitor());
