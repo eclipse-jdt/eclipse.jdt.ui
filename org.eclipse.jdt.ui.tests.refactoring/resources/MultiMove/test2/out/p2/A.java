@@ -1,6 +1,6 @@
 package p2;
-import p2.C;
 import p1.*;
+import p2.C;
 public class A{
 	C c;
 	B b;
