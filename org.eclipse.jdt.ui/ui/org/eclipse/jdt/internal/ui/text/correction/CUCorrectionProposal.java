@@ -235,19 +235,20 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 						}
 					}
 				}
-				/*if (selection != null) {
+				int cursorPosition= viewer.getSelectedRange().x;
+				if (cursorPosition != 0) {
+					editor.setFinalCaretOffset(cursorPosition);
+				} else if (selection != null) {
 					TextRange range= change.getNewTextRange(selection.getTextEdits());
 					if (range != null && range.isValid()) {
-						
+						editor.setFinalCaretOffset(range.getOffset());
 					}					
-				}*/
-				editor.setFinalCaretOffset(viewer.getSelectedRange().x);
-				
+				}		
 				editor.enter();
 				
 				IRegion region= editor.getSelectedRegion();
 				viewer.setSelectedRange(region.getOffset(), region.getLength());	
-
+				viewer.revealRange(region.getOffset(), region.getLength());
 			} else if (selection != null && part instanceof ITextEditor) {
 				// select a result
 				TextRange range= change.getNewTextRange(selection.getTextEdits());
