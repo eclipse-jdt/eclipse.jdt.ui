@@ -1,5 +1,7 @@
 package org.eclipse.jdt.ui.tests.actions;
 
+import java.io.IOException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
@@ -40,97 +43,82 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
+		
+	private ICompilationUnit fCuA;
+	private ICompilationUnit fCuB;
+	private ICompilationUnit fNewCuA;
+	private ICompilationUnit fNewCuB;
+	private static final String CU_A_NAME= "A";
+	private static final String CU_B_NAME= "B";
+		
+	protected void setUp() throws Exception{
+		super.setUp();
+		
+		fCuA= createCUfromTestFile(getPackageP(), CU_A_NAME);
+		fCuB= createCUfromTestFile(getPackageP(), CU_B_NAME);
+		assertTrue("A.java does not exist", fCuA.exists());
+		assertTrue("B.java does not exist", fCuB.exists());
+	}
 	
+	protected void tearDown() throws Exception{
+		super.tearDown();
+		if (fNewCuA != null && fNewCuA.exists())
+			fNewCuA.delete(false, null);		
+		if (fCuA != null && fCuA.exists())
+			fCuA.delete(false, null);		
+			
+		if (fNewCuB != null && fNewCuB.exists())
+			fNewCuB.delete(false, null);		
+		if (fCuB != null && fCuB.exists())
+			fCuB.delete(false, null);		
+	}
+
+	private void check() throws IOException, JavaModelException {
+		fNewCuA= getPackageP().getCompilationUnit(CU_A_NAME + ".java");
+		assertEquals("incorrect paste in A", getFileContents(getOutputTestFileName(CU_A_NAME)), fNewCuA.getSource());	
+		
+		fNewCuB= getPackageP().getCompilationUnit(CU_B_NAME + ".java");
+		assertEquals("incorrect paste in B", getFileContents(getOutputTestFileName("B")), fNewCuB.getSource());	
+	}
+		
 	//---- tests 
 	
 	public void test0() throws Exception{
-		ICompilationUnit newcuA= null;
-		ICompilationUnit newcuB= null;
-		try{
-			String oldCuName= "A";
-			ICompilationUnit cuA= createCUfromTestFile(getPackageP(), oldCuName);
-			
-			ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-			
-			IType typeA= cuA.getType("A");
-			ISelectionProvider provider= new FakeSelectionProvider(new IType[]{typeA});
-	
-			assertTrue("A does not exist", typeA.exists());
-			
-			CopySourceReferencesToClipboardAction copyAction= new CopySourceReferencesToClipboardAction(provider);
-			copyAction.update();
-			assertTrue("copy enabled", copyAction.isEnabled());
-			copyAction.run();
-	
-			IType typeB= cuB.getType("B");
-			provider= new FakeSelectionProvider(new IType[]{typeB});
-			
-			PasteSourceReferencesAction pasteAction= new PasteSourceReferencesAction(provider);
-			pasteAction.update();
-			assertTrue("paste enabled", pasteAction.isEnabled());
-			pasteAction.run();
-			
-			newcuA= getPackageP().getCompilationUnit(oldCuName + ".java");
-			assertEquals("incorrect paste in A", getFileContents(getOutputTestFileName(oldCuName)), newcuA.getSource());	
-			
-			newcuB= getPackageP().getCompilationUnit("B" + ".java");
-			assertEquals("incorrect paste in B", getFileContents(getOutputTestFileName("B")), newcuB.getSource());	
-		} finally{
-			if (newcuA != null)
-				newcuA.delete(false, null);
-			if (newcuB != null)	
-				newcuB.delete(false, null);
-		}
+		IType typeA= fCuA.getType("A");
+		assertTrue("A does not exist", typeA.exists());
+
+		SourceReferenceTestUtil.copy(new IType[]{typeA});
+		
+		IType typeB= fCuB.getType("B");
+		SourceReferenceTestUtil.paste(new IType[]{typeB});
+		
+		check();
+	}
+
+	public void test1() throws Exception{
+		IType typeA= fCuA.getType("A");
+		assertTrue("A does not exist", typeA.exists());
+		
+		SourceReferenceTestUtil.copy(new IType[]{typeA});
+		SourceReferenceTestUtil.delete(new IType[]{typeA});
+		
+		IType typeB= fCuB.getType("B");
+		SourceReferenceTestUtil.paste(new IType[]{typeB});
+
+		check();
 	}
 	
-	public void test1() throws Exception{
-		printTestDisabledMessage("should not show dialog when testing");	
-		if (true)
-			return;
-			
-		ICompilationUnit newcuA= null;
-		ICompilationUnit newcuB= null;
-		try{
-			String oldCuName= "A";
-			ICompilationUnit cuA= createCUfromTestFile(getPackageP(), oldCuName);
-			assertTrue("A.java does not exist", cuA.exists());
-			
-			ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-			
-			IType typeA= cuA.getType("A");
-			ISelectionProvider provider= new FakeSelectionProvider(new IType[]{typeA});
-			
-			assertTrue("A does not exist", typeA.exists());
-			CopySourceReferencesToClipboardAction copyAction= new CopySourceReferencesToClipboardAction(provider);
-			copyAction.update();
-			assertTrue("copy enabled", copyAction.isEnabled());
-			copyAction.run();
+	public void test2() throws Exception{
+		Object elem0= fCuA.getType("A").getField("y");
+				
+		SourceReferenceTestUtil.copy(new Object[]{elem0});
+		SourceReferenceTestUtil.delete(new Object[]{elem0});
+		
+		IType typeB= fCuB.getType("B");
+		SourceReferenceTestUtil.paste(new IType[]{typeB});
+
+		check();
+	}
 	
-			DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(provider);
-			deleteAction.update();
-			assertTrue("delete action enabled", deleteAction.isEnabled());
-			deleteAction.run();
-			
-	
-			IType typeB= cuB.getType("B");
-			provider= new FakeSelectionProvider(new IType[]{typeB});
-			
-			PasteSourceReferencesAction pasteAction= new PasteSourceReferencesAction(provider);
-			pasteAction.update();
-			assertTrue("paste enabled", pasteAction.isEnabled());
-			pasteAction.run();
-			
-			newcuA= getPackageP().getCompilationUnit(oldCuName + ".java");
-			assertEquals("incorrect paste in A", getFileContents(getOutputTestFileName(oldCuName)), newcuA.getSource());	
-			
-			newcuB= getPackageP().getCompilationUnit("B" + ".java");
-			assertEquals("incorrect paste in B", getFileContents(getOutputTestFileName("B")), newcuB.getSource());	
-		} finally{
-			if (newcuA != null)
-				newcuA.delete(false, null);
-			if (newcuB != null)	
-				newcuB.delete(false, null);
-		}	
-	}	
 }
 
