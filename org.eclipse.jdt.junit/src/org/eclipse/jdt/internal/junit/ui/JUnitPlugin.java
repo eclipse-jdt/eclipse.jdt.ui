@@ -163,20 +163,22 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			);
 		}
 		if (testRunner != null)
-			testRunner.startTestRunListening(launchedType, port, launch.getLaunchMode());	
+			testRunner.startTestRunListening(launchedType, port, launch);	
 	}
 
 	/*
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */
 	public void launchChanged(final ILaunch launch) {
-		if (!fTrackedLaunches.contains(launch))
-			return;
-			
 		ILauncher launcher= launch.getLauncher();
 		IType launchedType= null;
 		int port= -1;
-		
+
+		boolean oldLaunch= (launcher != null) && (launcher.getDelegate() instanceof IJUnitLauncherDelegate); 
+			
+		if (!oldLaunch && !fTrackedLaunches.contains(launch))
+			return;
+			
 		if (launcher != null && launcher.getDelegate() instanceof IJUnitLauncherDelegate) {
 			// old launchers
 			IJUnitLauncherDelegate launcherDelegate= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();

@@ -159,29 +159,37 @@ class FailureTraceView implements IMenuListener {
 	}
 
 	protected void fillTable(String trace) {
-		int start= 0;
-		int end= trace.indexOf('\n', start);
-		
-		TableItem tableItem= new TableItem(fTable, SWT.NONE);
-		String itemLabel= trace.substring(start, end).replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-		tableItem.setText(itemLabel);
-		tableItem.setImage(fExceptionIcon);
-		start= end + 1;
-		end= trace.indexOf('\n', start);
-		
-		while(end != -1){
-			itemLabel= trace.substring(start,end).replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-			if (!itemLabel.trim().equals("")) {
-				tableItem= new TableItem(fTable, SWT.NONE);
-				tableItem.setText(itemLabel);
-				// heuristic for detecting a stack frame - works for JDK
-				if ((itemLabel.indexOf("at ") > 0)) {
-					tableItem.setImage(fStackIcon);
-				}
+		StringReader stringReader= new StringReader(trace);
+		BufferedReader bufferedReader= new BufferedReader(stringReader);
+		String line;
+
+		try {	
+			// first line contains the thrown exception
+			line= bufferedReader.readLine();
+			if (line == null)
+				return;
+				
+			TableItem tableItem= new TableItem(fTable, SWT.NONE);
+			String itemLabel= line.replace('\t', ' ');
+			tableItem.setText(itemLabel);
+			tableItem.setImage(fExceptionIcon);
+			
+			// the stack frames of the trace
+			while ((line= bufferedReader.readLine()) != null) {
+				itemLabel= line.replace('\t', ' ');
+				if (itemLabel.trim().length() > 0) {
+					tableItem= new TableItem(fTable, SWT.NONE);
+					// heuristic for detecting a stack frame - works for JDK
+					if ((itemLabel.indexOf(" at ") >= 0)) {
+						tableItem.setImage(fStackIcon);
+					}
+					tableItem.setText(itemLabel);
+				}	
 			}
-			start= end + 1;
-			end= trace.indexOf('\n', start);
-		}
+		} catch (IOException e) {
+			TableItem tableItem= new TableItem(fTable, SWT.NONE);
+			tableItem.setText(trace);
+		}			
 	}
 	
 	/**

@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.*;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.swt.SWT;
@@ -102,6 +104,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * The launcher that has started the test
 	 */
 	private String fLaunchMode;
+	private ILaunch fLastLaunch= null;
 	/**
 	 * The client side of the remote test runner
 	 */
@@ -122,6 +125,18 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		}
 	}
 	
+	private class RerunAction extends Action{
+		public RerunAction() {
+			setText("Rerun last Test");
+			setToolTipText("Rerun last test");
+			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/relaunch.gif"));
+		}
+		
+		public void run(){
+			rerunTestRun();
+		}
+	}
+	
 	/**
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
@@ -130,6 +145,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fTestRunnerClient.stopTest();
 	}
 			
+	/**
+	 * Stops the currently running test and shuts down the RemoteTestRunner
+	 */
+	public void rerunTestRun() {
+		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
+			try {
+				fLastLaunch.getLaunchConfiguration().launch(fLastLaunch.getLaunchMode(), null);		
+			} catch (CoreException e) {
+				ErrorDialog.openError(getSite().getShell(), 
+					"Could not rerun test", e.getMessage(), e.getStatus()
+				);
+			}
+		}
+	}
+	
 	/*
 	 * @see ITestRunListener#testRunStarted(testCount)
 	 */
@@ -289,9 +319,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});	
 	}
 
-	public void startTestRunListening(IType type, int port, String mode) {
+	public void startTestRunListening(IType type, int port, ILaunch launch) {
 		fTestType= type;
-		fLaunchMode= mode;
+		fLaunchMode= launch.getLaunchMode();
 		String msg= "Launching TestRunner";
 		showInformation(msg);
 		postInfo(msg);
@@ -301,7 +331,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		}
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		fTestRunnerClient.startListening(this, port);
-		
+		fLastLaunch= launch;
 		setTitle("JUnit ("+fTestType.getElementName()+")");
 		setTitleToolTip(fTestType.getFullyQualifiedName());
 	}
@@ -544,6 +574,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		toolBar.add(new StopAction());
+		toolBar.add(new RerunAction());
 
 		actionBars.updateActionBars();
 		
