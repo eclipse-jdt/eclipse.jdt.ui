@@ -3256,26 +3256,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		if (isFoldingEnabled()) {
-
-			ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
-			
-			fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
-			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
-				public IInformationControl createInformationControl(Shell shell) {
-					return new CustomSourceInformationControl(shell, IDocument.DEFAULT_CONTENT_TYPE);
-				}
-			});
-			fProjectionSupport.install();
-			
-			fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
-			if (fProjectionModelUpdater != null)
-				fProjectionModelUpdater.install(this, projectionViewer);
+		ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
+		
+		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
+		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell shell) {
+				return new CustomSourceInformationControl(shell, IDocument.DEFAULT_CONTENT_TYPE);
+			}
+		});
+		fProjectionSupport.install();
+		
+		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+		if (fProjectionModelUpdater != null)
+			fProjectionModelUpdater.install(this, projectionViewer);
 				
+		if (isFoldingEnabled())
 			projectionViewer.doOperation(ProjectionViewer.TOGGLE);
-		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
