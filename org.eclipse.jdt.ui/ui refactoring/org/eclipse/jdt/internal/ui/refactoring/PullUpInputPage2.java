@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
-public class PullUpInputPage2 extends UserInputWizardPage {
+class PullUpInputPage2 extends UserInputWizardPage {
 
 	private static class PullUpFilter extends ViewerFilter {
 		private final Set fTypesToShow;
@@ -263,7 +263,7 @@ public class PullUpInputPage2 extends UserInputWizardPage {
 	
 	public void checkPulledUp() {
 		uncheckAll();
-		fTreeViewer.setCheckedElements(getPullUpMethodsRefactoring().getElementsToPullUp());
+		fTreeViewer.setCheckedElements(getPullUpMethodsRefactoring().getMembersToPullUp());
 		IType parent= getPullUpMethodsRefactoring().getDeclaringType();
 		fTreeViewer.setChecked(parent, true);
 		checkAllParents(parent);
@@ -453,7 +453,7 @@ public class PullUpInputPage2 extends UserInputWizardPage {
 	}
 	
 	private void precheckElements(final PullUpTreeViewer treeViewer) {
-		IMember[] members= getPullUpMethodsRefactoring().getElementsToPullUp();
+		IMember[] members= getPullUpMethodsRefactoring().getMembersToPullUp();
 		for (int i= 0; i < members.length; i++) {
 			treeViewer.setCheckState(members[i], true);
 		}
@@ -461,7 +461,7 @@ public class PullUpInputPage2 extends UserInputWizardPage {
 
 	private void initializeTreeViewer(IProgressMonitor pm) {
 		try {
-			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1));
+			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1), false);
 			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
 			removeAllTreeViewFilters();
 			fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
