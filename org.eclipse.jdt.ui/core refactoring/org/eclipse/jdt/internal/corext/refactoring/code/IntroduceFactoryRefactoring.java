@@ -728,14 +728,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param extraDims number of extra array dimensions to add to the resulting type
 	 */
 	private Type typeNodeForTypeBinding(ITypeBinding argType, int extraDims, AST ast) {
-		if (extraDims > 0)
+		if (extraDims > 0) {
 			return ast.newArrayType(typeNodeForTypeBinding(argType, 0, ast), extraDims);
-		if (argType.isPrimitive())
-			return ASTNodeFactory.newType(ast, argType, false);
-		else if (argType.isArray()) {
+			
+		} else if (argType.isArray()) {
 			Type elementType= typeNodeForTypeBinding(argType.getElementType(), extraDims, ast);
-
 			return ast.newArrayType(elementType, argType.getDimensions());
+			
 		} else {
 			return fImportRewriter.addImport(argType, ast);
 		}

@@ -619,9 +619,8 @@ public class CallInliner {
 				if(needsExplicitCast(status)) {
 					AST ast= node.getAST();
 					CastExpression castExpression= ast.newCastExpression();
-					ITypeBinding returnType= fSourceProvider.getReturnType();
-					fImportEdit.addImport(returnType);
-					castExpression.setType(ASTNodeFactory.newType(ast, returnType, false));
+					Type returnType= fImportEdit.addImport(fSourceProvider.getReturnType(), ast);
+					castExpression.setType(returnType);
 					castExpression.setExpression((Expression)node);
 					node= castExpression;
 				}
