@@ -247,8 +247,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
 			
 			// paste
-			if (formatFirstLine)
+			if (formatFirstLine) {
+				int end= command.offset + command.length;
 				command.offset= lineOffset;
+				command.length= end - command.offset; 
+			}
 			command.text= formattedParagraph;
 
 		} catch (BadLocationException e) {
