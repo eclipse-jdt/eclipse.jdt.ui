@@ -531,12 +531,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			}
 			StyleRange[] array= new StyleRange[ranges.size()];
 			array= (StyleRange[]) ranges.toArray(array);
-			textPresentation.mergeStyleRanges(array);
+			textPresentation.replaceStyleRanges(array);
 		} else {
 			for (; i < n; i++) {
 				HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
 				if (!position.isDeleted())
-					textPresentation.mergeStyleRange(position.createStyleRange());
+					textPresentation.replaceStyleRange(position.createStyleRange());
 			}
 		}
 	}
