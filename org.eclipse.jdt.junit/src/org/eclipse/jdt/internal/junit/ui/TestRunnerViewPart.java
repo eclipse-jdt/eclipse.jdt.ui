@@ -351,8 +351,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			fOrientation= orientation.intValue();
 		computeOrientation();
 		String scrollLock= memento.getString(TAG_SCROLL);
-		if (scrollLock != null)
+		if (scrollLock != null) {
 			fScrollLockAction.setChecked(scrollLock.equals("true")); //$NON-NLS-1$
+			setAutoScroll(!fScrollLockAction.isChecked());
+		}
 	}
 	
 	/**
@@ -497,7 +499,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				fProgressBar.stopped();
 			}
 		});	
-		fUpdateJob.stop();
+		if (fUpdateJob != null)
+			fUpdateJob.stop();
 	}
 
 	private void resetViewIcon() {
