@@ -12,8 +12,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URL;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
@@ -22,8 +22,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -61,7 +61,8 @@ class CPListLabelProvider extends LabelProvider {
 		fVariableImage= JavaPluginImages.DESC_OBJS_ENV_VAR;
 
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
-		fProjectImage= workbench.getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
+		
+		fProjectImage= workbench.getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 	}
 	
 	public String getText(Object element) {
@@ -135,7 +136,7 @@ class CPListLabelProvider extends LabelProvider {
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY: {
 				IResource resource= cpentry.getResource();
-				if (resource instanceof IFolder) {
+				if (resource instanceof IContainer) {
 					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
 					buf.append(' ');
 					buf.append(fClassLabel);

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -257,8 +259,22 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				}
 			}
+			if (!elementsToAdd.isEmpty()) {
+				askForAddingExclusionPatternsDialog(elementsToAdd);
+			}
+			
 			fLibrariesList.addElements(elementsToAdd);
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
+		}
+	}
+	
+	private void askForAddingExclusionPatternsDialog(List newEntries) {
+		HashSet modified= new HashSet();
+		fixNestingConflicts(newEntries, fClassPathList.getElements(), modified);
+		if (!modified.isEmpty()) {
+			String title= NewWizardMessages.getString("LibrariesWorkbookPage.exclusion_added.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("LibrariesWorkbookPage.exclusion_added.message"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), title, message);
 		}
 	}
 	
@@ -465,10 +481,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 	private CPListElement[] openClassFolderDialog(CPListElement existing) {	
 
-		Class[] acceptedClasses= new Class[] { IFolder.class };
+		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
-			
-		acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getUsedContainers(existing));	
 			
