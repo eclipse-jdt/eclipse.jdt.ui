@@ -48,7 +48,7 @@ public class SurroundWithTryCatchAction extends TextSelectionAction {
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-				RefactoringErrorDialog.open(TITLE, status);
+				RefactoringErrorDialogUtil.open(TITLE, status);
 				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
 				AbstractTextEditor editor= getEditor();
 				if (entry.getContext() instanceof JavaSourceContext && editor != null) {

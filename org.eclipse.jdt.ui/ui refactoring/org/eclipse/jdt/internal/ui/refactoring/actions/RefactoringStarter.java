@@ -79,7 +79,7 @@ public class RefactoringStarter {
 				triggerBuild();
 				
 		} else{
-			RefactoringErrorDialog.open(dialogTitle, activationStatus);
+			RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		}	
 	}
 	
@@ -92,7 +92,7 @@ public class RefactoringStarter {
 		Refactoring refactoring= (Refactoring)renameRefactoring;
 		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor()); 
 		if (status.hasFatalError()){
-			RefactoringErrorDialog.open(dialogTitle, status);
+			RefactoringErrorDialogUtil.open(dialogTitle, status);
 		} else{
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			IInputValidator validator= new IInputValidator(){
