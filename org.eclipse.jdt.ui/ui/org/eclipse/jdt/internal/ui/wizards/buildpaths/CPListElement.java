@@ -9,10 +9,13 @@ import java.net.URL;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 public class CPListElement {
-			
+	
+	private IJavaProject fProject;
+	
 	private int fEntryKind;
 	private IPath fPath;
 	private IResource fResource;
@@ -30,7 +33,9 @@ public class CPListElement {
 	
 	///private URL fJavaDocLocation;
 	
-	public CPListElement(int entryKind, IPath path, IResource res, IPath attachPath, IPath attachRoot, boolean isExported) {
+	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res, IPath attachPath, IPath attachRoot, boolean isExported) {
+		fProject= project;
+		
 		fEntryKind= entryKind;
 		fPath= path;
 		fSourceAttachmentPath= attachPath;
@@ -42,8 +47,8 @@ public class CPListElement {
 		fCachedEntry= null;
 	}
 
-	public CPListElement(int entryKind, IPath path, IResource res) {
-		this(entryKind, path, res, null, null, false);
+	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
+		this(project, entryKind, path, res, null, null, false);
 	}
 
 	
@@ -186,6 +191,14 @@ public class CPListElement {
 	 */
 	public void setJavadocLocation(URL javadocLocation) {
 		fJavadocLocation= javadocLocation;
+	}
+
+	/**
+	 * Gets the project.
+	 * @return Returns a IJavaProject
+	 */
+	public IJavaProject getJavaProject() {
+		return fProject;
 	}
 
 }

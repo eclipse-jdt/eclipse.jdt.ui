@@ -1,7 +1,6 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.IClasspathEntry;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.IClasspathEntry;
 
-public class CPListElementSorter extends ViewerSorter {
-	
+public class CPListElementSorter extends ViewerSorter {		private static final int SOURCE= 0;	private static final int PROJECT= 1;	private static final int LIBRARY= 2;	private static final int VARIABLE= 3;	private static final int CONTAINER= 4;	private static final int OTHER= 5;	
 	/*
 	 * @see ViewerSorter#category(Object)
 	 */
@@ -9,32 +8,15 @@ public class CPListElementSorter extends ViewerSorter {
 		if (obj instanceof CPListElement) {
 			switch (((CPListElement)obj).getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
-				return 3;
+				return LIBRARY;
 			case IClasspathEntry.CPE_PROJECT:
-				return 1;
+				return PROJECT;
 			case IClasspathEntry.CPE_SOURCE:
-				return 0;
+				return SOURCE;
 			case IClasspathEntry.CPE_VARIABLE:
-				return 2;
+				return VARIABLE;			case IClasspathEntry.CPE_CONTAINER:				return CONTAINER;
 			}
 		}
-		return super.category(obj);
+		return OTHER;
 	}
-	/*	 * @see ViewerSorter#compare()	 */	
-	public int compare(Viewer viewer, Object e1, Object e2) {
-		int cat1 = category(e1);
-		int cat2 = category(e2);
-	
-		if (cat1 != cat2)
-			return cat1 - cat2;
-			
-		if ((e1 instanceof CPListElement) && (e2 instanceof CPListElement)) {
-			IPath p1= ((CPListElement)e1).getPath();
-			IPath p2= ((CPListElement)e2).getPath();
-			
-			return p1.toString().compareTo(p2.toString());
-		}
-		return super.compare(viewer, e1, e2);
-	}	
-
-}
+}

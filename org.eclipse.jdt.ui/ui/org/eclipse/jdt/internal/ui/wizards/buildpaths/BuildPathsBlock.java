@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -272,6 +273,7 @@ public class BuildPathsBlock {
 	public void init(IJavaProject jproject, IPath outputLocation, IClasspathEntry[] classpathEntries) {
 		fCurrJProject= jproject;
 		boolean projectExists= false;
+		List newClassPath= null;
 		try {
 			IProject project= fCurrJProject.getProject();
 			projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
@@ -283,57 +285,20 @@ public class BuildPathsBlock {
 					classpathEntries=  fCurrJProject.getRawClasspath();
 				}
 			}
+			if (outputLocation == null) {
+				outputLocation= getDefaultBuildPath(jproject);
+			}			
+
+			if (classpathEntries != null) {
+				newClassPath= getExistingEntries(classpathEntries);
+			}
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 		}
-		if (outputLocation == null) {
-			outputLocation= getDefaultBuildPath(jproject);
+		if (newClassPath == null) {
+			newClassPath= getDefaultClassPath(jproject);
 		}
 		
-		List newClassPath;
-
-		if (classpathEntries == null) {
-			newClassPath= getDefaultClassPath(jproject);
-		} else {
-			newClassPath= new ArrayList();
-			for (int i= 0; i < classpathEntries.length; i++) {
-				IClasspathEntry curr= classpathEntries[i];
-				int entryKind= curr.getEntryKind();
-				IPath path= curr.getPath();
-				boolean isExported= curr.isExported();
-				// get the resource
-				IResource res= null;
-				boolean isMissing= false;
-				
-				IPath resolvedPath= path;
-				if (entryKind == IClasspathEntry.CPE_VARIABLE) {
-					resolvedPath= JavaCore.getResolvedVariablePath(path);
-				}
-					
-				res= fWorkspaceRoot.findMember(resolvedPath);
-				if (res == null) {
-					if (entryKind == IClasspathEntry.CPE_LIBRARY) {
-						isMissing= !resolvedPath.toFile().isFile(); // look for external JARs
-						if (!ArchiveFileFilter.isArchivePath(resolvedPath)) {
-							if (fWorkspaceRoot.getWorkspace().validatePath(resolvedPath.toString(), IResource.FOLDER).isOK()) {
-								res= fWorkspaceRoot.getFolder(resolvedPath);
-							}
-						}
-					} else if (entryKind == IClasspathEntry.CPE_SOURCE) {
-						isMissing= true;
-						if (fWorkspaceRoot.getWorkspace().validatePath(resolvedPath.toString(), IResource.FOLDER).isOK()) {
-							res= fWorkspaceRoot.getFolder(resolvedPath);
-						}
-					}
-				}
-											
-				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
-				if (projectExists) {
-					elem.setIsMissing(isMissing);
-				}
-				newClassPath.add(elem);
-			}
-		}
 		List exportedEntries = new ArrayList();
 		for (int i= 0; i < newClassPath.size(); i++) {
 			CPListElement curr= (CPListElement) newClassPath.get(i);
@@ -353,8 +318,64 @@ public class BuildPathsBlock {
 			fLibrariesPage.init(fCurrJProject);
 		}
 
-		
 		doStatusLineUpdate();
+	}
+
+	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) throws JavaModelException {
+		ArrayList newClassPath= new ArrayList();
+		boolean projectExists= fCurrJProject.exists();
+		for (int i= 0; i < classpathEntries.length; i++) {
+			IClasspathEntry curr= classpathEntries[i];
+			
+			IPath path= curr.getPath();
+			
+			// get the resource
+			IResource res= null;
+			boolean isMissing= false;
+			
+			switch (curr.getEntryKind()) {
+				case IClasspathEntry.CPE_CONTAINER:
+					res= null;
+					isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
+					break;
+				case IClasspathEntry.CPE_VARIABLE:
+					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
+					res= null;
+					isMissing=  fWorkspaceRoot.findMember(resolvedPath) == null && !resolvedPath.toFile().isFile(); 
+					break;
+				case IClasspathEntry.CPE_LIBRARY:
+					res= fWorkspaceRoot.findMember(path);
+					if (res == null) {
+						if (!ArchiveFileFilter.isArchivePath(path)) {
+							if (fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
+								res= fWorkspaceRoot.getFolder(path);
+							}
+						}
+						isMissing= !path.toFile().isFile(); // look for external JARs
+					}
+				case IClasspathEntry.CPE_SOURCE:
+					res= fWorkspaceRoot.findMember(path);
+					if (res == null) {
+						if (fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
+							res= fWorkspaceRoot.getFolder(path);
+						}
+						isMissing= true;
+					}
+					break;
+				case IClasspathEntry.CPE_PROJECT:					
+					res= fWorkspaceRoot.findMember(path);
+					isMissing= (res == null);
+					break;
+			}
+			boolean isExported= curr.isExported();
+										
+			CPListElement elem= new CPListElement(fCurrJProject, curr.getEntryKind(), path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
+			if (projectExists) {
+				elem.setIsMissing(isMissing);
+			}
+			newClassPath.add(elem);
+		}
+		return newClassPath;
 	}	
 	
 	// -------- public api --------
@@ -401,12 +422,12 @@ public class BuildPathsBlock {
 		} else {
 			srcFolder= jproj.getProject();
 		}
-		list.add(new CPListElement(IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
+		list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
 		IPath libPath= new Path(JavaRuntime.JRELIB_VARIABLE);
 		IPath attachPath= new Path(JavaRuntime.JRESRC_VARIABLE);
 		IPath attachRoot= new Path(JavaRuntime.JRESRCROOT_VARIABLE);
-		CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot, false);
+		CPListElement elem= new CPListElement(jproj, IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot, false);
 		list.add(elem);
 
 		return list;

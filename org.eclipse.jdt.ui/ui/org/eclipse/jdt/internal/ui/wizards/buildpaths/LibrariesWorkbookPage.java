@@ -105,6 +105,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		updateLibrariesList();
 	}
 	
+	private boolean isLibraryKind(int kind) {
+		return kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_CONTAINER;
+	}
+	
 	private void updateLibrariesList() {
 		List cpelements= fClassPathList.getElements();
 		List libelements= new ArrayList(cpelements.size());
@@ -112,8 +116,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		int nElements= cpelements.size();
 		for (int i= 0; i < nElements; i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
-			int kind= cpe.getEntryKind();
-			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE) {
+			if (isLibraryKind(cpe.getEntryKind())) {
 				libelements.add(cpe);
 			}
 		}
@@ -228,7 +231,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private boolean canDoSourceAttachment(List selElements) {
 		if (selElements != null && selElements.size() == 1) {
 			CPListElement elem= (CPListElement) selElements.get(0);
-			return (!(elem.getResource() instanceof IFolder));
+			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+				return (!(elem.getResource() instanceof IFolder));
+			} else if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				return true;
+			}
 		}
 		return false;
 	}		
@@ -242,7 +249,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		for (int i= cpelements.size() - 1; i >= 0; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			int kind= cpe.getEntryKind();
-			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE) {
+			if (isLibraryKind(kind)) {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
 					remove= true;
@@ -353,9 +360,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List cplist= fLibrariesList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
 			CPListElement elem= (CPListElement)cplist.get(i);
-			IResource resource= elem.getResource();
-			if (resource instanceof IContainer) {
-				res.add(resource);
+			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+				IResource resource= elem.getResource();
+				if (resource instanceof IContainer) {
+					res.add(resource);
+				}
 			}
 		}
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
@@ -366,16 +375,18 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List cplist= fLibrariesList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
 			CPListElement elem= (CPListElement)cplist.get(i);
-			IResource resource= elem.getResource();
-			if (resource instanceof IFile) {
-				res.add(resource);
+			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+				IResource resource= elem.getResource();
+				if (resource instanceof IFile) {
+					res.add(resource);
+				}
 			}
 		}
 		return (IFile[]) res.toArray(new IFile[res.size()]);
 	}	
 	
 	private CPListElement newCPLibraryElement(IResource res) {
-		return new CPListElement(IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
+		return new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
 	};
 
 	
@@ -399,7 +410,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		CPListElement[] elems= new CPListElement[nChosen];
 		for (int i= 0; i < nChosen; i++) {
 			IPath path= filterPath.append(fileNames[i]).makeAbsolute();	
-			elems[i]= new CPListElement(IClasspathEntry.CPE_LIBRARY, path, null);
+			elems[i]= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, path, null);
 		}
 		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
 		
@@ -414,7 +425,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IPath[] paths= dialog.getResult();
 			ArrayList result= new ArrayList();
 			for (int i = 0; i < paths.length; i++) {
-				CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, paths[i], null);
+				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, paths[i], null);
 				IPath resolvedPath= JavaCore.getResolvedVariablePath(paths[i]);
 				elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
 				if (!existingElements.contains(elem)) {
@@ -428,6 +439,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	
 	private void addAttachmentsFromExistingLibs(CPListElement elem) {
+		if (elem.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+			return;
+		}
+		
 		try {
 			IJavaModel jmodel= fCurrJProject.getJavaModel();
 			IJavaProject[] jprojects= jmodel.getJavaProjects();
@@ -507,8 +522,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	public void setSelection(List selElements) {
 		for (int i= selElements.size()-1; i >= 0; i--) {
 			CPListElement curr= (CPListElement) selElements.get(i);
-			int kind= curr.getEntryKind();
-			if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
+			if (!isLibraryKind(curr.getEntryKind())) {
 				selElements.remove(i);
 			}
 		}

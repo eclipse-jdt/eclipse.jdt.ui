@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
@@ -18,8 +19,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -29,9 +33,9 @@ class CPListLabelProvider extends LabelProvider {
 		
 	private String fNewLabel, fClassLabel, fCreateLabel;
 	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
-	private Image fFolderImage, fProjectImage, fVariableImage;
+	private Image fFolderImage, fProjectImage, fVariableImage, fContainerImage;
 	private Image fMissingLibaryImage, fMissingVariableImage;
-	private Image fMissingFolderImage, fMissingProjectImage;
+	private Image fMissingFolderImage, fMissingProjectImage, fMissingContainerImage;
 	
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.getString("CPListLabelProvider.new"); //$NON-NLS-1$
@@ -47,6 +51,8 @@ class CPListLabelProvider extends LabelProvider {
 		
 		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
 		
+		
+		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		fProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
 	
@@ -54,7 +60,9 @@ class CPListLabelProvider extends LabelProvider {
 		fMissingVariableImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_ENV_VAR);
 		fMissingFolderImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_PACKFRAG_ROOT);
 		fMissingProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
-	
+		
+		fContainerImage= reg.get(JavaPluginImages.IMG_OBJS_PACKAGE);
+		fMissingContainerImage= reg.get(JavaPluginImages.IMG_OBJS_PACKAGE);
 	}
 	
 	public String getText(Object element) {
@@ -103,6 +111,16 @@ class CPListLabelProvider extends LabelProvider {
 				}
 				case IClasspathEntry.CPE_PROJECT:
 					return path.lastSegment();
+				case IClasspathEntry.CPE_CONTAINER:
+					try {
+						IClasspathContainer container= JavaCore.getClasspathContainer(cpentry.getPath(), cpentry.getJavaProject());
+						if (container != null) {
+							return container.getDescription();
+						}
+					} catch (JavaModelException e) {
+						
+					}
+					return path.toString();		
 				case IClasspathEntry.CPE_SOURCE: {
 					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
 					IResource resource= cpentry.getResource();
@@ -166,6 +184,12 @@ class CPListLabelProvider extends LabelProvider {
 					} else {
 						return fMissingVariableImage;
 					}
+				case IClasspathEntry.CPE_CONTAINER:
+					if (!cpentry.isMissing()) {
+						return fContainerImage;
+					} else {
+						return fMissingContainerImage;
+					}					
 				default:
 					// pass						
 			}
