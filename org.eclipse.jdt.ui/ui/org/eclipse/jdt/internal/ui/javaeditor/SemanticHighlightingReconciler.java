@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Position;
@@ -177,7 +179,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		
 		TextPresentation textPresentation= fPresenter.createPresentation(fAddedPositions, fRemovedPositions);
 		
-		fPresenter.updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
+		updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
 		
 		stopReconcilingPositions();
 	}
@@ -219,6 +221,24 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	}
 
 	/**
+	 * Update the presentation.
+	 * 
+	 * @param textPresentation the text presentation
+	 * @param addedPositions the added positions
+	 * @param removedPositions the removed positions
+	 */
+	private void updatePresentation(TextPresentation textPresentation, List addedPositions, List removedPositions) {
+		Runnable runnable= fPresenter.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
+		if (runnable == null)
+			return;
+		
+		Shell shell= fEditor.getSite().getShell();
+		if (shell != null && !shell.isDisposed()) { 
+			shell.getDisplay().asyncExec(runnable);
+		}
+	}
+	
+	/**
 	 * Stop reconciling positions.
 	 */
 	private void stopReconcilingPositions() {
@@ -229,10 +249,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 	/**
 	 * Install this reconciler on the given editor, presenter and highlightings.
-	 * @param editor The editor
-	 * @param presenter The semantic highlighting presenter
-	 * @param semanticHighlightings The semantic highlightings
-	 * @param highlightings The highlightings
+	 * @param editor the editor
+	 * @param presenter the semantic highlighting presenter
+	 * @param semanticHighlightings the semantic highlightings
+	 * @param highlightings the highlightings
 	 */
 	public void install(JavaEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, Highlighting[] highlightings) {
 		fPresenter= presenter;

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -33,10 +32,7 @@ import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
-import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
-
-import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
@@ -235,8 +231,6 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/** Position updater */
 	private IPositionUpdater fPositionUpdater= new HighlightingPositionUpdater(getPositionCategory());
 	
-	/** The editor this reconciler is installed on */
-	private IEditorPart fEditor;
 	/** The source viewer this semantic highlighting reconciler is installed on */
 	private ISourceViewer fSourceViewer;
 	/** The background presentation reconciler */
@@ -281,17 +275,17 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	}
 
 	/**
-	 * Register the added positions on the document and delete the removed positions.
+	 * Create a text presentation in the background.
 	 * <p>
 	 * NOTE: Called from background thread.
 	 * </p>
 	 * 
 	 * @param addedPositions the added positions
 	 * @param removedPositions the removed positions
-	 * @return the repair description
+	 * @return the text presentation or <code>null</code>, if reconciliation should be canceled
 	 */
 	public TextPresentation createPresentation(List addedPositions, List removedPositions) {
-		if (fSourceViewer == null)
+		if (fSourceViewer == null || fPresentationReconciler == null)
 			return null;
 		
 		if (isCanceled())
@@ -327,17 +321,18 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	}
 
 	/**
-	 * Update the presentation.
+	 * Create a runnable for updating the presentation.
 	 * <p>
 	 * NOTE: Called from background thread.
 	 * </p>
 	 * @param textPresentation the text presentation
 	 * @param addedPositions the added positions
 	 * @param removedPositions the removed positions
+	 * @return the runnable or <code>null</code>, if reconciliation should be canceled
 	 */
-	public void updatePresentation(final TextPresentation textPresentation, List addedPositions, List removedPositions) {
-		if (fSourceViewer == null)
-			return;
+	public Runnable createUpdateRunnable(final TextPresentation textPresentation, List addedPositions, List removedPositions) {
+		if (fSourceViewer == null || textPresentation == null)
+			return null;
 		
 		// TODO: do clustering of positions and post multiple fast runnables
 		final HighlightedPosition[] added= new SemanticHighlightingManager.HighlightedPosition[addedPositions.size()];
@@ -346,16 +341,14 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		removedPositions.toArray(removed);
 		
 		if (isCanceled())
-			return;
+			return null;
 		
-		Shell shell= fEditor.getSite().getShell();
-		if (shell != null && !shell.isDisposed()) { 
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					internalUpdatePresentation(textPresentation, added, removed);
-				}
-			});
-		}
+		Runnable runnable= new Runnable() {
+			public void run() {
+				updatePresentation(textPresentation, added, removed);
+			}
+		};
+		return runnable;
 	}
 	
 	/**
@@ -364,9 +357,11 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * <p>
 	 * NOTE: Indirectly called from background thread by UI runnable.
 	 * </p>
-	 * @param addedPositions The added positions
+	 * @param textpresentation the text presentation or <code>null</code>, if the presentation should computed in the UI thread
+	 * @param addedPositions the added positions
+	 * @param addedPositions the added positions
 	 */
-	private void internalUpdatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions) {
+	public void updatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions) {
 		if (fSourceViewer == null)
 			return;
 		
@@ -438,6 +433,8 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		
 		if (textPresentation != null)
 			fSourceViewer.changeTextPresentation(textPresentation, false);
+		else
+			fSourceViewer.invalidateTextPresentation();
 	}
 
 	private void checkOrdering(String s, List positions) {
@@ -615,16 +612,19 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	}
 
 	/**
-	 * Install this presenter on the given source viewer. The source viewer should implement
-	 * {@link ITextViewerExtension2} and {@link ITextViewerExtension4}.
+	 * Install this presenter on the given source viewer and background presentation
+	 * reconciler. The source viewer should implement {@link ITextViewerExtension2} and
+	 * {@link ITextViewerExtension4}.
 	 * 
-	 * @param sourceViewer The source viewer.
+	 * @param sourceViewer the source viewer
+	 * @param backgroundPresentationReconciler the background presentation reconciler,
+	 * 	can be <code>null</code>, in that case {@link SemanticHighlightingPresenter#createPresentation(List, List)}
+	 * 	should not be called
 	 */
-	public void install(IEditorPart editor, ISourceViewer sourceViewer, IPresentationReconciler backgroundPresentationReconciler) {
-		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4 && backgroundPresentationReconciler instanceof JavaPresentationReconciler) {
-			fEditor= editor;
+	public void install(ISourceViewer sourceViewer, JavaPresentationReconciler backgroundPresentationReconciler) {
+		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4) {
 			fSourceViewer= sourceViewer;
-			fPresentationReconciler= (JavaPresentationReconciler) backgroundPresentationReconciler;
+			fPresentationReconciler= backgroundPresentationReconciler;
 			
 			((ITextViewerExtension4)fSourceViewer).addTextPresentationListener(this);
 			fSourceViewer.addTextInputListener(this);

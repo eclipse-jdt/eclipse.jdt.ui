@@ -18,15 +18,17 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextAttribute;
-import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
@@ -36,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
  * 
  * @since 3.0
  */
-public class SemanticHighlightingManager {
+public class SemanticHighlightingManager implements IPropertyChangeListener {
 	
 	/**
 	 * Highlighting.
@@ -179,6 +181,47 @@ public class SemanticHighlightingManager {
 		}
 	}
 	
+	/**
+	 * Highlighted ranges.
+	 */
+	public static class HighlightedRange extends Region {
+		/** The highlighting key as returned by {@link SemanticHighlighting#getPreferenceKey()}. */
+		private String fKey;
+		
+		/**
+		 * Initalize with the given offset, length and highlighting key.
+		 * 
+		 * @param offset
+		 * @param length
+		 * @param key the highlighting key as returned by {@link SemanticHighlighting#getPreferenceKey()}
+		 */
+		public HighlightedRange(int offset, int length, String key) {
+			super(offset, length);
+			fKey= key;
+		}
+		
+		/**
+		 * @return the highlighting key as returned by {@link SemanticHighlighting#getPreferenceKey()}
+		 */
+		public String getKey() {
+			return fKey;
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.Region#equals(java.lang.Object)
+		 */
+		public boolean equals(Object o) {
+			return super.equals(o) && o instanceof HighlightedRange && fKey.equals(((HighlightedRange)o).getKey());
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.Region#hashCode()
+		 */
+		public int hashCode() {
+			return super.hashCode() | fKey.hashCode();
+		}
+	}
+	
 	/** Semantic highlighting presenter */
 	private SemanticHighlightingPresenter fPresenter;
 	/** Semantic highlighting reconciler */
@@ -189,10 +232,19 @@ public class SemanticHighlightingManager {
 	/** Highlightings */
 	private Highlighting[] fHighlightings;
 
+	/** The editor */
+	private JavaEditor fEditor;
+	/** The source viewer */
+	private ISourceViewer fSourceViewer;
 	/** The color manager */
 	private IColorManager fColorManager;
 	/** The preference store */
 	private IPreferenceStore fPreferenceStore;
+	/** The presentation reconciler */
+	private JavaPresentationReconciler fPresentationReconciler;
+	
+	/** The hardcoded ranges */
+	private HighlightedRange[] fHardcodedRanges;
 	
 	/**
 	 * Install the semantic highlighting on the given editor infrastructure
@@ -201,26 +253,102 @@ public class SemanticHighlightingManager {
 	 * @param sourceViewer The source viewer 
 	 * @param colorManager The color manager
 	 * @param preferenceStore The preference store
+	 * @param backgroundPresentationReconciler the background presentation reconciler
 	 */
-	public void install(JavaEditor editor, ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, PresentationReconciler backgroundPresentationReconciler) {
-		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4 && backgroundPresentationReconciler instanceof JavaPresentationReconciler) {
+	public void install(JavaEditor editor, ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, JavaPresentationReconciler backgroundPresentationReconciler) {
+		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4) {
+			fEditor= editor;
+			fSourceViewer= sourceViewer;
 			fColorManager= colorManager;
 			fPreferenceStore= preferenceStore;
+			fPresentationReconciler= backgroundPresentationReconciler;
+			
+			fPreferenceStore.addPropertyChangeListener(this);
 
-			initializeHighlightings();
-			
-			fPresenter= new SemanticHighlightingPresenter();
-			fPresenter.install(editor, sourceViewer, backgroundPresentationReconciler);
-			
-			fReconciler= new SemanticHighlightingReconciler();
-			fReconciler.install(editor, sourceViewer, fPresenter, fSemanticHighlightings, fHighlightings);
+			if (isEnabled())
+				enable();
 		}
 	}
 	
 	/**
+	 * Install the semantic highlighting on the given source viewer infrastructure. No reconciliation will be performed.
+	 * 
+	 * @param sourceViewer the source viewer 
+	 * @param colorManager the color manager
+	 * @param preferenceStore the preference store
+	 */
+	public void install(ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, HighlightedRange[] hardcodedRanges) {
+		fHardcodedRanges= hardcodedRanges;
+		install(null, sourceViewer, colorManager, preferenceStore, null);
+	}
+	
+	/**
+	 * Enable semantic highlighting.
+	 */
+	private void enable() {
+		initializeHighlightings();
+		
+		fPresenter= new SemanticHighlightingPresenter();
+		fPresenter.install(fSourceViewer, fPresentationReconciler);
+		
+		if (fEditor != null) {
+			fReconciler= new SemanticHighlightingReconciler();
+			fReconciler.install(fEditor, fSourceViewer, fPresenter, fSemanticHighlightings, fHighlightings);
+		} else {
+			fPresenter.updatePresentation(null, createHardcodedPositions(), new HighlightedPosition[0]);
+		}
+	}
+	
+	/**
+	 * Computes the hardcoded postions from the hardcoded ranges
+	 * 
+	 * @return the hardcoded positions
+	 */
+	private HighlightedPosition[] createHardcodedPositions() {
+		HighlightedPosition[] positions= new HighlightedPosition[fHardcodedRanges.length];
+		for (int i= 0; i < fHardcodedRanges.length; i++) {
+			HighlightedRange range= fHardcodedRanges[i];
+			positions[i]= fPresenter.createHighlightedPosition(range.getOffset(), range.getLength(), getHighlighting(range.getKey()));
+		}
+		return positions;
+	}
+
+	/**
+	 * Returns the higlighting corresponding to the given key.
+	 * 
+	 * @param key the highlighting key as returned by {@link SemanticHighlighting#getPreferenceKey()}
+	 * @return the corresponding highlighting
+	 */
+	private Highlighting getHighlighting(String key) {
+		for (int i= 0; i < fSemanticHighlightings.length; i++) {
+			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
+			if (key.equals(semanticHighlighting.getPreferenceKey()))
+				return fHighlightings[i];
+		}
+		return null;
+	}
+
+	/**
 	 * Uninstall the semantic highlighting
 	 */
 	public void uninstall() {
+		disable();
+		
+		if (fPreferenceStore != null) {
+			fPreferenceStore.removePropertyChangeListener(this);
+			fPreferenceStore= null;
+		}
+		
+		fEditor= null;
+		fSourceViewer= null;
+		fColorManager= null;
+		fPresentationReconciler= null;
+	}
+
+	/**
+	 * Disable semantic highlighting.
+	 */
+	private void disable() {
 		if (fReconciler != null) {
 			fReconciler.uninstall();
 			fReconciler= null;
@@ -233,13 +361,17 @@ public class SemanticHighlightingManager {
 		
 		if (fSemanticHighlightings != null)
 			disposeHighlightings();
-		
-		fColorManager= null;
-		fPreferenceStore= null;
 	}
 
 	/**
-	 * 
+	 * @return <code>true</code> iff semantic highlighting is enabled in the preferences
+	 */
+	private boolean isEnabled() {
+		return fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+	}
+	
+	/**
+	 * Initialize semantic highlightings.
 	 */
 	private void initializeHighlightings() {
 		fSemanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
@@ -255,7 +387,7 @@ public class SemanticHighlightingManager {
 	}
 
 	/**
-	 * 
+	 * Dispose the semantic highlightings.
 	 */
 	private void disposeHighlightings() {
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++)
@@ -265,12 +397,33 @@ public class SemanticHighlightingManager {
 		fHighlightings= null;
 	}
 
+	/*
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		handlePropertyChangeEvent(event);
+	}
+
 	/**
 	 * Handle the given property change event
 	 * 
 	 * @param event The event
 	 */
-	public void handlePropertyChangeEvent(PropertyChangeEvent event) {
+	private void handlePropertyChangeEvent(PropertyChangeEvent event) {
+		if (fPreferenceStore == null)
+			return; // Uninstalled during event notification
+		
+		if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(event.getProperty())) {
+			if (isEnabled())
+				enable();
+			else
+				disable();
+			return;
+		}
+		
+		if (!isEnabled())
+			return;
+		
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
 			

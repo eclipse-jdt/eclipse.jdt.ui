@@ -2796,7 +2796,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		uninstallOverrideIndicator();
 		
-		uninstallSemanticReconciler();
+		uninstallSemanticHighlighting();
 		
 		if (fActivationListener != null) {
 			Shell shell= getEditorSite().getShell();
@@ -3016,13 +3016,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 			if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(property)) {
 				if (isSemanticHighlightingEnabled())
-					installSemanticReconciler();
+					installSemanticHighlighting();
 				else
-					uninstallSemanticReconciler();
+					uninstallSemanticHighlighting();
 				return;
 			}
-			if (isSemanticHighlightingEnabled())
-				fSemanticManager.handlePropertyChangeEvent(event);
 			
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 			
@@ -3299,7 +3297,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			installOccurrencesFinder();
 		
 		if (isSemanticHighlightingEnabled())
-			installSemanticReconciler();
+			installSemanticHighlighting();
 
 		getEditorSite().getShell().addShellListener(fActivationListener);
 	}
@@ -3733,7 +3731,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * @return <code>true</code> if semantic highlighting is enabled.
+	 * @return <code>true</code> if Semantic Highlighting is enabled.
 	 * 
 	 * @since 3.0
 	 */
@@ -3742,11 +3740,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	/**
-	 * Install the Semantic Highlight Reconciler
+	 * Install Semantic Highlighting.
 	 * 
 	 * @since 3.0
 	 */
-	private void installSemanticReconciler() {
+	private void installSemanticHighlighting() {
 		if (fSemanticManager == null) {
 			fSemanticManager= new SemanticHighlightingManager();
 			JavaPresentationReconciler backgroundPresentationReconciler= (JavaPresentationReconciler) getSourceViewerConfiguration().getPresentationReconciler(getSourceViewer());
@@ -3755,11 +3753,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	/**
-	 * Uninstall the Semantic Highlight Reconciler
+	 * Uninstall Semantic Highlighting.
 	 * 
 	 * @since 3.0
 	 */
-	private void uninstallSemanticReconciler() {
+	private void uninstallSemanticHighlighting() {
 		if (fSemanticManager != null) {
 			fSemanticManager.uninstall();
 			fSemanticManager= null;
