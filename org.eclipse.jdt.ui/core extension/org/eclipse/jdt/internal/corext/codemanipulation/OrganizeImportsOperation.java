@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -35,13 +37,19 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -62,269 +70,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	
-	private static class TypeRefASTVisitor extends GenericVisitor {
-
-		private Selection fSubRange;
-		private Collection fResult;
-		private ArrayList fOldSingleImports;
-		private ArrayList fOldDemandImports;
-
-		public TypeRefASTVisitor(Selection rangeLimit, Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
-			super(true);
-			fResult= result;
-			fOldSingleImports= oldSingleImports;
-			fOldDemandImports= oldDemandImports;
-			fSubRange= rangeLimit;
-		}
-		
-		private boolean isAffected(ASTNode node) {
-			return fSubRange == null || !fSubRange.liesOutside(node);
-		}
-		
-		
-		private void addReference(SimpleName name) {
-			if (isAffected(name)) {
-				fResult.add(name);
-			}
-		}			
-		
-		private void typeRefFound(Name node) {
-			if (node != null) {
-				while (node.isQualifiedName()) {
-					node= ((QualifiedName) node).getQualifier();
-				}
-				addReference((SimpleName) node);
-			}
-		}
-
-		private void possibleTypeRefFound(Name node) {
-			while (node.isQualifiedName()) {
-				node= ((QualifiedName) node).getQualifier();
-			}
-			IBinding binding= node.resolveBinding();
-			if (binding == null || binding.getKind() == IBinding.TYPE) {
-				// if the binding is null, we cannot determine if 
-				// we have a type binding or not, so we will assume
-				// we do.
-				addReference((SimpleName) node);
-			}
-		}
-		
-		private void doVisitChildren(List elements) {
-			int nElements= elements.size();
-			for (int i= 0; i < nElements; i++) {
-				((ASTNode) elements.get(i)).accept(this);
-			}
-		}
-		
-		private void doVisitNode(ASTNode node) {
-			if (node != null) {
-				node.accept(this);
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
-		 */
-		protected boolean visitNode(ASTNode node) {
-			return isAffected(node);
-		}
-		
-		/*
-		 * @see ASTVisitor#visit(ArrayType)
-		 */
-		public boolean visit(ArrayType node) {
-			doVisitNode(node.getElementType());
-			return false;
-		}
-
-		/*
-		 * @see ASTVisitor#visit(SimpleType)
-		 */
-		public boolean visit(SimpleType node) {
-			typeRefFound(node.getName());
-			return false;
-		}
-		
-		/*
-		 * @see ASTVisitor#visit(QualifiedName)
-		 */
-		public boolean visit(QualifiedName node) {
-			possibleTypeRefFound(node); // possible ref
-			return false;
-		}		
-
-		/*
-		 * @see ASTVisitor#visit(ImportDeclaration)
-		 */
-		public boolean visit(ImportDeclaration node) {
-			String id= ASTResolving.getFullName(node.getName());
-			if (node.isOnDemand()) {
-				fOldDemandImports.add(id);
-			} else {
-				fOldSingleImports.add(id);
-			}
-			return false;
-		}
-		
-		/*
-		 * @see ASTVisitor#visit(PackageDeclaration)
-		 */
-		public boolean visit(PackageDeclaration node) {
-			return false;
-		}				
-
-		/*
-		 * @see ASTVisitor#visit(ThisExpression)
-		 */
-		public boolean visit(ThisExpression node) {
-			typeRefFound(node.getQualifier());
-			return false;
-		}
-
-		private void evalQualifyingExpression(Expression expr) {
-			if (expr != null) {
-				if (expr instanceof Name) {
-					possibleTypeRefFound((Name) expr);
-				} else {
-					expr.accept(this);
-				}
-			}
-		}			
-
-		/*
-		 * @see ASTVisitor#visit(ClassInstanceCreation)
-		 */
-		public boolean visit(ClassInstanceCreation node) {
-			typeRefFound(node.getName());
-			evalQualifyingExpression(node.getExpression());
-			if (node.getAnonymousClassDeclaration() != null) {
-				node.getAnonymousClassDeclaration().accept(this);
-			}
-			doVisitChildren(node.arguments());
-			return false;
-		}
-
-		/*
-		 * @see ASTVisitor#endVisit(MethodInvocation)
-		 */
-		public boolean visit(MethodInvocation node) {
-			evalQualifyingExpression(node.getExpression());
-			doVisitChildren(node.arguments());
-			return false;
-		}
-
-		/*
-		 * @see ASTVisitor#visit(SuperConstructorInvocation)
-		 */		
-		public boolean visit(SuperConstructorInvocation node) {
-			if (!isAffected(node)) {
-				return false;
-			}
-			
-			evalQualifyingExpression(node.getExpression());
-			doVisitChildren(node.arguments());
-			return false;	
-		}		
-
-		/*
-		 * @see ASTVisitor#visit(FieldAccess)
-		 */
-		public boolean visit(FieldAccess node) {
-			evalQualifyingExpression(node.getExpression());
-			return false;
-		}
-		
-		/*
-		 * @see ASTVisitor#visit(SimpleName)
-		 */
-		public boolean visit(SimpleName node) {
-			// if the call gets here, it can only be a variable reference
-			return false;
-		}
-
-		/*
-		 * @see ASTVisitor#visit(TypeDeclaration)
-		 */
-		public boolean visit(TypeDeclaration node) {
-			if (!isAffected(node)) {
-				return false;
-			}
-			doVisitNode(node.getJavadoc());
-			
-			typeRefFound(node.getSuperclass());
-
-			Iterator iter= node.superInterfaces().iterator();
-			while (iter.hasNext()) {
-				typeRefFound((Name) iter.next());
-			}
-			doVisitChildren(node.bodyDeclarations());
-			return false;
-		}
-		
-		/*
-		 * @see ASTVisitor#visit(MethodDeclaration)
-		 */
-		public boolean visit(MethodDeclaration node) {
-			if (!isAffected(node)) {
-				return false;
-			}
-			doVisitNode(node.getJavadoc());
-			
-			if (!node.isConstructor()) {
-				doVisitNode(node.getReturnType());
-			}
-			doVisitChildren(node.parameters());
-			Iterator iter=node.thrownExceptions().iterator();
-			while (iter.hasNext()) {
-				typeRefFound((Name) iter.next());
-			}
-			doVisitNode(node.getBody());
-			return false;
-		}
-		
-		public boolean visit(TagElement node) {
-			String name= node.getTagName();
-			List list= node.fragments();
-			int idx= 0;
-			if (name != null && !list.isEmpty()) {
-				Object first= list.get(0);
-				if (first instanceof Name) {
-					if ("@throws".equals(name) || "@exception".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$
-						typeRefFound((Name) first);
-					} else if ("@see".equals(name) || "@link".equals(name) || "@linkplain".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-						possibleTypeRefFound((Name) first);
-					}
-					idx++;
-				}
-			}
-			for (int i= idx; i < list.size(); i++) {
-				doVisitNode((ASTNode) list.get(i));
-			}
-			return false;
-		}
-		
-		public boolean visit(MemberRef node) {
-			Name name= node.getQualifier();
-			if (name != null) {
-				typeRefFound(name);
-			}
-			return false;
-		}
-		
-		public boolean visit(MethodRef node) {
-			Name qualifier= node.getQualifier();
-			if (qualifier != null) {
-				typeRefFound(qualifier);
-			}
-			List list= node.parameters();
-			if (list != null) {
-				doVisitChildren(list); // visit MethodRefParameter with Type
-			}
-			return false;
-		}
-	}
-		
 	private static class TypeReferenceProcessor {
 		
 		private ArrayList fOldSingleImports;
@@ -486,7 +231,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}	
 
 
-	private Selection fRange;
+	private Region fRange;
 	private ImportsStructure fImportsStructure;	
 	private boolean fDoSave;
 	
@@ -499,7 +244,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private IProblem fParsingError;
 	private CompilationUnit fASTRoot;
 
-	public OrganizeImportsOperation(ImportsStructure impStructure, Selection range, boolean ignoreLowerCaseNames, boolean save, IChooseImportQuery chooseImportQuery) {
+	public OrganizeImportsOperation(ImportsStructure impStructure, Region range, boolean ignoreLowerCaseNames, boolean save, IChooseImportQuery chooseImportQuery) {
 		super();
 		fImportsStructure= impStructure;
 		fRange= range;
@@ -587,7 +332,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	private boolean isAffected(IProblem problem) {
-		return fRange == null || (fRange.getOffset() <= problem.getSourceEnd() && fRange.getExclusiveEnd() > problem.getSourceStart());
+		return fRange == null || (fRange.getOffset() <= problem.getSourceEnd() && (fRange.getOffset() + fRange.getLength()) > problem.getSourceStart());
 	}
 
 	
@@ -601,8 +346,19 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			}
 		}
+		List imports= fASTRoot.imports();
+		for (int i= 0; i < imports.size(); i++) {
+			ImportDeclaration curr= (ImportDeclaration) imports.get(i);
+			String id= ASTResolving.getFullName(curr.getName());
+			if (curr.isOnDemand()) {
+				oldDemandImports.add(id);
+			} else {
+				oldSingleImports.add(id);
+			}
+		}
+		
 		ArrayList result= new ArrayList();
-		TypeRefASTVisitor visitor = new TypeRefASTVisitor(fRange, result, oldSingleImports, oldDemandImports);
+		ImportReferencesCollector visitor = new ImportReferencesCollector(fRange, result);
 		fASTRoot.accept(visitor);
 
 		return result.iterator();

@@ -2905,6 +2905,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// add annotation actions
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getResourceBundle(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
+		
+		// replace cut/copy paste actions with a version that implement 'add imports on paste'
+		
+		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Cut.", this, ITextOperationTarget.CUT); //$NON-NLS-1$
+		setAction(ITextEditorActionConstants.CUT, action);
+		
+		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Copy.", this, ITextOperationTarget.COPY); //$NON-NLS-1$
+		setAction(ITextEditorActionConstants.COPY, action);
+		
+		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
+		setAction(ITextEditorActionConstants.PASTE, action);
+
 	}
 	
 	public void updatedTitleImage(Image image) {
