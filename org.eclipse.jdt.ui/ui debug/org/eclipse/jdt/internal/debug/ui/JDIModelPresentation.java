@@ -1,8 +1,9 @@
+package org.eclipse.jdt.internal.debug.ui;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.debug.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -11,26 +12,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.wizard.WizardDialog;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.ui.IEditorDescriptor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -44,7 +28,6 @@ import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
-
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -61,19 +44,31 @@ import org.eclipse.jdt.debug.core.IJavaObject;
 import org.eclipse.jdt.debug.core.IJavaRunToLineBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
+import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.debug.core.IJavaVariable;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
-
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @see IDebugModelPresentation
@@ -159,6 +154,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		store.addPropertyChangeListener(this);
 	}
 	
+	/**
+	 * @see IBaseLabelProvider#dispose()
+	 */
 	public void dispose() {
 		super.dispose();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -312,7 +310,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 			
 	/**
-	 * Returns a label for the item
+	 * @see IDebugModelPresentation#getText(Object)
 	 */
 	public String getText(Object item) {
 		try {
@@ -479,7 +477,11 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		String refTypeName= value.getReferenceTypeName();
 		String valueString= value.getValueString();
 		boolean isString= refTypeName.equals(fgStringName);
-		String signature= value.getSignature();
+		IJavaType type= value.getJavaType();
+		String signature= null;
+		if (type != null) {
+			signature= type.getSignature();
+		}
 		if ("V".equals(signature)) {
 			valueString= getResourceString(NO_RETURN_VALUE);
 		}
@@ -614,15 +616,28 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 	
 	/**
+	 * Returns the type signature for this value if its type is primitive.  
+	 * For non-primitive types, null is returned.
+	 */
+	protected String getPrimitiveValueTypeSignature(IJavaValue value) throws DebugException {
+		IJavaType type= value.getJavaType();
+		if (type != null) {
+			String sig= type.getSignature();
+			if (sig != null || sig.length() == 1) {
+				return sig;
+			}
+		}
+		return null;
+	}
+	/**
 	 * Returns the character string of a byte or <code>null</code if
 	 * the value is not a byte.
 	 */
 	protected String getValueCharText(IJavaValue value) throws DebugException {
-		String sig= value.getSignature();
-		if (sig == null || sig.length() > 1) {
+		String sig= getPrimitiveValueTypeSignature(value);
+		if (sig == null) {
 			return null;
 		}
-		
 		String valueString= value.getValueString();
 		int intValue= 0;	
 		switch (sig.charAt(0)) {
@@ -690,6 +705,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 
 	/**
 	 * Maps a Java element to an appropriate image.
+	 * 
+	 * @see IDebugModelPresentation#getImage(Object)
 	 */
 	public Image getImage(Object item) {
 		try {
@@ -782,7 +799,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	/**
-	 * @see IDebugModelPresentation
+	 * @see IDebugModelPresentation#getEditorInput(Object)
 	 */
 	public IEditorInput getEditorInput(Object item) {
 		try {
@@ -802,7 +819,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	/**
-	 * @see IDebugModelPresentaion
+	 * @see IDebugModelPresentation#getEditorId(IEditorInput, Object)
 	 */
 	public String getEditorId(IEditorInput input, Object inputObject) {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
@@ -814,7 +831,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	/**
-	 * @see IDebugModelPresentation
+	 * @see IDebugModelPresentation#setAttribute(String, Object)
 	 */
 	public void setAttribute(String id, Object value) {
 		if (value == null) {
@@ -899,8 +916,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 	
 	protected String getValueUnsignedText(IJavaValue value) throws DebugException {
-		String sig= value.getSignature();
-		if (sig == null || sig.length() > 1) {
+		String sig= getPrimitiveValueTypeSignature(value);
+		if (sig == null) {
 			return null;
 		}
 
@@ -917,8 +934,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	protected String getValueHexText(IJavaValue value) throws DebugException {
-		String sig= value.getSignature();
-		if (sig == null || sig.length() > 1) {
+		String sig= getPrimitiveValueTypeSignature(value);
+		if (sig == null) {
 			return null;
 		}
 
@@ -954,6 +971,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				}
 				buff.append(hexString);
 				break;
+			default:
+				return null;
 		}
 		return buff.toString();
 	}
