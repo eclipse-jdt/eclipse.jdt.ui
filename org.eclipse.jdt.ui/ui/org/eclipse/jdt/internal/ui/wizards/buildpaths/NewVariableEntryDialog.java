@@ -31,7 +31,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class NewVariableEntryDialog extends Dialog {
@@ -72,12 +71,17 @@ public class NewVariableEntryDialog extends Dialog {
 	}
 	
 	private static class FileContentProvider implements ITreeContentProvider {
+		
+		private final Object[] EMPTY= new Object[0];
 	
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof File) {
-				return ((File) parentElement).listFiles();
+				File[] children= ((File) parentElement).listFiles();
+				if (children != null) {
+					return children;
+				}
 			}
-			return new Object[0];
+			return EMPTY;
 		}
 	
 		public Object getParent(Object element) {
@@ -138,8 +142,8 @@ public class NewVariableEntryDialog extends Dialog {
 	 * @see Dialog#createButtonsForButtonBar(Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		fOkButton= createButton(parent, IDialogConstants.OK_ID, NewWizardMessages.getString("NewVariableEntryDialog.add.button"), true);
-		fExtensionButton= createButton(parent, IDialogConstants.CLIENT_ID, NewWizardMessages.getString("NewVariableEntryDialog.addextension.button"), false);
+		fOkButton= createButton(parent, IDialogConstants.OK_ID, NewWizardMessages.getString("NewVariableEntryDialog.add.button"), true); //$NON-NLS-1$
+		fExtensionButton= createButton(parent, IDialogConstants.CLIENT_ID, NewWizardMessages.getString("NewVariableEntryDialog.addextension.button"), false); //$NON-NLS-1$
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}	
 	
@@ -165,7 +169,7 @@ public class NewVariableEntryDialog extends Dialog {
 	}
 	
 	private void doSelectionChanged() {
-		StatusInfo status= new StatusInfo();
+		boolean isValidSelection= true;
 		
 		List selected= fVariableBlock.getSelectedElements();
 		int nSelected= selected.size();
@@ -175,15 +179,18 @@ public class NewVariableEntryDialog extends Dialog {
 		if (nSelected > 0) {
 			fResultPaths= new Path[nSelected];
 			for (int i= 0; i < nSelected; i++) {
-				String varName= ((CPVariableElement) selected.get(i)).getName();
-				fResultPaths[i]= new Path(varName);
+				CPVariableElement curr= (CPVariableElement) selected.get(i);
+				fResultPaths[i]= new Path(curr.getName());
+				if (!curr.getPath().toFile().isFile()) {
+					isValidSelection= false;
+				}
+					
 			}
-			if (nSelected == 1) {
-				canExtend= !fResultPaths[0].toFile().isFile();
-			}
-		}		
-		fExtensionButton.setEnabled(canExtend);
-		fOkButton.setEnabled(nSelected > 0);
+		} else {
+			isValidSelection= false;
+		}
+		fExtensionButton.setEnabled(nSelected == 1 && !isValidSelection);
+		fOkButton.setEnabled(isValidSelection);
 	}
 	
 	private IPath[] chooseExtensions(CPVariableElement elem) {
