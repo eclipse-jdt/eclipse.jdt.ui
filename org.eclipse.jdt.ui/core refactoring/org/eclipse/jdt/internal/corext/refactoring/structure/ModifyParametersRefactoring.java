@@ -30,12 +30,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -122,15 +124,76 @@ public class ModifyParametersRefactoring extends Refactoring {
 		return fParameterInfos;
 	}
 	
-	public RefactoringStatus checkNewNames(){
+	public RefactoringStatus checkParameters(){
 		RefactoringStatus result= new RefactoringStatus();
 		if (result.isOK())
-			result.merge(checkForDuplicateNames());
+			checkForDuplicateNames(result);
 		if (result.isOK())	
-			result.merge(checkAllNames());
+			checkAllNames(result);
+		checkAddedParameters(result);	
 		return result;
 	}
+
+	private void checkAddedParameters(RefactoringStatus result) {
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (! info.isAdded())
+				continue;
+			checkParameterType(result, info);
+			if (result.hasFatalError())
+				return;
+			checkParameterDefaultValue(result, info);
+		}
+	}
+
+	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
+		if (! isValidExpression(info.getDefaultValue())){
+			String pattern= "{0} is not a valid expression";
+			String msg= MessageFormat.format(pattern, new String[]{info.getDefaultValue()});
+			result.addFatalError(msg);
+		}	
+	}
+
+	private void checkParameterType(RefactoringStatus result, ParameterInfo info) {
+		if (! isValidType(info.getType())){
+			String pattern= "{0} is not a valid type name";
+			String msg= MessageFormat.format(pattern, new String[]{info.getType()});
+			result.addFatalError(msg);
+		}	
+	}
+
+	//XXX should maybe unify the 2 checks
+	private static boolean isValidType(String string){
+		StringBuffer cuBuff= new StringBuffer();
+		cuBuff.append("class A{");
+		int offset= cuBuff.length();
+		cuBuff.append(string)
+			  .append(" i= null;}");
+		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
+		Selection selection= Selection.createFromStartLength(offset, string.length());
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+		cu.accept(analyzer);
+		ASTNode selected= analyzer.getFirstSelectedNode();
+		return (selected instanceof Type) && 
+				string.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
+	}
 	
+	private static boolean isValidExpression(String string){
+		StringBuffer cuBuff= new StringBuffer();
+		cuBuff.append("class A{")
+			  .append("Object i=");
+		int offset= cuBuff.length();
+		cuBuff.append(string)
+			  .append(";}");
+		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
+		Selection selection= Selection.createFromStartLength(offset, string.length());
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+		cu.accept(analyzer);
+		ASTNode selected= analyzer.getFirstSelectedNode();
+		return (selected instanceof Expression) && 
+				string.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
+	}
+
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkAvailability(fMethod));
@@ -193,7 +256,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
 			
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkNewNames());
+			result.merge(checkParameters());
 			if (mustAnalyzeAst()) 
 				result.merge(analyzeAst()); 
 			if (result.hasFatalError())
@@ -226,8 +289,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 		return buff.toString();
 	}
 
-	private RefactoringStatus checkForDuplicateNames(){
-		RefactoringStatus result= new RefactoringStatus();
+	private void checkForDuplicateNames(RefactoringStatus result){
 		Set found= new HashSet();
 		Set doubled= new HashSet();
 		for (Iterator iter = getParameterInfos().iterator(); iter.hasNext();) {
@@ -240,11 +302,9 @@ public class ModifyParametersRefactoring extends Refactoring {
 				found.add(newName);
 			}	
 		}
-		return result;
 	}
 	
-	private RefactoringStatus checkAllNames(){
-		RefactoringStatus result= new RefactoringStatus();
+	private void  checkAllNames(RefactoringStatus result){
 		for (Iterator iter = getParameterInfos().iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
@@ -252,7 +312,6 @@ public class ModifyParametersRefactoring extends Refactoring {
 			if (! Checks.startsWithLowerCase(newName))
 				result.addWarning(RefactoringCoreMessages.getString("RenameParametersRefactoring.should_start_lowercase")); //$NON-NLS-1$
 		}
-		return result;			
 	}
 
 	private ICompilationUnit getCu() {
@@ -528,6 +587,8 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 		
 	private void addReorderings(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
+		if (fOccurrences == null)
+			return;
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.preview"), fOccurrences.length); //$NON-NLS-1$
 			for (int i= 0; i < fOccurrences.length ; i++){
