@@ -618,4 +618,13 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		}
 		return defaultValue;
 	}
+	
+	/**
+	 * Returns the invocationCount.
+	 * 
+	 * @return the invocationCount
+	 */
+	protected long getInvocationCount() {
+		return fInvocationCount;
+	}
 }

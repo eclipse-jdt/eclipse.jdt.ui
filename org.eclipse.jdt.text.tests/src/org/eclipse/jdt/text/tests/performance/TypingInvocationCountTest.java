@@ -231,12 +231,14 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		int offset= EditorTestHelper.getDocument(fEditor).getLineOffset(line) + column;
 		fEditor.selectAndReveal(offset, 0);
 		Display display= EditorTestHelper.getActiveDisplay();
-		EditorTestHelper.runEventQueue(100);
+		EditorTestHelper.runEventQueue(200);
 		performanceMeter.start();
 		SWTEventHelper.pressKeyChar(display, ch);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
-		EditorTestHelper.runEventQueue(100);
+		EditorTestHelper.runEventQueue(200);
 		performanceMeter.stop();
 		performanceMeter.commit();
+		
+		assertTrue(performanceMeter.getInvocationCount() > 0);
 	}
 }
