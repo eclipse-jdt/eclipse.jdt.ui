@@ -366,11 +366,13 @@ public class MoveCuUpdateCreator {
 						IBuffer buffer= unit.getBuffer();
 						String currectPackageName= fSource.getElementName();
 						String match= buffer.getText(start, end - start);
-						match= CommentAnalyzer.normalizeReference(match);
+						//TODO: must know where package reference ends
+						//match= CommentAnalyzer.normalizeReference(match);
 						if (match.startsWith(currectPackageName)) {
 							end= start + currectPackageName.length();
 							getResults().add(new TypeReference(res, start, end, element, accuracy, true));
 						} else {
+							// start, end never read iff not qualified
 							getResults().add(new TypeReference(res, start, end, element, accuracy, false));
 						}
 					}
