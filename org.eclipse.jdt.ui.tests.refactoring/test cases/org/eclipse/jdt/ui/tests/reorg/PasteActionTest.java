@@ -46,8 +46,9 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSource;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
+
+import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 
 
 public class PasteActionTest extends RefactoringTest{

@@ -46,9 +46,9 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSource;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
+import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;

@@ -22,6 +22,7 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.*;
 
 public class TypedSourceTransfer extends ByteArrayTransfer {
 
