@@ -541,18 +541,18 @@ public class SourceAttachmentBlock {
 	 */
 	public IRunnableWithProgress getRunnable(final IJavaProject jproject, final Shell shell) {
 		fProject= jproject;
-		return getRunnable();
+		return getRunnable(shell);
 	}
 
 	/**
 	 * Creates a runnable that sets the source attachment by modifying the
 	 * project's classpath or updating a container.
 	 */
-	public IRunnableWithProgress getRunnable() {
+	public IRunnableWithProgress getRunnable(final Shell shell) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
 				try {
-					attachSource(monitor);
+					attachSource(shell, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -561,7 +561,7 @@ public class SourceAttachmentBlock {
 	}	
 	
 	
-	protected void attachSource(IProgressMonitor monitor) throws CoreException {
+	protected void attachSource(final Shell shell, IProgressMonitor monitor) throws CoreException {
 		boolean isExported= fEntry.isExported();
 		IClasspathEntry newEntry;
 		if (fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
@@ -572,7 +572,7 @@ public class SourceAttachmentBlock {
 		if (fContainerPath != null) {
 			updateContainerClasspath(fProject, fContainerPath, newEntry, monitor);
 		} else {
-			updateProjectClasspath(fProject, newEntry, monitor);
+			updateProjectClasspath(shell, fProject, newEntry, monitor);
 		}
 	}
 
@@ -595,7 +595,7 @@ public class SourceAttachmentBlock {
 		monitor.worked(1);
 	}
 
-	private void updateProjectClasspath(IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
+	private void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
 		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
 		int nEntries= oldClasspath.length;
 		ArrayList newEntries= new ArrayList(nEntries + 1);
@@ -613,7 +613,7 @@ public class SourceAttachmentBlock {
 			}
 		}
 		if (!found) {
-			if (newEntry.getSourceAttachmentPath() == null || !putJarOnClasspathDialog()) {
+			if (newEntry.getSourceAttachmentPath() == null || !putJarOnClasspathDialog(shell)) {
 				return;
 			}
 			// add new
@@ -623,9 +623,9 @@ public class SourceAttachmentBlock {
 		jproject.setRawClasspath(newClasspath, monitor);
 	}
 	
-	private boolean putJarOnClasspathDialog() {
+	private boolean putJarOnClasspathDialog(Shell shell) {
 		final boolean[] result= new boolean[1];
-		getShell().getDisplay().syncExec(new Runnable() {
+		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				String title= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.title"); //$NON-NLS-1$
 				String message= NewWizardMessages.getString("SourceAttachmentBlock.putoncpdialog.message"); //$NON-NLS-1$

@@ -114,7 +114,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
-				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable();		
+				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(getShell());		
 				new ProgressMonitorDialog(getShell()).run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$

@@ -139,7 +139,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 * attachements.
      */
 	protected IRunnableWithProgress getRunnable() {
-		return fSourceAttachmentBlock.getRunnable();
+		return fSourceAttachmentBlock.getRunnable(getShell());
 	}
 
 	/**
