@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.javadoc;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -51,6 +54,7 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -61,15 +65,14 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 public class JavaDocLocations {
 	
 	public static final String ARCHIVE_PREFIX= "jar:file:/"; //$NON-NLS-1$
-	
-	private static final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
+	private static final String PREF_JAVADOCLOCATIONS= "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
 	
 	private static final String NODE_ROOT= "javadoclocation"; //$NON-NLS-1$
 	private static final String NODE_ENTRY= "location_01"; //$NON-NLS-1$
 	private static final String NODE_PATH= "path"; //$NON-NLS-1$
 	private static final String NODE_URL= "url"; //$NON-NLS-1$
 	
-	private static final String STORE_FILE= "javadoclocations.xml"; //$NON-NLS-1$
+	
 	
 	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
 	
@@ -113,7 +116,7 @@ public class JavaDocLocations {
 			URL old= (URL) getJavaDocLocations().put(path, url);
 			isModified= (old == null || !url.toExternalForm().equals(old.toExternalForm()));
 		}
-		if (save || isModified) {
+		if (save && isModified) {
 			try {
 				storeLocations();
 			} catch (CoreException e) {
@@ -189,28 +192,27 @@ public class JavaDocLocations {
 	}
 	
 	// loading & storing
-
-	private static File getStoreFile() {
-		IPath path= JavaPlugin.getDefault().getStateLocation();
-		path= path.append(STORE_FILE);
-		return path.toFile();
-	}
 	
 	private static JavaUIException createException(Throwable t, String message) {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}	
 
 	private static synchronized void storeLocations() throws CoreException {
-		Writer writer= null;
+		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
-			writer= new FileWriter(getStoreFile());
-			saveToStream(fgJavadocLocations, writer);
-		} catch (IOException e) {
-			throw createException(e, CorextMessages.getString("JavaDocLocations.error.writeFile")); //$NON-NLS-1$
+			saveToStream(fgJavadocLocations, stream);
+			byte[] bytes= stream.toByteArray();
+			String val;
+			try {
+				val= new String(bytes, "UTF-8"); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				val= new String(bytes);
+			}
+			PreferenceConstants.getPreferenceStore().setValue(PREF_JAVADOCLOCATIONS, val);
+			JavaPlugin.getDefault().savePluginPreferences();
 		} finally {
 			try {
-				if (writer != null)
-					writer.close();
+				stream.close();
 			} catch (IOException e) {
 				//	error closing reader: ignore
 			}
@@ -218,17 +220,46 @@ public class JavaDocLocations {
 	}
 	
 	private static boolean loadOldForCompatibility() {
-		// in 2.0, the Javadoc locations were store as one big string im the persistent properties
+		// in 2.1, the Javadoc locations were store in a file in the meta data
+		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
 		try {
+			final String STORE_FILE= "javadoclocations.xml"; //$NON-NLS-1$
+			File file= JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
+			if (file.exists()) {
+				Reader reader= null;
+				try {
+					reader= new FileReader(file);
+					loadFromStream(new InputSource(reader));
+					return true;
+				} catch (IOException e) {
+					JavaPlugin.log(e); // log but ignore
+				} finally {
+					try {
+						if (reader != null) {
+							reader.close();
+						}
+					} catch (IOException e) {}
+					file.delete(); // remove file
+				}
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e); // log but ignore
+		}	
+		
+		// in 2.0, the Javadoc locations were store as one big string im the persistent properties
+		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
+		try {
+			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
+			
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 			String xmlString= root.getPersistentProperty(QUALIFIED_NAME); 
 			if (xmlString != null) { // only set when workspace is old
 				Reader reader= new StringReader(xmlString);
 				try {
-					loadFromStream(reader);
-					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
+					loadFromStream(new InputSource(reader));
 					return true;
 				} finally {
+					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
 					try {
 						reader.close();
 					} catch (IOException e) {
@@ -242,28 +273,32 @@ public class JavaDocLocations {
 		return false;
 	}
 	
-	private static boolean loadFromFile() throws CoreException {
-		File file= getStoreFile();
-		if (file.exists()) {
-			Reader reader= null;
+	private static boolean loadFromPreferences() throws CoreException {
+		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
+		if (string != null && string.length() > 0) {
+			byte[] bytes;
 			try {
-				reader= new FileReader(getStoreFile());
-				loadFromStream(reader);
+				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				bytes= string.getBytes();
+			}
+			InputStream is= new ByteArrayInputStream(bytes);
+			try {
+				loadFromStream(new InputSource(is));
 				return true;
-			} catch (IOException e) {
-				throw createException(e, CorextMessages.getString("JavaDocLocations.error.readFile")); //$NON-NLS-1$
 			} finally {
 				try {
-					if (reader != null)
-					reader.close();
-				} catch (IOException e) {}
+					is.close();
+				} catch (IOException e) {
+					// ignore
+				}
 			}
 		}
 		return false;
 	}	
 	
 	
-	private static void saveToStream(Map locations, Writer writer) throws CoreException {
+	private static void saveToStream(Map locations, OutputStream stream) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder= factory.newDocumentBuilder();		
@@ -289,7 +324,7 @@ public class JavaDocLocations {
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(writer);
+			StreamResult result = new StreamResult(stream);
 
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
@@ -299,11 +334,11 @@ public class JavaDocLocations {
 		}
 	}
 	
-	private static void loadFromStream(Reader reader) throws CoreException {
+	private static void loadFromStream(InputSource inputSource) throws CoreException {
 		Element cpElement;
 		try {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
+			cpElement = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
 			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
@@ -348,10 +383,9 @@ public class JavaDocLocations {
 	
 	private static synchronized void initJavadocLocations() throws CoreException {
 		try {
-			if (loadOldForCompatibility()) {
-				storeLocations();
-			} else {
-				loadFromFile();
+			boolean res= loadFromPreferences();
+			if (!res) {
+				loadOldForCompatibility();
 			}
 		} finally {
 			fgVMInstallListener= new JavaDocVMInstallListener();
