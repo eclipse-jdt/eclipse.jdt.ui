@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,7 +30,8 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jface.text.Position;
 
@@ -40,74 +40,86 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
-class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
+class NLSSearchResultRequestor extends SearchRequestor {
 	/*
 	 * Matches are added to fResult. Element (group key) is IJavaElement or FileEntry.
 	 */
 
 	private static final StringMatcher fgGetClassNameMatcher= new StringMatcher("*.class.getName()*", false, false);  //$NON-NLS-1$
 
-	private IProgressMonitor fMonitor;
 	private NLSSearchResult fResult;
 	private IFile fPropertiesFile;
 	private Properties fProperties;
 	private HashSet fUsedPropertyNames;
 
-	public NLSSearchResultCollector2(IFile propertiesFile, IProgressMonitor monitor, NLSSearchResult result) {
+	public NLSSearchResultRequestor(IFile propertiesFile, NLSSearchResult result) {
 		fPropertiesFile= propertiesFile;
-		fMonitor= monitor;
 		fResult= result;
 	}
 
 	/*
-	 * @see IJavaSearchResultCollector#aboutToStart()
+	 * @see org.eclipse.jdt.core.search.SearchRequestor#beginReporting()
 	 */
-	public void aboutToStart() {
+	public void beginReporting() {
 		loadProperties();
 		fUsedPropertyNames= new HashSet(fProperties.size());
 	}
 	
 	/*
-	 * @see IJavaSearchResultCollector#accept(IResource, int, int, IJavaElement, int)
+	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
-	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
-		if (enclosingElement == null || start == -1 || end == -1)
+	public void acceptSearchMatch(SearchMatch match) throws CoreException {
+		int offset= match.getOffset();
+		int length= match.getLength();
+		if (offset == -1 || length == -1)
 			return;
 		
+		if (! (match.getElement() instanceof IJavaElement))
+			return;
+		IJavaElement javaElement= (IJavaElement) match.getElement();
+		
 		// ignore matches in import declarations:
-		if (enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
+		if (javaElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
 			return;
 		
 		// heuristic: ignore matches in resource bundle name field:
-		if (enclosingElement.getElementType() == IJavaElement.FIELD) {
-			IField field= (IField)enclosingElement;
+		if (javaElement.getElementType() == IJavaElement.FIELD) {
+			IField field= (IField) javaElement;
 			String source= field.getSource();
 			if (source != null && fgGetClassNameMatcher.match(source))
 				return;
 		}
 		
 		// found reference to NLS Wrapper - now check if the key is there:
-		Position mutableKeyPosition= new Position(start, end - start);
+		Position mutableKeyPosition= new Position(offset, length);
 		//TODO: What to do if argument string not found? Currently adds a match with type name.
-		String key= findKey(mutableKeyPosition, start, enclosingElement);
+		String key= findKey(mutableKeyPosition, offset, javaElement);
 		if (key != null && isKeyDefined(key))
 			return;
 
-		fResult.addMatch(new Match(enclosingElement, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
+		fResult.addMatch(new Match(javaElement, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
 	}
 
-	/*
-	 * @see IJavaSearchResultCollector#done()
-	 */
-	public void done() {
-		markUnusedPropertyNames();
-	}
-
-	/*
-	 * @see IJavaSearchResultCollector#getProgressMonitor()
-	 */
-	public IProgressMonitor getProgressMonitor() {
-		return fMonitor;
+	public void reportUnusedPropertyNames(IProgressMonitor pm) {
+		//Don't use endReporting() for long running operation.
+		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
+		boolean hasUnused= false;		
+		pm.setTaskName("Searching for unused properties ...");
+		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
+		FileEntry key= new FileEntry(fPropertiesFile, message);
+		
+		for (Enumeration enum= fProperties.propertyNames(); enum.hasMoreElements();) {
+			String propertyName= (String) enum.nextElement();
+			if (!fUsedPropertyNames.contains(propertyName)) {
+				int start= findPropertyNameStartPosition(propertyName);
+				fResult.addMatch(new Match(key, Math.max(start, 0), propertyName.length()));
+				hasUnused= true;
+			}
+			pm.worked(1);
+		}
+		if (hasUnused)
+			fResult.setUnusedGroup(key);
+		pm.done();
 	}
 
 	/**
@@ -170,23 +182,6 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 			}
 		}
 		return null;
-	}
-
-	private void markUnusedPropertyNames() {
-		boolean hasUnused= false;		
-		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
-		FileEntry key= new FileEntry(fPropertiesFile, message);
-		
-		for (Enumeration enum= fProperties.propertyNames(); enum.hasMoreElements();) {
-			String propertyName= (String) enum.nextElement();
-			if (!fUsedPropertyNames.contains(propertyName)) {
-				int start= findPropertyNameStartPosition(propertyName);
-				fResult.addMatch(new Match(key, Math.max(start, 0), propertyName.length()));
-				hasUnused= true;
-			}
-		}
-		if (hasUnused)
-			fResult.setUnusedGroup(key);
 	}
 	
 	/**

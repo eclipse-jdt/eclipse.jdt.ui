@@ -11,20 +11,24 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -51,13 +55,21 @@ public class NLSSearchQuery implements ISearchQuery {
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) {
-		NLSSearchResultCollector2 collector= new NLSSearchResultCollector2(fPropertiesFile, monitor, fResult);
-		SearchEngine engine= new SearchEngine();
+		monitor.beginTask("", 5); //$NON-NLS-1$
+		final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
+		textResult.removeAll();
+		
+		SearchPattern pattern= SearchPattern.createPattern(fWrapperClass, IJavaSearchConstants.REFERENCES);
+		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
+		NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(fPropertiesFile, fResult);
 		try {
-			engine.search(JavaPlugin.getWorkspace(), fWrapperClass, IJavaSearchConstants.REFERENCES, fScope, collector);
-		} catch (JavaModelException e) {
+			SearchEngine engine= new SearchEngine();
+			engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
+			requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
+		monitor.done();
 		return 	Status.OK_STATUS;
 	}
 
@@ -82,7 +94,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	 * @see org.eclipse.search.ui.ISearchQuery#canRerun()
 	 */
 	public boolean canRerun() {
-		return false; //TODO: would have to re-check existence of files
+		return true;
 	}
 
 	/*

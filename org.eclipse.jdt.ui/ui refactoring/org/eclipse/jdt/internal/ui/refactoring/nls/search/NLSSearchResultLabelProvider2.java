@@ -26,6 +26,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 	public NLSSearchResultLabelProvider2(AbstractTextSearchViewPage page) {
 		super(page);
 		fLabelProvider= new JavaSearchResultLabelProvider();
+		fLabelProvider.setAppearance(JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER);
 	}
 	
 	/*

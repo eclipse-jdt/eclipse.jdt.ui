@@ -42,7 +42,7 @@ public abstract class JavaSearchSorter extends ViewerSorter {
 
 	/**
 	 * Sets up the label provider according to the result from
-	 * <code>getSortOrder()</code>
+	 * {@link #getLabelAppearance()}.
 	 * @return true if the sort can proceed, false otherwise.
 	 */
 	protected boolean setupLabelProvider() {
@@ -52,16 +52,17 @@ public abstract class JavaSearchSorter extends ViewerSorter {
 			return false;
 		fLabelProvider= view.getLabelProvider();
 		if (fLabelProvider instanceof JavaSearchResultLabelProvider) {
-			((JavaSearchResultLabelProvider)fLabelProvider).setOrder(getSortOrder());
+			((JavaSearchResultLabelProvider)fLabelProvider).setAppearance(getLabelAppearance());
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * @return The sort order flag for the JavaSearchResultLabelProvider.
+	 * @return The appearance flag for this sort order.
+	 * 	One of the <code>int</code> constants in {@link JavaSearchResultLabelProvider}
 	 */
-	protected abstract int getSortOrder();
+	protected abstract int getLabelAppearance();
 
 	protected ILabelProvider fLabelProvider;
 

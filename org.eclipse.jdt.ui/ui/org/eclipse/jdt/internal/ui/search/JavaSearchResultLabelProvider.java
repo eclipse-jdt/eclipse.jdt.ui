@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
 
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -23,20 +26,17 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
-	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
+	public static final int SHOW_ELEMENT_CONTAINER= 1;
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
+	
 	public static final String POTENTIAL_MATCH= SearchMessages.getString("JavaSearchResultLabelProvider.potentialMatch"); //$NON-NLS-1$
 
 	private AppearanceAwareLabelProvider fLabelProvider;
@@ -90,14 +90,11 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 
-		if (javaElement == null)
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
-
-		Image image= fLabelProvider.getImage(javaElement);
+		Image image= fLabelProvider.getImage(o);
 		if (image == null)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
 		
-		if (fDecorator != null) {
+		if (fDecorator != null && javaElement != null) {
 			Image decoratedImage= fDecorator.decorateImage(image, javaElement);
 			if (decoratedImage != null)
 				return decoratedImage;
@@ -105,16 +102,16 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		return image;
 	}
 
-	public void setOrder(int orderFlag) {
+	public void setAppearance(int appearanceFlag) {
 		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED;
-		if (orderFlag == SHOW_ELEMENT_CONTAINER)
+		if (appearanceFlag == SHOW_ELEMENT_CONTAINER)
 			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
 			
-		else if (orderFlag == SHOW_CONTAINER_ELEMENT)
+		else if (appearanceFlag == SHOW_CONTAINER_ELEMENT)
 			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
-		else if (orderFlag == SHOW_PATH) {
+		else if (appearanceFlag == SHOW_PATH) {
 			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 			flags |= JavaElementLabels.PREPEND_ROOT_PATH;

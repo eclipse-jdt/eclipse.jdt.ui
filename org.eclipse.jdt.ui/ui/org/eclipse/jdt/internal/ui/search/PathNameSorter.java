@@ -68,7 +68,7 @@ public class PathNameSorter extends JavaSearchSorter {
 		return getCollator().compare(name1, name2);
 	}
 
-	protected int getSortOrder() {
+	protected int getLabelAppearance() {
 		return JavaSearchResultLabelProvider.SHOW_PATH;
 	}
 }
