@@ -28,8 +28,8 @@
   </library> 
 </runtime>
 
-<extension-point name="%elementFiltersName" id="javaElementFilters"/>
-<extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers"/>
+<extension-point name="%elementFiltersName" id="javaElementFilters" schema="schema/javaElementFilters.mxsd"/>
+<extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers" schema="schema/javaEditorTextHovers.mxsd"/>
 
 <!-- =================================================================================== -->
 <!-- Extension Point: Wizard page to create or edit a Classpath Container Entry          -->
@@ -60,7 +60,7 @@
 <!-- </extension>                                                                        -->
 <!--                                                                                     -->
 <!-- =================================================================================== -->
-<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage"/>
+<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage" schema/classpathContainerPage.mxsd"/>
 
 <extension
       point="org.eclipse.jdt.ui.classpathContainerPage">
