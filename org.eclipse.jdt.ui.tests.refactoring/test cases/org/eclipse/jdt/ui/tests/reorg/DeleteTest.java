@@ -19,22 +19,24 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
 
 
 public class DeleteTest extends RefactoringTest{
@@ -107,6 +109,10 @@ public class DeleteTest extends RefactoringTest{
 
 	//---- tests
 	
+	private IReorgQueries createReorgQueries() {
+		return new MockReorgQueries();
+	}
+
 	public void testDisabled_emptySelection() throws Exception{
 		IJavaElement[] javaElements= {};
 		IResource[] resources= {};
@@ -317,25 +323,6 @@ public class DeleteTest extends RefactoringTest{
 		//TODO implement me
 	}
 
-	private IReorgQueries createReorgQueries() {
-		final IConfirmQuery yesQuery= new IConfirmQuery(){
-			public boolean confirm(String question) throws OperationCanceledException {
-				return true;
-			}
-			public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
-				return true;
-			}
-		};
-		return new IReorgQueries(){
-			public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
-				return yesQuery;
-			}
-			public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
-				return yesQuery;
-			}
-		};
-	}
-	
 	public void testDeleteWithinCu0() throws Exception{
 //		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
 //		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");
