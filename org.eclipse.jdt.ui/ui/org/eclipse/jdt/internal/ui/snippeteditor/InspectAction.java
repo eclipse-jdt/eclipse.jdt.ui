@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.ui.texteditor.IUpdate;
 
 /**
  * Inspects a snippet

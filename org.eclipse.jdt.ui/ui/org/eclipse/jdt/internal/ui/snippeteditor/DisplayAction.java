@@ -4,11 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ui.texteditor.IUpdate;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.ui.texteditor.IUpdate;
 
 /**
  * Displays the result of a snippet

@@ -4,7 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 /**
  * Runs a snippet in the context of a package
