@@ -335,8 +335,10 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @return the keyboard probe singleton.
 	 */
 	protected static final KeyboardProbe getKeyboardProbe() {
-		if (fgKeyboardProbe == null)
+		if (fgKeyboardProbe == null) {
 			fgKeyboardProbe= new KeyboardProbe();
+			fgKeyboardProbe.initialize();
+		}
 		return fgKeyboardProbe;
 	}
 }
