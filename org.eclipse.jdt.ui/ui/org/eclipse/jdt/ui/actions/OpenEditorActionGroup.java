@@ -140,14 +140,10 @@ public class OpenEditorActionGroup extends ActionGroup {
 			return;
 
 		Object o= ss.getFirstElement();
-		IAdaptable element= null;
-		if (o instanceof IType) {
-			element= ((IType)o).getCompilationUnit();
-		} else if (o instanceof IAdaptable) {
-			element= (IAdaptable)o;
-		}
-		if (element == null)
+		if (!(o instanceof IAdaptable))
 			return;
+
+		IAdaptable element= (IAdaptable)o;
 		Object resource= element.getAdapter(IResource.class);
 		if (!(resource instanceof IFile))
 			return; 
