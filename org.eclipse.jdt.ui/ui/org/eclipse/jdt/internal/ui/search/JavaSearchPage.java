@@ -331,7 +331,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		} 
 		
 		textSearchJob= new JavaSearchQuery(querySpec);
-		new SearchResultUpdater((JavaSearchResult) textSearchJob.getSearchResult());
 		NewSearchUI.runQuery(textSearchJob);	
 		return true;
 	}
