@@ -803,12 +803,6 @@
             id="org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage">
       </page>
       <page
-            name="%searchParticipantsPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.SearchParticipantsPreferencePage">
-      </page>
-      <page
             name="%codeFormatterPrefName"
             category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"

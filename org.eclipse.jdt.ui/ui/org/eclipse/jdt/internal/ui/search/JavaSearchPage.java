@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -38,8 +39,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
-import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
@@ -495,7 +494,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		gd.verticalAlignment= GridData.FILL;
 		limitTo.setLayoutData(gd);
 
-		createParticipants(result);
+		//createParticipants(result);
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -540,7 +539,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PREF_SEARCH_JRE, value);
 	}
 	
-	private Control createParticipants(Composite result) {
+	/*private Control createParticipants(Composite result) {
 		if (!SearchParticipantsPreferencePage.hasAnyParticipants())
 			return new Composite(result, SWT.NULL);
 		Button selectParticipants= new Button(result, SWT.PUSH);
@@ -559,7 +558,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		});
 		return selectParticipants;
-	}
+	}*/
 
 
 	private Control createExpression(Composite parent) {

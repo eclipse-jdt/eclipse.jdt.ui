@@ -138,6 +138,15 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 		return activeParticipants;
 	}
 
+	public static Map readAllParticipants() {
+		HashMap activeParticipants= new HashMap();
+		IConfigurationElement[] allParticipants= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
+		for (int i= 0; i < allParticipants.length; i++) {
+			activeParticipants.put(allParticipants[i].getAttribute("id"), allParticipants[i]); //$NON-NLS-1$
+		}
+		return activeParticipants;
+	}
+
 	private static String[] unpackOrderList(String str) {
 		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 		int nTokens= tok.countTokens();

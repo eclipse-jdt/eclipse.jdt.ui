@@ -80,7 +80,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	}	
 	
 	private void collectParticipants(Map participants, IProject[] projects) throws CoreException {
-		Iterator activeParticipants= SearchParticipantsPreferencePage.readActiveParticipants().values().iterator();
+		Iterator activeParticipants= SearchParticipantsPreferencePage.readAllParticipants().values().iterator();
 		while (activeParticipants.hasNext()) {
 			IConfigurationElement participant= (IConfigurationElement) activeParticipants.next();
 			String id= participant.getAttribute("id"); //$NON-NLS-1$
