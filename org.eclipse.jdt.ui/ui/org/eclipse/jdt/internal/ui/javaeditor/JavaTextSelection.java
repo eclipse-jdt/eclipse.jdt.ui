@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
- * A special text selection that gives access to the resloved and
+ * A special text selection that gives access to the resolved and
  * enclosing element.
  */
 public class JavaTextSelection extends TextSelection {
