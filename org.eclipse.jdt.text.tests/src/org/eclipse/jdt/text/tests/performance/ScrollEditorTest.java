@@ -88,7 +88,7 @@ public abstract class ScrollEditorTest extends TestCase {
 		fEvaluator= createEvaluator();
 		EditorTestHelper.bringToTop();
 		fEditor= EditorTestHelper.openInEditor(getFile(), true);
-		EditorTestHelper.calmDown(1000, 10000, 100);
+		EditorTestHelper.calmDown(3000, 10000, 100);
 	}
 
 	protected IEvaluator createEvaluator() {
