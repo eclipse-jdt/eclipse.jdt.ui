@@ -22,6 +22,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -34,9 +35,14 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 
@@ -75,11 +81,12 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-
 public class CreateNewConstructorAction extends SelectionDispatchAction {
 	
 	private CompilationUnitEditor fEditor;
 	private static final String fDialogTitle= ActionMessages.getString("CreateNewConstructorAction.error.title"); //$NON-NLS-1$
+	private static final int UP_INDEX= 0;
+	private static final int DOWN_INDEX= 1;
 	
 	/**
 	 * Creates a new <code>CreateNewConstructorAction</code>. The action requires
@@ -142,6 +149,12 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
+			IType selectionType= getSelectedType(selection);
+			if (selectionType == null) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("CreateNewConstructorAction.not_applicable")); //$NON-NLS-1$
+				return;
+			}			
+			
 			IField[] selectedFields= getSelectedFields(selection);
 			// open an editor and work on a working copy
 			IEditorPart editor= null;
@@ -183,7 +196,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		else if (elements[0] instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) elements[0];
 			IType type= cu.findPrimaryType();
-			if (!type.isInterface())
+			if (type != null && !type.isInterface())
 				return type;
 		}
 		return null;
@@ -250,7 +263,6 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {		
-
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);			
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
@@ -281,7 +293,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 	}	
 	
 	//---- Helpers -------------------------------------------------------------------
-	
+		
 	private void run(IType type, IField[] preselected, IEditorPart editor, boolean activatedFromEditor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
 			return;
@@ -296,7 +308,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		for (int i= 0; i < constructorFields.length; i++) {
 			boolean isStatic= Flags.isStatic(constructorFields[i].getFlags());			
 			if (!isStatic)			
-				constructorFieldsList.add(constructorFields[i]);
+			constructorFieldsList.add(constructorFields[i]);
 		}
 		if (constructorFieldsList.isEmpty()){
 			MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("CreateNewConstructorAction.typeContainsNoFields.message")); //$NON-NLS-1$
@@ -304,7 +316,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		}
 		
 		JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		CreateNewConstructorContentProvider contentProvider = new CreateNewConstructorContentProvider(constructorFieldsList);			
+		CreateNewConstructorContentProvider contentProvider= new CreateNewConstructorContentProvider(constructorFieldsList);			
 		CreateNewConstructorSelectionDialog dialog= new CreateNewConstructorSelectionDialog(getShell(), labelProvider, contentProvider, fEditor, type);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(getDialogTitle());
@@ -313,7 +325,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		dialog.setSize(60, 18);			
 		dialog.setInput(new Object());
 		dialog.setMessage(ActionMessages.getString("CreateNewConstructorAction.dialog.label")); //$NON-NLS-1$
-		dialog.setValidator(createValidator(constructorFields.length));
+		dialog.setValidator(createValidator(constructorFieldsList.size()));
 		
 		IField[] selected= null;
 		int dialogResult = dialog.open();
@@ -377,9 +389,232 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 	private String getDialogTitle() {
 		return fDialogTitle;
 	}	
+	
+	private static class CreateNewConstructorValidator implements ISelectionStatusValidator {
+		private static int fEntries;
+			
+		CreateNewConstructorValidator(int entries) {
+			super();
+			fEntries= entries;
+		}
 
-	private static class CreateNewConstructorContentProvider implements ITreeContentProvider {
+		public IStatus validate(Object[] selection) {
+			int count= countSelectedFields(selection);
+
+			String message= ActionMessages.getFormattedString("CreateNewConstructorAction.fields_selected", //$NON-NLS-1$
+																new Object[] { String.valueOf(count), String.valueOf(fEntries)} ); 																	
+			return new StatusInfo(IStatus.INFO, message);
+		}
+
+		private int countSelectedFields(Object[] selection){
+			int count= 0;
+			for (int i = 0; i < selection.length; i++) {
+				if (selection[i] instanceof IField)
+					count++;
+			}
+			return count;
+		}		
+	}	
+	
+	private static class CreateNewConstructorSelectionDialog extends SourceActionDialog {
+		private CreateNewConstructorContentProvider fContentProvider;
+		private IType fType;
+		private int fSuperIndex;
+		private int fWidth= 60;
+		private int fHeight= 18;
+		protected Button[] fButtonControls;
+		private boolean[] fButtonsEnabled;
 		
+		protected CheckboxTreeViewer fTreeViewer;
+		private CreateNewConstructorTreeViewerAdapter fTreeViewerAdapter;
+
+		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
+		private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
+		
+		public CreateNewConstructorSelectionDialog(Shell parent, ILabelProvider labelProvider, CreateNewConstructorContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+			super(parent, labelProvider, contentProvider, editor, type);
+			fContentProvider= contentProvider;
+			fType= type;		
+			fTreeViewerAdapter= new CreateNewConstructorTreeViewerAdapter();
+		}	
+		
+		protected Control createDialogArea(Composite parent) {
+			initializeDialogUnits(parent);
+			
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			GridData gd= null;
+		
+			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
+			composite.setLayout(layout);
+			composite.setFont(parent.getFont());	
+						
+			Composite classConstructorComposite= addSuperClassConstructorChoices(composite);
+			gd= new GridData(GridData.FILL_BOTH);
+			classConstructorComposite.setLayoutData(gd);
+			
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout innerLayout= new GridLayout();
+			innerLayout.numColumns= 2;
+			innerLayout.marginHeight= 0;
+			innerLayout.marginWidth= 0;
+			inner.setLayout(innerLayout);
+			inner.setFont(parent.getFont());		
+			
+			Label messageLabel= createMessageArea(inner);			
+			if (messageLabel != null) {
+				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.horizontalSpan= 2;
+				messageLabel.setLayoutData(gd);	
+			}
+					
+			fTreeViewer= createTreeViewer(inner);
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.widthHint= convertWidthInCharsToPixels(fWidth);
+			gd.heightHint= convertHeightInCharsToPixels(fHeight);
+			fTreeViewer.getControl().setLayoutData(gd);		
+			fTreeViewer.setContentProvider(fContentProvider);
+			fTreeViewer.addSelectionChangedListener(fTreeViewerAdapter);	
+					
+			Composite buttonComposite= createSelectionButtons(inner);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
+			buttonComposite.setLayoutData(gd);
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			inner.setLayoutData(gd);
+		
+			Composite entryComposite= createEntryPtCombo(composite); 
+			entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+			Composite commentComposite= createCommentSelection(composite);
+			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
+
+			gd= new GridData(GridData.FILL_BOTH);
+			composite.setLayoutData(gd);
+			
+			return composite;
+		}
+		
+		protected Composite createSelectionButtons(Composite composite) {
+			Composite buttonComposite= super.createSelectionButtons(composite);
+
+			GridLayout layout= new GridLayout();
+			buttonComposite.setLayout(layout);						
+
+			createUpDownButtons(buttonComposite);
+			
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;						
+			layout.numColumns= 1;
+			
+			return buttonComposite;
+		}
+		
+		protected void createUpDownButtons(Composite buttonComposite) {
+			int numButtons= 2;	// up, down
+			fButtonControls= new Button[numButtons];
+			fButtonsEnabled= new boolean[numButtons];
+			fButtonControls[UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.up_button"), false); //$NON-NLS-1$	
+			fButtonControls[DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.down_button"), false); //$NON-NLS-1$			
+			boolean defaultState= false;
+			fButtonControls[UP_INDEX].setEnabled(defaultState);
+			fButtonControls[DOWN_INDEX].setEnabled(defaultState);
+			fButtonsEnabled[UP_INDEX]= defaultState;
+			fButtonsEnabled[DOWN_INDEX]= defaultState;
+		}
+		
+		protected void buttonPressed(int buttonId) {
+			super.buttonPressed(buttonId);
+			switch(buttonId) {
+				case UP_BUTTON: {
+					fContentProvider.up(getElementList(), getTreeViewer());
+					updateOKStatus();						
+					break;
+				}
+				case DOWN_BUTTON: {
+					fContentProvider.down(getElementList(), getTreeViewer());
+					updateOKStatus();									
+					break;
+				}
+			}
+		}
+		
+		private List getElementList() {
+			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
+			List elements= selection.toList();						
+			ArrayList elementList= new ArrayList();
+
+			for (int i= 0; i < elements.size(); i++) {
+				elementList.add(elements.get(i));		
+			}
+			return elementList;
+		}		
+
+		protected Composite createEntryPtCombo(Composite composite) {
+			Composite entryComposite= super.createEntryPtCombo(composite);						
+			return entryComposite;						
+		}
+		
+		private Composite addSuperClassConstructorChoices(Composite composite) {
+			try {
+				Label label= new Label(composite, SWT.NONE);
+				label.setText(ActionMessages.getString("CreateNewConstructorSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
+				GridData gd= new GridData(GridData.FILL_BOTH);
+				label.setLayoutData(gd);
+				
+				final Combo combo= new Combo(composite, SWT.READ_ONLY);
+				IMethod[] constructorMethods= StubUtility.getOverridableConstructors(fType);					
+				
+				// TODO: Always add the default constructor
+				
+				for (int i= 0; i < constructorMethods.length; i++) {					
+					combo.add(JavaElementLabels.getElementLabel(constructorMethods[i], JavaElementLabels.M_PARAMETER_TYPES));
+				}
+
+				// TODO: Can we be a little more intelligent about guessing the super() ?
+				combo.setText(combo.getItem(0));
+				combo.setLayoutData(new GridData(GridData.FILL_BOTH));
+				combo.addSelectionListener(new SelectionAdapter(){
+					public void widgetSelected(SelectionEvent e) {
+						fSuperIndex= combo.getSelectionIndex();
+					}
+				});	
+
+			} catch (CoreException e) {
+			}
+			return composite;
+		}		
+				
+		public int getSuperIndex() {
+			return fSuperIndex;
+		}
+				
+		public CheckboxTreeViewer getTreeViewer() {
+			return fTreeViewer;
+		}
+
+		private class CreateNewConstructorTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
+						 
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection= (IStructuredSelection) fTreeViewer.getSelection();				
+				
+				List selectedList= selection.toList();
+				CreateNewConstructorContentProvider cp= (CreateNewConstructorContentProvider) getContentProvider();
+				
+				fButtonControls[UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
+				fButtonControls[DOWN_INDEX].setEnabled(cp.canMoveDown(selectedList));
+			}
+	
+			public void doubleClick(DoubleClickEvent event) {
+				// TODO Do nothing?
+			}					
+		}
+	}
+	
+	private static class CreateNewConstructorContentProvider implements ITreeContentProvider {		
 		private List fFieldsList;
 		private static final Object[] EMPTY= new Object[0];
 		
@@ -445,7 +680,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 			}
 			if (floating != null) {
 				res.add(floating);
-			}
+			}			
 			return res;
 		}
 		
@@ -467,7 +702,8 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 			if (checkedElements.size() > 0) {
 				setElements(moveUp(fFieldsList, checkedElements), tree);
 				tree.reveal(checkedElements.get(0));
-			}			
+			}	
+			tree.setSelection(new StructuredSelection(checkedElements));
 		}		
 
 		public void down(List checkedElements, CheckboxTreeViewer tree) {
@@ -475,192 +711,38 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 				setElements(reverse(moveUp(reverse(fFieldsList), checkedElements)), tree);
 				tree.reveal(checkedElements.get(checkedElements.size() - 1));
 			}
+			tree.setSelection(new StructuredSelection(checkedElements));
 		}
-	}
-	
-	private static class CreateNewConstructorValidator implements ISelectionStatusValidator {
-		private static int fEntries;
-			
-		CreateNewConstructorValidator(int entries) {
-			super();
-			fEntries= entries;
-		}
-
-		public IStatus validate(Object[] selection) {
-			int count= countSelectedFields(selection);
-
-			String message= ActionMessages.getFormattedString("CreateNewConstructorAction.fields_selected", //$NON-NLS-1$
-																new Object[] { String.valueOf(count), String.valueOf(fEntries)} ); 																	
-			return new StatusInfo(IStatus.INFO, message);
-		}
-
-		private int countSelectedFields(Object[] selection){
-			int count= 0;
-			for (int i = 0; i < selection.length; i++) {
-				if (selection[i] instanceof IField)
-					count++;
+				
+		public boolean canMoveUp(List selectedElements) {
+			int nSelected= selectedElements.size();
+			int nElements= fFieldsList.size();
+			for (int i= 0; i < nElements && nSelected > 0; i++) {
+				if (!selectedElements.contains(fFieldsList.get(i))) {
+					return true;
+				}
+				nSelected--;
 			}
-			return count;
-		}		
+			return false;
+		}
+
+		public boolean canMoveDown(List selectedElements) {
+			int nSelected= selectedElements.size();			
+			for (int i= fFieldsList.size() - 1; i >= 0 && nSelected > 0; i--) {
+				if (!selectedElements.contains(fFieldsList.get(i))) {					
+					return true;
+				}
+				nSelected--;				
+			}
+			return false;
+		}
+
+			
+		public List getFieldsList() {
+			return fFieldsList;
+		}
+
 	}	
-	
-	private static class CreateNewConstructorSelectionDialog extends SourceActionDialog {
-		private CreateNewConstructorContentProvider fContentProvider;
-		private IType fType;
-		private int fSuperIndex;
-		private int fWidth = 60;
-		private int fHeight = 18;
-		
-		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
-		private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;		
-		
-		public CreateNewConstructorSelectionDialog(Shell parent, ILabelProvider labelProvider, CreateNewConstructorContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
-			super(parent, labelProvider, contentProvider, editor, type);
-			fContentProvider= contentProvider;
-			fType= type;
-		}	
-		
-		protected Control createDialogArea(Composite parent) {
-			initializeDialogUnits(parent);
-			
-			Composite composite = new Composite(parent, SWT.NONE);
-			GridLayout layout = new GridLayout();
-			GridData gd= null;
-		
-			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
-			composite.setLayout(layout);
-			composite.setFont(parent.getFont());	
-						
-			Label messageLabel = createMessageArea(composite);			
-			if (messageLabel != null) {
-				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-				gd.horizontalSpan= 2;
-				messageLabel.setLayoutData(gd);	
-			}
-			
-			Composite classConstructorComposite= addSuperClassConstructorChoices(composite);
-			gd= new GridData(GridData.FILL_BOTH);
-			classConstructorComposite.setLayoutData(gd);
-			
-			Composite inner= new Composite(composite, SWT.NONE);
-			GridLayout innerLayout = new GridLayout();
-			innerLayout.numColumns= 2;
-			innerLayout.marginHeight= 0;
-			innerLayout.marginWidth= 0;
-			inner.setLayout(innerLayout);
-			inner.setFont(parent.getFont());		
-			
-			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
-			gd= new GridData(GridData.FILL_BOTH);
-			gd.widthHint = convertWidthInCharsToPixels(fWidth);
-			gd.heightHint = convertHeightInCharsToPixels(fHeight);
-			treeViewer.getControl().setLayoutData(gd);			
-					
-			Composite buttonComposite= createSelectionButtons(inner);
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
-			buttonComposite.setLayoutData(gd);
-			
-			gd= new GridData(GridData.FILL_BOTH);
-			inner.setLayoutData(gd);
-		
-			Composite entryComposite= createEntryPtCombo(composite); 
-			entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-			Composite commentComposite= createCommentSelection(composite);
-			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
 
-			gd= new GridData(GridData.FILL_BOTH);
-			composite.setLayoutData(gd);
-			
-			return composite;
-		}
-		
-		protected Composite createSelectionButtons(Composite composite) {
-			Composite buttonComposite= super.createSelectionButtons(composite);
-
-			GridLayout layout = new GridLayout();
-			buttonComposite.setLayout(layout);						
-
-			createUpDownButtons(buttonComposite);
-			
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;						
-			layout.numColumns= 1;
-			
-			return buttonComposite;
-		}
-		
-		protected void createUpDownButtons(Composite buttonComposite) {
-			createButton(buttonComposite, UP_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.up_button"), false); //$NON-NLS-1$	
-			createButton(buttonComposite, DOWN_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.down_button"), false); //$NON-NLS-1$				
-		}
-		
-		protected void buttonPressed(int buttonId) {
-			super.buttonPressed(buttonId);
-			switch(buttonId) {
-				case UP_BUTTON: {
-					fContentProvider.up(getElementList(), getTreeViewer());
-					updateOKStatus();						
-					break;
-				}
-				case DOWN_BUTTON: {
-					fContentProvider.down(getElementList(), getTreeViewer());
-					updateOKStatus();									
-					break;
-				}
-			}
-		}
-		
-		private List getElementList() {
-			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
-			List elements= selection.toList();						
-			ArrayList elementList= new ArrayList();
-
-			for (int i= 0; i < elements.size(); i++) {
-				elementList.add(elements.get(i));		
-			}
-			return elementList;
-		}		
-
-		protected Composite createEntryPtCombo(Composite composite) {
-			Composite entryComposite= super.createEntryPtCombo(composite);						
-			return entryComposite;						
-		}
-		
-		private Composite addSuperClassConstructorChoices(Composite composite) {
-			try {
-				Label label= new Label(composite, SWT.NONE);
-				label.setText(ActionMessages.getString("CreateNewConstructorSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
-				GridData gd= new GridData(GridData.FILL_BOTH);
-				label.setLayoutData(gd);
-				
-				final Combo combo= new Combo(composite, SWT.READ_ONLY);
-				IMethod[] constructorMethods= StubUtility.getOverridableConstructors(fType);					
-				
-				for (int i= 0; i < constructorMethods.length; i++) {
-					combo.add(JavaElementLabels.getElementLabel(constructorMethods[i], JavaElementLabels.M_PARAMETER_TYPES));
-				}
-				// TODO: Can we be a little more intelligent about guessing the super() ?
-				combo.setText(combo.getItem(0));
-				combo.setLayoutData(new GridData(GridData.FILL_BOTH));
-				combo.addSelectionListener(new SelectionAdapter(){
-					public void widgetSelected(SelectionEvent e) {
-						fSuperIndex= combo.getSelectionIndex();
-					}
-				});	
-
-			} catch (CoreException e) {
-			}
-			return composite;
-		}		
-				
-		public int getSuperIndex() {
-			return fSuperIndex;
-		}
-
-	}
-	
 }
+
