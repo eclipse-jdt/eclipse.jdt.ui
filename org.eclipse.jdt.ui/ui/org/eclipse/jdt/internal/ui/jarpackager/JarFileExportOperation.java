@@ -8,7 +8,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	private JarPackage fJarPackage;	private IFile[] fDescriptionFiles;
 	private Shell fParentShell;
 	private Map fJavaNameToClassFilesMap;
-	private IFolder fClassFilesMapFolder;	private MultiStatus fProblems;		/**
+	private IContainer fClassFilesMapContainer;	// PR#1GEUVPU	private MultiStatus fProblems;		/**
 	 * Creates an instance of this class.
 	 *
 	 * @param	jarPackage	the JAR package specification
@@ -107,10 +107,10 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			if (outputContainer == null || !outputContainer.isAccessible())
 				throw new IOException("Output container not accessible");		}
 		if (isJavaFile(file)) {
-			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IFolder classFolder= outputContainer.getFolder(pathInJar.removeLastSegments(1));
-			if (fClassFilesMapFolder == null || !fClassFilesMapFolder.equals(classFolder)) {
-				fJavaNameToClassFilesMap= buildJavaToClassMap(classFolder);
-				fClassFilesMapFolder= classFolder;
+			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IContainer classContainer= outputContainer;	// PR#1GEUVPU			if (pathInJar.segmentCount() > 1) // PR#1GEUVPU				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
+			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
+				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
+				fClassFilesMapContainer= classContainer;
 			}
 			ArrayList classFiles= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
 			if (classFiles == null || classFiles.isEmpty())
@@ -155,12 +155,12 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * Builds and returns a map that has the class files
 	 * for each java file in a given directory
 	 */
-	private Map buildJavaToClassMap(IFolder folder) throws CoreException {
-		if (folder == null || !folder.isAccessible())
+	private Map buildJavaToClassMap(IContainer container) throws CoreException {		/*		 * PR#1GEUVPU: Changed argument from IFolder to IContainer		 */
+		if (container == null || !container.isAccessible())
 			return new HashMap(0);
 		/*		 * XXX Should not use internal class from JCore		 */
 		ClassFileReader cfReader;
-		IResource[] members= folder.members();
+		IResource[] members= container.members();
 		Map map= new HashMap(members.length);
 		for (int i= 0;  i < members.length; i++) {
 			if (isClassFile(members[i])) {
