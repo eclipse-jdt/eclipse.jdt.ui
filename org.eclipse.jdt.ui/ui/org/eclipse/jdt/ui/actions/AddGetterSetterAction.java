@@ -969,8 +969,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			try {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 				getTreeViewer().setExpandedElements(fType.getFields());
-				getTreeViewer().reveal(fContentProvider.getPreselected());
-				getTreeViewer().refresh();
+				IField preselected= fContentProvider.getPreselected();
+				if (preselected != null) {
+					getTreeViewer().reveal(preselected);
+				}
 			} catch (JavaModelException e) {
 			}
 	
