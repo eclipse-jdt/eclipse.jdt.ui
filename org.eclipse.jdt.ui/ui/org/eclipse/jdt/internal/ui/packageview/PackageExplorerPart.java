@@ -175,7 +175,9 @@ public class PackageExplorerPart extends ViewPart
 	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
 	static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
 	
-
+	public static final boolean ENABLE_WORKING_SET_MODE= false;
+	
+	
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
 	
@@ -513,23 +515,31 @@ public class PackageExplorerPart extends ViewPart
 		super.init(site, memento);
 		fMemento= memento;
 		restoreRootMode(fMemento);
-		Platform.run(new ISafeRunnable() {
-			public void handleException(Throwable exception) {
-				fWorkingSetModel= new WorkingSetModel();
-			}
-			public void run() throws Exception {
-				fWorkingSetModel= fMemento != null 
-				? new WorkingSetModel(fMemento) 
-				: new WorkingSetModel();
-			}
-		});
+		if (ENABLE_WORKING_SET_MODE) {
+			Platform.run(new ISafeRunnable() {
+				public void handleException(Throwable exception) {
+					fWorkingSetModel= new WorkingSetModel();
+				}
+				public void run() throws Exception {
+					fWorkingSetModel= fMemento != null 
+					? new WorkingSetModel(fMemento) 
+					: new WorkingSetModel();
+				}
+			});
+		} else {
+			fWorkingSetModel= new WorkingSetModel();
+		}
 		restoreLayoutState(memento);
 	}
 
 	private void restoreRootMode(IMemento memento) {
-		if (memento != null) {
-			Integer value= fMemento.getInteger(TAG_ROOT_MODE);
-			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
+		if (ENABLE_WORKING_SET_MODE) {
+			if (memento != null) {
+				Integer value= fMemento.getInteger(TAG_ROOT_MODE);
+				fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
+			} else {
+				fRootMode= ViewActionGroup.SHOW_PROJECTS;
+			}
 		} else {
 			fRootMode= ViewActionGroup.SHOW_PROJECTS;
 		}

@@ -23,6 +23,8 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.actions.ActionGroup;
 
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+
 /**
  * An action group to provide access to the working sets.
  */
@@ -60,9 +62,11 @@ public class ViewActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		fMenuManager= actionBars.getMenuManager();
-		IMenuManager showMenu= new MenuManager(WorkingSetMessages.getString("ViewActionGroup.show.label")); //$NON-NLS-1$
-		fillShowMenu(showMenu);
-		fMenuManager.add(showMenu);
+		if (PackageExplorerPart.ENABLE_WORKING_SET_MODE) {
+			IMenuManager showMenu= new MenuManager(WorkingSetMessages.getString("ViewActionGroup.show.label")); //$NON-NLS-1$
+			fillShowMenu(showMenu);
+			fMenuManager.add(showMenu);
+		}
 		fMenuManager.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
 		if (fActiveActionGroup == null)
 			fActiveActionGroup= fFilterActionGroup;

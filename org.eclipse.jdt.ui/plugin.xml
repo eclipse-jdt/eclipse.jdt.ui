@@ -2384,6 +2384,7 @@
 <!-- =========================================================================== -->
 <!-- History Working Set Page                                                    -->
 <!-- =========================================================================== -->
+<!-- disabled working set support for package explorer
    <extension point="org.eclipse.ui.workingSets">
       <workingSet
             name="%HistoryWorkingSetWizardPage.name"
@@ -2416,6 +2417,7 @@
             id="org.eclipse.jdt.internal.ui.othersWorkingSet">
       </factory>
    </extension>
+-->
 <!-- =========================================================================== -->
 <!-- JDT/UI command definitions                                                  -->
 <!-- =========================================================================== -->
