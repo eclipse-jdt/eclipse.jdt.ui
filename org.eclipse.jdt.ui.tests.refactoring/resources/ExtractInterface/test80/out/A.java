@@ -27,5 +27,4 @@ public class A implements I {
 
 	public void f2(){
 	}
-	
 }
