@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -47,6 +48,13 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
 	
+	private static final int NO_IMAGE= 0;
+	private static final int ORIGINAL_MARKER_IMAGE= 1;
+	private static final int QUICKFIX_IMAGE= 2;
+	private static final int OVERLAY_IMAGE= 3;
+	private static final int GRAY_IMAGE= 4;
+	private static final int BREAKPOINT_IMAGE= 5;
+
 	private static Image fgQuickFixImage;
 	private static ImageRegistry fgGrayMarkersImageRegistry;
 	
@@ -54,6 +62,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	private IJavaAnnotation fOverlay;
 	private boolean fNotRelevant= false;
 	private AnnotationType fType;
+	private int fImageType;
+	private boolean fQuickFixIconEnabled;
 	
 	
 	public JavaMarkerAnnotation(IMarker marker) {
@@ -72,7 +82,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * based upon the properties of the underlying marker.
 	 */
 	protected void initialize() {
-		
+		fQuickFixIconEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
+		fImageType= NO_IMAGE;
 		IMarker marker= getMarker();
 		
 		if (MarkerUtilities.isMarkerType(marker, IBreakpoint.BREAKPOINT_MARKER)) {
@@ -81,7 +92,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				fPresentation= DebugUITools.newDebugModelPresentation();
 				
 			setLayer(4);
-			setImage(fPresentation.getImage(marker));					
+			setImage(fPresentation.getImage(marker));
+			fImageType= BREAKPOINT_IMAGE;					
 			
 			fType= AnnotationType.UNKNOWN;
 			
@@ -110,23 +122,18 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			} catch(CoreException e) {
 				JavaPlugin.log(e);
 			}
-			
 			super.initialize();
-			
 		}
 	}
 	
-	private Image getQuickFixImage() {
-		if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(getMarker())) {
-			if (fgQuickFixImage != null)
-				fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-			return fgQuickFixImage;
-		}
-		return null;
+	private boolean mustShowQuickFixIcon() {
+		return fQuickFixIconEnabled && JavaCorrectionProcessor.hasCorrections(getMarker());
 	}
-
-	private boolean indicateQuixFixableProblems() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
+	
+	private Image getQuickFixImage() {
+		if (fgQuickFixImage != null)
+			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+		return fgQuickFixImage;
 	}
 
 	/*
@@ -206,37 +213,59 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see MarkerAnnotation#getImage(Display)
 	 */
 	public Image getImage(Display display) {
-		// return image of overlay annoation
-		if (fOverlay != null) {
-			Image image= fOverlay.getImage(display);
-			if (image != null)
-				return image;
+		if (fImageType == BREAKPOINT_IMAGE)
+			return super.getImage(display);
+
+		int newImageType= NO_IMAGE;
+
+		if (hasOverlay())
+			newImageType= OVERLAY_IMAGE;
+		else if (isRelevant()) {
+			if (mustShowQuickFixIcon())
+				newImageType= QUICKFIX_IMAGE; 
+			else
+				newImageType= ORIGINAL_MARKER_IMAGE; 
+		} else
+			newImageType= GRAY_IMAGE;
+
+		if (fImageType == newImageType)
+			return super.getImage(display);
+
+		Image newImage= null;
+		switch (newImageType) {
+			case ORIGINAL_MARKER_IMAGE:
+				newImage= null;
+				break;
+			case OVERLAY_IMAGE:
+				newImage= fOverlay.getImage(display);
+				break;
+			case QUICKFIX_IMAGE:
+				newImage= getQuickFixImage();
+				break;
+			case GRAY_IMAGE:
+				if (fImageType != ORIGINAL_MARKER_IMAGE)
+					setImage(null);
+				Image originalImage= super.getImage(display);
+				if (originalImage != null) {
+					ImageRegistry imageRegistry= getGrayMarkerImageRegistry(display);
+					if (imageRegistry != null) {
+						String key= Integer.toString(originalImage.handle);
+						Image grayImage= imageRegistry.get(key);
+						if (grayImage == null) {
+							grayImage= new Image(display, originalImage, SWT.IMAGE_GRAY);
+							imageRegistry.put(key, grayImage);
+						}
+						newImage= grayImage;
+					}
+				}
+				break;
+			default:
+				Assert.isLegal(false);
 		}
 
-		if (isRelevant()) {
-			Image image= getQuickFixImage();
-			if (image != null)
-				return image;
-			else
-				// the original marker image
-				return super.getImage(display);
-		} else {
-			// the original marker image
-			Image originalImage= super.getImage(display);
-			if (originalImage != null) {
-				ImageRegistry imageRegistry= getGrayMarkerImageRegistry(display);
-				if (imageRegistry != null) {
-					String key= Integer.toString(originalImage.handle);
-					Image grayImage= imageRegistry.get(key);
-					if (grayImage == null) {
-						grayImage= new Image(display, originalImage, SWT.IMAGE_GRAY);
-						imageRegistry.put(key, grayImage);
-					}
-					return grayImage;
-				}
-			}
-			return originalImage;
-		}
+		fImageType= newImageType;
+		setImage(newImage);
+		return newImage;
 	}
 	
 	private ImageRegistry getGrayMarkerImageRegistry(Display display) {
