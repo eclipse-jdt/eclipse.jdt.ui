@@ -595,17 +595,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return null;
 	}	
 	
-	// sets enabled flag for a control and all its sub-tree
-	private static void setEnabled(Control control, boolean enable) {
-		control.setEnabled(enable);
-		if (control instanceof Composite) {
-			Composite composite= (Composite) control;
-			Control[] children= composite.getChildren();
-			for (int i= 0; i < children.length; i++)
-				setEnabled(children[i], enable);
-		}
-	}
-
 	private Control createAppearancePage(Composite parent) {
 
 		Composite appearanceComposite= new Composite(parent, SWT.NONE);
@@ -1115,8 +1104,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String modifiers= fBrowserLikeLinksKeyModifierText.getText();
 		int stateMask= computeStateMask(modifiers);
 
-		if (fBrowserLikeLinksCheckBox.getSelection() && stateMask == -1 || (stateMask & SWT.SHIFT) != 0) {
-			fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
+		if (fBrowserLikeLinksCheckBox.getSelection() && (stateMask == -1 || (stateMask & SWT.SHIFT) != 0)) {
+			if (stateMask == -1)
+				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
+			else
+				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getString("JavaEditorPreferencePage.navigation.shiftIsDisabled")); //$NON-NLS-1$
 			setValid(false);
 			StatusUtil.applyToStatusLine(this, fBrowserLikeLinksKeyModifierStatus);
 		} else {

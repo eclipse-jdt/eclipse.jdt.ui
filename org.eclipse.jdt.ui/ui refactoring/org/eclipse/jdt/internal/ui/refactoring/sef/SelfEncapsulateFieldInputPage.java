@@ -46,7 +46,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private SelfEncapsulateFieldRefactoring fRefactoring;
 
 	public SelfEncapsulateFieldInputPage() {
-		super(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.inputPage"), true); //$NON-NLS-1$
+		super("InputPage", true); //$NON-NLS-1$
 		setDescription(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.description")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
