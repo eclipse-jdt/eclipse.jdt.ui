@@ -1,12 +1,16 @@
-import java.io.*;
+class A {
 
-class A{	
-  private static InputStream input;
-
-  public static void foo() {
-	try {
-		input = new FileInputStream("myfile");
-	} catch (FileNotFoundException e) {
+void gd(){}
+ 
+static String sfs(){
+		return "d";
 	}
-  }
+	int f(int dy){
+		return Integer.parseInt(this.ss());
+	}
+	
+	
+	private String ss() {
+		return "Hello";
+	}
 }
