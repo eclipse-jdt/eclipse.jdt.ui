@@ -22,8 +22,6 @@ import java.util.Vector;
 
 import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPluginDescriptor;
-import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -112,11 +110,8 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 	}
 	
 	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
-		IPluginRegistry registry= Platform.getPluginRegistry();
-		IPluginDescriptor descriptor= registry.getPluginDescriptor("org.eclipse.jdt.junit.runtime"); //$NON-NLS-1$
-		URL runtimeURL= descriptor.getInstallURL();
-		
-		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();
+		URL runtimeURL= Platform.getBundle("org.eclipse.jdt.junit.runtime").getEntry("/"); //$NON-NLS-1$ //$NON-NLS-2$
+		URL url= Platform.getBundle(JUnitPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
 		
 		String[] cp= getClasspath(configuration);
 		String[] classPath= null;

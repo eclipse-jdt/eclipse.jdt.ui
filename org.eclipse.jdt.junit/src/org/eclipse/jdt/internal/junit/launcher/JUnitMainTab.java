@@ -444,7 +444,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		if (javaProject != null) {
 			dialog.setInitialSelections(new Object[] { javaProject });
 		}
-		if (dialog.open() == ElementListSelectionDialog.OK) {			
+		if (dialog.open() == Window.OK) {			
 			return (IJavaProject) dialog.getFirstResult();
 		}			
 		return null;		
@@ -655,7 +655,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		dialog.setInitialSelection(initElement);
 		dialog.setAllowMultiple(false);
 		
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();
 			return (IJavaElement)element;
 		}

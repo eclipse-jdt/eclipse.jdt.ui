@@ -262,7 +262,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		dialog.setMultipleSelection(false);
 		int result= dialog.open();
 		labelProvider.dispose();
-		if (result == ElementListSelectionDialog.OK) {
+		if (result == Window.OK) {
 			return (ILaunchConfiguration)dialog.getFirstResult();
 		}
 		return null;		

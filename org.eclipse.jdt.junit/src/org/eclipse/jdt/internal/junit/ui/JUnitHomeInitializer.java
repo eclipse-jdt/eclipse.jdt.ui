@@ -17,22 +17,21 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.osgi.framework.Bundle;
 
 public class JUnitHomeInitializer extends ClasspathVariableInitializer {	
 	/**
 	 * @see ClasspathVariableInitializer#initialize(String)
 	 */
 	public void initialize(String variable) {
-		Plugin plugin= Platform.getPlugin("org.junit"); //$NON-NLS-1$
-		
-		if (plugin == null) {
+		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
+		if (bundle == null) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 		}
-		URL installLocation= plugin.getDescriptor().getInstallURL();
+		URL installLocation= bundle.getEntry("/"); //$NON-NLS-1$
 		URL local= null;
 		try {
 			try {

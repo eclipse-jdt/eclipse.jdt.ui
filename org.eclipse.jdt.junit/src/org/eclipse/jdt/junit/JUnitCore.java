@@ -4,7 +4,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * Class for accessing JUnit support; all functionality is provided by 
- * static methods.
+ * static methods. 
  * </p>
  * 
  * @since 2.1
@@ -23,7 +23,7 @@ public class JUnitCore {
 	/**
 	 * Removes a listener for test runs.
 	 * 
-	 * @param listener listener to be removed
+	 * @param listener listener to be removed 
 	 */
 	public static void removeTestRunListener(ITestRunListener listener) {
 		JUnitPlugin.getDefault().removeTestRunListener(listener);

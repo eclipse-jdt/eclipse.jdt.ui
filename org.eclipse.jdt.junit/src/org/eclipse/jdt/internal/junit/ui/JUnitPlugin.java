@@ -61,6 +61,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -102,17 +103,17 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	private List fJUnitLaunchConfigTypeIDs;
 
-	public JUnitPlugin(IPluginDescriptor desc) {
-		super(desc);
+	public JUnitPlugin(IPluginDescriptor descriptor) {
+		super(descriptor);
 		fgPlugin= this;
 		String pathSuffix= "icons/full/"; //$NON-NLS-1$
 		try {
-			fgIconBaseURL= new URL(getDescriptor().getInstallURL(), pathSuffix);
+			fgIconBaseURL= new URL(Platform.getBundle(PLUGIN_ID).getEntry("/"), pathSuffix); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// do nothing
 		}
 	}
-
+	
 	public static JUnitPlugin getDefault() {
 		return fgPlugin;
 	}
@@ -146,7 +147,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	public static String getPluginId() {
-		return getDefault().getDescriptor().getUniqueIdentifier();
+		return PLUGIN_ID;
 	}
 
 	/*
@@ -271,22 +272,25 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		}
 	}
 
-	/*
-	 * @see Plugin#startup()
+	/**
+	 * @see AbstractUIPlugin#start(BundleContext)
 	 */
-	public void startup() throws CoreException {
-		super.startup();
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(this);
 	}
 
-	/*
-	 * @see Plugin#shutdown()
+	/**
+	 * @see AbstractUIPlugin#stop(BundleContext)
 	 */
-	public void shutdown() throws CoreException {
-		super.shutdown();
-		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
-		launchManager.removeLaunchListener(this);
+	public void stop(BundleContext context) throws Exception {
+		try {
+			ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
+			launchManager.removeLaunchListener(this);
+		} finally {
+			super.stop(context);
+		}
 	}
 
 	public static Display getDisplay() {
@@ -366,7 +370,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	private void loadTestRunListeners() {
 		fTestRunListeners= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getPluginRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
+		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
 		}
@@ -391,7 +395,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	private void loadLaunchConfigTypeIDs() {
 		fJUnitLaunchConfigTypeIDs= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getPluginRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
+		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
 		if (extensionPoint == null) {
 			return;
 		}
