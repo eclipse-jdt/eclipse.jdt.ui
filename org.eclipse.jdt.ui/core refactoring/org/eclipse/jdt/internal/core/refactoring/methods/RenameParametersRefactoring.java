@@ -87,12 +87,9 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	}
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		if (! getMethod().getCompilationUnit().isStructureKnown())
-			result.addFatalError("Compilation unit that declares this method cannot be parsed correctly.");
-		return result;
+		return Checks.checkIfCuBroken(getMethod());
 	}
-
+
 	public RefactoringStatus checkNewNames(){
 		if (fNewParameterNames == null || fNewParameterNames.length == 0)
 			return new RefactoringStatus();
@@ -111,6 +108,9 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 10);
+		result.merge(Checks.checkIfCuBroken(getMethod()));
+		if (result.hasFatalError())
+			return result;
 		pm.subTask("checking preconditions");
 		result.merge(checkNewNames());
 		pm.worked(3);

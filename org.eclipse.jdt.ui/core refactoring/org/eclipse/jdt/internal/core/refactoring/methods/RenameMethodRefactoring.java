@@ -106,6 +106,9 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 6);
+		result.merge(Checks.checkIfCuBroken(getMethod()));
+		if (result.hasFatalError())
+			return result;
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
 		pm.subTask("checking new name");
 		result.merge(checkNewName());
@@ -141,11 +144,9 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	}
 	
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		if (! getMethod().getCompilationUnit().isStructureKnown())
-			result.addFatalError("Compilation unit that declares this method cannot be parsed correctly.");
+		RefactoringStatus result= Checks.checkIfCuBroken(getMethod());
 		if (Flags.isNative(getMethod().getFlags()))
-			result.addError("Renaming native methods can change the program's behavior.");
+			result.addError("Renaming native methods will cause UsatisfiedLinkError on runtime.");
 		return result;
 	}
 					

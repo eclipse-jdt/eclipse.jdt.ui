@@ -123,10 +123,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	}
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		if (! getField().getCompilationUnit().isStructureKnown())
-			result.addFatalError("Compilation unit that declares this field cannot be parsed correctly.");
-		return result;
+		return Checks.checkIfCuBroken(getField());
 	}
 	
 	/**
@@ -151,6 +148,9 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		pm.beginTask("", 9);
 		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
+		result.merge(Checks.checkIfCuBroken(getField()));
+		if (result.hasFatalError())
+			return result;
 		result.merge(checkNewName());
 		pm.worked(1);
 		result.merge(checkEnclosingHierarchy());

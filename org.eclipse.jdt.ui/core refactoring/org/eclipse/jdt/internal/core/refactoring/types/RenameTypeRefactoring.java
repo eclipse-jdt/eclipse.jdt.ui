@@ -116,6 +116,9 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			result.merge(checkNewName());
 			if (result.hasFatalError())
 				return result;
+			result.merge(Checks.checkIfCuBroken(getType()));
+			if (result.hasFatalError())
+				return result;
 			
 			pm.worked(2);
 			result.merge(checkTypesInCompilationUnit());
@@ -169,8 +172,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		pm.subTask("searching for references");	
 		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
-	}
-
+	}
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getType()));
@@ -180,12 +182,9 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			result.addFatalError("It is a special case");	
 		return result;
 	}
-
+	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		if (! getType().getCompilationUnit().isStructureKnown())
-			result.addFatalError("Compilation unit that declares this type cannot be parsed correctly.");
-		return result;
+		return Checks.checkIfCuBroken(getType());
 	}
 		
 	public RefactoringStatus checkNewName(){
