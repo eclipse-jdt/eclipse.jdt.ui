@@ -62,7 +62,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		fJarRoot= getJARPackageFragmentRoot();
 		if (fJarRoot != null) {
 			try {
-				IClasspathEntry entry= JavaModelUtil.getRawClasspathEntry(fJarRoot);
+				IClasspathEntry entry= fJarRoot.getRawClasspathEntry();
 				if (entry == null) {
 					// use a dummy entry to use for initialization
 					entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);

@@ -34,7 +34,7 @@ public class HierarchyAdornmentProvider implements IAdornmentProvider {
 			IType type= (IType) element;
 			IJavaElement input= fHierarchy.getInputElement();
 			if (input != null && input.getElementType() != IJavaElement.TYPE) {
-				IJavaElement parent= JavaModelUtil.findElementOfKind(type, input.getElementType());
+				IJavaElement parent= type.getAncestor(input.getElementType());
 				if (input.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					if (parent == null || !parent.getElementName().equals(input.getElementName())) {
 						return JavaElementImageProvider.LIGHT_TYPE_ICONS;

@@ -428,7 +428,7 @@ public class StubUtility {
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
-		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && cu.exists()) {
 			IBuffer buf= cu.getBuffer();
 			int length= buf.getLength();
@@ -482,7 +482,7 @@ public class StubUtility {
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
-			ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();

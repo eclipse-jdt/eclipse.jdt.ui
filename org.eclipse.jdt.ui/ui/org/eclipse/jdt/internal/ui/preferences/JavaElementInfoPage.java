@@ -91,7 +91,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			rootContents.setText(JavaUIMessages.getString("JavaElementInfoPage.classpath_entry_kind")); //$NON-NLS-1$
 			Label rootContentsType= new Label(composite, SWT.NONE);
 			try {
-				IClasspathEntry entry= JavaModelUtil.getRawClasspathEntry((IPackageFragmentRoot)element);
+				IClasspathEntry entry= ((IPackageFragmentRoot)element).getRawClasspathEntry();
 				if (entry != null) {
 					switch (entry.getEntryKind()) {
 						case IClasspathEntry.CPE_SOURCE:

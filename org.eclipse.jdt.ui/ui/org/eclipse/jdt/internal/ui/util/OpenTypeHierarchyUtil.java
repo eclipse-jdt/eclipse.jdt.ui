@@ -225,7 +225,7 @@ public class OpenTypeHierarchyUtil {
 				case IJavaElement.IMPORT_CONTAINER:
 				case IJavaElement.IMPORT_DECLARATION:
 				case IJavaElement.PACKAGE_DECLARATION: {
-					ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
 						IType[] types= cu.getTypes();
 						if (types.length > 0) {

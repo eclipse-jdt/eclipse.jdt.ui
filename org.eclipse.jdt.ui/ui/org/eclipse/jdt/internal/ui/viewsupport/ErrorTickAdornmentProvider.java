@@ -54,7 +54,7 @@ public class ErrorTickAdornmentProvider implements IAdornmentProvider {
 					case IJavaElement.INITIALIZER:
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
-						ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
+						ICompilationUnit cu= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 						if (cu != null && cu.exists()) {
 							// I assume that only source elements in compilation unit can have markers
 							ISourceRange range= ((ISourceReference)element).getSourceRange();

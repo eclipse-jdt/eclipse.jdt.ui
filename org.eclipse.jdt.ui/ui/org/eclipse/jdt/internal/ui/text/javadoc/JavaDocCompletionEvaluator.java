@@ -332,7 +332,7 @@ public class JavaDocCompletionEvaluator {
 				// '@see #foo'
 				IJavaElement elem= fCompilationUnit.getElementAt(wordStart);
 				if (elem != null) {
-					parent= (IType)JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
+					parent= (IType) elem.getAncestor(IJavaElement.TYPE);
 				}
 			}
 				

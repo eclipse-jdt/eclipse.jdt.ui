@@ -124,7 +124,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			return;
 		}
 		
-		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(fImportDeclaration, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit) fImportDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			try {
 				IType[] types= cu.getTypes();

@@ -267,7 +267,7 @@ public class JavaDocLocations {
 				element= element.getParent();
 				// fall through
 			case IJavaElement.COMPILATION_UNIT :
-				IType mainType= JavaModelUtil.findPrimaryType((ICompilationUnit) element);
+				IType mainType= ((ICompilationUnit) element).findPrimaryType();
 				if (mainType == null) {
 					return null;
 				}
@@ -312,7 +312,7 @@ public class JavaDocLocations {
 				}
 				break;
 			case IJavaElement.PACKAGE_DECLARATION :
-				IJavaElement pack= JavaModelUtil.findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT);
+				IJavaElement pack= element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 				if (pack != null) {
 					appendPackageSummaryPath((IPackageFragment) pack, pathBuffer);
 				} else {
