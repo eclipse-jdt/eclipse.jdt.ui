@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
@@ -1033,16 +1035,19 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testDestination_root_yes_1() throws Exception{
-		//TODO implement me
-		if (true) return;
-		IJavaProject otherJavaProject= null;
+		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
 		
-		IJavaElement[] javaElements= {getRoot()};
-		IResource[] resources= {};
-		CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
+		try {
+			IJavaElement[] javaElements= { getRoot()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
-		Object destination= otherJavaProject;
-		verifyValidDestination(ref, destination);						
+			Object destination= otherJavaProject;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			otherJavaProject.getProject().delete(true, true, null);
+		}						
 	}
 
 }
