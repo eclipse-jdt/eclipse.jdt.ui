@@ -607,7 +607,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else if (field == fSuperInterfacesDialogField) {
 			fSuperInterfacesStatus= superInterfacesChanged();
 			fieldName= INTERFACES;
-		} else if (field == fOtherMdfButtons) {
+		} else if (field == fOtherMdfButtons || field == fAccMdfButtons) {
 			fModifierStatus= modifiersChanged();
 			fieldName= MODIFIERS;
 		} else {
