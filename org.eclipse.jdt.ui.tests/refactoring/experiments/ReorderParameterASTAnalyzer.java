@@ -109,7 +109,8 @@ class ReorderParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer {
 		
 	private void analyzeArgument(Expression ex){
 		if (canHaveSideEffects(ex))
-			addError("Expression used in method invocation in line:" + getLineNumber(ex) + " may have side effects. If it does, reordering the parameters will modify your program's behavior");
+			addError("Expression used in method invocation in line:" + getLineNumber(ex) + " may have side effects. If it does, reordering the parameters will modify your program's behavior",
+							ex.sourceStart(), ex.sourceEnd());
 	}
 	
 	//------- visit methods 

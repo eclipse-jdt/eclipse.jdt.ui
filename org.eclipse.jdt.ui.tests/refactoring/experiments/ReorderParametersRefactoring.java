@@ -122,7 +122,8 @@ public class ReorderParametersRefactoring extends Refactoring {
 			return result;
 		}	
 		if (Flags.isNative(fMethod.getFlags()))
-			result.addError("Reordering parameters in a native method will cause UnsatisfiedLinkError on runtime");
+			result.addError("Reordering parameters in a native method will cause UnsatisfiedLinkError on runtime", 
+										Refactoring.getResource(fMethod), fMethod.getNameRange());
 				
 		result.merge(checkExpressionsInMethodInvocation());	
 		return result;
