@@ -87,7 +87,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 						
 						fCompilationUnitEditor.setProblems(fProblemRequestor.getProblems());
 						
-						if (WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove()) {
+						if (!WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove()) {
 							Shell shell= fCompilationUnitEditor.getSite().getShell();
 							if (shell != null && !shell.isDisposed()) {
 								shell.getDisplay().asyncExec(new Runnable() {
