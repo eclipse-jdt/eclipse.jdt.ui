@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
@@ -20,20 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,11 +33,29 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
@@ -63,11 +72,13 @@ public class MoveMembersWizard extends RefactoringWizard {
 	
 	private static class MoveMembersInputPage extends UserInputWizardPage {
 
+		private static final int MRU_COUNT= 10;
 		public static final String PAGE_NAME= "MoveMembersInputPage"; //$NON-NLS-1$
 		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
 				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
-		private Text fTextField;
+		private Combo fInputField;
+		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
 
 		public MoveMembersInputPage() {
 			super(PAGE_NAME, true);
@@ -86,24 +97,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 		public void createControl(Composite parent) {		
 			Composite composite= new Composite(parent, SWT.NONE);
 			GridLayout gl= new GridLayout();
-			gl.numColumns= 3;
-			gl.makeColumnsEqualWidth= false;
+			gl.numColumns= 2;
 			composite.setLayout(gl);
 		
 			addLabel(composite);
-			addTextField(composite);
+			addDestinationControls(composite);
 		
-			Button button= new Button(composite, SWT.PUSH);
-			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
-			button.setLayoutData(new GridData());
-			SWTUtil.setButtonDimensionHint(button);
-			button.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					openTypeSelectionDialog();
-				}
-			});
-		
-			setPageComplete(false);
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
 			WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
@@ -121,22 +120,28 @@ public class MoveMembersWizard extends RefactoringWizard {
 						"MoveMembersInputPage.destination_multi", //$NON-NLS-1$
 						String.valueOf(members.length)));
 			}
-			label.setLayoutData(new GridData());
+			GridData gd= new GridData();
+			gd.horizontalSpan= 2;
+			label.setLayoutData(gd);
 		}
 
-		private void addTextField(Composite composite) {
-			fTextField= new Text(composite, SWT.SINGLE | SWT.BORDER);
-			fTextField.setFocus();
-			fTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fTextField.addModifyListener(new ModifyListener(){
+		private void addDestinationControls(Composite composite) {
+			fInputField= new Combo(composite, SWT.SINGLE | SWT.BORDER);
+			fInputField.setFocus();
+			fInputField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fInputField.setItems((String[]) fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
+			fInputField.addModifyListener(new ModifyListener(){
 				public void modifyText(ModifyEvent e) {
-					IStatus status= JavaConventions.validateJavaTypeName(fTextField.getText());
+					handleDestinationChanged();
+				}
+				private void handleDestinationChanged() {
+					IStatus status= JavaConventions.validateJavaTypeName(fInputField.getText());
 					if (status.getSeverity() == IStatus.ERROR){
 						error(status.getMessage());
 					} else {
 						try {
-							IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fTextField.getText());
-							IStatus validationStatus= validateDestinationType(resolvedType, fTextField.getText());
+							IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fInputField.getText());
+							IStatus validationStatus= validateDestinationType(resolvedType, fInputField.getText());
 							if (validationStatus.isOK()){
 								setErrorMessage(null);
 								setPageComplete(true);
@@ -147,15 +152,29 @@ public class MoveMembersWizard extends RefactoringWizard {
 							JavaPlugin.log(ex); //no ui here
 							error(RefactoringMessages.getString("MoveMembersInputPage.invalid_name")); //$NON-NLS-1$
 						}
-					}	
+					}
 				}
 				private void error(String message){
 					setErrorMessage(message);
 					setPageComplete(false);
 				}
 			});
+			if (fgMruDestinations.size() > 0)
+				fInputField.select(0);
+			else
+				setPageComplete(false);
+			
+			Button button= new Button(composite, SWT.PUSH);
+			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
+			button.setLayoutData(new GridData());
+			SWTUtil.setButtonDimensionHint(button);
+			button.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					openTypeSelectionDialog();
+				}
+			});
 		}
-	
+			
 		protected boolean performFinish() {
 			initializeRefactoring();
 			return super.performFinish();
@@ -168,7 +187,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		private void initializeRefactoring() {
 			try {
-				getMoveRefactoring().setDestinationTypeFullyQualifiedName(fTextField.getText());
+				String destination= fInputField.getText();
+				if (!fgMruDestinations.remove(destination) && fgMruDestinations.size() >= MRU_COUNT)
+					fgMruDestinations.remove(fgMruDestinations.size() - 1);
+				fgMruDestinations.add(0, destination);
+				
+				getMoveRefactoring().setDestinationTypeFullyQualifiedName(destination);
 			} catch(JavaModelException e) {
 				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("MoveMembersInputPage.move_Member"), RefactoringMessages.getString("MoveMembersInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -216,12 +240,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (dialog.open() == Window.CANCEL)
 				return;
 			IType firstResult= (IType)dialog.getFirstResult();		
-			fTextField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
+			fInputField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
 		}
 
 		private String createInitialFilter() {
-			if (! fTextField.getText().trim().equals("")) //$NON-NLS-1$
-				return fTextField.getText();
+			if (! fInputField.getText().trim().equals("")) //$NON-NLS-1$
+				return fInputField.getText();
 			else
 				return getMoveRefactoring().getDeclaringType().getElementName();
 		}
