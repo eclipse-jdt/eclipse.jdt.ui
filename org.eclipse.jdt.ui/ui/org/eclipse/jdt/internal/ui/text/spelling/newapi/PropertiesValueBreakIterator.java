@@ -16,14 +16,23 @@ import java.text.CharacterIterator;
 import java.util.Locale;
 
 /**
+ * {@link BreakIterator} implementation for properties values.
+ * 
  * @since 3.1
  */
 public class PropertiesValueBreakIterator extends BreakIterator {
 
+	/** Parent break iterator from which breaks will be changed and filtered */
 	private BreakIterator fParent;
 	
+	/** Underlying character iterator */
 	private CharacterIterator fText;
 
+	/**
+	 * Initialize with the given locale.
+	 * 
+	 * @param locale the locale
+	 */
 	public PropertiesValueBreakIterator(Locale locale) {
 		fParent= BreakIterator.getWordInstance(locale);
 	}
@@ -104,6 +113,12 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 		fParent.setText(newText);
 	}
 
+	/**
+	 * Should stop at the given index?
+	 * 
+	 * @param index the index
+	 * @return <code>true</code> iff the iterator should stop at the given index
+	 */
 	private boolean stopAt(int index) {
 		if (index == BreakIterator.DONE)
 			return true;
@@ -112,6 +127,12 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 		return true;
 	}
 
+	/**
+	 * Returns the corrected break index of the given index.
+	 * 
+	 * @param index the index
+	 * @return the corrected index
+	 */
 	private int correct(int index) {
 		if (index == BreakIterator.DONE)
 			return index;
@@ -120,6 +141,12 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 		return index;
 	}
 
+	/**
+	 * Returns the underlying character at the given index.
+	 * 
+	 * @param index the index
+	 * @return the character
+	 */
 	private char charAt(int index) {
 		int oldIndex= fText.getIndex();
 		char ch= fText.setIndex(index);
@@ -127,14 +154,20 @@ public class PropertiesValueBreakIterator extends BreakIterator {
 		return ch;
 	}
 
-	private boolean validIndex(int index) {
-		return index >= getBeginIndex() && index < getEndIndex();
-	}
-
+	/**
+	 * Returns the exclusive end index of the underlying character iterator.
+	 * 
+	 * @return the exclusive end index of the underlying character iterator
+	 */
 	private int getEndIndex() {
 		return fText.getEndIndex();
 	}
 
+	/**
+	 * Returns the inclusive begin index of the underlying character iterator.
+	 * 
+	 * @return the inclusive begin index of the underlying character iterator
+	 */
 	private int getBeginIndex() {
 		return fText.getBeginIndex();
 	}

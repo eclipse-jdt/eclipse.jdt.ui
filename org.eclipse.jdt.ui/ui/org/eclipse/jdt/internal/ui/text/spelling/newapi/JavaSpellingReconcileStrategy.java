@@ -72,6 +72,17 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		/** Does the word start a new sentence? */
 		private boolean fSentence;
 
+		/**
+		 * Initialize with the given parameters.
+		 * 
+		 * @param start the start offset
+		 * @param end the end offset
+		 * @param line the line
+		 * @param message the message
+		 * @param word the word
+		 * @param match <code>true</code> iff the word was found in the dictionary
+		 * @param sentence <code>true</code> iff the word starts a sentence
+		 */
 		public CoreSpellingProblem(int start, int end, int line, String message, String word, boolean match, boolean sentence) {
 			super();
 			fSourceStart= start;
@@ -181,6 +192,10 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		}
 	}
 
+	/**
+	 * Spelling problem collector that forwards {@link SpellingProblem}s as
+	 * {@link IProblem}s to the {@link IProblemRequestor}.
+	 */
 	private class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		/*
@@ -276,6 +291,12 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		}
 	}
 
+	/**
+	 * Returns the content type of the underlying editor input.
+	 * 
+	 * @return the content type of the underlying editor input or
+	 *         <code>null</code> if none could be determined
+	 */
 	private IContentType getContentType() {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider instanceof IDocumentProviderExtension4) {

@@ -75,6 +75,16 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> iff the given region contains only
+	 * whitespace.
+	 * 
+	 * @param document the document
+	 * @param offset the region's offset
+	 * @param length the region's length
+	 * @return <code>true</code> iff the given region contains only
+	 *         whitespace
+	 */
 	private boolean isWhitespace(IDocument document, int offset, int length) {
 		try {
 			for (int i= 0; i < length; i++)

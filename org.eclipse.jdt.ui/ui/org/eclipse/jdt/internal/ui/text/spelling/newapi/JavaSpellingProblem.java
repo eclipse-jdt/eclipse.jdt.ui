@@ -20,10 +20,19 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 
+/**
+ * A {@link SpellingProblem} that adapts a {@link ISpellEvent}.
+ */
 public class JavaSpellingProblem extends SpellingProblem {
 	
+	/** Spell event */
 	private ISpellEvent fSpellEvent;
 	
+	/**
+	 * Initialize with the given spell event.
+	 * 
+	 * @param spellEvent the spell event
+	 */
 	public JavaSpellingProblem(ISpellEvent spellEvent) {
 		super();
 		fSpellEvent= spellEvent;
@@ -65,10 +74,26 @@ public class JavaSpellingProblem extends SpellingProblem {
 		return new ICompletionProposal[0];
 	}
 	
+	/**
+	 * Returns <code>true</code> iff the corresponding word was found in the dictionary.
+	 * <p>
+	 * NOTE: to be removed, see {@link #getProposals()}
+	 * </p>
+	 * 
+	 * @return <code>true</code> iff the corresponding word was found in the dictionary
+	 */
 	public boolean isDictionaryMatch() {
 		return fSpellEvent.isMatch();
 	}
 	
+	/**
+	 * Returns <code>true</code> iff the corresponding word starts a sentence.
+	 * <p>
+	 * NOTE: to be removed, see {@link #getProposals()}
+	 * </p>
+	 * 
+	 * @return <code>true</code> iff the corresponding word starts a sentence
+	 */
 	public boolean isSentenceStart() {
 		return fSpellEvent.isStart();
 	}

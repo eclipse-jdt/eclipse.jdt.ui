@@ -44,6 +44,9 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	/** Available spelling engines by content type */
 	private Map fEngines= new HashMap();
 	
+	/**
+	 * Initialize concrete engines.
+	 */
 	public DefaultSpellingEngine() {
 		if (JAVA_CONTENT_TYPE != null)
 			fEngines.put(JAVA_CONTENT_TYPE, new JavaSpellingEngine());

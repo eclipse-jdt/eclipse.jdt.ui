@@ -32,16 +32,26 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
- * Abstract spelling engine
+ * Internal abstract spelling engine, subclasses provide a content-type specific implementation.
  * 
  * @since 3.1
  */
 public abstract class SpellingEngine implements ISpellingEngine {
 
+	/**
+	 * {@link ISpellEvent}listener that forwards events as
+	 * {@link org.eclipse.ui.texteditor.spelling.SpellingProblem}.
+	 */
 	protected static class SpellEventListener implements ISpellEventListener {
 		
+		/** Spelling problem collector */
 		private ISpellingProblemCollector fCollector;
 		
+		/**
+		 * Initialize with the given spelling problem collector.
+		 * 
+		 * @param collector the spelling problem collector
+		 */
 		public SpellEventListener(ISpellingProblemCollector collector) {
 			super();
 			fCollector= collector;
@@ -69,11 +79,13 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	}
 
 	/**
-	 * @param document
-	 * @param regions
-	 * @param checker
-	 * @param locale
-	 * @param collector
+	 * Spell-checks the given document regions with the given arguments.
+	 * 
+	 * @param document the document
+	 * @param regions the regions
+	 * @param checker the spell checker
+	 * @param locale the locale
+	 * @param collector the spelling problem collector
 	 * @param monitor the progress monitor, can be <code>null</code>
 	 */
 	protected abstract void check(IDocument document, IRegion[] regions, ISpellChecker checker, Locale locale, ISpellingProblemCollector collector, IProgressMonitor monitor);
