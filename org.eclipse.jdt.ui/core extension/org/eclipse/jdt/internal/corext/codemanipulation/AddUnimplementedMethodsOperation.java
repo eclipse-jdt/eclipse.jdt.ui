@@ -212,7 +212,6 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 						if (fInsert instanceof IMethod)
 							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 						ImportRewrite imports= rewrite.getImportRewrite();
-						fCreatedImports= imports.getCreatedImports();
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {
@@ -236,6 +235,8 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 						imports.createEdit(document);
 						if (!fImports)
 							rewrite.clearImportRewrites();
+						fCreatedImports= imports.getCreatedImports();
+						
 						final Change result= rewrite.createChange();
 						if (result instanceof CompilationUnitChange) {
 							final CompilationUnitChange change= (CompilationUnitChange) result;

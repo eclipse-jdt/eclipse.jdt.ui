@@ -256,6 +256,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 						imports.createEdit(document);
 						if (!fImports)
 							rewrite.clearImportRewrites();
+						fCreatedImports= imports.getCreatedImports();
 						final Change result= rewrite.createChange();
 						if (result instanceof CompilationUnitChange) {
 							final CompilationUnitChange change= (CompilationUnitChange) result;
