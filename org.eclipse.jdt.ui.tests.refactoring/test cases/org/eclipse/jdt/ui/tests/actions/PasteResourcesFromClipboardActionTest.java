@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.*;
 
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
@@ -143,7 +143,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private void doCopy(Object[] copySelection) {
 		if (copySelection == null)
 			return; 
-		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(copySelection), new MockSelectionProvider(copySelection));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockUnifiedSite(copySelection), new MockSelectionProvider(copySelection));
 		copyAction.update();
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
@@ -151,14 +151,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
 	private void checkEnabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
 	}

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.reorg.NewJdtMoveAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 
 public class MoveAction extends SelectionDispatchAction{
 	
@@ -31,7 +31,7 @@ public class MoveAction extends SelectionDispatchAction{
 		super(site);
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
 		fMoveMembersAction= MoveAction.createMoveMembersAction(site);
-		fJdtMoveAction= new NewJdtMoveAction(site);
+		fJdtMoveAction= new JdtMoveAction(site);
 	}
 
 	/*

@@ -11,7 +11,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.*;
 
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class SourceReferenceTestUtil {
@@ -48,14 +48,14 @@ class SourceReferenceTestUtil {
 //	}	
 
 	static void copy(Object[] elems) {
-		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
 		copyAction.update();
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
 	static void paste(Object[] elems) {
-		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
 		pasteAction.update();
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();

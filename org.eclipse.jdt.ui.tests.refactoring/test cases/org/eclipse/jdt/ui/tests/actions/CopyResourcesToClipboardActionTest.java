@@ -22,7 +22,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.*;
 
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
@@ -104,13 +104,13 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(elements), new MockSelectionProvider(elements));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockUnifiedSite(elements), new MockSelectionProvider(elements));
 		copyAction.update();
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(elements), new MockSelectionProvider(elements));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockUnifiedSite(elements), new MockSelectionProvider(elements));
 		copyAction.update();
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}
