@@ -8,6 +8,8 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
@@ -54,8 +56,7 @@ class CustomSearchEngine extends SearchEngine {
 					scope, 
 					detailLevel, 
 					pathCollector, 
-					indexManager, 
-					progressMonitor),
+					indexManager),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				progressMonitor);
 
@@ -65,7 +66,11 @@ class CustomSearchEngine extends SearchEngine {
 				
 			/* eliminating false matches and locating them */
 			if (progressMonitor != null && progressMonitor.isCanceled()) throw new OperationCanceledException();
-			matchLocator.locateMatches(pathCollector.getPaths(), workspace);
+			matchLocator.locateMatches(
+				pathCollector.getPaths(), 
+				workspace,
+				new IWorkingCopy[0],
+				progressMonitor == null ? null : new SubProgressMonitor(progressMonitor, 95));
 		}
 
 		if (progressMonitor != null) {

@@ -301,7 +301,9 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		}
 		
 		public void acceptFieldReference(char[] fieldName, int sourcePosition) {}
-		public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {}
+		public void enterInitializer(int modifiers, int start) {}
+		public void exitInitializer(int end) {}
+		//public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {}
 		public void acceptLineSeparatorPositions(int[] positions) {}
 		public void acceptMethodReference(char[] methodName, int argCount, int sourcePosition) {}
 		public void acceptPackage(int declarationStart, int declarationEnd, char[] name) {}

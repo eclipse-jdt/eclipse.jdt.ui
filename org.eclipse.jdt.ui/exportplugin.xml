@@ -28,16 +28,16 @@
 		</copy>
 		<mkdir dir="TMP" />
 		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI" />
+			<fileset dir="ui" />
 		</copy>
 		<copy todir="TMP">
-			<fileset dir="Eclipse Java Core Refactoring" />
+			<fileset dir="core refactoring" />
 		</copy>
 		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI Debug" />
+			<fileset dir="ui debug" />
 		</copy>
 		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI Refactoring" />
+			<fileset dir="ui refactoring" />
 		</copy>
 		<zip 
 			zipfile="${dest}/jdtsrc.zip"

@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.ast.*;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ClassScope;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.ast.*;import org.eclipse.jdt.internal.compiler.ast.AssertStatement;
+import org.eclipse.jdt.internal.compiler.ast.EmptyStatement;
+import org.eclipse.jdt.internal.compiler.ast.LocalTypeDeclaration;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ClassScope;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 
 public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IParentTracker {
 
@@ -382,16 +385,6 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		fVisitor.endVisit(tryStatement, scope);	
 	}
 
-	public void endVisit(TypeDeclaration typeDeclaration, BlockScope scope) {
-		popParent();
-		fVisitor.endVisit(typeDeclaration, scope);	
-	}
-
-	public void endVisit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		popParent();
-		fVisitor.endVisit(typeDeclaration, scope);	
-	}
-
 	public void endVisit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
 		popParent();
 		fVisitor.endVisit(typeDeclaration, scope);	
@@ -399,7 +392,7 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 
 	public void endVisit(UnaryExpression unaryExpression, BlockScope scope) {
 		popParent();
-		fVisitor.endVisit(unaryExpression, scope);	
+		fVisitor.endVisit(unaryExpression, scope);
 	}
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
@@ -827,18 +820,6 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		return result;
 	}
 
-	public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
-		boolean result= fVisitor.visit(typeDeclaration, scope);
-		pushParent(typeDeclaration);
-		return result;
-	}
-
-	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		boolean result= fVisitor.visit(typeDeclaration, scope);
-		pushParent(typeDeclaration);
-		return result;
-	}
-
 	public boolean visit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
 		boolean result= fVisitor.visit(typeDeclaration, scope);
 		pushParent(typeDeclaration);
@@ -856,4 +837,60 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		pushParent(whileStatement);
 		return result;
 	}
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(AssertStatement, BlockScope)
+	 */
+	public void endVisit(AssertStatement assertStatement, BlockScope scope) {
+		popParent();
+		fVisitor.endVisit(assertStatement, scope);	
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(EmptyStatement, BlockScope)
+	 */
+	public void endVisit(EmptyStatement statement, BlockScope scope) {
+		popParent();
+		fVisitor.endVisit(statement, scope);	
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(LocalTypeDeclaration, BlockScope)
+	 */
+	public void endVisit(
+		LocalTypeDeclaration localTypeDeclaration,
+		BlockScope scope) {
+		popParent();
+		fVisitor.endVisit(localTypeDeclaration, scope);	
+			
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(AssertStatement, BlockScope)
+	 */
+	public boolean visit(AssertStatement assertStatement, BlockScope scope) {
+		boolean result= fVisitor.visit(assertStatement, scope);
+		pushParent(assertStatement);
+		return result;
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(EmptyStatement, BlockScope)
+	 */
+	public boolean visit(EmptyStatement statement, BlockScope scope) {
+		boolean result= fVisitor.visit(statement, scope);
+		pushParent(statement);
+		return result;
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(LocalTypeDeclaration, BlockScope)
+	 */
+	public boolean visit(
+		LocalTypeDeclaration localTypeDeclaration,
+		BlockScope scope) {
+		boolean result= fVisitor.visit(localTypeDeclaration, scope);
+		pushParent(localTypeDeclaration);
+		return result;
+	}
+
 }

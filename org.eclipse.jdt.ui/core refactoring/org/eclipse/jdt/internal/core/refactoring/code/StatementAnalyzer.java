@@ -502,11 +502,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		endVisitAbstractMethodDeclaration(clinit, scope);
 	}
 	
-	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		return fSelection.enclosedBy(typeDeclaration.declarationSourceStart,
-			typeDeclaration.declarationSourceEnd);
-	}
-	
 	public boolean visit(MemberTypeDeclaration memberTypeDeclaration, ClassScope scope) {
 		return fSelection.enclosedBy(memberTypeDeclaration.declarationSourceStart,
 			memberTypeDeclaration.declarationSourceEnd);
@@ -554,19 +549,11 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	
 	//---- Methods ----------------------------------------------------------------
 	
-	public boolean visit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
-		return visitLocalTypeDeclaration(localTypeDeclaration, scope);
-	}
-	
 	public boolean visit(Argument argument, BlockScope scope) {
 		return false;
 	}
 	
 	//---- Methods / Block --------------------------------------------------------
-	
-	public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
-		return visitLocalTypeDeclaration(typeDeclaration, scope);
-	}
 	
 	public boolean visit(AnonymousLocalTypeDeclaration anonymousTypeDeclaration, BlockScope scope) {
 		if (!checkLocalTypeDeclaration(anonymousTypeDeclaration))
@@ -1107,4 +1094,25 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		endVisitImplicitBranchTarget(whileStatement, scope);
 		endVisitConditionBlock(whileStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_while")); //$NON-NLS-1$
 	}
+	
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(AssertStatement, BlockScope)
+	 */
+	public boolean visit(AssertStatement assertStatement, BlockScope scope) {
+		return true;
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(EmptyStatement, BlockScope)
+	 */
+	public boolean visit(EmptyStatement statement, BlockScope scope) {
+		return true;
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#visit(LocalTypeDeclaration, BlockScope)
+	 */
+	public boolean visit(LocalTypeDeclaration localTypeDeclaration, BlockScope scope) {
+		return visitLocalTypeDeclaration(localTypeDeclaration, scope);	
+	}	
 }

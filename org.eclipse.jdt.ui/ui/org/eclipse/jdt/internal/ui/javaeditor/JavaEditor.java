@@ -93,8 +93,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		ISourceViewer viewer= super.createSourceViewer(parent, ruler, styles);
-		StyledText text= viewer.getTextWidget();
-		text.setBidiColoring(true);
+		StyledText text= viewer.getTextWidget(); 
+		//text.setBidiColoring(true);
 		return viewer;
 	}	
 	

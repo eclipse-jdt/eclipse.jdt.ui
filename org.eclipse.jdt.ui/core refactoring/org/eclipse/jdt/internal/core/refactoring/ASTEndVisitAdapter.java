@@ -237,4 +237,25 @@ public abstract class ASTEndVisitAdapter implements IAbstractSyntaxTreeVisitor {
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
 	}
+	
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(AssertStatement, BlockScope)
+	 */
+	public void endVisit(AssertStatement assertStatement, BlockScope scope) {
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(EmptyStatement, BlockScope)
+	 */
+	public void endVisit(EmptyStatement statement, BlockScope scope) {
+	}
+
+	/*
+	 * @see IAbstractSyntaxTreeVisitor#endVisit(LocalTypeDeclaration, BlockScope)
+	 */
+	public void endVisit(
+		LocalTypeDeclaration localTypeDeclaration,
+		BlockScope scope) {
+	}
+	
 }

@@ -54,6 +54,13 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		return new char[0];
 	}
 	
+	/* (non Java doc)
+	 * @see IcompilationUnit#getPackageName
+	 */
+	public char[][]getPackageName() {
+		return null;
+	}
+	
 	//---- ISourceElementRequestor
 	
 	public void enterCompilationUnit() {
@@ -99,9 +106,11 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		pop(declarationEnd);
 	}
 	
-	public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {
+	public void enterInitializer(int modifiers, int declarationSourceStart) {
 		push(JavaNode.INIT, getCurrentContainer().getInitializerCount(), declarationSourceStart);
-		//push(JavaNode.INIT, "<init>", " @ " + fLastSlotId, declarationSourceStart);
+	}
+	
+	public void exitInitializer(int declarationSourceEnd) {
 		pop(declarationSourceEnd);
 	}
 	
