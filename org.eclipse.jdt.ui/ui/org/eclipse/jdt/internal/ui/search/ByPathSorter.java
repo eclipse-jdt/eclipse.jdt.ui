@@ -4,33 +4,37 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
-import org.eclipse.core.resources.IResource;
-
+import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.SearchUI;
 
 /**
  * Sorts the search result viewer by the resource name.
  */
 public class ByPathSorter extends ViewerSorter {
 
+	private ILabelProvider fLabelProvider;
+	
 	/*
 	 * Overrides method from ViewerSorter
 	 */
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		String name1= null;
 		String name2= null;
+		
 		if (e1 instanceof ISearchResultViewEntry)
-			name1= ((ISearchResultViewEntry)e1).getResource().getFullPath().toString();
+			name1= fLabelProvider.getText(e1);
 		if (e2 instanceof ISearchResultViewEntry)
-			name2= ((ISearchResultViewEntry)e2).getResource().getFullPath().toString();
+			name2= fLabelProvider.getText(e2);
 		if (name1 == null)
 			name1= ""; //$NON-NLS-1$
 		if (name2 == null)
 			name2= ""; //$NON-NLS-1$
-		return name1.toLowerCase().compareTo(name2.toLowerCase());
+		return getCollator().compare(name1, name2);
 	}
 
 	/*
@@ -39,5 +43,19 @@ public class ByPathSorter extends ViewerSorter {
 	public boolean isSorterProperty(Object element, String property) {
 		return true;
 	}
+
+	/*
+	 * Overrides method from ViewerSorter
+	 */
+	public void sort(Viewer viewer, Object[] elements) {
+		// Set label provider to show "path - resource"
+		ISearchResultView view= SearchUI.getSearchResultView();
+		if (view == null)
+			return;
+		fLabelProvider= view.getLabelProvider();
+		if (fLabelProvider instanceof JavaSearchResultLabelProvider)
+			((JavaSearchResultLabelProvider)fLabelProvider).setOrder(JavaSearchResultLabelProvider.SHOW_CONTAINER_ELEMENT);
+
+		super.sort(viewer, elements);
+	}
 }
-	

@@ -23,7 +23,12 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
 
+	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
+	public static final int SHOW_CONTAINER_ELEMENT= 2;
+//	public static final int SHOW_RESOURCE= 3;
+
 	private JavaElementLabelProvider fLabelProvider;
+	private JavaTextLabelProvider fTextLabelProvider;
 	
 	// LRU Cache
 	private IMarker fLastMarker;
@@ -33,16 +38,22 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 
 	public JavaSearchResultLabelProvider() {
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | JavaElementLabelProvider.SHOW_ROOT);
 	}	
 
 	public String getText(Object o) {
 		fLastMarker= null;
 		IJavaElement javaElement= getJavaElement(o);
-		if (javaElement == null)
-			return ""; //$NON-NLS-1$
+		if (javaElement == null) {
+			IMarker marker= getMarker(o);
+			if (marker != null)
+				return fLabelProvider.getText(marker.getResource());
+			else
+				return ""; //$NON-NLS-1$
+		}
 		if (javaElement instanceof IImportDeclaration)
-			return fLabelProvider.getText(((IImportDeclaration)javaElement).getParent().getParent());
-		return fLabelProvider.getText((IJavaElement)javaElement);
+			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
+		return fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
 	}
 
 	public Image getImage(Object o) {
@@ -52,13 +63,36 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		return fLabelProvider.getImage(javaElement);
 	}
 
+	public void setOrder(int orderFlag) {
+		if (orderFlag == SHOW_ELEMENT_CONTAINER) {
+			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_CONTAINER);
+			fTextLabelProvider.turnOff(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
+
+			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
+		}
+		else if (orderFlag == SHOW_CONTAINER_ELEMENT) {
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
+			fTextLabelProvider.turnOn(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
+			
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);			
+		}
+	}
+
 	private IJavaElement getJavaElement(Object o) {
+		if (o instanceof IJavaElement)
+			return (IJavaElement)o;
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
-		IMarker marker= ((ISearchResultViewEntry)o).getSelectedMarker();
+		IMarker marker= getMarker(o);
 		if (marker == null || !marker.exists())
 			return null;
 		return getJavaElement(marker);
+	}
+
+	private IMarker getMarker(Object o) {
+		if (!(o instanceof ISearchResultViewEntry))
+			return null;
+		return ((ISearchResultViewEntry)o).getSelectedMarker();
 	}
 	
 	private IJavaElement getJavaElement(IMarker marker) {
