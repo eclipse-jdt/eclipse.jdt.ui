@@ -292,14 +292,21 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fHierarchyPresenter.uninstall();
 			fHierarchyPresenter= null;
 		}
+		
+		StyledText textWidget= getTextWidget();
 		if (fForegroundColor != null) {
+			if (textWidget != null && !textWidget.isDisposed())
+				textWidget.setForeground(null);
 			fForegroundColor.dispose();
 			fForegroundColor= null;
 		}
 		if (fBackgroundColor != null) {
+			if (textWidget != null && !textWidget.isDisposed())
+				textWidget.setBackground(null);
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
 		}
+		
 		if (fPreferenceStore != null)
 			fPreferenceStore.removePropertyChangeListener(this);
 		
