@@ -8,6 +8,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -49,12 +55,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -87,8 +87,20 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
@@ -98,6 +110,7 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -107,7 +120,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.ShowInNavigatorAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -119,17 +131,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
@@ -917,11 +918,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		if (selection.size() == 1) {
 			if (obj instanceof IJavaElement) {
-				IJavaElement cu= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.COMPILATION_UNIT);
+				IJavaElement cu= ((IJavaElement)obj).getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
 					element= getResourceFor(cu);
 				if (element == null)
-					element= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.CLASS_FILE);
+					element= ((IJavaElement)obj).getAncestor(IJavaElement.CLASS_FILE);
 			}
 			else if (obj instanceof IFile)
 				element= obj;
@@ -1134,7 +1135,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		cu= (ICompilationUnit)getSuitableJavaElement(cu);
 		
 		// Use primary type if possible
-		IType primaryType= JavaModelUtil.findPrimaryType(cu);
+		IType primaryType= cu.findPrimaryType();
 		if (primaryType != null)
 			return primaryType;
 

@@ -32,6 +32,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -135,5 +136,15 @@ public class JarPackagerUtil {
 		if (message == null)
 			message= ""; //$NON-NLS-1$
 		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.INTERNAL_ERROR, message, ex));
+	}
+
+	/**
+	 * XXX:	JavaModelUtil deprecated this helper method.
+	 * 		Moved here to reduce deprecation warnings in
+	 * 		this package. Voted to keep the method on
+	 * 		JavaModelUtil. Waiting for action.
+	 */
+	static IJavaElement findParentOfKind(IJavaElement element, int kind) {
+		return JavaModelUtil.findParentOfKind(element, kind);
 	}
 }

@@ -970,7 +970,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];
 			if (element instanceof ICompilationUnit) {
-				IJavaElement pack= JavaModelUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);
+				IJavaElement pack= JarPackagerUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);
 				if (pack != null)
 					packages.add(pack);
 			}

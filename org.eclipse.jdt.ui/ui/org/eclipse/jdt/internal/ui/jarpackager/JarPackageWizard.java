@@ -252,13 +252,13 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 					selectedElements.add(je);
 		}
 		else {
-			IJavaElement cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
+			IJavaElement cuOrCf= JarPackagerUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
 			if (cuOrCf instanceof ICompilationUnit) {
 				ICompilationUnit cu= (ICompilationUnit)cuOrCf;
 				if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
 					selectedElements.add(cu);
 			} else {
-				cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
+				cuOrCf= JarPackagerUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
 				if (cuOrCf instanceof IClassFile)
 					selectedElements.add(cuOrCf.getParent());
 			}
