@@ -98,6 +98,11 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		assertEquals("was not supposed to fail with different severity", expectedSeverity, performRefactoring(ref).getSeverity());
 	}
 
+	private void standardPassingTest() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
 	//---------------tests ----------------------
 	
 	public void test0() throws Exception{
@@ -157,9 +162,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test14() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test15() throws Exception{
@@ -169,27 +172,19 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test16() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test17() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test18() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test19() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test20() throws Exception{
@@ -219,75 +214,71 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test26() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test27() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test28() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test29() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test30() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test31() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 	
 	public void test32() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test33() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test34() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test35() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test36() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
 	}
 
 	public void test37() throws Exception{
-		String[] names= new String[]{"m"};
-		String[][] signatures= new String[][]{new String[0]};
-		validatePassingTest("A", "I", names, signatures, true);
+		standardPassingTest();
+	}
+
+	public void test38() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test39() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test40() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test41() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test42() throws Exception{
+		standardPassingTest();
 	}
 
 	public void testFail0() throws Exception{
