@@ -45,7 +45,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
 
 /**
@@ -172,10 +171,14 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		if (model == null)
 			return;
 		
-		SpellingContext context= new SpellingContext();
-		context.setContentType(getContentType());
-		PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(model);
-		EditorsUI.getSpellingService().check(fDocument, context, collector, fProgressMonitor);
+		try {
+			SpellingContext context= new SpellingContext();
+			context.setContentType(getContentType());
+			PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(model);
+			EditorsUI.getSpellingService().check(fDocument, context, collector, fProgressMonitor);
+		} catch (CoreException x) {
+			// swallow exception
+		}
 	}
 
 	/**
@@ -183,17 +186,14 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 	 * 
 	 * @return the content type of the underlying editor input or
 	 *         <code>null</code> if none could be determined
+	 * @throws CoreException if reading or accessing the underlying store fails
 	 */
-	private IContentType getContentType() {
+	private IContentType getContentType() throws CoreException {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider instanceof IDocumentProviderExtension4) {
-			try {
-				IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
-				if (desc != null)
-					return desc.getContentType();
-			} catch (CoreException x) {
-				JavaPlugin.log(x.getStatus());
-			}
+			IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
+			if (desc != null)
+				return desc.getContentType();
 		}
 		return null;
 	}
