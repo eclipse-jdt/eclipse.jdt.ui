@@ -384,6 +384,19 @@ public class PackagesView extends JavaBrowsingPart{
 	protected void setSiteSelectionProvider(){
 		getSite().setSelectionProvider(fWrappedViewer);
 	}
+
+	void adjustInputAndSetSelection(Object o) {
+		if (!(o instanceof LogicalPackage)) {
+			super.adjustInputAndSetSelection(o);
+			return;
+		}
+
+		LogicalPackage lp= (LogicalPackage)o;
+		if (!lp.getJavaProject().equals(getInput()))
+			setInput(lp.getJavaProject());
+	
+		setSelection(new StructuredSelection(lp), true);
+	}
 	
 	//do the same thing as the JavaBrowsingPart but with wrapper
 	protected void createActions() {
