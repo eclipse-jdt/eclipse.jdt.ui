@@ -23,6 +23,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckIterator;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
@@ -42,19 +43,21 @@ public class JavaSpellingEngine extends SpellingEngine {
 		ISpellEventListener listener= new SpellEventListener(collector);
 		try {
 			checker.addListener(listener);
-			// XXX: only check given regions
 			try {
-				ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, 0, document.getLength(), false); 
-				for (int index= 0; index < partitions.length; index++) {
-					if (monitor != null && monitor.isCanceled())
-						return;
-					
-					ITypedRegion partition= partitions[index];
-					if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
-						checker.execute(new SpellCheckIterator(document, partition, locale));
+				for (int i= 0; i < regions.length; i++) {
+					IRegion region= regions[i];
+					ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false); 
+					for (int index= 0; index < partitions.length; index++) {
+						if (monitor != null && monitor.isCanceled())
+							return;
+						
+						ITypedRegion partition= partitions[index];
+						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
+							checker.execute(new SpellCheckIterator(document, partition, locale));
+					}
 				}
 			} catch (BadLocationException x) {
-				// ignore
+				JavaPlugin.log(x);
 			}
 		} finally {
 			checker.removeListener(listener);
