@@ -31,7 +31,16 @@ import org.eclipse.jface.text.contentassist.IContentAssistSubject;
 import org.eclipse.jface.util.Assert;
 
 
-
+/**
+ * A <code>ControlContentAssistSubjectAdapter</code> delegates assistance requests from a 
+ * {@link org.eclipse.jface.text.contentassist.IContentAssistantExtension content assistant}
+ * to a <code>Control</code>.
+ * <p>
+ * XXX: This is work in progress and can change anytime until API for 3.0 is frozen.
+ * </p>
+ * 
+ * @since 3.0
+ */
 public abstract class ControlContentAssistSubjectAdapter implements IContentAssistSubject {
 
 	protected static final boolean DEBUG= false;
@@ -40,54 +49,81 @@ public abstract class ControlContentAssistSubjectAdapter implements IContentAssi
 	private Set fKeyListeners;
 	private Listener fControlListener;
 
+	/**
+	 * Creates a new <code>ControlContentAssistSubjectAdapter</code>
+	 * */
 	public ControlContentAssistSubjectAdapter() {
 		fVerifyKeyListeners= new ArrayList(1);
 		fKeyListeners= new HashSet(1);
 	}
-
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#getControl()
+	 */
 	public abstract Control getControl();
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#addKeyListener(org.eclipse.swt.events.KeyListener)
+	 */
 	public void addKeyListener(KeyListener keyListener) {
 		fKeyListeners.add(keyListener);
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#addKeyListener()");
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#addKeyListener()"); //$NON-NLS-1$
 		installControlListener();
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#removeKeyListener(org.eclipse.swt.events.KeyListener)
+	 */
 	public void removeKeyListener(KeyListener keyListener) {
 		boolean deleted= fKeyListeners.remove(keyListener);
 		if (DEBUG && !deleted)
-			System.err.println("removeKeyListener -> wasn't here");
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#removeKeyListener() -> " + fKeyListeners.size());
+			System.err.println("removeKeyListener -> wasn't here"); //$NON-NLS-1$
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#removeKeyListener() -> " + fKeyListeners.size()); //$NON-NLS-1$
 		uninstallControlListener();
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#supportsVerifyKeyListener()
+	 */
 	public boolean supportsVerifyKeyListener() {
 		return true;
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#appendVerifyKeyListener(org.eclipse.swt.custom.VerifyKeyListener)
+	 */
 	public boolean appendVerifyKeyListener(final VerifyKeyListener verifyKeyListener) {
 		fVerifyKeyListeners.add(verifyKeyListener);
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#appendVerifyKeyListener() -> " + fVerifyKeyListeners.size());
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#appendVerifyKeyListener() -> " + fVerifyKeyListeners.size()); //$NON-NLS-1$
 		installControlListener();
 		return true;
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#prependVerifyKeyListener(org.eclipse.swt.custom.VerifyKeyListener)
+	 */
 	public boolean prependVerifyKeyListener(final VerifyKeyListener verifyKeyListener) {
 		fVerifyKeyListeners.add(0, verifyKeyListener);
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#prependVerifyKeyListener() -> " + fVerifyKeyListeners.size());
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#prependVerifyKeyListener() -> " + fVerifyKeyListeners.size()); //$NON-NLS-1$
 		installControlListener();
 		return true;
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#removeVerifyKeyListener(org.eclipse.swt.custom.VerifyKeyListener)
+	 */
 	public void removeVerifyKeyListener(VerifyKeyListener verifyKeyListener) {
 		fVerifyKeyListeners.remove(verifyKeyListener);
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#removeVerifyKeyListener() -> " + fVerifyKeyListeners.size());
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#removeVerifyKeyListener() -> " + fVerifyKeyListeners.size()); //$NON-NLS-1$
 		uninstallControlListener();
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#setEventConsumer(org.eclipse.jface.text.IEventConsumer)
+	 */
 	public void setEventConsumer(IEventConsumer eventConsumer) {
 		// this is not supported
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#setEventConsumer()");
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#setEventConsumer()"); //$NON-NLS-1$
 	}
 
 	/*
@@ -98,7 +134,7 @@ public abstract class ControlContentAssistSubjectAdapter implements IContentAssi
 	}
 
 	private void installControlListener() {
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#installControlListener() -> k: " + fKeyListeners.size() + ", v: " + fVerifyKeyListeners.size());
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#installControlListener() -> k: " + fKeyListeners.size() + ", v: " + fVerifyKeyListeners.size()); //$NON-NLS-1$ //$NON-NLS-2$
 		if (fControlListener != null)
 			return;
 	
@@ -108,17 +144,17 @@ public abstract class ControlContentAssistSubjectAdapter implements IContentAssi
 				KeyEvent keyEvent= new KeyEvent(e);
 				switch (e.type) {
 					case SWT.Traverse :
-						if (DEBUG) dump("before traverse", e, verifyEvent);
+						if (DEBUG) dump("before traverse", e, verifyEvent); //$NON-NLS-1$
 						verifyEvent.doit= true;
 						for (Iterator iter= fVerifyKeyListeners.iterator(); iter.hasNext(); ) {
 							((VerifyKeyListener) iter.next()).verifyKey(verifyEvent);
 							if (! verifyEvent.doit) {
 								e.detail= SWT.TRAVERSE_NONE;
 								e.doit= true;
-								if (DEBUG) dump("traverse eaten by verify", e, verifyEvent);
+								if (DEBUG) dump("traverse eaten by verify", e, verifyEvent); //$NON-NLS-1$
 								return;
 							}
-							if (DEBUG) dump("traverse ok", e, verifyEvent);
+							if (DEBUG) dump("traverse ok", e, verifyEvent); //$NON-NLS-1$
 						}
 						break;
 					
@@ -127,11 +163,11 @@ public abstract class ControlContentAssistSubjectAdapter implements IContentAssi
 							((VerifyKeyListener) iter.next()).verifyKey(verifyEvent);
 							if (! verifyEvent.doit) {
 								e.doit= verifyEvent.doit;
-								if (DEBUG) dump("keyDown eaten by verify", e, verifyEvent);
+								if (DEBUG) dump("keyDown eaten by verify", e, verifyEvent); //$NON-NLS-1$
 								return;
 							}
 						}
-						if (DEBUG) dump("keyDown ok", e, verifyEvent);
+						if (DEBUG) dump("keyDown ok", e, verifyEvent); //$NON-NLS-1$
 						for (Iterator iter= fKeyListeners.iterator(); iter.hasNext();) {
 							((KeyListener) iter.next()).keyPressed(keyEvent);
 						}
@@ -142,38 +178,38 @@ public abstract class ControlContentAssistSubjectAdapter implements IContentAssi
 				}
 			}
 			private void dump(String who, Event e, VerifyEvent ve) {
-				StringBuffer sb= new StringBuffer("---\n");
+				StringBuffer sb= new StringBuffer("---\n"); //$NON-NLS-1$
 				sb.append(who);
-				sb.append(" - e: keyCode="+e.keyCode+hex(e.keyCode));
-				sb.append("; character="+e.character+hex(e.character));
-				sb.append("; stateMask="+e.stateMask+hex(e.stateMask));
-				sb.append("; doit="+e.doit);
-				sb.append("; detail="+e.detail+hex(e.detail));
-				sb.append("\n");
-				sb.append("  verifyEvent keyCode="+e.keyCode+hex(e.keyCode));
-				sb.append("; character="+e.character+hex(e.character));
-				sb.append("; stateMask="+e.stateMask+hex(e.stateMask));
-				sb.append("; doit="+ve.doit);
+				sb.append(" - e: keyCode="+e.keyCode+hex(e.keyCode)); //$NON-NLS-1$
+				sb.append("; character="+e.character+hex(e.character)); //$NON-NLS-1$
+				sb.append("; stateMask="+e.stateMask+hex(e.stateMask)); //$NON-NLS-1$
+				sb.append("; doit="+e.doit); //$NON-NLS-1$
+				sb.append("; detail="+e.detail+hex(e.detail)); //$NON-NLS-1$
+				sb.append("\n"); //$NON-NLS-1$
+				sb.append("  verifyEvent keyCode="+e.keyCode+hex(e.keyCode)); //$NON-NLS-1$
+				sb.append("; character="+e.character+hex(e.character)); //$NON-NLS-1$
+				sb.append("; stateMask="+e.stateMask+hex(e.stateMask)); //$NON-NLS-1$
+				sb.append("; doit="+ve.doit); //$NON-NLS-1$
 				System.out.println(sb);
 			}
 			private String hex(int i) {
-				return "[0x" + Integer.toHexString(i) + ']';
+				return "[0x" + Integer.toHexString(i) + ']'; //$NON-NLS-1$
 			}
 		};
 		getControl().addListener(SWT.Traverse, fControlListener);
 		getControl().addListener(SWT.KeyDown, fControlListener);
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#installControlListener() - installed");
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#installControlListener() - installed"); //$NON-NLS-1$
 	}
 
 	private void uninstallControlListener() {
 		if (fControlListener == null || fKeyListeners.size() + fVerifyKeyListeners.size() != 0) {
-			if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#uninstallControlListener() -> k: " + fKeyListeners.size() + ", v: " + fVerifyKeyListeners.size());
+			if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#uninstallControlListener() -> k: " + fKeyListeners.size() + ", v: " + fVerifyKeyListeners.size()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		getControl().removeListener(SWT.Traverse, fControlListener);
 		getControl().removeListener(SWT.KeyDown, fControlListener);
 		fControlListener= null;
-		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#uninstallControlListener() - done");
+		if (DEBUG) System.err.println("ControlContentAssistSubjectAdapter#uninstallControlListener() - done"); //$NON-NLS-1$
 	}
 
 }
