@@ -22,7 +22,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -37,7 +36,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class JavaElementUtil {
 	
@@ -55,18 +53,6 @@ public class JavaElementUtil {
 	
 	public static String createFieldSignature(IField field){
 		return JavaModelUtil.getFullyQualifiedName(field.getDeclaringType()) + "." + field.getElementName(); //$NON-NLS-1$
-	}
-	
-	public static String createInitializerSignature(IInitializer initializer){
-		String label= RefactoringCoreMessages.getString("JavaElementUtil.initializer_in") + JavaModelUtil.getFullyQualifiedName(initializer.getDeclaringType()); //$NON-NLS-1$
-		try {
-			if (JdtFlags.isStatic(initializer))
-				return "static " + label; //$NON-NLS-1$
-			else 
-				return label;
-		} catch(JavaModelException e) {
-			return label; //fallback
-		}
 	}
 	
 	public static String createSignature(IMember member){
@@ -127,7 +113,7 @@ public class JavaElementUtil {
 
 
 	private static boolean isCuOnlyType(IType type) throws JavaModelException{
-		return (type.getCompilationUnit().getTypes().length == 1);
+		return type.getCompilationUnit().getTypes().length == 1;
 	}
 
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
