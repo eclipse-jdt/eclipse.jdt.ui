@@ -81,8 +81,6 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	}
 	
 	protected void measureScrolling(String file, ScrollingMode mode, boolean preload) throws Exception {
-		int warmUpRuns= getWarmUpRuns();
-		int measuredRuns= getMeasuredRuns();
 		IEditorPart editor= null;
 		try {
 			editor= EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
@@ -97,6 +95,8 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 			int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
 			
+			int warmUpRuns= getWarmUpRuns();
+			int measuredRuns= getMeasuredRuns();
 			for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 				if (preload) {
 					for (int j= 0; j < operations; j++) {
