@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -22,13 +23,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -46,7 +47,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	private static final String DIALOG_TITLE= "Inline Method";
+	private static final String DIALOG_TITLE= "Inline Call";
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -54,7 +55,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	public InlineMethodAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		fEditor= editor;
-		setText("Inline Method");
+		setText("Inline Call");
 		update(null);
 	}
 
@@ -70,8 +71,12 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 */		
 	protected void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit();
-		ASTNode node= InlineMethodRefactoring.getSelectedNode(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
-		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(cu, (MethodInvocation)node);
+		ASTNode node= InlineMethodRefactoring.getTargetNode(cu, selection.getOffset(), selection.getLength());
+		if (node == null || node.getNodeType() != ASTNode.METHOD_INVOCATION) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method invocation selected.");
+			return;
+		}
+		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(cu, (MethodInvocation)node, JavaPreferencesSettings.getCodeGenerationSettings());
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
