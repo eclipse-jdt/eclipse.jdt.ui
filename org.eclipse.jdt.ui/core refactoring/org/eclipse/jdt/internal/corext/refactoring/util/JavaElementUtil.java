@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaElementUtil {
 	
@@ -50,7 +51,7 @@ public class JavaElementUtil {
 			case IJavaElement.FIELD:
 				return createFieldSignature((IField)member);
 			case IJavaElement.TYPE:
-				return ((IType)member).getFullyQualifiedName();
+				return JavaModelUtil.getFullyQualifiedName(((IType)member));
 			case IJavaElement.INITIALIZER:
 				return "initializer";
 			case IJavaElement.METHOD:
