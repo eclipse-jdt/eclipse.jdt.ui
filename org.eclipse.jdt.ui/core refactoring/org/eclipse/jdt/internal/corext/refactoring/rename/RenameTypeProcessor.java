@@ -622,7 +622,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 			Context context= JavaStatusContext.create(intersection[i]);
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.another_type", //$NON-NLS-1$
 				new String[]{fNewElementName, intersection[i].getElementName()});
-			result.addWarning(message, context);
+			result.addError(message, context);
 		}	
 		return result;
 	}
