@@ -552,9 +552,9 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			int segments= JavaPlugin.getWorkspace().getRoot().getLocation().matchingFirstSegments(fJarPackage.getJarLocation());
 			IPath path= fJarPackage.getJarLocation().removeFirstSegments(segments);
 			IResource resource= JavaPlugin.getWorkspace().getRoot().findMember(path);
-			if (resource != null) {
+			if (resource != null && resource.getType() == IResource.FILE) {
 				// test if included
-				if (JarPackagerUtil.asResources(fJarPackage.getElements()).contains(resource)) {
+				if (JarPackagerUtil.contains(JarPackagerUtil.asResources(fJarPackage.getElements()), (IFile)resource)) {
 					setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.cantExportJARIntoItself")); //$NON-NLS-1$
 					return false;
 				}
