@@ -1188,7 +1188,7 @@ public class JavaIndenter {
 			else
 				// if the formatter uses tabs to mark indentations, use the visual setting from the editor 
 				// to get nicely aligned indentations
-				tabLen= plugin.getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+				tabLen= plugin.getCombinedPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 		else
 			tabLen= 4; // sensible default for testing
 
