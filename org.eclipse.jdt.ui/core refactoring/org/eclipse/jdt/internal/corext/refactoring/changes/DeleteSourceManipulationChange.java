@@ -25,21 +25,21 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		fHandle= getJavaElement(sm).getHandleIdentifier();
 	}
 
-	/**
+	/*
 	 * @see IChange#getName()
 	 */
 	public String getName() {
 		return "Delete";
 	}
 
-	/**
+	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
 	public Object getModifiedLanguageElement() {
 		return JavaCore.create(fHandle);
 	}
 	
-	/**
+	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected void doDelete(IProgressMonitor pm) throws JavaModelException{

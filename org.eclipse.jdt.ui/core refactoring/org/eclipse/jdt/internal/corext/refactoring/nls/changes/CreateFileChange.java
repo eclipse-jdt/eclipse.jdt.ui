@@ -42,8 +42,6 @@ public class CreateFileChange extends Change {
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm)	throws JavaModelException, ChangeAbortException {
 
-		//FIXME must ask DB to do the exception hadnling dance correctly
-		
 		InputStream is= null;
 		try {
 			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 1); //$NON-NLS-1$
@@ -51,8 +49,6 @@ public class CreateFileChange extends Change {
 			if (!isActive()){
 				fUndoChange= new NullChange();	
 			} else{
-				ResourcesPlugin.getWorkspace();
-				is= getInputStream();
 				IFile file= getOldFile();
 				if (file.exists()){
 					CompositeChange composite= new CompositeChange();
@@ -61,6 +57,7 @@ public class CreateFileChange extends Change {
 					composite.perform(context, pm);
 					fUndoChange= composite.getUndoChange();
 				} else {
+					is= getInputStream();
 					file.create(is, false, pm);
 					fUndoChange= new DeleteFileChange(file);
 				}				
