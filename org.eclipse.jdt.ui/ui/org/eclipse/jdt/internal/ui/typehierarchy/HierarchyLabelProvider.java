@@ -13,14 +13,14 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 public class HierarchyLabelProvider extends LabelProvider {
 
 	private TypeHierarchyViewPart fViewPart;
 	private JavaTextLabelProvider fTextLabelProvider;
-	private JavaImageLabelProvider fImageLabelProvider;
+	private JavaElementImageProvider fImageLabelProvider;
 
 	/**
 	 * Constructor for HierarchyLabelProvider.
@@ -30,7 +30,7 @@ public class HierarchyLabelProvider extends LabelProvider {
 		super();
 		fViewPart= viewPart;
 		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		fImageLabelProvider= new JavaImageLabelProvider();
+		fImageLabelProvider= new JavaElementImageProvider();
 		fImageLabelProvider.setErrorTickProvider(provider);
 	}
 
@@ -40,16 +40,16 @@ public class HierarchyLabelProvider extends LabelProvider {
 	public Image getImage(Object obj) {
 		if (obj instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) obj;
-			int flags= JavaImageLabelProvider.OVERLAY_ICONS;
+			int flags= JavaElementImageProvider.OVERLAY_ICONS;
 
 			IJavaElement input= fViewPart.getInputElement();
 			if (input != null && input.getElementType() != IJavaElement.TYPE && element.getElementType() == IJavaElement.TYPE) {
 				IJavaElement parent= JavaModelUtil.findElementOfKind((IType) element, input.getElementType());
 				if (!input.equals(parent)) {
-					flags |= JavaImageLabelProvider.LIGHT_TYPE_ICONS;
+					flags |= JavaElementImageProvider.LIGHT_TYPE_ICONS;
 				}
 			}
-			return fImageLabelProvider.getLabelImage(element, flags); 
+			return fImageLabelProvider.getImageLabel(element, flags); 
 		}
 		return super.getImage(obj);
 	}

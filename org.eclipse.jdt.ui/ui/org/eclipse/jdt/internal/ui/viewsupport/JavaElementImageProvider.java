@@ -36,8 +36,9 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
  */
-public class JavaImageLabelProvider {
+public class JavaElementImageProvider {
 	
+
 	/**
 	 * Flags for the JavaImageLabelProvider:
 	 * Generate images with overlays.
@@ -72,7 +73,7 @@ public class JavaImageLabelProvider {
 	private ImageDescriptorRegistry fRegistry;
 	private IErrorTickProvider fErrorTickProvider;
 		
-	public JavaImageLabelProvider() {
+	public JavaElementImageProvider() {
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	}
 	
@@ -86,7 +87,7 @@ public class JavaImageLabelProvider {
 	 * <code>ISourceReference</code>s.
 	 * @param flags Flags as defined by the JavaImageLabelProvider
 	 */
-	public Image getLabelImage(IJavaElement element, int flags) {
+	public Image getImageLabel(IJavaElement element, int flags) {
 		ImageDescriptor descriptor= getImageDescriptor(element, flags);
 		return fRegistry.get(descriptor);
 	}
@@ -104,7 +105,7 @@ public class JavaImageLabelProvider {
 	}		
 
 	/**
-	 * Maps a Java element to an appropriate base image descriptor.
+	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */
 	public ImageDescriptor getImageDescriptor(IJavaElement element, int flags) {
 		int adornmentFlags= showOverlayIcons(flags) ? computeAdornmentFlags(element) : 0;
@@ -115,7 +116,7 @@ public class JavaImageLabelProvider {
 	// ---- Computation of base image key -------------------------------------------------
 	
 	/**
-	 * Maps a Java element to an appropriate base image descriptor.
+	 * Returns an image descriptor for a java element. This is the base image, no overlays.
 	 */
 	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
 		try {

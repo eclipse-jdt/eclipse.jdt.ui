@@ -23,7 +23,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
@@ -114,7 +114,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
 	private JavaTextLabelProvider fTextLabelProvider;
-	private JavaImageLabelProvider fImageLabelProvider;
+	private JavaElementImageProvider fImageLabelProvider;
 	private WorkbenchLabelProvider fWorkbenchLabelProvider;
 	
 	private int fFlags;
@@ -129,7 +129,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public JavaElementLabelProvider(int flags) {
 		fTextLabelProvider= new JavaTextLabelProvider(flags);
-		fImageLabelProvider= new JavaImageLabelProvider();
+		fImageLabelProvider= new JavaElementImageProvider();
 		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
 		fFlags= flags;
 	}
@@ -167,12 +167,12 @@ public class JavaElementLabelProvider extends LabelProvider {
 			IJavaElement e= (IJavaElement) element;
 			int imageFlags= 0;
 			if (getFlag(SHOW_OVERLAY_ICONS)) {
-				imageFlags |= JavaImageLabelProvider.OVERLAY_ICONS;
+				imageFlags |= JavaElementImageProvider.OVERLAY_ICONS;
 			}
 			if (getFlag(SHOW_SMALL_ICONS)) {
-				imageFlags |= JavaImageLabelProvider.SMALL_ICONS;
+				imageFlags |= JavaElementImageProvider.SMALL_ICONS;
 			}			
-			return fImageLabelProvider.getLabelImage(e, imageFlags);
+			return fImageLabelProvider.getImageLabel(e, imageFlags);
 		}
 
 		Image result= fWorkbenchLabelProvider.getImage(element);
