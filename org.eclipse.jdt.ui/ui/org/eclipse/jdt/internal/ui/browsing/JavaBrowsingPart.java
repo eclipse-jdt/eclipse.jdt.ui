@@ -33,6 +33,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.help.IContextProvider;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -388,6 +390,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
+		}
+		if (key == IContextProvider.class) {
+			JavaUIHelp.getHelpContextProvider(this, getHelpContextId());
 		}
 		return super.getAdapter(key);
 	}

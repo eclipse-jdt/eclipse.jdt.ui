@@ -16,9 +16,16 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.HelpEvent;
 import org.eclipse.swt.events.HelpListener;
 
+import org.eclipse.help.HelpSystem;
+import org.eclipse.help.IContext;
+import org.eclipse.help.IContextProvider;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+
+import org.eclipse.ui.IViewPart;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -38,6 +45,16 @@ public class JavaUIHelp {
 		JavaUIHelpListener listener= new JavaUIHelpListener(editor, contextId);
 		text.addHelpListener(listener);
 	}
+	
+	public static IContextProvider getHelpContextProvider(IViewPart part, String contextId) {
+		ISelection selection= part.getViewSite().getSelectionProvider().getSelection();
+		if (!(selection instanceof StructuredSelection)) 
+			return null;
+		Object[] elements= ((StructuredSelection)selection).toArray();
+		if (elements.length == 0)
+			return null;
+		return new JavaViewerContextProvider(contextId, elements);
+	}
 
 	private static class JavaUIHelpListener implements HelpListener {
 
@@ -56,21 +73,21 @@ public class JavaUIHelp {
 		}
 
 		/*
-		* @see HelpListener#helpRequested(HelpEvent)
-		* 
-		*/
+		 * @see HelpListener#helpRequested(HelpEvent)
+		 * 
+		 */
 		public void helpRequested(HelpEvent e) {
 			try {
 				Object[] selected= null;
 				if (fViewer != null) {
 					ISelection selection= fViewer.getSelection();
 					if (selection instanceof IStructuredSelection) {
-						selected= ((IStructuredSelection) selection).toArray();
+						selected= ((IStructuredSelection)selection).toArray();
 					}
 				} else if (fEditor != null) {
 					IJavaElement input= SelectionConverter.getInput(fEditor);
 					if (ActionUtil.isOnBuildPath(input)) {
-						selected= SelectionConverter.codeResolve(fEditor);					
+						selected= SelectionConverter.codeResolve(fEditor);
 					}
 				}
 				JavadocHelpContext.displayHelp(fContextId, selected);
@@ -80,4 +97,31 @@ public class JavaUIHelp {
 		}
 	}
 
+	private static class JavaViewerContextProvider implements IContextProvider {
+		private String fId;
+		private Object[] fSelected;
+		public JavaViewerContextProvider(String id, Object[] selected) {
+			fId= id;
+			fSelected= selected;
+		}
+		public int getContextChangeMask() {
+			return SELECTION;
+		}
+		public IContext getContext(Object target) {
+			IContext context= HelpSystem.getContext(fId);
+			if (context != null) {
+				if (fSelected != null && fSelected.length > 0) {
+					try {
+						context= new JavadocHelpContext(context, fSelected);
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+					}
+				}
+			}
+			return context;
+		}
+		public String getSearchExpression(Object target) {
+			return null;
+		}
+	}
 }

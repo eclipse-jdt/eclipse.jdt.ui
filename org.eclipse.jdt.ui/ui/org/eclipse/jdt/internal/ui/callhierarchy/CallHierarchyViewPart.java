@@ -31,6 +31,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.help.IContextProvider;
+
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -92,6 +94,7 @@ import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
@@ -618,6 +621,16 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 //            getSite().getPage().addPartListener(fPartListener);
             }
         }
+    }
+    
+    /**
+	 * {@inheritDoc}
+	 */
+    public Object getAdapter(Class adapter) {
+    	if (adapter == IContextProvider.class) {
+    		return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
+    	}
+    	return super.getAdapter(adapter);
     }
 
     /**

@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 
+import org.eclipse.help.IContextProvider;
+
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -125,6 +127,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -610,6 +613,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 
 			};
+		}
+		if (key == IContextProvider.class) {
+			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		}
 		return super.getAdapter(key);
 	}

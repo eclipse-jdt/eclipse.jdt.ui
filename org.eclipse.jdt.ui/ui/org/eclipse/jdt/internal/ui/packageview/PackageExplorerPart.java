@@ -46,6 +46,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.help.IContextProvider;
+
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -940,6 +942,9 @@ public class PackageExplorerPart extends ViewPart
 				}
 
 			};
+		}
+		if (key == IContextProvider.class) {
+			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.PACKAGES_VIEW);
 		}
 		return super.getAdapter(key);
 	}
