@@ -41,7 +41,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param inputString the given input string
 	 * @return the displayable string.
 	 */
-	private String displayString(String inputString, String indentation) {
+	private String displayString(String inputString, String indentation, String delimiter) {
 		
 		int length = inputString.length();
 		StringBuffer buffer = new StringBuffer(length);
@@ -55,12 +55,12 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					token = tokenizer.nextToken();
 					if (token.equals("\n")) { //$NON-NLS-1$
 						buffer.append("\\n"); //$NON-NLS-1$
-						buffer.append("\" + \n"); //$NON-NLS-1$
+						buffer.append("\" + " + delimiter); //$NON-NLS-1$
 						buffer.append(indentation);
 						buffer.append("\""); //$NON-NLS-1$
 						continue;
 					} else {
-						buffer.append("\" + \n"); //$NON-NLS-1$
+						buffer.append("\" + " + delimiter); //$NON-NLS-1$
 						buffer.append(indentation);
 						buffer.append("\""); //$NON-NLS-1$
 					}
@@ -69,7 +69,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				}
 			} else if (token.equals("\n")) { //$NON-NLS-1$
 				buffer.append("\\n"); //$NON-NLS-1$
-				buffer.append("\" + \n"); //$NON-NLS-1$
+				buffer.append("\" + " + delimiter); //$NON-NLS-1$
 				buffer.append(indentation);
 				buffer.append("\""); //$NON-NLS-1$
 				continue;
@@ -108,7 +108,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						tokenBuffer.append(c);
 				}
 			}
-			buffer.append(tokenBuffer.toString());
+			buffer.append(tokenBuffer);
 		}
 		return buffer.toString();
 	}
@@ -143,8 +143,8 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return document.get(start, end - start);
 	}
 
-	private String getModifiedText(String string, String indentation) throws BadLocationException {		
-		return displayString(string, indentation);
+	private String getModifiedText(String string, String indentation, String delimiter) throws BadLocationException {		
+		return displayString(string, indentation, delimiter);
 	}
 
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
@@ -160,6 +160,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return;
 
 		String indentation= getLineIndentation(document, command.offset);
+		String delimiter= getLineDelimiter(document, command.offset);
 
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset());
@@ -170,9 +171,32 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		if (isLineDelimiter(document, command.text))
 			command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
 		else if (command.text.length() > 1 && preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS))
-			command.text= getModifiedText(command.text, indentation);		
+			command.text= getModifiedText(command.text, indentation, delimiter);		
 	}
 	
+	/**
+	 * Returns the line delimiter for the line at <code>offset</code>. If there is none, 
+	 * the method falls back to the first legal line delimiter, or "\n".
+	 * 
+	 * @param document the document to check
+	 * @param offset the current offset
+	 * @return a legal line delimiter, never <code>null</code>
+	 * @throws BadLocationException if the offset is not valid in the document
+	 */
+	private String getLineDelimiter(IDocument document, int offset) throws BadLocationException {
+		int line= document.getLineOfOffset(offset);
+		String delim= document.getLineDelimiter(line);
+		if (delim == null) {
+			String[] delimiters= document.getLegalLineDelimiters();
+			if (delimiters.length > 0)
+				delim= delimiters[0];
+		}
+		if (delim == null)
+			delim= "\n"; //$NON-NLS-1$
+
+		return delim;
+	}
+
 	private boolean isSmartMode() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
