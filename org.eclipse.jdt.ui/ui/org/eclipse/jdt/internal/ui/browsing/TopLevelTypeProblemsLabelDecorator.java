@@ -46,13 +46,21 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 		ICompilationUnit cu= ((IType)sourceElement).getCompilationUnit();
 		if (cu == null)
 			return false;
-		IType[] types= cu.getAllTypes();
+		IType[] types= cu.getTypes();
 		if (types.length < 1)
 			return false;
+
+		int firstTypeStartOffset= -1; 
 		ISourceRange range= types[0].getSourceRange();
-		if (range == null)
-			return false;
-		return pos < range.getOffset() || isInside(pos, cu.getSourceRange());
+		if (range != null)
+			firstTypeStartOffset= range.getOffset();
+
+		int lastTypeEndOffset= -1;
+		range= types[types.length-1].getSourceRange();
+		if (range != null)
+			lastTypeEndOffset= range.getOffset() + range.getLength() - 1;
+
+		return pos < firstTypeStartOffset || pos > lastTypeEndOffset || isInside(pos, sourceElement.getSourceRange());
 	}
 	
 	private boolean isInside(int pos, ISourceRange range) {
