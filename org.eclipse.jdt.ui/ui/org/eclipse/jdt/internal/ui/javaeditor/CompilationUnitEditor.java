@@ -454,8 +454,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
 	public final static String OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
-	
-	
+	/** Preference key for automatically closing strings */
+	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
+	/** Preference key for automatically skipping closing quote */
+	public final static String SKIP_CLOSING_QUOTES= "skipClosingQuotes"; //$NON-NLS-1$
+	/** Preference key for automatically wrapping Java strings */
+	public final static String WRAP_STRINGS= "wrapStrings"; //$NON-NLS-1$
+	/** Preference key for automatically closing brackets and parenthesis */
+	public final static String CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
+	/** Preference key for automatically skipping closing brackets and parenthesis */
+	public final static String SKIP_CLOSING_BRACKETS= "skipClosingBrackets"; //$NON-NLS-1$
+	/** Preference key for automatically closing javadocs and comments */
+	public final static String CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
+	/** Preference key for automatically adding javadoc tags */
+	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
+
 	
 	/** The status line clearer */
 	protected ISelectionChangedListener fStatusLineClearer;

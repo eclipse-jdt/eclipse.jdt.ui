@@ -159,7 +159,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_QUOTES),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_BRACKETS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -232,6 +239,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundCustomRadioButton;
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
+	private Button fAddJavaDocTagsButton;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
     private Control fAutoInsertDelayText;
@@ -348,6 +356,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);
 		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
+
+		store.setDefault(CompilationUnitEditor.CLOSE_STRINGS, true);
+		store.setDefault(CompilationUnitEditor.CLOSE_BRACKETS, true);
+		store.setDefault(CompilationUnitEditor.CLOSE_JAVADOCS, true);
+		store.setDefault(CompilationUnitEditor.SKIP_CLOSING_QUOTES, true);
+		store.setDefault(CompilationUnitEditor.SKIP_CLOSING_BRACKETS, true);
+		store.setDefault(CompilationUnitEditor.WRAP_STRINGS, true);
+		store.setDefault(CompilationUnitEditor.ADD_JAVADOC_TAGS, true);
 	}
 
 	/*
@@ -729,6 +745,50 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return composite;
 	}
 
+	private Control createBehaviourPage(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NULL);
+		GridLayout layout= new GridLayout(); layout.numColumns= 2;
+		composite.setLayout(layout);
+
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_STRINGS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.skipClosingQuotes"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_QUOTES, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.WRAP_STRINGS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.skipClosingBrackets"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_BRACKETS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
+		final Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
+		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);
+
+		// indent this button
+		GridData gridData= new GridData();
+		gridData.horizontalIndent= 20;
+		fAddJavaDocTagsButton.setLayoutData(gridData);
+
+		final Button button2= fAddJavaDocTagsButton;
+
+		button.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				button2.setEnabled(button.getSelection());
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		return composite;
+	}
+
 	private Control createContentAssistPage(Composite parent) {
 
 		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
@@ -809,6 +869,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.problemIndicationTab.title")); //$NON-NLS-1$
 		item.setControl(createProblemIndicationPage(folder));
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.behaviourTab.title")); //$NON-NLS-1$
+		item.setControl(createBehaviourPage(folder));
 		
 		initialize();
 		
@@ -876,6 +940,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundDefaultRadioButton.setSelection(default_);
 		fBackgroundCustomRadioButton.setSelection(!default_);
 		fBackgroundColorButton.setEnabled(!default_);
+
+		boolean closeJavaDocs= fOverlayStore.getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS);
+		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
 		
         updateAutoactivationControls();
 	}

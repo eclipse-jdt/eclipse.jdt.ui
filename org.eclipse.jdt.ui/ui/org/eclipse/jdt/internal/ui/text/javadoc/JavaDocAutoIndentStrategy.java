@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -93,7 +94,9 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						// javadoc started on this line
 						buf.append(" * ");	 //$NON-NLS-1$
 
-						if (isNewComment(d, c.offset)) {
+						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS) &&
+							isNewComment(d, c.offset))
+						{
 							String lineDelimiter= d.getLegalLineDelimiters()[0];
 
 							c.doit= false;
@@ -101,7 +104,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 							
 							// evaluate method signature
 							ICompilationUnit unit= getCompilationUnit();
-							if (unit != null) {
+
+							if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(CompilationUnitEditor.ADD_JAVADOC_TAGS) &&
+								unit != null)
+							{
 								try {
 									unit.reconcile();
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);

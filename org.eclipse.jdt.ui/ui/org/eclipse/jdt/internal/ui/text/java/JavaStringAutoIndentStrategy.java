@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
@@ -7,6 +8,9 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * Auto indent strategy for java strings
@@ -107,12 +111,19 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		try {
 			if (command.length != 0 || command.text == null)
 				return;
+
+			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
-			if (hasLineDelimiters(document, command.text))
+			if (preferenceStore.getBoolean(CompilationUnitEditor.WRAP_STRINGS) &&
+				hasLineDelimiters(document, command.text))
+			{
 				javaStringIndentAfterNewLine(document, command);
 				
-			else if (command.text.equals("\"")) //$NON-NLS-1$
+			} else if (preferenceStore.getBoolean(CompilationUnitEditor.SKIP_CLOSING_QUOTES) &&
+				command.text.equals("\"")) //$NON-NLS-1$
+			{
 				javaStringSkipQuote(document, command);
+			}
 				
 		} catch (BadLocationException e) {
 		}
