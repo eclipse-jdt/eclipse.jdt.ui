@@ -20,8 +20,11 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -30,7 +33,7 @@ import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
-public class ExampleProjectCreationWizard extends BasicNewResourceWizard implements INewWizard, IExecutableExtension {
+public class ExampleProjectCreationWizard extends Wizard implements INewWizard, IExecutableExtension {
 
 	private ExampleProjectCreationWizardPage[] fPages;
 	private IConfigurationElement fConfigElement;
@@ -70,7 +73,6 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 		fPages=  new ExampleProjectCreationWizardPage[children.length];
 		
 		for (int i= 0; i < children.length; i++) {
-			IConfigurationElement curr= children[i];
 			fPages[i]= new ExampleProjectCreationWizardPage(i, children[i]);
 			addPage(fPages[i]);
 		}
@@ -132,7 +134,7 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 					}
 				}
 			});
-			selectAndReveal(resource);
+			BasicNewResourceWizard.selectAndReveal(resource, activePage.getWorkbenchWindow());
 		}
 	}	
 		
@@ -166,5 +168,12 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 			});
 			return result[0];
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+
 	}		
 }
