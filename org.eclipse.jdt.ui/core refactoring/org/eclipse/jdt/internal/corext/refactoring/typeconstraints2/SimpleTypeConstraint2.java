@@ -19,7 +19,7 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 	private final ConstraintVariable2 fRight;
 	private final ConstraintOperator2 fOperator;
 	
-	/* package */ SimpleTypeConstraint2(ConstraintVariable2 left, ConstraintVariable2 right, ConstraintOperator2 operator) {
+	public SimpleTypeConstraint2(ConstraintVariable2 left, ConstraintVariable2 right, ConstraintOperator2 operator) {
 		Assert.isNotNull(left);
 		Assert.isNotNull(right);
 		Assert.isNotNull(operator);
