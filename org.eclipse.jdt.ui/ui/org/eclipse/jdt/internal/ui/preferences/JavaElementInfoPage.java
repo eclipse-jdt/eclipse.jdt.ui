@@ -17,6 +17,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -72,8 +73,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			Label packageName= new Label(composite, SWT.NONE);
 			packageName.setText(unit.getParent().getElementName());
 			
-		}
-		if (element instanceof IPackageFragment) {
+		} else if (element instanceof IPackageFragment) {
 			IPackageFragment packageFragment= (IPackageFragment)element;
 			Label packageContents= new Label(composite, SWT.NONE);
 			packageContents.setText(JavaUIMessages.getString("JavaElementInfoPage.package_contents")); //$NON-NLS-1$
@@ -86,8 +86,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			} catch (JavaModelException e) {
 				packageContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
 			}
-		}
-		if (element instanceof IPackageFragmentRoot) {
+		} else if (element instanceof IPackageFragmentRoot) {
 			Label rootContents= new Label(composite, SWT.NONE);
 			rootContents.setText(JavaUIMessages.getString("JavaElementInfoPage.classpath_entry_kind")); //$NON-NLS-1$
 			Label rootContentsType= new Label(composite, SWT.NONE);
@@ -115,7 +114,12 @@ public class JavaElementInfoPage extends PropertyPage {
 			} catch (JavaModelException e) {
 				rootContentsType.setText(JavaUIMessages.getString("JavaElementInfoPage.not_present")); //$NON-NLS-1$
 			}
-		}		
+		} else if (element instanceof IJavaProject) {
+			Label packageLabel= new Label(composite, SWT.NONE);
+			packageLabel.setText(JavaUIMessages.getString("JavaElementInfoPage.location")); //$NON-NLS-1$
+			Label packageName= new Label(composite, SWT.NONE);
+			packageName.setText(((IJavaProject)element).getProject().getLocation().toOSString());
+		}
 		
 		return composite;
 	}
