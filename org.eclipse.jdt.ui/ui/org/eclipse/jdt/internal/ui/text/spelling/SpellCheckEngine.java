@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,6 +63,10 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		try {
 
 			final URL location= getDictionaryLocation();
+			
+			if (location == null)
+				return Collections.EMPTY_SET;
+			
 			final Locale[] locales= Locale.getAvailableLocales();
 
 			for (int index= 0; index < locales.length; index++) {
