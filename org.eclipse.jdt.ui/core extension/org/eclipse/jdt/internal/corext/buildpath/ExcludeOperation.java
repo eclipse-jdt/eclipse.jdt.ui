@@ -88,8 +88,9 @@ public class ExcludeOperation extends ClasspathModifierOperation {
             return false;
         for(int i= 0; i < elements.size(); i++) {
             Object element= elements.get(i);
-            if (!(types[i] == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT || 
-                    types[i] == DialogPackageExplorerActionGroup.INCLUDED_FOLDER || 
+            int type= types[i];
+			if (!(type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT || 
+                    type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER || 
                     element instanceof ICompilationUnit))
                 return false;
         }

@@ -84,15 +84,16 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      * @throws JavaModelException 
      */
     public boolean isValid(List elements, int[] types) throws JavaModelException {
-        if (elements.size() == 0 || elements.size() > 1)
+        if (elements.size() != 1)
             return false;
-        return  types[0] == DialogPackageExplorerActionGroup.JAVA_PROJECT || 
-                types[0] == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT ||
-                types[0] == DialogPackageExplorerActionGroup.INCLUDED_FOLDER || 
-                types[0] == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT || 
-                types[0] == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT ||
-                types[0] == DialogPackageExplorerActionGroup.FOLDER || 
-                types[0] == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER;
+        int type= types[0];
+		return  type == DialogPackageExplorerActionGroup.JAVA_PROJECT || 
+                type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT ||
+                type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER || 
+                type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT || 
+                type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT ||
+                type == DialogPackageExplorerActionGroup.FOLDER || 
+                type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER;
     }
     
     /**

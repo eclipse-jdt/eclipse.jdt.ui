@@ -71,37 +71,37 @@ public class IncludeOperation extends ClasspathModifierOperation {
     }
     
     /**
-     * Find out whether this operation can be executed on 
-     * the provided list of elements.
-     * 
-     * @param elements a list of elements
-     * @param types an array of types for each element, that is, 
-     * the type at position 'i' belongs to the selected element 
-     * at position 'i' 
-     * 
-     * @return <code>true</code> if the operation can be 
-     * executed on the provided list of elements, <code>
-     * false</code> otherwise.
-     * @throws JavaModelException 
-     */
-    public boolean isValid(List elements, int[] types) throws JavaModelException {
-        if (elements.size() == 0)
-            return false;
-        IJavaProject project= fInformationProvider.getJavaProject();
-        for(int i= 0; i < elements.size(); i++) {
-            Object element= elements.get(i);
-            switch(types[i]) {
-                case DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT: break; // ok
-                case DialogPackageExplorerActionGroup.FOLDER: if (!isValidFolder((IResource)element, project)) return false; break;
-                case DialogPackageExplorerActionGroup.EXCLUDED_FOLDER: break; // ok
-                case DialogPackageExplorerActionGroup.EXCLUDED_FILE: break; // ok
-                case DialogPackageExplorerActionGroup.COMPILATION_UNIT: break; // ok
-                default: return false; // all others are not ok
-            }
-            
-        }
-        return true;
-    }
+	 * Find out whether this operation can be executed on 
+	 * the provided list of elements.
+	 * 
+	 * @param elements a list of elements
+	 * @param types an array of types for each element, that is, 
+	 * the type at position 'i' belongs to the selected element 
+	 * at position 'i' 
+	 * 
+	 * @return <code>true</code> if the operation can be 
+	 * executed on the provided list of elements, <code>
+	 * false</code> otherwise.
+	 * @throws JavaModelException 
+	 */
+	public boolean isValid(List elements, int[] types) throws JavaModelException {
+	    if (elements.size() == 0)
+	        return false;
+	    IJavaProject project= fInformationProvider.getJavaProject();
+	    for(int i= 0; i < elements.size(); i++) {
+	        Object element= elements.get(i);
+	        switch (types[i]) {
+	            case DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT: break; // ok
+	            case DialogPackageExplorerActionGroup.FOLDER: if (!isValidFolder((IResource)element, project)) return false; break;
+	            case DialogPackageExplorerActionGroup.EXCLUDED_FOLDER: break; // ok
+	            case DialogPackageExplorerActionGroup.EXCLUDED_FILE: break; // ok
+	            case DialogPackageExplorerActionGroup.COMPILATION_UNIT: break; // ok
+	            default: return false; // all others are not ok
+	        }
+	        
+	    }
+	    return true;
+	}
     
     /**
      * Find out whether the folder can be included or not.

@@ -84,10 +84,11 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @throws JavaModelException 
      */
     public boolean isValid(List elements, int[] types) throws JavaModelException {
-        if (elements.size() == 0)
+        if (types.length == 0)
             return false;
-        for(int i= 0; i < elements.size(); i++) {
-            if (!(types[i] == DialogPackageExplorerActionGroup.INCLUDED_FILE || types[i] == DialogPackageExplorerActionGroup.INCLUDED_FOLDER))
+        for(int i= 0; i < types.length; i++) {
+			int type= types[i];
+            if (type != DialogPackageExplorerActionGroup.INCLUDED_FILE && type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
                 return false;
         }
         return true;

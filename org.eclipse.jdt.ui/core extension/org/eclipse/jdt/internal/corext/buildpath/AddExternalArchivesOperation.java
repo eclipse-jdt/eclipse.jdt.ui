@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 
 /**
@@ -79,7 +80,7 @@ public class AddExternalArchivesOperation extends ClasspathModifierOperation {
      * @throws JavaModelException 
      */
     public boolean isValid(List elements, int[] types) throws JavaModelException {
-        return true;
+        return types.length == 1 && types[0] == DialogPackageExplorerActionGroup.JAVA_PROJECT;
     }
 
     /* (non-Javadoc)

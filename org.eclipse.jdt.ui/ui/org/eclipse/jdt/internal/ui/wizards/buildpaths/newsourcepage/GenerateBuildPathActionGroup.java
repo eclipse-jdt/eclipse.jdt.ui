@@ -135,17 +135,19 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         ISelectionProvider provider= fSite.getSelectionProvider();
         ISelection selection= provider.getSelection();
         
+		BuildActionSelectionContext context= new BuildActionSelectionContext();
+		
         fActions= new BuildPathAction[9];
 
-        fActions[0]= createBuildPathAction(site, IClasspathInformationProvider.CREATE_LINK);
-        fActions[1]= createBuildPathAction(site, IClasspathInformationProvider.ADD_TO_BP);
-        fActions[2]= createBuildPathAction(site, IClasspathInformationProvider.REMOVE_FROM_BP);
-        fActions[3]= createBuildPathAction(site, IClasspathInformationProvider.ADD_JAR_TO_BP);
-        fActions[4]= createBuildPathAction(site, IClasspathInformationProvider.ADD_LIB_TO_BP);
-        fActions[5]= createBuildPathAction(site, IClasspathInformationProvider.EXCLUDE);
-        fActions[6]= createBuildPathAction(site, IClasspathInformationProvider.UNEXCLUDE);
-        fActions[7]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_FILTERS);
-        fActions[8]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_OUTPUT);
+        fActions[0]= createBuildPathAction(site, IClasspathInformationProvider.CREATE_LINK, context);
+        fActions[1]= createBuildPathAction(site, IClasspathInformationProvider.ADD_TO_BP, context);
+        fActions[2]= createBuildPathAction(site, IClasspathInformationProvider.REMOVE_FROM_BP, context);
+        fActions[3]= createBuildPathAction(site, IClasspathInformationProvider.ADD_JAR_TO_BP, context);
+        fActions[4]= createBuildPathAction(site, IClasspathInformationProvider.ADD_LIB_TO_BP, context);
+        fActions[5]= createBuildPathAction(site, IClasspathInformationProvider.EXCLUDE, context);
+        fActions[6]= createBuildPathAction(site, IClasspathInformationProvider.UNEXCLUDE, context);
+        fActions[7]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_FILTERS, context);
+        fActions[8]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_OUTPUT, context);
         
         for(int i= 0; i < fActions.length; i++) {
             fActions[i].update(selection);
@@ -166,11 +168,12 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      * 
      * @see IClasspathInformationProvider
      */
-    private BuildPathAction createBuildPathAction(IWorkbenchSite site, int type) {
+    private BuildPathAction createBuildPathAction(IWorkbenchSite site, int type, BuildActionSelectionContext context) {
         ImageDescriptor imageDescriptor= null, disabledImageDescriptor= null; 
         String text= null, tooltip= null;
         ClasspathModifierOperation operation= null;
-        BuildPathAction action= new BuildPathAction(site);
+		
+        BuildPathAction action= new BuildPathAction(site, context);
         switch(type) {
             case IClasspathInformationProvider.CREATE_LINK: {
                 imageDescriptor= JavaPluginImages.DESC_TOOL_NEWPACKROOT;
