@@ -61,7 +61,7 @@ public class MembersView extends JavaBrowsingPart {
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
-		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaPlugin.ID_PACKAGES_VIEW);
+		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaPlugin.ID_MEMBERS_VIEW);
 		return viewer;
 	}
 
@@ -72,6 +72,7 @@ public class MembersView extends JavaBrowsingPart {
 	}
 
 	protected void fillToolBar(IToolBarManager tbm) {
+		tbm.add(new LexicalSortingAction(getViewer(), JavaPlugin.ID_MEMBERS_VIEW));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
 	
