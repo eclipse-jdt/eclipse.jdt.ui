@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -62,8 +61,12 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 	 */
 	private IPartListener2 fPartListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference ref) {
-			if (ref.getId().equals(getSite().getId()))
+			if (ref.getId().equals(getSite().getId())) {
+				IWorkbenchPart activePart= ref.getPage().getActivePart();
+				if (activePart != null)
+					selectionChanged(activePart, ref.getPage().getSelection());
 				startListeningForSelectionChanges();
+			}
 		}
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (ref.getId().equals(getSite().getId()))
@@ -160,10 +163,6 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (part.equals(this))
 			return;
-			
-		// XXX: Workaround for bug 38888: javadoc / declaration view: selection is unacceptably slow
-		if (selection instanceof ITextSelection && ((ITextSelection)selection).getLength() > 0)
-			return;
 
 		setInputFrom(part);
 	}
@@ -183,22 +182,28 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 			return null;
 		}
 			
+		return findJavaElement(element);
+	}
+
+	private static IJavaElement findJavaElement(Object element) {
+
 		if (SearchUtil.isISearchResultViewEntry(element)) {
 			IJavaElement je= SearchUtil.getJavaElement(element);
 			if (je != null)
 				return je;
 			element= SearchUtil.getResource(element);
 		}
-
+	
 		IJavaElement je= null;
 		if (element instanceof IAdaptable)
 			je= (IJavaElement)((IAdaptable)element).getAdapter(IJavaElement.class);
-		
+			
 		if (je != null && je.getElementType() == IJavaElement.COMPILATION_UNIT)
 			je= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)je);
-		
+			
 		return je;
 	}
+
 
 	/**
 	 * Finds and returns the type for the given CU.
