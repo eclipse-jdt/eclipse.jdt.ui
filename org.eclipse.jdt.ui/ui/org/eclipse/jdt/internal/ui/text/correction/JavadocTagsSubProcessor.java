@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -25,19 +24,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocTag;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -124,7 +123,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 	
-	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
 			return;
@@ -142,30 +141,36 @@ public class JavadocTagsSubProcessor {
 		
 		MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 		
+		AST ast= javadoc.getAST();
+		ASTRewrite rewrite= new ASTRewrite(javadoc);
+		ListRewriter tagsRewriter= rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS);
+		
+		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
-		JavadocRewriteProposal proposal= new JavadocRewriteProposal("", context.getCompilationUnit(), javadoc, 1, image); //$NON-NLS-1$
-	
-		JavaDocTag[] existingTags= proposal.getTags();
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", context.getCompilationUnit(), rewrite, 1, image); //$NON-NLS-1$
 		
 		switch (problem.getProblemId()) {
 			case IProblem.JavadocMissingParamTag: {
 				String name= ASTNodes.asString(node);
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.paramtag.description")); //$NON-NLS-1$
-				int insertPosition= findParamInsertPosition(existingTags, methodDecl, node.getParent());
-				proposal.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.PARAM, name));
+				TagElement newTag= ast.newTagElement();
+				newTag.setTagName("@param"); //$NON-NLS-1$
+				newTag.fragments().add(ast.newSimpleName(name));
+				insertParamTag(javadoc, tagsRewriter, newTag, node.getParent());
 				break;
 			}
 			case IProblem.JavadocMissingReturnTag: {
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.returntag.description")); //$NON-NLS-1$
-				int insertPosition= findReturnInsertPosition(existingTags);
-				proposal.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.RETURN, "")); //$NON-NLS-1$
+				TagElement newTag= ast.newTagElement();
+				newTag.setTagName("@return"); //$NON-NLS-1$
+				insertReturnTag(javadoc, tagsRewriter, newTag);
 				break;
 			}
 			case IProblem.JavadocMissingThrowsTag: {
-				String name= ASTNodes.asString(node);
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.throwstag.description")); //$NON-NLS-1$
-				int insertPosition= findThrowsInsertPosition(existingTags, methodDecl, node);
-				proposal.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.THROWS, name));
+				TagElement newTag= ast.newTagElement();
+				newTag.setTagName("@throws"); //$NON-NLS-1$
+				insertThrowsTag(javadoc, tagsRewriter, newTag, node);
 				break;
 			}
 			default:
@@ -173,48 +178,58 @@ public class JavadocTagsSubProcessor {
 		}		
 		proposals.add(proposal);
 		
+		rewrite= new ASTRewrite(javadoc);
+		tagsRewriter= rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS);
+		
 		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$
-		JavadocRewriteProposal addAllMissing= new JavadocRewriteProposal(label, context.getCompilationUnit(), javadoc, 5, image); //$NON-NLS-1$
+		ASTRewriteCorrectionProposal addAllMissing= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
 		List list= methodDecl.parameters();
-		for (int i= 0; i < list.size(); i++) {
+		for (int i= list.size() - 1; i >= 0 ; i--) {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) list.get(i);
 			String name= decl.getName().getIdentifier();
-			if (findTag(existingTags, JavaDocTag.PARAM, name) == null) {
-				int insertPosition= findParamInsertPosition(existingTags, methodDecl, decl);
-				addAllMissing.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.PARAM, name)); //$NON-NLS-1$
+			if (findTag(javadoc, "@param", name) == null) { //$NON-NLS-1$
+				TagElement newTag= ast.newTagElement();
+				newTag.setTagName("@param"); //$NON-NLS-1$
+				newTag.fragments().add(ast.newSimpleName(name));
+				insertParamTag(javadoc, tagsRewriter, newTag, decl);
 			}
 		}
 		if (!methodDecl.isConstructor()) {
 			Type type= methodDecl.getReturnType();
 			if (!type.isPrimitiveType() || (((PrimitiveType) type).getPrimitiveTypeCode() != PrimitiveType.VOID)) {
-				if (findTag(existingTags, JavaDocTag.RETURN, null) == null) {
-					int insertPosition= findReturnInsertPosition(existingTags);
-					addAllMissing.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.RETURN, "")); //$NON-NLS-1$
+				if (findTag(javadoc, "@return", null) == null) { //$NON-NLS-1$
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName("@return"); //$NON-NLS-1$
+					insertReturnTag(javadoc, tagsRewriter, newTag);
 				}
 			}
 		}
 		List throwsExceptions= methodDecl.thrownExceptions();
-		for (int i= 0; i < throwsExceptions.size(); i++) {
+		for (int i= throwsExceptions.size() - 1; i >= 0 ; i--) {
 			Name exception= (Name) throwsExceptions.get(i);
 			ITypeBinding binding= exception.resolveTypeBinding();
 			if (binding != null) {
 				String name= binding.getName();
-				if (findThrowsTag(existingTags, name) == null) {
-					int insertPosition= findThrowsInsertPosition(existingTags, methodDecl, exception);
-					addAllMissing.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.THROWS, name)); //$NON-NLS-1$
+				if (findThrowsTag(javadoc, name) == null) {
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName("@throws"); //$NON-NLS-1$
+					newTag.fragments().add(ast.newSimpleName(name));
+					insertThrowsTag(javadoc, tagsRewriter, newTag, exception);
 				}
 			}
 		}
 		proposals.add(addAllMissing);
 	}
 	
-	private static JavaDocTag findTag(JavaDocTag[] existingTags, String name, String arg) {
-		for (int i= 0; i < existingTags.length; i++) {
-			JavaDocTag curr= existingTags[i];
-			if (name.equals(curr.getName())) {
+	public static TagElement findTag(Javadoc javadoc, String name, String arg) {
+		List tags= javadoc.tags();
+		int nTags= tags.size();
+		for (int i= 0; i < nTags; i++) {
+			TagElement curr= (TagElement) tags.get(i);
+			if (name.equals(curr.getTagName())) {
 				if (arg != null) {
-					String argument= getArgument(curr.getContent());
-					if (argument.equals(arg)) {
+					String argument= getArgument(curr);
+					if (arg.equals(argument)) {
 						return curr;
 					}
 				} else {
@@ -225,13 +240,15 @@ public class JavadocTagsSubProcessor {
 		return null;
 	}
 	
-	private static JavaDocTag findThrowsTag(JavaDocTag[] existingTags, String arg) {
-		for (int i= 0; i < existingTags.length; i++) {
-			JavaDocTag curr= existingTags[i];
-			String currName= curr.getName();
-			if (JavaDocTag.THROWS.equals(currName) || JavaDocTag.EXCEPTION.equals(currName)) {
-				String argument= getArgument(curr.getContent());
-				if (argument.equals(arg) || (Signature.getSimpleName(argument)).equals(arg)) {
+	private static TagElement findThrowsTag(Javadoc javadoc, String arg) {
+		List tags= javadoc.tags();
+		int nTags= tags.size();
+		for (int i= 0; i < nTags; i++) {
+			TagElement curr= (TagElement) tags.get(i);
+			String currName= curr.getTagName();
+			if ("@throws".equals(currName) || "@exception".equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
+				String argument= getArgument(curr);
+				if (arg.equals(argument)) {
 					return curr;
 				}
 			}
@@ -240,245 +257,93 @@ public class JavadocTagsSubProcessor {
 	}
 	
 	
-	private static int findThrowsInsertPosition(JavaDocTag[] tags, MethodDeclaration methodDecl, ASTNode node) {
+	private static void insertThrowsTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement, ASTNode node) {
 		Set previousArgs= new HashSet();
-		List list= methodDecl.thrownExceptions();
+		List list= ((MethodDeclaration) javadoc.getParent()).thrownExceptions();
 		for (int i= 0; i < list.size() && node != list.get(i); i++) {
 			Name curr= (Name) list.get(i);
 			previousArgs.add(ASTResolving.getSimpleName(curr));
 		}
-		int lastThrows= tags.length;
-		for (int i= tags.length - 1; i >= 0; i--) {
-			JavaDocTag curr= tags[i];
-			if (JavaDocTag.THROWS.equals(curr.getName())) {
-				String arg= getArgument(curr.getContent());
-				if (previousArgs.contains(arg) || previousArgs.contains(Signature.getSimpleName(arg))) {
-					return i + 1;
+		List tags= rewriter.getRewrittenList();
+		
+		ASTNode before= null;
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			TagElement curr= (TagElement) tags.get(i);
+			String tagName= curr.getTagName();
+			if ("@throws".equals(tagName) || "@exception".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$
+				String arg= getArgument(curr);
+				if (arg != null && previousArgs.contains(arg)) {
+					rewriter.insertAfter(newElement, curr, null);
+					return;
 				}
-				lastThrows= i;
+				before= curr;
 			}
 		}
-		return lastThrows;
+		if (before != null) {
+			rewriter.insertBefore(newElement, before, null);
+		} else {
+			rewriter.insertLast(newElement, null);
+		}
 	}
 
-	private static int findReturnInsertPosition(JavaDocTag[] tags) {
-		int res= tags.length;
-		for (int i= tags.length - 1; i >= 0; i--) {
-			JavaDocTag curr= tags[i];
-			if (JavaDocTag.THROWS.equals(curr.getName())) {
-				res= i;
-			} else if (JavaDocTag.PARAM.equals(curr.getName())) {
-				return i + 1;
+	private static void insertReturnTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement) {
+		List tags= rewriter.getRewrittenList();
+
+		ASTNode before= null;
+		
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			TagElement curr= (TagElement) tags.get(i);
+			String tagName=curr.getTagName();
+			if ("@throws".equals(tagName) || "@exception".equals(tagName)) { //$NON-NLS-1$ //$NON-NLS-2$
+				before= curr;
+			} else if ("@param".equals(tagName)) { //$NON-NLS-1$
+				break;
 			}
 		}
-		return res;
+		if (before != null) {
+			rewriter.insertBefore(newElement, before, null);
+		} else {
+			rewriter.insertLast(newElement, null);
+		}
 	}
 
-	private static int findParamInsertPosition(JavaDocTag[] tags, MethodDeclaration methodDecl, ASTNode node) {
+	private static void insertParamTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement, ASTNode node) {
 		Set previousArgs= new HashSet();
-		List list= methodDecl.parameters();
+
+		List list= ((MethodDeclaration) javadoc.getParent()).parameters();
 		for (int i= 0; i < list.size() && (list.get(i) != node); i++) {
 			SingleVariableDeclaration curr= (SingleVariableDeclaration) list.get(i);
 			previousArgs.add(curr.getName().getIdentifier());
 		}
-		for (int i= tags.length - 1; i >= 0; i--) {
-			JavaDocTag curr= tags[i];
-			if (JavaDocTag.PARAM.equals(curr.getName())) {
-				String arg= getArgument(curr.getContent());
-				if (previousArgs.contains(arg)) {
-					return i + 1;
+		List tags= rewriter.getRewrittenList();
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			TagElement curr= (TagElement) tags.get(i);
+			if ("@param".equals(curr.getTagName())) { //$NON-NLS-1$
+				String arg= getArgument(curr);
+				if (arg != null && previousArgs.contains(arg)) {
+					rewriter.insertAfter(newElement, curr, null);
+					return;
 				}
 			}
 		}
-		if (tags.length > 0 && tags[0].getName() == null) {
-			return 1;
+		if (!tags.isEmpty()) {
+			TagElement first= (TagElement) tags.get(0);
+			if (first.getTagName() == null) {
+				rewriter.insertAfter(newElement, first, null);
+				return;
+			}
 		}
-		return 0;
+		rewriter.insertFirst(newElement, null);
 	}
 	
-	private static String getArgument(String content) {
-		int i= 0;
-		while (i < content.length() && !Character.isWhitespace(content.charAt(i))) {
-			i++;
-		}
-		return content.substring(0, i);
-	}
-
-
-
-	private static class JavadocRewriteProposal extends CUCorrectionProposal {
-
-		private static class Event {
-			JavaDocTag originalTag;
-			JavaDocTag newTag;
-
-			public Event(JavaDocTag originalTag, JavaDocTag newTag) {
-				this.originalTag= originalTag;
-				this.newTag= newTag;
-			}
-			
-			public boolean isInserted() {
-				return originalTag == null && newTag != null;
-			}
-			
-			public boolean isRemoved() {
-				return originalTag != null && newTag == null;
-			}
-			
-		}
-		
-		private Javadoc fJavadoc;
-		private JavaDocTag[] fOriginalTags;
-		private List fChangedList;
-		
-
-		public JavadocRewriteProposal(String name, ICompilationUnit cu, Javadoc javadoc, int relevance, Image image) throws JavaModelException {
-			super(name, cu, relevance, image);
-			fJavadoc= javadoc;
-			fOriginalTags= JavaDocAccess.getJavaDocTags(cu, javadoc.getStartPosition(), javadoc.getLength());
-			fChangedList= new ArrayList();
-			for (int i= 0; i < fOriginalTags.length; i++) {
-				JavaDocTag curr= fOriginalTags[i];
-				fChangedList.add(new Event(curr, curr));
-			}
-		
-		}
-		
-		public JavaDocTag[] getTags() {
-			return fOriginalTags;
-		}
-
-		public void insertNewTag(int index, JavaDocTag tag) {
-			if (index < 0 || index > fOriginalTags.length) {
-				throw new IllegalArgumentException();
-			}
-			int count= 0;
-			
-			// insert after all other previously insted tags
-			int insertPos;
-			for (insertPos= 0; insertPos < fChangedList.size(); insertPos++) {
-				Event curr= (Event) fChangedList.get(insertPos);
-				if (!curr.isInserted()) {
-					if (count == index) {
-						break;
-					}
-					count++;
-				}
-			}
-			fChangedList.add(insertPos, new Event(null, tag));
-		}	
-		
-/*		private void createEditsNew(TextBuffer buffer, ICompilationUnit cu, TextEdit root) throws JavaModelException {
-			IBuffer cuBuffer= cu.getBuffer();
-			String comment= cuBuffer.getText(fJavadoc.getStartPosition(), fJavadoc.getLength());
-			
-			try {
-				String cat= "cat"; //$NON-NLS-1$
-				
-				Document doc= new Document(comment);
-				doc.addPositionCategory(cat);
-				
-				int offset= fJavadoc.getStartPosition();
-				
-				int currPos= 3;
-				for (int i= fChangedList.size() - 1; i > 0; i--) {
-					Event curr= (Event) fChangedList.get(i);
-					JavaDocTag origTag= curr.originalTag;
-					JavaDocTag newTag= curr.newTag;
-					if (origTag == newTag) {
-						int start= origTag.getOffset();
-						int end= origTag.getContentOffset() + origTag.getContentLength();
-						doc.addPosition(cat, new Position(start  - offset, end - start));
-						currPos= origTag.getOffset() + origTag.getLength() - offset;
-					} else if (newTag == null) {
-						// remove
-						doc.replace(origTag.getOffset() - offset, origTag.getLength(), ""); //$NON-NLS-1$
-						currPos= origTag.getOffset() + origTag.getLength() - offset;
-					} else if (origTag == null) {
-						// insert
-						String string= getNewTagString(curr.newTag);
-						doc.replace(currPos, 0, string);
-					} else {
-						// replace
-						String string= getNewTagString(curr.newTag);
-						doc.replace(origTag.getOffset() - offset, origTag.getLength(), string); //$NON-NLS-1$
-					}
-				}
-				
-				Position[] positions= doc.getPositions(cat);
-				String str= doc.get();
-				System.out.println(str);
-				System.out.println("++++++++"); //$NON-NLS-1$
-				for (int i= 0; i < positions.length; i++) {
-					Position pos= positions[i];
-					String string= doc.get(pos.getOffset(), pos.getLength());
-					System.out.println(string);
-				}
-				
-			} catch (BadLocationException e) {
-				
-			} catch (BadPositionCategoryException e) {
-			}
-		}*/
-		
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
-		 */
-		protected void addEdits(TextBuffer buffer) throws CoreException {
-			super.addEdits(buffer);
-			
-			//createEditsNew(buffer, cu, root);
-		
-			int currPos= fJavadoc.getStartPosition() + 3;
-			boolean needsLead= true;
-			boolean isLast= false;
-			for (int i= 0; i < fChangedList.size(); i++) {
-				Event curr= (Event) fChangedList.get(i);
-				if (curr.isInserted()) {
-					StringBuffer buf= new StringBuffer();
-					if (needsLead) {
-						buf.append('\n');
-					}
-					buf.append(getNewTagString(curr.newTag));
-					if (!needsLead && !isLast) {
-						buf.append('\n');
-					}
-					
-					String indentString= getIndent(buffer) + " * "; //$NON-NLS-1$
-					String str= Strings.changeIndent(buf.toString(), 0, CodeFormatterUtil.getTabWidth(), indentString, buffer.getLineDelimiter());
-					if (isLast) {
-						str= "* " + str + buffer.getLineDelimiter() + getIndent(buffer) + ' ';//$NON-NLS-1$
-					}
-					getRootTextEdit().addChild(new InsertEdit(currPos, str));
-				} else {
-					JavaDocTag original= curr.originalTag;
-					currPos= original.getOffset() + original.getLength();
-					needsLead= false;
-					isLast= (fOriginalTags.length > 0 && fOriginalTags[fOriginalTags.length - 1] == original);
-				}
+	private static String getArgument(TagElement curr) {
+		List fragments= curr.fragments();
+		if (!fragments.isEmpty()) {
+			Object first= fragments.get(0);
+			if (first instanceof Name) {
+				return ASTResolving.getSimpleName((Name) first);
 			}
 		}
-		
-		private String getNewTagString(JavaDocTag newTag) {
-			StringBuffer buf= new StringBuffer();
-			if (newTag.getName() != null) {
-				buf.append('@');
-				buf.append(newTag.getName());
-				if (newTag.getContent().length() > 0) {
-					buf.append(' ');
-				}
-			}
-			buf.append(newTag.getContent());
-			return buf.toString();
-		}
-		
-		
-		private String getIndent(TextBuffer buffer) {
-			String line= buffer.getLineContentOfOffset(fJavadoc.getStartPosition());
-			String indent= Strings.getIndentString(line, CodeFormatterUtil.getTabWidth());
-			return indent;
-		}
-		
+		return null;
 	}
 }

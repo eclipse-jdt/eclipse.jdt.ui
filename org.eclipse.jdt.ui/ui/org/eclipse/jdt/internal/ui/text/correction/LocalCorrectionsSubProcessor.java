@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
@@ -26,6 +25,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
@@ -49,8 +49,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -160,21 +158,15 @@ public class LocalCorrectionsSubProcessor {
 				if (currBinding == null) {
 					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
-				
-				TextBuffer buffer= null;
-				try {
-					buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
-					ImportRewrite importRewrite= new ImportRewrite(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-					String typeName= importRewrite.addImport(currBinding);
+							
+				ImportRewrite importRewrite= new ImportRewrite(cu);
+				String typeName= importRewrite.addImport(currBinding);
 	
-					String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevartype.description", typeName); //$NON-NLS-1$
-					ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
-					varProposal.getRootTextEdit().addChild(importRewrite.createEdit(buffer));
-					proposals.add(varProposal);
-				} finally {
-					if (buffer != null)
-						TextBuffer.release(buffer);
-				}	
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevartype.description", typeName); //$NON-NLS-1$
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
+				varProposal.setImportRewrite(importRewrite);
+				
+				proposals.add(varProposal);
 			}
 		}
 			
@@ -185,7 +177,6 @@ public class LocalCorrectionsSubProcessor {
 		if (bindingToCast == null) {
 			return false;
 		}
-		
 		
 		int arrStart= castTarget.indexOf('[');
 		if (arrStart != -1) {
@@ -736,12 +727,42 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl);
 			rewrite.markAsRemoved(selectedNode);
 			
+			Javadoc javadoc= decl.getJavadoc();
+			if (javadoc != null) {
+				IBinding binding= ((Name) selectedNode).resolveBinding();
+				if (binding != null) {
+					TagElement tagElement= findThrowsTag(javadoc, binding);
+					if (tagElement != null) {
+						rewrite.markAsRemoved(tagElement);
+					}
+				}
+			}
+			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessarythrow.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			proposals.add(proposal);
 		}
 	}
+	
+	private static TagElement findThrowsTag(Javadoc javadoc, IBinding binding) {
+		List tags= javadoc.tags();
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			TagElement curr= (TagElement) tags.get(i);
+			String currName= curr.getTagName();
+			if ("@throws".equals(currName) || "@exception".equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
+				List fragments= curr.fragments();
+				if (!fragments.isEmpty() && fragments.get(0) instanceof Name) {
+					Name name= (Name) fragments.get(0);
+					if (name.resolveBinding() == binding) {
+						return curr;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());

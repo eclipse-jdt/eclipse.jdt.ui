@@ -501,7 +501,12 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Javadoc)
 	 */
 	public boolean visit(Javadoc node) {
-		fResult.append(node.getComment());
+		fResult.append("/**"); //$NON-NLS-1$
+		for (Iterator it = node.tags().iterator(); it.hasNext(); ) {
+			fResult.append("\n * "); //$NON-NLS-1$
+			((ASTNode) it.next()).accept(this);
+		}
+		fResult.append("\n */\n"); //$NON-NLS-1$
 		return false;
 	}
 
@@ -956,4 +961,90 @@ public class ASTFlattener extends GenericVisitor {
 		node.getBody().accept(this);
 		return false;
 	}	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BlockComment)
+	 */
+	public boolean visit(BlockComment node) {
+		return false; // cant flatten, needs source
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LineComment)
+	 */
+	public boolean visit(LineComment node) {
+		return false; // cant flatten, needs source
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
+	 */
+	public boolean visit(MemberRef node) {
+		Name qualifier= node.getQualifier();
+		if (qualifier != null) {
+			qualifier.accept(this);
+		}
+		fResult.append('#');
+		node.getName().accept(this);
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
+	 */
+	public boolean visit(MethodRef node) {
+		Name qualifier= node.getQualifier();
+		if (qualifier != null) {
+			qualifier.accept(this);
+		}
+		fResult.append('#');
+		node.getName().accept(this);
+		fResult.append('(');
+		for (Iterator it = node.parameters().iterator(); it.hasNext(); ) {
+			((ASTNode) it.next()).accept(this);
+			if (it.hasNext()) {
+				fResult.append(',');
+			}
+		}
+		fResult.append(')');
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
+	 */
+	public boolean visit(MethodRefParameter node) {
+		node.getType().accept(this);
+		SimpleName name= node.getName();
+		if (name != null) {
+			fResult.append(' ');
+			name.accept(this);
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
+	 */
+	public boolean visit(TagElement node) {
+		if (node.isNested()) {
+			fResult.append('{');
+		}
+		String tagName= node.getTagName();
+		if (tagName != null) {
+			fResult.append(tagName);
+			fResult.append(' ');
+		}
+		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
+			((ASTNode) it.next()).accept(this);
+			if (it.hasNext()) {
+				fResult.append(' ');
+			}
+		}
+		if (node.isNested()) {
+			fResult.append('}');
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
+	 */
+	public boolean visit(TextElement node) {
+		fResult.append(node.getText());
+		return false;
+	}
 }

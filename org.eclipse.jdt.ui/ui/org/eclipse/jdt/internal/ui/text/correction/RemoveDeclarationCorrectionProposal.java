@@ -98,7 +98,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			rewrite.markAsRemoved(declaration);
 		} else { // variable
 			// needs full AST
-			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true, null, null);
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
 			rewrite= new ASTRewrite(completeRoot); 
@@ -106,15 +106,46 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
 			}
+			
+			ASTNode declaringNode= completeRoot.findDeclaringNode(nameNode.resolveBinding());
+			if (declaringNode instanceof SingleVariableDeclaration) {
+				if (declaringNode.getParent() instanceof MethodDeclaration) {
+					Javadoc javadoc= ((MethodDeclaration) declaringNode.getParent()).getJavadoc();
+					if (javadoc != null) {
+						TagElement tagElement= findThrowsTag(javadoc, nameNode.resolveBinding());
+						if (tagElement != null) {
+							rewrite.markAsRemoved(tagElement);
+						}
+					}
+				}
+			}
 		}
 		return rewrite;
 	}
+	
+	private static TagElement findThrowsTag(Javadoc javadoc, IBinding binding) {
+		List tags= javadoc.tags();
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			TagElement curr= (TagElement) tags.get(i);
+			String currName= curr.getTagName();
+			if ("@param".equals(currName)) {  //$NON-NLS-1$
+				List fragments= curr.fragments();
+				if (!fragments.isEmpty() && fragments.get(0) instanceof Name) {
+					Name name= (Name) fragments.get(0);
+					if (name.resolveBinding() == binding) {
+						return curr;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * Remove the field or variable declaration including the initializer.
 	 * 
 	 */
-	
 	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
 		int nameParentType= reference.getParent().getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {

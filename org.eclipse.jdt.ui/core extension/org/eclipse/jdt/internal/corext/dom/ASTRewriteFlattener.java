@@ -532,7 +532,13 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Javadoc)
 	 */
 	public boolean visit(Javadoc node) {
-		fResult.append(node.getComment());
+		fResult.append("/**"); //$NON-NLS-1$
+		List list= getChildList(node, ASTNodeConstants.TAGS);
+		for (int i= 0; i < list.size(); i++) {
+			fResult.append("\n * "); //$NON-NLS-1$
+			((ASTNode) list.get(i)).accept(this);
+		}
+		fResult.append("\n */"); //$NON-NLS-1$
 		return false;
 	}
 
@@ -941,5 +947,89 @@ public class ASTRewriteFlattener extends GenericVisitor {
 		fResult.append(')');
 		getChildNode(node, ASTNodeConstants.BODY).accept(this);
 		return false;
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BlockComment)
+	 */
+	public boolean visit(BlockComment node) {
+		return false; // cant flatten, needs source
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LineComment)
+	 */
+	public boolean visit(LineComment node) {
+		return false; // cant flatten, needs source
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
+	 */
+	public boolean visit(MemberRef node) {
+		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		if (qualifier != null) {
+			qualifier.accept(this);
+		}
+		fResult.append('#');
+		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
+	 */
+	public boolean visit(MethodRef node) {
+		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		if (qualifier != null) {
+			qualifier.accept(this);
+		}
+		fResult.append('#');
+		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		fResult.append('(');
+		visitList(node, ASTNodeConstants.PARAMETERS, ","); //$NON-NLS-1$
+		fResult.append(')');
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
+	 */
+	public boolean visit(MethodRefParameter node) {
+		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		ASTNode name= getChildNode(node, ASTNodeConstants.NAME);
+		if (name != null) {
+			fResult.append(' ');
+			name.accept(this);
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
+	 */
+	public boolean visit(TagElement node) {
+		Object tagName= getAttribute(node, ASTNodeConstants.TAG_NAME);
+		if (tagName != null) {
+			fResult.append((String) tagName);
+		}
+		List list= getChildList(node, ASTNodeConstants.FRAGMENTS);
+		for (int i= 0; i < list.size(); i++) {
+			if (i > 0 || tagName != null) {
+				fResult.append(' ');
+			}
+			ASTNode curr= (ASTNode) list.get(i);
+			if (curr instanceof TagElement) {
+				fResult.append('{');
+				curr.accept(this);
+				fResult.append('}');
+			} else {
+				curr.accept(this);
+			}
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
+	 */
+	public boolean visit(TextElement node) {
+		fResult.append(getAttribute(node, ASTNodeConstants.TEXT));
+		return false;
+	}
+
 }

@@ -52,6 +52,7 @@ public class ASTRewritingTest extends TestCase {
 		suite.addTest(ASTRewritingTypeDeclTest.allTests());
 		suite.addTest(SourceModifierTest.allTests());
 		suite.addTest(ASTRewritingCollapseTest.allTests());
+		suite.addTest(ASTRewritingJavadocTest.allTests());
 		
 		return new ProjectTestSetup(suite);
 	}

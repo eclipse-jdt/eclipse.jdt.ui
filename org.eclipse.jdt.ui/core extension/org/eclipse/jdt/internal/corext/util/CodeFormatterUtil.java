@@ -29,10 +29,11 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -214,6 +215,13 @@ public class CodeFormatterUtil {
 					suffix= ";"; //$NON-NLS-1$
 					code= CodeFormatter.K_STATEMENTS;
 					break;
+				case ASTNode.MEMBER_REF:
+				case ASTNode.METHOD_REF:
+				case ASTNode.METHOD_REF_PARAMETER:
+				case ASTNode.TAG_ELEMENT:
+				case ASTNode.TEXT_ELEMENT:
+					// not yet supported
+					return null;
 				default:
 					Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
 					return null;
