@@ -444,7 +444,9 @@ public class JavaIndenter {
 					// concurrent modification - walk default path
 				}
 				// if the opening brace is not on the start of the line, skip to the start
-				return skipToStatementStart(true, true);
+				int pos= skipToStatementStart(true, true);
+				fIndent= 0; // indent is aligned with reference position
+				return pos;
 			} else {
 				// if we can't find the matching brace, the heuristic is to unindent
 				// by one against the normal position
@@ -550,6 +552,7 @@ public class JavaIndenter {
 	 * Skips to the start of a statement that ends at the current position.
 	 * 
 	 * @param danglingElse whether to indent aligned with the last <code>if</code>
+	 * @param isInBlock whether the current position is inside a block, which limits the search scope to the next scope introducer
 	 * @return the reference offset of the start of the statement 
 	 */
 	private int skipToStatementStart(boolean danglingElse, boolean isInBlock) {
@@ -1119,13 +1122,11 @@ public class JavaIndenter {
 	private int prefArrayIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
 					return 1;
-				else
-					return prefContinuationIndent();
-			} catch (NumberFormatException e) {
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
@@ -1136,13 +1137,10 @@ public class JavaIndenter {
 	private boolean prefArrayDeepIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
-					return true;
-				else
-					return false;
-			} catch (NumberFormatException e) {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
@@ -1153,30 +1151,26 @@ public class JavaIndenter {
 	private boolean prefTernaryDeepAlign() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
-					return true;
-				else
-					return false;
-			} catch (NumberFormatException e) {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
-		
 		return false;
 	}
 
 	private int prefTernaryIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
 					return 1;
 				else
 					return prefContinuationIndent();
-			} catch (NumberFormatException e) {
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
@@ -1211,7 +1205,6 @@ public class JavaIndenter {
 			else
 				return 0;
 		}
-		
 		return prefBlockIndent(); // sun standard
 	}
 
@@ -1226,13 +1219,10 @@ public class JavaIndenter {
 	private boolean prefMethodDeclDeepIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
-					return true;
-				else
-					return false;
-			} catch (NumberFormatException e) {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
@@ -1243,47 +1233,42 @@ public class JavaIndenter {
 	private int prefMethodDeclIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
 					return 1;
 				else
 					return prefContinuationIndent();
-			} catch (NumberFormatException e) {
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
-		
 		return 1;
 	}
 
 	private boolean prefMethodCallDeepIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
-					return true;
-				else
-					return false;
-			} catch (NumberFormatException e) {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
-		
 		return false; // sensible default
 	}
 
 	private int prefMethodCallIndent() {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
-			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT);
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
 					return 1;
 				else
 					return prefContinuationIndent();
-			} catch (NumberFormatException e) {
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
@@ -1293,18 +1278,15 @@ public class JavaIndenter {
 
 	private boolean prefParenthesisDeepIndent() {
 		
-		if (true)
+		if (true) // don't do parenthesis deep indentation
 			return false;
 		
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
 			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
 			try {
-				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
-					return true;
-				else
-					return false;
-			} catch (NumberFormatException e) {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
 				// ignore and return default
 			}
 		}
