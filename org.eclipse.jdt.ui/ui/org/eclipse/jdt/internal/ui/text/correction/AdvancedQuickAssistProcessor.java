@@ -1429,57 +1429,61 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (selectionLen == 0) {
 			return false;
 		}
-		if ((selectionPos < node.getStartPosition()) || (selectionPos > node.getStartPosition() + node.getLength())) {
+		int valueStart= node.getStartPosition() + 1;
+		int valueEnd= node.getStartPosition() + node.getLength() - 1;
+		
+		// selection must be inside node and the quotes and not contain the full value
+		if ((selectionPos < valueStart) || (selectionPos + selectionLen > valueEnd) || (valueEnd - valueStart == selectionLen)) {
 			return false;
 		}
+
 		// prepare string parts positions
 		StringLiteral stringLiteral= (StringLiteral) node;
-		String stringValue= stringLiteral.getLiteralValue();
-		int stringPos= selectionPos - stringLiteral.getStartPosition() - 1; // -1 for "
-		// check if selection starts on "
-		if (stringPos == -1) {
-			stringPos= 0;
-			selectionLen--;
-		}
-		// check if selection ends on "
-		if (stringPos + selectionLen == stringValue.length() + 1) {
-			selectionLen--;
-		}
-		// check that after all checks part and only part is selected 
-		if ((selectionLen == 0) || (selectionLen == stringValue.length())) {
+		String stringValue= stringLiteral.getEscapedValue();
+		
+		int firstPos= selectionPos - node.getStartPosition();
+		int secondPos= firstPos + selectionLen;
+		
+		
+		// prepare new string literals
+		
+		AST ast= node.getAST();
+		StringLiteral leftLiteral= ast.newStringLiteral();
+		StringLiteral centerLiteral= ast.newStringLiteral();
+		StringLiteral rightLiteral= ast.newStringLiteral();
+		try {
+			leftLiteral.setEscapedValue('"' + stringValue.substring(1, firstPos) + '"');
+			centerLiteral.setEscapedValue('"' + stringValue.substring(firstPos, secondPos) + '"');
+			rightLiteral.setEscapedValue('"' + stringValue.substring(secondPos, stringValue.length() - 1)  + '"');
+		} catch (IllegalArgumentException e) {
 			return false;
 		}
-		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
-		// prepare string parts
-		String leftPart= stringValue.substring(0, stringPos);
-		String centerPart= stringValue.substring(stringPos, stringPos + selectionLen);
-		String rightPart= stringValue.substring(stringPos + selectionLen);
-		//
-		AST ast= node.getAST();
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		// prepare StringLiteral's for parts
-		StringLiteral leftLiteral= ast.newStringLiteral();
-		leftLiteral.setLiteralValue(leftPart);
-		StringLiteral centerLiteral= ast.newStringLiteral();
-		centerLiteral.setLiteralValue(centerPart);
-		StringLiteral rightLiteral= ast.newStringLiteral();
-		rightLiteral.setLiteralValue(rightPart);
+		
 		// prepare new expression instead of StringLiteral
 		InfixExpression expression= ast.newInfixExpression();
 		expression.setOperator(InfixExpression.Operator.PLUS);
-		if (leftPart.length() == 0) {
+		if (firstPos != 1 ) {
+			expression.setLeftOperand(leftLiteral);
+		}
+
+
+		if (firstPos == 1) {
 			expression.setLeftOperand(centerLiteral);
-			expression.setRightOperand(rightLiteral);
-		} else if (rightPart.length() == 0) {
-			expression.setLeftOperand(leftLiteral);
-			expression.setRightOperand(centerLiteral);
 		} else {
-			expression.setLeftOperand(leftLiteral);
 			expression.setRightOperand(centerLiteral);
-			expression.extendedOperands().add(rightLiteral);
+		}
+
+		if (secondPos < stringValue.length() - 1) {
+			if (firstPos == 1) {
+				expression.setRightOperand(rightLiteral);
+			} else {
+				expression.extendedOperands().add(rightLiteral);
+			}
 		}
 		// use new expression instead of old StirngLiteral
 		rewrite.replace(stringLiteral, expression, null);
