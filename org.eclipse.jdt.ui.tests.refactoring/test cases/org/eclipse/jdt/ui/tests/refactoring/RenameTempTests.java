@@ -342,4 +342,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	public void testFail23() throws Exception{
 		helper2("j");
 	}
+	
+	public void testFail24() throws Exception{
+		helper2("j");
+	}
+	
 }
