@@ -27,22 +27,37 @@ public abstract class JavaProjectPropertyPage extends PropertyPage {
 	protected static final String CORE_EXCEPTION="java_project_propertypage.core_exception";
 	protected static final String NO_JAVA="java_project_propertypage.no_java";
 	
+	private boolean fIsCreated;
+	
 	public final Control createContents(Composite parent) {
 		if (getJavaProject() == null) {
 			return createNoJavaContents(parent);
 		} else {
-			return createJavaContents(parent);
+			if (isOpenProject())  {
+				fIsCreated= true;
+				return createJavaContents(parent);
+			}
+			return createClosedContents(parent);
 		}
 	}
 	
+	protected abstract boolean performJavaOk();
 	protected abstract Control createJavaContents(Composite parent);
 	
 	protected Control createNoJavaContents(Composite parent) {
+		return createLabelOnly(parent, JavaLaunchUtils.getResourceString(NO_JAVA));
+	};
+	
+	protected Control createClosedContents(Composite parent) {
+		return createLabelOnly(parent, "Java information is not available for a closed project.");
+	}
+	
+	protected Control createLabelOnly(Composite parent, String labelText) {
 		noDefaultAndApplyButton();
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(JavaLaunchUtils.getResourceString(NO_JAVA));
-		return parent;
-	};
+		label.setText(labelText);
+		return label;
+	}
 
 	protected boolean isJavaProject(IProject proj) {
 		try {
@@ -53,6 +68,30 @@ public abstract class JavaProjectPropertyPage extends PropertyPage {
 		return false;
 	}
 	
+	protected boolean isOpenProject() {
+		IProject p= null;
+		Object o= getElement();
+		if (o instanceof IJavaProject)
+			p= ((IJavaProject)o).getProject();
+			
+		if (o instanceof IProject) 
+			p= (IProject)o;
+		if (p != null)
+			return p.isOpen();
+		return false;
+	}
+	
+	public boolean isCreated() {
+		return fIsCreated;
+	}
+	
+	final public boolean performOk() {
+		if (isCreated()) {
+			return performJavaOk();
+		}
+		return true;
+	}
+		
 	protected IJavaProject getJavaProject() {
 		Object o= getElement();
 		if (o instanceof IProject) {

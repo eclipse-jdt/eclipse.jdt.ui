@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.FillLayout;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;
 
 /*
  * The page for setting java runtime
@@ -15,12 +15,11 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	
 	public VMPropertyPage() {
 		fVMSelector= new VMSelector();
-		noDefaultAndApplyButton();
-		setDescription("Select the JRE for running Java programs");
 	}
 	
 	protected Control createJavaContents(Composite ancestor) {
 		
+		noDefaultAndApplyButton();
 		Control vmSelector= fVMSelector.createContents(ancestor);
 		fVMSelector.initFromProject(getJavaProject());
 		fVMSelector.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -32,7 +31,7 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	}
 
 	
-	public boolean performOk() {
+	protected boolean performJavaOk() {
 		IJavaProject project= getJavaProject();
 		if (project != null) {
 			try {
@@ -42,4 +41,11 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 		}
 		return true;
 	}
+	
+	public void setElement(IAdaptable element) {
+		super.setElement(element);
+		if (getJavaProject() != null && isOpenProject())
+			setDescription("Select the JRE for running Java programs");
+	} 
+
 }

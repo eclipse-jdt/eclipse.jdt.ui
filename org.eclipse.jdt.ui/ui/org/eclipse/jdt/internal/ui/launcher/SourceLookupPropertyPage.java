@@ -100,10 +100,12 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 	}
 	
 	public void setVisible(boolean visible) {
-		IJavaProject p= getJavaProject();
-		if (p != null && fFirst && visible) {
-			fFirst= false;
-			initialSetup(p);
+		if (isCreated()) {
+			IJavaProject p= getJavaProject();
+			if (p != null && fFirst && visible) {
+				fFirst= false;
+				initialSetup(p);
+			}
 		}
 		super.setVisible(visible);
 	}
@@ -134,7 +136,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 		super.performDefaults();
 	}
 
-	public boolean performOk() {
+	public boolean performJavaOk() {
 		IJavaProject p= getJavaProject();
 		if (p == null)
 			return true;
