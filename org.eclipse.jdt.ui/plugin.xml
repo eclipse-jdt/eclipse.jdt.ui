@@ -689,7 +689,7 @@ JavaStructureDiffViewerCreator
 	   id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
 	   name="%JavadocWizard.name"
 	   class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
-	   icon="icons/full/ctool16/insp_sbook.gif">
+	   icon="icons/full/ctool16/javadoc.gif">
 	   <description>Generate Javadoc</description>
 	   <selection class="org.eclipse.core.resources.IProject"/>
 	</wizard>
@@ -1359,11 +1359,12 @@ JavaStructureDiffViewerCreator
 <!-- =========================================================================== -->
 <!-- Java Working Set Page 														 -->
 <!-- =========================================================================== -->
+<!-- no icon yet 		icon="icons/full/ctool16/java_workingset_wiz.gif" -->
+<!-- see http://bugs.eclipse.org/bugs/show_bug.cgi?id=16234 -->
 <extension point="org.eclipse.ui.workingSets">
 	<workingSet
 		id="org.eclipse.jdt.ui.JavaWorkingSetPage"
 		name="%JavaWorkingSetPage.name"
-		icon="icons/full/obj16/jworkingSet_obj.gif"
 		pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage">
 	</workingSet>
 </extension>

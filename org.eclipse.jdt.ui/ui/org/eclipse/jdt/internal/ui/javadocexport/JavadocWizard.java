@@ -98,7 +98,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	public JavadocWizard(IFile xmlJavadocFile) {
 		super();
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXPORT_JAVADOC);
 		setWindowTitle(JavadocExportMessages.getString("JavadocWizard.javadocwizard.title")); //$NON-NLS-1$
 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());

@@ -40,7 +40,7 @@ public class JavaPluginImages {
 
 	/*
 	 * Available cached Images in the Java plugin image registry.
-	 */	
+	 */
 	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.gif"; 		//$NON-NLS-1$
@@ -106,8 +106,17 @@ public class JavaPluginImages {
 	private static final String T_OBJ= "obj16"; 		//$NON-NLS-1$
 	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
 	private static final String T_WIZBAN= "wizban"; 	//$NON-NLS-1$
-	private static final String T_LCL= "clcl16"; 	//$NON-NLS-1$
+	private static final String T_CLCL= "clcl16"; 	//$NON-NLS-1$
+	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
 	private static final String T_CTOOL= "ctool16"; 	//$NON-NLS-1$
+	private static final String T_CVIEW= "cview16"; //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= create(T_CVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= create(T_CVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= create(T_CVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
+	
+	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= create(T_CLCL, "metharg_obj.gif");
+	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= create(T_DLCL, "metharg_obj.gif");
 
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -197,13 +206,17 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= create(T_WIZBAN, "java_app_wiz.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= create(T_WIZBAN, "java_attach_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR= create(T_WIZBAN, "refactor_wiz.gif"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_FIELD= create(T_WIZBAN, "fieldrefact_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_METHOD= create(T_WIZBAN, "methrefact_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_TYPE= create(T_WIZBAN, "typerefact_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PACKAGE= create(T_WIZBAN, "packrefact_wiz.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CODE= create(T_WIZBAN, "coderefact_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= create(T_WIZBAN, "compunitrefact_wiz.gif");	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PULL_UP= create(T_WIZBAN, "pullup_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= create(T_WIZBAN, "jar_pack_wiz.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_WORKINGSET= create(T_WIZBAN, "java_workingset_wiz.gif");//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_EXPORT_JAVADOC= create(T_WIZBAN, "export_javadoc_wiz.gif");//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_EXTERNALIZE_STRINGS= create(T_WIZBAN, "extstr_wiz.gif");//$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif"); 				//$NON-NLS-1$
