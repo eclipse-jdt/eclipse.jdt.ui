@@ -101,7 +101,6 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	public Control createControl(Composite parent) {
 	
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		composite.setLayout(layout);

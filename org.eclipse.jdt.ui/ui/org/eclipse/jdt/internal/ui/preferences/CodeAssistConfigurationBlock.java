@@ -159,7 +159,6 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		PixelConverter pixelConverter= new PixelConverter(parent);
 
 		Composite contentAssistComposite= new Composite(parent, SWT.NONE);
-		contentAssistComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout(); 
 		layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
@@ -319,7 +318,7 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 	 * @param textLimit		the text limit
 	 * @param indentation	the field's indentation
 	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
-	 * @return
+	 * @return the controls added
 	 */
 	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
 		
