@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -106,6 +109,16 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
 			case IJavaElement.TYPE:
+				ICompilationUnit cunit= (ICompilationUnit)((IJavaElement)input).getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (cunit != null) {
+					IJavaProject project= cunit.getJavaProject();
+					try {
+						return project.isOnClasspath(cunit);
+					} catch (JavaModelException e) {
+						return false;
+					}
+				}
+				return true;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.PACKAGE_FRAGMENT:
@@ -131,6 +144,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
 			if (resolvedElements != null)	
 				candidates.addAll(Arrays.asList(resolvedElements));
+		}
+		for (Iterator iter= candidates.iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement)iter.next();
+			if (!ActionUtil.isProcessable(getShell(), element))
+				return;
 		}
 		run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
 	}
@@ -166,8 +184,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (!(input instanceof IJavaElement))
 			return createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
 			
-		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 		IJavaElement elem= (IJavaElement)input;
+		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$		
 		try {
 			switch (elem.getElementType()) {
 				case IJavaElement.INITIALIZER:
