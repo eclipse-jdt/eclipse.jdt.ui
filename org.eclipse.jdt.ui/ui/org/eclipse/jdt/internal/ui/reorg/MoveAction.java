@@ -102,7 +102,8 @@ public class MoveAction extends CopyAction {
 						createdElements.add(newElement);
 					} catch (CoreException e) {
 						status.merge(e.getStatus());
-						e.printStackTrace();
+						// 1GEPG0W: ITPJUI:WINNT - problem with smart save while moving 
+						// e.printStackTrace();
 					}
 				}
 				pm.done();
