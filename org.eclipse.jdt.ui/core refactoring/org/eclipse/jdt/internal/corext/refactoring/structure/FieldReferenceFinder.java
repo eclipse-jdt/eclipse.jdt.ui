@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -23,10 +21,9 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 class FieldReferenceFinder {
 
 	public static ISourceRange[] findFieldReferenceRanges(SearchResultGroup searchResultGroup) throws JavaModelException {
-		IJavaElement je= JavaCore.create(searchResultGroup.getResource());
-		if (je == null || je.getElementType() != IJavaElement.COMPILATION_UNIT)
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
 			return new ISourceRange[0];
-		ICompilationUnit cu= (ICompilationUnit)je;
 		return findFieldReferenceRanges(searchResultGroup.getSearchResults(), cu);
 	}
 	

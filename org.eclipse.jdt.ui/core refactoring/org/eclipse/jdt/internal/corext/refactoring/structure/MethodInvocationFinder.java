@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -21,11 +18,9 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 class MethodInvocationFinder {
 
 	public static ISourceRange[] findMessageSendRanges(SearchResultGroup searchResultGroup) throws JavaModelException {
-		Assert.isNotNull(searchResultGroup);
-		IJavaElement je= JavaCore.create(searchResultGroup.getResource());
-		if (je == null || je.getElementType() != IJavaElement.COMPILATION_UNIT)
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
 			return new ISourceRange[0];
-		ICompilationUnit cu= (ICompilationUnit)je;
 		return findMessageSendRanges(searchResultGroup.getSearchResults(), cu);
 	}
 	

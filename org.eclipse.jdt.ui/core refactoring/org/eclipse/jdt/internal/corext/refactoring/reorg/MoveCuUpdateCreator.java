@@ -131,10 +131,9 @@ class MoveCuUpdateCreator {
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
 		SearchResultGroup[] references = getReferences(movedUnit, pm);
 		for (int i= 0; i < references.length; i++){
-			IJavaElement el= JavaCore.create(references[i].getResource());
-			if (! (el instanceof ICompilationUnit))
+			ICompilationUnit referencingCu= references[i].getCompilationUnit();
+			if (referencingCu == null)
 				continue;
-			ICompilationUnit referencingCu= (ICompilationUnit)el;
 			SearchResult[] results= references[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				if (isQualifiedReference(results[j])){
@@ -237,10 +236,9 @@ class MoveCuUpdateCreator {
 		List cuList= Arrays.asList(fCus);
 		for (int i= 0; i < references.length; i++) {
 			SearchResultGroup searchResultGroup= references[i];
-			IJavaElement je= JavaCore.create(references[i].getResource());
-			if (je.getElementType() != IJavaElement.COMPILATION_UNIT)
+			ICompilationUnit referencingCu= references[i].getCompilationUnit();
+			if (referencingCu == null)
 				continue;
-			ICompilationUnit referencingCu= (ICompilationUnit)je;
 			if (needsImportToDestinationPackage(movedUnit, cuList, searchResultGroup, referencingCu))
 				result.add(referencingCu);
 		}
@@ -284,14 +282,13 @@ class MoveCuUpdateCreator {
 			return false;
 
 		//XXX needs improvement
-		IResource resource= searchResult.getResource();
-		IJavaElement element= JavaCore.create(resource);
-		if (element == null || ! (element instanceof ICompilationUnit))
+		ICompilationUnit cu= searchResult.getCompilationUnit();
+		if (cu == null)
 			return false;
 			
 		int offset= searchResult.getStart();
 		int end= searchResult.getEnd();
-		String source= ((ICompilationUnit)element).getBuffer().getText(offset, end - offset);
+		String source= cu.getBuffer().getText(offset, end - offset);
 		if (source.indexOf(".") != -1) //$NON-NLS-1$
 			return true;
 

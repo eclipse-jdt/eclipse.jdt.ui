@@ -584,17 +584,17 @@ public class MoveMembersRefactoring extends Refactoring {
 		
 		for (int i= 0; i < results.length; i++) {
 			SearchResultGroup searchResultGroup= results[i];
-			IJavaElement referencingElement= JavaCore.create(searchResultGroup.getResource());
-			if (referencingElement == null || referencingElement.getElementType() != IJavaElement.COMPILATION_UNIT)
+			ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+			if (cu == null)
 				continue;
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)referencingElement);
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			SearchResultGroup modifiedGroup= searchResultGroup;
 	
-			if (ResourceUtil.getResource(getDeclaringType()).equals(ResourceUtil.getResource(cu)))
+			if (ResourceUtil.getResource(getDeclaringType()).equals(ResourceUtil.getResource(wc)))
 				modifiedGroup= removeReferencesEnclosedIn(fMembers, searchResultGroup);
 	
-			modifyReferencesToMovedMember(member, manager, modifiedGroup, cu);
-			fImportManager.addImportTo(fDestinationType, cu);
+			modifyReferencesToMovedMember(member, manager, modifiedGroup, wc);
+			fImportManager.addImportTo(fDestinationType, wc);
 		}
 		pm.done();
 	}
