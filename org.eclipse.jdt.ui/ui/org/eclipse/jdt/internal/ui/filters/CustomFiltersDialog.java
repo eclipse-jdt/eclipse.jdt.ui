@@ -99,6 +99,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 		fBuiltInFilters= FilterDescriptor.getFilterDescriptors(fViewId);
 		fFilterDescriptorChangeHistory= new Stack();
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
 	protected void configureShell(Shell shell) {
@@ -191,7 +192,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		info= new Label(parent, SWT.LEFT);
 		info.setText(FilterMessages.getString("CustomFiltersDialog.description.label"));  //$NON-NLS-1$
 		final Text description= new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.VERTICAL);
-		data = new GridData(GridData.FILL_BOTH);
+		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint= convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);
 		fCheckBoxList.addSelectionChangedListener(new ISelectionChangedListener() {
