@@ -115,7 +115,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		
 		createBasicOptionsGroup(fUpperComposite);
 		createTagOptionsGroup(fUpperComposite);
-		createListDialgField(fUpperComposite);
+		createListDialogField(fUpperComposite);
 		createStyleSheetGroup(fUpperComposite);
 		
 		setControl(fUpperComposite);
@@ -219,7 +219,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	}
 
-	private void createListDialgField(Composite composite) {
+	private void createListDialogField(Composite composite) {
 		Composite c= new Composite(composite, SWT.NONE);
 		c.setLayout(createGridLayout(3));
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 4, 0));
@@ -241,7 +241,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.enableButton(2, false);
 	
 		fTempLinks= createTempLinksStore();
-		UpdateCheckedListGroup();
+		updateCheckedListGroup();
 		
 	}
 
@@ -287,56 +287,46 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.setCheckedElements(checkedElements);
 	}
 	
-	private void getElements(List referencedClasses, IJavaProject jproject, List visited) throws JavaModelException {
-		boolean sourceFolderFound= false;
-	
+	/**
+	 * Method finds a list of all referenced libararies and projects.
+	 * 
+	 */
+	private void findReferencedElements(List referencedClasses, IJavaProject jproject, List visited) throws JavaModelException {
+
 		//to avoid loops
 		if (visited.contains(jproject)) {
 			return;
 		}
 		visited.add(jproject);
-		
+
 		IClasspathEntry[] entries= jproject.getResolvedClasspath(true);
 		for (int i= 0; i < entries.length; i++) {
 			IClasspathEntry curr= entries[i];
 			switch (curr.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY:
-					IPackageFragmentRoot el = jproject.getPackageFragmentRoot(curr.getPath().toOSString());
-					if(el != null) {
+				case IClasspathEntry.CPE_LIBRARY :
+					IPackageFragmentRoot el= jproject.getPackageFragmentRoot(curr.getPath().toOSString());
+					if (el != null) {
 						if (!referencedClasses.contains(el)) {
-//							URL url= JavaDocLocations.getJavadocBaseLocation(el);
-//							if(url != null)
-								referencedClasses.add(el);
+							referencedClasses.add(el);
 						}
 					}
 					break;
-				case IClasspathEntry.CPE_PROJECT:
-					IProject reqProject= (IProject)fStore.getRoot().findMember(curr.getPath().lastSegment());
-					IJavaProject javaProject = JavaCore.create(reqProject);
-					if (javaProject != null && javaProject.getProject().isOpen()) {
-						getElements(referencedClasses, javaProject, visited);
-					}
-					break;
-				case IClasspathEntry.CPE_SOURCE:
-					if (!sourceFolderFound) {
-						// add the output location for the first source folder found
-						IPath outputLocation= jproject.getOutputLocation();
-						IResource resource= fStore.getRoot().findMember(outputLocation);
-						if (resource != null) {
-							IJavaElement javaElement= JavaCore.create(resource);
-							if((javaElement!= null) && (!javaElement.equals(fWizard.getProject()))) {
-								URL url= JavaDocLocations.getJavadocBaseLocation(javaElement);
-								if(url != null)
-									referencedClasses.add(javaElement);
-							}
+				case IClasspathEntry.CPE_PROJECT :
+					IProject reqProject= (IProject) fStore.getRoot().findMember(curr.getPath());
+					IJavaProject javaProject= JavaCore.create(reqProject);
+
+					if (reqProject.isOpen()) {
+						if (!referencedClasses.contains(javaProject)) {
+							referencedClasses.add(javaProject);
+							findReferencedElements(referencedClasses, javaProject, visited);
 						}
-						sourceFolderFound= true;
-					}			
+					}
 					break;
 			}
-		}		
-	}	
-			
+
+		}
+
+	}
 		
 	private void doValidation(int VALIDATE) {
 		File file= null;
@@ -431,14 +421,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			doValidation(STYLESHEETSTATUS);
 
 			//update elements CheckedListDialogField
-			UpdateCheckedListGroup();
+			updateCheckedListGroup();
 		} else {
 			String hrefs= makeHrefString();
 			fTempLinks.put(fWizard.getProject(), hrefs);	
 		}
 	}
 
-	public void UpdateCheckedListGroup() {
+	public void updateCheckedListGroup() {
 	
 		List referencedClasses = new ArrayList();
 		List visited = new ArrayList();
@@ -446,7 +436,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			IJavaProject currProject = fWizard.getProject();
 			if (lastProject != currProject) {
 				lastProject= currProject;
-				getElements(referencedClasses, currProject, visited);
+				findReferencedElements(referencedClasses, currProject, visited);
 				fListDialogField.removeAllElements();
 				fListDialogField.addElements(referencedClasses);
 				//compare with elements in list with those that are checked.
