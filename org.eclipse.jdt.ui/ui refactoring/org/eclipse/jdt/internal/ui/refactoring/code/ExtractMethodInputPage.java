@@ -146,6 +146,26 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		});
 		layouter.perform(checkBox);
 		
+		int dupliactes= fRefactoring.getNumberOfDuplicates();
+		checkBox= new Button(result, SWT.CHECK);
+		if (dupliactes == 0) {
+			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.none")); //$NON-NLS-1$
+		} else  if (dupliactes == 1) {
+			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.single")); //$NON-NLS-1$
+		} else {
+			checkBox.setText(RefactoringMessages.getFormattedString(
+				"ExtractMethodInputPage.duplicates.multi", //$NON-NLS-1$
+				new Integer(dupliactes))); 
+		}
+		checkBox.setSelection(dupliactes > 0);
+		checkBox.setEnabled(dupliactes > 0);
+		checkBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fRefactoring.setReplaceDuplicates(((Button)e.widget).getSelection());
+			}
+		});
+		layouter.perform(checkBox);
+		
 		label= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layouter.perform(label);
