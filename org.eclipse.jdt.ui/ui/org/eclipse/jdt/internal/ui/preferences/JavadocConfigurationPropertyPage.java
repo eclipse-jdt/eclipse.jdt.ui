@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 public class JavadocConfigurationPropertyPage extends PropertyPage implements IStatusChangeListener {
 
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
+	private boolean fIsValidElement;
 
 	public JavadocConfigurationPropertyPage() {
 	}
@@ -56,13 +58,22 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 */
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
-		if (elem instanceof IPackageFragmentRoot)
-			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
-		else if (elem instanceof IJavaProject)
-			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description")); //$NON-NLS-1$
-		else
+		try {
+			if (elem instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) elem).getKind() == IPackageFragmentRoot.K_BINARY) {
+				fIsValidElement= true;
+				setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
+			} else if (elem instanceof IJavaProject) {
+				fIsValidElement= true;
+				setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description")); //$NON-NLS-1$
+			} else {
+				fIsValidElement= false;
+			}
+		} catch (JavaModelException e) {
+			fIsValidElement= false;
+		}
+		if (!fIsValidElement) {
 			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
-
+		}
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 	}
@@ -71,6 +82,9 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		if (!fIsValidElement) {
+			return new Composite(parent, SWT.NONE);
+		}
 		
 		IJavaElement elem= getJavaElement();
 		
