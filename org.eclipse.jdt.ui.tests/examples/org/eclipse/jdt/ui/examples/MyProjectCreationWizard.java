@@ -32,8 +32,11 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
@@ -112,7 +115,12 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 	private void updatePage() {
 		IJavaProject jproject= JavaCore.create(fMainPage.getProjectHandle());
 		if (!jproject.equals(fJavaPage.getJavaProject())) {
-			fJavaPage.init(jproject, null, null, false);	
+			IClasspathEntry[] buildPath= {
+				JavaCore.newSourceEntry(jproject.getPath().append("in")),
+				JavaRuntime.getDefaultJREContainerEntry()
+			};
+			IPath outputLocation= jproject.getPath().append("out");		
+			fJavaPage.init(jproject, outputLocation, buildPath, false);	
 		}
 	}
 	
