@@ -27,7 +27,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 /**
- * A class to select one or more elements out of an indexed property
+ * An abstract class to select elements out of a list of elements.
  */
 public abstract class AbstractElementListSelectionDialog extends SelectionStatusDialog {
 	
@@ -39,14 +39,14 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	private Label fMessage;
 
-	protected FilteredList fFilteredList;
+	private FilteredList fFilteredList;
 	private Text fFilterText;
 	
 	private ISelectionValidator fValidator;	
 	private String fFilter= ""; //$NON-NLS-1$
 	
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
-	private String fNothingSelectedMessage= ""; //$NON-NLS-1$
+	private String fEmptySelectionMessage= ""; //$NON-NLS-1$
 		
 	private int fWidth= 60;
 	private int fHeight= 18;
@@ -64,78 +64,109 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 
 	/**
-	 * An element in the list has been default selected (double click).
-	 * Emulate a OK button pressed to close the dialog.
+	 * Handles default selection (double click).
+	 * By default, the OK button is pressed.
 	 */	
 	protected void handleDefaultSelected() {
-		if (verifyCurrentSelection())
+		if (validateCurrentSelection())
 			buttonPressed(IDialogConstants.OK_ID);
 	}
 	
+	/**
+	 * Specifies if sorting, filtering and folding is case sensitive.
+	 */
 	public void setIgnoreCase(boolean ignoreCase) {
 		fIgnoreCase= ignoreCase;
 	}
 	
+	/**
+	 * Returns if sorting, filtering and folding is case sensitive.
+	 */
 	public boolean isCaseIgnored() {
 		return fIgnoreCase;
 	}
 	
+	/**
+	 * Specifies whether everything or nothing should be filtered on
+	 * empty filter string.
+	 */
 	public void setMatchEmptyString(boolean matchEmptyString) {
 		fMatchEmptyString= matchEmptyString;
 	}
 	
+	/**
+	 * Specifies if multiple selection is allowed.
+	 */
 	public void setMultipleSelection(boolean multipleSelection) {
 		fIsMultipleSelection= multipleSelection;
 	}
 
+	/**
+	 * Specifies whether duplicate entries are displayed or not.
+	 */
 	public void setAllowDuplicates(boolean allowDuplicates) {
 		fAllowDuplicates= allowDuplicates;
 	}
 	
 	/**
-	 * If a empty-list message is set, a error message is shown
-	 * Must be set before widget creation
+	 * Sets the list size in unit of characters.
+	 * @param width  the width of the list.
+	 * @param height the height of the list.
+	 */
+	public void setSize(int width, int height) {
+		fWidth= width;
+		fHeight= height;
+	}
+	
+	/**
+	 * Sets the message to be displayed if the list is empty.
+	 * @param message the message to be displayed.
 	 */
 	public void setEmptyListMessage(String message) {
 		fEmptyListMessage= message;
 	}
 
 	/**
-	 * If the selection is empty, this message is shown
+	 * Sets the message to be displayed if the selection is empty.
+	 * @param message the message to be displayed.
 	 */
-	public void setNothingSelectedMessage(String message) {
-		fNothingSelectedMessage= message;
+	public void setEmptySelectionMessage(String message) {
+		fEmptySelectionMessage= message;
 	}
 	
 	/**
-	 * A validator can be set to check if the current selection
-	 * is valid
+	 * Sets an optional validator to check if the selection is valid.
+	 * The validator is invoked whenever the selection changes.
+	 * @param validator the validator to validate the selection.
 	 */
 	public void setValidator(ISelectionValidator validator) {
 		fValidator= validator;
 	}	
 	
 	/**
-	 * Initializes the selection list widget with the given list of
-	 * elements. To be called within open().
+	 * Sets the elements of the list (widget).
+	 * To be called within open().
+	 * @param elements the elements of the list.
 	 */
-	protected void setSelectionListElements(Object[] elements) {
+	protected void setListElements(Object[] elements) {
 		Assert.isNotNull(fFilteredList);
 		fFilteredList.setElements(elements);
 	}
 
 	/**
-	 * Sets the filter text to the given value.
+	 * Sets the filter pattern.
+	 * @param filter the filter pattern.
 	 */
-	protected void setFilter(String text) {
+	protected void setFilter(String filter) {
 		if (fFilterText == null)
-			fFilter= text;
+			fFilter= filter;
 		else
-			fFilterText.setText(text);
+			fFilterText.setText(filter);
 	} 
 	
 	/**
-	 * Returns the currently used filter text.
+	 * Returns the current filter pattern.
+	 * @return returns the current filter pattern.
 	 */
 	protected String getFilter() {
 		if (fFilteredList == null)
@@ -145,18 +176,29 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 
 	/**
-	 * Returns the selection indices.
-	 * To be called within or after open().
+	 * Returns the indices referring the current selection.
+	 * To be called within open().
+	 * @return returns the indices of the current selection.
 	 */
 	protected int[] getSelectionIndices() {
 		Assert.isNotNull(fFilteredList);
 		return fFilteredList.getSelectionIndices();
 	}
+
+	/**
+	 * Returns an index referring the first current selection.
+	 * To be called within open().
+	 * @return returns the indices of the current selection.
+	 */
+	protected int getSelectionIndex() {
+		Assert.isNotNull(fFilteredList);
+		return fFilteredList.getSelectionIndex();
+	}
 	
 	/**
-	 * Selects the elements in the list determined by the given
-	 * selection indices.
+	 * Sets the selection referenced by an array of indices.
 	 * To be called within open().
+	 * @param selection the indices of the selection.
 	 */
 	protected void setSelection(int[] selection) {
 		Assert.isNotNull(fFilteredList);
@@ -164,37 +206,28 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	} 
 	 	
 	/**
-	 * Returns the widget selection. Returns empty list when the widget is not
-	 * usable.
+	 * Returns an array of the currently selected elements.
 	 * To be called within or after open().
-	 */
-	protected List getWidgetSelection() {
-		if (fFilteredList == null || fFilteredList.isDisposed())
-			return new ArrayList(0);
-		return fFilteredList.getSelection();	
+	 * @return returns an array of the currently selected elements.
+	 */	
+	protected Object[] getSelectedElements() {
+		Assert.isNotNull(fFilteredList);
+		return fFilteredList.getSelection();
 	}
-	
-	/*
-	 * @private
+
+	/**
+	 * Returns all elements which are folded together to one entry in the list.
+	 * @param  index the index selecting the entry in the list.
+	 * @return returns an array of elements folded together.
 	 */
-	public int open() {
-		BusyIndicator.showWhile(null, new Runnable() {
-			public void run() {
-				access$superOpen();
-			}
-		});
-		return getReturnCode();
+	public Object[] getFoldedElements(int index) {
+		Assert.isNotNull(fFilteredList);
+		return fFilteredList.getFoldedElements(index);
 	}
-	
-	/*
-	 * @private
-	 */
-	private void access$superOpen() {
-		super.open();
-	} 
-	 
+		 
 	/**
 	 * Creates the message text widget and sets layout data.
+	 * @param composite the parent composite of the message area.
 	 */
 	protected Label createMessageArea(Composite composite) {
 		Label label= super.createMessageArea(composite);
@@ -210,38 +243,36 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		
 		return label;
 	}	
-	
+
 	/**
-	 * Returns <code>true</code> if the list of elements is empty,
-	 * <code>false</code> otherwise.
+	 * Handles a selection changed event.
+	 * By default, the current selection is validated.
 	 */
-	protected boolean isEmptyList() {
-		return (fFilteredList == null) || fFilteredList.isEmpty();
-	}
-	
 	protected void handleSelectionChanged() {
-		verifyCurrentSelection();
+		validateCurrentSelection();
 	}
 	
 	/**
-	 * Verifies the current selection and updates the status line
+	 * Validates the current selection and updates the status line
 	 * accordingly.
 	 */
-	protected boolean verifyCurrentSelection() {
-		IStatus status;
-		List selection= getWidgetSelection();
+	protected boolean validateCurrentSelection() {
+		Assert.isNotNull(fFilteredList);
 
-		if (selection.size() > 0) {
+		IStatus status;
+		Object[] elements= getSelectedElements();
+
+		if (elements.length > 0) {
 			if (fValidator != null) {
-				status= fValidator.validate(selection.toArray());
+				status= fValidator.validate(elements);
 			} else {
 				status= new StatusInfo();
 			}
 		} else {			
-			if (isEmptyList()) {
+			if (fFilteredList.isEmpty()) {
 				status= new StatusInfo(IStatus.ERROR, fEmptyListMessage);
 			} else {
-				status= new StatusInfo(IStatus.ERROR, fNothingSelectedMessage);
+				status= new StatusInfo(IStatus.ERROR, fEmptySelectionMessage);
 			}
 		}
 
@@ -251,7 +282,6 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 
 	/*
-	 * @private
 	 * @see Dialog#cancelPressed
 	 */
 	protected void cancelPressed() {
@@ -259,6 +289,11 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		super.cancelPressed();
 	}	
 
+	/**
+	 * Creates a filtered list.
+	 * @param parent the parent composite.
+	 * @return returns the filtered list widget.
+	 */
 	protected FilteredList createFilteredList(Composite parent) {
 		int flags= SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL |
 			(fIsMultipleSelection ? SWT.MULTI : SWT.SINGLE);
@@ -318,9 +353,24 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	protected void initFilterText() {
 		fFilterText.setText(fFilter);
 	}
+
+	/*
+	 * @see Window#open()
+	 */
+	public int open() {
+		BusyIndicator.showWhile(null, new Runnable() {
+			public void run() {
+				access$superOpen();
+			}
+		});
+		return getReturnCode();
+	}
+	
+	private void access$superOpen() {
+		super.open();
+	} 
 	
 	/*
-	 * @private
 	 * @see Window#create(Shell)
 	 */
 	public void create() {
@@ -328,30 +378,15 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 
 		Assert.isNotNull(fFilteredList);
 
-    	if (isEmptyList()) {
+    	if (fFilteredList.isEmpty()) {
      		fMessage.setEnabled(false);
      		fFilterText.setEnabled(false);
      		fFilteredList.setEnabled(false);
      	} else {
-	     	verifyCurrentSelection();		
+	     	validateCurrentSelection();		
 			fFilterText.selectAll();
 			fFilterText.setFocus();
      	}	
-	}
-	
-	/**
-	 * Sets the size in unit of characters.
-	 */
-	public void setSize(int width, int height) {
-		fWidth= width;
-		fHeight= height;
-	}
-	
-	/**
-	 * Returns the size in unit of characters.
-	 */
-	public int[] getSize() {
-		return new int[] {fWidth, fHeight};
 	}
 	
 }

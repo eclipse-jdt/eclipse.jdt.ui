@@ -5,6 +5,10 @@
 package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
+/**
+ * A dialog to select a type from a list of types. The selected type will be
+ * opened in the editor.
+ */
 public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 
 	private static final String SECTION_NAME= "OpenTypeSelectionDialog"; //$NON-NLS-1$
@@ -12,23 +16,31 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 
 	private boolean fShowInTypeHierarchy;
 
+	/**
+	 * Constructs an instance of <code>OpenTypeSelectionDialog</code>.
+	 * @param parent  the parent shell.
+	 * @param context the context.
+	 * @param scope   the java search scope.
+	 * @param style   the widget style.
+	 */
 	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style)
 	{
 		super(parent, context, scope, style);
-
 		fShowInTypeHierarchy= getDialogSetting().getBoolean(SHOW_IN_TYPE_HIERARCHY);
 	}
 	
 	/**
-	 * @see Windows#configureShell
+	 * @see Windows#configureShell(Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		
 		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.OPEN_TYPE_DIALOG });
 	}	
 
+	/**
+	 * Returns whether the opened type is shown in the type hierarchy as well.
+	 */
 	public boolean showInTypeHierarchy() {
 		return fShowInTypeHierarchy;
 	}
@@ -45,6 +57,9 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		return result;
 	}
 	
+	/*
+	 * @see Dialog#createDialogArea(Composite)
+	 */
 	public Control createDialogArea(Composite parent) {
 		Composite contents= (Composite)super.createDialogArea(parent);
 		
@@ -60,6 +75,9 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		return contents;
 	}
 
+	/*
+	 * @see Window#close()
+	 */
 	public boolean close() {
 		if (getReturnCode() != CANCEL)
 			getDialogSetting().put(SHOW_IN_TYPE_HIERARCHY, fShowInTypeHierarchy);

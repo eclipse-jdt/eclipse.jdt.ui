@@ -8,17 +8,17 @@ import java.util.Comparator;
 import org.eclipse.jface.util.Assert;
 
 /**
- * Quick sort to sort two arrays in parallel.
+ * Quick sort to sort key-value pairs. The keys and arrays are specified
+ * in separate arrays.
  */
 public class TwoArrayQuickSorter {
 	
 	private Comparator fComparator;
 
 	/**
-	 * Default comparator
+	 * Default comparator.
 	 */
 	public static final class StringComparator implements Comparator {
-	
 		private boolean fIgnoreCase;
 	
 		StringComparator(boolean ignoreCase) {
@@ -30,19 +30,29 @@ public class TwoArrayQuickSorter {
 				? ((String) left).compareToIgnoreCase((String) right)
 				: ((String) left).compareTo((String) right);
 		}
-		
 	}		
-				
+
+	/**
+	 * Creates a sorter with default string comparator.
+	 * The keys are assumed to be strings.
+	 * @param ignoreCase specifies whether sorting is case sensitive or not.
+	 */				
 	public TwoArrayQuickSorter(boolean ignoreCase) {
 		fComparator= new StringComparator(ignoreCase);
 	}
 
+	/**
+	 * Creates a sorter with a comparator.
+	 * @param comparator the comparator to order the elements. The comparator must not be <code>null</code>.
+	 */
 	public TwoArrayQuickSorter(Comparator comparator) {
 		fComparator= comparator;
 	}
 	
 	/**
 	 * Sorts keys and values in parallel.
+	 * @param keys   the keys to use for sorting.
+	 * @param values the values associated with the keys.
 	 */
 	public void sort(Object[] keys, Object[] values) {
 		if ((keys == null) || (values == null)) {
@@ -69,16 +79,8 @@ public class TwoArrayQuickSorter {
 				right--; 
 
 			if (left <= right) {
-				// swap(keys, left, right);
-				Object tmp= keys[left]; 
-				keys[left]= keys[right]; 
-				keys[right]= tmp;
-
-				// swap(values, left, right);				
-				Object tmp2= values[left]; 
-				values[left]= values[right]; 
-				values[right]= tmp2;
-				
+				swap(keys, left, right);
+				swap(values, left, right);
 				left++; 
 				right--; 
 			} 
@@ -91,13 +93,13 @@ public class TwoArrayQuickSorter {
 			internalSort(keys, values, left, original_right); 
 	}
 
-
-   /**
+    /*
      * Swaps x[a] with x[b].
-     */
+     */     
     private static final void swap(Object x[], int a, int b) {
 		Object t = x[a];
 		x[a] = x[b];
 		x[b] = t;
     }
+    
 }

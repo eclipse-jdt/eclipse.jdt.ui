@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -33,6 +34,13 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
+	/**
+	 * Constructs an instance of <code>MultiTypeSelectionDialog</code>.
+	 * @param parent  the parent shell.
+	 * @param context the context.
+	 * @param scope   the java search scope.
+	 * @param style   the widget style.
+	 */
 	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style)
 	{
@@ -49,7 +57,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	/*
-	 * @private
+	 * @see Window#open()
 	 */
 	public int open() {
 		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
@@ -59,17 +67,16 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound.toArray());
-//		setElements(typesFound);
 		setFilter("A"); //$NON-NLS-1$
 		
 		return super.open();
 	}
 	
 	/*
-	 * @private
+	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		List selection= getWidgetSelection();
+		List selection= Arrays.asList(getSelectedElements()); // XXX inefficient
 		int size= selection.size();
 		if (size == 0) {
 			setResult(null);
@@ -85,7 +92,6 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
 						String message= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogMessage"); //$NON-NLS-1$
 						MessageDialog.openError(getShell(), title, message);
-						//XXX: java model
 					} else {
 						result.add(type);
 					}

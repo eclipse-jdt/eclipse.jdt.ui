@@ -4,76 +4,48 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-//import java.util.Arrays;
-//import java.util.List;
-
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
+import java.util.Arrays;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 /**
- * A class to select one or more elements out of an indexed property
+ * A class to select elements out of a list of elements.
  */
 public class ElementListSelectionDialog extends AbstractElementListSelectionDialog {
 	
-//	private List fElements;
 	private Object[] fElements;
 	
 	/**
-	 * Constructs a list selection dialog.
-	 * @param renderer The label renderer used
-	 * @param ignoreCase Decides if the match string ignores lower/upppr case
-	 * @param multipleSelection Allow multiple selection	 
+	 * Creates a list selection dialog.
+	 * @param renderer          the label renderer.
+	 * @param ignoreCase        specifies whether sorting, folding and filtering are case sensitive.
+	 * @param multipleSelection specifies whether multiple selection is allowed.
 	 */	
-	public ElementListSelectionDialog(Shell parent,	ILabelProvider renderer)
-	{
+	public ElementListSelectionDialog(Shell parent,	ILabelProvider renderer) {
 		super(parent, renderer);
 	}
 
 	/**
-	 * Sets the elements presented by this dialog.
+	 * Sets the elements of the list.
+	 * @param elements the elements of the list.
 	 */
-/*	
-	public void setElements(List elements) {
-		fElements= elements;	
-	}
-*/	
-
-	/**
-	 * Sets the elements presented by this dialog.
-	 * Convenience method.
-	 */
-/*	
-	public void setElements(Object[] elements) {
-		fElements= Arrays.asList(elements);
-	}
-*/	
 	public void setElements(Object[] elements) {
 		fElements= elements;
 	}
-	
+
 	/*
-	 * @private
+	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		setResult(getWidgetSelection());
+		setResult(Arrays.asList(getSelectedElements()));
 	}
-
-/*
-	public Object[] getSelectedElements() {
-		return getResult();
-	}
-*/	
-
-/*	
-	public Object getSelectedElement() {
-		return getPrimaryResult();
-	}
-*/	
+	
+	/*
+	 * @see Dialog#createDialogArea(Composite)
+	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 		
@@ -83,9 +55,8 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 
 		initFilteredList();
 		initFilterText();
-		setSelectionListElements(fElements);
+		setListElements(fElements);
 						
 		return contents;
-	}
-
+	}
 }

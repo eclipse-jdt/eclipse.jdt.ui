@@ -27,6 +27,10 @@ import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.core.refactoring.util.Selection;
 
+/**
+ * A list selection dialog with two panes. Duplicated entries will be folded
+ * together and are displayed in the lower pane (qualifier).
+ */
 public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 
 	private String fUpperListLabel;
@@ -39,6 +43,9 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		
 	/**
 	 * Creates the two pane element selector.
+	 * @param paren           the parent shell.
+	 * @param elementRenderer the element renderer.
+	 * @param qualifier       the qualifier renderer.
 	 */
 	public TwoPaneElementSelector(Shell parent, ILabelProvider elementRenderer, 
 		ILabelProvider qualifierRenderer)
@@ -51,31 +58,32 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		fQualifierRenderer= qualifierRenderer;	
 	}				
 
+	/**
+	 * Sets the upper list label. If the label is <code>null</code> (default),
+	 * no label is created.
+	 */
 	public void setUpperListLabel(String label) {
 		fUpperListLabel= label;
 	}
 
+	/**
+	 * Sets the lower list label. If the label is <code>null</code> (default),
+	 * no label is created.
+	 */
 	public void setLowerListLabel(String label) {
 		fLowerListLabel= label;
 	}	
-	
+
+	/**
+	 * Sets the elements to be displayed.
+	 * @param elements the elements to be displayed.
+	 */	
 	public void setElements(Object[] elements) {
 		fElements= elements;
 	}
 
 	/**
-	 * @deprecated Use getPrimaryResult instead.
-	 */
-	public Object getSelectedElement() {
-		Object[] result= getResult();
-		if (result == null || result.length == 0)
-			return null;
-			
-		return result[0];
-	}
-
-	/**
-	 * getUIComponent method comment.
+	 * @see Dialog#createDialogArea(Composite)
 	 */
 	public Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
@@ -89,13 +97,21 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 
 		initFilteredList();
 		initFilterText();		
-//		setSelectionListElements(Arrays.asList(fElements));
-		setSelectionListElements(fElements);
+		setListElements(fElements);
 		
 		return contents;
 	}
 
+	/**
+	 * Creates a label if name was not <code>null</code>.
+	 * @param  parent the parent composite.
+	 * @param  name   the name of the label.
+	 * @return returns a label if a name was given, <code>null</code> otherwise.
+	 */
 	private Label createLabel(Composite parent, String name) {
+		if (name == null)
+			return null;
+			
 		Label label= new Label(parent, SWT.NONE);
 		label.setText(name);
 		
@@ -104,7 +120,8 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	
 	/**
 	 * Creates the list widget and sets layout data.
-	 * @return org.eclipse.swt.widgets.List
+	 * @param parent   the parent composite.
+	 * @return returns the list table widget.
 	 */
 	private Table createLowerList(Composite parent) {
 		Table list= new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -142,33 +159,37 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	}	
 
 	/**
-	 * @private
+	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		List result= new ArrayList(1);
-		result.add(getWidgetSelection());
-		setResult(result);
+		setResult(Arrays.asList(getSelectedElements()));
 	}
 
+	/**
+	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
+	 */
 	protected void handleDefaultSelected() {
-		if (verifyCurrentSelection() && (getWidgetSelection2() != null))
+		if (validateCurrentSelection() && (getLowerSelectedElement() != null))
 			buttonPressed(IDialogConstants.OK_ID);
 	}
 
+	/**
+	 * @see AbstractElementListSelectionDialog#handleSelectionChanged()
+	 */	
 	protected void handleSelectionChanged() {
 		super.handleSelectionChanged();
 		handleUpperSelectionChanged();
 	}
 
 	private void handleUpperSelectionChanged() {
-		int index= fFilteredList.getSelectionIndex();
+		int index= getSelectionIndex();
 
 		fLowerList.removeAll();
 		
 		if (index < 0)
 			return;
 			
-		fQualifierElements= fFilteredList.getFoldedElements(index);
+		fQualifierElements= getFoldedElements(index);
 		updateLowerListWidget(fQualifierElements);
 
 		updateOkState();		
@@ -178,8 +199,10 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		updateOkState();
 	}
 	
-	// XXX name
-	protected Object getWidgetSelection2() {
+	/**
+	 * Returns the selected element from the lower pane.
+	 */
+	protected Object getLowerSelectedElement() {
 		int index= fLowerList.getSelectionIndex();
 		
 		if (index >= 0)
@@ -191,7 +214,7 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	private void updateOkState() {
 		Button okButton= getOkButton();
 		if (okButton != null)
-			okButton.setEnabled(getWidgetSelection() != null);
+			okButton.setEnabled(getSelectedElements().length != 0);
 	}
 	
 	private void updateLowerListWidget(Object[] elements) {

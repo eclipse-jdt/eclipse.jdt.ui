@@ -1,9 +1,9 @@
 /* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jdt.internal.ui.widgets.MessageLine;
-/** * Util to work with IStatus. */
+/** * A utility class to work with IStatus. */
 public class StatusUtil {
 
 	/**
-	 * Compares two IStatus. The more severe is returned:
+	 * Compares two instances of <code>IStatus</code>. The more severe is returned:
 	 * An error is more severe than a warning, and a warning is more severe
 	 * than ok. If the two stati have the same severity, the second is returned.
 	 */

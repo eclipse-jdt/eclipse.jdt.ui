@@ -74,7 +74,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	}
 		
 	private void addSelectedInterface(){
-		TypeInfo ref= (TypeInfo)getWidgetSelection2();
+		TypeInfo ref= (TypeInfo)getLowerSelectedElement();
 		if (ref != null)
 			fList.addElement(ref.getFullyQualifiedName());
 	}
@@ -89,7 +89,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
 	 */
 	protected void handleDefaultSelected() {
-		if (verifyCurrentSelection())
+		if (validateCurrentSelection())
 			buttonPressed(ADD_ID);
 	}
 

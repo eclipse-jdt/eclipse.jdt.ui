@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.widg
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
  * The status message must be passed over as StatusInfo object and can be
- * an error, warning or ok. The OK button is enabled / disabled depending
+ * an error, warning or ok. The OK button is enabled or disabled depending
  * on the status.
  */ 
 public abstract class SelectionStatusDialog extends SelectionDialog {
@@ -34,7 +34,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	private boolean fStatusLineAboveButtons= false;	
 
 	/**
-	 *
+	 * Creates an instance of a <code>SelectionStatusDialog</code>.
 	 */	
 	public SelectionStatusDialog(Shell parent) {
 		super(parent);
@@ -53,8 +53,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	
 	/**
 	 * Sets the image for this dialog.
-	 *
-	 * @param image the dialog's image
+	 * @param image the image.
 	 */
 	public void setImage(Image image) {
 		fImage= image;
@@ -88,8 +87,8 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 */
 	protected abstract void computeResult();
 	  
-	/* (non-Javadoc)
-	 * Method declared in Window.
+	/*
+	 * @see Window#configureShell(shell)
 	 */
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
@@ -119,16 +118,16 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 			okButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
-	/* (non-Javadoc)
-	 * Method declared in Dialog.
+	/*
+	 * @see Dialog#okPressed()
 	 */
 	protected void okPressed() {
 		computeResult();
 		super.okPressed();
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in Dialog.
+	/*
+	 * @see Window#create()
 	 */
 	public void create() {
 		super.create();
@@ -136,8 +135,8 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 			updateStatus(fLastStatus);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in Dialog.
+	/*
+	 * @see Dialog#createButtonBar(Composite)
 	 */
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
@@ -158,5 +157,6 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 
 		super.createButtonBar(composite);
 		return composite;
-	}	
+	}
+	
 }

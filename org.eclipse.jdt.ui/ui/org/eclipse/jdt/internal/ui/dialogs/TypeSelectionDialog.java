@@ -22,7 +22,6 @@ import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
-
 /**
  * A dialog to select a type from a list of types.
  */
@@ -33,7 +32,11 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	private int fStyle;
 	
 	/**
-	 * Constructor.
+	 * Constructs a type selection dialog.
+	 * @param parent  the parent shell.
+	 * @param context the runnable context.
+	 * @param scope   the java search scope.
+	 * @param style   the widget style.
 	 */
 	public TypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style)
@@ -53,7 +56,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	}
 	
 	/**
-	 * @private
+	 * @see Window#open()
 	 */
 	public int open() {
 		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
@@ -74,10 +77,10 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	}
 	
 	/**
-	 * @private
+	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		TypeInfo ref= (TypeInfo) getWidgetSelection2();
+		TypeInfo ref= (TypeInfo) getLowerSelectedElement();
 
 		if (ref == null)
 			return;

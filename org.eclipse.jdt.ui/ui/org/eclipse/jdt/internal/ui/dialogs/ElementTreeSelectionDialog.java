@@ -33,6 +33,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
+/**
+ * A class to select elements out of a tree structure.
+ */
 public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	
 	private TreeViewer fViewer;
@@ -54,9 +57,9 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private int fHeight= 18;
 
 	/**
-	 * Constructor for the ElementTreeSelectionDialog.
-	 * @param labelProvider The label provider to render the entries
-	 * @param contentProvider The content provider to evaluate the tree structure
+	 * Constructs an instance of <code>ElementTreeSelectionDialog</code>.
+	 * @param labelProvider   the label provider to render the entries
+	 * @param contentProvider the content provider to evaluate the tree structure
 	 */	
 	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider,
 		ITreeContentProvider contentProvider)
@@ -71,30 +74,31 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}	
 
 	/**
-	 * Convenicence.
+	 * Sets the initial selection.
+	 * Convenience method.
+	 * @param selection the initial selection.
 	 */
 	public void setInitialSelection(Object selection) {
 		setInitialSelections(new Object[] {selection});
 	}
-	
+
 	/**
-	 * This message is shown when the tree has no entries at all
-	 * Must be set before widget creation
-	 */
+	 * Sets the message to be displayed if the list is empty.
+	 * @param message the message to be displayed.
+	 */	
 	public void setEmptyListMessage(String message) {
 		fEmptyListMessage= message;
 	}	
 
 	/**
-	 *
-	 * @param allowMultiple Specify the selection behaviour of the tree widget. Allows multiple selection or not 
+	 * Specifies if multiple selection is allowed.
 	 */
 	public void setAllowMultiple(boolean allowMultiple) {
 		fAllowMultiple= allowMultiple;
 	}
 	
 	/**
-	 * Sets the double click selects flag.
+	 * Specifies if default selected events (double click) are created.
 	 */
 	public void setDoubleClickSelects(boolean doubleClickSelects) {
 		fDoubleClickSelects= doubleClickSelects;
@@ -108,7 +112,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}		
 	
 	/**
-	 * Adds the given filter to the tree viewer.
+	 * Adds a filter to the tree viewer.
+	 * @param filter a filter.
 	 */
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
@@ -118,24 +123,32 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}
 	
 	/**
-	 * A validator can be set to check if the current selection
-	 * is valid
+	 * Sets an optional validator to check if the selection is valid.
+	 * The validator is invoked whenever the selection changes.
+	 * @param validator the validator to validate the selection.
 	 */
 	public void setValidator(ISelectionValidator validator) {
 		fValidator= validator;
-	}
+	}			
 	
 	/**
-	 * Sets the dialog's input to the given value.
-	 * @param input the dialog's input.
+	 * Sets the tree input.
+	 * @param input the tree input.
 	 */
 	public void setInput(Object input) {
 		fInput= input;
 	} 
 
-	/*
-	 * @private
-	 */	 
+	/**
+	 * Sets the size of the tree in unit of characters.
+	 * @param width  the width of the tree.
+	 * @param height the height of the tree.
+	 */
+	public void setSize(int width, int height) {
+		fWidth= width;
+		fHeight= height;
+	}
+
 	protected void updateOKStatus() {
 		if (!fIsEmpty) {
 			if (fValidator != null) {
@@ -151,7 +164,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}
 	
 	/*
-	 * @private
+	 * @see Window#open()
 	 */	 
 	public int open() {
 		fIsEmpty= evaluateIfTreeEmpty(fInput);
@@ -163,21 +176,13 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		
 		return getReturnCode();
 	}
-	
-	/**
-	 * Sets the size of the list in unit of characters.
-	 */
-	public void setSize(int width, int height) {
-		fWidth= width;
-		fHeight= height;
-	}
-	
+
 	private void access$superOpen() {
 		super.open();
 	}	
-	 
-	/*
-	 * @private
+	 		
+	/**
+	 * Handles cancel button pressed event.
 	 */	 
 	protected void cancelPressed() {
 		setResult(null);
@@ -185,14 +190,14 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	} 
 
 	/*
-	 * @private
+	 * @see SelectionStatusDialog#computeResult()
 	 */	 
 	protected void computeResult() {
 		setResult(SelectionUtil.toList(fViewer.getSelection()));
 	} 
 	 
 	/*
-	 * @private
+	 * @see Window#create()
 	 */	 
 	public void create() {
 		super.create();
@@ -205,7 +210,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	}		
 	
 	/*
-	 * @private
+	 * @see Dialog#createDialogArea(Composite)
 	 */	 
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
@@ -281,4 +286,5 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	protected void access$setResult(List result) {
 		super.setResult(result);
 	}
+	
 }

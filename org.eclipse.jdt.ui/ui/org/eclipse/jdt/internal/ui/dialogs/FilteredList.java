@@ -27,8 +27,10 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 
 /**
- * A composite widget which holds a list of elements. The elements
- * can be filtered. Duplicates can be eliminated if desired.
+ * A composite widget which holds a list of elements for user selection.
+ * The elements are sorted alphabetically.
+ * Optionally, the elements can be filtered and duplicate entries can
+ * be hidden (folding).
  */
 public class FilteredList extends Composite {
 	private Table fList;
@@ -92,7 +94,13 @@ public class FilteredList extends Composite {
 	}	
 	
 	/**
-	 * Creates new instance of the widget.
+	 * Constructs a new instance of a filtered list.
+	 * @param parent           the parent composite.
+	 * @param style            the widget style.
+	 * @param renderer         the label renderer.
+	 * @param ignoreCase       specifies whether sorting and folding is case sensitive.
+	 * @param allowDuplicates  specifies whether folding of duplicates is desired.
+	 * @param matchEmptyString specifies whether empty filter strings should filter everything or nothing.
 	 */
 	public FilteredList(Composite parent, int style, ILabelProvider renderer,
 		boolean ignoreCase, boolean allowDuplicates, boolean matchEmptyString)
@@ -119,7 +127,8 @@ public class FilteredList extends Composite {
 		fMatchEmtpyString= matchEmptyString;
 	}
 	/**
-	 * Sets the list of elements presented in the widget.
+	 * Sets the list of elements.
+	 * @param elements the elements to be shown in the list.
 	 */
 	public void setElements(Object[] elements) {
 		if (elements == null) {
@@ -147,107 +156,105 @@ public class FilteredList extends Composite {
 		fFilteredIndices= new int[length];	
 		fFilteredCount= filter();
 
-		updateListWidget();
+		updateList();
 	}
-	
-/*	
-	public void setElements(List elements) {
-		// copy list for sorting
-		if (elements == null)
-			fElements= new Object[0];
-		else 
-			fElements= elements.toArray();
-			
-		int length= fElements.length;
 
-		// fill labels			
-		fLabels= new Label[length];		
-		for (int i= 0; i != length; i++)
-			fLabels[i]= new Label(
-				fRenderer.getText(fElements[i]),
-				fRenderer.getImage(fElements[i]));
-
-		fSorter.sort(fLabels, fElements);
-		
-		fFoldedIndices= new int[length];
-		fFoldedCount= fold();
-
-		fFilteredIndices= new int[length];	
-		fFilteredCount= filter();
-
-		updateListWidget();
-	}
-*/
 	/**
-	 * Returns <code>true</code> if the list is empty, <code>false</code> otherwise.
+	 * Tests if the list (before folding and filtering) is empty.
+	 * @return returns <code>true</code> if the list is empty, <code>false</code> otherwise.
 	 */
 	public boolean isEmpty() {
 		return (fElements == null) || (fElements.length == 0);
 	}
 
+    /**
+     * Adds a selection listener to the list.
+     * @param listener the selection listener to be added.
+     */
 	public void addSelectionListener(SelectionListener listener) {
 		fList.addSelectionListener(listener);
 	}
 
+    /**
+     * Removes a selection listener from the list.
+     * @param listener the selection listener to be removed.
+     */
 	public void removeSelectionListener(SelectionListener listener) {
 		fList.removeSelectionListener(listener);
 	}	
 
+    /**
+     * Sets the selection of the list.
+     * @param selection an array of indices specifying the selection.
+     */
 	public void setSelection(int[] selection) {
 		fList.setSelection(selection);
 	}
 	
+	/**
+	 * Returns the selection of the list.
+	 * @return returns an array of indices specifying the current selection.
+	 */
 	public int[] getSelectionIndices() {
 		return fList.getSelectionIndices();
 	}
 	
-	// convenience
+	/**
+	 * Returns the selection of the list.
+	 * This is a convenience function for <code>getSelectionIndices()</code>.
+	 * @return returns the index of the selection, -1 for no selection.
+	 */
 	public int getSelectionIndex() {
 		return fList.getSelectionIndex();		
 	}
 	
 	/**
-	 * Returns a list of selected elements. Note that the type of the elements
-	 * returned in the list are the same as the ones passed to the selection list
-	 * via <code>setElements</code>. The list doesn't contain the rendered strings.
+	 * Returns an array of the selected elements. The type of the elements
+	 * returned in the list are the same as the ones passed with
+	 * <code>setElements</code>. The array does not contain the rendered strings.
+	 * @return returns the array of selected elements.
 	 */
-	public List getSelection() {
+	public Object[] getSelection() {
 		if (fList.isDisposed() || (fList.getSelectionCount() == 0))
-			return new ArrayList(0);
-			
-		int[] listSelection= fList.getSelectionIndices();
-		List selected= new ArrayList(listSelection.length);
-		for (int i= 0; i < listSelection.length; i++)
-			selected.add(fElements[fFilteredIndices[listSelection[i]]]);
+			return new Object[0];
+
+		int[] indices= fList.getSelectionIndices();
+		Object[] elements= new Object[indices.length];
 		
-		return selected;
+		for (int i= 0; i != indices.length; i++)
+			elements[i]= fElements[fFoldedIndices[fFilteredIndices[indices[i]]]];
+		
+		return elements;		
 	}
 
 	/**
-	 * Sets the filter pattern. Current only prefix filter pattern are supported.
+	 * Sets the filter pattern. Current only prefix filter patterns are supported.
 	 * @param filter the filter pattern.
 	 */
 	public void setFilter(String filter) {
-		fFilter= filter;
+		fFilter= (filter == null) ? "" : filter; //$NON-NLS-1$
 
-		fFilteredCount= filter();			
-		updateListWidget();
+		fFilteredCount= filter();
+		updateList();
 	}
 	
 	/**
 	 * Returns the filter pattern.
-	 * @return the filter pattern.
+	 * @return returns the filter pattern.
 	 */
 	public String getFilter() {
 		return fFilter;
 	}
 
 	/**
-	 * Returns all elements which are folded together.
-	 * @param index the selected index.
-	 * @return an array of elements folded together at the index.
+	 * Returns all elements which are folded together to one entry in the list.
+	 * @param  index the index selecting the entry in the list.
+	 * @return returns an array of elements folded together, <code>null</code> if index is out of range.
 	 */
 	public Object[] getFoldedElements(int index) {
+		if ((index < 0) || (index >= fFilteredCount))
+			return null;
+		
 		index= fFilteredIndices[index];
 
 		int start= fFoldedIndices[index];			
@@ -257,11 +264,16 @@ public class FilteredList extends Composite {
 			
 		Object[] elements= new Object[count];
 		for (int i= 0; i != count; i++)
-			elements[i]= fElements[start + i];			
+			elements[i]= fElements[start + i];
 				
 		return elements;
 	}
 
+    /*
+     * Folds duplicate entries. Two elements are considered as a pair of
+     * duplicates if they coiincide in the rendered string and image.
+     * @return returns the number of elements after folding.
+     */
 	private int fold() {
 		int length= fElements.length;
 		
@@ -286,8 +298,9 @@ public class FilteredList extends Composite {
 		}
 	}
 
-	/**
-	 * Filters the list  with the filter pattern.
+	/*
+	 * Filters the list with the filter pattern.
+     * @return returns the number of elements after filtering.
 	 */
 	private int filter() {
 		if (((fFilter == null) || (fFilter.length() == 0)) && !fMatchEmtpyString)
@@ -305,10 +318,10 @@ public class FilteredList extends Composite {
 		return k;
 	}	
 
-	/**
+	/*
 	 * Updates the list widget.
 	 */	 
-	private void updateListWidget() {
+	private void updateList() {
 		if (fList.isDisposed())
 			return;
 			

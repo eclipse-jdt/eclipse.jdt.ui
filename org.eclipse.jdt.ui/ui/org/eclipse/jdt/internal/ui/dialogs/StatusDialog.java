@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
  * The status message must be passed over as StatusInfo object and can be
- * an error, warning or ok. The OK button is enabled / disabled depending
+ * an error, warning or ok. The OK button is enabled or disabled depending
  * on the status.
  */ 
 public abstract class StatusDialog extends Dialog {
@@ -35,13 +35,16 @@ public abstract class StatusDialog extends Dialog {
 	
 	private boolean fStatusLineAboveButtons;
 	
+	/**
+	 * Creates an instane of a status dialog.
+	 */
 	public StatusDialog(Shell parent) {
 		super(parent);
 		fStatusLineAboveButtons= false;
 	}
 	
 	/**
-	 * Controls whether status line appears to the left of the buttons (default)
+	 * Specifies whether status line appears to the left of the buttons (default)
 	 * or above them.
 	 *
 	 * @param aboveButtons if <code>true</code> status line is placed above buttons; if
@@ -52,8 +55,8 @@ public abstract class StatusDialog extends Dialog {
 	}	
 	
 	/**
-	 * Update the dialog's status line to reflect the given status. It is save to call
-	 * this method before the dialog has been opened.
+	 * Update the dialog's status line to reflect the given status.
+	 * It is save to call this method before the dialog has been opened.
 	 */
 	protected void updateStatus(IStatus status) {
 		fLastStatus= status;
@@ -63,22 +66,26 @@ public abstract class StatusDialog extends Dialog {
 		}
 	}
 	
-	// 1GFCRWW: ITPJUI:ALL - Compile errors in VA/Java	
+	// 1GFCRWW: ITPJUI:ALL - Compile errors in VA/Java
+	/**
+	 * Returns the last status.
+	 */
 	public IStatus getStatus() {
 		return fLastStatus;
 	}
 
 	/**
-	 * Update the status of the ok button to reflect the given status. Subclasses
-	 * may override this method to update additional buttons.
+	 * Updates the status of the ok button to reflect the given status.
+	 * Subclasses may override this method to update additional buttons.
+	 * @param status the status.
 	 */
 	protected void updateButtonsEnableState(IStatus status) {
 		if (fOkButton != null && !fOkButton.isDisposed())
 			fOkButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
-	/* (non-Javadoc)
-	 * Method declared in Window.
+	/* 
+	 * @see Window#create(Shell)
 	 */
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
@@ -87,7 +94,7 @@ public abstract class StatusDialog extends Dialog {
 	}
 
 	/*
-	 * Non Java-Docd
+	 * @see Window#create()
 	 */	
 	public void create() {
 		super.create();
@@ -103,16 +110,15 @@ public abstract class StatusDialog extends Dialog {
 	}
 
 	/*
-	 * Non Java-Docd
+	 * @see Dialog#createButtonsForButtonBar(Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		fOkButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-
 	}
 	
 	/*
-	 * Non Java-Docd
+	 * @see Dialog#createButtonBar(Composite)
 	 */				
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
@@ -134,25 +140,24 @@ public abstract class StatusDialog extends Dialog {
 	
 	/**
 	 * Sets the title for this dialog.
-	 *
-	 * @param title the title
+	 * @param title the title.
 	 */
 	public void setTitle(String title) {
 		fTitle= title != null ? title : ""; //$NON-NLS-1$
 		Shell shell= getShell();
-		if (shell != null && !shell.isDisposed())
+		if ((shell != null) && !shell.isDisposed())
 			shell.setText(fTitle);
 	}
 
 	/**
 	 * Sets the image for this dialog.
-	 *
-	 * @param image the dialog's image
+	 * @param image the image.
 	 */
 	public void setImage(Image image) {
 		fImage= image;
 		Shell shell= getShell();
-		if (shell != null && !shell.isDisposed())
+		if ((shell != null) && !shell.isDisposed())
 			shell.setImage(fImage);
 	}	
+	
 }

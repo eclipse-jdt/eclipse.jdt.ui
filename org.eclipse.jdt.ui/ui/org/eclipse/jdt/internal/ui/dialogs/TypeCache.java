@@ -3,7 +3,7 @@ public class TypeCache{
 
 	private static int fgLastStyle= -1;
 	private static List fgTypeList;
-	private static boolean fgIsRegistered= false;		//no instances	private TypeCache(){	}
+	private static boolean fgIsRegistered= false;		// no instances	private TypeCache(){	}
 
 	public static List findTypes(AllTypesSearchEngine engine, int style, IRunnableContext runnableContext, IJavaSearchScope scope) {
 				checkIfOkToReuse(style, scope);
@@ -11,7 +11,7 @@ public class TypeCache{
 			fgTypeList= engine.searchTypes(runnableContext, scope, style);
 			if (!fgIsRegistered){
 				JavaCore.addElementChangedListener(new DeltaListener());				fgIsRegistered= true;			}	
-		}				//must not return null		if (fgTypeList == null)			return new ArrayList(0); 		else				return fgTypeList;
+		}				// must not return null		if (fgTypeList == null)			return new ArrayList(0); 		else				return fgTypeList;
 	}
 
 	private static void checkIfOkToReuse(int style, IJavaSearchScope scope) {
@@ -38,14 +38,14 @@ public class TypeCache{
 			if (delta.getKind() != IJavaElementDelta.CHANGED)
 				return true;
 	
-			//if it's a cu we wait
+			// if it's a cu we wait
 			if (delta.getElement().getElementType() == IJavaElement.COMPILATION_UNIT)
 				return false;					
-			//must be only children
+			// must be only children
 			if (delta.getFlags() != IJavaElementDelta.F_CHILDREN)
 				return true;
 	
-			//special case: if it's a type then _it_ must be added or removed
+			// special case: if it's a type then _it_ must be added or removed
 			if (delta.getElement().getElementType() == IJavaElement.TYPE)
 				return false;
 	
