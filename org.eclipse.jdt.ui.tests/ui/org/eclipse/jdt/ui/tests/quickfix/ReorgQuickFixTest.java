@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -138,6 +139,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
+		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
