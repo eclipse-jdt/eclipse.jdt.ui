@@ -11,9 +11,7 @@
 package org.eclipse.search.internal.core;
 
 import java.io.IOException;
-import java.util.HashSet;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.search.core.SearchQuery;

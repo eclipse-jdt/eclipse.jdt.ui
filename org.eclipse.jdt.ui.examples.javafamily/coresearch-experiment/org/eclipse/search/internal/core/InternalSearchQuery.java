@@ -64,9 +64,7 @@ public abstract class InternalSearchQuery {
 			monitor.beginTask(Util.bind("engine.searching"), 100); //$NON-NLS-1$
 		}
 
-		long start = -1;
 		if (SearchCore.VERBOSE) {
-			start = System.currentTimeMillis();
 			System.out.println("Searching for " + this + " in " + scope); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	

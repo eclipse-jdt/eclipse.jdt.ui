@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.search.internal.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,6 @@ public class IndexManager {
 
 	private static IndexManager INDEX_MANAGER = new IndexManager();
 
-	private Map indexes = new HashMap(10);               // indexPath --> index
 	private Map readWriteLocks = new HashMap(10); // index         --> lock
 	public JobManager jobManager = new JobManager();
 	
