@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public final class MoveSourceEdit extends AbstractTransferEdit {
+public class MoveSourceEdit extends AbstractTransferEdit {
 
 	private String fContent;
 	/* package */ int fCounter;
@@ -45,18 +45,22 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	protected String computeContent(TextBuffer buffer) {
+		TextRange range= getTextRange();
+		return buffer.getContent(range.getOffset(), range.getLength());
+	}	
+	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
 	public void perform(TextBuffer buffer) throws CoreException {
-		TextRange range= getTextRange();
-		fContent= buffer.getContent(range.getOffset(), range.getLength());
+		fContent= computeContent(buffer);
 		if (++fCounter == 2) {
 			try {
 				// Delete source
 				if (!getTextRange().isDeleted()) {
 					fMode= DELETE;
-					buffer.replace(range, ""); //$NON-NLS-1$
+					buffer.replace(getTextRange(), ""); //$NON-NLS-1$
 				}
 				
 				if (!fTarget.getTextRange().isDeleted()) {
@@ -74,7 +78,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	public TextEdit copy0(TextEditCopier copier) {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new MoveSourceEdit(getTextRange().copy());
 	}
 

@@ -21,9 +21,15 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.AnnotationData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.StringPlaceholderData;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -51,6 +57,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private TokenScanner fTokenScanner; // shared scanner
 	private HashMap fNodeRanges;
 	private HashMap fCopySources;
+	private HashMap fMoveSources;
 	
 
 	final TextBuffer fTextBuffer;
@@ -68,6 +75,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fCurrentEdit= rootEdit;
 		fGroupDescriptions= resGroupDescriptions;
 		fCopySources= new HashMap();
+		fMoveSources= new HashMap();
 	}
 	
 	final ListRewriter getDefaultRewriter() {
@@ -109,7 +117,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return range;
 	}
 	
-	final private CopyIndentedSourceEdit[] getSourceCopies(ASTNode node) {
+	final private CopyIndentedSourceEdit[] getCopySources(ASTNode node) {
 		int count= fRewrite.getCopyCount(node);
 		if (count == 0) {
 			return null;
@@ -125,7 +133,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		return edits;
 	}
-		
+	
+	final private MoveIndentedSourceEdit getMoveSource(ASTNode node) {
+		if (isMoveSource(node)) {
+			MoveIndentedSourceEdit edit= (MoveIndentedSourceEdit) fMoveSources.get(node);
+			if (edit == null) {
+				ISourceRange range= getNodeRange(node, -1);
+				edit= new MoveIndentedSourceEdit(range.getOffset(), range.getLength());
+			}
+			fMoveSources.put(node, edit);
+			return edit;
+		}
+		return null;
+	}
 	
 	final int getChangeKind(ASTNode node) {
 		return fRewrite.getChangeKind(node);
@@ -160,6 +180,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	final boolean isModified(ASTNode node) {
 		return fRewrite.isModified(node);
 	}
+	
+	final boolean isMoveSource(ASTNode node) {
+		return fRewrite.isMoveSource(node);
+	}	
 		
 	final ASTNode getModifiedNode(ASTNode node) {
 		return fRewrite.getModifiedNode(node);
@@ -198,13 +222,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fCurrentEdit.add(edit);
 	}
 	
-	final TextEdit doTextInsert(int offset, String insertString, String description) {
-		TextEdit edit= SimpleTextEdit.createInsert(offset, insertString);
-		addEdit(edit);
-		if (description != null) {
-			addDescription(description, edit);
+	final void doTextInsert(int offset, String insertString, String description) {
+		if (insertString.length() > 0) {
+			TextEdit edit= SimpleTextEdit.createInsert(offset, insertString);
+			addEdit(edit);
+			if (description != null) {
+				addDescription(description, edit);
+			}
 		}
-		return edit;
 	}
 	
 	final void addDescription(String description, TextEdit edit) {
@@ -218,6 +243,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	
 	final TextEdit doTextRemove(int offset, int len, String description) {
+		if (len == 0) {
+			return null;
+		}
 		TextEdit edit= SimpleTextEdit.createDelete(offset, len);
 		addEdit(edit);
 		if (description != null) {
@@ -226,14 +254,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return edit;
 	}
 	
-	final TextEdit doTextRemoveAndVisit(int offset, int len, ASTNode node) {
+	final void doTextRemoveAndVisit(int offset, int len, ASTNode node) {
 		TextEdit edit= doTextRemove(offset, len, getDescription(node));
-
-		fCurrentEdit= edit;
-		doVisit(node);
-		fCurrentEdit= edit.getParent();
-
-		return edit;
+		if (edit != null) {
+			fCurrentEdit= edit;
+			doVisit(node);
+			fCurrentEdit= edit.getParent();
+		}
 	}
 	
 	final int doVisit(ASTNode node) {
@@ -242,17 +269,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 	
-	final TextEdit doTextReplace(int offset, int len, String insertString, String description) {
-		TextEdit edit= SimpleTextEdit.createReplace(offset, len, insertString);
-		addEdit(edit);
-		if (description != null) {
-			addDescription(description, edit);
+	final void doTextReplace(int offset, int len, String insertString, String description) {
+		if (len > 0 || insertString.length() > 0) {
+			TextEdit edit= SimpleTextEdit.createReplace(offset, len, insertString);
+			addEdit(edit);
+			if (description != null) {
+				addDescription(description, edit);
+			}
 		}
-		return edit;
 	}
 		
 	final TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
-		CopyIndentedSourceEdit[] edits= getSourceCopies(copiedNode);
+		CopyIndentedSourceEdit[] edits= getCopySources(copiedNode);
 		if (edits == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString()); //$NON-NLS-1$
 		}
@@ -279,6 +307,25 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return targetEdit;			
 
 	}
+	
+	final TextEdit doTextMove(ASTNode movedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
+		MoveIndentedSourceEdit moveEdit= getMoveSource(movedNode);
+		if (moveEdit.isInitialized()) {
+			Assert.isTrue(false, "No move source available" + movedNode.toString()); //$NON-NLS-1$
+		}		
+		moveEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
+	
+		MoveTargetEdit targetEdit= new MoveTargetEdit(destOffset, moveEdit);
+		addEdit(targetEdit);
+	
+		if (description != null) {
+			addDescription(description, moveEdit);
+			addDescription(description, targetEdit);
+		}
+		return targetEdit;			
+
+	}	
+	
 			
 	private int getPosBeforeSpaces(int pos) {
 		while (pos > 0 && Strings.isIndentChar(fTextBuffer.getChar(pos - 1))) {
@@ -763,12 +810,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	final void doTextInsert(int insertOffset, ASTNode node, int initialIndentLevel, boolean removeLeadingIndent, String description) {		
 		
-		ASTWithExistingFlattener flattener= new ASTWithExistingFlattener();
+		ASTWithExistingFlattener flattener= new ASTWithExistingFlattener(fRewrite);
 		node.accept(flattener);
 		String formatted= flattener.getFormattedResult(initialIndentLevel, fTextBuffer.getLineDelimiter());
-		
-		ASTWithExistingFlattener.NodeMarker[] markers= flattener.getNodeMarkers();
-		
+
 		int tabWidth= CodeFormatterUtil.getTabWidth();
 		int currPos= 0;
 		if (removeLeadingIndent) {
@@ -776,6 +821,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				currPos++;
 			}
 		}
+		ASTWithExistingFlattener.NodeMarker[] markers= flattener.getNodeMarkers();
 		for (int i= 0; i < markers.length; i++) {
 			int offset= markers[i].offset;
 			if (offset != currPos) {
@@ -785,13 +831,22 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
 			
 			Object data= markers[i].data;
-			if (data instanceof ASTNode) {
-				ASTNode existingNode= (ASTNode) data;
+			if (data instanceof MovePlaceholderData) {
+				ASTNode existingNode= ((MovePlaceholderData) data).node;
+				int srcIndentLevel= getIndent(existingNode.getStartPosition());
+				doTextMove(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+			} else if (data instanceof CopyPlaceholderData) {
+				ASTNode existingNode= ((CopyPlaceholderData) data).node;
 				int srcIndentLevel= getIndent(existingNode.getStartPosition());
 				doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
-			} else if (data instanceof String) {
-				String str= Strings.changeIndent((String) data, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
+			} else if (data instanceof StringPlaceholderData) {
+				String code= ((StringPlaceholderData) data).code;
+				String str= Strings.changeIndent(code, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
 				doTextInsert(insertOffset, str, description);
+			} else if (data instanceof AnnotationData) {
+				TextEdit edit= new RangeMarker(offset, 0);
+				addDescription(((AnnotationData) data).description, edit);	
+				addEdit(edit);
 			}
 		
 			currPos= offset + markers[i].length;
@@ -870,10 +925,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
+		Object annotation= fRewrite.getTrackData(node);
+		if (annotation instanceof AnnotationData) {
+			fCurrentEdit= fCurrentEdit.getParent();
+		}
 		int count= fRewrite.getCopyCount(node);
 		while (count > 0) {
 			fCurrentEdit= fCurrentEdit.getParent();
 			count--;
+		}
+		if (isMoveSource(node)) {
+			fCurrentEdit= fCurrentEdit.getParent();
 		}
 	}
 
@@ -881,13 +943,27 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		TextEdit[] edits= getSourceCopies(node);
+		// first move, then copies, then range marker
+		TextEdit moveEdit= getMoveSource(node);
+		if (moveEdit != null) {
+			addEdit(moveEdit);
+			fCurrentEdit= moveEdit;
+		}
+		TextEdit[] edits= getCopySources(node);
 		if (edits != null) {
 			for (int i= 0; i < edits.length; i++) {
 				TextEdit edit= edits[i];
 				addEdit(edit);
 				fCurrentEdit= edit;		
 			}
+		}
+		Object data= fRewrite.getTrackData(node);
+		if (data instanceof AnnotationData) {
+			ISourceRange range= getNodeRange(node, -1);
+			TextEdit edit= new RangeMarker(range.getOffset(), range.getLength());
+			addDescription(((AnnotationData) data).description, edit);
+			addEdit(edit);
+			fCurrentEdit= edit;
 		}
 	}	
 

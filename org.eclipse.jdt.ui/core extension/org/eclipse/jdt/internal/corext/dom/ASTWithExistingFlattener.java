@@ -16,12 +16,12 @@ import java.util.Hashtable;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class ASTWithExistingFlattener extends ASTFlattener {
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.AnnotationData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 
-	private static final String KEY= "ExistingASTNode"; //$NON-NLS-1$
+/* package */ class ASTWithExistingFlattener extends ASTFlattener {
 
 	public static class NodeMarker {
 		public Object data;
@@ -29,66 +29,16 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		public int length;		
 	}
 	
-	/* package */ static ASTNode createPlaceholder(AST ast, Object data, int nodeType) {
-		ASTNode placeHolder;
-		switch (nodeType) {
-			case ASTRewrite.EXPRESSION:
-				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
-				break;
-			case ASTRewrite.TYPE:
-				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
-				break;				
-			case ASTRewrite.STATEMENT:
-				placeHolder= ast.newReturnStatement();
-				break;
-			case ASTRewrite.BLOCK:
-				placeHolder= ast.newBlock();
-				break;
-			case ASTRewrite.METHOD_DECLARATION:
-				placeHolder= ast.newMethodDeclaration();
-				break;
-			case ASTRewrite.FIELD_DECLARATION:
-				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-				break;
-			case ASTRewrite.INITIALIZER:
-				placeHolder= ast.newInitializer();
-				break;								
-			case ASTRewrite.SINGLEVAR_DECLARATION:
-				placeHolder= ast.newSingleVariableDeclaration();
-				break;
-			case ASTRewrite.VAR_DECLARATION_FRAGMENT:
-				placeHolder= ast.newVariableDeclarationFragment();
-				break;
-			case ASTRewrite.JAVADOC:
-				placeHolder= ast.newJavadoc();
-				break;				
-			case ASTRewrite.TYPE_DECLARATION:
-				placeHolder= ast.newTypeDeclaration();
-				break;
-			default:
-				return null;
-		}
-		
-		NodeMarker marker= new NodeMarker();
-		marker.data= data;
-		marker.offset= -1;
-		marker.length= 0;
-		
-		placeHolder.setProperty(KEY, marker);
-		return placeHolder;
-	}
-
-	private static NodeMarker getMarker(ASTNode node) {
-		return (NodeMarker) node.getProperty(KEY);
-	} 
-	
 	private ArrayList fExistingNodes;
+	private ASTRewrite fRewrite;
 
-	public ASTWithExistingFlattener() {
+	public ASTWithExistingFlattener(ASTRewrite rewrite) {
 		super();
 		fExistingNodes= new ArrayList(10);
+		fRewrite= rewrite;
 	}
 	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.ASTFlattener#reset()
 	 */
@@ -137,10 +87,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		NodeMarker marker= getMarker(node);
-		if (marker != null) {
-			marker.offset= fResult.length();
-			fExistingNodes.add(marker);
+		TrackData data= fRewrite.getTrackData(node);
+		if (data != null) {
+			addMarker(data, fResult.length());
 		}
 	}
 
@@ -148,9 +97,32 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		NodeMarker marker= getMarker(node);
-		if (marker != null) {
-			marker.length= fResult.length() - marker.offset;
+		TrackData data= fRewrite.getTrackData(node);
+		if (data != null) {
+			if (data instanceof AnnotationData) {
+				addMarker(data, fResult.length());
+			} else {
+				fixupLength(data, fResult.length());
+			}
 		}
 	}
+	
+	private NodeMarker addMarker(Object annotation, int startOffset) {
+		NodeMarker marker= new NodeMarker();
+		marker.offset= startOffset;
+		marker.length= 0;
+		marker.data= annotation;
+		fExistingNodes.add(marker);
+		return marker;
+	}
+	
+	private void fixupLength(Object data, int endOffset) {
+		for (int i= fExistingNodes.size()-1; i >= 0 ; i--) {
+			NodeMarker marker= (NodeMarker) fExistingNodes.get(i);
+			if (marker.data == data) {
+				marker.length= endOffset - marker.offset;
+				return;
+			}
+		}
+	}	
 }

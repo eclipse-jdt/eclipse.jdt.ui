@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -97,12 +99,15 @@ public final class ASTRewrite {
 	public static final int REPLACED= 3;
 	public static final int UNCHANGED= 4;
 	
+	// properties used on nodes
 	private static final String COMPOUND_CHILDREN= "collapsed"; //$NON-NLS-1$
 	
 	private ASTNode fRootNode;
 	
 	private HashMap fChangedProperties;
 	private HashMap fCopyCounts;
+	private HashSet fMoveSources;
+	private HashMap fTrackedAnnotations;
 	private boolean fHasASTModifications;
 	
 	/**
@@ -112,7 +117,9 @@ public final class ASTRewrite {
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 		fChangedProperties= new HashMap();
-		fCopyCounts= new HashMap();
+		fCopyCounts= null;
+		fMoveSources= null;
+		fTrackedAnnotations= null;
 		fHasASTModifications= false;
 	}
 	
@@ -151,7 +158,9 @@ public final class ASTRewrite {
 			fHasASTModifications= false;
 		}
 		fChangedProperties.clear();
-		fCopyCounts.clear();
+		fCopyCounts= null;
+		fMoveSources= null;
+		fTrackedAnnotations= null;
 	}
 
 	/**
@@ -210,7 +219,7 @@ public final class ASTRewrite {
 	public boolean hasASTModifications() {
 		return fHasASTModifications;
 	}
-
+	
 	/**
 	 * Marks an existing node as removed.
 	 * @param node The node to be marked as removed.
@@ -243,7 +252,7 @@ public final class ASTRewrite {
 		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)"); //$NON-NLS-1$
 		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node"); //$NON-NLS-1$
 		assertIsInside(node);
-		ASTReplace replace= new ASTReplace();
+		ASTReplace replace= new ASTReplace();	
 		replace.replacingNode= replacingNode;
 		replace.description= description;
 		setChangeProperty(node, replace);
@@ -327,7 +336,16 @@ public final class ASTRewrite {
 	}
 	
 	/**
-	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
+	 * Marks a node as tracked. 
+	 */
+	public final void markAsTracked(ASTNode node, String description) {
+		AnnotationData data= new AnnotationData();
+		data.description= description;
+		setTrackData(node, data);
+	}	
+	
+	/**
+	 * Creates a target node for a node to be copied. A target node can be inserted or used
 	 * to replace at the target position. 
 	 */
 	public final ASTNode createCopy(ASTNode node) {
@@ -340,8 +358,34 @@ public final class ASTRewrite {
 		if (placeHolderType == UNKNOWN) {
 			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName()); //$NON-NLS-1$
 		}
-		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, placeHolderType);
+		CopyPlaceholderData data= new CopyPlaceholderData();
+		data.node= node;
+		return createPlaceholder(data, placeHolderType);
 	}
+	
+	/**
+	 * Creates a target node for a node to be moved. A target node can be inserted or used
+	 * to replace at the target position. The source node will be marked as removed, but the user can also
+	 * override this by marking it as replaced.
+	 */
+	public final ASTNode createMove(ASTNode node) {
+		Assert.isTrue(node.getStartPosition() != -1, "Tries to move a non-existing node"); //$NON-NLS-1$
+		Assert.isTrue(!isMoveSource(node), "Node already marked as moved"); //$NON-NLS-1$
+		assertIsInside(node);
+		int placeHolderType= getPlaceholderType(node);
+		if (placeHolderType == UNKNOWN) {
+			Assert.isTrue(false, "Can not create move for elements of type " + node.getClass().getName()); //$NON-NLS-1$
+		}
+		
+		setAsMoveSource(node);
+		if (getChangeProperty(node) == null) {
+			markAsRemoved(node);
+		}
+		
+		MovePlaceholderData data= new MovePlaceholderData();
+		data.node= node;
+		return createPlaceholder(data, placeHolderType);
+	}	
 	
 	/**
 	 * Succeeding nodes in a list are collapsed and represented by a new 'compound' node. The new compound node is inserted in the list
@@ -399,8 +443,54 @@ public final class ASTRewrite {
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
-		return ASTWithExistingFlattener.createPlaceholder(fRootNode.getAST(), code, nodeType);
+		StringPlaceholderData data= new StringPlaceholderData();
+		data.code= code;
+		return createPlaceholder(data, nodeType);
 	}
+	
+	private final ASTNode createPlaceholder(TrackData data, int nodeType) {
+		AST ast= fRootNode.getAST();
+		ASTNode placeHolder;
+		switch (nodeType) {
+			case ASTRewrite.EXPRESSION:
+				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
+				break;
+			case ASTRewrite.TYPE:
+				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
+				break;				
+			case ASTRewrite.STATEMENT:
+				placeHolder= ast.newReturnStatement();
+				break;
+			case ASTRewrite.BLOCK:
+				placeHolder= ast.newBlock();
+				break;
+			case ASTRewrite.METHOD_DECLARATION:
+				placeHolder= ast.newMethodDeclaration();
+				break;
+			case ASTRewrite.FIELD_DECLARATION:
+				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+				break;
+			case ASTRewrite.INITIALIZER:
+				placeHolder= ast.newInitializer();
+				break;								
+			case ASTRewrite.SINGLEVAR_DECLARATION:
+				placeHolder= ast.newSingleVariableDeclaration();
+				break;
+			case ASTRewrite.VAR_DECLARATION_FRAGMENT:
+				placeHolder= ast.newVariableDeclarationFragment();
+				break;
+			case ASTRewrite.JAVADOC:
+				placeHolder= ast.newJavadoc();
+				break;				
+			case ASTRewrite.TYPE_DECLARATION:
+				placeHolder= ast.newTypeDeclaration();
+				break;
+			default:
+				return null;
+		}
+		setTrackData(placeHolder, data);
+		return placeHolder;
+	}	
 	
 	/**
 	 * Returns the node type that should be used to create a place holder for the given node
@@ -475,9 +565,11 @@ public final class ASTRewrite {
 	}
 	
 	public final int getCopyCount(ASTNode node) {
-		Integer n= (Integer) fCopyCounts.get(node);
-		if (n != null) {
-			return n.intValue();
+		if (fCopyCounts != null) {
+			Integer n= (Integer) fCopyCounts.get(node);
+			if (n != null) {
+				return n.intValue();
+			}
 		}
 		return 0;
 	}
@@ -514,10 +606,42 @@ public final class ASTRewrite {
 		return false;
 	}
 	
+	public final boolean isMoveSource(ASTNode node) {
+		if (fMoveSources != null) {
+			return fMoveSources.contains(node);
+		}
+		return false;
+	}
+	
+	private final void setAsMoveSource(ASTNode node) {
+		if (fMoveSources == null) {
+			fMoveSources= new HashSet();
+		}
+		fMoveSources.add(node);
+	}
+	
 	private final void incrementCopyCount(ASTNode node) {
 		int count= getCopyCount(node);
+		if (fCopyCounts == null) {
+			fCopyCounts= new HashMap();
+		}
 		fCopyCounts.put(node, new Integer(count + 1));
 	}
+	
+	public final TrackData getTrackData(ASTNode node) {
+		if (fTrackedAnnotations != null) {
+			return (TrackData) fTrackedAnnotations.get(node);
+		}
+		return null;	
+	}
+	
+	private void setTrackData(ASTNode node, TrackData data) {
+		if (fTrackedAnnotations == null) {
+			fTrackedAnnotations= new HashMap();
+		}
+		fTrackedAnnotations.put(node, data);		
+	}
+	
 	
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
 		fChangedProperties.put(node, change);
@@ -535,16 +659,16 @@ public final class ASTRewrite {
 	}
 	
 
-	private static class ASTChange {
+	private static abstract class ASTChange {
 		String description;
-		int kind;
-	}		
+	}
 	
 	private static final class ASTInsert extends ASTChange {
 		public boolean isBoundToPrevious;
 	}
 	
 	private static final class ASTRemove extends ASTChange {
+		public boolean isMoveSource;
 	}	
 		
 	private static final class ASTReplace extends ASTChange {
@@ -555,5 +679,23 @@ public final class ASTRewrite {
 		public ASTNode modifiedNode;
 	}
 	
+	public static abstract class TrackData {
+	}
+	
+	public static final class MovePlaceholderData extends TrackData {
+		public ASTNode node;
+	}
+	
+	public static final class CopyPlaceholderData extends TrackData {
+		public ASTNode node;
+	}	
+	
+	public static final class StringPlaceholderData extends TrackData {
+		public String code;
+	}
+	
+	public static final class AnnotationData extends TrackData {
+		public String description;
+	}	
 	
 }
