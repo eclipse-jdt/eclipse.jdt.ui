@@ -577,7 +577,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 				jsg= new JavaSearchActionGroup(this)});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
+		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
