@@ -778,7 +778,6 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 
 		boolean showQualified= isShowQualifiedNames();
 		IType type= breakpoint.getType();
-		//method entry breakpoints
 		IMember member= breakpoint.getMember();
 		if (type != null) {
 			StringBuffer label= new StringBuffer();
