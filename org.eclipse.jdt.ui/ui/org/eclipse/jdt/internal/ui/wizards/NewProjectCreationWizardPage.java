@@ -215,19 +215,27 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 			if ("java".equals(resource.getFileExtension())) { //$NON-NLS-1$
 				ICompilationUnit cu= JavaCore.createCompilationUnitFrom((IFile) resource);
 				if (cu != null) {
-					IPath packPath= resource.getParent().getFullPath();
-					IPackageDeclaration[] decls= cu.getPackageDeclarations();
-					if (decls.length == 0) {
-						sourceFolders.add(packPath);
-					} else {
-						IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
-						int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
-						if (remainingSegments >= 0) {
-							IPath prefix= packPath.uptoSegment(remainingSegments);
-							IPath common= packPath.removeFirstSegments(remainingSegments);
-							if (common.equals(relpath)) {
-								sourceFolders.add(prefix);
+					ICompilationUnit workingCopy= null;
+					try {
+						workingCopy= (ICompilationUnit) cu.getWorkingCopy();
+						IPath packPath= resource.getParent().getFullPath();
+						IPackageDeclaration[] decls= workingCopy.getPackageDeclarations();
+						if (decls.length == 0) {
+							sourceFolders.add(packPath);
+						} else {
+							IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
+							int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
+							if (remainingSegments >= 0) {
+								IPath prefix= packPath.uptoSegment(remainingSegments);
+								IPath common= packPath.removeFirstSegments(remainingSegments);
+								if (common.equals(relpath)) {
+									sourceFolders.add(prefix);
+								}
 							}
+						}						
+					} finally {
+						if (workingCopy != null) {
+							workingCopy.destroy();
 						}
 					}
 				}
