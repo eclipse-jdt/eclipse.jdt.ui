@@ -569,9 +569,15 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		// return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
-		//	localDeclaration, scope);
 		return visitNode(localDeclaration, scope);
+
+		// XXX: 1GF089K: ITPJCORE:WIN2000 - AbstractLocalDeclaration.declarationSourceStart includes preceeding comment
+		// int start= fBuffer.indexOfStatementCharacter(localDeclaration.declarationSourceStart);
+		// boolean result= visitRange(start, localDeclaration.declarationSourceEnd, localDeclaration, scope);
+		// if (localDeclaration.declarationSourceStart <= fSelection.end && fSelection.end < localDeclaration.declarationSourceEnd) {
+		//	invalidSelection("Cannot extract parts from a multiple variable declaration.");
+		// }
+		// return result;	
 	}
 
 	public boolean visit(FieldReference fieldReference, BlockScope scope) {

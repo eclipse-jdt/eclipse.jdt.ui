@@ -575,6 +575,27 @@ public class ExtractMethodTests extends RefactoringTest {
 		invalidSelectionTest();
 	}
 	
+	//----- local declarations
+	
+	public void test170() throws Exception {
+		System.out.println("\n170 disabled since it fails. See 1GF089K");
+		// invalidSelectionTest();
+	}
+	
+	public void test171() throws Exception {
+		System.out.println("\n171 disabled since it fails. See 1GF089K");
+		// invalidSelectionTest();
+	}
+	
+	public void test172() throws Exception {
+		System.out.println("\n172 disabled since it fails. See 1GF089K");
+		// invalidSelectionTest();
+	}
+	
+	public void test173() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -952,6 +973,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test517() throws Exception {
+		localsTest();
+	}
+	
+	public void test518() throws Exception {
+		localsTest();
+	}
+	
+	public void test519() throws Exception {
 		localsTest();
 	}
 	
