@@ -663,10 +663,14 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(node.getOperator().toString());
 		this.fBuffer.append(' ');
 		node.getRightOperand().accept(this);
-		for (Iterator it= node.extendedOperands().iterator(); it.hasNext();) {
-			this.fBuffer.append(node.getOperator().toString());
-			Expression e= (Expression) it.next();
-			e.accept(this);
+		final List extendedOperands = node.extendedOperands();
+		if (extendedOperands.size() != 0) {
+			this.fBuffer.append(' ');
+			for (Iterator it = extendedOperands.iterator(); it.hasNext(); ) {
+				this.fBuffer.append(node.getOperator().toString()).append(' ');
+				Expression e = (Expression) it.next();
+				e.accept(this);
+			}
 		}
 		return false;
 	}
@@ -792,6 +796,11 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(MethodRefParameter node) {
 		node.getType().accept(this);
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			if (node.isVarargs()) {
+				this.fBuffer.append("...");//$NON-NLS-1$
+			}
+		}
 		if (node.getName() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getName().accept(this);
