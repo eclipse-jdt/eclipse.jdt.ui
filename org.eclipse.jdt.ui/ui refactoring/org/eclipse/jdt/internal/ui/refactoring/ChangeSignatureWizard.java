@@ -170,7 +170,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$
 				setPageComplete(false);
 				JavaPlugin.log(e);
-			};
+			}
 		}
 
 		private void updateSignaturePreview() {

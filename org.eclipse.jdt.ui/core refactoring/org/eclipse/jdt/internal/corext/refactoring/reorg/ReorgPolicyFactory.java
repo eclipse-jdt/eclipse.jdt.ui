@@ -378,7 +378,7 @@ class ReorgPolicyFactory {
 			if (resDest instanceof IContainer)
 				return (IContainer)resDest;
 			if (resDest instanceof IFile)
-				return (IContainer)((IFile)resDest).getParent();
+				return ((IFile)resDest).getParent();
 			Assert.isTrue(false);//there's nothing else
 			return null;				
 		}
@@ -1361,7 +1361,7 @@ class ReorgPolicyFactory {
 				//<workaround>
 				if (fChangeManager == null){
 					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-					RefactoringStatus status= Checks.validateModifiesFiles(getAllModifiedFiles());;
+					RefactoringStatus status= Checks.validateModifiesFiles(getAllModifiedFiles());
 					if (status.hasFatalError())
 						fChangeManager= new TextChangeManager();
 				}	

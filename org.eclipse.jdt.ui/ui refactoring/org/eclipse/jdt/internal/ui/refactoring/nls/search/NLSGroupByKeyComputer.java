@@ -26,8 +26,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class NLSGroupByKeyComputer implements IGroupByKeyComputer {
 
-	IJavaElement fLastJavaElement= null;;
-	String fLastHandle= null;;
+	IJavaElement fLastJavaElement= null;
+	String fLastHandle= null;
 
 	public Object computeGroupByKey(IMarker marker) {
 		if (marker == null || marker.getResource() == null)

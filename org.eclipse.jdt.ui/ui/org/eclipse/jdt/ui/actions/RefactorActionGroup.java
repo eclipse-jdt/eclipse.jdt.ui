@@ -246,7 +246,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
-	};
+	}
 	
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup

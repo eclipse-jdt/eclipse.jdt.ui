@@ -670,7 +670,7 @@ class InstanceMethodMover {
 			}
 
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
-				fRewrite.markAsReplaced(fieldAccess, (SimpleName) fRewrite.createCopy(fieldAccess.getName()));			
+				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));			
 			}
 			
 			/**
@@ -678,7 +678,7 @@ class InstanceMethodMover {
 			 */
 			private void replaceReceiverWithImplicitThis(QualifiedName fieldAccess) {
 				Assert.isTrue(isFieldAccess(fieldAccess));
-				fRewrite.markAsReplaced(fieldAccess, (SimpleName) fRewrite.createCopy(fieldAccess.getName()));
+				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));
 			}
 
 			private void replaceExpressionWithExplicitThis(Expression expression) {
@@ -1195,7 +1195,7 @@ class InstanceMethodMover {
 					fSuperReferencesFound= true;
 					return false;
 				}
-			};
+			}
 			
 			SuperReferenceChecker checker= new SuperReferenceChecker();
 			fMethodNode.accept(checker);
@@ -1238,7 +1238,7 @@ class InstanceMethodMover {
 						fEnclosingInstanceReferencesFound= true;
 					return false;
 				}
-			};
+			}
 			
 			EnclosingInstanceReferenceChecker checker= new EnclosingInstanceReferenceChecker();
 			fMethodNode.accept(checker);
@@ -1305,7 +1305,7 @@ class InstanceMethodMover {
 				private boolean isStatic(MethodInvocation invocation) {
 					return JdtFlags.isStatic(invocation.resolveMethodBinding());
 				}					
-			};
+			}
 			
 			RecursionChecker checker= new RecursionChecker();
 			return checker.mayBeRecursive();
@@ -1842,7 +1842,7 @@ class InstanceMethodMover {
 	
 	private static IType getModelClass(ITypeBinding clazz, IJavaProject dependentProject) throws JavaModelException {
 		Assert.isTrue(clazz.isClass());
-		IType modelClass= (IType) Bindings.findType(clazz, dependentProject);
+		IType modelClass= Bindings.findType(clazz, dependentProject);
 		if(modelClass == null || !modelClass.exists())
 			return null;
 			

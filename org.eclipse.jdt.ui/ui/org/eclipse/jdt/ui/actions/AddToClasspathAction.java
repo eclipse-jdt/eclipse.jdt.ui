@@ -92,7 +92,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	}
 
 	private static IFile getCandidate(IAdaptable element) throws JavaModelException {
-		IResource resource= (IResource)((IAdaptable) element).getAdapter(IResource.class);
+		IResource resource= (IResource)element.getAdapter(IResource.class);
 		if (! (resource instanceof IFile))
 			return null;
 		
@@ -142,7 +142,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
 		ArrayList list= new ArrayList();
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= (Object) iter.next();
+			Object element= iter.next();
 			if (element instanceof IAdaptable) {
 				IFile file= getCandidate((IAdaptable) element);
 				if (file != null) {

@@ -502,7 +502,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		
 				if (fNewElementName.equals(node.getName().getIdentifier())){
 					Context	context= JavaStatusContext.create(fType.getCompilationUnit(), node);
-					String msg= null;;
+					String msg= null;
 					if (node.isLocalTypeDeclaration()){
 						msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type", //$NON-NLS-1$
 									new String[]{JavaElementUtil.createSignature(fType), fNewElementName});

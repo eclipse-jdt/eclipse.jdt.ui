@@ -402,7 +402,7 @@ public class NLSRefactoring extends Refactoring {
 		
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= map.keySet().iterator(); iter.hasNext();) {
-			Set subs= (Set)map.get((String) iter.next());
+			Set subs= (Set)map.get(iter.next());
 			result.merge(checkForDuplicateKeys(subs));
 		}
 		return result;
@@ -616,7 +616,7 @@ public class NLSRefactoring extends Refactoring {
 		for (int i= 0; i < line.size(); i++){
 			if (line.get(i).equals(element))
 				return i;
-		};
+		}
 		Assert.isTrue(false, "element not found in line"); //$NON-NLS-1$
 		return -1;
 	}
@@ -804,7 +804,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	//--bundle class source creation
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
-		return ToolFactory.createDefaultCodeFormatter(getFormatterOptions()).format(getUnformattedSource(pm), 0, (int[])null, null);
+		return ToolFactory.createDefaultCodeFormatter(getFormatterOptions()).format(getUnformattedSource(pm), 0, null, null);
 	}
 
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
@@ -979,6 +979,6 @@ public class NLSRefactoring extends Refactoring {
 				return info.getOffset() + info.getLength();
 			} 
 			return -1;
-		};
+		}
 	}
 }

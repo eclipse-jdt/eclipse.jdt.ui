@@ -410,7 +410,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	}
 	
 	private boolean isPreviewPageActive() {
-		return PreviewWizardPage.PAGE_NAME.equals(fCurrentPage.getName());
+		return IPreviewWizardPage.PAGE_NAME.equals(fCurrentPage.getName());
 	}
 	
 	private void previewPressed() {
@@ -427,7 +427,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 				return;
 			}
 		}
-		if (PreviewWizardPage.PAGE_NAME.equals(pageName)) {
+		if (IPreviewWizardPage.PAGE_NAME.equals(pageName)) {
 			fCurrentPage.createControl(fPageContainer);
 			makeVisible(fCurrentPage);
 			updateButtons();

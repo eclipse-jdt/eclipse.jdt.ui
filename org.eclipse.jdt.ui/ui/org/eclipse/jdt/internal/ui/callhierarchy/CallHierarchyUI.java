@@ -86,7 +86,7 @@ public class CallHierarchyUI {
         if (element != null) {
             try {
                 IEditorPart methodEditor = EditorUtility.openInEditor(element, true);
-                JavaUI.revealInEditor(methodEditor, (IJavaElement) element);
+                JavaUI.revealInEditor(methodEditor, element);
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
             } catch (PartInitException e) {

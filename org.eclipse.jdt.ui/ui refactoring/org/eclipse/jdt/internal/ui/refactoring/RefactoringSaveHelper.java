@@ -12,6 +12,12 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,16 +27,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.GlobalBuildAction;
@@ -107,7 +106,7 @@ public class RefactoringSaveHelper {
 		dialog.setMessage(RefactoringMessages.getString("RefactoringStarter.must_save")); //$NON-NLS-1$
 		dialog.setContentProvider(new ListContentProvider());
 		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
-		return dialog.open() == Dialog.OK;
+		return dialog.open() == Window.OK;
 	}
 	
 	private ILabelProvider createDialogLabelProvider() {

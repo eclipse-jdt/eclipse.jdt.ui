@@ -149,7 +149,7 @@ class TextMatchFinder {
 					return;
 				if (! element.exists())
 					return;
-				if (! fScope.encloses((ICompilationUnit)element))
+				if (! fScope.encloses(element))
 					return;
 				addTextMatches((ICompilationUnit)element);
 			}

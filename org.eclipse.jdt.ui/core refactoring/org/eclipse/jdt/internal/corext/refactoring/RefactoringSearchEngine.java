@@ -51,17 +51,17 @@ public class RefactoringSearchEngine {
 		final Set matches= new HashSet(5);
 		IJavaSearchResultCollector collector = new IJavaSearchResultCollector() {
 			private IResource fLastMatch;
-			public void aboutToStart() {};
+			public void aboutToStart() {}
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
 				if (fLastMatch != resource) {
 					matches.add(resource);	
 					fLastMatch= resource;
 				}
 			}
-			public void done() {};
+			public void done() {}
 			public IProgressMonitor getProgressMonitor() {
 				return pm;
-			};
+			}
 		};
 		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 		// XXX: This is a layer breaker - should not access jdt.ui

@@ -156,7 +156,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	 */
 	public IProgressMonitor getProgressMonitor() {
 		return fMonitor;
-	};
+	}
 
 	void setProgressMonitor(IProgressMonitor pm) {
 		fMonitor= pm;

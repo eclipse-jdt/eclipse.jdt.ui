@@ -233,7 +233,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			i++;
 			if (!pattern.equals(match.wrapperClassName))
 				match= null;
-		};
+		}
 		if (match == null) {
 			match= new SearchPatternData(pattern, fWrapperClass, fPropertyFileText.getText());
 			fgPreviousSearchPatterns.add(match);
@@ -248,7 +248,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				if (path.segmentCount() >= 2)
 					match.propertyFile= JavaPlugin.getWorkspace().getRoot().getFile(path);
 			}
-		};
+		}
 		return match;
 	}
 	/*
@@ -539,7 +539,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				}
 				searchFor= TYPE;
 				element= mainType;
-				pattern= JavaModelUtil.getFullyQualifiedName((IType) mainType);
+				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
 				break;
 			case IJavaElement.CLASS_FILE :
 				IClassFile cf= (IClassFile) element;

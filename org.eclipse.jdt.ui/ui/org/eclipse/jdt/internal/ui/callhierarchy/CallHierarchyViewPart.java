@@ -706,7 +706,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private MethodWrapper getCalleeRoot() {
         if (fCalleeRoot == null) {
-            fCalleeRoot = (MethodWrapper) CallHierarchy.getDefault().getCalleeRoot(fShownMethod);
+            fCalleeRoot = CallHierarchy.getDefault().getCalleeRoot(fShownMethod);
         }
 
         return fCalleeRoot;
@@ -718,7 +718,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private MethodWrapper getCallerRoot() {
         if (fCallerRoot == null) {
-            fCallerRoot = (MethodWrapper) CallHierarchy.getDefault().getCallerRoot(fShownMethod);
+            fCallerRoot = CallHierarchy.getDefault().getCallerRoot(fShownMethod);
         }
 
         return fCallerRoot;

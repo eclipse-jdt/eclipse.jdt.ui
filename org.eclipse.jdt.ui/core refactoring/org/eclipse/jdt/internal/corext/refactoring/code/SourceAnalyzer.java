@@ -207,7 +207,7 @@ class SourceAnalyzer  {
 				QualifiedName parent;
 				while ((parent= (QualifiedName)ASTNodes.getParent(qName, ASTNode.QUALIFIED_NAME)) != null &&
 						parent.getQualifier() != qName) {
-					qName= (Name)parent; 
+					qName= parent; 
 				}
 				String typeName= null;
 				if (tb.isArray())

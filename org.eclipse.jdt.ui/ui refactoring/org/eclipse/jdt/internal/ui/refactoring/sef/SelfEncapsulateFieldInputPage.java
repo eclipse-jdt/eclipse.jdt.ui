@@ -140,7 +140,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			Button radio= new Button(group, SWT.RADIO);
 			radio.setText(labels[i]);
 			radio.setData(data[i]);
-			int iData= ((Integer)data[i]).intValue();
+			int iData= data[i].intValue();
 			if (iData == visibility)
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {

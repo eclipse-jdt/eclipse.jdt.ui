@@ -66,7 +66,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		
 		if (getCompilationUnit() == null)
 			return false;	
-		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
+		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), selection);
 		if (renameTempRefactoring == null)
 			return false;
 		try {

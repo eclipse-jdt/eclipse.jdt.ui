@@ -180,12 +180,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	if (node instanceof AnonymousClassDeclaration)
     		return (AnonymousClassDeclaration)node;
     	if (node instanceof ClassInstanceCreation){
-    		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)((ClassInstanceCreation)node).getAnonymousClassDeclaration();
+    		AnonymousClassDeclaration anon= ((ClassInstanceCreation)node).getAnonymousClassDeclaration();
     		if (anon != null)
     			return anon;
     	}	
     	if (node.getParent() instanceof ClassInstanceCreation){
-    		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)((ClassInstanceCreation)node.getParent()).getAnonymousClassDeclaration();
+    		AnonymousClassDeclaration anon= ((ClassInstanceCreation)node.getParent()).getAnonymousClassDeclaration();
     		if (anon != null)
     			return anon;
     	}	
@@ -252,7 +252,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
-        rewrite.rewriteNode(textBuffer, resultingEdits, null);
+        rewrite.rewriteNode(textBuffer, resultingEdits);
         change.addTextEdit(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
         rewrite.removeModifications();
         return change;

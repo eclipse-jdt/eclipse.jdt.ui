@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -109,7 +109,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
 					if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){
-						setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), DialogPage.INFORMATION); //$NON-NLS-1$
+						setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), IMessageProvider.INFORMATION); //$NON-NLS-1$
 						setPageComplete(false);
 					} else {
 						setMessage(MESSAGE);
@@ -153,7 +153,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			}
 			fTableViewer.refresh();
 			if (noSupertypeCanBeUsed()){
-				setMessage("No updates are possible for any of the supertypes", DialogPage.INFORMATION);
+				setMessage("No updates are possible for any of the supertypes", IMessageProvider.INFORMATION);
 				setPageComplete(false);	
 			}
 		}

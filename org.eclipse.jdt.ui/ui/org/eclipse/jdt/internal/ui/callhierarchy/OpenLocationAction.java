@@ -35,7 +35,7 @@ class OpenLocationAction extends SelectionDispatchAction {
         }
 
         for (Iterator iter = selection.iterator(); iter.hasNext();) {
-            Object element = (Object) iter.next();
+            Object element = iter.next();
 
             if (element instanceof MethodWrapper) {
                 continue;

@@ -60,6 +60,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -166,8 +167,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				}
 			}
 		}
-	};
-	
+	}
 	
 	private class NlsSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider {
 		
@@ -193,7 +193,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return getNLSImage((NLSSubstitution) element);
 			return null;	
 		}
-	};
+	}
 	
 	private static Image getNLSImage(NLSSubstitution sub){
 		return getNLSImage(sub.task);
@@ -297,7 +297,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			public void fireApplyEditorValue() {
 				super.fireApplyEditorValue();
 			}
-		};
+		}
 		editors[KEY_PROP]= new AutoApplyTextCellEditor(fTable);
 		editors[KEY_PROP].getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
@@ -559,7 +559,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			Assert.isTrue(selected.size() == 1);
 			NLSSubstitution nls= (NLSSubstitution)selected.iterator().next();
 			InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ExternalizeWizardPage.Externalize_Strings"), RefactoringMessages.getString("ExternalizeWizardPage.Enter_New_Key"), nls.key, createKeyValidator());  //$NON-NLS-1$ //$NON-NLS-2$
-			if (dialog.open() == InputDialog.CANCEL)
+			if (dialog.open() == Window.CANCEL)
 				return;
 			nls.key= dialog.getValue();
 			fViewer.update(nls, new String[] { PROPERTIES[KEY_PROP] });

@@ -122,7 +122,7 @@ public class ASTFragmentFactory {
 			return false;
 		}
 		public boolean visit(Expression node) {
-			setFragment(new SimpleExpressionFragment((Expression) node));
+			setFragment(new SimpleExpressionFragment(node));
 			return false;
 		}
 		public boolean visit(ASTNode node) {
@@ -142,7 +142,7 @@ public class ASTFragmentFactory {
 		
 		public boolean visit(InfixExpression node) {
 			try {
-				setFragment(createInfixExpressionSubPartFragmentBySourceRange((InfixExpression) node, fRange, fCu));
+				setFragment(createInfixExpressionSubPartFragmentBySourceRange(node, fRange, fCu));
 			} catch(JavaModelException e) {
 				javaModelException= e;
 			} finally {

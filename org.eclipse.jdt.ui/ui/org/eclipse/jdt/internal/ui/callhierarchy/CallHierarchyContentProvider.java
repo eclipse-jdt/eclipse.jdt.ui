@@ -46,8 +46,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             }
             return new MethodWrapper[0];
         }
-    };
-
+    }
 
     public CallHierarchyContentProvider() {
         super();

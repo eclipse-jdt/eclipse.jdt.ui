@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -52,7 +53,7 @@ public class RefactoringStarter {
 				dialog= new RefactoringWizardDialog(parent, wizard);
 			else 
 				dialog= new RefactoringWizardDialog2(parent, wizard);
-			if (dialog.open() == Dialog.CANCEL)
+			if (dialog.open() == Window.CANCEL)
 				fSaveHelper.triggerBuild();
 			return null;	
 		} 

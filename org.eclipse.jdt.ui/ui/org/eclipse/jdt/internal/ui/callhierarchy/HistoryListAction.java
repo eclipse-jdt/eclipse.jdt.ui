@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -177,7 +178,7 @@ public class HistoryListAction extends Action {
 	public void run() {
 		IMethod[] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
-		if (dialog.open() == HistoryListDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
 			fView.setMethod(dialog.getResult());
 		}

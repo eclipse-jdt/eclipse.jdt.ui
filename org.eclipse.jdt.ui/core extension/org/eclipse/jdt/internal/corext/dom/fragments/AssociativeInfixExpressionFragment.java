@@ -38,7 +38,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		if(!isAssociativeInfix(node))
 			return null;
 		
-		InfixExpression groupRoot= findGroupRoot((InfixExpression) node);
+		InfixExpression groupRoot= findGroupRoot(node);
 		Assert.isTrue(isAGroupRoot(groupRoot));
 		
 		List groupMembers= GroupMemberFinder.findGroupMembersInOrderFor(groupRoot);
@@ -55,7 +55,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		if(!isAssociativeInfix(node))
 			return null;
 		
-		InfixExpression groupRoot= findGroupRoot((InfixExpression) node);
+		InfixExpression groupRoot= findGroupRoot(node);
 		Assert.isTrue(isAGroupRoot(groupRoot));
 		
 		List groupMembers= GroupMemberFinder.findGroupMembersInOrderFor(node);

@@ -207,7 +207,7 @@ public class MoveAction extends SelectionDispatchAction{
 	}
 
 	private boolean tryMoveInstanceMethod(IStructuredSelection selection) throws JavaModelException{
-		IMethod method= (IMethod)getSingleSelectedMethod(selection);
+		IMethod method= getSingleSelectedMethod(selection);
 		if (method == null)
 			return false;	
 		if (! MoveInstanceMethodRefactoring.isAvailable(method))

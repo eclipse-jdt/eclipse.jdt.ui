@@ -181,7 +181,7 @@ public class RefactoringWizard extends Wizard {
 	 * Sets the change object.
 	 */
 	public void setChange(IChange change){
-		IPreviewWizardPage page= (IPreviewWizardPage)getPage(PreviewWizardPage.PAGE_NAME);
+		IPreviewWizardPage page= (IPreviewWizardPage)getPage(IPreviewWizardPage.PAGE_NAME);
 		if (page != null)
 			page.setChange(change);
 		fChange= change;
@@ -309,7 +309,7 @@ public class RefactoringWizard extends Wizard {
 			setChange(change);
 		
 		if (status.isOK()) {
-			return getPage(PreviewWizardPage.PAGE_NAME);
+			return getPage(IPreviewWizardPage.PAGE_NAME);
 		} else {
 			return getPage(ErrorWizardPage.PAGE_NAME);
 		}

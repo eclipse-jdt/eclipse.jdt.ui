@@ -112,7 +112,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		if (selection.isEmpty())
 			return false;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= (Object)iter.next();
+			Object element= iter.next();
 			if (!(element instanceof IJavaElement))
 				return false;
 			IJavaElement javaElement= (IJavaElement)element;

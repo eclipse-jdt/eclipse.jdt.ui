@@ -143,7 +143,7 @@ public class ChangeParametersControl extends Composite {
 			ChangeParametersControl.this.fListener.parameterChanged(parameterInfo);
 			ChangeParametersControl.this.fTableViewer.update(parameterInfo, new String[] { property });
 		}
-	};
+	}
 
 	private static final String[] PROPERTIES= { "type", "new", "default" }; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 	private static final int TYPE_PROP= 0;
@@ -577,7 +577,7 @@ public class ChangeParametersControl extends Composite {
 			public void fireApplyEditorValue() {
 				super.fireApplyEditorValue();
 			}
-		};
+		}
 
 		editors[TYPE_PROP]= new AutoApplyTextCellEditor(getTable());
 		editors[TYPE_PROP].getControl().addFocusListener(new FocusAdapter() {

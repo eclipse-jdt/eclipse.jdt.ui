@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -202,7 +203,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			});
 			dialog.setMatchEmptyString(false);
 			dialog.setFilter(createInitialFilter());
-			if (dialog.open() == Dialog.CANCEL)
+			if (dialog.open() == Window.CANCEL)
 				return;
 			IType firstResult= (IType)dialog.getFirstResult();		
 			fTextField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	

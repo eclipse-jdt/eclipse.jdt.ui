@@ -338,7 +338,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_property_file")); //$NON-NLS-1$
 		dialog.setElements(createFileListInput());
 		dialog.setFilter("*" + NLSRefactoring.PROPERTY_FILE_EXT); //$NON-NLS-1$
-		if (dialog.open() == ElementListSelectionDialog.OK) { 
+		if (dialog.open() == Window.OK) { 
 			IFile selectedFile= (IFile)dialog.getFirstResult();
 			if (selectedFile != null)
 				fPropertyFile.setText(selectedFile.getName());						
@@ -352,7 +352,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setMessage(NLSUIMessages.getString("wizardPage2.choose_package")); //$NON-NLS-1$
 		dialog.setElements(createPackageListInput());
 		dialog.setFilter(""); //$NON-NLS-1$
-		if (dialog.open() == ElementListSelectionDialog.OK) { 
+		if (dialog.open() == Window.OK) { 
 			IPackageFragment selectedPackage= (IPackageFragment)dialog.getFirstResult();
 			if (selectedPackage != null)
 				fPropertyPackage.setText(selectedPackage.getElementName());						

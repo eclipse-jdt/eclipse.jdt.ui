@@ -125,7 +125,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 				} catch (Exception e) {
 					handleException(context, e);
 				}
-			};
+			}
 			pm.done();
 			Collections.reverse(undoList);
 			return undoList;
@@ -159,7 +159,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 		buff.append("CompositeChange\n"); //$NON-NLS-1$
 		for (Iterator iter= fChanges.iterator(); iter.hasNext();) {
 			buff.append("<").append(iter.next().toString()).append("/>\n"); //$NON-NLS-2$ //$NON-NLS-1$
-		};
+		}
 		return buff.toString();
 	}
 	
