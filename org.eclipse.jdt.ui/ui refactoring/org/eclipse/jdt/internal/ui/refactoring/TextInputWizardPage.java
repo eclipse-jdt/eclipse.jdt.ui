@@ -134,26 +134,29 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 		
 		RefactoringStatus status= validateTextField(text);
 		getRefactoringWizard().setStatus(status);
-		
-		switch(status.getSeverity()){
-			case RefactoringStatus.FATAL: 
-						setPageComplete(false);
-						setErrorMessage(status.getFirstMessage(status.getSeverity()));	
-						break;
-			case RefactoringStatus.ERROR:
-			case RefactoringStatus.WARNING:
-						setPageComplete(true);
-						setMessage(status.getFirstMessage(status.getSeverity()), IStatus.WARNING);	
-						break;
-			case RefactoringStatus.INFO:
-						setPageComplete(true);
-						setMessage(status.getFirstMessage(status.getSeverity()), IStatus.INFO);	
-						break;
-			default: 						
-						setPageComplete(true);
-						setErrorMessage(null);
-						restoreMessage();
+
+		if (status.getSeverity() == RefactoringStatus.FATAL){
+			setPageComplete(false);
+			setErrorMessage(status.getFirstMessage(status.getSeverity()));	
+		} else {
+			setPageComplete(true);
+			setErrorMessage(null);
+			if (status.getSeverity() == RefactoringStatus.OK)
+				restoreMessage();
+			else	
+				setMessage(status.getFirstMessage(status.getSeverity()), getCorrespondingIStatusSeverity(status.getSeverity()));	
 		}
+	}
+	private static int getCorrespondingIStatusSeverity(int severity) {
+		if (severity == RefactoringStatus.FATAL)
+			return IStatus.ERROR;
+		if (severity == RefactoringStatus.ERROR)
+			return IStatus.WARNING;
+		if (severity == RefactoringStatus.WARNING)
+			return IStatus.WARNING;
+		if (severity == RefactoringStatus.INFO)
+			return IStatus.INFO;
+		return IStatus.OK;			
 	}
 	
 	private void restoreMessage(){
