@@ -35,6 +35,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -52,9 +55,6 @@ import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -344,8 +344,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					fCreatedRoot= createPackageFragmentRoot(monitor, getShell());
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} 
@@ -359,7 +357,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	
 
 	
-	protected IPackageFragmentRoot createPackageFragmentRoot(IProgressMonitor monitor, Shell shell) throws CoreException, JavaModelException {
+	protected IPackageFragmentRoot createPackageFragmentRoot(IProgressMonitor monitor, Shell shell) throws CoreException {
 		String relPath= fRootDialogField.getText();
 			
 		IFolder folder= fCurrJProject.getProject().getFolder(relPath);
@@ -369,12 +367,15 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 		
 		IClasspathEntry[] entries= fCurrJProject.getRawClasspath();
-		int nEntries= entries.length;
-		IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
-		for (int i= 0; i < nEntries; i++) {
-			newEntries[i]= entries[i];
+		IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
+		for (int i= entries.length - 1, k= entries.length; i >= 0; i--) {
+			IClasspathEntry curr= entries[i];
+			if (k > i && curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				newEntries[k--]= JavaCore.newSourceEntry(path);
+			}
+			newEntries[k--]= curr;
 		}
-		newEntries[nEntries]= JavaCore.newSourceEntry(path);
+
 		fCurrJProject.setRawClasspath(newEntries, monitor);
 		
 		return fCurrJProject.getPackageFragmentRoot(folder);
@@ -384,7 +385,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	
 	private IFolder chooseFolder() {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		Object[] notWanted= getFilteredExistingContainerEntries();
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, notWanted);	
 		
@@ -513,7 +514,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				IResource container= fWorkspaceRoot.findMember(elem.getPath());
 				if (container != null) {
 					res.add(container);
-				}				
+				}
 			}		
 		}
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
