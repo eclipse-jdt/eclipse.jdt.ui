@@ -1650,8 +1650,8 @@ JavaStructureDiffViewerCreator
 		selected = "true">
 	</filter>
 	<filter
-		name= "%HideAnonymousInnerClasses.label"
-		description= "%HideAnonymousInnerClasses.description"
+		name= "%HideInnerClassFiles.label"
+		description= "%HideInnerClassFiles.description"
 		pattern= "*$*.class"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		enabled = "false">
