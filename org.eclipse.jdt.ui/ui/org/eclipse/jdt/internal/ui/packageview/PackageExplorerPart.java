@@ -98,6 +98,7 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
+import org.eclipse.ui.views.framelist.IFrameSource;
 import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
@@ -1320,7 +1321,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 
     public boolean tryToReveal(Object element) {
-        if (revealElementOrParent(element))
+		if (revealElementOrParent(element))
             return true;
         
         WorkingSetFilterActionGroup workingSetGroup = fActionSet.getWorkingSetActionGroup();
@@ -1346,6 +1347,10 @@ public class PackageExplorerPart extends ViewPart
         }
         FrameAction action = fActionSet.getUpAction();
         while (action.getFrameList().getCurrentIndex() > 0) {
+        	// only try to go up if there is a parent frame
+        	// fix for bug# 63769 Endless loop after Show in Package Explorer 
+        	if (action.getFrameList().getSource().getFrame(IFrameSource.PARENT_FRAME, 0) == null)
+        		break; 
             action.run();
             if (revealElementOrParent(element))
                 return true;
@@ -1354,22 +1359,20 @@ public class PackageExplorerPart extends ViewPart
     }
     
     private boolean revealElementOrParent(Object element) {
-        if (this != null) { 
-            if (revealAndVerify(element))
-                return true;
-            element= getVisibleParent(element);
-            if (element != null) {
-                if (revealAndVerify(element))
-                    return true;
-                if (element instanceof IJavaElement) {
-                    IResource resource= ((IJavaElement)element).getResource();
-                    if (resource != null) {
-                        if (revealAndVerify(resource))
-                            return true;
-                    }
-                }
-            }
-        }
+        if (revealAndVerify(element))
+		    return true;
+		element= getVisibleParent(element);
+		if (element != null) {
+		    if (revealAndVerify(element))
+		        return true;
+		    if (element instanceof IJavaElement) {
+		        IResource resource= ((IJavaElement)element).getResource();
+		        if (resource != null) {
+		            if (revealAndVerify(resource))
+		                return true;
+		        }
+		    }
+		}
         return false;
     }
 
