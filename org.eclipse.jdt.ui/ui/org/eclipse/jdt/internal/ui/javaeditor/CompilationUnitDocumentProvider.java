@@ -6,24 +6,23 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -33,11 +32,11 @@ import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
-import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IBufferChangedListener;
+import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -50,79 +49,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class CompilationUnitDocumentProvider extends FileDocumentProvider implements IWorkingCopyManager {
-	
+		
 		/**
-		 * Synchronizes the buffer of a working copy with the document representing the buffer content.
-		 * It would be more appropriate if the document could also serve as the working copy's buffer.
-		 * Listens to buffer changes and translates those into document changes. Also listens to document
-		 * changes and translates those into buffer changes, respectively.
+		 * Here for visibility issues only.
 		 */
-		protected static class BufferSynchronizer implements IDocumentListener, IBufferChangedListener {
-			
-			protected IDocument fDocument;
-			protected IBuffer fBuffer;
-			
-			public BufferSynchronizer(IDocument document, ICompilationUnit unit) {
-				Assert.isNotNull(document);
-				Assert.isNotNull(unit);
-				fDocument= document;
-				try {
-					fBuffer= unit.getBuffer();
-				} catch (JavaModelException x) {
-					Assert.isNotNull(fBuffer);
-				}
-			}
-			
-			/**
-			 * Installs the synchronizer to listen to document
-			 * as well as buffer changes.
-			 */
-			public void install() {
-				fDocument.addDocumentListener(this);
-				fBuffer.addBufferChangedListener(this);
-			}
-			
-			/**
-			 * Uninstalls the synchronizer. The synchronizer does no
-			 * longer listen to buffer or document changes.
-			 */
-			public void uninstall() {
-				fDocument.removeDocumentListener(this);
-				fBuffer.removeBufferChangedListener(this);
-			}
-						
-			/**
-			 * @see IDocumentListener#documentChanged
-			 */
-			public void documentChanged(DocumentEvent event) {
-				fBuffer.removeBufferChangedListener(this);
-				fBuffer.replace(event.getOffset(), event.getLength(), event.getText());
-				fBuffer.addBufferChangedListener(this);
-			}
-			
-			/**
-			 * @see IDocumentListener#documentAboutToBeChanged
-			 */
-			public void documentAboutToBeChanged(DocumentEvent event) {
-			}
-			
-			/**
-			 * @see IBufferChangedListener#bufferChanged
-			 */
-			public void bufferChanged(BufferChangedEvent event) {
-				fDocument.removeDocumentListener(this);
-				try {
-					if (event.getLength() > 0 || event.getText() != null)
-						fDocument.replace(event.getOffset(), event.getLength(), event.getText());
-				} catch (BadLocationException x) {
-					Assert.isTrue(false, JavaEditorMessages.getString("CompilationUnitDocumentProvider.out_of_sync.message")); //$NON-NLS-1$
-				} finally {
-					fDocument.addDocumentListener(this);
-				}
-			}	
-		};
-		
-		
 		protected class _FileSynchronizer extends FileSynchronizer {
 			public _FileSynchronizer(IFileEditorInput fileEditorInput) {
 				super(fileEditorInput);
@@ -135,12 +65,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		protected class CompilationUnitInfo extends FileInfo {
 			
 			ICompilationUnit fCopy;
-			BufferSynchronizer fBufferSynchronizer;
 			
-			CompilationUnitInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer, ICompilationUnit copy, BufferSynchronizer bufferSynchronizer) {
+			CompilationUnitInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer, ICompilationUnit copy) {
 				super(document, model, fileSynchronizer);
 				fCopy= copy;
-				fBufferSynchronizer= bufferSynchronizer;
 			}
 			
 			void setModificationStamp(long timeStamp) {
@@ -148,6 +76,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
+		/**
+		 * Annotation model dealing with java marker annotations.
+		 */
 		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel {
 			
 			public CompilationUnitMarkerAnnotationModel(IResource resource) {
@@ -159,10 +90,63 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
+		/**
+		 * Creates <code>IBuffer</code>s based on documents.
+		 */
+		protected class BufferFactory implements IBufferFactory {
+						
+			private IDocument internalCreateDocument(IFileEditorInput input)  throws CoreException {
+				
+				IDocument document= createDocument(input);
+				
+				JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+				IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+				partitioner.connect(document);
+				document.setDocumentPartitioner(partitioner);
+				
+				return document;
+			}
+			
+			private IDocument internalGetDocument(IFileEditorInput input) throws CoreException {
+				IDocument document= getDocument(input);
+				if (document != null)
+					return document;
+					
+				return internalCreateDocument(input);
+			}
+							
+			public IBuffer createBuffer(IOpenable owner) {
+				if (owner instanceof ICompilationUnit) {
+					
+					ICompilationUnit unit= (ICompilationUnit) owner;
+					
+					try {
+						
+						ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
+						IResource resource= original.getCorrespondingResource();
+						if (resource instanceof IFile) {
+							IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
+							IDocument document= internalGetDocument(providerKey);
+							return new DocumentAdapter(unit, document, CompilationUnitDocumentProvider.this, providerKey);
+						}
+						
+					} catch (CoreException x) {
+						handleCoreException(x, "Problems creating buffer");
+					}
+				}
+				return null;
+			}
+		};
 		
+	
+	/** The buffer factory */
+	private IBufferFactory fBufferFactory= new BufferFactory();
+	/** Indicates whether the save has been initialized by this provider */
+	private boolean fIsAboutToSave= false;
 	/** The save policy used by this provider */
 	private ISavePolicy fSavePolicy;
 	
+		
 	
 	/**
 	 * Constructor
@@ -177,6 +161,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		fSavePolicy= savePolicy;
 	}
 	
+	/**
+	 * Creates a compilation unit from the given file.
+	 * 
+	 * @param file the file from which to create the compilation unit
+	 */
 	protected ICompilationUnit createCompilationUnit(IFile file) {
 		Object element= JavaCore.create(file);
 		if (element instanceof ICompilationUnit)
@@ -197,23 +186,28 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (original != null) {
 				
 			try {
-				input.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
-			} catch (CoreException x) {
-				handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
+				
+				IProgressMonitor monitor= new NullProgressMonitor();
+				
+				try {
+					input.getFile().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				} catch (CoreException x) {
+					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
+				}
+				
+				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy(monitor, fBufferFactory);
+				DocumentAdapter a= (DocumentAdapter) c.getBuffer();
+				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
+				_FileSynchronizer f= new _FileSynchronizer(input); 
+				f.install();
+				
+				CompilationUnitInfo info= new CompilationUnitInfo(a.getDocument(), m, f, c);
+				info.setModificationStamp(computeModificationStamp(input.getFile()));
+				return info;
+				
+			} catch (JavaModelException x) {
+				throw new CoreException(x.getStatus());
 			}
-			
-			ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
-			IDocument d= createCompilationUnitDocument(c);
-			IAnnotationModel m= createCompilationUnitAnnotationModel(element);
-			_FileSynchronizer f= new _FileSynchronizer(input);
-			f.install();
-			BufferSynchronizer b= new BufferSynchronizer(d, c);
-			b.install();
-			
-			CompilationUnitInfo info= new CompilationUnitInfo(d, m, f, c, b);
-			info.setModificationStamp(computeModificationStamp(input.getFile()));
-			return info;
-			
 		} else {		
 			return super.createElementInfo(element);
 		}
@@ -226,29 +220,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		if (info instanceof CompilationUnitInfo) {
 			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
-			
-			if (cuInfo.fBufferSynchronizer != null)
-				cuInfo.fBufferSynchronizer.uninstall();
-			
 			cuInfo.fCopy.destroy();
 		}
 		
 		super.disposeElementInfo(element, info);
-	}
-	
-	/**
-	 * @see AbstractDocumentProvider#changed(Object)
-	 */
-	public void changed(Object element) {
-		
-		ElementInfo elementInfo= getElementInfo(element);		
-		if (elementInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			if (info.fBufferSynchronizer != null)
-				info.fBufferSynchronizer.install();
-		}
-		
-		super.changed(element);
 	}
 	
 	/**
@@ -260,42 +235,49 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
-			// update structure, assumes lock on info.fCopy
-			info.fCopy.reconcile();
-			
-			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-			IResource resource= original.getUnderlyingResource();
-			
-			if (resource != null && !overwrite)
-				checkSynchronizationState(info.fModificationStamp, resource);
-			
-			if (fSavePolicy != null)
-				fSavePolicy.preSave(info.fCopy);
-							
-			if (info.fBufferSynchronizer != null)
-				info.fBufferSynchronizer.uninstall();
+			try {					
+				// update structure, assumes lock on info.fCopy
+				info.fCopy.reconcile();
 				
-			// commit working copy
-			info.fCopy.commit(overwrite, monitor);
-			
-			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-			model.updateMarkers(info.fDocument);
-			
-			if (resource != null)
-				info.setModificationStamp(computeModificationStamp(resource));
-			
-			if (fSavePolicy != null) {
-				ICompilationUnit unit= fSavePolicy.postSave(original);
-				if (unit != null) {
-					IResource r= unit.getUnderlyingResource();
-					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-					if (markers != null && markers.length > 0) {
-						for (int i= 0; i < markers.length; i++)
-							model.updateMarker(markers[i], info.fDocument, null);
+				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+				IResource resource= original.getUnderlyingResource();
+				
+				if (resource != null && !overwrite)
+					checkSynchronizationState(info.fModificationStamp, resource);
+					
+				if (fSavePolicy != null)
+					fSavePolicy.preSave(info.fCopy);
+					
+				try {
+					fIsAboutToSave= true;
+					// commit working copy
+					info.fCopy.commit(overwrite, monitor);
+				} finally {
+					fIsAboutToSave= false;
+				}
+				
+				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+				model.updateMarkers(info.fDocument);
+				
+				if (resource != null)
+					info.setModificationStamp(computeModificationStamp(resource));
+					
+				if (fSavePolicy != null) {
+					ICompilationUnit unit= fSavePolicy.postSave(original);
+					if (unit != null) {
+						IResource r= unit.getUnderlyingResource();
+						IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+						if (markers != null && markers.length > 0) {
+							for (int i= 0; i < markers.length; i++)
+								model.updateMarker(markers[i], info.fDocument, null);
+						}
 					}
 				}
+					
+			} catch (JavaModelException x) {
+				throw new CoreException(x.getStatus());
 			}
-						
+			
 		} else {
 			super.doSaveDocument(monitor, element, document, overwrite);
 		}		
@@ -313,21 +295,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 	
 	/**
-	 * Replaces createDocument of the super class.
-	 */
-	protected IDocument createCompilationUnitDocument(ICompilationUnit unit) throws CoreException {
-		
-		Document document= new Document(unit.getSource());		
-		
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-		partitioner.connect(document);
-		document.setDocumentPartitioner(partitioner);
-		
-		return document;
-	}
-	
-	/**
 	 * @see AbstractDocumentProvider#resetDocument(Object)
 	 */
 	public void resetDocument(Object element) throws CoreException {
@@ -338,22 +305,64 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			if (info.fCanBeSaved) {
+				try {
 					
-				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				
-				fireElementContentAboutToBeReplaced(element);
-				
-				removeUnchangedElementListeners(element, info);
-				info.fDocument.set(original.getSource());
-				info.fCanBeSaved= false;
-				addUnchangedElementListeners(element, info);
-				
-				fireElementContentReplaced(element);
+					ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 					
+					fireElementContentAboutToBeReplaced(element);
+					
+					removeUnchangedElementListeners(element, info);
+					info.fDocument.set(original.getSource());
+					info.fCanBeSaved= false;
+					addUnchangedElementListeners(element, info);
+					
+					fireElementContentReplaced(element);
+					
+				} catch (JavaModelException x) {
+					throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
+				}
 			}
 		} else {
 			super.resetDocument(element);
 		}
+	}
+	
+	/**
+	 * Saves the content of the given document to the given element.
+	 * This is only performed when this provider initiated the save.
+	 * 
+	 * @param monitor the progress monitor
+	 * @param element the element to which to save
+	 * @param document the document to save
+	 * @param overwrite <code>true</code> if the save should be enforced
+	 */
+	public void saveDocumentContent(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
+		
+		if (!fIsAboutToSave)
+			return;
+		
+		if (element instanceof IFileEditorInput) {
+			
+			IFileEditorInput input= (IFileEditorInput) element;
+			InputStream stream= new ByteArrayInputStream(document.get().getBytes());
+			
+			IFile file= input.getFile();
+			file.setContents(stream, overwrite, true, monitor);
+		}
+	}
+	
+	/**
+	 * Returns the underlying resource for the given element.
+	 * 
+	 * @param the element
+	 * @return the underlying resource of the given element
+	 */
+	public IResource getUnderlyingResource(Object element) {
+		if (element instanceof IFileEditorInput) {
+			IFileEditorInput input= (IFileEditorInput) element;
+			return input.getFile();
+		}
+		return null;
 	}
 	
 	/**
@@ -396,7 +405,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	/**
 	 * Returns all working copies manages by this document provider.
 	 * 
-	 * @return all managed working copies
+	 * @return all managed working copies 
 	 */
 	public ICompilationUnit[] getAllWorkingCopies() {
 		List result= new ArrayList(10);
