@@ -4,12 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.eclipse.jface.text.*;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.help.internal.util.Resources;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
@@ -192,7 +195,14 @@ public class JavaStructureCreator implements IStructureCreator {
 		if (node instanceof JavaNode && input instanceof IEditableContent) {
 			IDocument document= ((JavaNode)node).getDocument();
 			IEditableContent bca= (IEditableContent) input;
-			bca.setContent(document.get().getBytes());
+			String contents= document.get();
+			byte[] bytes;				
+			try {
+				bytes= contents.getBytes(ResourcesPlugin.getEncoding());
+			} catch (UnsupportedEncodingException e) {
+				bytes= contents.getBytes();	
+			}
+			bca.setContent(bytes);
 		}
 	}
 	

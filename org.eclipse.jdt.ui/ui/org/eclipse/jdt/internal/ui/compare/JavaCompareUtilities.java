@@ -10,6 +10,8 @@ import java.util.*;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
@@ -236,7 +238,7 @@ class JavaCompareUtilities {
 			StringBuffer buffer= new StringBuffer();
 			char[] part= new char[2048];
 			int read= 0;
-			reader= new BufferedReader(new InputStreamReader(is));
+			reader= new BufferedReader(new InputStreamReader(is, ResourcesPlugin.getEncoding()));
 
 			while ((read= reader.read(part)) != -1)
 				buffer.append(part, 0, read);
