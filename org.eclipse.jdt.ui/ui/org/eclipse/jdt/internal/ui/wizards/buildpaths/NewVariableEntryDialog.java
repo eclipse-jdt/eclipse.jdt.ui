@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.graphics.Image;
@@ -30,7 +31,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class NewVariableEntryDialog extends Dialog {
@@ -105,7 +110,37 @@ public class NewVariableEntryDialog extends Dialog {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	
+	}
+	
+	private static class ExtensionValidator implements ISelectionStatusValidator {
+		
+		private boolean fAllowMulitple;
+		
+		public ExtensionValidator(boolean allowMultiple) {
+			fAllowMulitple= allowMultiple;
+		}
+		
+		
+		public IStatus validate(Object[] selection) {
+			int nSelected= selection.length;
+			if ((!fAllowMulitple && nSelected != 1) || nSelected == 0) {
+				return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
+			}
+			for (int i= 0; i < selection.length; i++) {
+				Object curr= selection[i];
+				if (curr instanceof File) {
+					File file= (File) curr;
+					if (!file.isFile() || !ArchiveFileFilter.isArchivePath(new Path(file.getName()))) {
+						return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
+					}
+				}
+			}
+			return new StatusInfo();
+		}
 	}	
+	
+
+	private final int EXTEND_ID= IDialogConstants.CLIENT_ID;
 
 	private VariableBlock fVariableBlock;
 
@@ -117,10 +152,12 @@ public class NewVariableEntryDialog extends Dialog {
 	private IPath fExistingPath;
 	private String fTitle;
 	
+	private boolean fFirstInvocation= true;
+	
 			
 	public NewVariableEntryDialog(Shell parent, String title, IPath existingPath) {
 		super(parent);
-		fVariableBlock= new VariableBlock(false, existingPath == null ? null : existingPath.segment(1));
+		fVariableBlock= new VariableBlock(false, existingPath == null ? null : existingPath.segment(0));
 		fResultPaths= null;
 		fExistingPath= existingPath;
 		fTitle= title;
@@ -148,8 +185,8 @@ public class NewVariableEntryDialog extends Dialog {
 	 * @see Dialog#createButtonsForButtonBar(Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		fOkButton= createButton(parent, IDialogConstants.OK_ID, NewWizardMessages.getString("NewVariableEntryDialog.add.button"), true); //$NON-NLS-1$
-		fExtensionButton= createButton(parent, IDialogConstants.CLIENT_ID, NewWizardMessages.getString("NewVariableEntryDialog.addextension.button"), false); //$NON-NLS-1$
+		fOkButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		fExtensionButton= createButton(parent, EXTEND_ID, NewWizardMessages.getString("NewVariableEntryDialog.addextension.button"), false); //$NON-NLS-1$
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}	
 	
@@ -171,7 +208,7 @@ public class NewVariableEntryDialog extends Dialog {
 		if (fOkButton.isEnabled()) {
 			okPressed();
 		} else if (fExtensionButton.isEnabled()) {
-			buttonPressed(IDialogConstants.CLIENT_ID);
+			buttonPressed(EXTEND_ID);
 		}
 	}
 	
@@ -202,6 +239,16 @@ public class NewVariableEntryDialog extends Dialog {
 		}
 		fExtensionButton.setEnabled(nSelected == 1 && !isValidSelection);
 		fOkButton.setEnabled(isValidSelection);
+		
+		if (fFirstInvocation) {
+			fFirstInvocation= false;
+			if (fExistingPath != null && fExistingPath.segmentCount() > 1 && nSelected == 1) {
+				IPath resolved= JavaCore.getResolvedVariablePath(fExistingPath);
+				if (resolved != null && resolved.toFile().exists()) {
+					buttonPressed(EXTEND_ID);
+				}
+			}
+		}
 	}
 	
 	private IPath[] chooseExtensions(CPVariableElement elem) {
@@ -214,9 +261,13 @@ public class NewVariableEntryDialog extends Dialog {
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);
-		dialog.setAllowMultiple(fExistingPath == null);
+		dialog.setValidator(new ExtensionValidator(fExistingPath == null));
+
 		if (fExistingPath != null) {
-			dialog.setInitialSelection(fExistingPath.toFile());
+			IPath resolved= JavaCore.getResolvedVariablePath(fExistingPath);
+			if (resolved != null) {
+				dialog.setInitialSelection(resolved.toFile());
+			}
 		}
 		if (dialog.open() == dialog.OK) {
 			Object[] selected= dialog.getResult();
@@ -238,7 +289,7 @@ public class NewVariableEntryDialog extends Dialog {
 	 * @see Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
-		if (buttonId ==  IDialogConstants.CLIENT_ID) {
+		if (buttonId ==  EXTEND_ID) {
 			List selected= fVariableBlock.getSelectedElements();
 			if (selected.size() == 1) {
 				IPath[] extendedPaths= chooseExtensions((CPVariableElement) selected.get(0));

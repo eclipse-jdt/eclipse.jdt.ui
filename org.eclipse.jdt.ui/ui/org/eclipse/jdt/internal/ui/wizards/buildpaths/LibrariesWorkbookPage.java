@@ -63,6 +63,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
+
+
+	
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
@@ -505,8 +508,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
 		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+		IPath existingPath= (existing == null) ? null : existing.getPath();
 		
-		NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), title, null);
+		NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), title, existingPath);
 		if (dialog.open() == dialog.OK) {
 			List existingElements= fLibrariesList.getElements();
 			
@@ -577,6 +581,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private class AdvancedDialog extends Dialog {
 
+		private static final String DIALOGSTORE_ADV_SECTION= "LibrariesWorkbookPage.advanced"; //$NON-NLS-1$
+		private static final String DIALOGSTORE_SELECTED= "selected"; //$NON-NLS-1$
+		private static final String DIALOGSTORE_CONTAINER_IDX= "containerindex"; //$NON-NLS-1$
+
 		private DialogField fLabelField;
 		private SelectionButtonDialogField fCreateFolderField;
 		private SelectionButtonDialogField fAddFolderField;
@@ -584,10 +592,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		private ComboDialogField fCombo;
 		private CPListElement[] fResult;
 		
+		private IDialogSettings fAdvSettings;
+		
 		private ClasspathContainerDescriptor[] fDescriptors;
 
 		public AdvancedDialog(Shell parent) {
 			super(parent);
+			
+			fAdvSettings= fDialogSettings.getSection(DIALOGSTORE_ADV_SECTION);
+			if (fAdvSettings == null) {
+				fAdvSettings= fDialogSettings.addNewSection(DIALOGSTORE_ADV_SECTION);
+				fAdvSettings.put(DIALOGSTORE_SELECTED, 2); // container
+				fAdvSettings.put(DIALOGSTORE_CONTAINER_IDX, 0);
+			}		
 			
 			fDescriptors= ClasspathContainerDescriptor.getDescriptors();
 			
@@ -610,8 +627,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 			fCombo= new ComboDialogField(SWT.READ_ONLY);
 			fCombo.setItems(names);
-			fCombo.selectItem(0);
+			
 			fAddContainerField.attachDialogField(fCombo);
+		
+			int selected= fAdvSettings.getInt(DIALOGSTORE_SELECTED);
+			fCreateFolderField.setSelection(selected == 0);
+			fAddFolderField.setSelection(selected == 1);
+			fAddContainerField.setSelection(selected == 2);
+			fCombo.selectItem(fAdvSettings.getInt(DIALOGSTORE_CONTAINER_IDX));
 		}
 
 		/* 
@@ -652,17 +675,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fResult= null;
 			if (fCreateFolderField.isSelected()) {
 				fResult= openNewClassFolderDialog(null);
+				fAdvSettings.put(DIALOGSTORE_SELECTED, 0);
 			} else if (fAddFolderField.isSelected()) {
 				fResult= openClassFolderDialog(null);
+				fAdvSettings.put(DIALOGSTORE_SELECTED, 1);
 			} else if (fAddContainerField.isSelected()) {
 				String selected= fCombo.getText();
 				for (int i = 0; i < fDescriptors.length; i++) {
 					if (fDescriptors[i].getName().equals(selected)) {
 						String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title"); //$NON-NLS-1$
 						fResult= openContainerDialog(title, new ClasspathContainerWizard(fDescriptors[i]));
+						fAdvSettings.put(DIALOGSTORE_CONTAINER_IDX, i);
 						break;
 					}
 				}
+				fAdvSettings.put(DIALOGSTORE_SELECTED, 2);
 			}
 			if (fResult != null) {
 				super.okPressed();
