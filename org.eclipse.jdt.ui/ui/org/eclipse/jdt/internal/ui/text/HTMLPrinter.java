@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.text;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.eclipse.swt.graphics.RGB;
+
 
 /**
  * Provides a set of convenience methods for creating HTML pages.
@@ -64,6 +66,19 @@ public class HTMLPrinter {
 		}
 		
 		return null;
+	}
+
+	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB) {
+		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"" + convertToHtmlColor(bgRGB) + "\"><font size=-1>"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private static String convertToHtmlColor(RGB rgb) {
+		StringBuffer buf= new StringBuffer(7);
+		buf.append('#');
+		buf.append(Integer.toHexString(rgb.red));
+		buf.append(Integer.toHexString(rgb.green));
+		buf.append(Integer.toHexString(rgb.blue));
+		return buf.toString();
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
