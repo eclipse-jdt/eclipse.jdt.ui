@@ -24,13 +24,10 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -113,8 +110,8 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
@@ -430,36 +427,24 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
-			ResourceTransfer.getInstance()};
-		
-		// Drop Adapter
+		// drop
+		Transfer[] dropTransfers= new Transfer[] {
+			LocalSelectionTransfer.getInstance()
+		};
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fViewer)
 		};
-		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
+		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, dropTransfers, new DelegatingDropAdapter(dropListeners));
 		
-		// Drag Adapter
-		Control control= fViewer.getControl();
+		// Drag 
+		Transfer[] dragTransfers= new Transfer[] {
+			LocalSelectionTransfer.getInstance(), 
+			ResourceTransfer.getInstance()};
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(fViewer),
 			new ResourceTransferDragAdapter(fViewer)
 		};
-		DragSource source= new DragSource(control, ops);
-		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
-			public void dragStart(DragSourceEvent event) {
-				IStructuredSelection selection= (IStructuredSelection)getSelectionProvider().getSelection();
-				for (Iterator iter= selection.iterator(); iter.hasNext(); ) {
-					if (iter.next() instanceof IMember) {
-						setPossibleListeners(new TransferDragSourceListener[] {new SelectionTransferDragAdapter(fViewer)});
-						break;
-					}
-				}
-				super.dragStart(event);
-			}
-		});
+		fViewer.addDragSupport(ops, dragTransfers, new JdtViewerDragAdapter(fViewer, dragListeners));
 	}
 	
 	protected void fillActionBars(IActionBars actionBars) {

@@ -20,7 +20,6 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
@@ -102,8 +101,8 @@ import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
@@ -667,14 +666,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		viewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
 	}
 
-	private void addDragAdapters(StructuredViewer viewer, int ops, Transfer[] transfers){
-		Control control= viewer.getControl();
+	private void addDragAdapters(StructuredViewer viewer, int ops, Transfer[] transfers) {
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(viewer)
 		};
-		DragSource source= new DragSource(control, ops);
-		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners));		
+		viewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(viewer, dragListeners));
 	}	
 			
 	/**

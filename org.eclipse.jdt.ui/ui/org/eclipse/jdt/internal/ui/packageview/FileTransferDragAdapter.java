@@ -42,7 +42,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -72,21 +71,26 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		event.doit= isDragable(fProvider.getSelection());
 	}
 	
-	private boolean isDragable(ISelection selection) {
-		if (selection instanceof IStructuredSelection) {
-			for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				if (element instanceof IPackageFragment) {
+	private boolean isDragable(ISelection s) {
+		if (!(s instanceof IStructuredSelection))
+			return false;
+		IStructuredSelection selection= (IStructuredSelection)s;
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IJavaElement) {
+				IJavaElement jElement= (IJavaElement)element;
+				int type= jElement.getElementType();
+				// valid elements are: projects, roots, units and types.
+				if (type != IJavaElement.JAVA_PROJECT && type != IJavaElement. PACKAGE_FRAGMENT_ROOT &&
+					type != IJavaElement.COMPILATION_UNIT && type != IJavaElement.TYPE)
 					return false;
-				} else if (element instanceof IJavaElement) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)((IJavaElement)element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					if (root != null && root.isArchive())
-						return false;
-				}
+				IPackageFragmentRoot root= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root != null && root.isArchive())
+					return false;
 			}
-			return true;
 		}
-		return false;
+		List resources= convertIntoResources(selection);
+		return resources.size() == selection.size();
 	}
 	
 	public void dragSetData(DragSourceEvent event){
@@ -200,9 +204,12 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		if (!(s instanceof IStructuredSelection)) 
 			return null;
 		
-		List result= new ArrayList(10);
-		Iterator iter= ((IStructuredSelection)s).iterator();
-		while (iter.hasNext()) {
+		return convertIntoResources((IStructuredSelection)s);
+	}
+
+	private List convertIntoResources(IStructuredSelection selection) {
+		List result= new ArrayList(selection.size());
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object o= iter.next();
 			IResource r= null;
 			if (o instanceof IResource) {

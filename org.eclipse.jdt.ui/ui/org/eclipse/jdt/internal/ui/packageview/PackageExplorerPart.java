@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
@@ -89,7 +87,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -97,8 +94,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
@@ -602,45 +599,34 @@ public class PackageExplorerPart extends ViewPart
 	//---- Event handling ----------------------------------------------------------
 	
 	private void initDragAndDrop() {
+		initDrag();
+		initDrop();
+	}
+
+	private void initDrag() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
-			ResourceTransfer.getInstance(),
+			LocalSelectionTransfer.getInstance(),
+			ResourceTransfer.getInstance(), 
 			FileTransfer.getInstance()};
-		
-		// Drop Adapter
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
-			new SelectionTransferDropAdapter(fViewer),
-			// new ResourceTransferDropAdapter(fViewer),
-			new FileTransferDropAdapter(fViewer)
-		};
-		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
-		
-		// Drag Adapter
-		Control control= fViewer.getControl();
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(fViewer),
 			new ResourceTransferDragAdapter(fViewer),
 			new FileTransferDragAdapter(fViewer)
 		};
-		DragSource source= new DragSource(control, ops);
-		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
-			public void dragStart(DragSourceEvent event) {
-				IStructuredSelection selection= (IStructuredSelection)getSelection();
-				if (selection.isEmpty()) {
-					event.doit= false;
-					return; 
-				}
-				for (Iterator iter= selection.iterator(); iter.hasNext(); ) {
-					if (iter.next() instanceof IMember) {
-						setPossibleListeners(new TransferDragSourceListener[] {new SelectionTransferDragAdapter(fViewer)});
-						break;
-					}
-				}
-				super.dragStart(event);
-			}
-		});
+		fViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fViewer, dragListeners));
+	}
+
+	private void initDrop() {
+		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
+		Transfer[] transfers= new Transfer[] {
+			LocalSelectionTransfer.getInstance(), 
+			FileTransfer.getInstance()};
+		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
+			new SelectionTransferDropAdapter(fViewer),
+			new FileTransferDropAdapter(fViewer)
+		};
+		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
 	}
 
 	/**
