@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,11 +42,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 public class ReorgUtils {
@@ -311,8 +312,8 @@ public class ReorgUtils {
 
 	public static IResource[] union(IResource[] set1, IResource[] set2) {
 		Set union= new HashSet(set1.length + set2.length);
-		union.addAll(Arrays.asList(set1));
-		union.addAll(Arrays.asList(set2));
+		union.addAll(Arrays.asList(ReorgUtils.getNotNulls(set1)));
+		union.addAll(Arrays.asList(ReorgUtils.getNotNulls(set2)));
 		return (IResource[]) union.toArray(new IResource[union.size()]);
 	}	
 
@@ -414,7 +415,7 @@ public class ReorgUtils {
 	}
 		
 	private static boolean isOfType(IResource resource, int type) {
-		return isFlagSet(resource.getType(), type);
+		return resource != null && isFlagSet(resource.getType(), type);
 	}
 		
 	private static boolean isFlagSet(int flags, int flag){
@@ -450,7 +451,7 @@ public class ReorgUtils {
 		
 	public static boolean containsLinkedResources(IResource[] resources){
 		for (int i= 0; i < resources.length; i++) {
-			if (resources[i].isLinked()) return true;
+			if (resources[i] != null && resources[i].isLinked()) return true;
 		}
 		return false;
 	}
@@ -545,12 +546,12 @@ public class ReorgUtils {
 	}
 	
 	public static IResource[] getNotNulls(IResource[] resources) {
-		Set set= new HashSet(resources.length);
+		Collection result= new ArrayList(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			if (resource != null)
-				set.add(resource);
+			if (resource != null && ! result.contains(resource))
+				result.add(resource);
 		}
-		return (IResource[]) set.toArray(new IResource[set.size()]);
+		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
 }

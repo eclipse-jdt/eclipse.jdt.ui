@@ -380,7 +380,6 @@ class ReorgPolicyFactory {
 				return (IContainer)resDest;
 			if (resDest instanceof IFile)
 				return ((IFile)resDest).getParent();
-			Assert.isTrue(false);//there's nothing else
 			return null;				
 		}
 				
@@ -396,7 +395,10 @@ class ReorgPolicyFactory {
 		protected IJavaElement getDestinationContainerAsJavaElement() {
 			if (getJavaElementDestination() != null)
 				return getJavaElementDestination();
-			IJavaElement je= JavaCore.create(getDestinationAsContainer());
+			IContainer destinationAsContainer= getDestinationAsContainer();
+			if (destinationAsContainer == null)
+				return null;
+			IJavaElement je= JavaCore.create(destinationAsContainer);
 			if (je != null && je.exists())
 				return je;
 			return null;
@@ -462,10 +464,13 @@ class ReorgPolicyFactory {
 			oh.setFolders(fFolders);
 			oh.setCus(fCus);
 			IPackageFragment destPack= getDestinationAsPackageFragment();
-			if (destPack != null)
+			if (destPack != null) {
 				oh.confirmOverwritting(reorgQueries, destPack);
-			else
-				oh.confirmOverwritting(reorgQueries, getDestinationAsContainer());
+			} else {
+				IContainer destinationAsContainer= getDestinationAsContainer();
+				if (destinationAsContainer != null)
+					oh.confirmOverwritting(reorgQueries, destinationAsContainer);
+			}	
 			fFiles= oh.getFilesWithoutUnconfirmedOnes();
 			fFolders= oh.getFoldersWithoutUnconfirmedOnes();
 			fCus= oh.getCusWithoutUnconfirmedOnes();
@@ -951,7 +956,6 @@ class ReorgPolicyFactory {
 			if (pack != null)
 				return copyCuToPackage(unit, pack, nameProposer, copyQueries);
 			IContainer container= getDestinationAsContainer();
-			Assert.isNotNull(container);
 			return copyFileToContainer(unit, container, nameProposer, copyQueries);
 		}
 	
@@ -966,6 +970,8 @@ class ReorgPolicyFactory {
 		}
 			
 		private static IChange createCopyResourceChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries, IContainer destination) {
+			if (resource == null || destination == null)
+				return new NullChange();
 			INewNameQuery nameQuery;
 			String name= nameProposer.createNewName(resource, destination);
 			if (name == null)
@@ -1464,7 +1470,8 @@ class ReorgPolicyFactory {
 			if (pack != null)
 				return moveCuToPackage(cu, pack);
 			IContainer container= getDestinationAsContainer();
-			Assert.isNotNull(container);
+			if (container == null)
+				return new NullChange();
 			return moveFileToContainer(cu, container);
 		}
 
@@ -1483,7 +1490,10 @@ class ReorgPolicyFactory {
 		}
 
 		private IChange createChange(IResource res) throws JavaModelException{
-			return new MoveResourceChange(res, getDestinationAsContainer());
+			IContainer destinationAsContainer= getDestinationAsContainer();
+			if (destinationAsContainer == null)
+				return new NullChange();
+			return new MoveResourceChange(res, destinationAsContainer);
 		}
 
 		private static void addAllChildren(CompositeChange collector, ICompositeChange composite){

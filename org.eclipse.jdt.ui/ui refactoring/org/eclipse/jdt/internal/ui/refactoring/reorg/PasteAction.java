@@ -210,7 +210,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (resources != null)
 				result.addAll(Arrays.asList(resources));
 			if (javaElements != null)
-				result.addAll(Arrays.asList(ReorgUtils.getResources(javaElements)));
+				result.addAll(Arrays.asList(ReorgUtils.getNotNulls(ReorgUtils.getResources(javaElements))));
 			Assert.isTrue(result.size() > 0);
 			return (IProject[]) result.toArray(new IProject[result.size()]);
 		}

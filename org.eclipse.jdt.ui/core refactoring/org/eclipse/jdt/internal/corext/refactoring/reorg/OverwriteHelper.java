@@ -164,6 +164,8 @@ class OverwriteHelper {
 	}
 
 	private boolean canOverwrite(IResource resource) {
+		if (resource == null)
+			return false;
 		IResource destinationResource= ResourceUtil.getResource(fDestination);
 		if (destinationResource.equals(resource.getParent()))
 			return false;
