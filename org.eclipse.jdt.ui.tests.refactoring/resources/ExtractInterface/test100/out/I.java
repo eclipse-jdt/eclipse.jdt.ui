@@ -17,6 +17,5 @@ public interface I {
 	/** en */
 	// gros!
 	; //post
-
 	public abstract void d();
 }

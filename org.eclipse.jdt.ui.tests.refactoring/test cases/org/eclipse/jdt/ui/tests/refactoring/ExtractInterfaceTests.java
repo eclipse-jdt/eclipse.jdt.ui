@@ -691,6 +691,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47785
 		//validatePassingTest("A", "I", true, false);
 		// TODO: enable again with I20040302
+		printTestDisabledMessage("ma: enable again with I20040302");
 	}
 	
 	public void testPaperExample0() throws Exception{
