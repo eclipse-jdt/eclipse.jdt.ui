@@ -119,8 +119,7 @@ public class Checks {
 	 *  name is not a valid java type parameter name.
 	 */
 	public static RefactoringStatus checkTypeParameterName(String name) {
-		// TODO use method from JavaConventions (see 73535)
-		return checkName(name, JavaConventions.validateIdentifier(name));
+		return checkName(name, JavaConventions.validateTypeVariableName(name));
 	}
 
 	/**
