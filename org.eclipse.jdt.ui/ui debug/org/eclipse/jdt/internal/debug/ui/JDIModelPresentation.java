@@ -650,7 +650,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 	/**
 	 * Returns the character string of a byte or <code>null</code if
-	 * the value is not a byte.
+	 * the value can not be interpreted as a valid character.
 	 */
 	protected String getValueCharText(IJavaValue value) throws DebugException {
 		String sig= getPrimitiveValueTypeSignature(value);
