@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.util.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -282,7 +283,7 @@ public class Checks {
 		 * for simplicity we ignore type access modifiers and report all public static void methods
 		 */
 		RefactoringStatus result= new RefactoringStatus();
-		if (JavaModelUtility.hasMainMethod(type))
+		if (JavaModelUtil.hasMainMethod(type))
 			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.has_main", type.getFullyQualifiedName())); //$NON-NLS-1$
 		result.merge(checkForMainMethods(type.getTypes()));	
 		return result;
