@@ -61,11 +61,11 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument, char, int, ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-
-	
 		IType definingType= null;
 		if (impStructure != null) {
-			IJavaElement currElem= impStructure.getCompilationUnit().getElementAt(offset);
+			ICompilationUnit cu= impStructure.getCompilationUnit();
+			JavaModelUtil.reconcile(cu);
+			IJavaElement currElem= cu.getElementAt(offset);
 			if (currElem != null) {
 				definingType= (IType) currElem.getAncestor(IJavaElement.TYPE);
 			}
