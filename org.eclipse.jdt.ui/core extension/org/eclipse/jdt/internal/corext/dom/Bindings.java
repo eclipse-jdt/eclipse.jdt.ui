@@ -291,6 +291,39 @@ public class Bindings {
 		}
 		return null;
 	}
+	
+	/**
+	 * Finds the declarartion of a method specified by <code>methodName</code> and </code>parameters</code> in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
+	 * exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 */
+	public static IMethodBinding findDeclarationInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			ITypeBinding curr= interfaces[i];
+			IMethodBinding method= findMethodInType(curr, methodName, parameters);
+			if (method != null)
+				return method;
+			method= findDeclarationInHierarchy(interfaces[i], methodName, parameters);
+			if (method != null)
+				return method;
+		}
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			IMethodBinding method= findMethodInType(superClass, methodName, parameters);
+			if (method != null)
+				return method;
+			
+			method= findDeclarationInHierarchy(superClass, methodName, parameters);
+			if (method != null)
+				return method;			
+		}
+		return null;
+	}
 
 	/**
 	 * Method to visit a type hierarchy defined by a given type.
