@@ -1,6 +1,6 @@
 package p;
 
-class A {
+class A implements I {
 	public void m(){}
 	public void m1(){}
 	void f(){

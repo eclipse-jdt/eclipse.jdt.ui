@@ -1,4 +1,4 @@
 package p;
-class A{
+class A implements I{
 	public void m(){}
 }
