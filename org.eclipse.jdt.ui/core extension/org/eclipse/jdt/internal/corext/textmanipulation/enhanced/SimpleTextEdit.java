@@ -16,42 +16,31 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public abstract class SimpleTextEdit extends TextEdit {
+public class SimpleTextEdit extends TextEdit {
 
 	private TextRange fRange;
 	private String fText;
 
 	public static SimpleTextEdit createReplace(int offset, int length, String text) {
-		return new SimpleTextEditImpl(offset, length, text);
+		return new SimpleTextEdit(offset, length, text);
 	}
 
 	public static SimpleTextEdit createInsert(int offset, String text) {
-		return new SimpleTextEditImpl(offset, 0, text);
+		return new SimpleTextEdit(offset, 0, text);
 	}
 	
 	public static SimpleTextEdit createDelete(int offset, int length) {
-		return new SimpleTextEditImpl(offset, length, ""); //$NON-NLS-1$
+		return new SimpleTextEdit(offset, length, ""); //$NON-NLS-1$
 	}
 	
-	private final static class SimpleTextEditImpl extends SimpleTextEdit {
-		protected SimpleTextEditImpl(TextRange range, String text) {
-			super(range, text);
-		}
-		protected SimpleTextEditImpl(int offset, int length, String text) {
-			super(offset, length, text);
-		}
-		protected TextEdit copy0() {
-			return new SimpleTextEditImpl(getTextRange().copy(), getText());
-		}	
+	public SimpleTextEdit(int offset, int length, String text) {
+		this(new TextRange(offset, length), text);
 	}
 	
 	protected SimpleTextEdit() {
 		this(TextRange.UNDEFINED, ""); //$NON-NLS-1$
 	}
 	
-	protected SimpleTextEdit(int offset, int length, String text) {
-		this(new TextRange(offset, length), text);
-	}
 	protected SimpleTextEdit(TextRange range, String text) {
 		Assert.isNotNull(range);
 		Assert.isNotNull(text);
@@ -108,6 +97,11 @@ public abstract class SimpleTextEdit extends TextEdit {
 		String current= buffer.getContent(fRange.getOffset(), fRange.getLength());
 		buffer.replace(fRange, fText);
 	}
+	
+	protected TextEdit copy0() {
+		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0");
+		return new SimpleTextEdit(getTextRange().copy(), getText());
+	}		
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {
 		super.updateTextRange(delta, executedEdits);
