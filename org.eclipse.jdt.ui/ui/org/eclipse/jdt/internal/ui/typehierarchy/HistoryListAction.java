@@ -46,11 +46,12 @@ public class HistoryListAction extends Action {
 			setTitle(TypeHierarchyMessages.getString("HistoryListDialog.title")); //$NON-NLS-1$
 			
 			String[] buttonLabels= new String[] { 
-				/* 0 */ TypeHierarchyMessages.getString("HistoryListDialog.remove.button") //$NON-NLS-1$
+				/* 0 */ TypeHierarchyMessages.getString("HistoryListDialog.remove.button"), //$NON-NLS-1$
 			};
 					
 			IListAdapter adapter= new IListAdapter() {
 				public void customButtonPressed(DialogField field, int index) {
+					doCustomButtonPressed();
 				}
 				public void selectionChanged(DialogField field) {
 					doSelectionChanged();
@@ -61,7 +62,6 @@ public class HistoryListAction extends Action {
 			
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(TypeHierarchyMessages.getString("HistoryListDialog.label")); //$NON-NLS-1$
-			fHistoryList.setRemoveButtonIndex(0);
 			fHistoryList.setElements(Arrays.asList(elements));
 			
 			ISelection sel;
@@ -73,7 +73,8 @@ public class HistoryListAction extends Action {
 			
 			fHistoryList.selectElements(sel);
 		}
-		
+
+			
 		/*
 		 * @see Dialog#createDialogArea(Composite)
 		 */
@@ -99,6 +100,13 @@ public class HistoryListAction extends Action {
 			});
 			return composite;
 		}
+
+		/**
+		 * Method doCustomButtonPressed.
+		 */
+		private void doCustomButtonPressed() {
+			fHistoryList.removeElements(fHistoryList.getSelectedElements());
+		}	
 		
 		private void doSelectionChanged() {
 			StatusInfo status= new StatusInfo();
@@ -109,6 +117,7 @@ public class HistoryListAction extends Action {
 			} else {
 				fResult= (IJavaElement) selected.get(0);
 			}
+			fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size());			
 			fHistoryStatus= status;
 			updateStatus(status);	
 		}
@@ -140,7 +149,6 @@ public class HistoryListAction extends Action {
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.HISTORY_LIST_ACTION);
 	}
-	
 		
 	/*
 	 * @see IAction#run()
