@@ -19,6 +19,8 @@ public class CodeGenerationSettings {
 
 	public boolean createComments= true;
 	
+	public boolean useKeywordThis= false;
+	
 	/**
 	 * @deprecated
 	 */
@@ -31,6 +33,7 @@ public class CodeGenerationSettings {
 	
 	public void setSettings(CodeGenerationSettings settings) {
 		settings.createComments= createComments;
+		settings.useKeywordThis= useKeywordThis;
 		settings.importOrder= importOrder;
 		settings.importThreshold= importThreshold;
 		settings.tabWidth= tabWidth;

@@ -27,6 +27,7 @@ public class JavaPreferencesSettings  {
 		
 		CodeGenerationSettings res= new CodeGenerationSettings();
 		res.createComments= store.getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS);
+		res.useKeywordThis= store.getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
 		res.importOrder= getImportOrderPreference(store);
 		res.importThreshold= getImportNumberThreshold(store);
 		res.tabWidth= JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);

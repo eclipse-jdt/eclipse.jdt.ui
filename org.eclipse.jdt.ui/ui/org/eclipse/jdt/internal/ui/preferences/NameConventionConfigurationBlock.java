@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /*
@@ -271,6 +274,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}
 		
 	private ListDialogField fNameConventionList;
+	private SelectionButtonDialogField fUseKeywordThisBox;
+	private static final String PREF_KEYWORD_THIS= PreferenceConstants.CODEGEN_KEYWORD_THIS;
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project);
@@ -301,6 +306,11 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		} else {
 			fNameConventionList.enableButton(0, false);
 		}
+		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
+		fUseKeywordThisBox=  new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
+		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$		fUseKeywordThisBox.setSelection(false);
+		fUseKeywordThisBox.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_KEYWORD_THIS));
 	}
 	
 	protected String[] getAllKeys() {
@@ -326,6 +336,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		data.grabExcessHorizontalSpace= true;
 		data.verticalAlignment= 0;
 		data.heightHint= SWTUtil.getTableHeightHint(table, 5);
+
+		fUseKeywordThisBox.doFillIntoGrid(composite, 2);
 
 		return composite;
 	}
@@ -408,9 +420,22 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}		
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
+	 */
+	public void performDefaults() {
+		super.performDefaults();
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fUseKeywordThisBox.setSelection(prefs.getDefaultBoolean(PREF_KEYWORD_THIS));
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
 	 */
 	public boolean performOk(boolean enabled) {
+		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
+		prefs.setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
+		JavaPlugin.getDefault().savePluginPreferences();
+				
 		packEntries();
 		return super.performOk(enabled);
 	}

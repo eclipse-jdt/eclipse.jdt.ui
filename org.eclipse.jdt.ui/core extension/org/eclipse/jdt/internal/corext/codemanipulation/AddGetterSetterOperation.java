@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -26,9 +27,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * For given fields, method stubs for getters and setters are created.
@@ -155,7 +160,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private void generateGetter(IField field) throws CoreException, OperationCanceledException {
 		String fieldName= field.getElementName();
-		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		boolean isStatic= Flags.isStatic(field.getFlags());
 
 		String typeName= Signature.toString(field.getTypeSignature());
@@ -194,6 +201,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			buf.append(' ');
 			buf.append(getterName);
 			buf.append("() {\n"); //$NON-NLS-1$
+			
+			if (genStubSettings.useKeywordThis && !isStatic) {
+				fieldName= "this." + fieldName; //$NON-NLS-1$
+			}
+			
 			buf.append(CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n')));
 			buf.append("}\n"); //$NON-NLS-1$
 			
@@ -211,7 +223,12 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	}
 
 	private void generateSetter(IField field) throws CoreException, OperationCanceledException {
+		
 		String fieldName= field.getElementName();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		boolean isStatic= Flags.isStatic(field.getFlags());
+			
 		IJavaProject project= field.getJavaProject();
 		
 		String returnSig= field.getTypeSignature();
@@ -226,7 +243,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 		String argname= StubUtility.guessArgumentName(project, accessorName, EMPTY);
 	
-		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
 
 		String typeName= Signature.toString(returnSig);
@@ -269,7 +285,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			buf.append(' '); 
 			buf.append(argname); 
 			buf.append(") {\n"); //$NON-NLS-1$
-			if (argname.equals(fieldName)) {
+			if (argname.equals(fieldName) || (genStubSettings.useKeywordThis && !isStatic)) {
 				if (isStatic)
 					fieldName= parentType.getElementName() + '.' + fieldName;
 				else
