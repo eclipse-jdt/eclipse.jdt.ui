@@ -834,8 +834,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		//restore library
 		String show= fMemento.getString(TAG_SHOWLIBRARIES);
-		getLibraryFilter().setShowLibraries(show.equals("true"));
-
+		if (show != null)
+			getLibraryFilter().setShowLibraries(show.equals("true"));
 	}
 	
 	void initFilterFromPreferences() {
