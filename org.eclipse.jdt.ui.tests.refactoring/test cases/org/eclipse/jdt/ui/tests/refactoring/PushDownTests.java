@@ -567,6 +567,108 @@ public class PushDownTests extends RefactoringTest {
 			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
 			   new String[]{"B", "C"}, new String[]{"p", "p"});
 	}
+
+	public void test22() throws Exception{
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"bar"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+	
+	public void test23() throws Exception{
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"bar"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test24() throws Exception{
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"foo", "bar"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test25() throws Exception{
+		String[] selectedMethodNames= {"foo"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test26() throws Exception{
+		String[] selectedMethodNames= {"bar"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test27() throws Exception{
+		String[] selectedMethodNames= {"bar"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
 	
 	public void testFail0() throws Exception {
 		String[] selectedMethodNames= {"f"};
@@ -714,6 +816,96 @@ public class PushDownTests extends RefactoringTest {
 
 	public void testFail8() throws Exception {
 		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   RefactoringStatus.ERROR);
+	}
+
+	public void testFail9() throws Exception {
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"f"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   RefactoringStatus.ERROR);
+	}
+
+	public void testFail10() throws Exception {
+		String[] selectedMethodNames= {"foo"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   RefactoringStatus.ERROR);
+	}
+
+	public void testFail11() throws Exception {
+		String[] selectedMethodNames= {"foo"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   RefactoringStatus.ERROR);
+	}
+
+	public void testFail12() throws Exception {
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"bar"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   RefactoringStatus.ERROR);
+	}
+
+	public void testFail13() throws Exception {
+		String[] selectedMethodNames= {"foo"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
 		String[] namesOfMethodsToPushDown= {};
