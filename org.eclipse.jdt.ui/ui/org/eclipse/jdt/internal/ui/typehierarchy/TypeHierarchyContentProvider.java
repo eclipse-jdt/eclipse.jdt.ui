@@ -118,7 +118,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	
 	private boolean isInWorkingSet(Object element) {
-		return fWorkingSetFilter != null && fWorkingSetFilter.select(null, null, element);
+		return fWorkingSetFilter == null || fWorkingSetFilter.select(null, null, element);
 	}
 	
 	/*
