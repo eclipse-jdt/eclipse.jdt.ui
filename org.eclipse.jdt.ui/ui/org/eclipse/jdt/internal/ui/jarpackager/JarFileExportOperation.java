@@ -66,7 +66,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	}
 
 	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
-		boolean isNonJavaResource= !isInJavaProject || (pkgRoot == null && !isInOutputFolder);
+		boolean isNonJavaResource= !isInJavaProject || pkgRoot == null;
 		boolean isInClassFolder= false;
 		try {
 			isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == pkgRoot.K_BINARY;
