@@ -60,8 +60,8 @@ public class JUnitProgressBar extends Canvas {
 			}
 		});
 		Display display= parent.getDisplay();
-		fFailureColor= new Color(display, 223, 63, 63);
-		fOKColor= new Color(display, 63, 127, 63);
+		fFailureColor= new Color(display, 216,88,88);
+		fOKColor= new Color(display, 56,152,56);
 	}
 
 	public void setMaximum(int max) {
