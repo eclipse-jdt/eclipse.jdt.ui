@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.runtime.CoreException;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.test.performance.Dimension;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -30,8 +30,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 public class JavaFormatterTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaFormatterTest.class;
-	
-	private static final String SHORT_NAME= "Format large compilation unit";
 	
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
@@ -65,7 +63,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 	 */
 	public void test() throws Exception {
 		measureToggleComment(getNullPerformanceMeter(), getWarmUpRuns());
-		measureToggleComment(createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS), getMeasuredRuns());
+		measureToggleComment(createPerformanceMeter(), getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
