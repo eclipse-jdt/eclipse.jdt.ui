@@ -16,11 +16,15 @@ public abstract class SingleCharReader extends Reader {
 	public int read(char cbuf[], int off, int len) throws IOException {
 		int end= off + len;
 		for (int i= off; i < end; i++) {
-			char ch= (char)read();
+			int ch= read();
 			if (ch == -1) {
-				return i - off;
+				if (i == off) {
+					return -1;
+				} else {
+					return i - off;
+				}
 			}
-			cbuf[i]= ch;
+			cbuf[i]= (char)ch;
 		}
 		return len;
 	}		
@@ -28,7 +32,7 @@ public abstract class SingleCharReader extends Reader {
 	/**
 	 * @see Reader#ready()
 	 */		
-    	public boolean ready() throws IOException {
+    public boolean ready() throws IOException {
 		return true;
 	}
 	

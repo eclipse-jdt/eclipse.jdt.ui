@@ -125,7 +125,7 @@ public class JavaDocAccess {
 		}
 		return null;
 	}
-	
+		
 	
 	private static int findCommentEnd(IBuffer buffer, int start, int end) {
 		for (int i= start; i < end; i++) {
