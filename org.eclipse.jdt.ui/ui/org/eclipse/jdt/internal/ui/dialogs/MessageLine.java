@@ -72,7 +72,7 @@ public class MessageLine extends CLabel {
 				return;
 			}
 		}		
-		setText("");
+		setText(""); //$NON-NLS-1$	
 		setImage(null);
 		setBackground(fNormalMsgAreaBackground);	
 	}

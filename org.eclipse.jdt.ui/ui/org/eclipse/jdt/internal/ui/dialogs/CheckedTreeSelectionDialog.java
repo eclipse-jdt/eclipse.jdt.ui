@@ -290,7 +290,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.select_all"), false);
+		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.select_all"), false); //$NON-NLS-1$	
 
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -300,7 +300,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.deselect_all"), false);
+		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.deselect_all"), false); //$NON-NLS-1$	
 
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

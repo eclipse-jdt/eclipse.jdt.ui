@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
+import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -114,7 +115,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		for (int i= 0; i != variables.length; i++) {
 			TemplatePosition variable= variables[i];
 			
-			if (variable.getName().equals("cursor"))
+			if (variable.getName().equals(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"))) //$NON-NLS-1$
 				return variable.getOffsets()[0];
 		}
 

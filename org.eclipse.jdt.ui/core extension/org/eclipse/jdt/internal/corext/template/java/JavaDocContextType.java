@@ -19,7 +19,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super("javadoc");
+		super("javadoc"); //$NON-NLS-1$
 		
 		// global
 		addVariable(new GlobalVariables.Cursor());

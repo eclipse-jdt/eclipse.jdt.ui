@@ -9,10 +9,8 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
-
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -32,9 +30,6 @@ import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
  */
 public class JavaFormatter implements ITemplateEditor {
 
-	private static final String CURSOR= "cursor"; //$NON-NLS-1$
-	private static final String MARKER= "/*${cursor}*/"; //$NON-NLS-1$
-
 	/*
 	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
 	 */
@@ -53,7 +48,7 @@ public class JavaFormatter implements ITemplateEditor {
 	    for (int i= 0; i != variables.length; i++) {
 	        TemplatePosition variable= variables[i];
 	        
-	        if (variable.getName().equals(CURSOR))
+	        if (variable.getName().equals(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"))) //$NON-NLS-1$
 	        	return variable.getOffsets()[0];
 	    }
 	    
@@ -64,6 +59,8 @@ public class JavaFormatter implements ITemplateEditor {
 		// XXX 4360
 		// workaround for code formatter limitations
 		// handle a special case where cursor position is surrounded by whitespaces		
+
+		final String MARKER= "/*${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
@@ -104,7 +101,7 @@ public class JavaFormatter implements ITemplateEditor {
 		int[] offsets= variablesToOffsets(variables);
 		
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		string= formatter.format(string, indentationLevel, offsets, "\n"); // XXX: to be reviewed
+		string= formatter.format(string, indentationLevel, offsets, "\n"); //$NON-NLS-1$
 		
 		offsetsToVariables(offsets, variables);
 

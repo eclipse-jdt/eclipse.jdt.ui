@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.TwoPaneElementSelector;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -90,8 +90,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			//XX: to do
-			ExceptionHandler.handle(e, "Error", e.getMessage());
+			ExceptionHandler.handle(e, JavaUIMessages.getString("MainTypeSelectionDialog.errorTitle"), e.getMessage()); //$NON-NLS-1$
 			return CANCEL;
 		}
 		

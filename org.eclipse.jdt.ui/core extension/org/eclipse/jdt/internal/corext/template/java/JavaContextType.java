@@ -23,7 +23,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Array extends TemplateVariable {
 		public Array() {
-			super("array", TemplateMessages.getString("JavaContextType.variable.description.array"));
+			super(JavaTemplateMessages.getString("JavaContextType.variable.name.array"), JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).guessArray();
@@ -32,7 +32,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class ArrayType extends TemplateVariable {
 	    public ArrayType() {
-	     	super("array_type", TemplateMessages.getString("JavaContextType.variable.description.array.type"));
+	     	super(JavaTemplateMessages.getString("JavaContextType.variable.name.array.type"), JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayType();
@@ -41,7 +41,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class ArrayElement extends TemplateVariable {
 	    public ArrayElement() {
-	     	super("array_element", TemplateMessages.getString("JavaContextType.variable.description.array.element"));	        
+	     	super(JavaTemplateMessages.getString("JavaContextType.variable.name.array.element"), JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayElement();
@@ -50,7 +50,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Index extends TemplateVariable {
 	    public Index() {
-	     	super("index", TemplateMessages.getString("JavaContextType.variable.description.index"));
+	     	super(JavaTemplateMessages.getString("JavaContextType.variable.name.index"), JavaTemplateMessages.getString("JavaContextType.variable.description.index")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).getIndex();
@@ -59,7 +59,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Collection extends TemplateVariable {
 	    public Collection() {
-		    super("collection", TemplateMessages.getString("JavaContextType.variable.description.collector"));
+		    super(JavaTemplateMessages.getString("JavaContextType.variable.name.collection"), JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).guessCollection();
@@ -68,7 +68,7 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	protected static class Iterator extends TemplateVariable {
 	    public Iterator() {
-		    super("collection", TemplateMessages.getString("JavaContextType.variable.description.iterator"));
+		    super(JavaTemplateMessages.getString("JavaContextType.variable.name.iterator"), JavaTemplateMessages.getString("JavaContextType.variable.description.iterator")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	    public String evaluate(TemplateContext context) {
 	        return ((JavaContext) context).getIterator();
@@ -87,7 +87,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaContextType() {
-		super("java");
+		super("java"); //$NON-NLS-1$
 		
 		// global
 		addVariable(new GlobalVariables.Cursor());

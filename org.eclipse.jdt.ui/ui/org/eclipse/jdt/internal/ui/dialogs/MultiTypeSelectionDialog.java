@@ -82,7 +82,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		try {
 			fRunnableContext.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, JavaUIMessages.getString("MultiTypeSelectionDialog.error2Title"), JavaUIMessages.getString("MultiTypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InterruptedException e) {
 			// cancelled by user
 			return CANCEL;

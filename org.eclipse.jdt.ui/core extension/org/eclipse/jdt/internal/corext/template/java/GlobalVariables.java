@@ -22,8 +22,8 @@ public class GlobalVariables {
 	 */
 	static class Cursor extends SimpleTemplateVariable {
 		public Cursor() {
-			super("cursor", TemplateMessages.getString("GlobalVariables.variable.description.cursor"));
-			setEvaluationString("");
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"), JavaTemplateMessages.getString("GlobalVariables.variable.description.cursor")); //$NON-NLS-1$ //$NON-NLS-2$
+			setEvaluationString(""); //$NON-NLS-1$
 			setResolved(true);
 		}
 	}
@@ -33,8 +33,8 @@ public class GlobalVariables {
 	 */
 	static class Dollar extends SimpleTemplateVariable {
 		public Dollar() {
-			super("dollar", TemplateMessages.getString("GlobalVariables.variable.description.dollar"));
-			setEvaluationString("$");
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.dollar"), JavaTemplateMessages.getString("GlobalVariables.variable.description.dollar")); //$NON-NLS-1$ //$NON-NLS-2$
+			setEvaluationString("$"); //$NON-NLS-1$
 			setResolved(true);
 		}
 	}
@@ -44,7 +44,7 @@ public class GlobalVariables {
 	 */
 	static class Date extends SimpleTemplateVariable {
 		public Date() {
-			super("date", TemplateMessages.getString("GlobalVariables.variable.description.date"));
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.date"), JavaTemplateMessages.getString("GlobalVariables.variable.description.date")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
@@ -57,7 +57,7 @@ public class GlobalVariables {
 	 */
 	static class Time extends SimpleTemplateVariable {
 		public Time() {
-			super("time", TemplateMessages.getString("GlobalVariables.variable.description.time"));
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.time"), JavaTemplateMessages.getString("GlobalVariables.variable.description.time")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
@@ -70,11 +70,11 @@ public class GlobalVariables {
 	 */
 	static class User extends SimpleTemplateVariable {
 		public User() {
-			super("user", TemplateMessages.getString("GlobalVariables.variable.description.user"));
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.user"), JavaTemplateMessages.getString("GlobalVariables.variable.description.user")); //$NON-NLS-1$ //$NON-NLS-2$
 			setResolved(true);
 		}
 		public String evaluate(TemplateContext context) {
-			return System.getProperty("user.name");
+			return System.getProperty("user.name"); //$NON-NLS-1$
 		}	
 	}
 }

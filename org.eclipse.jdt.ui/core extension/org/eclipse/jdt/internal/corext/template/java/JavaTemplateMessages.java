@@ -8,12 +8,12 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class TemplateMessages {
+public class JavaTemplateMessages {
 
-	private static final String RESOURCE_BUNDLE= TemplateMessages.class.getName();
+	private static final String RESOURCE_BUNDLE= JavaTemplateMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
-	private TemplateMessages() {
+	private JavaTemplateMessages() {
 	}
 
 	public static String getString(String key) {

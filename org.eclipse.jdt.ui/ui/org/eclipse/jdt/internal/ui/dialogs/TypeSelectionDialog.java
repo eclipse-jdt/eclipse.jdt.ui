@@ -159,7 +159,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			try {
 				AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+				ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error2Title"), JavaUIMessages.getString("TypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return CANCEL;
 			}
 		} else {
@@ -179,7 +179,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			try {
 				fRunnableContext.run(true, true, runnable);
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+				ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return CANCEL;
 			} catch (InterruptedException e) {
 				// cancelled by user
