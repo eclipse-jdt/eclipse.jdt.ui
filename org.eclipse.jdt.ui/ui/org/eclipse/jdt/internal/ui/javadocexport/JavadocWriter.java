@@ -17,7 +17,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -46,8 +46,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 public class JavadocWriter {
 	
+	private static final char PATH_SEPARATOR= '/'; // use forward slash for all platforms
+	
 	private OutputStream fOutputStream;
-	private IJavaProject fJavaProject;
+	private IJavaProject[] fJavaProjects;
 	private IPath fBasePath;
 
 	/**
@@ -56,11 +58,11 @@ public class JavadocWriter {
 	 * @param basePath The base path to which all path will be made relative (if
 	 * possible). If <code>null</code>, paths are not made relative.
 	 */
-	public JavadocWriter(OutputStream outputStream, IPath basePath, IJavaProject project) {
+	public JavadocWriter(OutputStream outputStream, IPath basePath, IJavaProject[] projects) {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
 		fBasePath= basePath;
-		fJavaProject= project;
+		fJavaProjects= projects;
 	}
 
 	public void writeXML(JavadocOptionsManager store) throws ParserConfigurationException, TransformerException {
@@ -75,7 +77,6 @@ public class JavadocWriter {
 		Element project= document.createElement("project"); //$NON-NLS-1$
 		document.appendChild(project);
 
-		project.setAttribute("name", fJavaProject.getElementName()); //$NON-NLS-1$
 		project.setAttribute("default", "javadoc"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element javadocTarget= document.createElement("target"); //$NON-NLS-1$
@@ -85,7 +86,7 @@ public class JavadocWriter {
 		Element xmlJavadocDesc= document.createElement("javadoc"); //$NON-NLS-1$
 		javadocTarget.appendChild(xmlJavadocDesc);
 
-		if (!store.fromStandard())
+		if (!store.isFromStandard())
 			xmlWriteDoclet(store, document, xmlJavadocDesc);
 		else
 			xmlWriteJavadocStandardParams(store, document, xmlJavadocDesc);
@@ -153,15 +154,12 @@ public class JavadocWriter {
 		if (str.length() > 0) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 
-		String hrefs= store.getDependencies();
-		StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
-		while (tokenizer.hasMoreElements()) {
-			String href= (String) tokenizer.nextElement();
+		String[] hrefs= store.getHRefs();
+		for (int i= 0; i < hrefs.length; i++) {
 			Element links= document.createElement("link"); //$NON-NLS-1$
 			xmlJavadocDesc.appendChild(links);
-			links.setAttribute(store.HREF, href);
+			links.setAttribute(store.HREF, hrefs[i]);
 		}
-
 	}
 
 	private void sortSourceElement(IJavaElement[] iJavaElements, List sourcefiles, List packages) {
@@ -213,12 +211,14 @@ public class JavadocWriter {
 		if (fBasePath.segmentCount() == matchingSegments) {
 			return getRelativePath(fullPath, matchingSegments);
 		}
-		IProject proj= fJavaProject.getProject();	
-		IPath projLoc= proj.getLocation();
-		if (projLoc.segmentCount() <= matchingSegments && projLoc.isPrefixOf(fullPath)) {
-			return getRelativePath(fullPath, matchingSegments);
+		for (int i= 0; i < fJavaProjects.length; i++) {
+			IProject proj= fJavaProjects[i].getProject();
+			IPath projLoc= proj.getLocation();
+			if (projLoc.segmentCount() <= matchingSegments && projLoc.isPrefixOf(fullPath)) {
+				return getRelativePath(fullPath, matchingSegments);
+			}
 		}
-		IPath workspaceLoc= proj.getWorkspace().getRoot().getLocation();
+		IPath workspaceLoc= ResourcesPlugin.getWorkspace().getRoot().getLocation();
 		if (workspaceLoc.segmentCount() <= matchingSegments && workspaceLoc.isPrefixOf(fullPath)) {
 			return getRelativePath(fullPath, matchingSegments);
 		}		
@@ -230,13 +230,13 @@ public class JavadocWriter {
 		int backSegments= fBasePath.segmentCount() - matchingSegments;
 		while (backSegments > 0) {
 			res.append(".."); //$NON-NLS-1$
-			res.append(File.separatorChar);
+			res.append(PATH_SEPARATOR);
 			backSegments--;
 		}
 		int segCount= fullPath.segmentCount();
 		for (int i= matchingSegments; i < segCount; i++) {
 			if (i > matchingSegments) {
-				res.append(File.separatorChar);
+				res.append(PATH_SEPARATOR);
 			}
 			res.append(fullPath.segment(i));
 		}
@@ -280,7 +280,7 @@ public class JavadocWriter {
 		int nAdded= 0;
 		while (iter.hasNext()) {
 			if (nAdded > 0) {
-				buf.append(","); //$NON-NLS-1$
+				buf.append(',');
 			}
 			nAdded++;
 			String curr= (String) iter.next();

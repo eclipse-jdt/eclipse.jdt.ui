@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 
+import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -68,15 +69,6 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	Creates an instance of this class.  Use this constructor if you wish to specify
 	 *	the width and/or height of the combined widget (to only hardcode one of the
 	 *	sizing dimensions, specify the other dimension's value as -1)
-	 *
-	 *	@param parent org.eclipse.swt.widgets.Composite
-	 *	@param style int
-	 *  @param rootObject java.lang.Object
-	 *	@param childPropertyName java.lang.String
-	 *	@param parentPropertyName java.lang.String
-	 *	@param listPropertyName java.lang.String
-	 *	@param width int
-	 *	@param height int
 	 */
 	public CheckboxTreeAndListGroup(
 			Composite parent,
@@ -265,7 +257,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 * To determine whether a tree item should be white-checked use method
 	 * #determineShouldBeWhiteChecked(Object).
 	 *
-	 * @param element java.lang.Object
+	 * @param treeElement java.lang.Object
 	 * @return boolean
 	 * @see #determineShouldBeWhiteChecked(java.lang.Object)
 	 */
@@ -509,7 +501,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Handles the selection of an item in the tree viewer
 	 *
-	 *	@param selection ISelection
+	 *	@param event ISelection
 	 */
 	public void selectionChanged(final SelectionChangedEvent event) {
 		BusyIndicator.showWhile(getTable().getShell().getDisplay(), new Runnable() {
@@ -709,7 +701,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 * Update the selections of the tree elements in items to reflect the new
 	 * selections provided.
 	 * 
-	 * @param Map with keys of Object (the tree element) and values of List (the selected
+	 * @param items with keys of Object (the tree element) and values of List (the selected
 	 * list elements).
 	 */
 	public void updateSelections(final Map items) {
@@ -803,5 +795,11 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */	
 	public void expandTreeToLevel(Object object, int level) {
 		fTreeViewer.expandToLevel(object, level);	
+	}
+	/**
+	 * @param selection
+	 */
+	public void setTreeSelection(ISelection selection) {
+		fTreeViewer.setSelection(selection);
 	}
 }

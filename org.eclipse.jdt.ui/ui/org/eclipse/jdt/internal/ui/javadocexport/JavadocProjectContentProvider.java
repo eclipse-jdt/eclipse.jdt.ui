@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -48,27 +49,25 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IWorkspaceRoot) {
-			ArrayList list= new ArrayList();
-			try {
-				IJavaProject[] jprojects= JavaCore.create((IWorkspaceRoot) inputElement).getJavaProjects();
-				for (int i= 0; i < jprojects.length; i++) {
-					IJavaProject javaProject= jprojects[i];
-					IPackageFragment[] els= javaProject.getPackageFragments();
-					for (int j= 0; j < els.length; j++) {
-						IPackageFragment iPackageFragment= els[j];
-						if (iPackageFragment.getCompilationUnits().length > 0) {
-							list.add(javaProject);
-							break;
-						}
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		ArrayList list= new ArrayList();
+		try {
+			IJavaProject[] jprojects= JavaCore.create(root).getJavaProjects();
+			for (int i= 0; i < jprojects.length; i++) {
+				IJavaProject javaProject= jprojects[i];
+				IPackageFragment[] els= javaProject.getPackageFragments();
+				for (int j= 0; j < els.length; j++) {
+					IPackageFragment iPackageFragment= els[j];
+					if (iPackageFragment.getCompilationUnits().length > 0) {
+						list.add(javaProject);
+						break;
 					}
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
 			}
-			return list.toArray();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
-		return new Object[0];
+		return list.toArray();
 	}
 
 	/*

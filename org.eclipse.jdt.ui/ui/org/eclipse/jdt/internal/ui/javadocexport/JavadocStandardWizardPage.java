@@ -14,13 +14,13 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
@@ -66,8 +66,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class JavadocStandardWizardPage extends JavadocWizardPage {
 
+	private final int STYLESHEETSTATUS= 0;
+	
 	private JavadocOptionsManager fStore;
-	private JavadocWizard fWizard;
 	private Composite fUpperComposite;
 
 	private Group fBasicOptionsGroup;
@@ -75,27 +76,23 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	private Button fTitleButton;
 	private Text fTitleText;
-	protected Text fStyleSheetText;
-	protected FlaggedButton fDeprecatedList;
-	protected FlaggedButton fAuthorCheck;
-	protected FlaggedButton fVersionCheck;
-	protected FlaggedButton fDeprecatedCheck;
-	protected FlaggedButton fHierarchyCheck;
-	protected FlaggedButton fNavigatorCheck;
-	protected FlaggedButton fIndexCheck;
-	protected FlaggedButton fSeperatedIndexCheck;
-	protected FlaggedButton fUse;
-	protected Button fStyleSheetBrowseButton;
-	protected Button fStyleSheetButton;
+	private Text fStyleSheetText;
+	private FlaggedButton fDeprecatedList;
+	private FlaggedButton fDeprecatedCheck;
+	private FlaggedButton fIndexCheck;
+	private FlaggedButton fSeperatedIndexCheck;
+	private Button fStyleSheetBrowseButton;
+	private Button fStyleSheetButton;
 
 	private CheckedListDialogField fListDialogField;
-	private final int STYLESHEETSTATUS= 0;
-	private StatusInfo fStyleSheetStatus;
-	protected ArrayList fButtonsList;
-	private Map fTempLinks;
 
-	public JavadocStandardWizardPage(String pageName, JavadocOptionsManager store) {
+	private StatusInfo fStyleSheetStatus;
+	private ArrayList fButtonsList;
+	private JavadocTreeWizardPage fFirstPage;
+
+	public JavadocStandardWizardPage(String pageName, JavadocTreeWizardPage firstPage, JavadocOptionsManager store) {
 		super(pageName);
+		fFirstPage= firstPage;
 		setDescription(JavadocExportMessages.getString("JavadcoStandardWizardPage.description")); //$NON-NLS-1$
 
 		fStore= store;
@@ -109,7 +106,6 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	public void createControl(Composite parent) {
 
 		initializeDialogUnits(parent);
-		fWizard= (JavadocWizard) this.getWizard();
 
 		fUpperComposite= new Composite(parent, SWT.NONE);
 		fUpperComposite.setLayoutData(createGridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL, 1, 0));
@@ -143,24 +139,17 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fBasicOptionsGroup.setText(JavadocExportMessages.getString("JavadcoStandardWizardPage.basicgroup.label")); //$NON-NLS-1$
 
-		fUse= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.usebutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true); //$NON-NLS-1$
-		fHierarchyCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.hierarchybutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false); //$NON-NLS-1$
-		fNavigatorCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.navigartorbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false); //$NON-NLS-1$
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.usebutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true); //$NON-NLS-1$
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.hierarchybutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false); //$NON-NLS-1$
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.navigartorbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false); //$NON-NLS-1$
 
 		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.indexbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NOINDEX, false); //$NON-NLS-1$
 
 		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.seperateindexbutton.label"), createGridData(GridData.GRAB_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.SPLITINDEX, true); //$NON-NLS-1$
 		fSeperatedIndexCheck.getButton().setEnabled(fIndexCheck.getButton().getSelection());
 
-		fIndexCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fSeperatedIndexCheck.getButton()}) {
-			public void validate() {
-			}
-		});
-
-		fTitleButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fTitleText }) {
-			public void validate() {
-			}
-		});
+		fIndexCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fSeperatedIndexCheck.getButton()}));
+		fTitleButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fTitleText }));
 
 	}
 
@@ -170,16 +159,13 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fTagsGroup.setText(JavadocExportMessages.getString("JavadcoStandardWizardPage.tagsgroup.label")); //$NON-NLS-1$
 
-		fAuthorCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.authorbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true); //$NON-NLS-1$
-		fVersionCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.versionbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true); //$NON-NLS-1$
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.authorbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true); //$NON-NLS-1$
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.versionbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true); //$NON-NLS-1$
 		fDeprecatedCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.deprecatedbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false); //$NON-NLS-1$
 		fDeprecatedList= new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadcoStandardWizardPage.deprecatedlistbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.NODEPRECATEDLIST, false); //$NON-NLS-1$
 		fDeprecatedList.getButton().setEnabled(fDeprecatedCheck.getButton().getSelection());
 
-		fDeprecatedCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fDeprecatedList.getButton()}) {
-			public void validate() {
-			}
-		});
+		fDeprecatedCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fDeprecatedList.getButton()}));
 	} //end createTagOptionsGroup
 
 	private void createStyleSheetGroup(Composite composite) {
@@ -246,67 +232,45 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		LayoutUtil.setHorizontalGrabbing(fListDialogField.getListControl(null));
 
 		fListDialogField.enableButton(2, false);
-
-		fTempLinks= createTempLinksStore();
-		updateCheckedListGroup();
-
 	}
 
-	private Map createTempLinksStore() {
-		Map temp= new HashMap();
-		IProject[] projects= fStore.getRoot().getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IProject iProject= projects[i];
-			IJavaProject javaProject= JavaCore.create(iProject);
-			if (javaProject != null) {
-				String links= fStore.getLinks(javaProject);
-				temp.put(javaProject, links);
-			}
-		}
-		return temp;
-	}
-
-	private void checkListDialogFieldElements(List referencedClasses, IJavaProject[] projects) {
+	private List getCheckedReferences(List referencedClasses) {
 		List checkedElements= new ArrayList();
-		for (int i= 0; i < projects.length; i++) {
-			IJavaProject iJavaProject= projects[i];
-			String hrefs= (String) fTempLinks.get(iJavaProject);
-			URL url= null;
-			if (!hrefs.equals("")) { //$NON-NLS-1$
-
-				for (Iterator iterator= referencedClasses.iterator(); iterator.hasNext();) {
-					IJavaElement element= (IJavaElement) iterator.next();
-					try {
-						url= JavaUI.getJavadocBaseLocation(element);
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-						continue;
+		
+		String hrefs[]= fStore.getHRefs();
+		if (hrefs.length > 0) { //$NON-NLS-1$
+			HashSet set= new HashSet();
+			for (int i= 0; i < hrefs.length; i++) {
+				set.add(hrefs[i]);
+			}
+			for (Iterator iterator= referencedClasses.iterator(); iterator.hasNext();) {
+				IJavaElement element= (IJavaElement) iterator.next();
+				try {
+					URL url= JavaUI.getJavadocBaseLocation(element);
+					if (set.contains(url.toExternalForm())) {
+						checkedElements.add(element);
 					}
-					StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
-					while (tokenizer.hasMoreElements()) {
-						String href= (String) tokenizer.nextElement();
-						if ((url != null) && href.equals(url.toExternalForm())) {
-							if (!checkedElements.contains(element))
-								checkedElements.add(element);
-							break;
-						}
-					}
+				} catch (JavaModelException ignore) {
+					// ignore
 				}
 			}
 		}
-		fListDialogField.setCheckedElements(checkedElements);
+		return checkedElements;
+
 	}
 
-	private void findRE(List referencedClasses, IJavaProject[] jprojects, List visisted) throws JavaModelException {
-		for (int j= 0; j < jprojects.length; j++) {
-			IJavaProject iJavaProject= jprojects[j];
-			findReferencedElements(referencedClasses, iJavaProject, new ArrayList());
+	private void findReferencedElements(List result, IJavaProject[] checkedProjects, List visisted) throws JavaModelException {
+		for (int j= 0; j < checkedProjects.length; j++) {
+			IJavaProject iJavaProject= checkedProjects[j];
+			findReferencedElements(result, iJavaProject, new ArrayList());
+		}
+		for (int i= 0; i < checkedProjects.length; i++) {
+			result.remove(checkedProjects[i]);
 		}
 	}
 
 	/**
 	 * Method finds a list of all referenced libararies and projects.
-	 * 
 	 */
 	private void findReferencedElements(List referencedClasses, IJavaProject jproject, List visited) throws JavaModelException {
 
@@ -316,6 +280,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			return;
 		}
 		visited.add(jproject);
+		
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
 		IClasspathEntry[] entries= jproject.getResolvedClasspath(true);
 		for (int i= 0; i < entries.length; i++) {
@@ -330,13 +296,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					}
 					break;
 				case IClasspathEntry.CPE_PROJECT :
-					IProject reqProject= (IProject) fStore.getRoot().findMember(curr.getPath());
+					IProject reqProject= (IProject) root.findMember(curr.getPath());
 					IJavaProject javaProject= JavaCore.create(reqProject);
 
 					if (reqProject != null && reqProject.isOpen()) {
 						if (!referencedClasses.contains(javaProject)) {
-							if (!fWizard.getSelectedProjects().contains(javaProject))
-								referencedClasses.add(javaProject);
 							findReferencedElements(referencedClasses, javaProject, visited);
 						}
 					}
@@ -374,7 +338,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		return StatusUtil.getMostSevere(new IStatus[] { fStyleSheetStatus });
 	}
 
-	protected void finish() {
+	public void updateStore() {
 
 		if (fTitleButton.getSelection())
 			fStore.setTitle(fTitleText.getText());
@@ -399,35 +363,25 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		else
 			fStore.setStyleSheet(""); //$NON-NLS-1$
 
-		String hrefs= makeHrefString();
-		fStore.setDependencies(hrefs);
-		//only store the new dependecies for a project if only one is selected
-		if (fWizard.getSelectedProjects().size() == 1)
-			fStore.setLinks((IJavaProject) fWizard.getSelectedProjects().iterator().next(), hrefs);
+		fStore.setHRefs(getHRefs());
 	}
 
-	protected String makeHrefString() {
-		boolean firstTime= true;
-		StringBuffer buf= new StringBuffer();
-		List els= fListDialogField.getCheckedElements();
-		URL url= null;
-		for (Iterator iterator= els.iterator(); iterator.hasNext();) {
+	private String[] getHRefs() {
+		HashSet res= new HashSet();
+		List checked= fListDialogField.getCheckedElements();
+		for (Iterator iterator= checked.iterator(); iterator.hasNext();) {
 			try {
 				IJavaElement element= (IJavaElement) iterator.next();
-				url= JavaUI.getJavadocBaseLocation(element);
+				URL url= JavaUI.getJavadocBaseLocation(element);
+				if (url != null) {
+					res.add(url.toExternalForm());
+				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				continue;
 			}
-			if (url != null) {
-				if (firstTime)
-					firstTime= false;
-				else
-					buf.append(";"); //$NON-NLS-1$
-				buf.append(url.toExternalForm());
-			}
 		}
-		return buf.toString();
+		return (String[]) res.toArray(new String[res.size()]);
 	}
 
 	//get the links
@@ -436,16 +390,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			doValidation(STYLESHEETSTATUS);
-
-			//update elements CheckedListDialogField
-			updateCheckedListGroup();
+			updateHRefList(fFirstPage.getCheckedProjects());
 		} else {
-
-			String hrefs= makeHrefString();
-			IJavaProject[] projects= (IJavaProject[]) fWizard.getSelectedProjects().toArray(new IJavaProject[fWizard.getSelectedProjects().size()]);
-			for (int i= 0; i < projects.length; i++) {
-				fTempLinks.put(projects[i], hrefs);
-			}
+			fStore.setHRefs(getHRefs());
 		}
 	}
 
@@ -454,18 +401,16 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 * depended on the projects or elements of projects selected in the
 	 * TreeViewer on the JavadocTreeWizardPage.
 	 */
-	public void updateCheckedListGroup() {
+	private void updateHRefList(IJavaProject[] checkedProjects) {
 
-		List referencedClasses= new ArrayList();
-		List visited= new ArrayList();
+		List references= new ArrayList();
 		try {
 
-			IJavaProject[] currProjects= (IJavaProject[]) fWizard.getSelectedProjects().toArray(new IJavaProject[fWizard.getSelectedProjects().size()]);
-
-			findRE(referencedClasses, currProjects, visited);
-			fListDialogField.setElements(referencedClasses);
-			//compare with elements in list with those that are checked.
-			checkListDialogFieldElements(referencedClasses, currProjects);
+			findReferencedElements(references, checkedProjects, new ArrayList());
+			fListDialogField.setElements(references);
+			
+			List checked= getCheckedReferences(references);
+			fListDialogField.setCheckedElements(checked);
 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);

@@ -21,27 +21,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import org.eclipse.core.internal.runtime.Assert;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
  */
 public class JavadocReader extends Object {
 
-	protected InputStream fInputStream;
-	//@Improve: variable needed for new impletation of ant scripts
-	protected IJavaProject fProject;
+	private InputStream fInputStream;
 
 	/**
 	 * Reads a Javadoc Ant Script from the underlying stream.
@@ -78,12 +68,6 @@ public class JavadocReader extends Object {
 
 		//find the project associated with the ant script
 		Element xmlJavadocDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
-		String projectName= xmlJavadocDesc.getAttribute("name"); //$NON-NLS-1$
-		IResource res= null;
-		if (projectName != null)
-			res= JavaPlugin.getWorkspace().getRoot().findMember(projectName);
-		if (res instanceof IProject)
-			fProject= JavaCore.create((IProject) res);
 
 		NodeList targets= xmlJavadocDesc.getChildNodes();
 
@@ -103,26 +87,6 @@ public class JavadocReader extends Object {
 
 		}
 		return null;
-	}
-
-	protected boolean getBooleanAttribute(Element element, String name, boolean defaultValue) throws IOException {
-		if (element.hasAttribute(name))
-			return getBooleanAttribute(element, name);
-		else
-			return defaultValue;
-	}
-
-	protected boolean getBooleanAttribute(Element element, String name) throws IOException {
-		String value= element.getAttribute(name);
-		if (value != null && value.equalsIgnoreCase("true")) //$NON-NLS-1$
-			return true;
-		if (value != null && value.equalsIgnoreCase("false")) //$NON-NLS-1$
-			return false;
-		throw new IOException("Illegal value for boolean attribute"); //$NON-NLS-1$
-	}
-
-	IJavaProject getProject() {
-		return fProject;
 	}
 
 }

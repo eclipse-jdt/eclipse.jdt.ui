@@ -15,14 +15,8 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,8 +28,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -44,10 +39,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -57,10 +49,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -68,16 +56,13 @@ import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 
 public class JavadocOptionsManager {
 
-	private IWorkspaceRoot fRoot;
-	//consider making a List
-	private List fProjects;
 	private IFile fXmlfile;
 
 	private StatusInfo fWizardStatus;
 
-	private List fSourceElements;
+	private IJavaElement[] fSelectedElements;
 
-	private List fSelectedElements;
+	private IJavaElement[] fInitialElements;
 
 	private String fAccess;
 	private String fDocletpath;
@@ -87,6 +72,8 @@ public class JavadocOptionsManager {
 	private String fAdditionalParams;
 	private String fOverview;
 	private String fTitle;
+	
+	private String[] fHRefs;
 
 	private IPath[] fSourcepath;
 	private IPath[] fClasspath;
@@ -104,13 +91,11 @@ public class JavadocOptionsManager {
 	private boolean fJDK14Mode;
 
 	private boolean fOpenInBrowser;
-
-	//list of hrefs in string format
-	private Map fLinks;
+	
+	private RecentSettingsStore fRecentSettings;
 
 	//add-on for multi-project version
 	private String fDestination;
-	private String fDependencies;
 	private String fAntpath;
 
 	public final String PRIVATE= "private"; //$NON-NLS-1$
@@ -140,35 +125,31 @@ public class JavadocOptionsManager {
 	public final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
 	public final String SOURCEFILES= "sourcefiles"; //$NON-NLS-1$
 	public final String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
-	public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
+	//public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
 	public final String TITLE= "doctitle"; //$NON-NLS-1$
 	public final String HREF= "href"; //$NON-NLS-1$
 
 	public final String NAME= "name"; //$NON-NLS-1$
 	public final String PATH= "path"; //$NON-NLS-1$
-	private final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
-	private final String ANTPATH= "antpath"; //$NON-NLS-1$
+	public final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
+	public final String ANTPATH= "antpath"; //$NON-NLS-1$
 	public final String SOURCE= "source"; //$NON-NLS-1$
 	
+	private final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
 	
-
-	/**
-	 * @param xmlJavadocFile The ant file to take initl values from or null, if not started from an ant file.
-	 * @param setting Dialog settings for the Javadoc exporter.
-	 */
-	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings settings, ISelection currSelection) {
-		fRoot= ResourcesPlugin.getWorkspace().getRoot();
+	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
-		fLinks= new HashMap();
-		fProjects= new ArrayList();
+
+		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC); //$NON-NLS-1$
+		
+		fRecentSettings= new RecentSettingsStore(javadocSection);
+		
 		if (xmlJavadocFile != null) {
 			try {
 				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
 				Element element= reader.readXML();
-				IJavaProject p= reader.getProject();
-				if (element != null && p != null) {
-					fProjects.add(p);
+				if (element != null) {
 					loadFromXML(element);
 					return;
 				}
@@ -183,16 +164,35 @@ public class JavadocOptionsManager {
 				fWizardStatus.setWarning(JavadocExportMessages.getString("JavadocOptionsManager.antfileincorrectSAXE.warning")); //$NON-NLS-1$
 			}
 		}
-		if (settings != null) {
-			loadFromDialogStore(settings, currSelection);
+		if (javadocSection != null) {
+			loadFromDialogStore(javadocSection, currSelection);
 		} else {
 			loadDefaults(currSelection);
 		}
 	}
 
-	private void loadFromDialogStore(IDialogSettings settings, ISelection sel) {
-		//getValidSelection will also find the project
-		fSelectedElements= getValidSelection(sel);
+	/*
+	 * Returns the the Java project that is parent top all selected elements or null if
+	 * the elements are from several projects.
+	 */
+	private IJavaProject getSingleProjectFromInitialSelection() {
+		IJavaProject res= null;
+		for (int i= 0; i < fInitialElements.length; i++) {
+			IJavaProject curr= fInitialElements[i].getJavaProject();
+			if (res == null) {
+				res= curr;
+			} else if (!res.equals(curr)) {
+				return null;
+			}
+		}
+		return res;
+	}
+	
+	
+	private void loadFromDialogStore(IDialogSettings settings, List sel) {
+		fInitialElements= getInitialElementsFromSelection(sel);
+		
+		IJavaProject project= getSingleProjectFromInitialSelection();
 
 		fAccess= settings.get(VISIBILITY);
 		if (fAccess == null)
@@ -210,17 +210,25 @@ public class JavadocOptionsManager {
 			fDocletname= ""; //$NON-NLS-1$
 		}
 
-		//load a default antpath
-		fAntpath= settings.get(ANTPATH);
-		if (fAntpath == null)
-			fAntpath= ""; //$NON-NLS-1$
-		//$NON-NLS-1$
+		
+		if (project != null) {
+			fAntpath= getRecentSettings().getAntpath(project);
+		} else {
+			fAntpath= settings.get(ANTPATH);
+			if (fAntpath == null) {
+				fAntpath= ""; //$NON-NLS-1$
+			}
+		}
 
-		//load a default antpath
-		fDestination= settings.get(DESTINATION);
-		if (fDestination == null)
-			fDestination= ""; //$NON-NLS-1$
-		//$NON-NLS-1$
+		
+		if (project != null) {
+			fDestination= getRecentSettings().getDestination(project);
+		} else {
+			fDestination= settings.get(DESTINATION);
+			if (fDestination == null) {
+				fDestination= ""; //$NON-NLS-1$
+			}
+		}
 
 		fTitle= settings.get(TITLE);
 		if (fTitle == null)
@@ -238,112 +246,43 @@ public class JavadocOptionsManager {
 		if (fOverview == null)
 			fOverview= ""; //$NON-NLS-1$
 
-		fUse= loadbutton(settings.get(USE));
-		fAuthor= loadbutton(settings.get(AUTHOR));
-		fVersion= loadbutton(settings.get(VERSION));
-		fNodeprecated= loadbutton(settings.get(NODEPRECATED));
-		fNoDeprecatedlist= loadbutton(settings.get(NODEPRECATEDLIST));
-		fNonavbar= loadbutton(settings.get(NONAVBAR));
-		fNoindex= loadbutton(settings.get(NOINDEX));
-		fNotree= loadbutton(settings.get(NOTREE));
-		fSplitindex= loadbutton(settings.get(SPLITINDEX));
-		fOpenInBrowser= loadbutton(settings.get(OPENINBROWSER));
+		fUse= loadBoolean(settings.get(USE));
+		fAuthor= loadBoolean(settings.get(AUTHOR));
+		fVersion= loadBoolean(settings.get(VERSION));
+		fNodeprecated= loadBoolean(settings.get(NODEPRECATED));
+		fNoDeprecatedlist= loadBoolean(settings.get(NODEPRECATEDLIST));
+		fNonavbar= loadBoolean(settings.get(NONAVBAR));
+		fNoindex= loadBoolean(settings.get(NOINDEX));
+		fNotree= loadBoolean(settings.get(NOTREE));
+		fSplitindex= loadBoolean(settings.get(SPLITINDEX));
+		fOpenInBrowser= loadBoolean(settings.get(OPENINBROWSER));
 		
-		fJDK14Mode= loadbutton(settings.get(SOURCE));
-
-		//get the set of project specific data
-		loadLinksFromDialogSettings(settings);
-	}
-
-	private String getDefaultAntPath(IJavaProject project) {
+		fJDK14Mode= loadBoolean(settings.get(SOURCE));
+		
 		if (project != null) {
-			IPath path= project.getProject().getLocation();
-			if (path != null)
-				return path.append("javadoc.xml").toOSString(); //$NON-NLS-1$
-		}
-
-		return ""; //$NON-NLS-1$
-	}
-
-	private String getDefaultDestination(IJavaProject project) {
-		if (project != null) {
-			URL url= JavaUI.getProjectJavadocLocation(project);
-			//uses default if source is has http protocol
-			if (url == null || !url.getProtocol().equals("file")) { //$NON-NLS-1$
-				IPath path= project.getProject().getLocation();
-				if (path != null)
-					return path.append("doc").toOSString(); //$NON-NLS-1$
-			} else {
-				//must do this to remove leading "/"
-				return (new File(url.getFile())).getPath();
-			}
-		}
-
-		return ""; //$NON-NLS-1$
-
-	}
-	/**
-	* Method creates a list of data structes that contain
-	* The destination, antfile location and the list of library/project references for every
-	* project in the workspace.Defaults are created for new project.
-	*/
-	private void loadLinksFromDialogSettings(IDialogSettings settings) {
-
-		//sets data for projects if stored in the dialog settings
-		if (settings != null) {
-			IDialogSettings links= settings.getSection("projects"); //$NON-NLS-1$
-			if (links != null) {
-				IDialogSettings[] projs= links.getSections();
-				for (int i= 0; i < projs.length; i++) {
-					IDialogSettings iDialogSettings= projs[i];
-					String projectName= iDialogSettings.getName();
-					IProject project= fRoot.getProject(projectName);
-					//make sure project has not been removed
-					if (project.exists()) {
-						IJavaProject javaProject= JavaCore.create(project);
-						if (!fLinks.containsKey(javaProject)) {
-							String hrefs= iDialogSettings.get(HREF);
-							if (hrefs == null) {
-								hrefs= ""; //$NON-NLS-1$
-							}
-							String destdir= iDialogSettings.get(DESTINATION);
-							if (destdir == null || destdir.length() == 0) {
-								destdir= getDefaultDestination(javaProject);
-							}
-							String antpath= iDialogSettings.get(ANTPATH);
-							if (antpath == null || antpath.length() == 0) {
-								antpath= getDefaultAntPath(javaProject);
-							}
-							ProjectData data= new ProjectData();
-							data.setDestination(destdir);
-							data.setAntpath(antpath);
-							data.setLinks(hrefs);
-							if (!fLinks.containsValue(javaProject))
-								fLinks.put(javaProject, data);
-						}
-					}
-				}
-			}
-		}
-		//finds projects in the workspace that have been added since the
-		//last time the wizard was run
-		IProject[] projects= fRoot.getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IProject iProject= projects[i];
-			IJavaProject javaProject= JavaCore.create(iProject);
-			if (!fLinks.containsKey(javaProject)) {
-				ProjectData data= new ProjectData();
-				data.setDestination(getDefaultDestination(javaProject));
-				data.setAntpath(getDefaultAntPath(javaProject));
-				data.setLinks(""); //$NON-NLS-1$
-				fLinks.put(javaProject, data);
-			}
+			fHRefs= getRecentSettings().getHRefs(project);
+		} else {
+			fHRefs= new String[0];
 		}
 	}
+
+
 	//loads defaults for wizard (nothing is stored)
-	private void loadDefaults(ISelection sel) {
-		fSelectedElements= getValidSelection(sel);
+	private void loadDefaults(List sel) {
+		fInitialElements= getInitialElementsFromSelection(sel);
+		
+		IJavaProject project= getSingleProjectFromInitialSelection();
 
+		if (project != null) {
+			fAntpath= getRecentSettings().getAntpath(project);
+			fDestination= getRecentSettings().getDestination(project);
+			fHRefs= getRecentSettings().getHRefs(project);
+		} else {
+			fAntpath= ""; //$NON-NLS-1$
+			fDestination= ""; //$NON-NLS-1$
+			fHRefs= new String[0];
+		}
+		
 		fAccess= PUBLIC;
 
 		fDocletname= ""; //$NON-NLS-1$
@@ -352,8 +291,6 @@ public class JavadocOptionsManager {
 		fStylesheet= ""; //$NON-NLS-1$
 		fAdditionalParams= ""; //$NON-NLS-1$
 		fOverview= ""; //$NON-NLS-1$
-		fAntpath= ""; //$NON-NLS-1$
-		fDestination= ""; //$NON-NLS-1$
 
 		fUse= true;
 		fAuthor= true;
@@ -369,30 +306,29 @@ public class JavadocOptionsManager {
 
 		//by default it is empty all project map to the empty string
 		fFromStandard= true;
-		loadLinksFromDialogSettings(null);
 	}
 
 	private void loadFromXML(Element element) {
 
 		fAccess= element.getAttribute(VISIBILITY);
-		if (!(fAccess.length() > 0))
+		if (fAccess.length() == 0)
 			fAccess= PROTECTED;
 
 		//Since the selected packages are stored we must locate the project
 		String destination= element.getAttribute(DESTINATION);
-		fDestination= destination;
+		fDestination= makeAbsolutePathFromRelative(destination).toOSString();
 		fFromStandard= true;
 		fDocletname= ""; //$NON-NLS-1$
 		fDocletpath= ""; //$NON-NLS-1$
 
-		if (destination.equals("")) { //$NON-NLS-1$
+		if (destination.length() == 0) { //$NON-NLS-1$
 			NodeList list= element.getChildNodes();
 			for (int i= 0; i < list.getLength(); i++) {
 				Node child= list.item(i);
 				if (child.getNodeName().equals("doclet")) { //$NON-NLS-1$
 					fDocletpath= ((Element) child).getAttribute(PATH);
 					fDocletname= ((Element) child).getAttribute(NAME);
-					if (!(fDocletpath.equals("") && !fDocletname.equals(""))) { //$NON-NLS-1$ //$NON-NLS-2$
+					if (fDocletpath.length() != 0 || fDocletname.length() != 0) {
 						fFromStandard= false;
 					} else {
 						fDocletname= ""; //$NON-NLS-1$
@@ -402,40 +338,21 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
+		
+		fInitialElements= getSelectedElementsFromAnt(element);
+		
 
 		//find all the links stored in the ant script
-		boolean firstTime= true;
-		StringBuffer buf= new StringBuffer();
 		NodeList children= element.getChildNodes();
-		for (int i= 0; i < children.getLength(); i++) {
+		fHRefs= new String[children.getLength()];
+		for (int i= 0; i < fHRefs.length; i++) {
 			Node child= children.item(i);
 			if (child.getNodeName().equals("link")) { //$NON-NLS-1$
-				String href= ((Element) child).getAttribute(HREF);
-				if (firstTime)
-					firstTime= false;
-				else
-					buf.append(';');
-				buf.append(href);
+				fHRefs[i]= ((Element) child).getAttribute(HREF);
 			}
 		}
 
-		//associate all those links with each project selected	
-		for (Iterator iter= fProjects.iterator(); iter.hasNext();) {
-			IJavaProject iJavaProject= (IJavaProject) iter.next();
-
-			ProjectData data= new ProjectData();
-			IPath path= fXmlfile.getLocation();
-			if (path != null)
-				data.setAntpath(path.toOSString());
-			else
-				data.setAntpath(""); //$NON-NLS-1$
-			data.setLinks(buf.toString());
-			data.setDestination(destination);
-			fLinks.put(iJavaProject, data);
-		}
-
 		//get tree elements
-		setSelectedElementsFromAnt(element, (IJavaProject) fProjects.get(0));
 		IPath p= fXmlfile.getLocation();
 		if (p != null)
 			fAntpath= p.toOSString();
@@ -447,15 +364,15 @@ public class JavadocOptionsManager {
 		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
 		fOverview= element.getAttribute(OVERVIEW);
 
-		fUse= loadbutton(element.getAttribute(USE));
-		fAuthor= loadbutton(element.getAttribute(AUTHOR));
-		fVersion= loadbutton(element.getAttribute(VERSION));
-		fNodeprecated= loadbutton(element.getAttribute(NODEPRECATED));
-		fNoDeprecatedlist= loadbutton(element.getAttribute(NODEPRECATEDLIST));
-		fNonavbar= loadbutton(element.getAttribute(NONAVBAR));
-		fNoindex= loadbutton(element.getAttribute(NOINDEX));
-		fNotree= loadbutton(element.getAttribute(NOTREE));
-		fSplitindex= loadbutton(element.getAttribute(SPLITINDEX));
+		fUse= loadBoolean(element.getAttribute(USE));
+		fAuthor= loadBoolean(element.getAttribute(AUTHOR));
+		fVersion= loadBoolean(element.getAttribute(VERSION));
+		fNodeprecated= loadBoolean(element.getAttribute(NODEPRECATED));
+		fNoDeprecatedlist= loadBoolean(element.getAttribute(NODEPRECATEDLIST));
+		fNonavbar= loadBoolean(element.getAttribute(NONAVBAR));
+		fNoindex= loadBoolean(element.getAttribute(NOINDEX));
+		fNotree= loadBoolean(element.getAttribute(NOTREE));
+		fSplitindex= loadBoolean(element.getAttribute(SPLITINDEX));
 	}
 
 	/*
@@ -480,56 +397,75 @@ public class JavadocOptionsManager {
 		}
 		return path;
 	}
+	
+	private IContainer[] getSourceContainers(Element element) {
+		String sourcePaths= element.getAttribute(SOURCEPATH);
+		StringTokenizer tokenizer= new StringTokenizer(sourcePaths, ","); //$NON-NLS-1$
+		ArrayList res= new ArrayList();
+		
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		
+		while (tokenizer.hasMoreTokens()) {
+			IPath path= makeAbsolutePathFromRelative(tokenizer.nextToken().trim());
+			if (path != null) {
+				IContainer[] containers= root.findContainersForLocation(path);
+				for (int i= 0; i < containers.length; i++) {
+					res.add(containers[i]);
+				}
+			}
+		}
+		return (IContainer[]) res.toArray(new IContainer[res.size()]);
+	}
+	
 
-	private void setSelectedElementsFromAnt(Element element, IJavaProject iJavaProject) {
-		fSelectedElements= new ArrayList();
+	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
+		List res= new ArrayList();
 
-		//get all the packages in side the project
-		String name;
+		// get all the packages listed in the ANT file
 		String packagenames= element.getAttribute(PACKAGENAMES);
 		if (packagenames != null) {
+			IContainer[] containers= getSourceContainers(element);
+			
 			StringTokenizer tokenizer= new StringTokenizer(packagenames, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
-				name= tokenizer.nextToken().trim();
-				IJavaElement el;
-				try {
-					el= JavaModelUtil.findTypeContainer(iJavaProject, name);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					continue;
-				}
-				if ((el != null) && (el instanceof IPackageFragment)) {
-					fSelectedElements.add(el);
+				IPath relPackagePath= new Path(tokenizer.nextToken().trim().replace('.', '/'));
+				for (int i= 0; i < containers.length; i++) {
+					IContainer curr= containers[i];
+					IResource resource= curr.findMember(relPackagePath);
+					if (resource != null) {
+						IJavaElement javaElem= JavaCore.create(resource);
+						if (javaElem instanceof IPackageFragment) {
+							res.add(javaElem);
+						}
+					}
 				}
 			}
 		}
 
-		//get all CompilationUnites in side the project
+		//get all CompilationUnites listed in the ANT file
 		String sourcefiles= element.getAttribute(SOURCEFILES);
 		if (sourcefiles != null) {
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			
 			StringTokenizer tokenizer= new StringTokenizer(sourcefiles, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
-				name= tokenizer.nextToken().trim();
+				String name= tokenizer.nextToken().trim();
 				if (name.endsWith(".java")) { //$NON-NLS-1$
 					IPath path= makeAbsolutePathFromRelative(name);
-
 					//if unable to create an absolute path the the resource skip it
-					if (path == null)
-						continue;
-
-					IFile[] files= fRoot.findFilesForLocation(path);
-					for (int i= 0; i < files.length; i++) {
-						IFile curr= files[i];
-						if (curr.getProject().equals(iJavaProject.getProject())) {
-							IJavaElement el= JavaCore.createCompilationUnitFrom(curr);
+					if (path != null) {
+						IFile[] files= root.findFilesForLocation(path);
+						for (int i= 0; i < files.length; i++) {
+							IJavaElement el= JavaCore.createCompilationUnitFrom(files[i]);
 							if (el != null) {
-								fSelectedElements.add(el);
+								res.add(el);
 							}
 						}
 					}
 				}
 			}
 		}
+		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
 	}
 
 	//it is possible that the package list is empty
@@ -537,43 +473,24 @@ public class JavadocOptionsManager {
 		return fWizardStatus;
 	}
 
-	public IJavaElement[] getSelectedElements() {
-		return (IJavaElement[]) fSelectedElements.toArray(new IJavaElement[fSelectedElements.size()]);
+	public IJavaElement[] getInitialElements() {
+		return fInitialElements;
 	}
 
 	public IJavaElement[] getSourceElements() {
-		return (IJavaElement[]) fSourceElements.toArray(new IJavaElement[fSourceElements.size()]);
+		return fSelectedElements;
 	}
 
 	public String getAccess() {
 		return fAccess;
 	}
 
-	public String getGeneralAntpath() {
+	public String getAntpath() {
 		return fAntpath;
 	}
 
-	public String getSpecificAntpath(IJavaProject project) {
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			return data.getAntPath();
-		else
-			return ""; //$NON-NLS-1$
-	}
-
-	public boolean fromStandard() {
+	public boolean isFromStandard() {
 		return fFromStandard;
-	}
-
-	//for now if multiple projects are selected the destination
-	//feild will be empty, 
-	public String getDestination(IJavaProject project) {
-
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			return data.getDestination();
-		else
-			return ""; //$NON-NLS-1$
 	}
 
 	public String getDestination() {
@@ -608,41 +525,16 @@ public class JavadocOptionsManager {
 		return fSourcepath;
 	}
 
-	public IWorkspaceRoot getRoot() {
-		return fRoot;
-	}
-
-	//	public IJavaProject[] getJavaProjects() {
-	//		return (IJavaProject[]) fProjects.toArray(new IJavaProject[fProjects.size()]);
-	//	}
-
-	//Use only this one later
-	public List getJavaProjects() {
-		return fProjects;
-	}
-
 	public String getTitle() {
 		return fTitle;
 	}
 
-	public String getLinks(IJavaProject project) {
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			return data.getLinks();
-		else
-			return ""; //$NON-NLS-1$
-	}
-
-	public String getDependencies() {
-		return fDependencies;
-	}
-
-	public Map getLinkMap() {
-		return fLinks;
-	}
-
 	public boolean doOpenInBrowser() {
 		return fOpenInBrowser;
+	}
+	
+	public String[] getHRefs() {
+		return fHRefs;
 	}
 
 	public boolean getBoolean(String flag) {
@@ -669,9 +561,9 @@ public class JavadocOptionsManager {
 			return false;
 	}
 
-	private boolean loadbutton(String value) {
+	private boolean loadBoolean(String value) {
 
-		if (value == null || value.equals("")) //$NON-NLS-1$
+		if (value == null || value.length() == 0) //$NON-NLS-1$
 			return false;
 		else {
 			if (value.equals("true")) //$NON-NLS-1$
@@ -694,10 +586,6 @@ public class JavadocOptionsManager {
 	
 
 	public String[] createArgumentArray() {
-		if (fProjects.isEmpty()) {
-			return new String[0];
-		}
-
 		List args= new ArrayList();
 		//bug 38692
 		args.add(JavadocPreferencePage.getJavaDocCommand());
@@ -705,7 +593,7 @@ public class JavadocOptionsManager {
 			args.add("-d"); //$NON-NLS-1$
 			args.add(fDestination);
 		} else {
-			if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
+			if (fAdditionalParams.length() != 0) { //$NON-NLS-1$
 				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
 				String[] argsArray= tokens.getProgramArgumentsArray();
 				for (int i= 0; i < argsArray.length; i++) {
@@ -748,18 +636,18 @@ public class JavadocOptionsManager {
 			if (fSplitindex)
 				args.add("-splitindex"); //$NON-NLS-1$
 
-			if (!fTitle.equals("")) { //$NON-NLS-1$
+			if (fTitle.length() != 0) { //$NON-NLS-1$
 				args.add("-doctitle"); //$NON-NLS-1$
 				args.add(fTitle);
 			}
 
 
-			if (!fStylesheet.equals("")) { //$NON-NLS-1$
+			if (fStylesheet.length() != 0) { //$NON-NLS-1$
 				args.add("-stylesheetfile"); //$NON-NLS-1$
 				args.add(fStylesheet);
 			}
 
-			if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
+			if (fAdditionalParams.length() != 0) { //$NON-NLS-1$
 				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
 				String[] argsArray= tokens.getProgramArgumentsArray();
 				for (int i= 0; i < argsArray.length; i++) {
@@ -767,22 +655,20 @@ public class JavadocOptionsManager {
 				}
 			}
 
-			String hrefs= fDependencies;
-			StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
-			while (tokenizer.hasMoreElements()) {
-				String href= (String) tokenizer.nextElement();
+			for (int i= 0; i < fHRefs.length; i++) {
 				args.add("-link"); //$NON-NLS-1$
-				args.add(href);
+				args.add(fHRefs[i]);
 			}
+
 		} //end standard options
 
-		if (!fOverview.equals("")) { //$NON-NLS-1$
+		if (fOverview.length() != 0) { //$NON-NLS-1$
 			args.add("-overview"); //$NON-NLS-1$
 			args.add(fOverview);
 		}
 
-		for (int i= 0; i < fSourceElements.size(); i++) {
-			IJavaElement curr= (IJavaElement) fSourceElements.get(i);
+		for (int i= 0; i < fSelectedElements.length; i++) {
+			IJavaElement curr= fSelectedElements[i];
 			if (curr instanceof IPackageFragment) {
 				args.add(curr.getElementName());
 			} else if (curr instanceof ICompilationUnit) {
@@ -797,31 +683,28 @@ public class JavadocOptionsManager {
 
 	}
 
-	public void createXML() throws CoreException {
+	public void createXML(IJavaProject[] projects) throws CoreException {
 		FileOutputStream objectStreamOutput= null;
 		//@change
 		//for now only writting ant files for single project selection
 		String antpath= fAntpath;
 		try {
-			if (!antpath.equals("")) { //$NON-NLS-1$
+			if (antpath.length() > 0) {
 				File file= new File(antpath);
 
 				IPath antPath= new Path(antpath);
 				IPath antDir= antPath.removeLastSegments(1);
 				
 				IPath basePath= null;
-				
-				Assert.isTrue(fProjects.size() == 1);
-				IJavaProject jproject= (IJavaProject) fProjects.get(0);
-				IWorkspaceRoot root= jproject.getProject().getWorkspace().getRoot();
+				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 				if (root.findFilesForLocation(antPath).length > 0) {
 					basePath= antDir; // only do relative path if ant file is stored in the workspace
 				}
 				
 				antDir.toFile().mkdirs();
-
+			
 				objectStreamOutput= new FileOutputStream(file);
-				JavadocWriter writer= new JavadocWriter(objectStreamOutput, basePath, jproject);
+				JavadocWriter writer= new JavadocWriter(objectStreamOutput, basePath, projects);
 				writer.writeXML(this);
 			}
 		} catch (IOException e) {
@@ -843,9 +726,8 @@ public class JavadocOptionsManager {
 		}
 	}
 
-	public IDialogSettings createDialogSettings() {
-
-		IDialogSettings settings= new DialogSettings("javadoc"); //$NON-NLS-1$
+	public void updateDialogSettings(IDialogSettings dialogSettings, IJavaProject[] checkedProjects) {
+		IDialogSettings settings= dialogSettings.addNewSection(SECTION_JAVADOC);
 
 		settings.put(FROMSTANDARD, fFromStandard);
 
@@ -866,153 +748,103 @@ public class JavadocOptionsManager {
 		settings.put(OPENINBROWSER, fOpenInBrowser);
 		settings.put(SOURCE, fJDK14Mode);
 
-		if (!fAntpath.equals("")) //$NON-NLS-1$
+		if (fAntpath.length() != 0) //$NON-NLS-1$
 			settings.put(ANTPATH, fAntpath);
-		if (!fDestination.equals("")) //$NON-NLS-1$
+		if (fDestination.length() != 0) //$NON-NLS-1$
 			settings.put(DESTINATION, fDestination);
-		if (!fAdditionalParams.equals("")) //$NON-NLS-1$
+		if (fAdditionalParams.length() != 0) //$NON-NLS-1$
 			settings.put(EXTRAOPTIONS, fAdditionalParams);
-		if (!fOverview.equals("")) //$NON-NLS-1$
+		if (fOverview.length() != 0) //$NON-NLS-1$
 			settings.put(OVERVIEW, fOverview);
-		if (!fStylesheet.equals("")) //$NON-NLS-1$
+		if (fStylesheet.length() != 0) //$NON-NLS-1$
 			settings.put(STYLESHEETFILE, fStylesheet);
-		if (!fTitle.equals("")) //$NON-NLS-1$
+		if (fTitle.length() != 0) //$NON-NLS-1$
 			settings.put(TITLE, fTitle);
 
-		IDialogSettings links= new DialogSettings("projects"); //$NON-NLS-1$
-
-		//Write all project information to DialogSettings.
-		Set keys= fLinks.keySet();
-		for (Iterator iter= keys.iterator(); iter.hasNext();) {
-
-			IJavaProject iJavaProject= (IJavaProject) iter.next();
-
-			IDialogSettings proj= new DialogSettings(iJavaProject.getElementName());
-			if (!keys.contains(iJavaProject)) {
-				proj.put(HREF, ""); //$NON-NLS-1$
-				proj.put(DESTINATION, ""); //$NON-NLS-1$
-				proj.put(ANTPATH, ""); //$NON-NLS-1$
-			} else {
-				ProjectData data= (ProjectData) fLinks.get(iJavaProject);
-				proj.put(HREF, data.getLinks());
-				proj.put(DESTINATION, data.getDestination());
-				proj.put(ANTPATH, data.getAntPath());
-			}
-			links.addSection(proj);
+		if (checkedProjects.length == 1) {
+			updateRecentSettings(checkedProjects[0]);
 		}
-		settings.addSection(links);
-
-		return settings;
+		getRecentSettings().store(settings);
 	}
 
 	public void setAccess(String access) {
-		this.fAccess= access;
+		fAccess= access;
 	}
-
-	public void setDestination(IJavaProject project, String destination) {
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			data.setDestination(destination);
-	}
-
 	public void setDestination(String destination) {
 		fDestination= destination;
 	}
 
 	public void setDocletPath(String docletpath) {
-		this.fDocletpath= docletpath;
+		fDocletpath= docletpath;
 	}
 
 	public void setDocletName(String docletname) {
-		this.fDocletname= docletname;
+		fDocletname= docletname;
 	}
 
 	public void setStyleSheet(String stylesheet) {
-		this.fStylesheet= stylesheet;
+		fStylesheet= stylesheet;
 	}
 
 	public void setOverview(String overview) {
-		this.fOverview= overview;
+		fOverview= overview;
 	}
 
 	public void setAdditionalParams(String params) {
 		fAdditionalParams= params;
 	}
 
-	public void setSpecificAntpath(IJavaProject project, String antpath) {
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			data.setAntpath(antpath);
-	}
-
 	public void setGeneralAntpath(String antpath) {
-		this.fAntpath= antpath;
+		fAntpath= antpath;
 	}
 	public void setClasspath(IPath[] classpath) {
-		this.fClasspath= classpath;
+		fClasspath= classpath;
 	}
 
 	public void setSourcepath(IPath[] sourcepath) {
-		this.fSourcepath= sourcepath;
+		fSourcepath= sourcepath;
 	}
 
-	public void setSourceElements(IJavaElement[] elements) {
-		this.fSourceElements= new ArrayList(Arrays.asList(elements));
-	}
-
-	public void setProjects(IJavaProject[] projects, boolean clear) {
-		if (clear)
-			fProjects.clear();
-
-		for (int i= 0; i < projects.length; i++) {
-			IJavaProject iJavaProject= projects[i];
-			if (!fProjects.contains(iJavaProject))
-				this.fProjects.add(iJavaProject);
-		}
+	public void setSelectedElements(IJavaElement[] elements) {
+		fSelectedElements= elements;
 	}
 
 	public void setFromStandard(boolean fromStandard) {
-		this.fFromStandard= fromStandard;
+		fFromStandard= fromStandard;
 	}
 
 	public void setTitle(String title) {
-		this.fTitle= title;
-	}
-
-	public void setDependencies(String dependencies) {
-		fDependencies= dependencies;
-	}
-
-	public void setLinks(IJavaProject project, String hrefs) {
-		ProjectData data= (ProjectData) fLinks.get(project);
-		if (data != null)
-			data.setLinks(hrefs);
+		fTitle= title;
 	}
 
 	public void setOpenInBrowser(boolean openInBrowser) {
-		this.fOpenInBrowser= openInBrowser;
+		fOpenInBrowser= openInBrowser;
+	}
+	
+	public void setHRefs(String[] hrefs) {
+		fHRefs= hrefs;
 	}
 
 	public void setBoolean(String flag, boolean value) {
 
 		if (flag.equals(AUTHOR))
-			this.fAuthor= value;
+			fAuthor= value;
 		else if (flag.equals(USE))
-			this.fUse= value;
+			fUse= value;
 		else if (flag.equals(VERSION))
-			this.fVersion= value;
+			fVersion= value;
 		else if (flag.equals(NODEPRECATED))
-			this.fNodeprecated= value;
+			fNodeprecated= value;
 		else if (flag.equals(NODEPRECATEDLIST))
-			this.fNoDeprecatedlist= value;
+			fNoDeprecatedlist= value;
 		else if (flag.equals(NOINDEX))
-			this.fNoindex= value;
+			fNoindex= value;
 		else if (flag.equals(NOTREE))
-			this.fNotree= value;
+			fNotree= value;
 		else if (flag.equals(SPLITINDEX))
-			this.fSplitindex= value;
+			fSplitindex= value;
 		else if (flag.equals(NONAVBAR))
-			this.fNonavbar= value;
+			fNonavbar= value;
 	}
 	
 	public boolean isJDK14Mode() {
@@ -1023,71 +855,28 @@ public class JavadocOptionsManager {
 		fJDK14Mode= jdk14Mode;
 	}	
 
-	private List getValidSelection(ISelection currentSelection) {
-
+	private IJavaElement[] getInitialElementsFromSelection(List candidates) {
 		ArrayList res= new ArrayList();
-		if (currentSelection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-
-			if (structuredSelection.isEmpty()) {
-				currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
-				if (currentSelection instanceof IStructuredSelection)
-					structuredSelection= (IStructuredSelection) currentSelection;
-			}
-			Iterator iter= structuredSelection.iterator();
-			//this method will also find the project for default
-			//destination and ant generation paths
-			getProjects(res, iter);
-		}
-		return res;
-	}
-
-	private void getProjects(List selectedElements, Iterator iter) {
-
-		while (iter.hasNext()) {
-			Object selectedElement= iter.next();
-			IJavaElement elem= getSelectableJavaElement(selectedElement);
-			if (elem != null) {
-				IJavaProject jproj= elem.getJavaProject();
-				if (jproj != null) {
-					//adding the project of the selected element in the list
-					//now we can select and generate javadoc for two 
-					//methods in different projects
-					if (!fProjects.contains(jproj))
-						fProjects.add(jproj);
-					selectedElements.add(elem);
-				}
-			}
-		}
-		//if no projects selected add a default
-		if (fProjects.isEmpty()) {
+		for (int i= 0; i < candidates.size(); i++) {
 			try {
-				IJavaProject[] jprojects= JavaCore.create(fRoot).getJavaProjects();
-
-				for (int i= 0; i < jprojects.length; i++) {
-					IJavaProject iJavaProject= jprojects[i];
-					if (getValidProject(iJavaProject)) {
-						fProjects.add(iJavaProject);
-						break;
-					}
-				}				
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				IJavaElement elem= getSelectableJavaElement(candidates.get(i));
+				if (elem != null) {
+					res.add(elem);
+				}
+			} catch (JavaModelException ignore) {
+				// ignore this
 			}
 		}
+		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
 	}
 
-	private IJavaElement getSelectableJavaElement(Object obj) {
+	private IJavaElement getSelectableJavaElement(Object obj) throws JavaModelException {
 		IJavaElement je= null;
-		try {
-			if (obj instanceof IAdaptable) {
-				je= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
-			}
+		if (obj instanceof IAdaptable) {
+			je= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+		}
 
-			if (je == null) {
-				return null;
-			}
-
+		if (je != null) {
 			switch (je.getElementType()) {
 				case IJavaElement.JAVA_MODEL :
 				case IJavaElement.JAVA_PROJECT :
@@ -1106,31 +895,24 @@ public class JavadocOptionsManager {
 				default :
 					ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
-						return JavaModelUtil.toOriginal(cu);
+						return cu;
 					}
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			IJavaProject project= je.getJavaProject();
+			if (isValidProject(project))
+				return project;
 		}
-		IJavaProject project= je.getJavaProject();
-		if (getValidProject(project))
-			return project;
-		else
-			return null;
+
+		return null;
 	}
 
-	private boolean getValidProject(IJavaProject project) {
+	private boolean isValidProject(IJavaProject project) throws JavaModelException {
 		if (project != null && project.exists()) {
-			try {
-				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					if (containsCompilationUnits(roots[i])) {
-						return true;
-					}
+			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (containsCompilationUnits(roots[i])) {
+					return true;
 				}
-
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
 			}
 		}
 		return false;
@@ -1156,49 +938,15 @@ public class JavadocOptionsManager {
 	private boolean containsCompilationUnits(IPackageFragment pack) throws JavaModelException {
 		return pack.getCompilationUnits().length > 0;
 	}
-		
 
-	private static class ProjectData {
-
-		private String fHrefs;
-		private String fDestinationDir;
-		private String fAntPath;
-
-		public void setLinks(String hrefs) {
-			if (hrefs == null)
-				fHrefs= ""; //$NON-NLS-1$
-			else
-				fHrefs= hrefs;
-		}
-
-		public void setDestination(String destination) {
-			if (destination == null)
-				fDestinationDir= ""; //$NON-NLS-1$
-			else
-				fDestinationDir= destination;
-		}
-
-		public void setAntpath(String antpath) {
-			if (antpath == null)
-				fAntPath= ""; //$NON-NLS-1$
-			else
-				fAntPath= antpath;
-		}
-
-		public String getLinks() {
-			return fHrefs;
-		}
-
-		public String getDestination() {
-			return fDestinationDir;
-		}
-
-		public String getAntPath() {
-			return fAntPath;
-		}
-
+	public RecentSettingsStore getRecentSettings() {
+		return fRecentSettings;
 	}
 
-
-
+	/**
+	 * @param project
+	 */
+	public void updateRecentSettings(IJavaProject project) {
+		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);
+	}
 }

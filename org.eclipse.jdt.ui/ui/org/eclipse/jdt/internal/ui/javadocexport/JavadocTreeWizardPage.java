@@ -17,8 +17,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +50,7 @@ import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -61,9 +63,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -77,39 +78,32 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	private CheckboxTreeAndListGroup fInputGroup;
 
-	protected IWorkspaceRoot fRoot;
-	protected String fWorkspace;
-
-	//private JavadocTreeViewerFilter fFilter;
-
-	protected Text fDestinationText;
-	protected Text fJavadocCommandText;
-	protected Text fDocletText;
-	protected Text fDocletTypeText;
-	protected Button fStandardButton;
-	protected Button fDestinationBrowserButton;
-	protected Button fCustomButton;
-	protected Button fPrivateVisibility;
-	protected Button fProtectedVisibility;
-	protected Button fPackageVisibility;
-	protected Button fPublicVisibility;
+	private Text fDestinationText;
+	private Text fJavadocCommandText;
+	private Text fDocletText;
+	private Text fDocletTypeText;
+	private Button fStandardButton;
+	private Button fDestinationBrowserButton;
+	private Button fCustomButton;
+	private Button fPrivateVisibility;
+	private Button fProtectedVisibility;
+	private Button fPackageVisibility;
+	private Button fPublicVisibility;
 	private Label fDocletLabel;
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
-	protected CLabel fDescriptionLabel;
+	private CLabel fDescriptionLabel;
 	
-	protected String fVisibilitySelection;
-	protected boolean fDocletSelected;
+	private String fVisibilitySelection;
 
-	protected JavadocOptionsManager fStore;
-	protected JavadocWizard fWizard;
+	private JavadocOptionsManager fStore;
 
-	protected StatusInfo fJavadocStatus;
-	protected StatusInfo fDestinationStatus;
-	protected StatusInfo fDocletStatus;
-	protected StatusInfo fTreeStatus;
-	protected StatusInfo fPreferenceStatus;
-	protected StatusInfo fWizardStatus;
+	private StatusInfo fJavadocStatus;
+	private StatusInfo fDestinationStatus;
+	private StatusInfo fDocletStatus;
+	private StatusInfo fTreeStatus;
+	private StatusInfo fPreferenceStatus;
+	private StatusInfo fWizardStatus;
 
 	private final int PREFERENCESTATUS= 0;
 	private final int CUSTOMSTATUS= 1;
@@ -141,7 +135,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		fWizard= (JavadocWizard) this.getWizard();
 
 		final Composite composite= new Composite(parent, SWT.NONE);
 		final GridLayout layout= new GridLayout();
@@ -207,20 +200,20 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		
 		ITreeContentProvider treeContentProvider= new JavadocProjectContentProvider();
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
-		fInputGroup= new CheckboxTreeAndListGroup(c, fStore.getRoot(), treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
+		fInputGroup= new CheckboxTreeAndListGroup(c, this, treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
 		fInputGroup.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				doValidation(TREESTATUS);
-				fWizard.removeAllProjects();
-				setProjects();
 			}
 		});
-
-		//the store will contain at least one project in it's list so long as
-		//the workspace is not empty.
-		if (!fStore.getJavaProjects().isEmpty())
-			setTreeChecked(fStore.getSelectedElements(), (IJavaProject) fStore.getJavaProjects().get(0));
+		fInputGroup.setTreeSorter(new JavaElementSorter());
+		
+		IJavaElement[] elements= fStore.getInitialElements();
+		setTreeChecked(elements);
+		if (elements.length > 0) {
+			fInputGroup.setTreeSelection(new StructuredSelection(elements[0].getJavaProject()));
+		}
 
 		fInputGroup.aboutToOpen();
 	}
@@ -384,22 +377,18 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	private void setOptionSetSettings() {
 
-		if (!fStore.fromStandard()) {
+		if (!fStore.isFromStandard()) {
 			fCustomButton.setSelection(true);
 			fDocletText.setText(fStore.getDocletPath());
 			fDocletTypeText.setText(fStore.getDocletName());
-			//take the destination as the destination of the first project
-			fDestinationText.setText(fStore.getDestination((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
+			fDestinationText.setText(fStore.getDestination());
 			fDestinationText.setEnabled(false);
 			fDestinationBrowserButton.setEnabled(false);
 			fDestinationLabel.setEnabled(false);
 			
 		} else {
 			fStandardButton.setSelection(true);
-			if (fWizard.getSelectedProjects().size() == 1)
-				fDestinationText.setText(fStore.getDestination((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
-			else
-				fDestinationText.setText(fStore.getDestination());
+			fDestinationText.setText(fStore.getDestination());
 			fDocletText.setText(fStore.getDocletPath());
 			fDocletTypeText.setText(fStore.getDocletName());
 			fDocletText.setEnabled(false);
@@ -416,34 +405,27 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * Receives of list of elements selected by the user and passes them
 	 * to the CheckedTree. List can contain multiple projects and elements from
 	 * different projects. If the list of seletected elements is empty a default
-	* project is selected.
+	 * project is selected.
 	 */
-
-	protected void setTreeChecked(IJavaElement[] sourceElements, IJavaProject project) {
-
-		if (sourceElements.length < 1)
-			fInputGroup.initialCheckTreeItem(project);
-
-		else {
-			for (int i= 0; i < sourceElements.length; i++) {
-				IJavaElement curr= sourceElements[i];
-				if (curr instanceof ICompilationUnit) {
-					fInputGroup.initialCheckListItem(curr);
-				} else if (curr instanceof IPackageFragment) {
+	private void setTreeChecked(IJavaElement[] sourceElements) {
+		for (int i= 0; i < sourceElements.length; i++) {
+			IJavaElement curr= sourceElements[i];
+			if (curr instanceof ICompilationUnit) {
+				fInputGroup.initialCheckListItem(curr);
+			} else if (curr instanceof IPackageFragment) {
+				fInputGroup.initialCheckTreeItem(curr);
+			} else if (curr instanceof IJavaProject) {
+				fInputGroup.initialCheckTreeItem(curr);
+			} else if (curr instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) curr;
+				if (!root.isArchive())
 					fInputGroup.initialCheckTreeItem(curr);
-				} else if (curr instanceof IJavaProject) {
-					fInputGroup.initialCheckTreeItem(curr);
-				} else if (curr instanceof IPackageFragmentRoot) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) curr;
-					if (!root.isArchive())
-						fInputGroup.initialCheckTreeItem(curr);
-				}
 			}
 		}
 	}
 
 	private IPath[] getSourcePath(IJavaProject[] projects) {
-		ArrayList res= new ArrayList();
+		HashSet res= new HashSet();
 		//loops through all projects and gets a list if of thier sourpaths
 		for (int k= 0; k < projects.length; k++) {
 			IJavaProject iJavaProject= projects[k];
@@ -470,22 +452,21 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private IPath[] getClassPath(IJavaProject[] javaProjects) {
-		ArrayList res= new ArrayList();
+		HashSet res= new HashSet();
 
 		for (int j= 0; j < javaProjects.length; j++) {
-			IJavaProject iJavaProject= javaProjects[j];
+			IJavaProject curr= javaProjects[j];
 
 			try {
-				IPath p= iJavaProject.getProject().getLocation();
+				IPath p= curr.getProject().getLocation();
 				if (p == null)
 					continue;
 
-				IPath outputLocation= p.append(iJavaProject.getOutputLocation());
-				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(iJavaProject);
+				IPath outputLocation= p.append(curr.getOutputLocation());
+				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(curr);
 
 				for (int i= 0; i < classPath.length; i++) {
-					String curr= classPath[i];
-					IPath path= new Path(curr);
+					IPath path= new Path(classPath[i]);
 					if (!outputLocation.equals(path)) {
 						res.add(path);
 					}
@@ -560,7 +541,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
 	}
 
-	protected void finish() {
+	protected void updateStore(IJavaProject[] checkedProjects) {
 
 		if (fCustomButton.getSelection()) {
 			fStore.setDocletName(fDocletTypeText.getText());
@@ -569,32 +550,30 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		}
 		if (fStandardButton.getSelection()) {
 			fStore.setFromStandard(true);
-			//in case of a single project selection the personal destination is updated for
-			//storage in the dialog settings
-			if (fWizard.getSelectedProjects().size() == 1) {
-				fStore.setDestination((IJavaProject) fWizard.getSelectedProjects().iterator().next(), fDestinationText.getText());
-			}
 			//the destination used in javadoc generation
 			fStore.setDestination(fDestinationText.getText());
 		}
 
-		IJavaProject[] projects= (IJavaProject[]) fWizard.getSelectedProjects().toArray(new IJavaProject[fWizard.getSelectedProjects().size()]);
-
-		fStore.setProjects(projects, true);
-		fStore.setSourcepath(getSourcePath(projects));
-		fStore.setClasspath(getClassPath(projects));
+		fStore.setSourcepath(getSourcePath(checkedProjects));
+		fStore.setClasspath(getClassPath(checkedProjects));
 		fStore.setAccess(fVisibilitySelection);
-		fStore.setSourceElements(getSourceElements(projects));
+		fStore.setSelectedElements(getSourceElements(checkedProjects));
 	}
 
-	protected void setProjects() {
+	public IJavaProject[] getCheckedProjects() {
+		ArrayList res= new ArrayList();
 		TreeItem[] treeItems= fInputGroup.getTree().getItems();
 		for (int i= 0; i < treeItems.length; i++) {
-			if (treeItems[i].getChecked())
-				fWizard.addSelectedProject((IJavaProject) treeItems[i].getData());
+			if (treeItems[i].getChecked()) {
+				Object curr= treeItems[i].getData();
+				if (curr instanceof IJavaProject) {
+					res.add(curr);
+				}
+			}
 		}
+		return (IJavaProject[]) res.toArray(new IJavaProject[res.size()]);
 	}
-
+	
 	protected void doValidation(int validate) {
 
 		switch (validate) {
@@ -711,13 +690,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			doValidation(TREESTATUS);
 			doValidation(PREFERENCESTATUS);
 		}
-	}
-
-	public IPath getDestination() {
-		if (fStandardButton.getSelection()) {
-			return new Path(fDestinationText.getText());
-		}
-		return null;
 	}
 
 }

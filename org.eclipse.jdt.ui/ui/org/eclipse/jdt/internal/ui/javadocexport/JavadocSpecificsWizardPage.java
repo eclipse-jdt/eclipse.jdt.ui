@@ -32,8 +32,6 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -41,31 +39,26 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
-	protected Button fAntBrowseButton;
+	private Button fAntBrowseButton;
 	private Button fCheckbrowser;
-	protected Text fAntText;
-	protected Button fOverViewButton;
+	private Text fAntText;
+	private Button fOverViewButton;
 	private Button fOverViewBrowseButton;
-	protected Button fAntButton;
+	private Button fAntButton;
 	private Button fJDK14Button;
 	
 	private Composite fLowerComposite;
-	protected Text fOverViewText;
-	protected Text fExtraOptionsText;
+	private Text fOverViewText;
+	private Text fExtraOptionsText;
 
 	private StatusInfo fOverviewStatus;
 	private StatusInfo fAntStatus;
 
 	private JavadocOptionsManager fStore;
-	private JavadocWizard fWizard;
 
 	private final int OVERVIEWSTATUS= 1;
 	private final int ANTSTATUS= 2;
 
-	/**
-	 * Constructor for JavadocWizardPage.
-	 * @param pageName
-	 */
 	protected JavadocSpecificsWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
 		setDescription(JavadocExportMessages.getString("JavadocSpecificsWizardPage.description")); //$NON-NLS-1$
@@ -80,8 +73,6 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-
-		fWizard= (JavadocWizard) this.getWizard();
 
 		fLowerComposite= new Composite(parent, SWT.NONE);
 		fLowerComposite.setLayoutData(createGridData(GridData.FILL_BOTH, 1, 0));
@@ -166,20 +157,13 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		//there really aught to be a way to specify this
 		 ((GridData) fAntText.getLayoutData()).widthHint= 200;
 
-		//if multiple projects selected anpath is empty or location of ant file
-		if (fWizard.getSelectedProjects().size() == 1) {
-			fAntText.setText(fStore.getSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
-		} else
-			fAntText.setText(fStore.getGeneralAntpath());
-  
+		fAntText.setText(fStore.getAntpath());
+
 		fAntBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowse.label"), createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); //$NON-NLS-1$
 		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
-  
-		//set enabled
-		fAntButton.setEnabled(fWizard.getSelectedProjects().size() != 1);
-		fAntText.setEnabled(fAntButton.getEnabled());
-		fAntBrowseButton.setEnabled(fAntButton.getEnabled());
-
+		fAntText.setEnabled(false);
+		fAntBrowseButton.setEnabled(false);
+		
 		fCheckbrowser= createButton(c, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.openbrowserbutton.label"), createGridData(3)); //$NON-NLS-1$
 		fCheckbrowser.setSelection(fStore.doOpenInBrowser());
 
@@ -215,12 +199,12 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 	} //end method createExtraOptionsGroup
 
-	private void doValidation(int VALIDATE) {
+	private void doValidation(int val) {
 		File file= null;
 		String ext= null;
 		Path path= null;
 
-		switch (VALIDATE) {
+		switch (val) {
 
 			case OVERVIEWSTATUS :
 				fOverviewStatus= new StatusInfo();
@@ -258,7 +242,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	 * @see JavadocWizardPage#onFinish()
 	 */
 
-	protected void finish() {
+	protected void updateStore() {
 
 		String str= fExtraOptionsText.getText();
 		if (str.length() > 0)
@@ -274,8 +258,6 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		//for now if there are multiple then the ant file is not stored for specific projects	
 		if (fAntText.getEnabled()) {
 			fStore.setGeneralAntpath(fAntText.getText());
-			if (fWizard.getSelectedProjects().size() == 1)
-				fStore.setSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next(), fAntText.getText());
 		}
 		fStore.setOpenInBrowser(fCheckbrowser.getSelection());
 		fStore.setJDK14Mode(fJDK14Button.getSelection());
@@ -285,8 +267,6 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			//ant button only enabled if a single project selected
-			fAntButton.setEnabled(fWizard.getSelectedProjects().size() == 1);
 			doValidation(OVERVIEWSTATUS);
 			doValidation(ANTSTATUS);
 		}
