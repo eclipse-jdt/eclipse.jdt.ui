@@ -27,25 +27,37 @@ import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-
-public class JavadocPropertyDialog extends StatusDialog {
+/**
+ * Dialog to configure a Javadoc location
+ */
+public class JavadocLocationDialog extends StatusDialog {
 
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
 	
-	public JavadocPropertyDialog(Shell parent, CPListElement element) {
+	/**
+	 * Shows the UI for configuring a javadoc location.
+	 * Use {@link org.eclipse.jdt.ui.JavaUI} to access and configure Javadoc locations.
+	 * 
+	 * @param parent The parent shell for the dialog.
+	 * @param libraryName Name of of the library to which configured javadoc location belongs.
+	 * @param initialURL The initial URL or <code>null</code>.
+	 */
+	public JavadocLocationDialog(Shell parent, String libraryName, URL initialURL) {
 		super(parent);
 		
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
-		};		
+		};	
 		
-		setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
-		URL initialLocation= (URL) element.getAttribute(CPListElement.JAVADOC);
-		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialLocation, false);
+		setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", libraryName)); //$NON-NLS-1$
+		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialURL, false);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		Control inner= fJavadocConfigurationBlock.createContents(composite);
@@ -54,7 +66,12 @@ public class JavadocPropertyDialog extends StatusDialog {
 		return composite;
 	}
 	
-	public URL getJavaDocLocation() {
+	/**
+	 * Returns the configured Javadoc location. The result is only valid after the dialog
+	 * has been opened and has not been cancelled by the user.
+	 * @return The configured javadoc location
+	 */
+	public URL getResult() {
 		return fJavadocConfigurationBlock.getJavadocLocation();
 	}
 

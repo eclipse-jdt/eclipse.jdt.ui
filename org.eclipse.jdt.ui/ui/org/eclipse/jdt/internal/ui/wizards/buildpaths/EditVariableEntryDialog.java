@@ -11,7 +11,8 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -52,20 +53,27 @@ public class EditVariableEntryDialog extends StatusDialog {
 	
 	private IStatus fNameStatus;
 	
-	private List fExistingEntries;
+	private Set fExistingEntries;
 	private VariablePathDialogField fFileNameField;
 	private CLabel fFullPathResolvedLabel;
-	private IPath fEditEntry;
 
 	/**
 	 * Constructor for EditVariableEntryDialog.
 	 * @param parent
 	 */
-	public EditVariableEntryDialog(Shell parent, IPath editEntry, List existingEntries) {
+	public EditVariableEntryDialog(Shell parent, IPath initialEntry, IPath[] existingEntries) {
 		super(parent);
-		fExistingEntries= existingEntries;
-		fExistingEntries.remove(editEntry);
-		fEditEntry= editEntry;
+		setTitle(NewWizardMessages.getString("EditVariableEntryDialog.title")); //$NON-NLS-1$
+		
+		fExistingEntries= new HashSet();
+		if (existingEntries != null) {
+			for (int i = 0; i < existingEntries.length; i++) {
+				IPath curr= existingEntries[i];
+				if (!curr.equals(initialEntry)) {
+					fExistingEntries.add(curr);
+				}
+			}
+		}
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
 		
@@ -74,7 +82,8 @@ public class EditVariableEntryDialog extends StatusDialog {
 		fFileNameField.setLabelText(NewWizardMessages.getString("EditVariableEntryDialog.filename.varlabel")); //$NON-NLS-1$
 		fFileNameField.setButtonLabel(NewWizardMessages.getString("EditVariableEntryDialog.filename.external.varbutton")); //$NON-NLS-1$
 		fFileNameField.setVariableButtonLabel(NewWizardMessages.getString("EditVariableEntryDialog.filename.variable.button")); //$NON-NLS-1$
-		fFileNameField.setText(fEditEntry.toString());
+		String initialString= initialEntry != null ? initialEntry.toString() : ""; //$NON-NLS-1$
+		fFileNameField.setText(initialString);
 	}
 	
 	public IPath getPath() {

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -226,10 +228,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		case IDX_ADDVAR: /* add variable */
 			libentries= openVariableSelectionDialog(null);
 			break;
-		case IDX_ADDLIB: /* addvanced */
+		case IDX_ADDLIB: /* add libary */
 			libentries= openContainerSelectionDialog(null);
 			break;
-		case IDX_ADDFOL: /* addvanced */
+		case IDX_ADDFOL: /* add folder */
 			libentries= openClassFolderDialog(null);
 			break;			
 		case IDX_EDIT: /* edit */
@@ -360,10 +362,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				applyChanges= true;
 			}
 			Shell shell= getShell();
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(shell, selElement.getClasspathEntry());
-			if (dialog.open() == Window.OK) {
-				IClasspathEntry result= dialog.getResult();
-				
+			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, selElement.getClasspathEntry());
+			if (result != null) {
 				if (applyChanges) {
 					try {
 						IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, result, fCurrJProject, containerPath);
@@ -384,9 +384,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
-			JavadocPropertyDialog dialog= new JavadocPropertyDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.JAVADOC, dialog.getJavaDocLocation());
+			URL initialLocation= (URL) selElement.getAttribute(CPListElement.JAVADOC);
+			String elementName= new CPListLabelProvider().getText(selElement);
+			
+			URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, initialLocation);
+			if (result != null) {
+				selElement.setAttribute(CPListElement.JAVADOC, result[0]);
 				fLibrariesList.refresh();
 			}
 		}
@@ -657,13 +660,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
+		List existingElements= fLibrariesList.getElements();
+		ArrayList existingPaths= new ArrayList(existingElements.size());
+		for (int i= 0; i < existingElements.size(); i++) {
+			CPListElement elem= (CPListElement) existingElements.get(i);
+			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				existingPaths.add(elem.getPath());
+			}
+		}
+		IPath[] existingPathsArray= (IPath[]) existingPaths.toArray(new IPath[existingPaths.size()]);
+		
 		if (existing == null) {
-			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell());
-			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title")); //$NON-NLS-1$
-			if (dialog.open() == Window.OK) {
-				List existingElements= fLibrariesList.getElements();
-				
-				IPath[] paths= dialog.getResult();
+			IPath[] paths= BuildPathDialogAccess.chooseVariableEntries(getShell(), existingPathsArray);
+			if (paths != null) {
 				ArrayList result= new ArrayList();
 				for (int i = 0; i < paths.length; i++) {
 					CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, paths[i], null);
@@ -676,18 +685,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				return (CPListElement[]) result.toArray(new CPListElement[result.size()]);
 			}
 		} else {
-			List existingElements= fLibrariesList.getElements();
-			ArrayList existingPaths= new ArrayList(existingElements.size());
-			for (int i= 0; i < existingElements.size(); i++) {
-				CPListElement elem= (CPListElement) existingElements.get(i);
-				if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					existingPaths.add(elem.getPath());
-				}
-			}
-			EditVariableEntryDialog dialog= new EditVariableEntryDialog(getShell(), existing.getPath(), existingPaths);
-			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title")); //$NON-NLS-1$
-			if (dialog.open() == Window.OK) {
-				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, dialog.getPath(), null);
+			IPath path= BuildPathDialogAccess.configureVariableEntry(getShell(), existing.getPath(), existingPathsArray);
+			if (path != null) {
+				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, path, null);
 				return new CPListElement[] { elem };
 			}
 		}

@@ -93,6 +93,8 @@ public class NewVariableEntryDialog extends StatusDialog {
 	
 	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
+		setTitle(NewWizardMessages.getString("NewVariableEntryDialog.title")); //$NON-NLS-1$
+		
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 		updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
@@ -262,7 +264,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		return null;
 	}
 	
-	protected void extendButtonPressed() {
+	protected final void extendButtonPressed() {
 		List selected= fVariablesList.getSelectedElements();
 		if (selected.size() == 1) {
 			IPath[] extendedPaths= chooseExtensions((CPVariableElement) selected.get(0));
@@ -273,7 +275,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		}
 	}
 		
-	protected void configButtonPressed() {
+	protected final void configButtonPressed() {
 		ClasspathVariablesPreferencePage page= new ClasspathVariablesPreferencePage();
 		PreferencePageSupport.showPreferencePage(getShell(), ClasspathVariablesPreferencePage.ID, page);
 		initializeElements();

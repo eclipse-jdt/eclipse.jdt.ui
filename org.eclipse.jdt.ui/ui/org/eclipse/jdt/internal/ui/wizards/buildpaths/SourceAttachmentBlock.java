@@ -177,7 +177,7 @@ public class SourceAttachmentBlock {
 	}
 	
 	/**
-	 * @deprecated Use API {@link org.eclipse.jdt.ui.wizards.BuildPathDialogs#configureSourceAttachment(Shell, IClasspathEntry)}
+	 * @deprecated Use API {@link org.eclipse.jdt.ui.wizards.BuildPathDialogAccess#configureSourceAttachment(Shell, IClasspathEntry)}
 	 */
 	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry, IPath containerPath, IJavaProject project) {
 		this(context, entry);

@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -102,8 +103,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocPropertyDialog;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -811,16 +810,19 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			CPListElement selElement= elem.getParent();
 			
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getResult().getSourceAttachmentPath());
+			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
+			if (result != null) {
+				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
 				fLibraryList.refresh();
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
-			JavadocPropertyDialog dialog= new JavadocPropertyDialog(getShell(), selElement);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.JAVADOC, dialog.getJavaDocLocation());
+			URL initialLocation= (URL) selElement.getAttribute(CPListElement.JAVADOC);
+			String elementName= new CPListLabelProvider().getText(selElement);
+			
+			URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, initialLocation);
+			if (result != null) {
+				selElement.setAttribute(CPListElement.JAVADOC, result[0]);
 				fLibraryList.refresh();
 			}
 		}

@@ -54,7 +54,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -76,13 +75,14 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileDisassembler;
 import org.eclipse.jdt.core.util.IClassFileReader;
 
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
  * Java specific text editor.
@@ -264,9 +264,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					public void widgetSelected(SelectionEvent event) {				
 						try {
 							Shell shell= fScrolledComposite.getShell();
-							SourceAttachmentDialog dialog= new SourceAttachmentDialog(shell, entry);
-							if (dialog.open() == Window.OK) {
-								applySourceAttachment(shell, dialog.getResult(), jproject, containerPath);
+
+							IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, entry);
+							if (result != null) {
+								applySourceAttachment(shell, result, jproject, containerPath);
 								verifyInput(getEditorInput());
 							}
 	
