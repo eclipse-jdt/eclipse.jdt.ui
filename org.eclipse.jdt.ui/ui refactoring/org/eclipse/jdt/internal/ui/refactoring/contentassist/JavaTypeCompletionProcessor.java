@@ -159,7 +159,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		String input= contentAssistSubject.getDocument().get();
 		ICompletionProposal[] proposals;
 		if (documentOffset == 0) {
-			proposals= internalComputeCompletionProposals(1, "a"); //$NON-NLS-1$
+			proposals= internalComputeCompletionProposals(1, "A"); //$NON-NLS-1$
 		} else {
 			proposals= internalComputeCompletionProposals(documentOffset, input);
 		}
