@@ -265,15 +265,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionBackgroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
 	};
 	
-	private final String[][] fContentAssistColorListModel= new String[][] {
-		{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND }, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND }, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"), PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND }, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"), PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND }, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND }, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } //$NON-NLS-1$
-	};
-	
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	private FoldingConfigurationBlock fFoldingConfigurationBlock;
@@ -306,11 +297,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private List fAppearanceColorList;
-	private List fContentAssistColorList;
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private ColorEditor fAppearanceColorEditor;
 	private Button fAppearanceColorDefault;
-	private ColorEditor fContentAssistColorEditor;
 	private ColorEditor fBackgroundColorEditor;
 	private Button fBackgroundDefaultRadioButton;
 	private Button fBackgroundCustomRadioButton;
@@ -323,24 +312,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fItalicCheckBox;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
-    private Control fAutoInsertDelayText;
-    private Control fAutoInsertJavaTriggerText;
-    private Control fAutoInsertJavaDocTriggerText;
-	private Label fAutoInsertDelayLabel;
-	private Label fAutoInsertJavaTriggerLabel;
-	private Label fAutoInsertJavaDocTriggerLabel;
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
-	private Button fCompletionInsertsRadioButton;
-	private Button fCompletionOverwritesRadioButton;
 	
 	/**
 	 * Tells whether the fields are initialized.
 	 * @since 3.0
 	 */
 	private boolean fFieldsInitialized= false;
-
+	
 	/**
 	 * List of master/slave listeners when there's a dependency.
 	 * 
@@ -450,26 +431,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_AUTOACTIVATION));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_AUTOINSERT));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND));		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_CASE_SENSITIVITY));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_ADDIMPORT));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_INSERT_COMPLETION));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION));
-		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE));
 
@@ -550,14 +511,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	}
 
-	private void handleContentAssistColorListSelection() {	
-		int i= fContentAssistColorList.getSelectionIndex();
-		String key= fContentAssistColorListModel[i][1];
-		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fContentAssistColorEditor.setColorValue(rgb);
-	}
-	
-	
 	private Control createSyntaxPage(Composite parent) {
 		
 		Composite colorComposite= new Composite(parent, SWT.NULL);
@@ -990,154 +943,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fMasterSlaveListeners.add(listener);
 	}
 
-	private Control createContentAssistPage(Composite parent) {
-
-		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); 
-		layout.numColumns= 2;
-		contentAssistComposite.setLayout(layout);
-
-		addCompletionRadioButtons(contentAssistComposite);
-
-		String label;		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.completePrefixes"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, 0);		
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button master= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button slave= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
-		createDependency(master, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, slave);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
-		final Button autoactivation= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
-		autoactivation.addSelectionListener(new SelectionAdapter(){
-            public void widgetSelected(SelectionEvent e) {
-            	updateAutoactivationControls();
-            }
-		});		
-		
-		Control[] labelledTextField;
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
-		fAutoInsertDelayLabel= getLabelControl(labelledTextField);
-		fAutoInsertDelayText= getTextControl(labelledTextField);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
-		fAutoInsertJavaTriggerLabel= getLabelControl(labelledTextField);
-		fAutoInsertJavaTriggerText= getTextControl(labelledTextField);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
-		fAutoInsertJavaDocTriggerLabel= getLabelControl(labelledTextField);
-		fAutoInsertJavaDocTriggerText= getTextControl(labelledTextField);
-		
-
-		Label l= new Label(contentAssistComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.colorOptions")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		l.setLayoutData(gd);
-
-		Composite editorComposite= new Composite(contentAssistComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
-
-		fContentAssistColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(8);
-		fContentAssistColorList.setLayoutData(gd);
-						
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.color")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
-		l.setLayoutData(gd);
-
-		fContentAssistColorEditor= new ColorEditor(stylesComposite);
-		Button colorButton= fContentAssistColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		colorButton.setLayoutData(gd);
-
-		fContentAssistColorList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				handleContentAssistColorListSelection();
-			}
-		});
-		colorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				int i= fContentAssistColorList.getSelectionIndex();
-				String key= fContentAssistColorListModel[i][1];
-				
-				PreferenceConverter.setValue(fOverlayStore, key, fContentAssistColorEditor.getColorValue());
-			}
-		});
-
-		return contentAssistComposite;
-	}
-	private void addCompletionRadioButtons(Composite contentAssistComposite) {
-		Composite completionComposite= new Composite(contentAssistComposite, SWT.NONE);
-		GridData ccgd= new GridData();
-		ccgd.horizontalSpan= 2;
-		completionComposite.setLayoutData(ccgd);
-		GridLayout ccgl= new GridLayout();
-		ccgl.marginWidth= 0;
-		ccgl.numColumns= 2;
-		completionComposite.setLayout(ccgl);
-		
-		SelectionListener completionSelectionListener= new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {				
-				boolean insert= fCompletionInsertsRadioButton.getSelection();
-				fOverlayStore.setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, insert);
-			}
-		};
-		
-		fCompletionInsertsRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionInsertsRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionInserts")); //$NON-NLS-1$
-		fCompletionInsertsRadioButton.setLayoutData(new GridData());
-		fCompletionInsertsRadioButton.addSelectionListener(completionSelectionListener);
-		
-		fCompletionOverwritesRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionOverwritesRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionOverwrites")); //$NON-NLS-1$
-		fCompletionOverwritesRadioButton.setLayoutData(new GridData());
-		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
-	}
-
 	private Control createNavigationPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
@@ -1295,10 +1100,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
 		item.setControl(createSyntaxPage(folder));
-		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
-		item.setControl(createContentAssistPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle")); //$NON-NLS-1$
@@ -1315,7 +1116,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.folding.title")); //$NON-NLS-1$
 		item.setControl(fFoldingConfigurationBlock.createControl(folder));
-		
+
 		initialize();
 		
 		Dialog.applyDialogFont(folder);
@@ -1340,17 +1141,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
 					fAppearanceColorList.select(0);
 					handleAppearanceColorListSelection();
-				}
-			}
-		});
-		
-		for (int i= 0; i < fContentAssistColorListModel.length; i++)
-			fContentAssistColorList.add(fContentAssistColorListModel[i][0]);
-		fContentAssistColorList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fContentAssistColorList != null && !fContentAssistColorList.isDisposed()) {
-					fContentAssistColorList.select(0);
-					handleContentAssistColorListSelection();
 				}
 			}
 		});
@@ -1390,14 +1180,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundCustomRadioButton.setSelection(!default_);
 		fBackgroundColorButton.setEnabled(!default_);
 
-		boolean completionInserts= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
-		fCompletionInsertsRadioButton.setSelection(completionInserts);
-		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
-		
 		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
 
-        updateAutoactivationControls();
-        
         fFieldsInitialized= true;
         updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
         
@@ -1432,18 +1216,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	}
 	
-    private void updateAutoactivationControls() {
-        boolean autoactivation= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
-        fAutoInsertDelayText.setEnabled(autoactivation);
-		fAutoInsertDelayLabel.setEnabled(autoactivation);
-
-        fAutoInsertJavaTriggerText.setEnabled(autoactivation);
-		fAutoInsertJavaTriggerLabel.setEnabled(autoactivation);
-
-        fAutoInsertJavaDocTriggerText.setEnabled(autoactivation);
-		fAutoInsertJavaDocTriggerLabel.setEnabled(autoactivation);
-    }
-	
 	/*
 	 * @see PreferencePage#performOk()
 	 */
@@ -1467,7 +1239,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		handleSyntaxColorListSelection();
 		handleAppearanceColorListSelection();
-		handleContentAssistColorListSelection();
 
 		fJavaEditorHoverConfigurationBlock.performDefaults();
 		fFoldingConfigurationBlock.performDefaults();
@@ -1515,10 +1286,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return getTextControl(addLabelledTextField(composite, label, key, textLimit, indentation, isNumber));
 	}
 	
-	private static Label getLabelControl(Control[] labelledTextField){
-		return (Label)labelledTextField[0];
-	}
-
 	private static Text getTextControl(Control[] labelledTextField){
 		return (Text)labelledTextField[1];
 	}

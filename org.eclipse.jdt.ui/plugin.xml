@@ -871,6 +871,12 @@
             class="org.eclipse.jdt.internal.ui.preferences.OccurrencesPreferencePage"
             id="org.eclipse.jdt.ui.preferences.OccurrencesPreferencePage">
       </page>
+      <page
+            name="%codeAssistPageName"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeAssistPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage">
+      </page>
 
       <page
             name="%codeTemplatePreferencePageName"
