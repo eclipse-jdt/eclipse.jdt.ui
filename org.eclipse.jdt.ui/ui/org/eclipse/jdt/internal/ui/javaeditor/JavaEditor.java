@@ -3126,7 +3126,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private boolean isNavigationTargetType(Object type) {
-		Preferences preferences= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
+		Preferences preferences= Platform.getPlugin("org.eclipse.ui.editors").getPluginPreferences(); //$NON-NLS-1$
 		Iterator i= getAnnotationPreferences().getAnnotationPreferences().iterator();
 		while (i.hasNext()) {
 			AnnotationPreference annotationPref= (AnnotationPreference) i.next();

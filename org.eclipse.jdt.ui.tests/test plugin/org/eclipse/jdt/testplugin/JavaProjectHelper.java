@@ -409,12 +409,14 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets autobuilding state for the test workspace.
-	 */	public static void setAutoBuilding(boolean state) throws CoreException {
+	 */	public static boolean setAutoBuilding(boolean state) throws CoreException {
 		// disable auto build
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription desc= workspace.getDescription();
+		boolean result= desc.isAutoBuilding();
 		desc.setAutoBuilding(state);
 		workspace.setDescription(desc);
+		return result;
 	}
 
 	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
