@@ -195,8 +195,9 @@ public abstract class ElementSearchAction extends JavaElementAction {
 						workingSets.add(workingSet);
 					}
 				}
-				foundLRU= true;										
-				fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
+				foundLRU= true;
+				if (!workingSets.isEmpty())
+					fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
 			}
 		}
 		if (!foundLRU)
