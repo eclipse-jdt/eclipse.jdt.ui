@@ -180,7 +180,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 				int probelmId= annot.getId();
 				if (probelmId != -1) {
 					if (JavaCorrectionProcessor.hasCorrections(probelmId)) {
-						invocationOffset= computeBestOffset(invocationOffset, pos, offset);
+					invocationOffset= computeBestOffset(invocationOffset, pos, offset);
 					}
 				} else if (annot instanceof MarkerAnnotation) {
 					IMarker marker= ((MarkerAnnotation)annot).getMarker();
@@ -240,7 +240,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	}
 
 	private void restorePosition() {
-		if (fPosition != null) {
+		if (fPosition != null && !fPosition.isDeleted()) {
 			fViewer.setSelectedRange(fPosition.offset, fPosition.length);
 			fViewer.revealRange(fPosition.offset, fPosition.length);
 		}
