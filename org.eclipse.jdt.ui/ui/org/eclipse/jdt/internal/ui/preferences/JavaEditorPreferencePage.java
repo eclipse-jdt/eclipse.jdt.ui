@@ -118,6 +118,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PRINT_MARGIN),
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.LINKED_POSITION_COLOR),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
@@ -225,6 +227,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, true);
+
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
 		
@@ -562,6 +566,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fProblemIndicationButton;
 	private Control fProblemIndicationColor;
 	private Control fFindScopeColor;
+	private Control fLinkedPositionColor;
 	
 	private Control createBehaviorPage(Composite parent) {
 
@@ -650,8 +655,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.findScope"); //$NON-NLS-1$
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor"); //$NON-NLS-1$
 		fFindScopeColor= addColorButton(behaviorComposite, label, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor"); //$NON-NLS-1$
+		fLinkedPositionColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.LINKED_POSITION_COLOR, 0);
 		
 		return behaviorComposite;
 	}

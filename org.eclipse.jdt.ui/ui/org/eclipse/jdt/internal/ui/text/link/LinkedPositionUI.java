@@ -16,9 +16,13 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -31,14 +35,17 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
 public class LinkedPositionUI implements LinkedPositionListener,
-	ITextInputListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener {
+	ITextInputListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener {
 
 	/**
 	 * A listener for notification when the user cancelled the edit operation.
@@ -55,10 +62,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 	private static final String CARET_POSITION= "LinkedPositionUI.caret.position"; //$NON-NLS-1$
 	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(CARET_POSITION);
+	private static final IPreferenceStore fgStore= JavaPlugin.getDefault().getPreferenceStore();
 	
 	private final ITextViewer fViewer;
 	private final LinkedPositionManager fManager;	
-	private final Color fFrameColor;
+	private Color fFrameColor;
 
 	private int fFinalCaretOffset= -1; // no final caret offset
 
@@ -81,7 +89,47 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fManager= manager;
 		
 		fManager.setLinkedPositionListener(this);
-		fFrameColor= viewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_RED);
+
+		initializeHighlightColor(viewer);
+	}
+
+	/**
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		initializeHighlightColor(fViewer);
+		redrawRegion();
+	}
+
+	private void initializeHighlightColor(ITextViewer viewer) {
+
+		if (fFrameColor != null)
+			fFrameColor.dispose();
+
+		Display display= viewer.getTextWidget().getDisplay();
+		fFrameColor= createColor(fgStore, CompilationUnitEditor.LINKED_POSITION_COLOR, display);
+	}
+
+	/**
+	 * Creates a color from the information stored in the given preference store.
+	 * Returns <code>null</code> if there is no such information available.
+	 */
+	private Color createColor(IPreferenceStore store, String key, Display display) {
+	
+		RGB rgb= null;		
+		
+		if (store.contains(key)) {
+			
+			if (store.isDefault(key))
+				rgb= PreferenceConverter.getDefaultColor(store, key);
+			else
+				rgb= PreferenceConverter.getColor(store, key);
+		
+			if (rgb != null)
+				return new Color(display, rgb);
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -148,6 +196,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fFramePosition= fManager.getFirstPosition();
 		if (fFramePosition == null)
 			leave(UNINSTALL | COMMIT | UPDATE_CARET);
+
+		fgStore.addPropertyChangeListener(this);
 	}
 
 	/**
@@ -155,7 +205,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 */
 	public void exit(boolean success) {
 		// no UNINSTALL since manager has already uninstalled itself
-		leave((success ? COMMIT : 0) | UPDATE_CARET);	
+		leave((success ? COMMIT : 0) | UPDATE_CARET);
 	}
 
 	/**
@@ -172,6 +222,13 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private void leave(int flags) {
 		if ((flags & UNINSTALL) != 0)
 			fManager.uninstall((flags & COMMIT) != 0);
+
+		fgStore.removePropertyChangeListener(this);
+		
+		if (fFrameColor != null) {
+			fFrameColor.dispose();
+			fFrameColor= null;
+		}			
 		
 		StyledText text= fViewer.getTextWidget();	
 		text.removePaintListener(this);
@@ -439,4 +496,5 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			position.getOffset() >= region.getOffset() &&
 			position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
 	}
+
 }

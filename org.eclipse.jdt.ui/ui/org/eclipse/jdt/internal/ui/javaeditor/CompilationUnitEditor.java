@@ -411,6 +411,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String PROBLEM_INDICATION= "problemIndication"; //$NON-NLS-1$
 	/** Preference key for problem highlight color */
 	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
+	/** Preference key for linked position color */
+	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
 	public final static String OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
 	
