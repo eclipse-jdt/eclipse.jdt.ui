@@ -95,6 +95,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 * @see IJavaSearchResultCollector#accept
 	 */
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
+		if (accuracy == POTENTIAL_MATCH && SearchUI.arePotentialMatchesIgnored())
+			return;
+		
 		IMarker marker= resource.createMarker(SearchUI.SEARCH_MARKER);
 		HashMap attributes;
 		Object groupKey= enclosingElement;
