@@ -309,7 +309,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementString()
 	 */
 	public CharSequence getCompletionText() {
-		return null;
+		return new String();
 	}
 
 	/*
