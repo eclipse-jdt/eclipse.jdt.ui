@@ -132,6 +132,7 @@ public class OpenTypeHierarchyUtil {
 		part= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
 		part.setInputElement(perspectiveInput);
 		if (input instanceof IMember) {
+			part.selectMember((IMember) input);
 			openEditor(input, false);
 		}
 		return part;
