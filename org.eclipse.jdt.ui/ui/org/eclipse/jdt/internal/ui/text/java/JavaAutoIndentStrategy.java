@@ -40,9 +40,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private final static String COMMENT= "//"; //$NON-NLS-1$
 	private int fTabWidth= -1;
-	private Boolean fUseSpaces= null;
+	private boolean fUseSpaces;
 
 	public JavaAutoIndentStrategy() {
+        fUseSpaces= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);
 	}
 
 	// evaluate the line with the opening bracket that matches the closing bracket on the given line
@@ -661,9 +662,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private boolean useSpaces() {
-		if (fUseSpaces == null)
-			fUseSpaces= new Boolean(JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR)));
-		return fUseSpaces.booleanValue();
+		return fUseSpaces;
 	}
 	
 	private int getTabWidth() {
@@ -675,6 +674,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private void clearCachedValues() {
 		fTabWidth= -1;
-		fUseSpaces= null;
+        fUseSpaces= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);
 	}
 }
