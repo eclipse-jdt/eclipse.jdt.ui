@@ -97,6 +97,6 @@ class DeleteResourcesAction extends ReorgAction {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		return MessageDialog.openConfirm(parent, title, label);
+		return MessageDialog.openQuestion(parent, title, label);
 	}
 }
