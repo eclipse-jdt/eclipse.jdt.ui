@@ -96,6 +96,9 @@ public class RefactorActionGroup extends ActionGroup {
 
 		fPullUpAction= new PullUpAction(editor);
 		initAction(fPullUpAction, editor.getSelectionProvider());		
+		
+		fMoveAction= new MoveAction(editor);
+		initAction(fMoveAction, editor.getSelectionProvider());		
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
