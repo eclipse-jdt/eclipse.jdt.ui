@@ -68,14 +68,6 @@ import org.eclipse.ui.model.WorkbenchViewerSorter;
  */
 public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, Listener {
 
-	// UI message keys
-	private static final String PREFIX= "JavaDebugPreferencePage."; //$NON-NLS-1$
-	private static final String DESCRIPTION= PREFIX + "description"; //$NON-NLS-1$
-	private static final String HEX= PREFIX + "hex"; //$NON-NLS-1$
-	private static final String CHAR= PREFIX + "char"; //$NON-NLS-1$
-	private static final String UNSIGNED= PREFIX + "unsigned"; //$NON-NLS-1$
-	private static final String PRIMITIVE_PREFS= PREFIX + "primitivePrefs"; //$NON-NLS-1$
-	
 	// Preference store keys
 	private static final String SHOW_HEX= IPreferencesConstants.SHOW_HEX_VALUES;
 	private static final String SHOW_CHARS= IPreferencesConstants.SHOW_CHAR_VALUES;
@@ -240,11 +232,11 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	 * Create the primitive display preferences composite widget
 	 */
 	private void createPrimitiveDisplayPreferences(Composite parent) {
-		Composite comp= createLabelledComposite(parent, 1, getString(PRIMITIVE_PREFS));	
+		Composite comp= createLabelledComposite(parent, 1, "Primitive type display options");	
 		
-		fHexButton= createCheckButton(comp, getString(HEX));
-		fCharButton= createCheckButton(comp, getString(CHAR));
-		fUnsignedButton= createCheckButton(comp, getString(UNSIGNED));
+		fHexButton= createCheckButton(comp, "Display &hexadecimal values (byte, short, char, int, long)");
+		fCharButton= createCheckButton(comp, "Display ASCII &character values (byte, short, int, long)");
+		fUnsignedButton= createCheckButton(comp, "Display &unsigned values (byte)");
 	}
 	
 	/**
@@ -633,13 +625,5 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		store.setValue(SHOW_CHARS, fCharButton.getSelection());
 		store.setValue(SHOW_UNSIGNED, fUnsignedButton.getSelection());
 	}
-	
-	/**
-	 * Get the string associated with the given resource string from
-	 * JavaUIMessages
-	 */
-	private String getString(String key) {
-		return JavaUIMessages.getString(key);
-	}
 }
 
