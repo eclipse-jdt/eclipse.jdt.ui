@@ -23,6 +23,13 @@ public class Strings {
 	}
 	
 	/**
+	 * tests if a char is lower case. Fix for 26529 
+	 */
+	public static boolean isLowerCase(char ch) {
+		return Character.toLowerCase(ch) == ch;
+	}	
+	
+	/**
 	 * Line delimiter chars are  '\n' and '\r'.
 	 */
 	public static boolean isLineDelimiterChar(char ch) {

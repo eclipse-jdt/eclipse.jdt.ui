@@ -12,6 +12,8 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 public class NameProposer {
 	
 	private String[] fNamePrefixes;
@@ -76,7 +78,7 @@ public class NameProposer {
 	
 	public String proposeAccessorName(String fieldName) {
 		String name= removePrefixAndSuffix(fieldName);
-		if (name.length() > 0 && Character.isLowerCase(name.charAt(0))) {
+		if (name.length() > 0 && Strings.isLowerCase(name.charAt(0))) {
 			name= String.valueOf(Character.toUpperCase(name.charAt(0))) + name.substring(1);
 		}
 		return name;

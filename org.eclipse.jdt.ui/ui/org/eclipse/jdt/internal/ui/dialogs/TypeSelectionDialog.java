@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -97,12 +98,12 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	     	String leftString= (String) left;
 	     	String rightString= (String) right;
 	     		     	
-	     	if (Character.isLowerCase(leftString.charAt(0)) &&
-	     		!Character.isLowerCase(rightString.charAt(0)))
+	     	if (Strings.isLowerCase(leftString.charAt(0)) &&
+	     		!Strings.isLowerCase(rightString.charAt(0)))
 	     		return +1;
 
-	     	if (Character.isLowerCase(rightString.charAt(0)) &&
-	     		!Character.isLowerCase(leftString.charAt(0)))
+	     	if (Strings.isLowerCase(rightString.charAt(0)) &&
+	     		!Strings.isLowerCase(leftString.charAt(0)))
 	     		return -1;
 	     	
 			int result= leftString.compareToIgnoreCase(rightString);			
