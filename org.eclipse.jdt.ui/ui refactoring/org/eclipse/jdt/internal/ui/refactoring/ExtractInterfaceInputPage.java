@@ -1,6 +1,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -15,20 +17,24 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class ExtractInterfaceInputPage extends TextInputWizardPage {
+
+	private Button fReplaceAllCheckbox;
+	private CheckboxTableViewer fTableViewer;
 
 	public ExtractInterfaceInputPage() {
 		super(true);
@@ -67,15 +73,15 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		gd.horizontalSpan= 2;
 		composite.setLayoutData(gd);
 		
-		final CheckboxTableViewer tableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		tableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-		tableViewer.setLabelProvider(new JavaElementLabelProvider());
-		tableViewer.setContentProvider(createContentProvider());
+		fTableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		fTableViewer.setLabelProvider(new JavaElementLabelProvider());
+		fTableViewer.setContentProvider(createContentProvider());
 		try {
-			tableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
+			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, "Extract Interface", "Internal Error"); //XXX
-			tableViewer.setInput(new IMember[0]);
+			fTableViewer.setInput(new IMember[0]);
 		}
 
 		Composite buttonComposite= new Composite(composite, SWT.NONE);
@@ -92,7 +98,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		SWTUtil.setButtonDimensionHint(selectAll);
 		selectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				tableViewer.setAllChecked(true);
+				fTableViewer.setAllChecked(true);
 			}
 		});
 
@@ -102,12 +108,12 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		SWTUtil.setButtonDimensionHint(deSelectAll);
 		deSelectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				tableViewer.setAllChecked(false);
+				fTableViewer.setAllChecked(false);
 			}
 		});
 	}
 
-	private IStructuredContentProvider createContentProvider() {
+	private static IStructuredContentProvider createContentProvider() {
 		return new IStructuredContentProvider(){
 			public void dispose() {
 			}
@@ -119,16 +125,15 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		};
 	}
 
-
 	private void addReplaceAllCheckbox(Composite result) {
 		String key= "Change references to the class ''{0}'' into references to the interface (where possible)"; 
 		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputClass().getElementName()});
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
-		final Button checkBox= createCheckbox(result,  title, defaultValue);
-		getExtractInterfaceRefactoring().setReplaceOccurrences(checkBox.getSelection());
-		checkBox.addSelectionListener(new SelectionAdapter(){
+		fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
+		getExtractInterfaceRefactoring().setReplaceOccurrences(fReplaceAllCheckbox.getSelection());
+		fReplaceAllCheckbox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				getExtractInterfaceRefactoring().setReplaceOccurrences(checkBox.getSelection());
+				getExtractInterfaceRefactoring().setReplaceOccurrences(fReplaceAllCheckbox.getSelection());
 			}
 		});		
 	}
@@ -154,5 +159,38 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	private ExtractInterfaceRefactoring getExtractInterfaceRefactoring(){
 		return (ExtractInterfaceRefactoring)getRefactoring();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
+	 */
+	public IWizardPage getNextPage() {
+		try {
+			initializeRefactoring();
+			return super.getNextPage();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
+	 */
+	public boolean performFinish(){
+		try {
+			initializeRefactoring();
+			return super.performFinish();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
+	}
+
+	private void initializeRefactoring() throws JavaModelException {
+		getExtractInterfaceRefactoring().setNewInterfaceName(getText());
+		getExtractInterfaceRefactoring().setReplaceOccurrences(fReplaceAllCheckbox.getSelection());
+		List checked= Arrays.asList(fTableViewer.getCheckedElements());
+		getExtractInterfaceRefactoring().setExtractedMembers((IMember[]) checked.toArray(new IMember[checked.size()]));
 	}
 }
