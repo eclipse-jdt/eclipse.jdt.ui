@@ -931,7 +931,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				lastUsedPath= ""; //$NON-NLS-1$
 			}
 		}
-		String title= (existing == null) ? PreferencesMessages.getString("UserLibraryPreferencePage.browsejar.new.title") : PreferencesMessages.getString("UserLibraryPreferencePage.browseJAR.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+		String title= (existing == null) ? PreferencesMessages.getString("UserLibraryPreferencePage.browsejar.new.title") : PreferencesMessages.getString("UserLibraryPreferencePage.browsejar.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		FileDialog dialog= new FileDialog(getShell(), existing == null ? SWT.MULTI : SWT.SINGLE);
 		dialog.setText(title);
