@@ -20,6 +20,9 @@ import java.util.StringTokenizer;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -443,17 +446,15 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private IPath[] getClassPath(IJavaProject[] javaProjects) {
 		HashSet res= new HashSet();
 
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int j= 0; j < javaProjects.length; j++) {
 			IJavaProject curr= javaProjects[j];
-
 			try {
-				IResource outputPathFolder= curr.getProject().findMember(curr.getOutputLocation());
-				if (outputPathFolder == null)
-					continue;
-
-				IPath outputLocation= outputPathFolder.getLocation();
-				if (outputLocation == null)
-					continue;
+				IPath outputLocation= null;
+				
+				IResource outputPathFolder= root.findMember(curr.getOutputLocation());
+				if (outputPathFolder != null)
+					outputLocation= outputPathFolder.getLocation();
 
 				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(curr);
 				for (int i= 0; i < classPath.length; i++) {

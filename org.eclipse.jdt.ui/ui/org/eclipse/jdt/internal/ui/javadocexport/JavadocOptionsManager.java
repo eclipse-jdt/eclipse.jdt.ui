@@ -695,10 +695,15 @@ public class JavadocOptionsManager {
 			toolArgs.add(fDocletpath);
 		}
 		
-		toolArgs.add("-sourcepath"); //$NON-NLS-1$
-		toolArgs.add(flatPathList(fSourcepath));
-		toolArgs.add("-classpath"); //$NON-NLS-1$
-		toolArgs.add(flatPathList(fClasspath));
+		if (fSourcepath.length > 0) {
+			toolArgs.add("-sourcepath"); //$NON-NLS-1$
+			toolArgs.add(flatPathList(fSourcepath));
+		}
+		
+		if (fClasspath.length > 0) {
+			toolArgs.add("-classpath"); //$NON-NLS-1$
+			toolArgs.add(flatPathList(fClasspath));
+		}
 		toolArgs.add("-" + fAccess); //$NON-NLS-1$
 
 		if (fFromStandard) {
