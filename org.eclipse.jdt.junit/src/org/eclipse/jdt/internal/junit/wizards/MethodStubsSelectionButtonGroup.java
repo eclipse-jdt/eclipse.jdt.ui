@@ -191,7 +191,7 @@ public class MethodStubsSelectionButtonGroup {
 
 	/**
 	 * Returns the group widget. When called the first time, the widget will be created.
-	 * @param The parent composite when called the first time, or <code>null</code>
+	 * @param parent composite when called the first time, or <code>null</code>
 	 * after.
 	 */
 	public Composite getSelectionButtonsGroup(Composite parent) {
@@ -268,7 +268,7 @@ public class MethodStubsSelectionButtonGroup {
 	
 	/**
 	 * Returns the selection state of a button contained in the group.
-	 * @param The index of the button
+	 * @param index of the button
 	 */
 	public boolean isSelected(int index) {
 		if (index >= 0 && index < fButtonsSelected.length) {
@@ -296,7 +296,7 @@ public class MethodStubsSelectionButtonGroup {
 
 	/**
 	 * Returns the enabled state of a button contained in the group.
-	 * @param The index of the button
+	 * @param index of the button
 	 */
 	public boolean isEnabled(int index) {
 		if (index >= 0 && index < fButtonsEnabled.length) {
@@ -366,7 +366,7 @@ public class MethodStubsSelectionButtonGroup {
 	}
 
 	/**
-	 * Programatical invocation of a dialog field change.
+	 * A dialog field has changed.
 	 */		
 	public void dialogFieldChanged() {
 		if (fGroupListener != null) {
@@ -377,7 +377,7 @@ public class MethodStubsSelectionButtonGroup {
 	/**
 	 * Tries to set the focus to the dialog field.
 	 * Returns <code>true</code> if the dialog field can take focus.
-	 * 	To be reimplemented by dialog field implementors.
+	 * 	To be re-implemented by dialog field implementors.
 	 */
 	public boolean setFocus() {
 		return false;

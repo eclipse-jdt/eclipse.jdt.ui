@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,10 +29,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -42,7 +42,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
  */
 public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 
-	private IRunnableContext fRunnableContext;
 	private IJavaElement fElement;
 
 	public static class TestReferenceCollector implements IJavaSearchResultCollector {
@@ -73,9 +72,8 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
-	public TestMethodSelectionDialog(Shell shell, IRunnableContext context, IJavaElement element) {
+	public TestMethodSelectionDialog(Shell shell, IJavaElement element) {
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED));
-		fRunnableContext= context;
 		fElement= element;
 	}
 	
@@ -98,7 +96,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		try {
-			elements= searchTestMethods(fElement, testType, fRunnableContext);
+			elements= searchTestMethods(fElement, testType);
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
@@ -153,7 +151,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		for (int i= 0; i < projects.length; i++) 
 			projects[i]= testTypes[i].getJavaProject();
 		dialog.setElements(projects);
-		if (dialog.open() == ElementListSelectionDialog.CANCEL)	
+		if (dialog.open() == Window.CANCEL)	
 			return null;
 		IJavaProject project= (IJavaProject) dialog.getFirstResult();
 		for (int i= 0; i < testTypes.length; i++) {
@@ -163,7 +161,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		return null;	
 	}
 	
-	public Object[] searchTestMethods(final IJavaElement element, final IType testType, IRunnableContext context) throws InvocationTargetException, InterruptedException  {
+	public Object[] searchTestMethods(final IJavaElement element, final IType testType) throws InvocationTargetException, InterruptedException  {
 		final TestReferenceCollector[] col= new TestReferenceCollector[1];
 		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
@@ -175,7 +173,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 				}
 			}
 		};
-		context.run(true, true, runnable);
+		PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
 		return col[0].getResult();
 	}
 

@@ -134,8 +134,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fDefaultClassToTest= ""; //$NON-NLS-1$
 	}
 
-	// -------- Initialization ---------
-
 	/**
 	 * Should be called from the wizard with the initial selection and the 2nd page of the wizard..
 	 */
@@ -190,7 +188,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	/**
-	 * @see NewContainerWizardPage#handleFieldChanged
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -393,7 +391,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}	
 
 	/**
-	 * @see NewTypeWizardPage#createTypeMembers
+	 * @see NewTypeWizardPage#createTypeMembers(IType, ImportsManager, IProgressMonitor)
 	 */
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
@@ -662,7 +660,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	/**
-	 * @see DialogPage#setVisible(boolean)
+	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -783,7 +781,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 		
 	/**
-	 * @see IWizardPage#canFlipToNextPage
+	 * @see org.eclipse.jface.wizard.IWizardPage#canFlipToNextPage()
 	 */
 	public boolean canFlipToNextPage() {
 		return isPageComplete() && getNextPage() != null && isNextPageValid();

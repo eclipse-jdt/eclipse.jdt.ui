@@ -84,7 +84,7 @@ public class JUnitStubUtility {
 	 * will be constructed so it can be added to a type.
 	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param options Options as defined abouve (GENSTUB_*)
+	 * @param settings Options as defined above (GENSTUB_*)
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */

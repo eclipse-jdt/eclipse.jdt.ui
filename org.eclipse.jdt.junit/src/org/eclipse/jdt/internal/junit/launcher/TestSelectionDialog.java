@@ -12,29 +12,20 @@ package org.eclipse.jdt.internal.junit.launcher;
 
  
 import java.lang.reflect.InvocationTargetException;
-
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * A dialog to select a test class or a test suite from a list of types.
  */
 public class TestSelectionDialog extends TwoPaneElementSelector {
 
-	private IRunnableContext fRunnableContext;
 	private IJavaProject fProject;
 	
 	private static class PackageRenderer extends JavaElementLabelProvider {
@@ -54,20 +45,16 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	/**
 	 * Constructor.
 	 */
-	public TestSelectionDialog(Shell shell, IRunnableContext context, IJavaProject project)
+	public TestSelectionDialog(Shell shell, IJavaProject project)
 	{
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
 			new PackageRenderer());
 
-		Assert.isNotNull(context);
-		Assert.isNotNull(project);
-
-		fRunnableContext= context;
 		fProject= project;
 	}
 	
 	/**
-	 * @see Windows#configureShell
+	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
@@ -80,7 +67,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	public int open() {
 		IType[] types= new IType[0];
 		try {
-			types= TestSearchEngine.findTests(fRunnableContext, new Object[] {fProject});
+			types= TestSearchEngine.findTests(new Object[] {fProject});
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {

@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -49,7 +48,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -60,6 +58,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -317,7 +316,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		}
 		final IJavaProject[] projects= originals;
 		final JavaModelException[] exception= new JavaModelException[1];
-		ProgressMonitorDialog monitor= new ProgressMonitorDialog(shell);
+		
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) {
 				try {
@@ -346,7 +345,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			}
 		};
 		try {
-			monitor.run(false, false, r);
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(r);
 		} catch (InvocationTargetException e) {
 			JUnitPlugin.log(e);
 		} catch (InterruptedException e) {

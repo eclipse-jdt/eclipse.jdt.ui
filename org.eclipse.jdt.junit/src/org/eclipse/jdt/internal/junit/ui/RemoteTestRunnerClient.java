@@ -223,18 +223,18 @@ public class RemoteTestRunnerClient {
 	 * Reads the message stream from the RemoteTestRunner
 	 */
 	private class ServerConnection extends Thread {
-		int fPort;
+		int fServerPort;
 		
 		public ServerConnection(int port) {
 			super("ServerConnection"); //$NON-NLS-1$
-			fPort= port;
+			fServerPort= port;
 		}
 		
 		public void run() {
 			try {
 				if (fDebug)
-					System.out.println("Creating server socket "+fPort); //$NON-NLS-1$
-				fServerSocket= new ServerSocket(fPort);
+					System.out.println("Creating server socket "+fServerPort); //$NON-NLS-1$
+				fServerSocket= new ServerSocket(fServerPort);
 				fSocket= fServerSocket.accept();	
 				try {
 				    fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream(), "UTF-8")); //$NON-NLS-1$

@@ -31,7 +31,7 @@ public interface ITestRunListener2 extends ITestRunListener {
 	 * Example: "324968,testPass(junit.tests.MyTest),false,1"
 	 * </pre>
 	 * 
-	 * @param entry
+	 * @param description a string describing a tree entry
 	 */ 
 	public void testTreeEntry(String description);
 }

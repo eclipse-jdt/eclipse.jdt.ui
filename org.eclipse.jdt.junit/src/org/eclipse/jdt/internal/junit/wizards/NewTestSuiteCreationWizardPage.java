@@ -13,13 +13,11 @@ package org.eclipse.jdt.internal.junit.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,7 +31,6 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
@@ -41,7 +38,6 @@ import org.eclipse.jdt.internal.junit.util.SWTUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -119,7 +115,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	/**
-	 * @see IDialogPage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -166,7 +162,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	/**
-	 * @see NewContainerWizardPage#handleFieldChanged
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -200,7 +196,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	/**
-	 * @see DialogPage#setVisible(boolean)
+	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -353,7 +349,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	/**
 	 * Returns the string content for creating a new suite() method.
 	 */
-	public String getSuiteMethodString() throws JavaModelException {
+	public String getSuiteMethodString() {
 		IPackageFragment pack= getPackageFragment();
 		String packName= pack.getElementName();
 		StringBuffer suite= new StringBuffer("public static Test suite () {TestSuite suite= new TestSuite(\"Test for "+((packName.equals(""))?"default package":packName)+"\");\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -365,7 +361,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	/**
 	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
 	 */
-	public static String getUpdatableString(Object[] selectedClasses) throws JavaModelException {
+	public static String getUpdatableString(Object[] selectedClasses) {
 		StringBuffer suite= new StringBuffer();
 		suite.append(START_MARKER+"\n"); //$NON-NLS-1$
 		for (int i= 0; i < selectedClasses.length; i++) {
@@ -383,7 +379,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		return suite.toString();
 	}
 	
-	private String getUpdatableString() throws JavaModelException {
+	private String getUpdatableString() {
 		return getUpdatableString(fClassesInSuiteTable.getCheckedElements());
 	}
 
@@ -406,80 +402,74 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	protected void updateExistingClass(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		try {
-			IPackageFragment pack= getPackageFragment();
-			ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
-			
-			if (!cu.exists()) {
-				createType(monitor);
-				fUpdatedExistingClassButton= false;
-				return;
-			}
-			
-			if (! UpdateTestSuite.checkValidateEditStatus(cu, getShell()))
-				return;
+		IPackageFragment pack= getPackageFragment();
+		ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
+		
+		if (!cu.exists()) {
+			createType(monitor);
+			fUpdatedExistingClassButton= false;
+			return;
+		}
+		
+		if (! UpdateTestSuite.checkValidateEditStatus(cu, getShell()))
+			return;
 
-			IType suiteType= cu.getType(getTypeName());
-			monitor.beginTask(WizardMessages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
-			IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
-			monitor.worked(1);
-			
-			String lineDelimiter= JUnitStubUtility.getLineDelimiterUsed(cu);
-			if (suiteMethod.exists()) {
-				ISourceRange range= suiteMethod.getSourceRange();
-				if (range != null) {
-					IBuffer buf= cu.getBuffer();
-					String originalContent= buf.getText(range.getOffset(), range.getLength());
-					StringBuffer source= new StringBuffer(originalContent);
+		IType suiteType= cu.getType(getTypeName());
+		monitor.beginTask(WizardMessages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
+		IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
+		monitor.worked(1);
+		
+		String lineDelimiter= JUnitStubUtility.getLineDelimiterUsed(cu);
+		if (suiteMethod.exists()) {
+			ISourceRange range= suiteMethod.getSourceRange();
+			if (range != null) {
+				IBuffer buf= cu.getBuffer();
+				String originalContent= buf.getText(range.getOffset(), range.getLength());
+				StringBuffer source= new StringBuffer(originalContent);
+				//using JDK 1.4
+				//int start= source.toString().indexOf(START_MARKER) --> int start= source.indexOf(START_MARKER);
+				int start= source.toString().indexOf(START_MARKER);
+				if (start > -1) {
 					//using JDK 1.4
-					//int start= source.toString().indexOf(START_MARKER) --> int start= source.indexOf(START_MARKER);
-					int start= source.toString().indexOf(START_MARKER);
-					if (start > -1) {
-						//using JDK 1.4
-						//int end= source.toString().indexOf(END_MARKER, start) --> int end= source.indexOf(END_MARKER, start)
-						int end= source.toString().indexOf(END_MARKER, start);
-						if (end > -1) {
-							monitor.subTask(WizardMessages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
-							monitor.worked(1);
-							end += END_MARKER.length();
-							source.replace(start, end, getUpdatableString());
-							buf.replace(range.getOffset(), range.getLength(), source.toString());
-							cu.reconcile();  
-							originalContent= buf.getText(0, buf.getLength());
-							monitor.worked(1);
-							String formattedContent=
-								JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
-							buf.replace(0, buf.getLength(), formattedContent);
-							monitor.worked(1);
-							cu.save(new SubProgressMonitor(monitor, 1), false);
-						} else {
-							cannotUpdateSuiteError();
-						}
+					//int end= source.toString().indexOf(END_MARKER, start) --> int end= source.indexOf(END_MARKER, start)
+					int end= source.toString().indexOf(END_MARKER, start);
+					if (end > -1) {
+						monitor.subTask(WizardMessages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
+						monitor.worked(1);
+						end += END_MARKER.length();
+						source.replace(start, end, getUpdatableString());
+						buf.replace(range.getOffset(), range.getLength(), source.toString());
+						cu.reconcile();  
+						originalContent= buf.getText(0, buf.getLength());
+						monitor.worked(1);
+						String formattedContent=
+							JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
+						buf.replace(0, buf.getLength(), formattedContent);
+						monitor.worked(1);
+						cu.save(new SubProgressMonitor(monitor, 1), false);
 					} else {
 						cannotUpdateSuiteError();
 					}
 				} else {
-					MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.title"), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					cannotUpdateSuiteError();
 				}
 			} else {
-				suiteType.createMethod(getSuiteMethodString(), null, true, monitor);
-				ISourceRange range= cu.getSourceRange();
-				IBuffer buf= cu.getBuffer();
-				String originalContent= buf.getText(range.getOffset(), range.getLength());
-				monitor.worked(2);
-				String formattedContent=
-					JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
-				buf.replace(range.getOffset(), range.getLength(), formattedContent);
-				monitor.worked(1);
-				cu.save(new SubProgressMonitor(monitor, 1), false);
+				MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.title"), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			monitor.done();
-			fUpdatedExistingClassButton= true;
-		} catch (JavaModelException e) {
-			String title= WizardMessages.getString("NewTestSuiteWizPage.error_tile"); //$NON-NLS-1$
-			String message= WizardMessages.getString("NewTestSuiteWizPage.error_message"); //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), title, message);
+		} else {
+			suiteType.createMethod(getSuiteMethodString(), null, true, monitor);
+			ISourceRange range= cu.getSourceRange();
+			IBuffer buf= cu.getBuffer();
+			String originalContent= buf.getText(range.getOffset(), range.getLength());
+			monitor.worked(2);
+			String formattedContent=
+				JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
+			buf.replace(range.getOffset(), range.getLength(), formattedContent);
+			monitor.worked(1);
+			cu.save(new SubProgressMonitor(monitor, 1), false);
 		}
+		monitor.done();
+		fUpdatedExistingClassButton= true;
 	}
 
 	/**

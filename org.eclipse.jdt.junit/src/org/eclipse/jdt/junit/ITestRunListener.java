@@ -25,21 +25,21 @@ package org.eclipse.jdt.junit;
 	/**
    	 * Status constant indicating that a test passed (constant value 0).
  	 * 
-     * @see #testFailed
+     * @see #testFailed(int, String, String, String)
  	 */
  	public static final int STATUS_OK= 0;
  	/**
 	 * Status constant indicating that a test had an error an unanticipated
 	 * exception (constant value 1).
  	 * 
-	 * @see #testFailed
+	 * @see #testFailed(int, String, String, String)
  	 */
  	public static final int STATUS_ERROR= 1;
  	/**
 	 * Status constant indicating that a test failed an assertion
 	 * (constant value 2).
  	 * 
- 	 * @see #testFailed
+ 	 * @see #testFailed(int, String, String, String)
 	 */
  	public static final int STATUS_FAILURE= 2;
  	/**

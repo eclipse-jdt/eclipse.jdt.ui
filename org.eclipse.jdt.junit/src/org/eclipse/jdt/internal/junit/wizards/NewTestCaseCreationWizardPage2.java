@@ -74,7 +74,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	}
 
 	/**
-	 * @see IDialogPage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite container= new Composite(parent, SWT.NONE);
@@ -212,7 +212,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	}
 
 	/**
-	 * @see DialogPage#setVisible(boolean)
+	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);

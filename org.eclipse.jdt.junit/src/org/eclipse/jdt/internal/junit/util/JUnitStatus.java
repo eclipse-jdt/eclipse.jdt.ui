@@ -82,7 +82,7 @@ public class JUnitStatus implements IStatus {
 	}
 	
 	/**
-	 * @see IStatus#getMessage
+	 * @see IStatus#getMessage()
 	 */
 	public String getMessage() {
 		return fStatusMessage;
@@ -90,7 +90,7 @@ public class JUnitStatus implements IStatus {
 	
 	/**
 	 * Sets the status to ERROR.
-	 * @param The error message (can be empty, but not null)
+	 * @param errorMessage the error message (can be empty, but not null)
 	 */	
 	public void setError(String errorMessage) {
 		Assert.isNotNull(errorMessage);
@@ -100,7 +100,7 @@ public class JUnitStatus implements IStatus {
 
 	/**
 	 * Sets the status to WARNING.
-	 * @param The warning message (can be empty, but not null)
+	 * @param warningMessage the warning message (can be empty, but not null)
 	 */		
 	public void setWarning(String warningMessage) {
 		Assert.isNotNull(warningMessage);
@@ -110,7 +110,7 @@ public class JUnitStatus implements IStatus {
 
 	/**
 	 * Sets the status to INFO.
-	 * @param The info message (can be empty, but not null)
+	 * @param infoMessage the info message (can be empty, but not null)
 	 */		
 	public void setInfo(String infoMessage) {
 		Assert.isNotNull(infoMessage);

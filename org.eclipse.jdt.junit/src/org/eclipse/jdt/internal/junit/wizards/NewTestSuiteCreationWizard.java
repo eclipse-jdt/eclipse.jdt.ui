@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,10 +25,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A wizard for creating test suites.
@@ -70,9 +69,8 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 						WizardMessages.getFormattedString("NewTestSuiteWiz.unsavedchangesDialog.message", //$NON-NLS-1$
 						filename));  
 				if (saveUnsavedChanges) {
-					ProgressMonitorDialog progressDialog= new ProgressMonitorDialog(fPage.getShell());
 					try {
-						progressDialog.run(false, false, getRunnableSave(cu_ep));
+						PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnableSave(cu_ep));
 					} catch (Exception e) {
 						JUnitPlugin.log(e);
 					}

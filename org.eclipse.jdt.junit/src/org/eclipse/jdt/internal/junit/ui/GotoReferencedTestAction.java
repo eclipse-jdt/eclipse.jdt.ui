@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -27,16 +26,15 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 /**
@@ -82,12 +80,12 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	private void run(IJavaElement[] elements) throws PartInitException, JavaModelException {
 		IJavaElement element= elements[0];
 		
-		SelectionStatusDialog dialog = new TestMethodSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), element); 
+		SelectionStatusDialog dialog = new TestMethodSelectionDialog(getShell(), element); 
 		dialog.setTitle(JUnitMessages.getString("GotoReferencedTestAction.selectdialog.title"));  //$NON-NLS-1$
 		String msg= JUnitMessages.getFormattedString("GotoReferencedTestAction.dialog.select_message", element.getElementName()); //$NON-NLS-1$
 		dialog.setMessage(msg); 
 		
-		if (dialog.open() == SelectionDialog.CANCEL) 
+		if (dialog.open() == Window.CANCEL) 
 			return;
 	
 		Object result = dialog.getFirstResult();

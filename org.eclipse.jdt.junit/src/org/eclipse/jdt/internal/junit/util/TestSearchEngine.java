@@ -15,17 +15,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.ui.IFileEditorInput;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,9 +34,11 @@ import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Custom Search engine for suite() methods
@@ -104,7 +99,7 @@ public class TestSearchEngine {
 		return v;
 	}
 	
-	public static IType[] findTests(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException{
+	public static IType[] findTests(final Object[] elements) throws InvocationTargetException, InterruptedException{
 		final Set result= new HashSet();
 	
 		if (elements.length > 0) {
@@ -113,7 +108,7 @@ public class TestSearchEngine {
 					doFindTests(elements, result, pm);
 				}
 			};
-			context.run(true, true, runnable);			
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);			
 		}
 		return (IType[]) result.toArray(new IType[result.size()]) ;
 	}

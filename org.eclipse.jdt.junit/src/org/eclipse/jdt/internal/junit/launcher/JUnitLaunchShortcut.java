@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -91,7 +90,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	protected void launchType(Object[] search, String mode) {
 		IType[] types= null;
 		try {
-			types= TestSearchEngine.findTests(new ProgressMonitorDialog(getShell()), search);
+			types= TestSearchEngine.findTests(search); 
 		} catch (InterruptedException e) {
 			JUnitPlugin.log(e);
 			return;
