@@ -553,10 +553,10 @@ public class JavaModelUtil {
 	}
 	
 	/**
-	 * Returns the original type if the given type. If the type is already
-	 * an original the input type is returned. The returned type must not exist
+	 * Returns the original if the given member. If the member is already
+	 * an original the input is returned. The returned member must not exist
 	 */
-	public static IType toOriginal(IType type) {
+	public static IMember toOriginal(IMember type) {
 		ICompilationUnit cu= type.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
 			return (IType)cu.getOriginal(type);
@@ -574,21 +574,21 @@ public class JavaModelUtil {
 	}	
 	
 	/**
-	 * Returns the working copy type of the given type. If the type is already in a
-	 * working copy or the type does not exist in the working copy the input type is returned.
+	 * Returns the working copy of the given member. If the member is already in a
+	 * working copy or the member does not exist in the working copy the input is returned.
 	 */
-	public static IType toWorkingCopy(IType type) {
-		ICompilationUnit cu= type.getCompilationUnit();
+	public static IMember toWorkingCopy(IMember member) {
+		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && !cu.isWorkingCopy()) {
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
-				IJavaElement[] types= workingCopy.findElements(type);
+				IJavaElement[] types= workingCopy.findElements(member);
 				if (types != null && types.length > 0) {
 					return (IType) types[0];
 				}
 			}
 		}
-		return type;
+		return member;
 	}
 
 
