@@ -635,6 +635,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fJavaEditorTextHoverDescriptors[last]= fJavaEditorTextHoverDescriptors[annotationHoverIndex];
 				fJavaEditorTextHoverDescriptors[annotationHoverIndex]= hoverDescriptor;
 			}
+			
+			// Move Best Match hover to front
+			for (int i= 0; i < fJavaEditorTextHoverDescriptors.length - 1; i++) {
+				if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(fJavaEditorTextHoverDescriptors[i].getId())) {
+					hoverDescriptor= fJavaEditorTextHoverDescriptors[i];
+					for (int j= i; j > 0; j--)
+						fJavaEditorTextHoverDescriptors[j]= fJavaEditorTextHoverDescriptors[j-1];
+					fJavaEditorTextHoverDescriptors[0]= hoverDescriptor;
+					break;
+				}
+				
+			}
 		}
 		
 		return fJavaEditorTextHoverDescriptors;
