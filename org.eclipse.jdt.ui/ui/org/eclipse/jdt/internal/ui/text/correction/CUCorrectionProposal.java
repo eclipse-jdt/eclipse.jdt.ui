@@ -254,7 +254,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 					buf.append(ch);
 				}
 			}
-			buf.append(content);
 			if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
 				buf.append("<br>"); //$NON-NLS-1$
 			}
