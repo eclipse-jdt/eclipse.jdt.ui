@@ -255,6 +255,8 @@ public class PullUpInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 1;
 		composite.setLayout(layout);
 		
+		initializeDialogUnits(composite);
+		
 		createHierarchyTreeComposite(composite);
 		createSourceViewer(composite);
 		composite.setWeights(new int[]{50, 50});
@@ -296,8 +298,10 @@ public class PullUpInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 1;
 		c.setLayout(layout);
 		
-		fContextLabel= new Label(c, SWT.NONE);
-		fContextLabel.setLayoutData(new GridData());
+		fContextLabel= new Label(c, SWT.WRAP);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(2);
+		fContextLabel.setLayoutData(gd);
 		
 		fSourceViewer= new SourceViewer(c, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools(), null));
@@ -330,8 +334,10 @@ public class PullUpInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 1;
 		composite.setLayout(layout);
 
-		fTypeHierarchyLabel= new Label(composite, SWT.NONE);
-		fTypeHierarchyLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fTypeHierarchyLabel= new Label(composite, SWT.WRAP);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(2);
+		fTypeHierarchyLabel.setLayoutData(gd);
 		
 		fTreeViewer= createTreeViewer(composite, pm);
 		updateTypeHierarchyLabel();
@@ -415,17 +421,17 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}
 	
 	private void setLabelText(ISourceReference entry){
-		if (entry == null)
-			fContextLabel.setText("");
-		else{
-			String text= "";
-			if (entry instanceof IMethod)
-				text= "Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
-			else if (entry instanceof IType)	
-				text= "Source of type: '" + ((IType)entry).getElementName()+ "' declared in package '" + ((IType)entry).getPackageFragment().getElementName()+ "'";
-			fContextLabel.setText(text);
-		}	
+		fContextLabel.setText(createLabelText(entry));	
 		fContextLabel.pack(true);		
+	}
+
+	private static String createLabelText(ISourceReference entry) {
+		if (entry instanceof IMethod)
+			return "Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
+		else if (entry instanceof IType)	
+			return  "Source of type: '" + ((IType)entry).getElementName()+ "' declared in package '" + ((IType)entry).getPackageFragment().getElementName()+ "'";
+		else
+			return "";
 	}
 	
 	private boolean isMarkedToDelete(Object object){
