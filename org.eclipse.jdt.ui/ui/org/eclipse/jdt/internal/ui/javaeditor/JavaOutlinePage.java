@@ -628,8 +628,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint");
 		
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "FieldFilter");
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "LexicalSort");
+		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "FieldFilter");
+		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "LexicalSort");
 		
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
 		addRefactoring(menu);	
