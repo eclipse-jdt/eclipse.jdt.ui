@@ -17,26 +17,28 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.viewsupport.IReconciled;
 
 /**
  * Content provider used for the method view.
  * Allows also seeing methods inherited from base classes.
  */
-public class MethodsContentProvider implements IStructuredContentProvider {
+public class MethodsContentProvider implements IStructuredContentProvider, IReconciled {
 	
 	private static final Object[] NO_ELEMENTS = new Object[0];
 		
 	private boolean fShowInheritedMethods;
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private TableViewer fViewer;
+	private boolean fIsReconciled;
 	
 	public MethodsContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fHierarchyLifeCycle= lifecycle;
 		fShowInheritedMethods= false;
 		fViewer= null;
+		fIsReconciled= JavaBasePreferencePage.reconcileJavaViews();
 	}
 	
 	/**
@@ -50,6 +52,13 @@ public class MethodsContentProvider implements IStructuredContentProvider {
 			}
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see IReconciled#isReconciled()
+	 */
+	public boolean isReconciled() {
+		return fIsReconciled;
+	}	
 	
 	/**
 	 * Returns true if inherited methods are shown
@@ -122,11 +131,13 @@ public class MethodsContentProvider implements IStructuredContentProvider {
 	 * is a corresponding working copy.
 	 */
 	private IType getSuitableType(IType type) throws JavaModelException {
-		if (JavaBasePreferencePage.reconcileJavaViews() && type.getCompilationUnit() != null) {
+		if (isReconciled() && type.getCompilationUnit() != null) {
 			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
 			if (typeInWc != null)
 				return typeInWc;
 		}
 		return type;
 	}
+
+
 }

@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
@@ -38,11 +37,14 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected boolean fShowAllTypes;
 	
 	protected TreeViewer fViewer;
+
+	private boolean fIsReconciled;
 	
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy= lifecycle;
 		fMemberFilter= null;
 		fShowAllTypes= false;
+		fIsReconciled= JavaBasePreferencePage.reconcileJavaViews();
 	}
 	
 	/**
@@ -74,6 +76,14 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected final ITypeHierarchy getHierarchy() {
 		return fTypeHierarchy.getHierarchy();
 	}
+	
+	
+	/* (non-Javadoc)
+	 * @see IReconciled#isReconciled()
+	 */
+	public boolean isReconciled() {
+		return fIsReconciled;
+	}		
 	
 	
 	/*
@@ -241,7 +251,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * is a corresponding working copy.
 	 */
 	private IType getSuitableType(IType type) throws JavaModelException {
-		if (JavaBasePreferencePage.reconcileJavaViews() && type.getCompilationUnit() != null) {
+		if (isReconciled() && type.getCompilationUnit() != null) {
 			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
 			if (typeInWc != null)
 				return typeInWc;

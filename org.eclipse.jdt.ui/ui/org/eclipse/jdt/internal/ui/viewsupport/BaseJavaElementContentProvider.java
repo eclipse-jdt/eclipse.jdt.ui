@@ -39,7 +39,7 @@ Java model (<code>IJavaModel</code>)
  * Java project and the package fragments is automatically filtered out.
  * </p>
  */
-public class BaseJavaElementContentProvider implements ITreeContentProvider {
+public class BaseJavaElementContentProvider implements ITreeContentProvider, IReconciled {
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
@@ -77,6 +77,14 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 	public boolean getProvideWorkingCopy() {
 		return fProvideWorkingCopy;
 	}
+
+	/* (non-Javadoc)
+	 * @see IReconciled#isReconciled()
+	 */
+	public boolean isReconciled() {
+		return fProvideWorkingCopy;
+	}
+
 
 	/**
 	 * Returns whether the members are provided when asking
@@ -354,4 +362,6 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 		System.arraycopy(a2, 0, res, a1Len, a2Len); 
 		return res;
 	}
+
+
 }

@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -16,15 +15,19 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.text.source.AnnotationModelEvent;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.util.ListenerList;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -32,10 +35,10 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * Viewers showing error ticks should register as listener to
  * this type.
  */
-public class ProblemMarkerManager implements IResourceChangeListener {
+public class ProblemMarkerManager implements IResourceChangeListener, IAnnotationModelListener , IAnnotationModelListenerExtension {
 
 	/**
-	 * Visitors used to filter the element delta changes
+	 * Visitors used to look if the element change delta containes a marker change.
 	 */	private static class ProjectErrorVisitor implements IResourceDeltaVisitor {
 
 		private HashSet fChangedElements; 
@@ -54,7 +57,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 						return false;
 					}
 				} catch (CoreException e) {
-					JavaPlugin.log(e.getStatus());
+					JavaPlugin.log(e);
 					return false;
 				}
 			}
@@ -95,7 +98,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 	
 	
 	public ProblemMarkerManager() {
-		fListeners= new ListenerList(5);
+		fListeners= new ListenerList(10);
 	}
 
 	/*
@@ -114,9 +117,30 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 
 		if (!changedElements.isEmpty()) {
 			IResource[] changes= (IResource[]) changedElements.toArray(new IResource[changedElements.size()]);
-			fireChanges(changes);
+			fireChanges(changes, true);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
+	 */
+	public void modelChanged(IAnnotationModel model) {
+		// no action
+	}
+
+	/* (non-Javadoc)
+	 * @see IAnnotationModelListenerExtension#modelChanged(AnnotationModelEvent)
+	 */
+	public void modelChanged(AnnotationModelEvent event) {
+		if (event instanceof CompilationUnitAnnotationModelEvent) {
+			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;
+			if (cuEvent.includesMarkerAnnotationChanges()) {
+				IResource[] changes= new IResource[] { cuEvent.getUnderlyingResource() };
+				fireChanges(changes, false);
+			}
+		}
+	}	
+	
 	
 	/**
 	 * Adds a listener for problem marker changes.
@@ -124,6 +148,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 	public void addListener(IProblemChangedListener listener) {
 		if (fListeners.isEmpty()) { 
 			JavaPlugin.getWorkspace().addResourceChangeListener(this);
+			JavaPlugin.getDefault().getCompilationUnitDocumentProvider().addGlobalAnnotationModelListener(this);
 		}
 		fListeners.add(listener);
 	}
@@ -135,10 +160,11 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 		fListeners.remove(listener);
 		if (fListeners.isEmpty()) {
 			JavaPlugin.getWorkspace().removeResourceChangeListener(this);
+			JavaPlugin.getDefault().getCompilationUnitDocumentProvider().removeGlobalAnnotationModelListener(this);
 		}
 	}
 	
-	private void fireChanges(final IResource[] changes) {
+	private void fireChanges(final IResource[] changes, final boolean isMarkerChange) {
 		Display display= SWTUtil.getStandardDisplay();
 		if (display != null && !display.isDisposed()) {
 			display.asyncExec(new Runnable() {
@@ -146,11 +172,11 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 					Object[] listeners= fListeners.getListeners();
 					for (int i= 0; i < listeners.length; i++) {
 						IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
-						curr.problemsChanged(changes);
+						curr.problemsChanged(changes, isMarkerChange);
 					}	
 				}
 			});
 		}	
 	}
-
+
 }

@@ -17,9 +17,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 /**
- * Helper class for updating error markers.
- * Items are mapped to paths of their underlying resources.
- * Method <code>problemsChanged</code> updates all items that are affected from the changed
+ * Helper class for updating error markers and other decorators that work on resources.
+ * Items are mapped to their element's underlying resource.
+ * Method <code>resourceChanged</code> updates all items that are affected from the changed
  * elements.
  */public class ResourceToItemMapper {
 
@@ -156,7 +156,15 @@ import org.eclipse.jdt.core.IJavaElement;
 		if (element instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) element;
 			if (!elem.isReadOnly()) { // only modifieable elements can get error ticks
-				return elem.getResource(); // no mapping for elements in working copies
+				IResource res= elem.getResource();
+				if (res == null) {
+					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (cu != null && cu.isWorkingCopy()) {
+						// elements in working copies are mapped to the underlying resource of the original cu
+						res= cu.getOriginalElement().getResource();
+					}
+				}
+				return res; 
 			}
 			return null;
 		} else if (element instanceof IResource) {

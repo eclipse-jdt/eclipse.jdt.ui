@@ -7,14 +7,17 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.core.resources.IResource;
 
 /**
- * Can be added to a ProblemMarkerManager to get notified about error
+ * Can be added to a ProblemMarkerManager to get notified about problem
  * marker changes. Used to update error ticks.
  */
 public interface IProblemChangedListener {
 	
 	/**
 	 * @param changedElements  A set with elements of type <code>IResource</code> that
-	 * describe the resources that had an error marker change.
+	 * describe the resources that had an problem change.
+	 * @param isMarkerChnage If set to <code>true</code>, the change was a marker change, if
+	 * <code>false</code>, the change came from an annotation model change.
 	 */
-	void problemsChanged(IResource[] changedResources);
+	void problemsChanged(IResource[] changedResources, boolean isMarkerChnage);
+	
 }

@@ -10,6 +10,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -34,11 +36,13 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -55,6 +59,7 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -62,6 +67,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -71,6 +77,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -159,7 +166,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			class ChildrenProvider implements ITreeContentProvider {
 				
 				private ElementChangedListener fListener;
-				private JavaOutlineErrorTickUpdater fErrorTickUpdater;
 				
 				protected boolean matches(IJavaElement element) {
 					if (element.getElementType() == IJavaElement.METHOD) {
@@ -238,11 +244,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					if (fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
 						fListener= null;
-					}
-					if (fErrorTickUpdater != null) {
-						fErrorTickUpdater.setAnnotationModel(null);
-						fErrorTickUpdater= null;
-					}					
+					}		
 				}
 				
 				/*
@@ -254,16 +256,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					if (isCU && fListener == null) {
 						fListener= new ElementChangedListener();
 						JavaCore.addElementChangedListener(fListener);
-						fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer);
-						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
-					} else if (isCU && fErrorTickUpdater != null) {
-						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
 					} else if (!isCU && fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
 						fListener= null;
-						
-						fErrorTickUpdater.setAnnotationModel(null);
-						fErrorTickUpdater= null;
 					}
 				}
 			};
@@ -535,7 +530,54 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					
 					if (doUpdateParent)
 						updateItem(w, delta.getElement());
-				}					
+				}
+				
+
+								
+				/*
+				 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
+				 */
+				protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
+					Object input= getInput();
+					if (event instanceof ProblemsLabelChangedEvent) {
+						ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
+						if (e.isMarkerChange() && input instanceof ICompilationUnit) {
+							return; // marker changes can be ignored
+						}
+					}
+					// look if the underlying resource changed
+					Object[] changed= event.getElements();
+					if (changed != null) {
+						IResource resource= getUnderlyingResource();
+						if (resource != null) {
+							for (int i= 0; i < changed.length; i++) {
+								if (changed[i].equals(resource)) {
+									// change event to a full refresh
+									event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource());
+									break;
+								}
+							}
+						}
+					}
+					super.handleLabelProviderChanged(event);
+				}
+				
+				private IResource getUnderlyingResource() {
+					Object input= getInput();
+					if (input instanceof ICompilationUnit) {
+						ICompilationUnit cu= (ICompilationUnit) input;
+						if (cu.isWorkingCopy()) {
+							return cu.getOriginalElement().getResource();
+						} else {
+							return cu.getResource();
+						}				
+					} else if (input instanceof IClassFile) {
+						return ((IClassFile) input).getResource();
+					}
+					return null;
+				}				
+				
+
 			};
 				
 			class LexicalSortingAction extends Action {

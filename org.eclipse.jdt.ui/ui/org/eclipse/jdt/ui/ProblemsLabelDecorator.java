@@ -20,6 +20,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -41,9 +42,31 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * LabelDecorator that decorates an element's image with error and warning overlays that represent the severity
  * of markers attached to the element's underlying resource.
  * To see a problem decoration for a marker, the marker needs to be a subtype of IMarker.PROBLEM.
- * Updating of images on marker change is currently only performed on Java project.
+ * Updating of images on marker change is currently only performed on elements in Java projects.
  */
-public class ProblemsLabelDecorator implements ILabelDecorator { 
+public class ProblemsLabelDecorator implements ILabelDecorator {
+	
+	/**
+	 * LabelProviderChangedEvent sent out by the ProblemsLabelDecorator.
+	 */
+	public static class ProblemsLabelChangedEvent extends LabelProviderChangedEvent {
+
+		private boolean fMarkerChange;
+
+		public ProblemsLabelChangedEvent(IBaseLabelProvider source, IResource[] changedResource, boolean isMarkerChange) {
+			super(source, changedResource);
+			fMarkerChange= isMarkerChange;
+		}
+		
+		/**
+		 * Returns if this event origins from marker changes. If set to <code>false</code>, an annotation model change
+		 * was the origin. Viewers not displaying working copies can ignore these events.
+		 */
+		public boolean isMarkerChange() {
+			return fMarkerChange;
+		}
+
+	}
 
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;	
@@ -246,8 +269,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		fListeners.add(listener);
 		if (fProblemChangedListener == null) {
 			fProblemChangedListener= new IProblemChangedListener() {
-				public void problemsChanged(IResource[] changedResources) {
-					fireProblemsChanged(changedResources);
+				public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
+					fireProblemsChanged(changedResources, isMarkerChange);
 				}
 			};
 			JavaPlugin.getDefault().getProblemMarkerManager().addListener(fProblemChangedListener);
@@ -267,9 +290,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		}
 	}
 	
-	private void fireProblemsChanged(IResource[] changedResources) {
+	private void fireProblemsChanged(IResource[] changedResources, boolean isMarkerChange) {
 		if (fListeners != null && !fListeners.isEmpty()) {
-			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, changedResources);
+			LabelProviderChangedEvent event= new ProblemsLabelChangedEvent(this, changedResources, isMarkerChange);
 			Object[] listeners= fListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++) {
 				((ILabelProviderListener) listeners[i]).labelProviderChanged(event);

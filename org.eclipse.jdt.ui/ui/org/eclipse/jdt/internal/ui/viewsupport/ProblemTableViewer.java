@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
@@ -97,9 +98,16 @@ public class ProblemTableViewer extends TableViewer {
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
+		if (event instanceof ProblemsLabelChangedEvent) {
+			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
+			if (!e.isMarkerChange() && !isShowingWorkingCopies()) {
+				return;
+			}
+		}
+		
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemMapper.isEmpty()) {
-			ArrayList others= new ArrayList();
+			ArrayList others= new ArrayList(changed.length);
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {
@@ -180,8 +188,7 @@ public class ProblemTableViewer extends TableViewer {
 	 * @return <code>true</code> if this viewer shows working copies
 	 */
 	private boolean isShowingWorkingCopies() {
-		IContentProvider contentProvider= getContentProvider();
-		return contentProvider instanceof BaseJavaElementContentProvider
-			&& ((BaseJavaElementContentProvider)contentProvider).getProvideWorkingCopy();
+		Object contentProvider= getContentProvider();
+		return contentProvider instanceof IReconciled && ((IReconciled)contentProvider).isReconciled();
 	}
 }

@@ -12,12 +12,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Canvas;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -27,6 +21,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.Document;
@@ -35,8 +35,12 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
@@ -69,8 +73,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
-
-
 
 
 public class CompilationUnitDocumentProvider extends FileDocumentProvider implements IWorkingCopyManager {
@@ -190,8 +192,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
-			
-			
+				
 			public CompilationUnitAnnotationModel(IResource resource) {
 				super(resource);
 			}
@@ -265,8 +266,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					}
 				}
 					
-				if (temporaryProblemsChanged)
-					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, false));
+				if (temporaryProblemsChanged) {
+					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), false));
+				}
 			}
 			
 			/**
@@ -293,7 +295,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see AnnotationModel#fireModelChanged()
 			 */
 			protected void fireModelChanged() {
-				fireModelChanged(new CompilationUnitAnnotationModelEvent(this, true));
+				fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), true));
 			}
 			
 			/*
@@ -372,6 +374,47 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
+		private static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
+			
+			private ListenerList fListenerList;
+			
+			public GlobalAnnotationModelListener() {
+				fListenerList= new ListenerList();
+			}
+			
+			/**
+			 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
+			 */
+			public void modelChanged(IAnnotationModel model) {
+				Object[] listeners= fListenerList.getListeners();
+				for (int i= 0; i < listeners.length; i++) {
+					((IAnnotationModelListener) listeners[i]).modelChanged(model);
+				}
+			}
+
+			/**
+			 * @see IAnnotationModelListenerExtension#modelChanged(AnnotationModelEvent)
+			 */
+			public void modelChanged(AnnotationModelEvent event) {
+				Object[] listeners= fListenerList.getListeners();
+				for (int i= 0; i < listeners.length; i++) {
+					Object curr= listeners[i];
+					if (curr instanceof IAnnotationModelListenerExtension) {
+						((IAnnotationModelListenerExtension) curr).modelChanged(event);
+					}
+				}
+			}
+			
+			public void addListener(IAnnotationModelListener listener) {
+				fListenerList.add(listener);
+			}
+			
+			public void removeListener(IAnnotationModelListener listener) {
+				fListenerList.remove(listener);
+			}			
+			
+		}
+		
 	/* Preference key for temporary problems */
 	public final static String HANDLE_TEMPORARY_PROBLEMS= "handleTemporaryProblems"; //$NON-NLS-1$
 	
@@ -385,7 +428,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	/** Internal property changed listener */
 	private IPropertyChangeListener fPropertyListener;
 	
-		
+	/** annotation model listener added to all created CU annotation models */
+	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;	
 	
 	/**
 	 * Constructor
@@ -397,6 +441,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					enableHandlingTemporaryProblems();
 			}
 		};
+		
+		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
 		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyListener);
 	}
@@ -476,6 +522,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					IProblemRequestorExtension extension= (IProblemRequestorExtension) r;
 					extension.setIsActive(isHandlingTemporaryProblems());
 				}
+				m.addAnnotationModelListener(fGlobalAnnotationModelListener);
 				
 				return info;
 				
@@ -495,6 +542,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (info instanceof CompilationUnitInfo) {
 			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
 			cuInfo.fCopy.destroy();
+			cuInfo.fModel.removeAnnotationModelListener(fGlobalAnnotationModelListener);
 		}
 		
 		super.disposeElementInfo(element, info);
@@ -743,4 +791,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		}
 	}
+	
+	/**
+	 * Adds a listener that reports changes from all compilation unit annotation models.
+	 */
+	public void addGlobalAnnotationModelListener(IAnnotationModelListener listener) {
+		fGlobalAnnotationModelListener.addListener(listener);
+	}
+
+	/**
+	 * Removes the listener.
+	 */	
+	public void removeGlobalAnnotationModelListener(IAnnotationModelListener listener) {
+		fGlobalAnnotationModelListener.removeListener(listener);
+	}
+	
 }
