@@ -61,11 +61,16 @@ public class NLSRefactoring extends Refactoring {
 	private String fSubstitutionPattern;
 	private ICompilationUnit fCu;
 	private NLSSubstitution[] fSubstitutions;
+	
+	private String fPrefix;
 
 	private NLSRefactoring(ICompilationUnit cu) {
 		Assert.isNotNull(cu);
 
 		fCu= cu;
+		
+		String cuName= cu.getElementName();
+		setPrefix(cuName.substring(0, cuName.length() - 4)); // A.java -> A. 
 
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, true, null);
 		NLSHint nlsHint= new NLSHint(cu, astRoot);
@@ -75,7 +80,7 @@ public class NLSRefactoring extends Refactoring {
 		setAccessorClassPackage(nlsHint.getAccessorClassPackage());
 		setResourceBundleName(nlsHint.getResourceBundleName());
 		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
-
+		
 		fSubstitutionPattern= getDefaultSubstitutionPattern();
 	}
 
@@ -394,11 +399,13 @@ public class NLSRefactoring extends Refactoring {
 		return fSubstitutions;
 	}
 
-	public String getPrefixHint() {
-		String cuName= fCu.getElementName();
-		if (cuName.endsWith(".java")) //$NON-NLS-1$
-			return cuName.substring(0, cuName.length() - ".java".length()) + '.'; //$NON-NLS-1$
-		return ""; //$NON-NLS-1$
+	public String getPrefix() {
+		return fPrefix;
+	}
+	
+	public void setPrefix(String prefix) {
+		fPrefix = prefix;
+		NLSSubstitution.setPrefix(prefix);
 	}
 
 

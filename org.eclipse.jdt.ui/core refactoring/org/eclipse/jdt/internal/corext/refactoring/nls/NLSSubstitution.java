@@ -211,6 +211,7 @@ public class NLSSubstitution {
 
 	/**
 	 * Prefix is valid for ALL Substitutions, that have changed into EXTERNALIZED state.
+	 * Should fix, shouldn't be a static variable
 	 */
 	public static void setPrefix(String prefix) {
 		fPrefix= prefix;

@@ -608,18 +608,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
 		fTableViewer.setInput(new Object());
 
-		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				List selected= getSelectedTableEntries();
-				if (selected.size() != 1)
-					return;
-				NLSSubstitution substitution= (NLSSubstitution) selected.iterator().next();
-				if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-					//openEditButton(event.getSelection());
-				}
-			}
-		});
-
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ExternalizeWizardPage.this.selectionChanged(event);

@@ -61,18 +61,19 @@ public class NLSPropertyFileModifier {
 	private static void addChanges(TextChange textChange, NLSSubstitution[] substitutions) throws CoreException {
 		PropertyFileDocumentModel model= new PropertyFileDocumentModel(textChange.getCurrentDocument(new NullProgressMonitor()));
 
-		HashMap keyToSubstMap= getKeyToSubstitutionMap(substitutions);
-		
-		addInsertEdits(textChange, substitutions, keyToSubstMap, model);
-		addRemoveEdits(textChange, substitutions, keyToSubstMap, model);
-		addReplaceEdits(textChange, substitutions, keyToSubstMap, model);
+		Map newKeyToSubstMap= getNewKeyToSubstitutionMap(substitutions);
+		Map oldKeyToSubstMap= getOldKeyToSubstitutionMap(substitutions);
+
+		addInsertEdits(textChange, substitutions, newKeyToSubstMap, oldKeyToSubstMap, model);
+		addRemoveEdits(textChange, substitutions, newKeyToSubstMap, oldKeyToSubstMap, model);
+		addReplaceEdits(textChange, substitutions, newKeyToSubstMap, oldKeyToSubstMap, model);
 	}
 
 	/**
-	 * Maps keys to a substitutions. If a substitution is not in the map then it is a duplicate.
+	 * Maps the new keys to a substitutions. If a substitution is not in the map then it is a duplicate.
 	 */
-	private static HashMap getKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
-		HashMap keyToSubstMap= new HashMap();
+	private static HashMap getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
+		HashMap keyToSubstMap= new HashMap(substitutions.length);
 		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution curr= substitutions[i];
@@ -85,65 +86,111 @@ public class NLSPropertyFileModifier {
 		}
 		return keyToSubstMap;
 	}
-
-	private static void addReplaceEdits(TextChange textChange, NLSSubstitution[] substitutions, Map keyToSubstMap, PropertyFileDocumentModel model) {
+	
+	/**
+	 * Maps the old keys to a substitutions. If a substitution is not in the map then it is a duplicate.
+	 */
+	private static HashMap getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
+		HashMap keyToSubstMap= new HashMap(substitutions.length);
+		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
-			if (!substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED)) {
-				if (substitution.isKeyRename() || substitution.isValueRename()) {
-					if (keyToSubstMap.get(substitution.getKey()) == substitution) { // only rename if we're not a duplicate. duplicates will be removed
-						KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
-						KeyValuePair newPair= new KeyValuePair(substitution.getKey(), substitution.getValueNonEmpty());
-						TextEdit edit= model.replace(initialPair, newPair);
-						if (edit != null) {
-							TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.replace_entry", substitution.getKey()), edit); //$NON-NLS-1$
-						}
+			NLSSubstitution curr= substitutions[i];
+			if (curr.getInitialState() == NLSSubstitution.EXTERNALIZED) {
+				String key= curr.getInitialKey();
+				if (key != null) {
+					NLSSubstitution fav= (NLSSubstitution) keyToSubstMap.get(key);
+					if (fav == null || (fav.hasStateChanged() && !curr.hasStateChanged())) {
+						keyToSubstMap.put(key, curr); // store if first or if stored will not be externalized anymore
 					}
 				}
 			}
 		}
+		return keyToSubstMap;
 	}
 
-	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map keyToSubstMap, PropertyFileDocumentModel model) {
+	private static boolean doReplace(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+		if (substitution.getState() != NLSSubstitution.EXTERNALIZED || substitution.hasStateChanged() || substitution.getInitialValue() == null) {
+			return false; // was not in property file before
+		}
+		if (oldKeyToSubstMap.get(substitution.getInitialKey()) != substitution) {
+			return false; // not the owner of this key
+		}
+		if (substitution.isKeyRename() || substitution.isValueRename()) {
+			if (newKeyToSubstMap.get(substitution.getKey()) == substitution) { // only rename if we're not a duplicate. duplicates will be removed
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static void addReplaceEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
-			boolean isExternalized= substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED);
-			boolean isMissingKey= !substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED) && (substitution.getInitialValue() == null);
-			if (isExternalized || isMissingKey) {
-				if (keyToSubstMap.get(substitution.getKey()) == substitution) { // only insert if we're not a duplicate
-					String value= substitution.getValueNonEmpty();
-				
-					KeyValuePair curr= new KeyValuePair(substitution.getKey(), value);
-					
-					InsertEdit insert= model.insert(curr);
-					String message= NLSMessages.getFormattedString("NLSPropertyFileModifier.add_entry", curr.getKey()); //$NON-NLS-1$
-					TextChangeCompatibility.addTextEdit(textChange, message, insert);
+			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
+				KeyValuePair newPair= new KeyValuePair(substitution.getKey(), substitution.getValueNonEmpty());
+				TextEdit edit= model.replace(initialPair, newPair);
+				if (edit != null) {
+					TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.replace_entry", substitution.getKey()), edit); //$NON-NLS-1$
 				}
 			}
 		}
 	}
 	
-	private static boolean doRemove(NLSSubstitution substitution, Map keyToSubstMap) {
-		if (substitution.getInitialState() != NLSSubstitution.EXTERNALIZED || substitution.getInitialValue() == null) {
+	private static boolean doInsert(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+		if (substitution.getState() != NLSSubstitution.EXTERNALIZED) {
+			return false; // does not go into the property file
+		}
+		if (!substitution.hasStateChanged() && substitution.getInitialValue() != null) {
+			if (!substitution.isKeyRename() || oldKeyToSubstMap.get(substitution.getInitialKey()) == substitution) {
+				return false; // no key rename and was not a duplicate
+			}
+		}
+		if (newKeyToSubstMap.get(substitution.getKey()) == substitution) { // only insert if we're not a duplicate
+			return true;
+		}
+		return false;
+	}
+
+	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
+				String value= substitution.getValueNonEmpty();
+				KeyValuePair curr= new KeyValuePair(substitution.getKey(), value);
+				
+				InsertEdit insert= model.insert(curr);
+				String message= NLSMessages.getFormattedString("NLSPropertyFileModifier.add_entry", curr.getKey()); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(textChange, message, insert);
+			}
+		}
+	}
+	
+	private static boolean doRemove(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
+		if (substitution.getInitialState() != NLSSubstitution.EXTERNALIZED || substitution.getInitialKey() == null) {
 			return false; // was not in property file before
+		}
+		if (oldKeyToSubstMap.get(substitution.getInitialKey()) != substitution) {
+			return false; // not the owner of this key
 		}
 		if (substitution.hasStateChanged()) {
 			return true; // was externalized, but not anymore
 		} else {
-			if (substitution.hasPropertyFileChange() && keyToSubstMap.get(substitution.getKey()) != substitution) {
+			if (substitution.hasPropertyFileChange() && newKeyToSubstMap.get(substitution.getKey()) != substitution) {
 				return true; // has been changed to an already existing
 			}
 		}
 		return false;
 	}
 	
-
-	private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, Map keyToSubstMap, PropertyFileDocumentModel model) {
+	private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
-			if (doRemove(substitution, keyToSubstMap)) {
+			if (doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				TextEdit edit= model.remove(substitution.getInitialKey());
-				TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.remove_entry", substitution.getInitialKey()), edit); //$NON-NLS-1$
+				if (edit != null) {
+					TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.remove_entry", substitution.getInitialKey()), edit); //$NON-NLS-1$
+				}
 			}
 		}
 	}
