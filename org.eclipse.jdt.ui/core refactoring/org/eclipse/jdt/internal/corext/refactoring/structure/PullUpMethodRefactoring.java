@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -50,19 +49,20 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferenceEdit;
 
 public class PullUpMethodRefactoring extends Refactoring {
 
 	private IMethod[] fMethodsToPullUp;
 	private IMethod[] fMethodsToDelete;
 	private CodeGenerationSettings fPreferenceSettings;
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
 
 	public PullUpMethodRefactoring(IMethod[] methods, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(methods.length > 0);
@@ -542,9 +542,7 @@ public class PullUpMethodRefactoring extends Refactoring {
 	}
 	
 	private void addCopyMethodChange(TextChangeManager manager, IMethod method) throws CoreException {
-		String methodSource=method.getSource();
-		if (needsToChangeVisibility(method))
-			methodSource= computeNewMethodSource(method);
+		String methodSource= computeNewMethodSource(method);
 		String changeName= "copy method '" + JavaElementUtil.createMethodSignature(method) 
 										+ "' to type '" + getDeclaringType().getElementName() + "'";
 		if (needsToChangeVisibility(method))
@@ -554,12 +552,16 @@ public class PullUpMethodRefactoring extends Refactoring {
 	}
 
 	private TextEdit createAddMemberEdit(String methodSource) throws JavaModelException {
-		int tabWidth= 4;//FIX ME
+		int tabWidth=getTabWidth();
 		IMethod sibling= getLastMethod(getSuperType());
 		if (sibling != null)
 			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ methodSource}, tabWidth);
 		return
 			new MemberEdit(getSuperType(), MemberEdit.ADD_AT_END, new String[]{ methodSource}, tabWidth);
+	}
+
+	private static int getTabWidth() {
+		return Integer.parseInt((String)JavaCore.getOptions().get(PREF_TAB_SIZE));
 	}
 	
 	private static boolean needsToChangeVisibility(IMethod method) throws JavaModelException {
@@ -567,20 +569,44 @@ public class PullUpMethodRefactoring extends Refactoring {
 	}
 	
 	private static String computeNewMethodSource(IMethod method) throws JavaModelException {
+		String source= replaceSuperCalls(method);
+
+		if (! needsToChangeVisibility(method))
+			return source;
+			
+		if (Flags.isPrivate(method.getFlags()))
+			return substitutePrivateWithProtected(source);
+		return "protected " + removeLeadingWhiteSpaces(source);
+	}
+
+	private static String replaceSuperCalls(IMethod method) throws JavaModelException {
 		ISourceRange[] superRefOffsert= reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method));
 		
-		StringBuffer originalSource= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
+		StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
 		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit());
 		
 		for (int i= 0; i < superRefOffsert.length; i++) {
 			int start= superRefOffsert[i].getOffset() - originalMethodRange.getOffset();
 			int end= start + superRefOffsert[i].getLength();
-			originalSource.replace(start, end, "this");
+			source.replace(start, end, "this");
 		}
+		return source.toString();
+	}
+	
+	private static String removeLeadingWhiteSpaces(String s){
+		if ("".equals(s))
+			return "";
 
-		if (Flags.isPrivate(method.getFlags()))
-			return substitutePrivateWithProtected(originalSource.toString());
-		return "protected " + originalSource.toString();
+		if ("".equals(s.trim()))	
+			return "";
+			
+		int i= 0;
+		while (i < s.length() && Character.isWhitespace(s.charAt(i))){
+			i++;
+		}
+		if (i == s.length())
+			return "";
+		return s.substring(i);
 	}
 	
 	private static ISourceRange[] reverseSortByOffset(ISourceRange[] refs){
