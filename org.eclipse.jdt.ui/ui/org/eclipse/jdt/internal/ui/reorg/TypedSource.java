@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 
 /**
  * A tuple used to keep source of  an element and its type.
@@ -31,7 +31,7 @@ class TypedSource {
 	}
 	
 	public TypedSource(ISourceReference ref) throws JavaModelException{
-		this(SourceReferenceSourceRangeComputer.computeSource(ref), ((IJavaElement)ref).getElementType());
+		this(SourceRangeComputer.computeSource(ref), ((IJavaElement)ref).getElementType());
 		Assert.isTrue(((IJavaElement)ref).getElementType() != IJavaElement.CLASS_FILE);
 		Assert.isTrue(((IJavaElement)ref).getElementType() != IJavaElement.COMPILATION_UNIT);
 	}
