@@ -3058,7 +3058,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SMART_BACKSPACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
-		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.JAVA_PROFILE);
+		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.DEFAULT_PROFILE);
 		ProfileStore.checkCurrentOptionsVersion();
 	
 		
