@@ -21,9 +21,11 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		
 		private String fValue;
 		private boolean fIsEditable;
+		private PropertyNode fParent;
 		
 		public PropertyNode(PropertyNode parent, int type, String id, String value, IDocument doc, int start, int length) {
 			super(type, id, doc, start, length);
+			fParent= parent;
 			fValue= value;
 			if (parent != null) {
 				parent.addChild(this);
@@ -64,11 +66,27 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		public boolean isEditable() {
 			return fIsEditable;
 		}
+		
+		public void setContent(byte[] content) {
+			super.setContent(content);
+			nodeChanged(this);
+		}
+		
+		public ITypedElement replace(ITypedElement child, ITypedElement other) {
+			ITypedElement e= super.replace(child, other);
+			nodeChanged(this);
+			return e;
+		}
+
+		void nodeChanged(PropertyNode node) {
+			if (fParent != null)
+				fParent.nodeChanged(node);
+		}
 	};
 	
 	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
-	private static final String SEPARATORS2= "=:"; //$NON-NLS-1$
-	private static final String SEPARATORS= SEPARATORS2 + WHITESPACE;
+	private static final String SEPARATORS= "=:"; //$NON-NLS-1$
+	private static final String SEPARATORS2= SEPARATORS + WHITESPACE;
 			
 
 	public PropertiesStructureCreator() {
@@ -78,7 +96,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		return CompareMessages.getString("PropertyCompareViewer.title"); //$NON-NLS-1$
 	}
 
-	public IStructureComparator getStructure(Object input) {
+	public IStructureComparator getStructure(final Object input) {
 		
 		String s= null;
 		if (input instanceof IStreamContentAccessor) {
@@ -94,10 +112,14 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		if (input instanceof IEditableContent)
 			isEditable= ((IEditableContent) input).isEditable();
 
-		PropertyNode root= new PropertyNode(doc, isEditable);		
+		PropertyNode root= new PropertyNode(doc, isEditable) {
+			void nodeChanged(PropertyNode node) {
+				save(this, input);
+			}
+		};
 				
 		try {
-			load(root, doc);
+			parsePropertyFile(root, doc);
 		} catch (IOException ex) {
 		}
 		
@@ -159,7 +181,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		return null;
 	}
 			
-	private void load(PropertyNode root, IDocument doc) throws IOException {
+	private void parsePropertyFile(PropertyNode root, IDocument doc) throws IOException {
 		
 		int start= 0;
 		
@@ -180,7 +202,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 				continue;	// comment
 								
 			// find continuation lines
-			while (continueLine(line)) {
+			while (needNextLine(line)) {
 				String nextLine= readLine(args, doc);
 				if (nextLine == null)
 					nextLine= ""; //$NON-NLS-1$
@@ -207,7 +229,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
         		char c= line.charAt(separatorPos);
         		if (c == '\\')
             		separatorPos++;
-        		else if (SEPARATORS.indexOf(c) != -1)
+        		else if (SEPARATORS2.indexOf(c) != -1)
             		break;
     		}
 
@@ -217,7 +239,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
             		break;
 
      		if (valuePos < len)
-        		if (SEPARATORS2.indexOf(line.charAt(valuePos)) != -1)
+        		if (SEPARATORS.indexOf(line.charAt(valuePos)) != -1)
             		valuePos++;
 
      		while (valuePos < len) {
@@ -239,7 +261,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 	}
 
-	private boolean continueLine(String line) {
+	private boolean needNextLine(String line) {
 		int slashes= 0;
 		int ix= line.length() - 1;
 		while ((ix >= 0) && (line.charAt(ix--) == '\\'))
