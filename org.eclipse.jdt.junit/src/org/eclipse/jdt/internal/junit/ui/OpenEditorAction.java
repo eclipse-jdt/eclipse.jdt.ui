@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
@@ -44,13 +45,13 @@ public abstract class OpenEditorAction extends Action {
 		try {
 			IJavaElement element= findElement(getLaunchedProject(), fClassName);
 			if (element == null) {
-				MessageDialog.openError(fTestRunner.getSite().getShell(), 
+				MessageDialog.openError(getShell(), 
 					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			} 
 			textEditor= (ITextEditor)EditorUtility.openInEditor(element, false);			
 		} catch (CoreException e) {
-			ErrorDialog.openError(fTestRunner.getSite().getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+			ErrorDialog.openError(getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		if (textEditor == null) {
@@ -60,6 +61,10 @@ public abstract class OpenEditorAction extends Action {
 		reveal(textEditor);
 	}
 	
+	protected Shell getShell() {
+		return fTestRunner.getSite().getShell();
+	}
+
 	protected IJavaProject getLaunchedProject() {
 		return fTestRunner.getLaunchedProject();
 	}

@@ -42,8 +42,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 	private class NonPublicClassInCUCollector implements IJavaSearchResultCollector {
 		private IJavaElement fFound;
 
-		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy)
-			throws JavaModelException {
+		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
 
 			if ((enclosingElement instanceof IType) && (resource.getName().equals(fCUName)))
 				fFound= enclosingElement;
