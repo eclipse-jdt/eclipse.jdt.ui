@@ -47,7 +47,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations4"));
+			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations5"));
 			return suite;
 		}
 	}
@@ -304,9 +304,114 @@ public class ScopeAnalyzerTest extends CoreTests {
 			assertVariables(res, new String[] { "x", "y"});
 		}			
 			
-	}	
-		
+	}
 	
+	public void testVariableDeclarations5() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int fVar1, fVar2;\n");
+		
+		buf.append("    private class A {\n");
+		buf.append("        int fCount;\n");
+		buf.append("        public int foo(int param1) {\n");
+		buf.append("            return 1;\n");		
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("    public int goo(int param0) {\n");
+		buf.append("        int k= 0;\n");
+		buf.append("        class B extends A {\n");
+		buf.append("            int fCount2;\n");
+		buf.append("            public int foo(int param1) {\n");
+		buf.append("                return 2;\n");		
+		buf.append("            }\n");		
+		buf.append("        }\n");		
+		buf.append("        return 3;\n");
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertTrue(problems.length == 0);
+		{
+			String str= "return 1;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "param1", "fCount", "fVar1", "fVar2"});
+		}
+		
+		{
+			String str= "return 2;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "param1", "fCount2", "fCount", "k", "param0", "fVar1", "fVar2"});
+		}				
+			
+	}	
+	
+	public void testMethodDeclarations1() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");			
+		
+		buf.append("    public void goo() {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		
+		buf.append("    public String toString() {\n");
+		buf.append("        return String.valueOf(1);\n");
+		buf.append("    }\n");	
+		
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertTrue(problems.length == 0);
+		{
+			String str= "return;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.METHODS;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertMethods(res, new String[] { "goo", "foo", "E" }, true);
+		}			
+			
+	}
+	
+	private static final String[] OBJ_METHODS= new String[] { "getClass", 
+		"hashCode", "equals", "clone", "toString", "notify", "notifyAll", "wait", "wait",
+		"wait", "finalize", "Object" }; 
+		
+	private void assertMethods(IBinding[] res, String[] expectedNames, boolean addObjectMethods) {
+		String[] names= new String[res.length];		
+		for (int i= 0; i < res.length; i++) {
+			names[i]= res[i].getName();
+		}
+		String[] expected= expectedNames;
+		
+		if (addObjectMethods) {
+			expected= new String[expectedNames.length + OBJ_METHODS.length];
+			System.arraycopy(OBJ_METHODS, 0, expected, 0, OBJ_METHODS.length);
+			System.arraycopy(expectedNames, 0, expected, OBJ_METHODS.length, expectedNames.length);
+		}
+		
+		assertEqualStringsIgnoreOrder(names, expected);
+	}	
 
 	private void assertVariables(IBinding[] res, String[] expectedNames) {
 		String[] names= new String[res.length];		
