@@ -361,7 +361,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		Button commentButton= new Button(commentComposite, SWT.CHECK);
 		commentButton.setText(fCommentString); //$NON-NLS-1$
-		commentButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		commentButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
