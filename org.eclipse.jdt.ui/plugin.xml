@@ -701,7 +701,7 @@
          point="org.eclipse.core.filebuffers.documentSetup">
       <participant
             extensions="java"
-            class="org.eclipse.jdt.internal.ui.javaeditor.filebuffers.JavaDocumentSetupParticipant">
+            class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentSetupParticipant">
       </participant>
    </extension>
    <extension
@@ -710,7 +710,7 @@
          point="org.eclipse.core.filebuffers.documentCreation">
       <factory
             extensions="java"
-            class="org.eclipse.jdt.internal.ui.javaeditor.filebuffers.JavaDocumentFactory">
+            class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentFactory">
       </factory>
    </extension>
    <extension

@@ -78,8 +78,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
-import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumentProvider2;
-import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
@@ -97,7 +95,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/** temporarily */
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	/** temporarily */
-	public static final boolean USE_FILE_BUFFERS= true;
+	private static final boolean _USE_FILE_BUFFERS= true;
 	
 	
 	private static JavaPlugin fgJavaPlugin;
@@ -388,13 +386,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	public synchronized IBufferFactory getBufferFactory() {
 		if (fBufferFactory == null)
-			fBufferFactory= USE_FILE_BUFFERS ? (IBufferFactory) new CustomBufferFactory2() : (IBufferFactory) new CustomBufferFactory();
+			fBufferFactory= new CustomBufferFactory();
 		return fBufferFactory;
 	}
 	
 	public synchronized ICompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
 		if (fCompilationUnitDocumentProvider == null)
-			fCompilationUnitDocumentProvider= USE_FILE_BUFFERS ? (ICompilationUnitDocumentProvider) new CompilationUnitDocumentProvider2() : (ICompilationUnitDocumentProvider) new CompilationUnitDocumentProvider();
+			fCompilationUnitDocumentProvider= new CompilationUnitDocumentProvider();
 		return fCompilationUnitDocumentProvider;
 	}
 	

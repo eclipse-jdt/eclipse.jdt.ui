@@ -8,13 +8,12 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 	IBM Corporation - Initial implementation
 **********************************************************************/
-package org.eclipse.jdt.internal.ui.javaeditor.filebuffers;
+package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.filebuffers.IDocumentFactory;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.ui.javaeditor.PartiallySynchronizedDocument;
 
 /**
  * The document factory for JDT UI,
@@ -30,5 +29,4 @@ public class JavaDocumentFactory  implements IDocumentFactory {
 	public IDocument createDocument() {
 		return new PartiallySynchronizedDocument();
 	}
-
 }

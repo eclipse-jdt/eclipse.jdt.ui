@@ -8,7 +8,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 	IBM Corporation - Initial implementation
 **********************************************************************/
-package org.eclipse.jdt.internal.ui.javaeditor.filebuffers;
+package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.filebuffers.IDocumentSetupParticipant;
 

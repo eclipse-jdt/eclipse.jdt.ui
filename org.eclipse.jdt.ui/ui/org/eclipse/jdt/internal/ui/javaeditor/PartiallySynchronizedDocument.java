@@ -13,81 +13,119 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 
 
 /**
  * Document that can also be used by a background reconciler.
  */
-public class PartiallySynchronizedDocument extends Document {
+public class PartiallySynchronizedDocument extends Document implements ISynchronizable {
+    
+    private final Object fInternalLockObject= new Object();
+    private Object fLockObject;
+    
+    /*
+     * @see org.eclipse.jface.text.ISynchronizable#setLockObject(java.lang.Object)
+     */
+    public void setLockObject(Object lockObject) {
+        fLockObject= lockObject;
+    }
+
+    /*
+     * @see org.eclipse.jface.text.ISynchronizable#getLockObject()
+     */
+    public Object getLockObject() {
+        return fLockObject == null ? fInternalLockObject : fLockObject;
+    }
 	
 	/*
 	 * @see IDocumentExtension#startSequentialRewrite(boolean)
 	 */
-	synchronized public void startSequentialRewrite(boolean normalized) {
-		super.startSequentialRewrite(normalized);
+	public void startSequentialRewrite(boolean normalized) {
+	    synchronized (getLockObject()) {
+	        super.startSequentialRewrite(normalized);
+	    }
 	}
 
 	/*
 	 * @see IDocumentExtension#stopSequentialRewrite()
 	 */
-	synchronized public void stopSequentialRewrite() {
-		super.stopSequentialRewrite();
-	}
+	public void stopSequentialRewrite() {
+		synchronized (getLockObject()) {
+            super.stopSequentialRewrite();
+        }
+    }
 	
 	/*
 	 * @see IDocument#get()
 	 */
-	synchronized public String get() {
-		return super.get();
-	}
+	public String get() {
+		synchronized (getLockObject()) {
+            return super.get();
+        }
+    }
 	
 	/*
 	 * @see IDocument#get(int, int)
 	 */
-	synchronized public String get(int offset, int length) throws BadLocationException {
-		return super.get(offset, length);
+	public String get(int offset, int length) throws BadLocationException {
+		synchronized (getLockObject()) {
+            return super.get(offset, length);
+        }
 	}
 	
 	/*
 	 * @see IDocument#getChar(int)
 	 */
-	synchronized public char getChar(int offset) throws BadLocationException {
-		return super.getChar(offset);
+	public char getChar(int offset) throws BadLocationException {
+		synchronized (getLockObject()) {
+            return super.getChar(offset);
+        }
 	}
 	
 	/*
 	 * @see IDocument#replace(int, int, String)
 	 */
-	synchronized public void replace(int offset, int length, String text) throws BadLocationException {
-		super.replace(offset, length, text);
+	public void replace(int offset, int length, String text) throws BadLocationException {
+		synchronized (getLockObject()) {
+            super.replace(offset, length, text);
+        }
 	}
 	
 	/*
 	 * @see IDocument#set(String)
 	 */
-	synchronized public void set(String text) {
-		super.set(text);
+	public void set(String text) {
+		synchronized (getLockObject()) {
+            super.set(text);
+        }
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#addPosition(java.lang.String, org.eclipse.jface.text.Position)
 	 */
-	synchronized public void addPosition(String category, Position position) throws BadLocationException, BadPositionCategoryException {
-		super.addPosition(category, position);
+	public void addPosition(String category, Position position) throws BadLocationException, BadPositionCategoryException {
+		synchronized (getLockObject()) {
+            super.addPosition(category, position);
+        }
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#removePosition(java.lang.String, org.eclipse.jface.text.Position)
 	 */
-	synchronized public void removePosition(String category, Position position) throws BadPositionCategoryException {
-		super.removePosition(category, position);
+	public void removePosition(String category, Position position) throws BadPositionCategoryException {
+		synchronized (getLockObject()) {
+            super.removePosition(category, position);
+        }
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.AbstractDocument#getPositions(java.lang.String)
 	 */
-	synchronized public Position[] getPositions(String category) throws BadPositionCategoryException {
-		return super.getPositions(category);
+	public Position[] getPositions(String category) throws BadPositionCategoryException {
+		synchronized (getLockObject()) {
+            return super.getPositions(category);
+        }
 	}
 }

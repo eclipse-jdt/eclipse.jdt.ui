@@ -13,32 +13,39 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TextUtilities;
-
-import org.eclipse.ui.IFileEditorInput;
 
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -48,7 +55,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * This class is <code>public</code> for test purposes only.
  */
 public class DocumentAdapter implements IBuffer, IDocumentListener {
-		
+	
 		/**
 		 * Internal implementation of a NULL instanceof IBuffer.
 		 */
@@ -74,97 +81,104 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			public void setContents(char[] contents) {}
 			public void setContents(String contents) {}
 		}
-		
 	
-	/** NULL implementing <code>IBuffer</code> */
-	public final static IBuffer NULL= new NullBuffer();
-		
 	
-	/**
-	 *  Executes a document set content call in the ui thread.
-	 */
-	protected class DocumentSetCommand implements Runnable {
+		/** NULL implementing <code>IBuffer</code> */
+		public final static IBuffer NULL= new NullBuffer();
+			
 		
-		private String fContents;
+		/**
+		 *  Executes a document set content call in the ui thread.
+		 */
+		protected class DocumentSetCommand implements Runnable {
+			
+			private String fContents;
+			
+			public void run() {
+				fDocument.set(fContents);
+			}
 		
-		public void run() {
-			fDocument.set(fContents);
-		}
-	
-		public void set(String contents) {
-			fContents= contents;
-			Display.getDefault().syncExec(this);
-		}
-	}
-	
-	/**
-	 * Executes a document replace call in the ui thread.
-	 */
-	protected class DocumentReplaceCommand implements Runnable {
-		
-		private int fOffset;
-		private int fLength;
-		private String fText;
-		
-		public void run() {
-			try {
-				fDocument.replace(fOffset, fLength, fText);
-			} catch (BadLocationException x) {
-				// ignore
+			public void set(String contents) {
+				fContents= contents;
+				Display.getDefault().syncExec(this);
 			}
 		}
 		
-		public void replace(int offset, int length, String text) {
-			fOffset= offset;
-			fLength= length;
-			fText= text;
-			Display.getDefault().syncExec(this);
+		/**
+		 * Executes a document replace call in the ui thread.
+		 */
+		protected class DocumentReplaceCommand implements Runnable {
+			
+			private int fOffset;
+			private int fLength;
+			private String fText;
+			
+			public void run() {
+				try {
+					fDocument.replace(fOffset, fLength, fText);
+				} catch (BadLocationException x) {
+					// ignore
+				}
+			}
+			
+			public void replace(int offset, int length, String text) {
+				fOffset= offset;
+				fLength= length;
+				fText= text;
+				Display.getDefault().syncExec(this);
+			}
 		}
-	}
+	
+	private static final boolean DEBUG_LINE_DELIMITERS= true;
 	
 	private IOpenable fOwner;
+	private IFile fFile;
+	private ITextFileBuffer fTextFileBuffer;
 	private IDocument fDocument;
+	
 	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
 	
-	private IFileEditorInput fProviderKey;
-	private ICompilationUnitDocumentProvider fProvider;
-	private String fLineDelimiter;
-	private ILineTracker fLineTracker;
+	private Set fLegalLineDelimiters;
 	
 	private List fBufferListeners= new ArrayList(3);
-	
 	private IStatus fStatus;
+	
 	
 	/**
 	 * This method is <code>public</code> for test purposes only.
 	 */
-	public DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, ICompilationUnitDocumentProvider provider, IFileEditorInput providerKey) {
-		
-		Assert.isNotNull(document);
-		Assert.isNotNull(lineTracker);
+	public DocumentAdapter(IOpenable owner, IFile file) {
 		
 		fOwner= owner;
-		fDocument= document;
-		fLineTracker= lineTracker;
-		fProvider= provider;
-		fProviderKey= providerKey;
+		fFile= file;
 		
-		fDocument.addPrenotifiedDocumentListener(this);
+		initialize();
 	}
 	
-	/**
-	 * Sets the status of this document adapter.
-	 */
-	public void setStatus(IStatus status) {
-		fStatus= status;
+	private void initialize() {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath location= fFile.getFullPath();
+		try {
+			manager.connect(location, new NullProgressMonitor());
+			fTextFileBuffer= manager.getTextFileBuffer(location);
+			fDocument= fTextFileBuffer.getDocument();
+		} catch (CoreException x) {
+			fStatus= x.getStatus();
+			fDocument= manager.createEmptyDocument(location);
+		}
+		fDocument.addPrenotifiedDocumentListener(this);
 	}
 	
 	/**
 	 * Returns the status of this document adapter.
 	 */
 	public IStatus getStatus() {
-		return fStatus;
+		if (fStatus != null)
+			return fStatus;
+		if (fTextFileBuffer != null)
+			return fTextFileBuffer.getStatus();
+		return null;
 	}
 	
 	/**
@@ -175,52 +189,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	public IDocument getDocument() {
 		return fDocument;
 	}
-	
-	/**
-	 * Returns the line delimiter of this buffer. As a document has a set of
-	 * valid line delimiters, this set must be reduced to size 1.
-	 */
-	protected String getLineDelimiter() {
-		if (fLineDelimiter == null)
-			fLineDelimiter= TextUtilities.getDefaultLineDelimiter(fDocument);
-		return fLineDelimiter;
-	}	
-	
-	/**
-	 * Converts the given string to the line delimiter of this buffer.
-	 * This method is <code>public</code> for test purposes only.
-	 */
-	public String normalize(String text) {
-		fLineTracker.set(text);
 		
-		int lines= fLineTracker.getNumberOfLines();
-		if (lines <= 1)
-			return text;
-			
-		StringBuffer buffer= new StringBuffer(text);
-		
-		try {
-			IRegion previous= fLineTracker.getLineInformation(0);
-			for (int i= 1; i < lines; i++) {
-				int lastLineEnd= previous.getOffset() + previous.getLength();
-				int lineStart= fLineTracker.getLineInformation(i).getOffset();
-				fLineTracker.replace(lastLineEnd,  lineStart - lastLineEnd, getLineDelimiter());
-				buffer.replace(lastLineEnd, lineStart, getLineDelimiter());
-				previous= fLineTracker.getLineInformation(i);
-			}
-			
-			// last line
-			String delimiter= fLineTracker.getLineDelimiter(lines -1);
-			if (delimiter != null && delimiter.length() > 0)
-				buffer.replace(previous.getOffset() + previous.getLength(), buffer.length(), getLineDelimiter());
-				
-			return buffer.toString();
-		} catch (BadLocationException x) {
-		}
-		
-		return text;
-	}
-	
 	/*
 	 * @see IBuffer#addBufferChangedListener(IBufferChangedListener)
 	 */
@@ -249,7 +218,10 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#append(String) 
 	 */
 	public void append(String text) {
-		fReplaceCmd.replace(fDocument.getLength(), 0, normalize(text));
+		if (DEBUG_LINE_DELIMITERS) {
+			validateLineDelimiters(text);
+		}
+		fReplaceCmd.replace(fDocument.getLength(), 0, text);
 	}
 	
 	/*
@@ -263,6 +235,16 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		IDocument d= fDocument;
 		fDocument= null;
 		d.removePrenotifiedDocumentListener(this);
+		
+		if (fTextFileBuffer != null) {
+			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+			try {
+				manager.disconnect(fTextFileBuffer.getLocation(), new NullProgressMonitor());
+			} catch (CoreException x) {
+				// ignore
+			}
+			fTextFileBuffer= null;
+		}
 		
 		fireBufferChanged(new BufferChangedEvent(this, 0, 0, null));
 		fBufferListeners.clear();
@@ -323,14 +305,14 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#getUnderlyingResource()
 	 */
 	public IResource getUnderlyingResource() {
-		return fProviderKey.getFile();
+		return fFile;
 	}
 	
 	/*
 	 * @see IBuffer#hasUnsavedChanges()
 	 */
 	public boolean hasUnsavedChanges() {
-		return fProvider != null ? fProvider.canSaveDocument(fProviderKey) : false;
+		return fTextFileBuffer != null ? fTextFileBuffer.isDirty() : false;
 	}
 	
 	/*
@@ -359,19 +341,21 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#replace(int, int, String)
 	 */
 	public void replace(int position, int length, String text) {
-		fReplaceCmd.replace(position, length, normalize(text));
+		if (DEBUG_LINE_DELIMITERS) {
+			validateLineDelimiters(text);
+		}
+		fReplaceCmd.replace(position, length, text);
 	}
 	
 	/*
 	 * @see IBuffer#save(IProgressMonitor, boolean)
 	 */
 	public void save(IProgressMonitor progress, boolean force) throws JavaModelException {
-		if (fProvider != null) {
-			try {
-				fProvider.saveDocumentContent(progress, fProviderKey, fDocument, force);
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
+		try {
+			if (fTextFileBuffer != null)
+				fTextFileBuffer.commit(progress, force);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
 	}
 	
@@ -396,14 +380,62 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		} else {
 			
 			// set only if different
-			String newContents= normalize(contents);
-			int newLength= newContents.length();
+			if (DEBUG_LINE_DELIMITERS) {
+				validateLineDelimiters(contents);
+			}
 			
-			if (oldLength != newLength || !newContents.equals(fDocument.get()))
-				fSetCmd.set(newContents);
+			if (!contents.equals(fDocument.get()))
+				fSetCmd.set(contents);
 		}
 	}
 	
+	
+	private void validateLineDelimiters(String contents) {
+
+		if (fLegalLineDelimiters == null) {
+			// collect all line delimiters in the document
+			HashSet existingDelimiters= new HashSet();
+
+			for (int i= fDocument.getNumberOfLines() - 1; i >= 0; i-- ) {
+				try {
+					String curr= fDocument.getLineDelimiter(i);
+					if (curr != null) {
+						existingDelimiters.add(curr);
+					}
+				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
+				}
+			}
+			if (existingDelimiters.isEmpty()) {
+				return; // first insertion of a line delimiter: no test
+			}
+			fLegalLineDelimiters= existingDelimiters;
+			
+		}
+		
+		DefaultLineTracker tracker= new DefaultLineTracker();
+		tracker.set(contents);
+		
+		int lines= tracker.getNumberOfLines();
+		if (lines <= 1)
+			return;
+		
+		for (int i= 0; i < lines; i++) {
+			try {
+				String curr= tracker.getLineDelimiter(i);
+				if (curr != null && !fLegalLineDelimiters.contains(curr)) {
+					StringBuffer buf= new StringBuffer("New line delimiter added to new code: "); //$NON-NLS-1$
+					for (int k= 0; k < curr.length(); k++) {
+						buf.append(String.valueOf((int) curr.charAt(k)));
+					}
+					JavaPlugin.log(new Exception(buf.toString()));
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+
 	/*
 	 * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
 	 */
