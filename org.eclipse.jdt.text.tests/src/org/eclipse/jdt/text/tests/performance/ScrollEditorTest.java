@@ -115,7 +115,7 @@ public abstract class ScrollEditorTest extends TestCase {
 					fPerformanceMeter.stop();
 					EditorTestHelper.runEventQueue(100);
 				}
-				assertTrue("TopIndex: "+text.getTopIndex() + " visibleLines: "+visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
+				assertTrue("TopIndex: "+text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO);
 				EditorTestHelper.runEventQueue(100);
 				assertEquals(0, text.getTopIndex());
