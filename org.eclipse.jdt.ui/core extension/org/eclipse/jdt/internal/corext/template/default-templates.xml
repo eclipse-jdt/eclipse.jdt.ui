@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-(c) Copyright IBM Corp. 2000, 2003.
-All Rights Reserved.
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *      Alex Blewitt (alex_blewitt@yahoo.com) - see bug 35919
+ *******************************************************************************/ 
 -->
 
 <templates><template name="for" description="iterate over array" context="java" enabled="true">for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
 	${line_selection}${cursor}
-}</template><template name="for" description="iterate over array w/ temporary variable" context="java" enabled="true">for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
+}</template><template name="for" description="iterate over array with temporary variable" context="java" enabled="true">for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
 	${array_type} ${array_element} = ${array}[${index}];
 	${cursor}
 }</template><template name="for" description="iterate over collection" context="java" enabled="true">for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
