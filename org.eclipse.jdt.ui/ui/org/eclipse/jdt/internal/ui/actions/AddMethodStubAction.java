@@ -5,10 +5,11 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -19,30 +20,30 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation.IRequestQuery;
+import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 /**
- * Creates Method Stubs in a type for selected methods.
- * The type has to be set before usage (setParentType)
- * Always forces the he type to be in an open editor. The result is unsaved,
- * so the user can decide if he wants to accept the changes
+ * Creates method stubs in a type.
+ * The type has to be set before usage (init)
+ * Always forces the type to open in an editor. The result is unsaved,
+ * so the user can decide if the changes are acceptable.
  */
 public class AddMethodStubAction extends Action {
 
@@ -68,16 +69,14 @@ public class AddMethodStubAction extends Action {
 				setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
 			}
 			return true;
-		} else {
-			fParentType= null;
-			fSelection= null;
 		}
+		fParentType= null;
+		fSelection= null;
 		return false;
 	}	
 
 	public void run() {
-		if (fParentType == null || fParentType.getCompilationUnit() == null ||
-				fSelection.isEmpty() || !(fSelection instanceof IStructuredSelection)) {
+		if (!canActionBeAdded(fParentType, fSelection)) {
 			return;
 		}
 		
@@ -87,39 +86,26 @@ public class AddMethodStubAction extends Action {
 			IEditorPart editor= EditorUtility.openInEditor(fParentType);
 			IType usedType= (IType)EditorUtility.getWorkingCopy(fParentType);
 			if (usedType == null) {
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), JavaUIMessages.getString("AddMethodStubAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
-			ArrayList newMethods= new ArrayList(10);
-			
-			// remove the methods that already exist
-			Iterator iter= ((IStructuredSelection)fSelection).iterator();
-			while (iter.hasNext()) {
-				Object obj= iter.next();
-				if (obj instanceof IMethod) {
-					newMethods.add(obj);
-				}
-			}			
-			IMethod[] methods= (IMethod[]) newMethods.toArray(new IMethod[newMethods.size()]); 
+			List list= ((IStructuredSelection)fSelection).toList();	
+			IMethod[] methods= (IMethod[]) list.toArray(new IMethod[list.size()]); 
 			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(false, true, op);
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
-				//EditorUtility.openInEditor(res[0], true);
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			JavaPlugin.log(e.getTargetException());
-		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), null, e.getStatus()); //$NON-NLS-1$
+		} catch (CoreException e) {
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
 			JavaPlugin.log(e.getStatus());
-		} catch (PartInitException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), e.getMessage()); //$NON-NLS-1$
-			JavaPlugin.log(e);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}
@@ -127,7 +113,7 @@ public class AddMethodStubAction extends Action {
 	
 	private IRequestQuery createOverrideQuery() {
 		return new IRequestQuery() {
-			public int doQuery(IMethod method) {
+			public int doQuery(IMember method) {
 				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
 				String methodName= lprovider.getTextLabel(method);
 				String declTypeName= lprovider.getTextLabel(method.getDeclaringType());
@@ -149,7 +135,7 @@ public class AddMethodStubAction extends Action {
 	
 	private IRequestQuery createReplaceQuery() {
 		return new IRequestQuery() {
-			public int doQuery(IMethod method) {
+			public int doQuery(IMember method) {
 				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
 				String methodName= lprovider.getTextLabel(method);
 				String formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.ReplaceExistingDialog.message", methodName); //$NON-NLS-1$
@@ -160,8 +146,12 @@ public class AddMethodStubAction extends Action {
 	
 	
 	private int showQueryDialog(final String message) {
-		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.ALL, IRequestQuery.CANCEL};
+		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
 		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		if (shell == null) {
+			JavaPlugin.logErrorMessage("AddMethodStubAction.showQueryDialog: No active shell found");
+			return IRequestQuery.CANCEL;
+		}
 		final int[] result= { MessageDialog.CANCEL };
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -175,9 +165,12 @@ public class AddMethodStubAction extends Action {
 		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
 	}	
 	
+	/**
+	  * Tests if the action can run with given arguments
+	 */
 	public static boolean canActionBeAdded(IType parentType, ISelection selection) {
 		if (parentType == null || parentType.getCompilationUnit() == null ||
-				selection.isEmpty() || !(selection instanceof IStructuredSelection)) {
+				!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
 			return false;
 		}
 		Object[] elems= ((IStructuredSelection)selection).toArray();

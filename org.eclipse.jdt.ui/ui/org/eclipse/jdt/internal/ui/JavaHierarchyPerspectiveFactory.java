@@ -4,14 +4,20 @@
  */
 
 package org.eclipse.jdt.internal.ui;
-import org.eclipse.ui.IFolderLayout;import org.eclipse.ui.IPageLayout;import org.eclipse.ui.IPerspectiveFactory;import org.eclipse.search.ui.SearchUI;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.ui.IFolderLayout;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.IPerspectiveFactory;
+
+import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 	/**
-	 * Constructs a new Default layout engine.
+	 * Constructs a new Java hierarchy layout engine.
 	 */
 	public JavaHierarchyPerspectiveFactory() {
 		super();
@@ -22,7 +28,6 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY); 
-		//folder.addView(JavaUI.ID_PACKAGES);
 		
 		layout.addActionSet(IDebugUIConstants.DEBUG_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);

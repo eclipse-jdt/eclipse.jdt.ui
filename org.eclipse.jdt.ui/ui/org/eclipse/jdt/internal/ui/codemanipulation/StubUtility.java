@@ -22,7 +22,9 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -589,6 +591,22 @@ public class StubUtility {
 		formatter.options.setLineSeparator(lineDelim);
 		formatter.setInitialIndentationLevel(initialIndentationLevel);
 		return formatter.formatSourceString(sourceString) + lineDelim;
-	}		
+	}
+	
+	/**
+	 * Returns the element after the give element.
+	 */
+	public static IJavaElement findSibling(IJavaElement member) throws JavaModelException {
+		IJavaElement parent= member.getParent();
+		if (parent instanceof IParent) {
+			IJavaElement[] elements= ((IParent)parent).getChildren();
+			for (int i= elements.length - 2; i >= 0 ; i--) {
+				if (member.equals(elements[i])) {
+					return elements[i+1];
+				}
+			}
+		}
+		return null;
+	}
 
 }

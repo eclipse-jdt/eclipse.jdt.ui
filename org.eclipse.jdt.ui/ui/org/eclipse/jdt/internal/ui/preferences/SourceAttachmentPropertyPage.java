@@ -34,7 +34,6 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
 				return fSourceAttachmentBlock.createControl(composite);				
 			} catch (CoreException e) {
-				ErrorDialog.openError(getShell(), JavaUIMessages.getString("SourceAttachmentPropertyPage.error"), "", e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 				JavaPlugin.log(e.getStatus());
 			}		
 		}

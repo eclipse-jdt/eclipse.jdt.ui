@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui;import org.eclipse.jdt.ui.JavaUI;
 
 
 /**
- * Help context ids for the java ui.
+ * Help context ids for the Java UI.
  * <p>
  * This interface contains constants only; it is not intended to be implemented
  * or extended.
@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui;import org.eclipse.jdt.ui.JavaUI;
  * 
  */
 public interface IJavaHelpContextIds {
-	public static final String PREFIX= JavaUI.ID_PLUGIN + "."; //$NON-NLS-1$
+	public static final String PREFIX= JavaUI.ID_PLUGIN + '.';
 
 	// Actions
 	public static final String GETTERSETTER_ACTION= PREFIX + "getter_setter_action_context"; //$NON-NLS-1$

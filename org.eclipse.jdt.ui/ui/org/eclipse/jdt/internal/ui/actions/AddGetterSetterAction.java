@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -23,21 +24,26 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
- * Create Getter and Setter for a selected field
- * Always forces the he field to be in an open editor. The result is unsaved,
- * so the user can decide if he wnats to accept the changes
+ * Create Getter and Setter for selected fields.
+ * Will open the parent compilation unit in the editor.
+ * The result is unsaved, so the user can decide if the
+ * changes are acceptable.
  */
 public class AddGetterSetterAction extends Action {
 
@@ -72,7 +78,7 @@ public class AddGetterSetterAction extends Action {
 			} else {
 				workingCopyCU= EditorUtility.getWorkingCopy(cu);
 				if (workingCopyCU == null) {
-					showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
+					showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 					return;
 				}
 				workingCopyFields= new IField[fields.length];
@@ -86,16 +92,12 @@ public class AddGetterSetterAction extends Action {
 					workingCopyFields[i]= workingCopyField;
 				}
 			}
+			IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
+			IRequestQuery skipReplaceQuery= skipReplaceQuery();
 		
-			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, skipSetterForFinalQuery, skipReplaceQuery);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
 			dialog.run(false, true, op);
-			
-			if (op.getOperationInfo() != null) {
-				String title= JavaUIMessages.getString("AddGetterSetterAction.info.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("AddGetterSetterAction.info.message"); //$NON-NLS-1$
-				ProblemDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, op.getOperationInfo());
-			}
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {
@@ -103,24 +105,77 @@ public class AddGetterSetterAction extends Action {
 			}		
 		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
-			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
-		} catch (InterruptedException e) {
-			// operation cancelled
+			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
-			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
+			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 			return;
+		} catch (InterruptedException e) {
+			// operation cancelled
 		}
+		
 	}
+	
+	private IRequestQuery skipSetterForFinalQuery() {
+		return new IRequestQuery() {
+			public int doQuery(IMember field) {
+				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
+				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
+				String fieldName= lprovider.getTextLabel(field);
+				String formattedMessage= JavaUIMessages.getFormattedString("AddGetterSetterAction.SkipSetterForFinalDialog.message", fieldName); //$NON-NLS-1$
+				return showQueryDialog(formattedMessage, options, returnCodes);	
+			}
+		};
+	}
+	
+	private IRequestQuery skipReplaceQuery() {
+		return new IRequestQuery() {
+			public int doQuery(IMember method) {
+				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+				String skipLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skip.label");
+				String replaceLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label");
+				String skipAllLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label");
+				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
+				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
+				String methodName= lprovider.getTextLabel(method);
+				String formattedMessage= JavaUIMessages.getFormattedString("AddGetterSetterAction.SkipExistingDialog.message", methodName); //$NON-NLS-1$
+				return showQueryDialog(formattedMessage, options, returnCodes);		
+			}
+		};
+	}
+	
+	
+	private int showQueryDialog(final String message, final String[] buttonLabels, int[] returnCodes) {
+		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		if (shell == null) {
+			JavaPlugin.logErrorMessage("AddGetterSetterAction.showQueryDialog: No active shell found");
+			return IRequestQuery.CANCEL;
+		}		
+		final int[] result= { MessageDialog.CANCEL };
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				String title= JavaUIMessages.getString("AddGetterSetterAction.QueryDialog.title"); //$NON-NLS-1$
+				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
+				result[0]= dialog.open();				
+			}
+		});
+		int returnVal= result[0];
+		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
+	}	
 				
 	
 	
 	private void showError(String message) {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		String title= JavaUIMessages.getString("AddGetterSetterAction.error.dialogTitle"); //$NON-NLS-1$
+		String title= JavaUIMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 		MessageDialog.openError(shell, title, message);
 	}
 	
+	/*
+	 * Returns fields in the selection or <code>null</code> if the selection is 
+	 * empty or not valid.
+	 */
 	private IField[] getSelectedFields() {
 		ISelection sel= fSelectionProvider.getSelection();
 		if (sel instanceof IStructuredSelection) {
@@ -135,15 +190,18 @@ public class AddGetterSetterAction extends Action {
 						IField fld= (IField)curr;
 						
 						if (i == 0) {
+							// remember the cu of the first element
 							cu= fld.getCompilationUnit();
 							if (cu == null) {
 								return null;
 							}
 						} else if (!cu.equals(fld.getCompilationUnit())) {
+							// all fields must be in the same CU
 							return null;
 						}
 						try {
 							if (fld.getDeclaringType().isInterface()) {
+								// no setters/getters for interfaces
 								return null;
 							}
 						} catch (JavaModelException e) {
@@ -162,7 +220,9 @@ public class AddGetterSetterAction extends Action {
 		return null;
 	}
 	
-	
+	/**
+	 * Tests if the acion can be runned using the current selection.
+	 */
 	public boolean canActionBeAdded() {
 		return getSelectedFields() != null;
 	}

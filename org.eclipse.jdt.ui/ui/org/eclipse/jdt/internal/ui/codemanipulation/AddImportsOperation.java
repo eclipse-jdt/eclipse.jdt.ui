@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IType;
 /**
  * Add imports to a compilation unit.
  * The input is an array of full qualified type names. No elimination of unnecessary
- * imports is not done (use StubUtility for this). Dublicates are eliminated.
+ * imports is done (use ImportStructure for this). Duplicates are not added.
  * If the compilation unit is open in an editor, be sure to pass over its working copy.
  */
 public class AddImportsOperation extends WorkspaceModifyOperation {

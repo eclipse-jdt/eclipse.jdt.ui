@@ -4,20 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Iterator;
-
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -35,9 +29,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
- * Shows the type hierarchy on a single selected element of type IType or IClassFile 
+ * Shows the type hierarchy on a single selected element of type IType
+ * IClassFile or ICompilationUnit
  */
 public class ShowTypeHierarchyAction extends Action implements IUpdate {
 	
@@ -56,85 +52,79 @@ public class ShowTypeHierarchyAction extends Action implements IUpdate {
 	 * Perform the action
 	 */
 	public void run() {
-		ISelection sel= fSelectionProvider.getSelection();
-		if (!(sel instanceof IStructuredSelection))
-			return;
-			
-		Object element= ((IStructuredSelection)sel).getFirstElement();
-		IType[] types= getAllTypesFrom(element);
-		if (types == null || types.length == 0) {
-			Display.getCurrent().beep();
+		IType[] types= getSelectedTypes();
+		if (types == null) {
 			return;
 		}
-		
 		IType type= determineType(types);
-		if (type != null)
+		if (type != null) {
 			showType(type);
+		}
 	}
 
 	private IType determineType(IType[] types) {
 		if (types.length == 1)
 			return types[0];
 
-		String title= JavaUIMessages.getString("ShowTypeHierarchyAction.dialogTitle"); //$NON-NLS-1$
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		
-		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
-		ElementListSelectionDialog d= new ElementListSelectionDialog(parent, title, null, new JavaElementLabelProvider(flags), true, false);
-		d.setMessage(JavaUIMessages.getString("ShowTypeHierarchyAction.dialogMessage")); //$NON-NLS-1$
-		if (d.open(types, null) == d.OK) {
-			Object[] elements= d.getResult();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();			
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), true, false);
+		dialog.setMessage(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.message")); //$NON-NLS-1$
+		dialog.setTitle(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.title")); //$NON-NLS-1$
+		if (dialog.open(types, null) == dialog.OK) {
+			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length == 1) {
 				return ((IType)elements[0]);
 			}
 		}
 		return null;
-			
 	}
 
 	private void showType(IType type) {
-		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-		IWorkbenchPage page= window.getActivePage();
-		try {
-			IViewPart view= page.showView(JavaUI.ID_TYPE_HIERARCHY);
-			((TypeHierarchyViewPart) view).setInput(type);
-		} catch (PartInitException x) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("ShowTypeHierarchyAction.errorTitle"), x.getMessage()); //$NON-NLS-1$
-		}			
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			try {
+				IViewPart view= page.showView(JavaUI.ID_TYPE_HIERARCHY);
+				if (view instanceof TypeHierarchyViewPart) {
+					((TypeHierarchyViewPart) view).setInput(type);
+				} else {
+					JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Not a TypeHierarchyViewPart");
+				}
+			} catch (PartInitException e) {
+				JavaPlugin.log(e.getStatus());
+				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("ShowTypeHierarchyAction.error.title"), "", e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			}
+		} else {
+			JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Active page is null");
+		}	
 	}
 	
+	/*
+	 * @see IUpdate#update
+	 */
 	public void update() {
 		setEnabled(canActionBeAdded());
 	}
 	
 	public boolean canActionBeAdded() {
-		ISelection sel= fSelectionProvider.getSelection();
-		if (sel instanceof IStructuredSelection) {
-			Iterator iter= ((IStructuredSelection)sel).iterator();
-			if (iter.hasNext()) {
-				Object obj= iter.next();
-				if (obj instanceof IType || obj instanceof IClassFile || obj instanceof ICompilationUnit) {
-					return !iter.hasNext();
-				}
-			}
-		}
-		return false;
+		return getSelectedTypes() != null;
 	}
 
 
-	private IType[] getAllTypesFrom(Object element) {
-		IType[] result= null;
+	private IType[] getSelectedTypes() {
+		Object element= SelectionUtil.getSingleElement(fSelectionProvider.getSelection());
 		try {
-			if (element instanceof IClassFile) {
-				result= new IType[] { ((IClassFile)element).getType() };
+			if (element == null) {
+				return null;
+			} else if (element instanceof IClassFile) {
+				return new IType[] { ((IClassFile)element).getType() };
 			} else if (element instanceof ICompilationUnit) {
-				result= ((ICompilationUnit)element).getAllTypes();
+				return ((ICompilationUnit)element).getAllTypes();
 			} else if (element instanceof IType) {
-				result= new IType[] { (IType)element };
+				return new IType[] { (IType)element };
 			}
 		} catch (JavaModelException e) {
-			// don't show menu on error.
+			JavaPlugin.log(e.getStatus());
 		}
-		return result;
+		return null;
 	}
 }

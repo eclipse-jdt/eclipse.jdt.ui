@@ -6,8 +6,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -18,7 +19,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMethod;
@@ -34,15 +34,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Evaluates unimplemented methods of a type.
- * Always forces the the type to be in an open editor. The result is unsaved,
- * so the user can decide if he wants to accept the changes.
+ * Will open an editor for the type. Changes are unsaved.
  */
 public class AddUnimplementedMethodsAction extends Action {
 
 	private ISelectionProvider fSelectionProvider;
 
 	public AddUnimplementedMethodsAction(ISelectionProvider selProvider) {
-		super(JavaUIMessages.getString("AddUnimplementedMethodsAction.lebel")); //$NON-NLS-1$
+		super(JavaUIMessages.getString("AddUnimplementedMethodsAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("AddUnimplementedMethodsAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("AddUnimplementedMethodsAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
@@ -63,7 +62,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			type= (IType)EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
-				MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -73,30 +72,28 @@ public class AddUnimplementedMethodsAction extends Action {
 				dialog.run(false, true, op);
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
-					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
 				} else if (editor != null) {
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
+				JavaPlugin.log(e);
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled by user.
 			}
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
 		}			
 	}
 		
 	private IType getSelectedType() throws JavaModelException {
 		ISelection sel= fSelectionProvider.getSelection();
 		if (sel instanceof IStructuredSelection) {
-			Object[] vec= ((IStructuredSelection)sel).toArray();
-			if (vec.length == 1 && (vec[0] instanceof IType)) {
-				IType type= (IType)vec[0];
+			Object[] elements= ((IStructuredSelection)sel).toArray();
+			if (elements.length == 1 && (elements[0] instanceof IType)) {
+				IType type= (IType) elements[0];
 				if (type.getCompilationUnit() != null && type.isClass()) {
 					return type;
 				}
@@ -109,7 +106,7 @@ public class AddUnimplementedMethodsAction extends Action {
 		try {
 			return getSelectedType() != null;
 		} catch (JavaModelException e) {
-			// do not handle here
+			JavaPlugin.log(e.getStatus());
 		}
 		return false;
 	}	

@@ -26,16 +26,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * If the parent type is open in an editor, be sure to pass over its working copy.
  */
 public class AddMethodStubOperation extends WorkspaceModifyOperation {
-	
-	public static interface IRequestQuery {
-		public static final int CANCEL= 0;
-		public static final int NO= 1;
-		public static final int YES= 2;
-		public static final int ALL= 3;
 		
-		int doQuery(IMethod method);
-	}	
-	
 	private IType fType;
 	private IMethod[] fMethods;
 	private IMethod[] fCreatedMethods;
@@ -64,7 +55,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 					throw new InterruptedException();
 				case IRequestQuery.NO:
 					return false;
-				case IRequestQuery.ALL:
+				case IRequestQuery.YES_ALL:
 					fOverrideAll= true;
 			}
 		}
@@ -78,7 +69,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 					throw new InterruptedException();
 				case IRequestQuery.NO:
 					return false;
-				case IRequestQuery.ALL:
+				case IRequestQuery.YES_ALL:
 					fReplaceAll= true;
 			}
 		}

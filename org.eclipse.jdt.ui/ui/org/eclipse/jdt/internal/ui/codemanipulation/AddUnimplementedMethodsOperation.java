@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
 /**
- * Evaluate all unimplemented methods and create them
+ * Evaluates all unimplemented methods and creates them.
  * If the type is open in an editor, be sure to pass over the types working working copy.
  */
 public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
@@ -74,7 +74,10 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 			monitor.done();
 		}
 	}
-	
+
+	/**
+	 * Returns the created accessors. To be called after a sucessful run.
+	 */	
 	public IMethod[] getCreatedMethods() {
 		return fCreatedMethods;
 	}
