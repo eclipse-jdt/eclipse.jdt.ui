@@ -65,4 +65,16 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		return fVariableBlock.performOk();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			fVariableBlock.refresh();
+		}
+		
+		
+		super.setVisible(visible);
+	}
+
 }
