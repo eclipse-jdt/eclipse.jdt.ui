@@ -140,7 +140,9 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		if (unimplemented != null) {
 			for (int i= 0; i < unimplemented.length; i++) {
 				buf.append(unimplemented[i]);
-				buf.append('\n');
+				if (i < unimplemented.length - 1) {
+					buf.append('\n');
+				}
 			}
 			return true;
 		}

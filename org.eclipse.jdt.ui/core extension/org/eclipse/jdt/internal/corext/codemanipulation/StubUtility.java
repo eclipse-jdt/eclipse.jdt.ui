@@ -186,7 +186,7 @@ public class StubUtility {
 				}
 				buf.append(");\n\t"); //$NON-NLS-1$
 			}
-			buf.append("}\n\n");			 //$NON-NLS-1$
+			buf.append("}\n");			 //$NON-NLS-1$
 		}
 		return buf.toString();
 	}

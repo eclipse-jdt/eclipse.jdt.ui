@@ -1395,7 +1395,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		IMethod[] createdMethods= new IMethod[newMethods.size()];
 		for (int i= 0; i < newMethods.size(); i++) {
-			createdMethods[i]= type.createMethod((String) newMethods.get(i), null, false, null);
+			String content= (String) newMethods.get(i) + "\n";
+			createdMethods[i]= type.createMethod(content, null, false, null);
 		}
 		return createdMethods;
 	}
