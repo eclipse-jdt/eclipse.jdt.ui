@@ -238,6 +238,19 @@
        class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage">
        <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
    	</page>
+    <page name="%compilerPageName"
+  	   id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage"
+       objectClass="org.eclipse.core.resources.IProject"
+       class="org.eclipse.jdt.internal.ui.preferences.CompilerPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+   	</page>
+   	<page name="%compilerPageName"
+  	   id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage"
+       objectClass="org.eclipse.jdt.core.IJavaProject"
+       class="org.eclipse.jdt.internal.ui.preferences.CompilerPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+   	</page> 	
+   	
    	<page name="%sourceAttachmentPageName"
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1" 
 		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
