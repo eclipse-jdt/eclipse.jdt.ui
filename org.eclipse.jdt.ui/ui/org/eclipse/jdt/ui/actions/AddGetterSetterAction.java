@@ -234,7 +234,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
-		String message= ActionMessages.getString("AddGetterSetterAction.dialog.title");//$NON-NLS-1$
+		String message= ActionMessages.getString("AddGetterSetterAction.dialog.label");//$NON-NLS-1$
 		dialog.setMessage(message);
 		dialog.setValidator(createValidator(fNumEntries));
 		dialog.setContainerMode(true);

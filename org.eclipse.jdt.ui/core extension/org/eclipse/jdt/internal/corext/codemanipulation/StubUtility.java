@@ -627,7 +627,6 @@ public class StubUtility {
 		return null;
 	}
 
-
 	/**
 	 * Creates needed constructors for a type.
 	 * @param type The type to create constructors for
@@ -654,6 +653,31 @@ public class StubUtility {
 			}
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);
+	}
+	
+	/**
+	 * Returns all unimplemented constructors of a type
+	 * @param type The type to create constructors for
+	 * @param supertype The type's super type
+	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 */
+	public static IMethod[] getOverridableConstructors(IType type) throws CoreException {
+		List constructorMethods= new ArrayList();
+		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);				
+		IType supertype= hierarchy.getSuperclass(type);
+		if (supertype == null)
+			return (new IMethod[0]);
+
+		IMethod[] superMethods= supertype.getMethods();
+		String typeName= type.getElementName();
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < superMethods.length; i++) {
+			IMethod curr= superMethods[i];
+			if (curr.isConstructor() && (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags())))
+				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null)
+					constructorMethods.add(curr);
+		}
+		return (IMethod[]) constructorMethods.toArray(new IMethod[constructorMethods.size()]);
 	}
 
 	/**
