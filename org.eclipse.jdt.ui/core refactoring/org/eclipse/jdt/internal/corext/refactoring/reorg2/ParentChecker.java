@@ -36,6 +36,8 @@ class ParentChecker {
 	}
 	
 	public Object getCommonParent(){
+		if (fJavaElements.length == 0 && fResources.length == 0)
+			return null;
 		if (! resourcesHaveCommonParent() || ! javaElementsHaveCommonParent())
 			return null;
 		if (fJavaElements.length == 0){
@@ -63,11 +65,15 @@ class ParentChecker {
 	}
 
 	private IJavaElement getCommonJavaElementParent() {
-		return fJavaElements[0].getParent();//safe - checked before
+		Assert.isNotNull(fJavaElements);
+		Assert.isTrue(fJavaElements.length > 0);//safe - checked before
+		return fJavaElements[0].getParent();
 	}
 
 	private IResource getCommonResourceParent() {
-		return fResources[0].getParent();//safe - checked before
+		Assert.isNotNull(fResources);
+		Assert.isTrue(fResources.length > 0);//safe - checked before
+		return fResources[0].getParent();
 	}
 
 	private boolean javaElementsHaveCommonParent() {
