@@ -289,7 +289,7 @@ public class UnresolvedElementsSubProcessor {
 			if (anonymDecl != null) {
 				ITypeBinding bind= Bindings.getBindingOfParentType(anonymDecl.getParent());
 				if (!bind.isAnonymous()) {
-					addNewFieldForType(targetCU, binding, bind, simpleName, isWriteAccess, proposals);
+					addNewFieldForType(targetCU, bind, bind, simpleName, isWriteAccess, proposals);
 				}
 			}
 		}
