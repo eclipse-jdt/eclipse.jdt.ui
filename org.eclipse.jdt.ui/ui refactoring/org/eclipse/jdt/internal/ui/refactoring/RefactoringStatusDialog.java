@@ -37,6 +37,7 @@ class RefactoringStatusDialog extends Dialog {
 		fStatus= status;
 		fWindowTitle= windowTitle;
 		fBackButton= backButton;
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 	
 	public RefactoringStatusDialog(Shell parent, ErrorWizardPage page, boolean backButton) {
