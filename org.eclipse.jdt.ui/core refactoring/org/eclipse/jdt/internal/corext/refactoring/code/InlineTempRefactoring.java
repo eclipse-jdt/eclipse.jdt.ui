@@ -232,7 +232,7 @@ public class InlineTempRefactoring extends Refactoring {
 	private void inlineTemp(TextChange change, IProgressMonitor pm) throws JavaModelException {
 		int[] offsets= getReferenceOffsets();
 		pm.beginTask("", offsets.length); //$NON-NLS-1$
-		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name") + getTempName(); //$NON-NLS-1$
+		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name"); //$NON-NLS-1$
 		int length= getTempName().length();
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i];
@@ -291,7 +291,7 @@ public class InlineTempRefactoring extends Refactoring {
 	
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
 		ISourceRange range= SourceRangeComputer.computeSourceRange(new SourceRange(offset, length), fCu.getSource());
-		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name") + getTempName();  //$NON-NLS-1$
+		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name"); //$NON-NLS-1$
 		TextChangeCompatibility.addTextEdit(change, changeName, new DeleteEdit(range.getOffset(), range.getLength()));
 	}
 	
