@@ -65,6 +65,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 		Label tableLabel= new Label(result, SWT.NONE);
 		tableLabel.setText("&Members to declare in the interface:");
+		tableLabel.setEnabled(anyMembersToExtract());
 		gd= new GridData();
 		gd.horizontalSpan= 2;
 		tableLabel.setLayoutData(gd);
@@ -93,6 +94,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 			ExceptionHandler.handle(e, "Extract Interface", "Internal Error. See log for details");
 			fTableViewer.setInput(new IMember[0]);
 		}
+		fTableViewer.getControl().setEnabled(anyMembersToExtract());
 
 		createButtonComposite(composite);
 	}
@@ -109,6 +111,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		
 		Button selectAll= new Button(buttonComposite, SWT.PUSH);
 		selectAll.setText("&Select All");
+		selectAll.setEnabled(anyMembersToExtract());
 		selectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(selectAll);
 		selectAll.addSelectionListener(new SelectionAdapter(){
@@ -119,6 +122,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		
 		Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
 		deSelectAll.setText("&Deselect All");
+		deSelectAll.setEnabled(anyMembersToExtract());
 		deSelectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(deSelectAll);
 		deSelectAll.addSelectionListener(new SelectionAdapter(){
@@ -126,6 +130,14 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 				fTableViewer.setAllChecked(false);
 			}
 		});
+	}
+
+	private boolean anyMembersToExtract() {
+		try {
+			return getExtractInterfaceRefactoring().getExtractableMembers().length > 0;
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 
 	private static IStructuredContentProvider createContentProvider() {
