@@ -1137,8 +1137,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				try {
 					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
 					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
-					String args= "-rerun "+testId;
-					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
+//					String args= "-rerun "+testId;
+//					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
 					tmp.launch(fLastLaunch.getLaunchMode(), null);	
 					return;	
 				} catch (CoreException e) {
