@@ -33,7 +33,8 @@ public class LeakTestSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public LeakTestSuite() {
-		//addTest(JavaLeakTest.suite());
+		if (false)
+			addTest(JavaLeakTest.suite());
 	}
 	
 }
