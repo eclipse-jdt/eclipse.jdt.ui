@@ -6,18 +6,14 @@ package org.eclipse.jdt.ui;
 
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IStorage;
 
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,6 +21,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
 
 /**
  * Standard label provider for Java elements.
@@ -131,7 +128,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
 	private JavaElementImageProvider fImageLabelProvider;
-	private WorkbenchLabelProvider fWorkbenchLabelProvider;
+	private WorkbenchLabelProvider fWorkbenchLabelProvider;	
+	private StorageLabelProvider fStorageLabelProvider;
 
 	private int fFlags;
 	private int fImageFlags;
@@ -159,6 +157,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public JavaElementLabelProvider(int flags) {
 		fImageLabelProvider= new JavaElementImageProvider();
 		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
+		fStorageLabelProvider= new StorageLabelProvider();
 		fFlags= flags;
 		updateImageProviderFlags();
 		updateTextProviderFlags();		
@@ -245,7 +244,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 		}
 
 		if (element instanceof IStorage) 
-			return getImageForJarEntry((IStorage)element);
+			return fStorageLabelProvider.getImage(element);
 
 		return super.getImage(element);
 	}
@@ -264,9 +263,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 			return text;
 		}
 
-		if (element instanceof IStorage) {
-			return ((IStorage)element).getName();
-		}
+		if (element instanceof IStorage)
+			return fStorageLabelProvider.getText(element);
 
 		return super.getText(element);
 	}
@@ -277,38 +275,10 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public void dispose() {
 		fWorkbenchLabelProvider.dispose();
-		disposeJarEntryImages();
+		fStorageLabelProvider.dispose();
 	}
 	
 	public void setErrorTickManager(IErrorTickProvider provider) {
 		fImageLabelProvider.setErrorTickProvider(provider);
 	}	
-	
-	/*
-	 * Dispose the cached images for JarEntry files 
-	 */
-	private void disposeJarEntryImages() {
-		Iterator each= fJarImageMap.values().iterator();
-		while (each.hasNext()) {
-			Image image= (Image)each.next();
-			image.dispose();
-		}
-		fJarImageMap.clear();
-	}
-	
-	/*
-	 * Gets and caches an image for a JarEntryFile.
-	 * The image for a JarEntryFile is retrieved from the EditorRegistry.
-	 */ 
-	private Image getImageForJarEntry(IStorage element) {
-		String extension= element.getFullPath().getFileExtension();
-		Image image= (Image)fJarImageMap.get(extension);
-		if (image != null) 
-			return image;
-		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		ImageDescriptor desc= registry.getImageDescriptor(element.getName());
-		image= desc.createImage();
-		fJarImageMap.put(extension, image);
-		return image;
-	}
 }
