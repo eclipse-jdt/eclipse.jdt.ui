@@ -57,11 +57,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -161,21 +162,28 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	private boolean fProcessSelectionEvents= true;
 
-	private IPartListener fPartListener= new IPartListener() {
-		public void partActivated(IWorkbenchPart part) {
-				setSelectionFromEditor(part);
+	private IPartListener2 fPartListener= new IPartListener2() {
+		public void partActivated(IWorkbenchPartReference ref) {
+			setSelectionFromEditor(ref);
 		}
-		public void partBroughtToTop(IWorkbenchPart part) {
-				setSelectionFromEditor(part);
+		public void partBroughtToTop(IWorkbenchPartReference ref) {
+			setSelectionFromEditor(ref);
 		}
-		public void partClosed(IWorkbenchPart part) {
+	 	public void partInputChanged(IWorkbenchPartReference ref) {
+			setSelectionFromEditor(ref);
+	 	}
+		public void partClosed(IWorkbenchPartReference ref) {
 		}
-		public void partDeactivated(IWorkbenchPart part) {
+		public void partDeactivated(IWorkbenchPartReference ref) {
 		}
-		public void partOpened(IWorkbenchPart part) {
+		public void partOpened(IWorkbenchPartReference ref) {
+		}
+		public void partVisible(IWorkbenchPartReference ref) {
+		}
+		public void partHidden(IWorkbenchPartReference ref) {
 		}
 	};
-	
+
 
 	/*
 	 * Implements method from IViewPart.
@@ -823,7 +831,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			adjustInputAndSetSelection((IJavaElement)input);
 	}
 
-	final protected void setHelp() {
+	protected final void setHelp() {
 		JavaUIHelp.setHelp(fViewer, getHelpContextId());
 	}
 
@@ -907,7 +915,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return findInputForJavaElement(je.getParent());
 	}
 	
-	final protected IJavaElement findElementToSelect(Object obj) {
+	protected final IJavaElement findElementToSelect(Object obj) {
 		if (obj instanceof IJavaElement)
 			return findElementToSelect((IJavaElement)obj);
 		return null;
@@ -990,6 +998,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					EditorUtility.revealInEditor(part, (IJavaElement) obj);
 			}
 		}
+	}
+
+	private void setSelectionFromEditor(IWorkbenchPartReference ref) {
+			IWorkbenchPart part= ref.getPart(false);
+			setSelectionFromEditor(part);
 	}
 
 	void setSelectionFromEditor(IWorkbenchPart part) {
