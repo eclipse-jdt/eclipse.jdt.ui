@@ -13,6 +13,13 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Iterator;
 
+import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IRegion;
@@ -20,16 +27,16 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
@@ -65,14 +72,20 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		
-		if (getEditor() == null)
+		IPath path;
+		IAnnotationModel model;
+		if (textViewer instanceof ISourceViewer) {
+			path= null;
+			model= ((ISourceViewer)textViewer).getAnnotationModel();
+		} else {
+			// Get annotation model from file buffer manager
+			path= getEditorInputPath();
+			model= getAnnotationModel(path);
+		}
+		if (model == null)
 			return null;
-		
-		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
-		
-		if (model != null) {
+
+		try {
 			Iterator e= new JavaAnnotationIterator(model, true, fAllAnnotations);
 			int layer= -1;
 			String message= null;
@@ -97,19 +110,61 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 			if (layer > -1)
 				return formatMessage(message);
+			
+		} finally {
+			try {
+				if (path != null) {
+					ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+					manager.disconnect(path, null);
+				}
+			} catch (CoreException ex) {
+				JavaPlugin.log(ex.getStatus());
+			}
 		}
 		
 		return null;
 	}
 	
-	/*
-	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
-	 */
-	public void setEditor(IEditorPart editor) {
-		if (editor instanceof CompilationUnitEditor)
-			super.setEditor(editor);
-		else
-			super.setEditor(null);
+	private IPath getEditorInputPath() {
+		if (getEditor() == null)
+			return null;
+		
+		IEditorInput input= getEditor().getEditorInput();
+		if (input instanceof IStorageEditorInput) {
+			try {
+				return ((IStorageEditorInput)input).getStorage().getFullPath();
+			} catch (CoreException ex) {
+				JavaPlugin.log(ex.getStatus());
+			}
+		}
+		return null;
+	}
+	
+	private IAnnotationModel getAnnotationModel(IPath path) {
+		if (path == null)
+			return null;
+		
+		ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+		try {
+			manager.connect(path, null);
+		} catch (CoreException ex) {
+			JavaPlugin.log(ex.getStatus());
+			return null;
+		}
+		
+		IAnnotationModel model= null;
+		try {
+			model= manager.getTextFileBuffer(path).getAnnotationModel();
+			return model;
+		} finally {
+			if (model == null) {
+				try {
+					manager.disconnect(path, null);
+				} catch (CoreException ex) {
+					JavaPlugin.log(ex.getStatus());
+				}
+			}
+		}
 	}
 
 	/**
