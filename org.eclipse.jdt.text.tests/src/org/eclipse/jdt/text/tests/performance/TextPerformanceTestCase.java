@@ -144,14 +144,31 @@ public class TextPerformanceTestCase extends TestCase {
 	}
 
 	/**
+	 * @return the default scenario id for this test
+	 */
+	protected final String getDefaultScenarioId() {
+		return Performance.getDefault().getDefaultScenarioId(this);
+	}
+
+	/**
 	 * Create a performance meter with a default scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
 	 * 
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeter() {
-		Performance performance= Performance.getDefault();
-		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		return createPerformanceMeter(getDefaultScenarioId());
+	}
+
+	/**
+	 * Create a performance meter with the given scenario id. The
+	 * performance meter will be disposed on {@link #tearDown()}.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeter(String scenarioId) {
+		PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(scenarioId);
 		if (fPerformanceMeters == null)
 			fPerformanceMeters= new ArrayList();
 		fPerformanceMeters.add(performanceMeter);
@@ -171,7 +188,24 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeterForSummary(String shortName, Dimension dimension) {
-		PerformanceMeter performanceMeter= createPerformanceMeter();
+		return createPerformanceMeterForSummary(getDefaultScenarioId(), shortName, dimension);
+	}
+
+	/**
+	 * Create a performance meter with the given scenario id and mark the
+	 * scenario to be included into the component performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForSummary(String scenarioId, String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter(scenarioId);
 		Performance.getDefault().tagAsSummary(performanceMeter, shortName, dimension);
 		return performanceMeter;
 	}
@@ -189,11 +223,38 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String shortName, Dimension dimension) {
-		PerformanceMeter performanceMeter= createPerformanceMeter();
+		return createPerformanceMeterForGlobalSummary(getDefaultScenarioId(), shortName, dimension);
+	}
+
+	/**
+	 * Create a performance meter with the given scenario id and mark the
+	 * scenario to be included into the global performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String scenarioId, String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter(scenarioId);
 		Performance.getDefault().tagAsGlobalSummary(performanceMeter, shortName, dimension);
 		return performanceMeter;
 	}
 
+	/**
+	 * Commits the measurements captured by all performance meters created
+	 * through one of this class' factory methods.
+	 */
+	protected final void commitAllMeasurements() {
+		if (fPerformanceMeters != null)
+			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				((PerformanceMeter) iter.next()).commit();
+	}
+	
 	/**
 	 * Asserts default properties of the measurements captured by the given
 	 * performance meter.
@@ -201,7 +262,29 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @param performanceMeter the performance meter
 	 * @throws RuntimeException if the properties do not hold
 	 */
-	protected void assertPerformance(PerformanceMeter performanceMeter) {
+	protected final void assertPerformance(PerformanceMeter performanceMeter) {
 		Performance.getDefault().assertPerformance(performanceMeter);
+	}
+
+	/**
+	 * Asserts default properties of the measurements captured by all
+	 * performance meters created through one of this class' factory
+	 * methods.
+	 * 
+	 * @throws RuntimeException if the properties do not hold
+	 */
+	protected final void assertAllPerformance() {
+		if (fPerformanceMeters != null)
+			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				assertPerformance((PerformanceMeter) iter.next());
+	}
+
+	/**
+	 * Returns the null performance meter singleton.
+	 * 
+	 * @return the null performance meter singleton
+	 */
+	protected final PerformanceMeter getNullPerformanceMeter() {
+		return Performance.getDefault().getNullPerformanceMeter();
 	}
 }
