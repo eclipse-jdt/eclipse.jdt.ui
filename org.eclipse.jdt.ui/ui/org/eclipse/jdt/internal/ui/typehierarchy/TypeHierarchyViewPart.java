@@ -452,12 +452,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// separate thread.
 		// Work-araound for http://dev.eclipse.org/bugs/show_bug.cgi?id=30881
 		processOutstandingEvents();
-		fInputElement= inputElement;
-		if (fInputElement == null) {	
+		if (inputElement == null) {	
 			clearInput();
 		} else {
+			fInputElement= inputElement;
 			try {
-				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
+				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				clearInput();
@@ -472,10 +472,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			// turn off member filtering
 			setMemberFilter(null);
 			fIsEnableMemberFilter= false;
-			if (!fInputElement.equals(prevInput)) {
+			if (!inputElement.equals(prevInput)) {
 				updateHierarchyViewer(true);
 			}
-			IType root= getSelectableType(fInputElement);
+			IType root= getSelectableType(inputElement);
 			internalSelectType(root, true);
 			updateMethodViewer(root);
 			updateToolbarButtons();
