@@ -1084,7 +1084,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				if (javaAnnotation.isRelevant())
 					return javaAnnotation.getAnnotationType();
 			}
-			return null;
+			return super.getType(annotation);
 		}
 
 		/*
@@ -2509,7 +2509,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
 		Position annotationPosition= new Position(0, 0);
-		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), s.getLength(),forward, annotationPosition);
+		Annotation nextAnnotation= getNextAnnotation(s.getOffset(), s.getLength(),forward, annotationPosition);
 		
 		setStatusLineErrorMessage(null);
 
@@ -2518,8 +2518,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			IMarker marker= null;
 			if (nextAnnotation instanceof MarkerAnnotation)
 				marker= ((MarkerAnnotation) nextAnnotation).getMarker();
-			else {
-				Iterator e= nextAnnotation.getOverlaidIterator();
+			else if (nextAnnotation instanceof IJavaAnnotation) {
+				Iterator e= ((IJavaAnnotation)nextAnnotation).getOverlaidIterator();
 				if (e != null) {
 					while (e.hasNext()) {
 						Object o= e.next();
@@ -2541,8 +2541,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 			
 			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
-			if (nextAnnotation.isProblem())
-				setStatusLineErrorMessage(nextAnnotation.getMessage());
+			if (nextAnnotation instanceof IJavaAnnotation && ((IJavaAnnotation)nextAnnotation).isProblem())
+				setStatusLineErrorMessage(((IJavaAnnotation)nextAnnotation).getMessage());
 		}
 	}
 	
@@ -2664,10 +2664,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 
 
-	private IJavaAnnotation getNextAnnotation(int offset, int length, boolean forward, Position annotationPosition) {
-		IJavaAnnotation nextAnnotation= null;
+	private Annotation getNextAnnotation(int offset, int length, boolean forward, Position annotationPosition) {
+		Annotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
-		IJavaAnnotation containingAnnotation= null;
+		Annotation containingAnnotation= null;
 		Position containingAnnotationPosition= null;
 		boolean currentAnnotation= false;
 		
@@ -2675,16 +2675,24 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		int endOfDocument= document.getLength(); 
 		int distance= 0;
 		
+		IAnnotationAccess access= getAnnotationAccess();
+		
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new JavaAnnotationIterator(model, true);
+		Iterator e= new JavaAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
-			IJavaAnnotation a= (IJavaAnnotation) e.next();
+			Annotation a= (Annotation) e.next();
+			Object type;
+			if (a instanceof IJavaAnnotation)
+				type= ((IJavaAnnotation)a).getAnnotationType();
+			else
+				type= access.getType(a);
+			
 			Preferences workbenchTextEditorPrefStore= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
 			Iterator iter= getAnnotationPreferences().getAnnotationPreferences().iterator();
 			boolean isNavigationTarget= false;
 			while (iter.hasNext()) {
 				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
-				if (annotationPref.getAnnotationType().equals(a.getAnnotationType())) {
+				if (annotationPref.getAnnotationType().equals(type)) {
 					String key;
 					/*
 					 * Fixes bug 41689
@@ -2704,10 +2712,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				annotationPref= null;
 			}
 			
-			if (a.hasOverlay() || !isNavigationTarget)
+			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget)
 				continue;
 				
-			Position p= model.getPosition((Annotation) a);
+			Position p= model.getPosition(a);
 			if (!(p.includes(offset) || (p.getLength() == 0 && offset == p.offset))) {
 				
 				int currentDistance= 0;

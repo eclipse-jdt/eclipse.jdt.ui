@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
+
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 
@@ -20,10 +22,25 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 public class JavaAnnotationIterator implements Iterator {
 			
 	private Iterator fIterator;
-	private IJavaAnnotation fNext;
+	private Annotation fNext;
 	private boolean fSkipIrrelevants;
+	private boolean fReturnAllAnnotations;
 	
+	/**
+	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
+	 */
 	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
+		this(model, skipIrrelevants, false);
+	}
+	
+	/**
+	 * Returns a new JavaAnnotationIterator. 
+	 * @param model the annotation model
+	 * @param skipIrrelevants whether to skip irrelevant annotations
+	 * @param returnAllAnnotations Whether to return non IJavaAnnotations as well
+	 */
+	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants, boolean returnAllAnnotations) {
+		fReturnAllAnnotations= returnAllAnnotations;
 		fIterator= model.getAnnotationIterator();
 		fSkipIrrelevants= skipIrrelevants;
 		skip();
@@ -36,13 +53,16 @@ public class JavaAnnotationIterator implements Iterator {
 				IJavaAnnotation a= (IJavaAnnotation) next;
 				if (fSkipIrrelevants) {
 					if (a.isRelevant()) {
-						fNext= a;
+						fNext= (Annotation)a;
 						return;
 					}
 				} else {
-					fNext= a;
+					fNext= (Annotation)a;
 					return;
 				}
+			} else if (fReturnAllAnnotations) {
+				fNext= (Annotation)next;
+				return;
 			}
 		}
 		fNext= null;
