@@ -2,7 +2,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
@@ -47,22 +46,22 @@ class AstMatchingNodeFinder extends GenericVisitor{
 
 	private static  class AstFlattener extends GenericVisitor{
 	
-		private List fFlattenedNodeStack;
+		private List fFlattenedNodeList;
 		
 		private AstFlattener(){
-			fFlattenedNodeStack= new Stack();
+			fFlattenedNodeList= new ArrayList();
 		}
 		
 		public static AstNode[] flattenNode(AstNode node){
 			AstFlattener instance= new AstFlattener();
 			node.traverse(instance, null);
-			return (AstNode[]) instance.fFlattenedNodeStack.toArray(new AstNode[instance.fFlattenedNodeStack.size()]);
+			return (AstNode[]) instance.fFlattenedNodeList.toArray(new AstNode[instance.fFlattenedNodeList.size()]);
 		}
 		
 		//--- visit methods
 		
 		protected boolean visitRange(int start, int end, AstNode node, Scope scope) {
-			fFlattenedNodeStack.add(node);
+			fFlattenedNodeList.add(node);
 			return true;
 		}
 	}
