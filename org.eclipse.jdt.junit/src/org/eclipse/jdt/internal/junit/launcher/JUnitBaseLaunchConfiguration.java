@@ -81,9 +81,9 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());
 		runConfig.setWorkingDirectory(workingDirName);
 
-		String[] bootpath= getBootpath(configuration);
-		if (bootpath.length > 0) 
-			runConfig.setBootClassPath(bootpath);
+		String[] bootpath = getBootpath(configuration);
+		runConfig.setBootClassPath(bootpath);
+
 				
 		//  set default source locator if none specified
 		String id= configuration.getAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, (String)null);
