@@ -301,11 +301,6 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
-	<page name="%javaDebugPrefName"
-         id="org.eclipse.jdt.ui.JavaDebugPreferencePage"   
-	     class="org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage"
-         category="org.eclipse.debug.ui.DebugPreferencePage">
-	</page>	
 	<page name="%templatePageName"
 		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"

@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
@@ -265,9 +264,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
 		
-		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_PORT, "8000"); //$NON-NLS-1$
-		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_HOST, "localhost"); //$NON-NLS-1$
-		
 		store.setDefault(IPreferencesConstants.EDITOR_SHOW_HOVER, true);
 		store.setDefault(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, false);
 		
@@ -280,9 +276,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		PackageExplorerPart.initDefaults(store);
 		JavaEditorPreferencePage.initDefaults(store);
-		
-		JavaDebugPreferencePage.initDefaults(store);
-		TemplatePreferencePage.initDefaults(store);
+	
+		TemplatePreferencePage.initDefaults(store);		
 		CodeGenerationPreferencePage.initDefaults(store);
 	}
 }

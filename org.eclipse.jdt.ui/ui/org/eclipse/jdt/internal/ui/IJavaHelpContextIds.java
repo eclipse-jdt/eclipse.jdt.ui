@@ -42,7 +42,6 @@ public interface IJavaHelpContextIds {
 	public static final String RUN_TO_LINE_ACTION= PREFIX + "run_to_line_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_PRESENTATION_ACTION= PREFIX + "toggle_presentation_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_TEXTHOVER_ACTION= PREFIX + "toggle_texthover_action_context"; //$NON-NLS-1$
-	public static final String DISPLAY_ACTION= PREFIX + "display_action_context"; //$NON-NLS-1$
 
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
@@ -57,16 +56,13 @@ public interface IJavaHelpContextIds {
 	// view parts
 	public static final String PACKAGE_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
-	public static final String DISPLAY_VIEW= PREFIX + "display_view_context"; //$NON-NLS-1$
 
 	// Preference/Property pages
 	public static final String BUILD_PATH_PROPERTY_PAGE= PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
 	public static final String CP_VARIABLES_PREFERENCE_PAGE= PREFIX + "cp_variables_preference_page_context"; //$NON-NLS-1$
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE= PREFIX + "source_attachment_property_page_context"; //$NON-NLS-1$
-	public static final String JRE_PREFERENCE_PAGE= PREFIX + "jre_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_LOOKUP_PROPERTY_PAGE= PREFIX + "source_lookup_property_page_context"; //$NON-NLS-1$
-	public static final String LAUNCH_JRE_PROPERYY_PAGE= PREFIX + "launch_jre_property_page_context"; //$NON-NLS-1$
 
 	public static final String CODE_MANIPULATION_PREFERENCE_PAGE= PREFIX + "code_manipulation_preference_context"; //$NON-NLS-1$
 	public static final String ORGANIZE_IMPORTS_PREFERENCE_PAGE= PREFIX + "organizeimports_preference_page_context"; //$NON-NLS-1$
@@ -84,8 +80,6 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_PACKAGEROOT_WIZARD_PAGE= PREFIX + "new_packageroot_wizard_page_context"; //$NON-NLS-1$
-	public static final String JAVA_APPLICATION_WIZARD_PAGE= PREFIX + "java_application_page_context"; //$NON-NLS-1$
-	public static final String JDI_ATTACH_LAUNCHER_WIZARD_PAGE= PREFIX + "jdi_attach_launcher_page_context"; //$NON-NLS-1$
 	public static final String JARPACKAGER_WIZARD_PAGE= PREFIX + "jar_packager_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARMANIFEST_WIZARD_PAGE= PREFIX + "jar_manifest_wizard_page_context"; //$NON-NLS-1$
 	public static final String JAROPTIONS_WIZARD_PAGE= PREFIX + "jar_options_wizard_page_context"; //$NON-NLS-1$
