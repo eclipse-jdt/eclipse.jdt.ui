@@ -79,12 +79,7 @@ public class InlineTempTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper1(cu, selection);
 	}
-	
-	private void helper1() throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		helper1(cu, getSelection(cu));
-	}	
-	
+		
 	private void helper2() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		helper2(cu, getSelection(cu));
@@ -107,27 +102,27 @@ public class InlineTempTests extends RefactoringTest {
 	//--- tests 
 	
 	public void test0() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 18);
 	}
 
 	public void test1() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 18);
 	}
 
 	public void test2() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 18);
 	}
 	
 	public void test3() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 22);
 	}
 
 	public void test4() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 22);
 	}
 
 	public void test5() throws Exception{
-		helper1();
+		helper1(4, 9, 4, 22);
 	}
 
 	public void test6() throws Exception{
@@ -136,7 +131,7 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 	public void test7() throws Exception{
-		helper1();
+		helper1(9, 9, 9, 18);
 	}
 	
 	public void test8() throws Exception{
@@ -145,7 +140,7 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	public void test9() throws Exception{
-		helper1();
+		helper1(5, 9, 5, 21);
 	}
 	
 	public void test10() throws Exception{
@@ -213,6 +208,16 @@ public class InlineTempTests extends RefactoringTest {
 	public void test23() throws Exception{
 //		printTestDisabledMessage("regression test for 22938");		
 		helper1(5, 16, 5, 20);
+	}	
+
+	public void test24() throws Exception{
+//		printTestDisabledMessage("regression test for 26242");		
+		helper1(5, 19, 5, 24);
+	}	
+
+	public void test25() throws Exception{
+//		printTestDisabledMessage("regression test for 26242");		
+		helper1(5, 19, 5, 24);
 	}	
 
 	//------
