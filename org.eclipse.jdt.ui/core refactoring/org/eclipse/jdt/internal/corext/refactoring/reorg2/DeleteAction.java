@@ -37,12 +37,15 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
-public class DeleteAction2 extends SelectionDispatchAction{
+public class DeleteAction extends SelectionDispatchAction{
 
-	public DeleteAction2(IWorkbenchSite site) {
+	private boolean fSuggestGetterSetterDeletion;
+
+	public DeleteAction(IWorkbenchSite site) {
 		super(site);
 		setText("&Delete");
 		setDescription("Delete the selected elements");
+		fSuggestGetterSetterDeletion= true;//default
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));		
@@ -50,6 +53,10 @@ public class DeleteAction2 extends SelectionDispatchAction{
 
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.DELETE_ACTION);
+	}
+	
+	public void setSuggestGetterSetterDeletion(boolean suggest){
+		fSuggestGetterSetterDeletion= suggest;
 	}
 
 	/*
@@ -119,7 +126,9 @@ public class DeleteAction2 extends SelectionDispatchAction{
 	}
 		
 	private DeleteRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setSuggestGetterSetterDeletion(fSuggestGetterSetterDeletion);
+		return ref;
 	}
 
 	private static IResource[] getResources(IStructuredSelection selection) {
