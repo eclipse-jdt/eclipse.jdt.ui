@@ -931,35 +931,21 @@ public class PackageExplorerPart extends ViewPart
 		Object input= getElementOfInput(editor.getEditorInput());
 		if (input == null) 
 			return;
-		if (!inputIsSelected(input))
+		if (!inputIsSelected(editor.getEditorInput()))
 			showInput(input);
 	}
 
-	private boolean inputIsSelected(Object input) {
+	private boolean inputIsSelected(IEditorInput input) {
 		IStructuredSelection selection= (IStructuredSelection)fViewer.getSelection();
 		if (selection.size() != 1) 
 			return false;
-		Object object= selection.getFirstElement();
-		if (!(object instanceof IJavaElement)) 
+		IEditorInput selectionAsInput= null;
+		try {
+			selectionAsInput= EditorUtility.getEditorInput(selection.getFirstElement());
+		} catch (JavaModelException e1) {
 			return false;
-		IJavaElement javaElement= (IJavaElement)object;
-		IOpenable openable= javaElement.getOpenable();
-		if (openable == null)
-			return false;
-		if (!(openable instanceof IJavaElement)) 
-			return false;
-		if (input.equals(openable))
-			return true;
-		if (openable instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)openable;
-			try {
-				if (input.equals(cu.getCorrespondingResource()))
-					return true;
-			} catch (JavaModelException e) {
-				// fall through
-			}
 		}
-		return false;
+		return input.equals(selectionAsInput);
 	}
 
 	boolean showInput(Object input) {
