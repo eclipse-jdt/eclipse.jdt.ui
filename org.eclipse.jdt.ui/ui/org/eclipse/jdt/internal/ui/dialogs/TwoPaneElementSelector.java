@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 /**
  * A list selection dialog with two panes. Duplicated entries will be folded
  * together and are displayed in the lower pane (qualifier).
+ * @deprecated Use org.eclipse.ui.dialogs.TwoPaneElementSelector
  */
 public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 

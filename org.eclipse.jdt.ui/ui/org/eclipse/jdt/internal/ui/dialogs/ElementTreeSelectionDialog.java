@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
  * A class to select elements out of a tree structure.
+ * @deprecated Use org.eclipse.ui.dialogs.ElementTreeSelectionDialog
  */
 public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	

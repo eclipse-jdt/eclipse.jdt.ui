@@ -8,6 +8,8 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -16,7 +18,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
  * type of an element.
  * Empty selections are not accepted.
  */
-public class TypedElementSelectionValidator implements ISelectionValidator {
+public class TypedElementSelectionValidator implements ISelectionValidator, ISelectionStatusValidator {
 
 	private IStatus fgErrorStatus= new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 	private IStatus fgOKStatus= new StatusInfo();

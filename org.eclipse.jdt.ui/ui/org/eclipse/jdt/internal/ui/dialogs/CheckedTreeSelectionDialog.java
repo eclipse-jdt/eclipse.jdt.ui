@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ContainerCheckedTreeViewer;
 
 /**
  * A class to select elements out of a tree structure.
+ * @deprecated Use org.eclipse.ui.dialogs.CheckedTreeSelectionDialog
  */
 public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 	
