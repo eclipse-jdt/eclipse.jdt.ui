@@ -14,18 +14,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
-
+/**
+ * TODO: Should find out if this is the same functionality as Bindings.canAssign or Bindings.canCast
+ */
 public final class TypeBindings {
 	
 	private TypeBindings() {}
 	
-	public static boolean isNullBinding(ITypeBinding binding){
+	private static boolean isNullBinding(ITypeBinding binding){
 		return binding == null;
 	}
 	
@@ -65,8 +66,7 @@ public final class TypeBindings {
 	}
 
 	private static boolean isThisType(ITypeBinding binding, String qualifiedName){
-		return (binding.equals(new AST().resolveWellKnownType(qualifiedName))) 
-			|| binding.getQualifiedName().equals(qualifiedName);
+		return binding.getQualifiedName().equals(qualifiedName);
 	}
 
 	/**
