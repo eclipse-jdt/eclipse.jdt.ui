@@ -17,12 +17,11 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
-public class ModifyParametersRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
+public class ModifyParametersRefactoring extends Refactoring implements IReferenceUpdatingRefactoring{
 	
 	private RenameParametersRefactoring fRenameParameters;
 	private ReorderParametersRefactoring fReorderParameters;
@@ -78,7 +77,7 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 	}
 
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
-		//XXX disable for constructors  - brkoen. see bug 23585
+		//XXX disable for constructors  - broken. see bug 23585
 		if (fReorderParameters.getMethod().isConstructor())
 			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
 
@@ -203,10 +202,11 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException {
 		TextChangeManager manager= new TextChangeManager();
-		if (! fRenameParameters.isInputSameAsInitial())
-			fRenameParameters.createChange(new SubProgressMonitor(pm, 1), manager);
+		//the sequence here is critical 
 		if (! fReorderParameters.isInputSameAsInitial())	
 			fReorderParameters.createChange(new SubProgressMonitor(pm, 1), manager);
+		if (! fRenameParameters.isInputSameAsInitial())
+			fRenameParameters.createChange(new SubProgressMonitor(pm, 1), manager);
 		return manager;
 	}
 	
