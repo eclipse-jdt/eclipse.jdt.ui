@@ -27,17 +27,17 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  *
  */
-public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationModel implements IResourceChangeListener, IResourceDeltaVisitor {
+public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationModel implements IResourceChangeListener {
 
 	protected IClassFile fClassFile;
 	protected IWorkspace fWorkspace;
 	protected IResource fMarkerResource;
 	protected boolean fChangesApplied;
 	
-
+	
 	public ClassFileMarkerAnnotationModel(IResource markerResource) {
 		super();
-		fMarkerResource= markerResource;
+		fMarkerResource= markerResource;		
 		fWorkspace= fMarkerResource.getWorkspace();
 	}
 	
@@ -94,27 +94,12 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	 * @see AbstractMarkerAnnotationModel#retrieveMarkers()
 	 */
 	protected IMarker[] retrieveMarkers() throws CoreException {
-		return fMarkerResource.findMarkers(IMarker.MARKER, true, IResource.DEPTH_INFINITE);
+		if (fMarkerResource != null)
+			return fMarkerResource.findMarkers(IMarker.MARKER, true, IResource.DEPTH_INFINITE);
+		return null;
 	}
-			
-	/**
-	 * @see IResourceDeltaVisitor#visit
-	 */
-	public boolean visit(IResourceDelta delta) throws CoreException {
-		
-		if (delta == null)
-			return false;
-
-		if (fMarkerResource != null) {
-
-			IPath path= fMarkerResource.getFullPath();
-			delta= delta.findMember(path);
-
-			if (delta == null)
-				return false;			
-		}
-		
-		IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
+	
+	private void checkDeltas(IMarkerDelta[] markerDeltas) throws CoreException {
 		for (int i= 0; i < markerDeltas.length; i++) {
 			if (isAffected(markerDeltas[i])) {
 				IMarker marker= markerDeltas[i].getMarker();
@@ -134,24 +119,20 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 				}
 			}
 		}
-		
-		return (fMarkerResource == null);
 	}
 	
 	/**
 	 * @see IResourceChangeListener#resourceChanged
 	 */
 	public void resourceChanged(IResourceChangeEvent e) {
-		IResourceDelta delta= e.getDelta();
 		try {
-			
-			if (delta != null) {
+			IMarkerDelta[] deltas= e.findMarkerDeltas(null, true);
+			if (deltas != null) {
 				fChangesApplied= false;
-				delta.accept(this);
+				checkDeltas(deltas);
 				if (fChangesApplied)
 					fireModelChanged();
 			}
-			
 		} catch (CoreException x) {
 			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.resourceChanged")); //$NON-NLS-1$
 		}
