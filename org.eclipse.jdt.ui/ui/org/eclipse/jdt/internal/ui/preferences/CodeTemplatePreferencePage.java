@@ -474,7 +474,7 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 			return;
 		
 		try {
-			fTemplates.addFromFile(new File(path));
+			fTemplates.addFromFile(new File(path), false);
 			
 			fTableViewer.refresh();
 //			fTableViewer.setAllChecked(false);

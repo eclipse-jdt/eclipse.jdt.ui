@@ -93,6 +93,12 @@ public class ASTNodes {
 		node.accept(flattener);
 		return flattener.getResult();
 	}
+	
+	public static String asFormattedString(ASTNode node, int indent, String lineDelim) {
+		ASTFlattener flattener= new ASTFlattener();
+		node.accept(flattener);
+		return flattener.getFormattedResult(indent, lineDelim);
+	}	
 
     public static String modifierString(int mod) {
 		StringBuffer result = new StringBuffer();

@@ -20,7 +20,11 @@ ${type_declaration}
 context="catchblock_context" enabled="true">// ${todo} Auto-generated catch block
 ${exception_var}.printStackTrace();</codetemplate>
 
-<codetemplate name="methodbody" description="Code in new method bodies" 
-context="methodbody_context" enabled="true">// TODO</codetemplate>
+<codetemplate name="methodbody" description="Code in created method stubs" 
+context="methodbody_context" enabled="true">// ${todo} Auto-generated method stub</codetemplate>
+
+<codetemplate name="constructorbody" description="Code in created constructor stubs" 
+context="constructorbody_context" enabled="true">// ${todo} Auto-generated constructor stub</codetemplate>
+
 
 </templates>

@@ -65,7 +65,7 @@ public class TemplateSet {
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
 	private static final String ENABLED_ATTRIBUTE= "enabled"; //$NON-NLS-1$
 
-	private List fTemplates= new ArrayList();
+	protected List fTemplates= new ArrayList();
 	private Comparator fTemplateComparator= new TemplateComparator();
 	private Template[] fSortedTemplates= new Template[0];
 	private String fTemplateTag;
@@ -80,12 +80,12 @@ public class TemplateSet {
 	 * 
 	 * @see #addFromStream(InputStream)
 	 */
-	public void addFromFile(File file) throws CoreException {
+	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
 		InputStream stream= null;
 
 		try {
 			stream= new FileInputStream(file);
-			addFromStream(stream);
+			addFromStream(stream, allowDuplicates);
 
 		} catch (IOException e) {
 			throwReadException(e);
@@ -104,9 +104,9 @@ public class TemplateSet {
 	
 
 	/**
-	 * Reads templates from a XML stream and adds them to the template set.
+	 * Reads templates from a XML stream and adds them to the templates
 	 */	
-	public void addFromStream(InputStream stream) throws CoreException {
+	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder parser= factory.newDocumentBuilder();		
@@ -143,6 +143,12 @@ public class TemplateSet {
 
 				Template template= new Template(name, description, context, pattern);	
 				template.setEnabled(enabled);
+				if (!allowDuplicates) {
+					Template[] templates= getTemplates(name);
+					for (int k= 0; k < templates.length; k++) {
+						remove(templates[k]);
+					}
+				}
 				add(template);
 			}
 	
@@ -156,6 +162,7 @@ public class TemplateSet {
 			throwReadException(e);
 		}
 	}
+
 	
 	private String getAttributeValue(NamedNodeMap attributes, String name) {
 		Node node= attributes.getNamedItem(name);

@@ -29,25 +29,24 @@ public class Templates extends TemplateSet {
 	 */
 	public static Templates getInstance() {
 		if (fgTemplates == null)
-			fgTemplates= create();
+			fgTemplates= new Templates();
 		
 		return fgTemplates;
 	}
 	
 	public Templates() {
 		super("template");
+		create();
 	}		
 
-	private static Templates create() {
-		Templates templates= new Templates();
-
-		try {			
+	private void create() {
+		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				templates.addFromFile(templateFile);
+				addFromFile(templateFile, true);
 			} else {
-				templates.addFromStream(getDefaultsAsStream());
-				templates.saveToFile(templateFile);
+				addFromStream(getDefaultsAsStream(), true);
+				saveToFile(templateFile);
 			}
 
 		} catch (CoreException e) {
@@ -56,10 +55,9 @@ public class Templates extends TemplateSet {
 				TemplateMessages.getString("Templates.error.title"), //$NON-NLS-1$
 				e.getMessage(), e.getStatus());
 
-			templates.clear();
+			clear();
 		}
 
-		return templates;
 	}	
 	
 	/**
@@ -67,7 +65,7 @@ public class Templates extends TemplateSet {
 	 */
 	public void reset() throws CoreException {
 		clear();
-		addFromFile(getTemplateFile());
+		addFromFile(getTemplateFile(), true);
 	}
 
 	/**
@@ -75,7 +73,7 @@ public class Templates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream());
+		addFromStream(getDefaultsAsStream(), true);
 	}
 
 	/**

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -102,9 +104,14 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 	}
 	
 	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
-		
+		String name= fTypeNode.getName().getIdentifier();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setConstructor(true);
+		decl.setName(ast.newSimpleName(name));
+		Block body= ast.newBlock();
+		decl.setBody(body);		
+	
+		String bodyStatement= "";
 		if (binding == null) {
 			decl.setModifiers(Modifier.PUBLIC);
 			if (commentSettings != null) {
@@ -116,7 +123,6 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			}
 		} else {
 			decl.setModifiers(binding.getModifiers());
-			decl.setName(ast.newSimpleName(fTypeNode.getName().getIdentifier()));
 		
 			List parameters= decl.parameters();
 			ITypeBinding[] params= binding.getParameterTypes();
@@ -137,16 +143,13 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 				addImport(curr);
 				thrownExceptions.add(ast.newSimpleName(curr.getName())); // can only be single type, no array
 			}
-
-			Block body= ast.newBlock();
-			decl.setBody(body);
-			
+		
 			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 			List arguments= invocation.arguments();
 			for (int i= 0; i < paramNames.length; i++) {
 				arguments.add(ast.newSimpleName(paramNames[i]));
 			}
-			body.statements().add(invocation);
+			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		
 			if (commentSettings != null) {
 				StringBuffer buf= new StringBuffer();
@@ -161,6 +164,13 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 				decl.setJavadoc(javadoc);
 			}
 		}
+		String placeHolder= StubUtility.getBodyStubTemplate(false, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
+		if (placeHolder != null) {
+			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
+			body.statements().add(todoNode);
+		}			
+		
+		
 		return decl;
 	}
 

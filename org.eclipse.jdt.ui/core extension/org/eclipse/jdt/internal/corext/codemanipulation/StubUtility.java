@@ -6,7 +6,10 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 
@@ -29,6 +32,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -62,7 +67,7 @@ public class StubUtility {
 	 * all type names are qualified.
 	 * @throws JavaModelException
 	 */
-	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws CoreException {
 		return genStub(destTypeName, method, method.getDeclaringType(), settings, imports);
 	}
 	
@@ -70,24 +75,25 @@ public class StubUtility {
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
-	 * @param definingType The name of the type to which the method will be added to (Used for the constructor)
+	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param declaringType The type that declares the method.
+	 * @param definingType The type that defines the method.
 	 * @param options Options as defined above (<code>GenStubSettings</code>)
 	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
 	 * all type names are qualified.
 	 * @throws JavaModelException
 	 */
-	public static String genStub(String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
 		IType parentType= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
 		String[] paramNames= method.getParameterNames();
 		String[] excTypes= method.getExceptionTypes();
-		String retTypeSig= method.getReturnType();
+		
 		int flags= method.getFlags();
 		boolean isConstructor= method.isConstructor();
+		String retTypeSig= isConstructor ? null : method.getReturnType();
 		
 		int lastParam= paramTypes.length -1;		
 		
@@ -178,40 +184,67 @@ public class StubUtility {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (!settings.callSuper) {
-				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
-					buf.append('\t');
-					if (!isPrimitiveType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
-						buf.append("return null;\n\t"); //$NON-NLS-1$
-					} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
-						buf.append("return false;\n\t"); //$NON-NLS-1$
-					} else {
-						buf.append("return 0;\n\t"); //$NON-NLS-1$
-					}
-				}
-			} else {
-				buf.append('\t');
-				if (!isConstructor) {
-					if (!Signature.SIG_VOID.equals(retTypeSig)) {
-						buf.append("return "); //$NON-NLS-1$
-					}
-					buf.append("super."); //$NON-NLS-1$
-					buf.append(methodName);
-				} else {
-					buf.append("super"); //$NON-NLS-1$
-				}
-				buf.append('(');			
-				for (int i= 0; i <= lastParam; i++) {
-					buf.append(paramNames[i]);
-					if (i < lastParam) {
-						buf.append(", "); //$NON-NLS-1$
-					}
-				}
-				buf.append(");\n\t"); //$NON-NLS-1$
+					
+			String body= createMethodBody(settings.callSuper, methodName, paramNames, retTypeSig);
+			String template= getBodyStubTemplate(isConstructor, method.getJavaProject(), destTypeName, methodName, body);
+			if (template != null) {
+				buf.append(template);
+				buf.append('\n');
 			}
 			buf.append("}\n");			 //$NON-NLS-1$
 		}
 		return buf.toString();
+	}
+	
+	public static String createMethodBody(boolean callSuper, String methodName, String[] paramNames, String retTypeSig) {
+		StringBuffer buf= new StringBuffer();
+		if (callSuper) {
+			if (retTypeSig != null) {
+				if (!Signature.SIG_VOID.equals(retTypeSig)) {
+					buf.append("return "); //$NON-NLS-1$
+				}
+				buf.append("super."); //$NON-NLS-1$
+				buf.append(methodName);
+			} else {
+				buf.append("super"); //$NON-NLS-1$
+			}
+			buf.append('(');			
+			for (int i= 0; i < paramNames.length; i++) {
+				if (i > 0) {
+					buf.append(", "); //$NON-NLS-1$
+				}
+				buf.append(paramNames[i]);
+			}
+			buf.append(");"); //$NON-NLS-1$
+			return buf.toString();
+		} else {
+			if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
+				if (!isPrimitiveType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
+					buf.append("return null;"); //$NON-NLS-1$
+				} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
+					buf.append("return false;"); //$NON-NLS-1$
+				} else {
+					buf.append("return 0;"); //$NON-NLS-1$
+				}
+			}			
+			return "";
+		}
+	}	
+
+	public static String getBodyStubTemplate(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement) throws CoreException {
+		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB_NAME : CodeTemplateContextType.METHODSTUB_NAME;
+		HashMap mappedValues= new HashMap();
+		mappedValues.put(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+		mappedValues.put(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
+		mappedValues.put(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
+		String template= CodeTemplateContext.evaluateTemplate(templateName, project, mappedValues, String.valueOf('\n'), 0);
+		if (Strings.containsOnlyWhitespaces(template)) {
+			if (Strings.containsOnlyWhitespaces(bodyStatement)) {
+				return null;
+			}
+			return bodyStatement;
+		}
+		return template;
 	}
 	
 	private static boolean isSet(int options, int flag) {
@@ -344,7 +377,7 @@ public class StubUtility {
 	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
-	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws JavaModelException {
+	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
 		IMethod[] superMethods= supertype.getMethods();
 		String typeName= type.getElementName();
 		IMethod[] methods= type.getMethods();
@@ -373,7 +406,7 @@ public class StubUtility {
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
-				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws JavaModelException {
+				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws CoreException {
 		List allMethods= new ArrayList();
 		List toImplement= new ArrayList();
 

@@ -109,7 +109,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return true;
 	}	
 	
-	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws JavaModelException {
+	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws CoreException {
 		if (fDeclaringType == null) {
 			return true;
 		}

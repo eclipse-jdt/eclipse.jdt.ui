@@ -118,14 +118,8 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		
 		Block body= null;
-		if (!fSenderBinding.isInterface()) {
-			body= ast.newBlock();
-			/**String todoTask= StubUtility.getTodoTaskTag(getCompilationUnit().getJavaProject());
-			if (todoTask != null) {
-				ASTNode todoNode= rewrite.createPlaceholder("// " + todoTask, ASTRewrite.STATEMENT);
-				body.statements().add(todoNode);
-			}*/			
-		}
+
+		String bodyStatement= "";
 		if (!isConstructor()) {
 			Type returnType= evaluateMethodType(ast);
 			if (returnType == null) {
@@ -133,10 +127,18 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else {
 				decl.setReturnType(returnType);
 			}
-			if (body != null && returnType != null) {
+			if (!fSenderBinding.isInterface() && returnType != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(ASTResolving.getInitExpression(returnType, 0));
-				body.statements().add(returnStatement);
+				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
+			}
+		}
+		if (!fSenderBinding.isInterface()) {
+			body= ast.newBlock();
+			String placeHolder= StubUtility.getBodyStubTemplate(isConstructor(), getCompilationUnit().getJavaProject(), fSenderBinding.getName(), getMethodName(), bodyStatement); 	
+			if (placeHolder != null) {
+				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
+				body.statements().add(todoNode);
 			}
 		}
 		decl.setBody(body);

@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-/*
+/**
  * CompletionProposal with a relevance value.
  * The relevance value is used to sort the completion proposals. Proposals with higher relevance
  * should be listed before proposals with lower relevance.

@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
@@ -16,15 +17,24 @@ public class CodeTemplateContextType extends ContextType {
 	
 	public static final String CATCHBLOCK_CONTEXTTYPE= "catchblock_context";
 	public static final String METHODBODY_CONTEXTTYPE= "methodbody_context";
+	public static final String CONSTRUCTORBODY_CONTEXTTYPE= "constructorbody_context";
 	public static final String NEWTYPE_CONTEXTTYPE= "newtype_context";
 	
 	public static final String CATCHBLOCK_NAME= "catchblock"; //$NON-NLS-1$
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
 	public static final String EXCEPTION_VAR= "exception_var"; //$NON-NLS-1$
+	
+	public static final String METHODSTUB_NAME= "methodbody"; //$NON-NLS-1$
+	public static final String ENCLOSING_METHOD= "enclosing_method"; //$NON-NLS-1$
+	public static final String ENCLOSING_TYPE= "enclosing_type"; //$NON-NLS-1$
+	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
 
 	public static final String NEWTYPE_NAME= "newtype"; //$NON-NLS-1$
 	public static final String PACKAGE_STATEMENT= "package_statement"; //$NON-NLS-1$
 	public static final String TYPE_DECLARATION= "type_declaration"; //$NON-NLS-1$
+	
+	public static final String CONSTRUCTORSTUB_NAME= "constructorbody"; //$NON-NLS-1$
+	
 	
 	public static class CodeTemplateVariable extends TemplateVariable {
 		public CodeTemplateVariable(String name, String description) {
@@ -70,9 +80,15 @@ public class CodeTemplateContextType extends ContextType {
 		addVariable(new Todo());	
 		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
-			addVariable(new CodeTemplateVariable(EXCEPTION_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionType")));
-			addVariable(new CodeTemplateVariable(EXCEPTION_VAR,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionVar")));
+			addVariable(new CodeTemplateVariable(EXCEPTION_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptiontype")));
+			addVariable(new CodeTemplateVariable(EXCEPTION_VAR,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionvar")));
 		} else if (METHODBODY_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
+			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod")));
+			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));
+		} else if (CONSTRUCTORBODY_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
+			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));			
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(PACKAGE_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packstatement")));
 			addVariable(new CodeTemplateVariable(TYPE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typedeclaration")));
@@ -112,6 +128,13 @@ public class CodeTemplateContextType extends ContextType {
 		return null;
 	}
 
-
+	public static void registerContextTypes(ContextTypeRegistry registry) {
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODBODY_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORBODY_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
+	}
+	
+	
 
 }

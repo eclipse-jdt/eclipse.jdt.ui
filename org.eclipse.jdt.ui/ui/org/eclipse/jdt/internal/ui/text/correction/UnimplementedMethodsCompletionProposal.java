@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -80,17 +81,18 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, methods[i], rewrite, settings);
+			MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, methods[i], rewrite, binding.getName(), settings);
 			rewrite.markAsInserted(newMethodDecl);
 			bodyDecls.add(newMethodDecl);
 		}
 		return rewrite;
 	}
 	
-	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
+	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, String typeName, CodeGenerationSettings commentSettings) throws CoreException {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setModifiers(binding.getModifiers() & ~Modifier.ABSTRACT);
 		decl.setName(ast.newSimpleName(binding.getName()));
+		decl.setConstructor(false);
 		
 		ITypeBinding returnTypeBinding= binding.getReturnType();
 		addImport(returnTypeBinding);
@@ -119,12 +121,19 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		
 		Block body= ast.newBlock();
 		decl.setBody(body);
-		
+	
+		String bodyStatement= "";
 		Expression expression= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(expression);
-			body.statements().add(returnStatement);
+			bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
+		}
+
+		String placeHolder= StubUtility.getBodyStubTemplate(false, getCompilationUnit().getJavaProject(), typeName, binding.getName(), bodyStatement); 	
+		if (placeHolder != null) {
+			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
+			body.statements().add(todoNode);
 		}
 		
 		if (commentSettings != null) {

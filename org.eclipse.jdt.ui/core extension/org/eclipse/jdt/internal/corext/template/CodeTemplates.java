@@ -10,8 +10,9 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * <code>CodeTemplates</code> gives access to the available code templates.
@@ -29,37 +30,34 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public static CodeTemplates getInstance() {
 		if (fgTemplates == null)
-			fgTemplates= create();
+			fgTemplates= new CodeTemplates();
 		
 		return fgTemplates;
 	}
 	
 	public CodeTemplates() {
 		super("codetemplate");
-	}	
-
-	private static CodeTemplates create() {
-		CodeTemplates templates= new CodeTemplates();
-
-		try {			
+		create();
+	}
+	
+	private void create() {
+		try {
+			addFromStream(getDefaultsAsStream(), false);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				templates.addFromFile(templateFile);
-			} else {
-				templates.addFromStream(getDefaultsAsStream());
-				templates.saveToFile(templateFile);
+				addFromFile(templateFile, false);
 			}
+			saveToFile(templateFile);
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			ErrorDialog.openError(null,
-				TemplateMessages.getString("Templates.error.title"), //$NON-NLS-1$
+				TemplateMessages.getString("CodeTemplates.error.title"), //$NON-NLS-1$
 				e.getMessage(), e.getStatus());
 
-			templates.clear();
+			clear();
 		}
 
-		return templates;
 	}	
 	
 	/**
@@ -67,7 +65,7 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public void reset() throws CoreException {
 		clear();
-		addFromFile(getTemplateFile());
+		addFromFile(getTemplateFile(), false);
 	}
 
 	/**
@@ -75,7 +73,7 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream());
+		addFromStream(getDefaultsAsStream(), false);
 	}
 
 	/**

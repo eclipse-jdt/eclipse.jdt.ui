@@ -480,7 +480,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			return;
 		
 		try {
-			fTemplates.addFromFile(new File(path));
+			fTemplates.addFromFile(new File(path), true);
 			
 			fTableViewer.refresh();
 			fTableViewer.setAllChecked(false);
