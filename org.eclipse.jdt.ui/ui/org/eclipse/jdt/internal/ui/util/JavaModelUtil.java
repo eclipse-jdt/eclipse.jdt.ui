@@ -169,25 +169,35 @@ public class JavaModelUtil {
 		return null;
 	}
 	
+	
 	/**
-	 * Returns the element contained in the given set with the same name
-	 * as the given key.
-	 * 
-	 * @param set the set to choose from
-	 * @param key the key to look for
-	 * @return the member of the given set with the same name as the given key
+	 * Gets the primary type of a compilation unit (type with the same name as the
+	 * compilation unit), or <code>null</code> if not existing.
 	 */
-	private static IJavaElement find(IJavaElement[] set, IJavaElement key) {
-		if (set == null)
+	public static IType findPrimaryType(ICompilationUnit cu) {
+		String typeName= Signature.getQualifier(cu.getElementName());
+		IType primaryType= cu.getType(typeName);
+		if (primaryType.exists()) {
+			return primaryType;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Finds a JavaElement by name.
+	 * 
+	 * @param elements the array to choose from
+	 * @param name Name of the element to find
+	 * @return the first member of the given array with the name given
+	 */
+	private static IJavaElement find(IJavaElement[] elements, String name) {
+		if (elements == null || name == null)
 			return null;
 			
-		String name= key.getElementName();
-		if (name == null)
-			return null;
-			
-		for (int i= 0; i < set.length; i++) {
-			if (name.equals(set[i].getElementName()))
-				return set[i];
+		for (int i= 0; i < elements.length; i++) {
+			if (name.equals(elements[i].getElementName()))
+				return elements[i];
 		}
 		
 		return null;
@@ -213,10 +223,10 @@ public class JavaModelUtil {
 				return cu.getImportContainer();
 			
 			case IJavaElement.PACKAGE_DECLARATION:
-				return find(cu.getPackageDeclarations(), element);
+				return find(cu.getPackageDeclarations(), element.getElementName());
 			
 			case IJavaElement.IMPORT_DECLARATION:
-				return find(cu.getImports(), element);
+				return find(cu.getImports(), element.getElementName());
 			
 			case IJavaElement.COMPILATION_UNIT:
 				return cu;

@@ -243,9 +243,23 @@ public abstract class TypePage extends ContainerPage {
 		ArrayList initSuperinterfaces= new ArrayList(5);
 
 		IPackageFragment pack= null;
+		IType enclosingType= null;
 				
 		if (elem != null) {
+			// evaluate the enclosing type
 			pack= (IPackageFragment) JavaModelUtil.findElementOfKind(elem, IJavaElement.PACKAGE_FRAGMENT);
+			IType typeInCU= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
+			if (typeInCU != null) {
+				if (typeInCU.getCompilationUnit() != null) {
+					enclosingType= typeInCU;
+				}
+			} else {
+				ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+				if (cu != null) {
+					enclosingType= JavaModelUtil.findPrimaryType(cu);
+				}
+			}
+			
 			try {
 				IType type= null;
 				if (elem.getElementType() == IJavaElement.TYPE) {
@@ -266,7 +280,7 @@ public abstract class TypePage extends ContainerPage {
 		}			
 
 		setPackageFragment(pack, true);
-		setEnclosingType(null, true);
+		setEnclosingType(enclosingType, true);
 		setEnclosingTypeSelection(false, true);
 	
 		setTypeName("", true); //$NON-NLS-1$
