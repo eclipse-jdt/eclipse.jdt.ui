@@ -22,13 +22,11 @@ class SourceReferenceTestUtil {
 			protected boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 				return false;
 			}
-			protected boolean confirmDelete() {
-				return true;
-			}
 			protected boolean confirmGetterSetterDelete(){
 				return true;
 			}
 		};
+		deleteAction.setAskForDeleteConfirmation(false);
 		return deleteAction;
 	}
 
