@@ -56,7 +56,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testIndirectStaticAccess2"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testIndirectStaticAccess_bug40880"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -2160,6 +2160,67 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public int foo() {\n");
 		buf.append("        return A.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	boolean BUG_40880= true;
+	
+	public void testIndirectStaticAccess_bug40880() throws Exception {
+		if (BUG_40880) {
+			return;
+		}
+		
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class FileType {\n");
+		buf.append("    public String extension;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("FileType.java", buf.toString(), false, null);		
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface ToolConfigurationSettingsConstants {\n");
+		buf.append("     FileType FILE_TYPE = null;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("ToolConfigurationSettingsConstants.java", buf.toString(), false, null);		
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface ToolUserSettingsConstants extends ToolConfigurationSettingsConstants {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("ToolUserSettingsConstants.java", buf.toString(), false, null);		
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        ToolUserSettingsConstants.FILE_TYPE.extension.toLowerCase();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        ToolConfigurationSettingsConstants.FILE_TYPE.extension.toLowerCase();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
