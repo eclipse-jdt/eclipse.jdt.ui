@@ -31,7 +31,6 @@ import java.util.Vector;
 
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
-import junit.framework.ComparisonFailure;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestFailure;
@@ -542,7 +541,7 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
 		if ("3".equals(fVersion)) { //$NON-NLS-1$
-		    if (assertionFailedError instanceof ComparisonFailure) {
+			if (isComparisonFailure(assertionFailedError)) {
 		        // transmit the expected and the actual string
 		        String expected = getField(assertionFailedError, "fExpected"); //$NON-NLS-1$
 		        String actual = getField(assertionFailedError, "fActual"); //$NON-NLS-1$
@@ -553,6 +552,11 @@ public class RemoteTestRunner implements TestListener {
 		    }
 		} 
 		notifyTestFailed(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError));
+	}
+
+	private boolean isComparisonFailure(Throwable throwable) {
+		// avoid reference to comparison failure to avoid a dependency on 3.8.1
+		return throwable.getClass().getName().equals("junit.framework.ComparisonFailure");
 	}
 
 	/*
@@ -788,7 +792,7 @@ public class RemoteTestRunner implements TestListener {
 			Throwable t= failure.thrownException();
 			
 			if ("3".equals(fVersion)) { //$NON-NLS-1$
-			    if (t instanceof ComparisonFailure) {
+			    if (isComparisonFailure(t)) {
 			        // transmit the expected and the actual string
 			        String expected = getField(t, "fExpected"); //$NON-NLS-1$
 			        String actual = getField(t, "fActual"); //$NON-NLS-1$
