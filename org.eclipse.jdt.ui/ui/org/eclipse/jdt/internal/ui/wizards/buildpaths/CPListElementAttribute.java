@@ -52,7 +52,6 @@ public class CPListElementAttribute {
 	
 	/**
 	 * Returns the value.
-	 * @return Object
 	 */
 	public void setValue(Object value) {
 		fValue= value;

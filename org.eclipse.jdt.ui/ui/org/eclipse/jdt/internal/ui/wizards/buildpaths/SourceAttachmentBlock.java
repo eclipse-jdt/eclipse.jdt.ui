@@ -137,7 +137,7 @@ public class SourceAttachmentBlock {
 	
 	/**
 	 * @param context listeners for status updates
-	 * @param entryToEdit The entry to edit
+	 * @param entry The entry to edit
 	 * @param containerPath Path of the container that contains the given entry or
 	 * <code>null</code> if the entry does not belong to a container.
 	 * @param project Project to which the entry belongs. Can be
