@@ -20,7 +20,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -133,35 +135,73 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu) throws CoreException {
 		StringBuffer buffer= new StringBuffer();
 		if (fCodeGenerationSettings.createFileComments)
-			buffer.append(createFileComments(newCu));
-		buffer.append(createPackageDeclaration());
-		buffer.append(createImports());
+			buffer.append(createFileCommentsSource(newCu));
+		buffer.append(createPackageDeclarationSource());
+		buffer.append(createImportsSource());
 		if (fCodeGenerationSettings.createComments){
 			buffer.append(getLineSeperator());
-			buffer.append(createTypeComment(newCu));
+			buffer.append(createTypeCommentSource(newCu));
 		}	
 		buffer.append(createInterfaceSource());
 		return buffer.toString();
 	}
 
-	private String createInterfaceSource() {
-		return "interface " + fNewInterfaceName + " {}";
+	private String createInterfaceSource() throws JavaModelException {
+		StringBuffer buff= new StringBuffer();
+		buff.append("interface ")
+			 .append(fNewInterfaceName)
+			 .append(" {")
+			 .append(createInterfaceMemberDeclarationsSource())
+			 .append("}");
+		return buff.toString();
 	}
 
-	private String createImports() {
+	private String createInterfaceMemberDeclarationsSource() throws JavaModelException {
+		StringBuffer buff= new StringBuffer();
+		for (int i= 0; i < fExtractedMembers.length; i++) {
+			buff.append(createInterfaceMemberDeclarationsSource(fExtractedMembers[i]));
+		}
+		return buff.toString();
+	}
+
+	private String createInterfaceMemberDeclarationsSource(IMember iMember) throws JavaModelException {
+		Assert.isTrue(iMember.getElementType() == IJavaElement.FIELD || iMember.getElementType() == IJavaElement.METHOD);
+		if (iMember.getElementType() == IJavaElement.FIELD)
+			return iMember.getSource();
+		else 
+			return createInterfaceMethodDeclarationsSource((IMethod)iMember);
+	}
+
+	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
+		String methodSource= iMethod.getSource();
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
+		AST.parseCompilationUnit(fInputClass.getCompilationUnit(), false).accept(analyzer);
+		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
+			return ""; //???
+		MethodDeclaration methodDeclaration= (MethodDeclaration) analyzer.getFirstSelectedNode();
+		Block body= methodDeclaration.getBody();
+		
+		if (body == null)
+			return iMethod.getSource();
+		StringBuffer methodSourceBuffer= new StringBuffer(iMethod.getSource());
+		int declarationRelativeBodyOffset= body.getStartPosition() - methodDeclaration.getStartPosition();
+		return methodSourceBuffer.replace(declarationRelativeBodyOffset, methodSource.length(), ";").toString();
+	}
+
+	private String createImportsSource() {
 		return "";
 	}
 
-	private String createPackageDeclaration() {
-		return "package " + getInputClassPackage().getElementName() + ";";
+	private String createPackageDeclarationSource() {
+		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
 	}
 
-	private String createTypeComment(ICompilationUnit newCu) throws CoreException {
-		return getTemplate("typecomment", 0, newCu);
+	private String createTypeCommentSource(ICompilationUnit newCu) throws CoreException {
+		return getTemplate("typecomment", 0, newCu);//$NON-NLS-1$
 	}
 
-	private String createFileComments(ICompilationUnit newCu) throws CoreException {
-		return getTemplate("filecomment", 0, newCu);
+	private String createFileCommentsSource(ICompilationUnit newCu) throws CoreException {
+		return getTemplate("filecomment", 0, newCu);//$NON-NLS-1$
 	}
 
 	private static String getTemplate(String name, int pos, ICompilationUnit newCu) throws CoreException {
