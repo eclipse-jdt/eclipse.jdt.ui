@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -79,6 +80,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -127,6 +129,9 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
 
+	private static final String TAG_SELECTED_ELEMENTS= "selectedElements"; //$NON-NLS-1$
+	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
+	private static final String TAG_SELECTED_ELEMENT_PATH= "selectedElementPath"; //$NON-NLS-1$
 
 	private ILabelProvider fLabelProvider;
 	private ILabelProvider fTitleProvider;
@@ -193,7 +198,23 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fWorkingSetFilterActionGroup.saveState(memento);
 		if (fHasCustomFilter)
 			fCustomFiltersActionGroup.saveState(memento);
+		
+		saveSelectionState(memento);
 	}	
+
+	private void saveSelectionState(IMemento memento) {
+		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
+		if (elements.length > 0) {
+			IMemento selectionMem= memento.createChild(TAG_SELECTED_ELEMENTS);
+			for (int i= 0; i < elements.length; i++) {
+				IMemento elementMem= selectionMem.createChild(TAG_SELECTED_ELEMENT);
+				// we can only persist JavaElements for now
+				Object o= elements[i];
+				if (o instanceof IJavaElement)
+					elementMem.putString(TAG_SELECTED_ELEMENT_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
+			}
+		}
+	}
 
 	protected void restoreState(IMemento memento) {
 		if (fHasWorkingSetFilter)
@@ -206,7 +227,27 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fViewer.refresh();
 			fViewer.getControl().setRedraw(true);
 		}
+//		restoreSelectionState(memento);
 	}	
+
+	private ISelection restoreSelectionState(IMemento memento) {
+		if (memento == null)
+			return null;
+		
+		IMemento childMem;
+		childMem= memento.getChild(TAG_SELECTED_ELEMENTS);
+		if (childMem != null) {
+			ArrayList list= new ArrayList();
+			IMemento[] elementMem= childMem.getChildren(TAG_SELECTED_ELEMENT);
+			for (int i= 0; i < elementMem.length; i++) {
+				IJavaElement element= JavaCore.create(elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH));
+				if (element != null && element.exists())
+					list.add(element);
+			}
+			return new StructuredSelection(list);
+		}
+		return null;
+	}
 
 	/**
 	 * Creates the search list inner viewer.
@@ -244,7 +285,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		if (fMemento != null)
 			restoreState(fMemento);
-		fMemento= null;
+//		fMemento= null;
 
 		getSite().setSelectionProvider(fViewer);
 		
@@ -266,6 +307,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		// Initialize selecton
 		setInitialSelection();
+		fMemento= null;		
 		
 		// Listen to workbench window changes
 		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
@@ -705,7 +747,23 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void setInitialSelection() {
 		// Use the selection, if any
 		Object input;
-		ISelection selection= getSite().getPage().getSelection();
+		IWorkbenchPage page= getSite().getPage();
+		ISelection selection= null;
+		if (page != null)
+			selection= page.getSelection();
+		if (selection instanceof ITextSelection) {
+			Object part= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
+			if (part instanceof IEditorPart) {
+				setSelectionFromEditor((IEditorPart)part);
+				if (fViewer.getSelection() != null)
+					return;
+			}
+		}
+
+		// Use saved selection from memento
+		if (selection == null || selection.isEmpty())
+			selection= restoreSelectionState(fMemento);
+			
 		if (selection != null && !selection.isEmpty())
 			input= getSingleElementFromSelection(selection);
 		else {
@@ -817,7 +875,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	abstract protected IJavaElement findElementToSelect(IJavaElement je);
 	
 
-	private Object getSingleElementFromSelection(ISelection selection) {
+	protected Object getSingleElementFromSelection(ISelection selection) {
 		if (!(selection instanceof StructuredSelection) || selection.isEmpty())
 			return null;
 		
@@ -875,6 +933,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	void setSelectionFromEditor(IWorkbenchPart part) {
+		if (!JavaBasePreferencePage.linkBrowsingViewSelectionToEditor())
+			return;
+		
 		if (part == null)
 			return;
 		IWorkbenchPartSite site= part.getSite();
@@ -886,7 +947,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private void setSelectionFromEditor(IWorkbenchPart part, ISelection selection) {
-		if (part instanceof IEditorPart && JavaBasePreferencePage.linkBrowsingViewSelectionToEditor()) {
+		if (part instanceof IEditorPart) {
 			IEditorInput ei= ((IEditorPart)part).getEditorInput();
 			if (selection instanceof ITextSelection) {
 				int offset= ((ITextSelection)selection).getOffset();
