@@ -671,14 +671,7 @@ public final class StubUtility2 {
 		while (clazz != null) {
 			ITypeBinding[] superInterfaces= clazz.getInterfaces();
 			for (int index= 0; index < superInterfaces.length; index++) {
-				IMethodBinding[] methods= superInterfaces[index].getDeclaredMethods();
-				for (int offset= 0; offset < methods.length; offset++) {
-					final int modifiers= methods[offset].getModifiers();
-					if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-						if (findOverridingMethod(methods[offset], allMethods) == null && !Modifier.isStatic(modifiers))
-							allMethods.add(methods[offset]);
-					}
-				}
+				getOverridableMethods(superInterfaces[index], allMethods);
 			}
 			clazz= clazz.getSuperclass();
 		}
@@ -692,6 +685,21 @@ public final class StubUtility2 {
 				allMethods.remove(index);
 		}
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
+	}
+
+	private static void getOverridableMethods(final ITypeBinding superBinding, List allMethods) {
+		IMethodBinding[] methods= superBinding.getDeclaredMethods();
+		for (int offset= 0; offset < methods.length; offset++) {
+			final int modifiers= methods[offset].getModifiers();
+			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+				if (findOverridingMethod(methods[offset], allMethods) == null && !Modifier.isStatic(modifiers))
+					allMethods.add(methods[offset]);
+			}
+		}
+		ITypeBinding[] superInterfaces= superBinding.getInterfaces();
+		for (int index= 0; index < superInterfaces.length; index++) {
+			getOverridableMethods(superInterfaces[index], allMethods);
+		}
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
