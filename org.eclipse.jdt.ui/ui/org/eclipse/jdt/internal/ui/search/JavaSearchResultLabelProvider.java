@@ -43,7 +43,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 			new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS  | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-				null);
+				AppearanceAwareLabelProvider.getDecorators(true, null));
 	}	
 
 	public String getText(Object o) {
