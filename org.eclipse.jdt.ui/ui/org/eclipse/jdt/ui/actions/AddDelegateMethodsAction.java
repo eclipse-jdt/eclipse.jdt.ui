@@ -9,7 +9,6 @@
  *   Martin Moebius
  * *****************************************************************************/
 
-
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +56,6 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -91,11 +89,11 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * @since 2.1
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
-	
-	private static boolean fgReplaceFlag= false;
+
+	private static boolean fgReplaceFlag = false;
 	private static boolean fgOverrideFinalsFlag = false;
-	
-	private static final String DIALOG_TITLE= ActionMessages.getString("AddDelegateMethodsAction.error.title"); //$NON-NLS-1$
+
+	private static final String DIALOG_TITLE = ActionMessages.getString("AddDelegateMethodsAction.error.title"); //$NON-NLS-1$
 
 	private CompilationUnitEditor fEditor;
 
@@ -111,7 +109,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("AddDelegateMethodsAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddDelegateMethodsAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("AddDelegateMethodsAction.tooltip")); //$NON-NLS-1$
-		
+
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_DELEGATE_METHODS_ACTION);
 	}
 
@@ -120,11 +118,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 */
 	public AddDelegateMethodsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
-		fEditor= editor;
+		fEditor = editor;
 	}
-	
+
 	//---- Structured Viewer -----------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -138,79 +136,79 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-		
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	protected void run(IStructuredSelection selection) {
 		try {
-			IField[] selectedFields= getSelectedFields(selection);
-			if (canEnableOn(selectedFields)){
+			IField[] selectedFields = getSelectedFields(selection);
+			if (canEnableOn(selectedFields)) {
 				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
-			}	
-			Object firstElement= selection.getFirstElement();
+			}
+			Object firstElement = selection.getFirstElement();
 			if (firstElement instanceof IType)
-				run((IType)firstElement, new IField[0], false);
-			else if (firstElement instanceof ICompilationUnit)	
-				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0], false);
+				run((IType) firstElement, new IField[0], false);
+			else if (firstElement instanceof ICompilationUnit)
+				run(JavaElementUtil.getMainType((ICompilationUnit) firstElement), new IField[0], false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}
-				
+
 	}
-	
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if (canEnableOn(getSelectedFields(selection)))
 			return true;
-			
+
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType))
-			return canEnableOn((IType)selection.getFirstElement());
+			return canEnableOn((IType) selection.getFirstElement());
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
-			return canEnableOn(JavaElementUtil.getMainType((ICompilationUnit)selection.getFirstElement()));
+			return canEnableOn(JavaElementUtil.getMainType((ICompilationUnit) selection.getFirstElement()));
 
-		return false;	
+		return false;
 	}
 
 	private static boolean canEnableOn(IType type) throws JavaModelException {
 		if (type == null || type.getCompilationUnit() == null)
 			return false;
-			
+
 		return canEnableOn(type.getFields());
 	}
-	
+
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
 		if (fields == null) {
 			return false;
 		}
-		int count= 0;
-		for (int i= 0; i < fields.length; i++) {
+		int count = 0;
+		for (int i = 0; i < fields.length; i++) {
 			if (!hasPrimitiveType(fields[i])) {
 				count++;
 			}
 		}
 		return (count > 0);
 	}
-	
+
 	/*
 	 * Returns fields in the selection or <code>null</code> if the selection is 
 	 * empty or not valid.
 	 */
 	private IField[] getSelectedFields(IStructuredSelection selection) {
-		List elements= selection.toList();
-		int nElements= elements.size();
+		List elements = selection.toList();
+		int nElements = elements.size();
 		if (nElements > 0) {
-			IField[] res= new IField[nElements];
-			ICompilationUnit cu= null;
-			for (int i= 0; i < nElements; i++) {
-				Object curr= elements.get(i);
+			IField[] res = new IField[nElements];
+			ICompilationUnit cu = null;
+			for (int i = 0; i < nElements; i++) {
+				Object curr = elements.get(i);
 				if (curr instanceof IField) {
-					IField fld= (IField)curr;
-					
+					IField fld = (IField) curr;
+
 					if (i == 0) {
 						// remember the cu of the first element
-						cu= fld.getCompilationUnit();
+						cu = fld.getCompilationUnit();
 						if (cu == null) {
 							return null;
 						}
@@ -227,8 +225,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						JavaPlugin.log(e);
 						return null;
 					}
-					
-					res[i]= fld;
+
+					res[i] = fld;
 				} else {
 					return null;
 				}
@@ -236,57 +234,55 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return res;
 		}
 		return null;
-	}	
-	
+	}
+
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
-		showUI(type, preselected);		
+		showUI(type, preselected);
 	}
 
-	
 	//---- Java Editior --------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * Method declared on SelectionDispatchAction
-     */		
-    protected void selectionChanged(ITextSelection selection) {
-    }
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
+	protected void selectionChanged(ITextSelection selection) {
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
 	protected void run(ITextSelection selection) {
 		try {
-			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
+			IJavaElement[] elements = SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
-				IField field= (IField)elements[0];
-				run(field.getDeclaringType(), new IField[] {field}, true);
+				IField field = (IField) elements[0];
+				run(field.getDeclaringType(), new IField[] { field }, true);
 				return;
 			}
-			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			if (element != null){
-				IType type= (IType)element.getAncestor(IJavaElement.TYPE);
-				if (type != null){
-					if (type.getFields().length > 0){
-						run(type, new IField[0], true);	
+			IJavaElement element = SelectionConverter.getElementAtOffset(fEditor);
+			if (element != null) {
+				IType type = (IType) element.getAncestor(IJavaElement.TYPE);
+				if (type != null) {
+					if (type.getFields().length > 0) {
+						run(type, new IField[0], true);
 						return;
-					} 
+					}
 				}
-			} 
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, 
-				ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+			}
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
-	
+
 	private boolean checkEnabledEditor() {
 		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
-	}	
-	
+	}
+
 	//---- Helpers -------------------------------------------------------------------
-	
+
 	/**build ui */
 	private void showUI(IType type, IField[] preselected) {
 		try {
@@ -298,9 +294,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					StatusInfo state = new StatusInfo();
 					if (selection != null && selection.length > 0) {
 						HashSet map = new HashSet(selection.length);
+						int count = 0;
 						for (int i = 0; i < selection.length; i++) {
 							Object key = selection[i];
 							if (selection[i] instanceof Methods2Field) {
+								count++;
 								try {
 									key = createSignatureKey(((Methods2Field) selection[i]).fMethod);
 								} catch (JavaModelException e) {
@@ -310,21 +308,29 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 							if (!map.add(key)) { //$NON-NLS-1$
 								state = new StatusInfo(IStatus.ERROR, ActionMessages.getString("AddDelegateMethodsAction.duplicate_methods")); //$NON-NLS-1$
 								break;
+							} else {
+								String message;
+								if (count == 1) {
+									message = ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.one", String.valueOf(count)); //$NON-NLS-1$
+								} else {
+									message = ActionMessages.getFormattedString("AddDelegateMethodsAction.selectioninfo.more", String.valueOf(count)); //$NON-NLS-1$
+								}
+								state = new StatusInfo(IStatus.INFO, message);
 							}
-							
 						}
+
 					}
 					return state;
 				}
 			});
-	
+
 			dialog.setSorter(new Methods2FieldSorter());
 			dialog.setInput(provider);
 			dialog.setContainerMode(true);
 			dialog.setMessage(ActionMessages.getString("AddDelegateMethodsAction.message")); //$NON-NLS-1$
 			dialog.setTitle(ActionMessages.getString("AddDelegateMethodsAction.title")); //$NON-NLS-1$
 			dialog.setExpandedElements(preselected);
-			
+
 			int result = dialog.open();
 			if (result == Window.OK) {
 				Object[] o = dialog.getResult();
@@ -336,17 +342,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (o[i] instanceof Methods2Field)
 						methods.add(o[i]);
 				}
-				
-				IEditorPart part= EditorUtility.openInEditor(type);
-				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
-				type= (IType) JavaModelUtil.toWorkingCopy(type);
-				
-				target.setRedraw(false);
-				
-				IMethod[] createdMethods= processResults(methods, type);
-				
-				target.setRedraw(true);
-				
+
+				IEditorPart part = EditorUtility.openInEditor(type);
+				type = (IType) JavaModelUtil.toWorkingCopy(type);
+				IMethod[] createdMethods = processResults(methods, type);
 				if (createdMethods != null && createdMethods.length > 0) {
 					EditorUtility.revealInEditor(part, createdMethods[0]);
 				}
@@ -355,8 +354,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
-		}		
-		
+		}
+
 	}
 	/**Runnable for the operation*/
 	private static class ResultRunner implements IWorkspaceRunnable {
@@ -364,30 +363,28 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		List fList = null;
 		/**Type to add methods to*/
 		IType fType = null;
-		
-		ArrayList fCreatedMethods;
 
+		ArrayList fCreatedMethods;
 
 		public ResultRunner(List resultList, IType type) {
 			fList = resultList;
 			fType = type;
-			fCreatedMethods= new ArrayList();
+			fCreatedMethods = new ArrayList();
 		}
-		
+
 		public IMethod[] getCreatedMethods() {
 			return (IMethod[]) fCreatedMethods.toArray(new IMethod[fCreatedMethods.size()]);
 		}
-		
 
 		public void run(IProgressMonitor monitor) throws CoreException {
-			String message= ActionMessages.getFormattedString("AddDelegateMethodsAction.monitor.message", String.valueOf(fList.size())); //$NON-NLS-1$
+			String message = ActionMessages.getFormattedString("AddDelegateMethodsAction.monitor.message", String.valueOf(fList.size())); //$NON-NLS-1$
 
 			monitor.beginTask(message, fList.size());
-		
+
 			// the preferences
 			CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
-			boolean addComments= settings.createComments;
-			
+			boolean addComments = settings.createComments;
+
 			// already existing methods
 			IMethod[] existingMethods = fType.getMethods();
 			//the delemiter used
@@ -397,13 +394,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 			// perhaps we have to add import statements
 			final ImportsStructure imports =
-				new ImportsStructure(
-					fType.getCompilationUnit(),
-					settings.importOrder,
-					settings.importThreshold,
-					true);
-					
-			ArrayList res= new ArrayList();
+				new ImportsStructure(fType.getCompilationUnit(), settings.importOrder, settings.importThreshold, true);
 
 			for (int i = 0; i < fList.size(); i++) {
 				//long time=System.currentTimeMillis();
@@ -419,7 +410,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				String content = null;
 				Methods2Field wrapper = (Methods2Field) fList.get(i);
 				IMethod curr = wrapper.fMethod;
-				IField field= wrapper.fField;
+				IField field = wrapper.fField;
 				IMethod overwrittenMethod =
 					JavaModelUtil.findMethodImplementationInHierarchy(
 						typeHierarchy,
@@ -462,17 +453,16 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						System.out.println(existing);
 						sibling = StubUtility.findNextSibling(existing);
 						existing.delete(false, null);
+					} else {
+						continue;
 					}
 				} else if (curr.isConstructor() && existingMethods.length > 0) {
 					// add constructors at the beginning
 					sibling = existingMethods[0];
 				}
-				
-				res.add(content);
-				
 
 				String formattedContent = StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
+				IMethod created = fType.createMethod(formattedContent, sibling, true, null);
 				fCreatedMethods.add(created);
 
 				monitor.worked(1);
@@ -481,59 +471,71 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 			imports.create(false, null);
 		}
-		
-		private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
-			String methodName= curr.getElementName();
-			String[] paramNames= curr.getParameterNames();
-			String returnTypSig= curr.getReturnType();
-			
-			StringBuffer buf= new StringBuffer();
+
+		private String createStub(
+			IField field,
+			IMethod curr,
+			boolean addComment,
+			IMethod overridden,
+			IImportsStructure imports)
+			throws CoreException {
+			String methodName = curr.getElementName();
+			String[] paramNames = curr.getParameterNames();
+			String returnTypSig = curr.getReturnType();
+
+			StringBuffer buf = new StringBuffer();
 			if (addComment) {
-				String comment= StubUtility.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, overridden);
+				String comment =
+					StubUtility.getMethodComment(
+						fType.getCompilationUnit(),
+						fType.getElementName(),
+						methodName,
+						paramNames,
+						curr.getExceptionTypes(),
+						returnTypSig,
+						overridden);
 				if (comment != null) {
 					buf.append(comment);
 				}
 			}
-			
-			String methodDeclaration= null;
+
+			String methodDeclaration = null;
 			if (fType.isClass()) {
-				StringBuffer body= new StringBuffer();
+				StringBuffer body = new StringBuffer();
 				if (!Signature.SIG_VOID.equals(returnTypSig)) {
 					body.append("return "); //$NON-NLS-1$
 				}
 				if (JdtFlags.isStatic(curr)) {
 					body.append(resolveTypeOfField(field).getElementName());
 				} else {
-					
 					body.append(field.getElementName());
 				}
 				body.append('.').append(methodName).append('(');
 				for (int i = 0; i < paramNames.length; i++) {
 					body.append(paramNames[i]);
 					if (i < paramNames.length - 1)
-					body.append(',');
+						body.append(',');
 				}
 				body.append(");"); //$NON-NLS-1$
-				methodDeclaration= body.toString();
+				methodDeclaration = body.toString();
 			}
-			
+
 			StubUtility.genMethodDeclaration(fType.getElementName(), curr, methodDeclaration, imports, buf);
-			
+
 			return buf.toString();
 		}
-		
-		
+
 	}
 
 	/**creates methods in class*/
 	private IMethod[] processResults(List list, IType type) throws InvocationTargetException {
 		if (list.size() == 0)
 			return null;
-		
-		ResultRunner resultRunner=  new ResultRunner(list, type);
+
+		ResultRunner resultRunner = new ResultRunner(list, type);
 		IRunnableContext runnableContext = new ProgressMonitorDialog(getShell());
 		try {
-			runnableContext.run(true, true, new WorkbenchRunnableAdapter(resultRunner));
+			runnableContext.run(false, true, new WorkbenchRunnableAdapter(resultRunner));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;
@@ -541,10 +543,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return resultRunner.getCreatedMethods();
 	}
 
-	/**
-	 * The  model (content provider) for the field-methods tree
-	 * @author Martin Möbius
-	 */
+	/** The  model (content provider) for the field-methods tree */
 	private static class FieldContentProvider implements ITreeContentProvider {
 
 		private TreeMap fTreeMap = null;
@@ -569,21 +568,26 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		private void buildModel(IType type) throws JavaModelException {
-			IField[] fields= type.getFields();
-			
+			IField[] fields = type.getFields();
+
 			//build map to filter against
 			IMethod[] finMeths = resolveFinalMethods(type);
 			for (int i = 0; i < finMeths.length; i++) {
 				fFilter.put(createSignatureKey(finMeths[i]), finMeths[i]);
 			}
-			
+
+			IMethod[] filter = type.getMethods();
+			for (int i = 0; i < filter.length; i++) {
+				fFilter.put(createSignatureKey(filter[i]), filter[i]);
+			}
+
 			for (int i = 0; i < fields.length; i++) {
 				IType fieldType = resolveTypeOfField(fields[i]);
-				if (fieldType==null)
+				if (fieldType == null)
 					continue;
 				IMethod[] methods = resolveMethodsHierarchy(fieldType);
 				ArrayList accessMethods = new ArrayList();
-			
+
 				//show public methods; hide constructors + final methods
 				for (int j = 0; j < methods.length; j++) {
 					boolean publicField = Flags.isPublic(methods[j].getFlags());
@@ -599,7 +603,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				fTreeMap.put(fields[i].getElementName(), mf);
 				fFieldMap.put(fields[i].getElementName(), fields[i]);
-			
+
 			}
 		}
 
@@ -698,7 +702,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 	}
-	
+
 	/** and a delegate for the sorter*/
 	private static class Methods2FieldSorter extends ViewerSorter {
 		JavaElementSorter fSorter = new JavaElementSorter();
@@ -720,7 +724,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return fSorter.getCollator();
 		}
 	}
-	
+
 	/**return all methods of all super types, minus dups*/
 	private static IMethod[] resolveMethodsHierarchy(IType type) throws JavaModelException {
 		HashMap map = new HashMap();
@@ -743,13 +747,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		return methods;
 	}
-	
+
 	/**returns a non null array of final methods of the type*/
 	private static IMethod[] resolveFinalMethods(IType type) throws JavaModelException {
-		
+
 		//Interfaces are java.lang.Objects
-		if(type.isInterface()){
-			type=JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object");
+		if (type.isInterface()) {
+			type = JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object");
 		}
 
 		IMethod[] methods = resolveMethodsHierarchy(type);
@@ -765,30 +769,75 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 		return finalMethods;
 	}
-	
+
 	/**creates a key used for hashmaps for a method signature (name+arguments(fqn))*/
 	private static String createSignatureKey(IMethod method) throws JavaModelException {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(method.getElementName());
 		String[] args = method.getParameterTypes();
 		for (int i = 0; i < args.length; i++) {
-			String signature = Signature.toString(args[i]);
-			String[][] fqn = method.getDeclaringType().resolveType(signature);
-			if (fqn != null) {
-				buffer.append(fqn[0][0]).append(fqn[0][1]);
-			} else {
+			String signature;
+			if (isUnresolved(args[i])) {
+				int acount = Signature.getArrayCount(args[i]);
+				if (acount > 0) {
+					String arg = args[i];
+					int index = arg.lastIndexOf(Signature.C_ARRAY);
+					arg = arg.substring(index + 1);
+					signature = Signature.toString(arg);
+				} else {
+					signature = Signature.toString(args[i]);
+				}
+
+				String[][] fqn = method.getDeclaringType().resolveType(signature);
+				if (fqn != null) {
+					buffer.append(fqn[0][0]).append('.').append(fqn[0][1]);
+					//TODO check for [][]
+					for (int j = 0; j < acount; j++) {
+						buffer.append("[]");
+					}
+				}
+			}else{
+				signature=Signature.toString(args[i]);
 				buffer.append(signature);
 			}
 		}
 		return buffer.toString();
 	}
-	
+
+	private static boolean isUnresolved(String signature) {
+		boolean flag = false;
+
+		char c=Signature.getElementType(signature).charAt(0);
+		boolean primitive=(c!= Signature.C_RESOLVED && c != Signature.C_UNRESOLVED);
+		if(primitive)
+			return flag;
+
+		int acount = Signature.getArrayCount(signature);
+		if (acount > 0) {
+			int index = signature.lastIndexOf(Signature.C_ARRAY);
+			c = signature.charAt(index + 1);
+		} else {
+			c = signature.charAt(0);
+		}
+		switch (c) {
+			case Signature.C_RESOLVED :
+				flag=false;
+				break;
+			case Signature.C_UNRESOLVED :
+				flag=true;
+				break;
+			default :
+				throw new IllegalArgumentException();
+		}
+		return flag;
+	}
+
 	private static boolean hasPrimitiveType(IField field) throws JavaModelException {
 		String signature = field.getTypeSignature();
-		char first= Signature.getElementType(signature).charAt(0);
+		char first = Signature.getElementType(signature).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
-	}	
-	
+	}
+
 	/** 
 	 * returns Type of field.
 	 * 
@@ -809,5 +858,4 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return null;
 
 	}
-
 }
