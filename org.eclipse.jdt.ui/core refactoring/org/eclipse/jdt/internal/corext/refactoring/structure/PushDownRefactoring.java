@@ -824,7 +824,7 @@ public class PushDownRefactoring extends Refactoring {
 
 		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
-			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
+			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer.getDocument()));
 		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits);
 		rewrite.removeModifications();
 	}

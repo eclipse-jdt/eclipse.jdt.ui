@@ -577,7 +577,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (rewrite.isEmpty())
 			return null;
 		else	
-			return rewrite.createEdit(buffer);
+			return rewrite.createEdit(buffer.getDocument());
 	}
 
 	private TextEdit[] createReplaceExpressionWithTempEdits() throws JavaModelException {

@@ -105,7 +105,7 @@ public class MoveCuUpdateCreator {
 					TextBuffer buffer= null;
 					try {
 						buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
-						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer));
+						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument()));
 					} finally {
 						if (buffer != null)
 							TextBuffer.release(buffer);

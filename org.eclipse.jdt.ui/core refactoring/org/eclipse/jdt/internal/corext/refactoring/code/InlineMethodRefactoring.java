@@ -233,7 +233,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				} else {
 					ImportRewrite rewrite= inliner.getImportEdit();
 					if (!rewrite.isEmpty()) {
-						TextEdit edit= rewrite.createEdit(inliner.getBuffer());
+						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument());
 						root.addChild(edit);
 						change.addTextEditGroup(
 							new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$

@@ -14,11 +14,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -29,21 +39,18 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -86,13 +93,15 @@ public final class ImportsStructure implements IImportsStructure {
 		fPackageEntries= new ArrayList(20);
 		
 		if (restoreExistingImports && container.exists()) {
-			TextBuffer buffer= null;
+			IDocument document= null;
 			try {
-				buffer= aquireTextBuffer();
-				addExistingImports(buffer, cu.getImports());
+				document= aquireDocument();
+				addExistingImports(document, cu.getImports());
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
 			} finally {
-				if (buffer != null) {
-					TextBuffer.release(buffer);
+				if (document != null) {
+					releaseDocument(document);
 				}
 			 }
 		}	
@@ -158,7 +167,7 @@ public final class ImportsStructure implements IImportsStructure {
 	}
 
 	
-	private void addExistingImports(TextBuffer buffer, IImportDeclaration[] decls) throws JavaModelException {
+	private void addExistingImports(IDocument document, IImportDeclaration[] decls) throws JavaModelException, BadLocationException {
 		if (decls.length == 0) {
 			return;
 		}				
@@ -168,7 +177,7 @@ public final class ImportsStructure implements IImportsStructure {
 		ISourceRange sourceRange= curr.getSourceRange();
 		int currOffset= sourceRange.getOffset();
 		int currLength= sourceRange.getLength();
-		int currEndLine= buffer.getLineOfOffset(currOffset + currLength);
+		int currEndLine= document.getLineOfOffset(currOffset + currLength);
 			
 		for (int i= 1; i < decls.length; i++) {
 			String name= curr.getElementName();
@@ -183,28 +192,28 @@ public final class ImportsStructure implements IImportsStructure {
 			sourceRange= next.getSourceRange();
 			int nextOffset= sourceRange.getOffset();
 			int nextLength= sourceRange.getLength();
-			int nextOffsetLine= buffer.getLineOfOffset(nextOffset);
+			int nextOffsetLine= document.getLineOfOffset(nextOffset);
 
 			// if next import is on a different line, modify the end position to the next line begin offset
 			if (currEndLine < nextOffsetLine) {
 				currEndLine++;
-				nextOffset= buffer.getLineInformation(currEndLine).getOffset();
+				nextOffset= document.getLineInformation(currEndLine).getOffset();
 			}
-			currPackage.add(new ImportDeclEntry(name, buffer.getContent(currOffset, nextOffset - currOffset)));
+			currPackage.add(new ImportDeclEntry(name, document.get(currOffset, nextOffset - currOffset)));
 			currOffset= nextOffset;
 			curr= next;
 				
 			// add a comment entry for spacing between imports
 			if (currEndLine < nextOffsetLine) {
-				nextOffset= buffer.getLineInformation(nextOffsetLine).getOffset();
+				nextOffset= document.getLineInformation(nextOffsetLine).getOffset();
 				
 				currPackage= new PackageEntry(); // create a comment package entry for this
 				fPackageEntries.add(currPackage);
-				currPackage.add(new ImportDeclEntry(null, buffer.getContent(currOffset, nextOffset - currOffset)));
+				currPackage.add(new ImportDeclEntry(null, document.get(currOffset, nextOffset - currOffset)));
 					
 				currOffset= nextOffset;
 			}
-			currEndLine= buffer.getLineOfOffset(nextOffset + nextLength);
+			currEndLine= document.getLineOfOffset(nextOffset + nextLength);
 		}
 
 		String name= curr.getElementName();
@@ -215,7 +224,7 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 		ISourceRange range= curr.getSourceRange();			
 		int endOffset= range.getOffset() + range.getLength();
-		String content= buffer.getContent(currOffset, endOffset - currOffset) + buffer.getLineDelimiter();
+		String content= document.get(currOffset, endOffset - currOffset) + TextUtilities.getDefaultLineDelimiter(document);
 		currPackage.add(new ImportDeclEntry(name, content));
 	}		
 		
@@ -554,56 +563,69 @@ public final class ImportsStructure implements IImportsStructure {
 			monitor= new NullProgressMonitor();
 		}
 		
-		TextBuffer buffer= null;
+		IDocument document= null;
 		try {
-			buffer= aquireTextBuffer();
+			document= aquireDocument();
 			
-			IRegion textRange= getReplaceRange(buffer);
+			IRegion textRange= getReplaceRange(document);
 
-			String replaceString= getReplaceString(buffer, textRange);
+			String replaceString= getReplaceString(document, textRange);
 			if (replaceString != null) {
-				buffer.replace(textRange, replaceString);
+				document.replace(textRange.getOffset(), textRange.getLength(), replaceString);
 				if (save) {
-					TextBuffer.commitChanges(buffer, true, null);
+					commitDocument(document);
 				}
-			}		
+			}
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
 		} finally {
-			if (buffer != null) {
-				releaseTextBuffer(buffer);
+			if (document != null) {
+				releaseDocument(document);
 			}
 			monitor.done();
 		}
 	}
-		
-	private TextBuffer aquireTextBuffer() throws CoreException {
+	
+	private IDocument aquireDocument() throws CoreException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
-				return TextBuffer.acquire(file);
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				IPath path= file.getFullPath();
+				bufferManager.connect(path, null);
+				return bufferManager.getTextFileBuffer(path).getDocument();
 			}
 		}
-		return TextBuffer.create(fCompilationUnit.getSource());
+		return new Document(fCompilationUnit.getSource());
 	}
 	
-	private void releaseTextBuffer(TextBuffer buffer) throws CoreException {
-		try {
-			if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-				IFile file= (IFile) fCompilationUnit.getResource();
-				if (file.exists()) {
-					return;
-				}
+	private void releaseDocument(IDocument document) throws CoreException {
+		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
+			IFile file= (IFile) fCompilationUnit.getResource();
+			if (file.exists()) {
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				bufferManager.disconnect(file.getFullPath(), null);
+				return;
 			}
-			fCompilationUnit.getBuffer().setContents(buffer.getContent());
-		} finally {
-			TextBuffer.release(buffer);
+		}
+		fCompilationUnit.getBuffer().setContents(document.get());
+	}
+	
+	private void commitDocument(IDocument document) throws CoreException {
+		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
+			IFile file= (IFile) fCompilationUnit.getResource();
+			if (file.exists()) {
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				bufferManager.getTextFileBuffer(file.getFullPath()).commit(null, true);
+			}
 		}
 	}
 		
 	/**
 	 * Get the replace positons.
-	 * @param textBuffer The textBuffer
+	 * @param document The textBuffer
 	 */
-	public IRegion getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
+	public IRegion getReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
 		JavaModelUtil.reconcile(fCompilationUnit);
 
 		IImportContainer container= fCompilationUnit.getImportContainer();
@@ -611,21 +633,21 @@ public final class ImportsStructure implements IImportsStructure {
 			ISourceRange importSourceRange= container.getSourceRange();
 			int startPos= importSourceRange.getOffset();
 			int endPos= startPos + importSourceRange.getLength();
-			if (!Strings.isLineDelimiterChar(textBuffer.getChar(endPos - 1))) {
+			if (!Strings.isLineDelimiterChar(document.getChar(endPos - 1))) {
 				// if not already after a new line, go to beginning of next line
 				// (if last char in new line -> import ends with a comment, see 10557)
-				int nextLine= textBuffer.getLineOfOffset(endPos) + 1;
-				if (nextLine < textBuffer.getNumberOfLines()) {
-					int stopPos= textBuffer.getLineInformation(nextLine).getOffset();
+				int nextLine= document.getLineOfOffset(endPos) + 1;
+				if (nextLine < document.getNumberOfLines()) {
+					int stopPos= document.getLineInformation(nextLine).getOffset();
 					// read to beginning of next character or beginning of next line
-					while (endPos < stopPos && Character.isWhitespace(textBuffer.getChar(endPos))) {
+					while (endPos < stopPos && Character.isWhitespace(document.getChar(endPos))) {
 						endPos++;
 					}
 				}
 			}
 			return new Region(startPos, endPos - startPos);
 		} else {
-			int start= getPackageStatementEndPos(textBuffer);
+			int start= getPackageStatementEndPos(document);
 			return new Region(start, 0);
 		}		
 	}
@@ -633,11 +655,11 @@ public final class ImportsStructure implements IImportsStructure {
 	/**
 	 * Returns the replace string or <code>null</code> if no replace is needed.
 	 */
-	public String getReplaceString(TextBuffer textBuffer, IRegion textRange) throws JavaModelException {
+	public String getReplaceString(IDocument document, IRegion textRange) throws JavaModelException, BadLocationException {
 		int importsStart=  textRange.getOffset();
 		int importsLen= textRange.getLength();
 				
-		String lineDelim= textBuffer.getLineDelimiter();
+		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		
 		StringBuffer buf= new StringBuffer();
 				
@@ -709,7 +731,7 @@ public final class ImportsStructure implements IImportsStructure {
 		fNumberOfImportsCreated= nCreated;
 		
 		String newContent= buf.toString();
-		if (hasChanged(textBuffer, importsStart, importsLen, newContent)) {
+		if (hasChanged(document, importsStart, importsLen, newContent)) {
 			return newContent;
 		}
 		return null;
@@ -773,12 +795,12 @@ public final class ImportsStructure implements IImportsStructure {
 		return false;
 	}
 	
-	private boolean hasChanged(TextBuffer textBuffer, int offset, int length, String content) {
+	private boolean hasChanged(IDocument document, int offset, int length, String content) throws BadLocationException {
 		if (content.length() != length) {
 			return true;
 		}
 		for (int i= 0; i < length; i++) {
-			if (content.charAt(i) != textBuffer.getChar(offset + i)) {
+			if (content.charAt(i) != document.getChar(offset + i)) {
 				return true;
 			}
 		}
@@ -791,12 +813,12 @@ public final class ImportsStructure implements IImportsStructure {
 		buf.append(str);
 	}
 	
-	private int getPackageStatementEndPos(TextBuffer buffer) throws JavaModelException {
+	private int getPackageStatementEndPos(IDocument document) throws JavaModelException, BadLocationException {
 		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
 		if (packDecls != null && packDecls.length > 0) {
 			ISourceRange range= packDecls[0].getSourceRange();
-			int line= buffer.getLineOfOffset(range.getOffset() + range.getLength());
-			TextRegion region= buffer.getLineInformation(line + 1);
+			int line= document.getLineOfOffset(range.getOffset() + range.getLength());
+			IRegion region= document.getLineInformation(line + 1);
 			if (region != null) {
 				return region.getOffset();
 			}

@@ -18,7 +18,10 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
@@ -79,17 +82,17 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		change.setSaveMode(TextFileChange.LEAVE_DIRTY);
 		setChange(change);
 		
-		TextBuffer buffer= null;
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath path= getCompilationUnit().getPath();
+		manager.connect(path, null);
 		try {
-			buffer= TextBuffer.acquire(change.getFile());
-			addEdits(buffer.getDocument());
+			IDocument document= manager.getTextFileBuffer(path).getDocument();
+			addEdits(document);
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				getRootTextEdit().addChild(fImportRewrite.createEdit(buffer));
+				getRootTextEdit().addChild(fImportRewrite.createEdit(document));
 			}
 		} finally {
-			if (buffer != null) {
-				TextBuffer.release(buffer);
-			}
+			manager.disconnect(path, null);
 		}
 		return change;
 	}

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
@@ -731,7 +732,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			if (someChange) {
 				unitRewriter.rewriteNode(buffer, root);
-				fImportRewriter.rewrite(buffer, root);
+				root.addChild(fImportRewriter.createEdit(buffer.getDocument()));
 			}
 		} finally {
 			if (unitRewriter != null)

@@ -10,22 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -50,23 +53,19 @@ public final class ImportRewrite {
 		this(cunit, settings.importOrder, settings.importThreshold);
 	}
 	
-	public final TextEdit createEdit(TextBuffer buffer) throws CoreException {
-		IRegion region= fImportsStructure.getReplaceRange(buffer);
-		String text= fImportsStructure.getReplaceString(buffer, region);
-		if (text == null) {
-			return new MultiTextEdit(region.getOffset(), 0);
-		}
-		return new ReplaceEdit(region.getOffset(), region.getLength(), text);		
-	}
-	
-	public final void rewrite(TextBuffer buffer, TextEdit rootEdit) throws MalformedTreeException, CoreException {
-		IRegion region= fImportsStructure.getReplaceRange(buffer);
-		String text= fImportsStructure.getReplaceString(buffer, region);
-		if (text != null) {
-			rootEdit.addChild(new ReplaceEdit(region.getOffset(), region.getLength(), text));
+	public final TextEdit createEdit(IDocument document) throws CoreException {
+		try {
+			IRegion region= fImportsStructure.getReplaceRange(document);
+			String text= fImportsStructure.getReplaceString(document, region);
+			if (text == null) {
+				return new MultiTextEdit(region.getOffset(), 0);
+			}
+			return new ReplaceEdit(region.getOffset(), region.getLength(), text);
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
 		}
 	}
-	
+			
 	public ICompilationUnit getCompilationUnit() {
 		return fImportsStructure.getCompilationUnit();
 	}

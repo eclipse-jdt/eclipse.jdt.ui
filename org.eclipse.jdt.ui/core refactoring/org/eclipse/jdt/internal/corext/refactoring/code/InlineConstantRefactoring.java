@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
@@ -689,7 +691,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			List allEdits= new ArrayList(fInlineEdits);
 			if(!fImportRewrite.isEmpty()) {
 				allEdits.add(fImportRewrite.createEdit(
-					TextBuffer.create(fImportRewrite.getCompilationUnit().getBuffer().getContents())));
+					new Document(fImportRewrite.getCompilationUnit().getBuffer().getContents())));
 			}
 			return allEdits;			
 		}

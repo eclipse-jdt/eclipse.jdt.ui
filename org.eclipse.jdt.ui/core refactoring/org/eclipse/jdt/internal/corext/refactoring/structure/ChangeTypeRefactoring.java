@@ -1118,7 +1118,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private String updateImports(ICompilationUnit icu, TextBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
 		ImportRewrite rewrite= new ImportRewrite(icu, JavaPreferencesSettings.getCodeGenerationSettings());
 		String typeName= rewrite.addImport(fSelectedType.getFullyQualifiedName());
-		rewrite.rewrite(buffer, rootEdit);
+		rootEdit.addChild(rewrite.createEdit(buffer.getDocument()));
 		return typeName;
 	}
 

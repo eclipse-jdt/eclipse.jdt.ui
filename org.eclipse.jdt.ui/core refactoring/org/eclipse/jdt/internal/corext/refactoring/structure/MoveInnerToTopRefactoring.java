@@ -560,7 +560,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.rewriteNode(textBuffer, resultingEdit);
 		if (fImportManager.hasImportEditFor(cu)) {
 			ImportRewrite importRewrite= fImportManager.getImportRewrite(cu);
-			resultingEdit.addChild(importRewrite.createEdit(textBuffer));
+			resultingEdit.addChild(importRewrite.createEdit(textBuffer.getDocument()));
 		}
 		return resultingEdit;
 	}

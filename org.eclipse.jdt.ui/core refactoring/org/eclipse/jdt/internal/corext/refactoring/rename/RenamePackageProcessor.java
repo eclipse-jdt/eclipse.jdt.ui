@@ -702,7 +702,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 			try {
 				ICompilationUnit cu= importRewrite.getCompilationUnit();
 				buffer= buffer= TextBuffer.acquire((IFile) cu.getResource());
-				TextEdit importEdit= importRewrite.createEdit(buffer);
+				TextEdit importEdit= importRewrite.createEdit(buffer.getDocument());
 				String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_imports"); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, importEdit);
 			} finally {

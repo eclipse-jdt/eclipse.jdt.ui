@@ -588,7 +588,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (rewrite.isEmpty())
 			return null;
 		else
-			return rewrite.createEdit(buffer);
+			return rewrite.createEdit(buffer.getDocument());
 	}
 
 	// !!! very similar to (same as) equivalent in ExtractTempRefactoring

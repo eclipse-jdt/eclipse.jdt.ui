@@ -205,7 +205,7 @@ class InstanceMethodMover {
 			TextChange cuChange= manager.get(getReceiverClassCU());
 			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit);
 			ImportRewrite importRewrite= createImportRewrite(allTypesUsedWithoutQualification, getReceiverClassCU());
-			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), importRewrite.createEdit(buffer));
+			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), importRewrite.createEdit(buffer.getDocument()));
 		}
 
 		private ImportRewrite createImportRewrite(List types, ICompilationUnit cu) throws CoreException {

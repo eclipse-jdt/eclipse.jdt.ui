@@ -412,7 +412,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			replaceDuplicates(result);
 		
 			if (!fImportRewriter.isEmpty()) {
-				TextEdit edit= fImportRewriter.createEdit(buffer);
+				TextEdit edit= fImportRewriter.createEdit(buffer.getDocument());
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(
 					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$

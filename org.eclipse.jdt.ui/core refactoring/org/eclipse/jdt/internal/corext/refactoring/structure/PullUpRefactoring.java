@@ -1326,7 +1326,7 @@ public class PullUpRefactoring extends Refactoring {
 
 		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
-			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
+			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer.getDocument()));
 		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PullUpRefactoring.42"), resultingEdits);
 		rewrite.removeModifications();
 	}

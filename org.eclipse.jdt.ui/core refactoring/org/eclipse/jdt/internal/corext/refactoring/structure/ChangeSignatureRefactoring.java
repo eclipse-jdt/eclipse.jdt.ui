@@ -1077,7 +1077,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private void addImportEdit(TextChangeManager manager, ICompilationUnit cu, ImportRewrite importRewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= importRewrite.createEdit(textBuffer);
+		TextEdit resultingEdits= importRewrite.createEdit(textBuffer.getDocument());
 		if (! importRewrite.isEmpty()) {
 		    TextChange textChange= manager.get(cu);
 		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_imports"), resultingEdits); //$NON-NLS-1$
