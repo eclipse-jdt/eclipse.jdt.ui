@@ -197,7 +197,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	    }
 	    
 	    public String getColumnText(Object element, int columnIndex) {
-	        String columnText = "";
+	        String columnText = ""; //$NON-NLS-1$
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (columnIndex == KEY_PROP){
@@ -404,10 +404,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		super(PAGE_NAME);
 		fCu = nlsRefactoring.getCu();
 		fSubstitutions = nlsRefactoring.getSubstitutions();		
-		fDefaultPrefix = nlsRefactoring.getPrefixHint();		
+		fDefaultPrefix = nlsRefactoring.getPrefixHint();
+		
+		createDefaultExternalization(fSubstitutions, fDefaultPrefix);
 	}	
 
-	/*
+    /*
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -506,6 +508,16 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 	}
+    
+    private void createDefaultExternalization(NLSSubstitution[] substitutions, String defaultPrefix) {
+	    for (int i = 0; i < substitutions.length; i++) {
+            NLSSubstitution substitution = substitutions[i];
+            if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
+                substitution.setState(NLSSubstitution.EXTERNALIZED);
+                substitution.generateKey(substitutions, defaultPrefix);
+            }
+        }
+    }
 	
 	private CellEditor[] createCellEditors() {
 		final CellEditor editors[]= new CellEditor[SIZE];
@@ -610,7 +622,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	        if (substitution.hasChanged()) {
 	            return substitution.hasDuplicateKey(fSubstitutions, fPrefixField.getText());	            
 	        } else {
-	            return substitution.hasDuplicateKey(fSubstitutions, "");
+	            return substitution.hasDuplicateKey(fSubstitutions, ""); //$NON-NLS-1$
 	        }
 	    }
 	    return false;
