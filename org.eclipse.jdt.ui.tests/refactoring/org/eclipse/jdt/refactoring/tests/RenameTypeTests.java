@@ -53,7 +53,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 		
 	private RenameTypeRefactoring createRefactoring(IType type, String newName){
-		RenameTypeRefactoring ref= new RenameTypeRefactoring(fgChangeCreator, type);
+		RenameTypeRefactoring ref= new RenameTypeRefactoring(type);
 		ref.setNewName(newName);
 		return ref;
 	}

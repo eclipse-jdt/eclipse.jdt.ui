@@ -79,7 +79,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameParame
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, method);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(method);
 		ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
 		ref.setNewNames(createRenamings(method, newNames));
@@ -103,7 +103,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameParame
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, method);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(method);
 		if (newNames.length > 0)
 			ref.setNewNames(createRenamings(method, newNames));
 			//ref.setNewParameterNames(newNames);

@@ -45,7 +45,7 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	// -------------
 	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) {
-		RenamePackageRefactoring ref= new RenamePackageRefactoring(fgChangeCreator, pack);
+		RenamePackageRefactoring ref= new RenamePackageRefactoring(pack);
 		ref.setNewName(newName);
 		return ref;
 	}

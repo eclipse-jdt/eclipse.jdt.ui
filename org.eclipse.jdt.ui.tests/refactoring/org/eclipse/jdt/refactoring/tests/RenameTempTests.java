@@ -83,7 +83,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameTempTe
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		ISourceRange selection= getSelection(cu);
-		RenameTempRefactoring ref= new RenameTempRefactoring(cu, fgChangeCreator, selection.getOffset(), selection.getLength());
+		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
 		
@@ -104,7 +104,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameTempTe
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		IType classA= getType(cu, "A");
 		ISourceRange selection= getSelection(cu);
-		RenameTempRefactoring ref= new RenameTempRefactoring(cu, fgChangeCreator, selection.getOffset(), selection.getLength());
+		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
 		
