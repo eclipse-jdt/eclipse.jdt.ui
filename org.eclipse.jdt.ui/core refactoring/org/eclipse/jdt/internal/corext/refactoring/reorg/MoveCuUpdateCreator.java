@@ -17,16 +17,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,8 +56,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -103,16 +104,14 @@ public class MoveCuUpdateCreator {
 
 	private void addImportRewriteUpdates(TextChangeManager changeManager) throws CoreException {
 		for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit)iter.next();
-			ImportRewrite importRewrite= (ImportRewrite)fImportRewrites.get(cu);
-			if (importRewrite != null && ! importRewrite.isEmpty()) {
-				TextBuffer buffer= null;
+			ICompilationUnit cu= (ICompilationUnit) iter.next();
+			ImportRewrite importRewrite= (ImportRewrite) fImportRewrites.get(cu);
+			if (importRewrite != null && !importRewrite.isEmpty()) {
 				try {
-					buffer= TextBuffer.acquire((IFile) cu.getResource());
+					ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
 					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
 				} finally {
-					if (buffer != null)
-						TextBuffer.release(buffer);
+					RefactoringFileBuffers.disconnect(cu);
 				}
 			}
 		}

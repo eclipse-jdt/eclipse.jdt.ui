@@ -19,9 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +29,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -69,11 +71,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -712,18 +713,15 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	}
 
 	private void addImportEdits(TextChangeManager manager, ImportRewrite importRewrite) throws CoreException {
-		if (! importRewrite.isEmpty()) {
-			TextBuffer buffer= null;
+		if (!importRewrite.isEmpty()) {
+			ICompilationUnit cu= importRewrite.getCompilationUnit();
 			try {
-				ICompilationUnit cu= importRewrite.getCompilationUnit();
-				buffer= buffer= TextBuffer.acquire((IFile) cu.getResource());
+				ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
 				TextEdit importEdit= importRewrite.createEdit(buffer.getDocument());
 				String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_imports"); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, importEdit);
 			} finally {
-				if (buffer != null) {
-					TextBuffer.release(buffer);
-				}
+				RefactoringFileBuffers.disconnect(cu);
 			}
 		}
 	}

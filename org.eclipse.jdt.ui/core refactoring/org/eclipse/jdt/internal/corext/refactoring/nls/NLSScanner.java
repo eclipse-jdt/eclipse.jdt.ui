@@ -13,15 +13,17 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 public class NLSScanner {
 
@@ -80,10 +82,15 @@ public class NLSScanner {
 			}
 			token= scanner.getNextToken();
 		}
-		NLSLine[] result= (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
-		TextBuffer buffer= TextBuffer.create(new String(scanner.getSource()));
-		for (int i= 0; i < result.length; i++) {
-			setTagPositions(buffer, result[i]);
+		NLSLine[] result;
+		try {
+			result= (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
+			IDocument document= new Document(String.valueOf(scanner.getSource()));
+			for (int i= 0; i < result.length; i++) {
+				setTagPositions(document, result[i]);
+			}
+		} catch (BadLocationException exception) {
+			throw new InvalidInputException();
 		}
 		return result;
 	}
@@ -114,8 +121,8 @@ public class NLSScanner {
 		}
 	}
 	
-	private static void setTagPositions(TextBuffer buffer, NLSLine line) {
-		TextRegion info= buffer.getLineInformation(line.getLineNumber());
+	private static void setTagPositions(IDocument document, NLSLine line) throws BadLocationException {
+		IRegion info= document.getLineInformation(line.getLineNumber());
 		int defaultValue= info.getOffset() + info.getLength();
 		NLSElement[] elements= line.getElements();
 		for (int i= 0; i < elements.length; i++) {

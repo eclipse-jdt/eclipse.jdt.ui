@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -47,8 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulat
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -113,18 +115,21 @@ class DeleteChangeCreator {
 	}
 
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= rewrite.rewriteAST(textBuffer.getDocument(), cu.getJavaProject().getOptions(true));
-
-		TextChange textChange= manager.get(cu);
-		if (textChange instanceof TextFileChange){
-			TextFileChange tfc= (TextFileChange)textChange;
-			if (cu.isWorkingCopy()) 
-				tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
+		try {
+			ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
+			TextChange textChange= manager.get(cu);
+			if (textChange instanceof TextFileChange) {
+				TextFileChange tfc= (TextFileChange) textChange;
+				if (cu.isWorkingCopy())
+					tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
+			}
+			String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
+			return textChange;
+		} finally {
+			RefactoringFileBuffers.disconnect(cu);
 		}
-		String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
-		TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
-		return textChange;
 	}
 
 	//List<IJavaElement>

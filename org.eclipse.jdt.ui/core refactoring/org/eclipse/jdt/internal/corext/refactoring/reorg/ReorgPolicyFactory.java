@@ -31,6 +31,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -94,9 +96,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -571,22 +573,25 @@ class ReorgPolicyFactory {
 				return (ICompilationUnit) destination;
 			return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
 		}
-	
+
 		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-			TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-			TextEdit resultingEdits= rewrite.rewriteAST(textBuffer.getDocument(), cu.getJavaProject().getOptions(true));
-				
-			TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
-			if (textChange instanceof TextFileChange){
-				TextFileChange tfc= (TextFileChange)textChange;
-				if (cu.isWorkingCopy()) 
-					tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
+			try {
+				ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+				TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
+				TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
+				if (textChange instanceof TextFileChange) {
+					TextFileChange tfc= (TextFileChange) textChange;
+					if (cu.isWorkingCopy())
+						tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
+				}
+				String message= RefactoringCoreMessages.getString("ReorgPolicyFactory.copy"); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
+				return textChange;
+			} finally {
+				RefactoringFileBuffers.disconnect(cu);
 			}
-			String message= RefactoringCoreMessages.getString("ReorgPolicyFactory.copy"); //$NON-NLS-1$
-			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
-			return textChange;
 		}
-	
+
 		protected void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			switch(element.getElementType()){
 				case IJavaElement.FIELD: 
