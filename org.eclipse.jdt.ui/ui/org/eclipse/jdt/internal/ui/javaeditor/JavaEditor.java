@@ -16,9 +16,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
@@ -28,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
@@ -147,6 +151,34 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	};
 	
+	class MouseClickListener implements MouseListener {		
+		/*
+		 * @see org.eclipse.swt.events.MouseListener#mouseDoubleClick(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseDoubleClick(MouseEvent e) {}
+		/*
+		 * @see org.eclipse.swt.events.MouseListener#mouseUp(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseUp(MouseEvent e) {}
+		/*
+		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseDown(MouseEvent e) {
+
+			if (e.stateMask != SWT.CTRL)
+				return;
+				
+			if (e.button != 1)
+				return;
+				
+			IAction action= getAction("OpenEditor");  //$NON-NLS-1$
+			if (action == null)
+				return;
+				
+			action.run();			
+		}
+	}
+	
 	/** Preference key for showing the line number ruler */
 	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
 	/** Preference key for the foreground color of the line numbers */
@@ -167,6 +199,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private LineNumberRulerColumn fLineNumberRulerColumn;
 	/** This editor's encoding support */
 	private DefaultEncodingSupport fEncodingSupport;
+	/** The mouse listener */
+	private MouseClickListener fMouseListener;
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -573,6 +607,17 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @see IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer != null) {
+			StyledText text= sourceViewer.getTextWidget();
+			if (text != null && !text.isDisposed() && fMouseListener != null) {
+				text.removeMouseListener(fMouseListener);
+				fMouseListener= null;
+			}
+			
+		}
+		
 		if (fEncodingSupport != null) {
 				fEncodingSupport.dispose();
 				fEncodingSupport= null;
@@ -603,6 +648,15 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer != null) {
+			StyledText text= sourceViewer.getTextWidget();
+			if (text != null && !text.isDisposed()) {
+				fMouseListener= new MouseClickListener();
+				text.addMouseListener(fMouseListener);
+			}
+		}
 	}
 	
 	private boolean isTextSelectionEmpty() {
@@ -856,4 +910,5 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		super.doSetSelection(selection);
 		synchronizeOutlinePageSelection();
 	}
+
 }

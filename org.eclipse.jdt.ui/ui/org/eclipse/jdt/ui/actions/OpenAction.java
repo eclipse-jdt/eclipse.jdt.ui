@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
@@ -123,14 +124,11 @@ public class OpenAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
-				ActionMessages.getString("OpenAction.select_element"));				 //$NON-NLS-1$
+				ActionMessages.getString("OpenAction.select_element")); //$NON-NLS-1$
 			if (element == null) {
-				/* waiting for support a time out in status line to ensure that message disappears
-				IStatusLineManager statusLine= getStatusLineManager();
-				if (statusLine != null) {
-					statusLine.setErrorMessage("Current text selection doesn't resolve to Java element");
-				}
-				*/
+				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
+				if (statusLine != null)
+					statusLine.setMessage(true, "OpenAction.error.messageBadSelection", null); //$NON-NLS-1$
 				getShell().getDisplay().beep();
 				return;
 			}
@@ -206,13 +204,5 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	private void showError(CoreException e) {
 		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
-	}
-	
-	private IStatusLineManager getStatusLineManager() {
-		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
-		if (contributor instanceof EditorActionBarContributor) {
-			return ((EditorActionBarContributor)contributor).getActionBars().getStatusLineManager();
-		}
-		return null; 
 	}
 }
