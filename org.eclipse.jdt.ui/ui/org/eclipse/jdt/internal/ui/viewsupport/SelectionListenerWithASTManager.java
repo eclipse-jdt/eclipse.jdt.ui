@@ -83,6 +83,12 @@ public class SelectionListenerWithASTManager {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
+		}
+		
+		public void firePostSelectionChanged(final ITextSelection selection) {
+			if (fCurrentJob != null) {
+				fCurrentJob.cancel();
+			}
 			
 			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
@@ -116,11 +122,11 @@ public class SelectionListenerWithASTManager {
 						}
 					}
 					if (buffer != null) {
-						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject());
+						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject(), null, monitor);
 					}
 				} else if (element instanceof IClassFile) {
 					try {
-						return AST.parseCompilationUnit((IClassFile) element, true);
+						return AST.parseCompilationUnit((IClassFile) element, true, null, monitor);
 					} catch (IllegalArgumentException e) {
 						// element has no source
 						return null;
@@ -136,7 +142,7 @@ public class SelectionListenerWithASTManager {
 			}
 			// create AST
 			CompilationUnit astRoot= computeAST(monitor);
-			
+		
 			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();
 				for (int i= 0; i < listeners.length; i++) {
@@ -152,13 +158,26 @@ public class SelectionListenerWithASTManager {
 	}
 	
 	
-	private static class WorkbenchWindowListener implements ISelectionListener {
+	private static class WorkbenchWindowListener {
 		private ISelectionService fSelectionService;
+		private ISelectionListener fSelectionListener, fPostSelectionListener;
 		private Map fPartListeners; // key: IEditorPart, value: PartListenerGroup
 		
 		public WorkbenchWindowListener(ISelectionService service) {
 			fSelectionService= service;
 			fPartListeners= new HashMap();
+			fSelectionListener= new ISelectionListener() {
+				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+					doSelectionChanged(part, selection);
+				}
+			};
+			
+			fPostSelectionListener= new ISelectionListener() {
+				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+					doPostSelectionChanged(part, selection);
+				}
+			};
+			
 		}
 		
 		public boolean isEmpty() {
@@ -168,7 +187,8 @@ public class SelectionListenerWithASTManager {
 		
 		public void install(IEditorPart part, ISelectionListenerWithAST listener) {
 			if (fPartListeners.isEmpty()) {
-				fSelectionService.addPostSelectionListener(this);
+				fSelectionService.addPostSelectionListener(fPostSelectionListener);
+				fSelectionService.addSelectionListener(fSelectionListener);
 			}
 			
 			PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
@@ -188,22 +208,29 @@ public class SelectionListenerWithASTManager {
 			if (listenerGroup.isEmpty()) {
 				fPartListeners.remove(part);
 				if (fPartListeners.isEmpty()) {
-					fSelectionService.removePostSelectionListener(this);
+					fSelectionService.removePostSelectionListener(fPostSelectionListener);
+					fSelectionService.removePostSelectionListener(fSelectionListener);
 				}
 			}
 		}		
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
-		 */
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		protected void doPostSelectionChanged(IWorkbenchPart part, ISelection selection) {
+			if (part instanceof IEditorPart && selection instanceof ITextSelection) { // only editor parts are interesting
+				PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
+				if (listenerGroup != null) {
+					listenerGroup.firePostSelectionChanged((ITextSelection) selection);
+				}
+			}
+		}
+		
+		protected void doSelectionChanged(IWorkbenchPart part, ISelection selection) {
 			if (part instanceof IEditorPart && selection instanceof ITextSelection) { // only editor parts are interesting
 				PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
 				if (listenerGroup != null) {
 					listenerGroup.fireSelectionChanged((ITextSelection) selection);
 				}
 			}
-		}		
+		}	
 	}
 	
 	private Map fListenerGroups;
@@ -252,6 +279,6 @@ public class SelectionListenerWithASTManager {
 		ISelectionService service= part.getSite().getWorkbenchWindow().getSelectionService();
 		WorkbenchWindowListener windowListener= (WorkbenchWindowListener) fListenerGroups.get(service);
 		if (windowListener != null) {
-			windowListener.selectionChanged(part, selection);
+			windowListener.doPostSelectionChanged(part, selection);
 		}
 	}}
