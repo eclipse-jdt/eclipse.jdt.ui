@@ -59,7 +59,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -296,7 +295,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 			IJavaElement elementPosition= dialog.getElementPosition();
 
-			generate(getterFields, setterFields, getterSetterFields, elementPosition);
+			generate(type, getterFields, setterFields, getterSetterFields, elementPosition);
 		}
 	}
 
@@ -467,7 +466,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
-	private void generate(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) throws CoreException {
+	private void generate(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) throws CoreException {
 		if (getterFields.length == 0 && setterFields.length == 0 && getterSetterFields.length == 0)
 			return;
 
@@ -480,7 +479,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			cu= getterSetterFields[0].getCompilationUnit();
 		// open the editor, forces the creation of a working copy
 		IEditorPart editor= EditorUtility.openInEditor(cu);
-		run(cu, getterFields, setterFields, getterSetterFields, editor, elementPosition);
+		run(cu, type, getterFields, setterFields, getterSetterFields, editor, elementPosition);
 	}
 
 	// ---- Java Editior --------------------------------------------------------------
@@ -524,13 +523,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// ---- Helpers -------------------------------------------------------------------
 
-	private void run(ICompilationUnit cu, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, IJavaElement elementPosition) {
+	private void run(ICompilationUnit cu, IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, IJavaElement elementPosition) {
 		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 		if (target != null) {
 			target.beginCompoundChange();
 		}
 		try {
-			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields, getterSetterFields, elementPosition);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, false);
 			setOperationStatusFields(op);
 
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
@@ -540,10 +539,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 
-			IMethod[] createdMethods= op.getCreatedAccessors();
-			if (createdMethods.length > 0) {
-				EditorUtility.revealInEditor(editor, createdMethods[0]);
-			}
 		} catch (InvocationTargetException e) {
 			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, message);
@@ -568,12 +563,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		op.setSort(fSort);
 		op.setFlags(flags);
 		op.setCreateComments(fGenerateComment);
-	}
-
-	private AddGetterSetterOperation createAddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) {
-		IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
-		IRequestQuery skipReplaceQuery= skipReplaceQuery();
-		return new AddGetterSetterOperation(getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery, skipReplaceQuery, elementPosition);
 	}
 
 	private IRequestQuery skipSetterForFinalQuery() {

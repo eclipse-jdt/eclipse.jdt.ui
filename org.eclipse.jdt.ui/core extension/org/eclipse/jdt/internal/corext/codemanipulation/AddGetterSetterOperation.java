@@ -10,26 +10,47 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * For given fields, method stubs for getters and setters are created.
@@ -42,11 +63,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	private final String[] EMPTY= new String[0];
 	
+	private IType fType;
 	private IField[] fGetterFields;
 	private IField[] fSetterFields;
 	private IField[] fGetterSetterFields;
-	private List fCreatedAccessors;
-	
+
 	private IRequestQuery fSkipExistingQuery;
 	private IRequestQuery fSkipFinalSettersQuery;
 	
@@ -54,25 +75,21 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private boolean fSkipAllExisting;
 
 	private boolean fCreateComments;
+	private boolean fSave;
 		
-	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
-		super();
+	public AddGetterSetterOperation(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition, boolean save) {
+		fType= type;
 		fGetterFields= getterFields;
 		fSetterFields= setterFields;
 		fGetterSetterFields= getterSetterFields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
-		fCreatedAccessors= new ArrayList();
 		fInsertPosition= elementPosition;
 		fCreateComments= true;
 		fFlags= Flags.AccPublic;
 		fSort= false;
 	}
-	
-	/**
-	 * Runs the operation.
-	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
-	 */
+
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
@@ -80,35 +97,67 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		try {
 			monitor.setTaskName(CodeGenerationMessages.getString("AddGetterSetterOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
-
-			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
-			fSkipAllExisting= (fSkipExistingQuery == null);
-			
-			// create pairs first: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
-			if (!fSort) {
-				for (int i= 0; i < fGetterSetterFields.length; i++) {
-					generateGetter(fGetterSetterFields[i]);
-					generateSetter(fGetterSetterFields[i]);
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						throw new OperationCanceledException();
-					}	
-				}	
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			ListRewrite rewriter= null;
+			if (fType.isAnonymous()) {
+				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				if (creation != null) {
+					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+					if (declaration != null)
+						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				}
+			} else {
+				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				if (declaration != null)
+					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			}
-			for (int i= 0; i < fGetterFields.length; i++) {
-				generateGetter(fGetterFields[i]);
-				monitor.worked(1);
-				if (monitor.isCanceled()){
-					throw new OperationCanceledException();
-				}	
+			if (rewriter != null) {
+				try {
+					final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+					fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
+					fSkipAllExisting= (fSkipExistingQuery == null);
+					if (!fSort) {
+						for (int i= 0; i < fGetterSetterFields.length; i++) {
+							generateGetter(fGetterSetterFields[i], rewriter);
+							generateSetter(fGetterSetterFields[i], rewriter);
+							monitor.worked(1);
+							if (monitor.isCanceled()){
+								throw new OperationCanceledException();
+							}	
+						}	
+					}
+					for (int i= 0; i < fGetterFields.length; i++) {
+						generateGetter(fGetterFields[i], rewriter);
+						monitor.worked(1);
+						if (monitor.isCanceled()){
+							throw new OperationCanceledException();
+						}	
+					}
+					for (int i= 0; i < fSetterFields.length; i++) {
+						generateSetter(fSetterFields[i], rewriter);
+						monitor.worked(1);
+						if (monitor.isCanceled()){
+							throw new OperationCanceledException();
+						}	
+					}		
+					final Change result= rewrite.createChange();
+					if (result instanceof CompilationUnitChange) {
+						final CompilationUnitChange change= (CompilationUnitChange) result;
+						final TextEdit edit= change.getEdit();
+						if (edit != null) {
+							try {
+								edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
+								if (fSave)
+									buffer.commit(new SubProgressMonitor(monitor, 1), true);
+							} catch (Exception exception) {
+								throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
+							}
+						}
+					}
+				} finally {
+					RefactoringFileBuffers.release(fType.getCompilationUnit());
+				}
 			}
-			for (int i= 0; i < fSetterFields.length; i++) {
-				generateSetter(fSetterFields[i]);
-				monitor.worked(1);
-				if (monitor.isCanceled()){
-					throw new OperationCanceledException();
-				}	
-			}			
 		} finally {
 			monitor.done();
 		}
@@ -142,7 +191,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}	
 	
-	private void generateGetter(IField field) throws CoreException, OperationCanceledException {
+	private void generateGetter(IField field, ListRewrite rewrite) throws CoreException, OperationCanceledException {
 		IType parentType= field.getDeclaringType();
 
 		String getterName= GetterSetterUtil.getGetterName(field, null);
@@ -156,20 +205,25 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			IJavaElement sibling= null;
 			if (existingGetter != null) {
 				sibling= StubUtility.findNextSibling(existingGetter);
-				existingGetter.delete(false, null);
+				removeExistingAccessor(rewrite, existingGetter);
 			}
 			else
-				sibling= getInsertPosition();
+				sibling= fInsertPosition;
+			ASTNode insertion= null;
+			if (sibling instanceof IMethod)
+				insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsertPosition, (CompilationUnit) rewrite.getParent().getRoot());
 			
-			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-			int indent= StubUtility.getIndentUsed(field);
-			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, field.getJavaProject()) + lineDelim;
-			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
+			addNewAccessor(field, rewrite, parentType, stub, insertion);
 		}
 	}
 
-	private void generateSetter(IField field) throws CoreException, OperationCanceledException {
+	private void removeExistingAccessor(ListRewrite rewrite, IMethod accessor) throws JavaModelException {
+		MethodDeclaration decl= ASTNodeSearchUtil.getMethodDeclarationNode(accessor, (CompilationUnit) rewrite.getParent().getRoot());
+		if (decl != null)
+			rewrite.remove(decl, null);
+	}
+
+	private void generateSetter(IField field, ListRewrite rewrite) throws CoreException, OperationCanceledException {
 		boolean isFinal= Flags.isFinal(field.getFlags());
 		
 		IType parentType= field.getDeclaringType();
@@ -187,26 +241,27 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			IJavaElement sibling= null;
 			if (existingSetter != null) {
 				sibling= StubUtility.findNextSibling(existingSetter);
-				existingSetter.delete(false, null);
+				removeExistingAccessor(rewrite, existingSetter);
 			}
 			else
-				sibling= getInsertPosition();			
-			
-			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-			int indent= StubUtility.getIndentUsed(field);
-			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, field.getJavaProject()) + lineDelim;
-			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
+				sibling= fInsertPosition;			
+			ASTNode insertion= null;
+			if (sibling instanceof IMethod)
+				insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsertPosition, (CompilationUnit) rewrite.getParent().getRoot());
+		
+			addNewAccessor(field, rewrite, parentType, stub, insertion);
 		}
 	}
-	
-	/**
-	 * Returns the created accessors. To be called after a successful run.
-	 */
-	public IMethod[] getCreatedAccessors() {
-		return (IMethod[]) fCreatedAccessors.toArray(new IMethod[fCreatedAccessors.size()]);
-	}
 
+	private void addNewAccessor(IField field, ListRewrite rewrite, IType type, String contents, ASTNode insertion) throws JavaModelException {
+		String lineDelim= StubUtility.getLineDelimiterUsed(type);
+		MethodDeclaration decl= (MethodDeclaration) rewrite.getASTRewrite().createStringPlaceholder(CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, contents, 0, null, lineDelim, field.getJavaProject()) + lineDelim, ASTNode.METHOD_DECLARATION);
+		if (insertion != null)
+			rewrite.insertBefore(decl, insertion, null);
+		else
+			rewrite.insertLast(decl, null);
+	}
+	
 	public void setSort(boolean sort) {
 		fSort = sort;
 	}
@@ -219,16 +274,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		fCreateComments= createComments;
 	}
 
-	public IJavaElement getInsertPosition() {
-		return fInsertPosition;
-	}
-
 	/**
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
-
 }
-	
