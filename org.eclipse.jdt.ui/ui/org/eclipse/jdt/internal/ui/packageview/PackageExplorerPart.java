@@ -69,7 +69,6 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
@@ -953,11 +952,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			
 			refreshViewer= true;
 		}
-		String property= event.getProperty();
-		if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property))
-			updateTitle();
-		else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
-			updateTitle();
 
 		if (refreshViewer)
 			fViewer.refresh();

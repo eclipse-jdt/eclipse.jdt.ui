@@ -33,6 +33,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
@@ -294,8 +295,11 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		return new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String property= event.getProperty();
-				if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-					String workingSetName= (String)event.getNewValue();
+				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+					IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
+					String workingSetName= null;
+					if (workingSet != null)
+						workingSetName= workingSet.getName();
 					fPart.setWorkingSetName(workingSetName);
 					fPart.updateTitle();
 				}
