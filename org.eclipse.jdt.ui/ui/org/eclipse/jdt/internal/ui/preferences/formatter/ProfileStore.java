@@ -183,9 +183,9 @@ public class ProfileStore {
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection.
 	 */
-	private static List readOldForCompatibility() {
+	private List readOldForCompatibility() {
 		
-		// in 3.0 M9 and less the profiles were stored in a file in the plugin's metadata
+		// in 3.0 M9 and less the profiles were stored in a file in the plugin's meta data
 		final String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
 
 		File file= JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
@@ -194,9 +194,12 @@ public class ProfileStore {
 		
 		try {
 			// note that it's wrong to use a file reader when XML declares UTF-8: Kept for compatibility
-			final FileReader reader= new FileReader(file); 
+			final FileReader reader= new FileReader(file);
 			try {
-				return readProfilesFromStream(new InputSource(reader));
+				List res= readProfilesFromStream(new InputSource(reader));
+				writeProfiles(res);
+				file.delete(); // remove after successful write
+				return res;
 			} finally {
 				reader.close();
 			}
@@ -204,8 +207,6 @@ public class ProfileStore {
 			JavaPlugin.log(e); // log but ignore
 		} catch (IOException e) {
 			JavaPlugin.log(e); // log but ignore
-		} finally {
-			file.delete(); // remove
 		}
 		return null;
 	}
