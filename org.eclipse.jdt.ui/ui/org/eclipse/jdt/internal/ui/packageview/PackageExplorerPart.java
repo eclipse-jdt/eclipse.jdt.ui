@@ -167,7 +167,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
-	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
 	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
@@ -197,7 +196,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
-	private ShowBinariesAction fShowBinariesAction;
 	private FilterWorkingSetAction fFilterWorkingSetAction;
 	private RemoveWorkingSetFilterAction fRemoveWorkingSetAction;
 	private IMemento fMemento;
@@ -633,7 +631,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		provider.addSelectionChangedListener(fRefreshAction);
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
-		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
 		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
 		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
 		
@@ -881,13 +878,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (!showLibraries)
 			show= "false"; //$NON-NLS-1$
 		memento.putString(TAG_SHOWLIBRARIES, show);
-		
-		//save binary filter
-		boolean showBinaries= getBinaryFilter().getShowBinaries();
-		String showBinString= "true"; //$NON-NLS-1$
-		if (!showBinaries)
-			showBinString= "false"; //$NON-NLS-1$
-		memento.putString(TAG_SHOWBINARIES, showBinString);
 	}
 
 	protected void savePatternFilterState(IMemento memento) {
@@ -1165,14 +1155,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return fWorkingSetFilter;
 	}
 
-	/**
- 	 * Returns the Binary filter for this view.
- 	 * @return the binary filter
- 	 */
-	BinaryProjectFilter getBinaryFilter() {
-		return fBinaryFilter;
-	}
-
 	void restoreFilters() {
 		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
 		if(filtersMem != null) {	
@@ -1191,14 +1173,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
 		else 
 			initLibraryFilterFromPreferences();		
-		
-		//restore binary fileter
-		String showbin= fMemento.getString(TAG_SHOWBINARIES);
-		if (showbin != null)
-			getBinaryFilter().setShowBinaries(showbin.equals("true")); //$NON-NLS-1$
-		else 
-			initBinaryFilterFromPreferences();		
-			
+					
 		//restore working set
 		String workingSetName= fMemento.getString(TAG_WORKINGSET);
 		if (workingSetName != null) {
@@ -1211,7 +1186,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 	
 	void initFilterFromPreferences() {
-		initBinaryFilterFromPreferences();
 		initLibraryFilterFromPreferences();
 	}
 
@@ -1221,12 +1195,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		getLibraryFilter().setShowLibraries(show);
 	}
 
-	void initBinaryFilterFromPreferences() {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		boolean showbin= plugin.getPreferenceStore().getBoolean(TAG_SHOWBINARIES);
-		getBinaryFilter().setShowBinaries(showbin);
-	}
-	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;

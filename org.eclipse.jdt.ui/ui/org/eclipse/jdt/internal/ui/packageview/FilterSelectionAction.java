@@ -39,7 +39,7 @@ class FilterSelectionAction extends SelectionProviderAction {
 				new LabelProvider(),
 				PackagesMessages.getString("FilterSelectionAction.apply.label")); //$NON-NLS-1$
 	
-		dialog.setInitialSelections(contentProvider.getInitialSelections());		dialog.setTitle(PackagesMessages.getString("FilterSelectionAction.dialog.title"));
+		dialog.setInitialSelections(contentProvider.getInitialSelections());		dialog.setTitle(PackagesMessages.getString("FilterSelectionAction.dialog.title")); //$NON-NLS-1$
 		dialog.open();
 		if (dialog.getReturnCode() == dialog.OK) {
 			Object[] results= dialog.getResult();
