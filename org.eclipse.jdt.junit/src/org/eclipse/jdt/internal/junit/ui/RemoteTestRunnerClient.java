@@ -49,11 +49,11 @@ public class RemoteTestRunnerClient {
 	            return fTraceState;
 	        }
 	        if (message.startsWith(MessageIds.EXPECTED_START)) {
-	            fExpectedResult= ""; //$NON-NLS-1$
+	            fExpectedResult= null;
 	            return fExpectedState;
 	        }
 	        if (message.startsWith(MessageIds.ACTUAL_START)) {
-	            fActualResult= ""; //$NON-NLS-1$
+	            fActualResult= null;
 	            return fActualState;
 	        }
 	        if (message.startsWith(MessageIds.RTRACE_START)) {
@@ -124,8 +124,8 @@ public class RemoteTestRunnerClient {
 	        if (message.startsWith(MessageIds.TRACE_END)) {
 	            notifyTestFailed();
 	            fFailedTrace = ""; //$NON-NLS-1$
-	            fExpectedResult= ""; //$NON-NLS-1$
-	            fActualResult = ""; //$NON-NLS-1$
+	            fExpectedResult= null;
+	            fActualResult = null;
 	            return fDefaultState;
 	        }
 	        fFailedTrace+= message + '\n';
@@ -136,7 +136,10 @@ public class RemoteTestRunnerClient {
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.EXPECTED_END)) 
 	            return fDefaultState;
-	        fExpectedResult+= message + '\n';
+	        if (fExpectedResult == null)
+	        	fExpectedResult= message + '\n';
+	        else
+	        	fExpectedResult+= message + '\n';
 	        return this;
 	    }
 	}
@@ -144,7 +147,10 @@ public class RemoteTestRunnerClient {
 	    ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.ACTUAL_END)) 
 	            return fDefaultState;
-	        fActualResult+= message + '\n';
+	        if (fActualResult == null)
+	        	fActualResult= message + '\n';
+	        else 
+				fActualResult+= message + '\n';
 	        return this;
 	    }
 	}

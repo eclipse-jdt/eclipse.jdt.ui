@@ -516,7 +516,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	/*
 	 * @see ITestRunListener#testFailed
 	 */
-	public void testFailed(int status, String testId, String testName, String trace, String expected, String actual){
+	public void testFailed(int status, String testId, String testName, String trace, String expected, String actual) {
 	    TestRunInfo testInfo= getTestInfo(testId);
 	    if (testInfo == null) {
 	        testInfo= new TestRunInfo(testId, testName);
@@ -524,10 +524,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	    }
 	    testInfo.setTrace(trace);
 	    testInfo.setStatus(status);
-	    if (expected != null && expected.length() > 0) {
+	    if (expected != null) {
 			testInfo.setExpected(expected.substring(0, expected.length()-1));
 		}
-	    if (actual != null && actual.length() > 0)
+	    if (actual != null)
 	        testInfo.setActual(actual.substring(0, actual.length()-1));
 	    
 	    if (status == ITestRunListener.STATUS_ERROR)
