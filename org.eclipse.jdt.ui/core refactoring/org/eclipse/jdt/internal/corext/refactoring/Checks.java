@@ -116,7 +116,11 @@ public class Checks {
 	 *  name is not a valid java method name.
 	 */
 	public static RefactoringStatus checkMethodName(String name) {
-		return checkName(name, JavaConventions.validateMethodName(name));
+		RefactoringStatus status= checkName(name, JavaConventions.validateMethodName(name));
+		if (status.isOK() && startsWithUpperCase(name))
+			return RefactoringStatus.createWarningStatus("By convention, all names of methods start with uppercase letters");
+		else	
+			return status;
 	}
 		
 	/**
@@ -165,6 +169,16 @@ public class Checks {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
 			return new RefactoringStatus();
+	}
+
+	private static boolean startsWithUpperCase(String s) {
+		if (s == null)
+			return false;
+		else if ("".equals(s)) //$NON-NLS-1$
+			return false;
+		else
+			//workaround for JDK bug (see 26529)
+			return s.charAt(0) == Character.toUpperCase(s.charAt(0));
 	}
 		
 	public static boolean startsWithLowerCase(String s){
