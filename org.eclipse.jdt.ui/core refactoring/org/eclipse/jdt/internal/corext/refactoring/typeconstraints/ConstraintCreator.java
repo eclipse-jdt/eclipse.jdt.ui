@@ -10,11 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -78,530 +73,446 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.internal.corext.Assert;
+/**
+ * Empty implementation of a creator - provided to allow subclasses to override only a subset of methods.
+ * Subclass to provide constraint creation functionality.
+ */
+public class ConstraintCreator {
 
-public final class ConstraintCollector extends ASTVisitor {
-
-	private final ConstraintCreator fCreator;
-	private final Set fConstraints;
-	
-	public ConstraintCollector() {
-		this(new FullConstraintCreator());
-	}
-	
-	public ConstraintCollector(ConstraintCreator creator) {
-		Assert.isNotNull(creator);
-		fCreator= creator;
-		fConstraints= new HashSet();
-	}
-
-	private void add(ITypeConstraint[] constraints){
-		fConstraints.addAll(Arrays.asList(constraints));
-	}
-	
-	public void clear(){
-		fConstraints.clear();
-	}
-
-	public ITypeConstraint[] getConstraints(){
-		return (ITypeConstraint[]) fConstraints.toArray(new ITypeConstraint[fConstraints.size()]);
-	}
-	
-	//------------------------- visit methods -------------------------//
+	private static final ITypeConstraint[] EMPTY_ARRAY= new ITypeConstraint[0];
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
 	 */
-	public boolean visit(AnonymousClassDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(AnonymousClassDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayAccess)
 	 */
-	public boolean visit(ArrayAccess node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ArrayAccess node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
 	 */
-	public boolean visit(ArrayCreation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ArrayCreation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayInitializer)
 	 */
-	public boolean visit(ArrayInitializer node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ArrayInitializer node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayType)
 	 */
-	public boolean visit(ArrayType node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ArrayType node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AssertStatement)
 	 */
-	public boolean visit(AssertStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(AssertStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Assignment)
 	 */
-	public boolean visit(Assignment node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(Assignment node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Block)
 	 */
-	public boolean visit(Block node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(Block node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BooleanLiteral)
 	 */
-	public boolean visit(BooleanLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(BooleanLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BreakStatement)
 	 */
-	public boolean visit(BreakStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(BreakStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CastExpression)
 	 */
-	public boolean visit(CastExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(CastExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CatchClause)
 	 */
-	public boolean visit(CatchClause node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(CatchClause node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CharacterLiteral)
 	 */
-	public boolean visit(CharacterLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(CharacterLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
 	 */
-	public boolean visit(ClassInstanceCreation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ClassInstanceCreation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
-	public boolean visit(CompilationUnit node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(CompilationUnit node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConditionalExpression)
 	 */
-	public boolean visit(ConditionalExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ConditionalExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
-	public boolean visit(ConstructorInvocation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ConstructorInvocation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ContinueStatement)
 	 */
-	public boolean visit(ContinueStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ContinueStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
 	 */
-	public boolean visit(DoStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(DoStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EmptyStatement)
 	 */
-	public boolean visit(EmptyStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(EmptyStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ExpressionStatement)
 	 */
-	public boolean visit(ExpressionStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ExpressionStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldAccess)
 	 */
-	public boolean visit(FieldAccess node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(FieldAccess node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldDeclaration)
 	 */
-	public boolean visit(FieldDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(FieldDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 	 */
-	public boolean visit(ForStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ForStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 	 */
-	public boolean visit(IfStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(IfStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ImportDeclaration)
 	 */
-	public boolean visit(ImportDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ImportDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.InfixExpression)
 	 */
-	public boolean visit(InfixExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(InfixExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Initializer)
 	 */
-	public boolean visit(Initializer node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(Initializer node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.InstanceofExpression)
 	 */
-	public boolean visit(InstanceofExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(InstanceofExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Javadoc)
 	 */
-	public boolean visit(Javadoc node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(Javadoc node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LabeledStatement)
 	 */
-	public boolean visit(LabeledStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(LabeledStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
-	public boolean visit(MethodDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(MethodDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
-	public boolean visit(MethodInvocation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(MethodInvocation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NullLiteral)
 	 */
-	public boolean visit(NullLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(NullLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NumberLiteral)
 	 */
-	public boolean visit(NumberLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(NumberLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PackageDeclaration)
 	 */
-	public boolean visit(PackageDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(PackageDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ParenthesizedExpression)
 	 */
-	public boolean visit(ParenthesizedExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ParenthesizedExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PostfixExpression)
 	 */
-	public boolean visit(PostfixExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(PostfixExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PrefixExpression)
 	 */
-	public boolean visit(PrefixExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(PrefixExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PrimitiveType)
 	 */
-	public boolean visit(PrimitiveType node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(PrimitiveType node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedName)
 	 */
-	public boolean visit(QualifiedName node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(QualifiedName node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ReturnStatement)
 	 */
-	public boolean visit(ReturnStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ReturnStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 	 */
-	public boolean visit(SimpleName node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SimpleName node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleType)
 	 */
-	public boolean visit(SimpleType node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SimpleType node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
-	public boolean visit(SingleVariableDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SingleVariableDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.StringLiteral)
 	 */
-	public boolean visit(StringLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(StringLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperConstructorInvocation)
 	 */
-	public boolean visit(SuperConstructorInvocation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SuperConstructorInvocation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperFieldAccess)
 	 */
-	public boolean visit(SuperFieldAccess node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SuperFieldAccess node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperMethodInvocation)
 	 */
-	public boolean visit(SuperMethodInvocation node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SuperMethodInvocation node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SwitchCase)
 	 */
-	public boolean visit(SwitchCase node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SwitchCase node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SwitchStatement)
 	 */
-	public boolean visit(SwitchStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SwitchStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SynchronizedStatement)
 	 */
-	public boolean visit(SynchronizedStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(SynchronizedStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ThisExpression)
 	 */
-	public boolean visit(ThisExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ThisExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ThrowStatement)
 	 */
-	public boolean visit(ThrowStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(ThrowStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TryStatement)
 	 */
-	public boolean visit(TryStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(TryStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclaration)
 	 */
-	public boolean visit(TypeDeclaration node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(TypeDeclaration node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclarationStatement)
 	 */
-	public boolean visit(TypeDeclarationStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(TypeDeclarationStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeLiteral)
 	 */
-	public boolean visit(TypeLiteral node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(TypeLiteral node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationExpression)
 	 */
-	public boolean visit(VariableDeclarationExpression node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(VariableDeclarationExpression node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationFragment)
 	 */
-	public boolean visit(VariableDeclarationFragment node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(VariableDeclarationFragment node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationStatement)
 	 */
-	public boolean visit(VariableDeclarationStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(VariableDeclarationStatement node) {
+		return EMPTY_ARRAY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
 	 */
-	public boolean visit(WhileStatement node) {
-		add(fCreator.create(node));
-		return true;
+	public ITypeConstraint[] create(WhileStatement node) {
+		return EMPTY_ARRAY;
 	}
+
 }
