@@ -466,7 +466,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			setMemberFilter(null);
 			fIsEnableMemberFilter= false;
 			if (!fInputElement.equals(prevInput)) {
-				updateHierarchyViewer();
+				updateHierarchyViewer(true);
 			}
 			IType root= getSelectableType(fInputElement);
 			internalSelectType(root, true);
@@ -488,7 +488,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fInputElement= null;
 		fHierarchyLifeCycle.freeHierarchy();
 		
-		updateHierarchyViewer();
+		updateHierarchyViewer(false);
 		updateToolbarButtons();
 	}
 
@@ -587,7 +587,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
 					if (event.keyCode == SWT.F5) {
-						updateHierarchyViewer();
+						updateHierarchyViewer(false);
 						return;
 					} else if (event.character == SWT.DEL){
 						if (fCCPActionGroup.getDeleteAction().isEnabled())
@@ -930,14 +930,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * <code>updateHierarchyViewer<code> brings up the correct view and refreshes
 	 * the current tree
 	 */
-	private void updateHierarchyViewer() {
+	private void updateHierarchyViewer(final boolean doExpand) {
 		if (fInputElement == null) {
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (getCurrentViewer().containsElements() != null) {
 				Runnable runnable= new Runnable() {
 					public void run() {
-						getCurrentViewer().updateContent(); // refresh
+						getCurrentViewer().updateContent(doExpand); // refresh
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);
@@ -1003,7 +1003,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					selected.toArray(memberFilter);
 				}
 				setMemberFilter(memberFilter);
-				updateHierarchyViewer();
+				updateHierarchyViewer(true);
 				updateTitle();
 				internalSelectType(fSelectedType, true);	
 			}
@@ -1116,7 +1116,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (viewerIndex < fAllViewers.length && fCurrentViewerIndex != viewerIndex) {			
 			fCurrentViewerIndex= viewerIndex;
 			
-			updateHierarchyViewer();
+			updateHierarchyViewer(false);
 			if (fInputElement != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
@@ -1159,7 +1159,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (!on) {
 				IType methodViewerInput= (IType) fMethodsViewer.getInput();
 				setMemberFilter(null);
-				updateHierarchyViewer();
+				updateHierarchyViewer(true);
 				updateTitle();
 			
 				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
@@ -1228,7 +1228,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					return;
 				}
 				fMethodsViewer.refresh();
-				updateHierarchyViewer();
+				updateHierarchyViewer(false);
 			} else {
 				// elements in hierarchy modified
 				fMethodsViewer.refresh();
@@ -1236,7 +1236,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
 					} else {
-						updateHierarchyViewer();
+						updateHierarchyViewer(false);
 					}
 				} else {
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );

@@ -147,7 +147,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	/**
 	 * Updates the content of this viewer: refresh and expanding the tree in the way wanted.
 	 */
-	public abstract void updateContent();	
+	public abstract void updateContent(boolean doExpand);	
 	
 	/**
 	 * Returns the title for the current view

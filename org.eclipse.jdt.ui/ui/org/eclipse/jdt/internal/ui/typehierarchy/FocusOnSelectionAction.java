@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 public class FocusOnSelectionAction extends Action {
 		
 	private TypeHierarchyViewPart fViewPart;
-	private ISelectionProvider fSelectionProvider;
 	private String fText;
 	
 	public FocusOnSelectionAction(TypeHierarchyViewPart part) {

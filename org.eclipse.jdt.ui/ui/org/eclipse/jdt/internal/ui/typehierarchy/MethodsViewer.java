@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
@@ -53,8 +52,6 @@ public class MethodsViewer extends ProblemTableViewer {
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_SORTBYDEFININGTYPE= "sortbydefiningtype";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
-	
-	private static final int LABEL_BASEFLAGS= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS;
 	
 	private HierarchyLabelProvider fLabelProvider;
 	

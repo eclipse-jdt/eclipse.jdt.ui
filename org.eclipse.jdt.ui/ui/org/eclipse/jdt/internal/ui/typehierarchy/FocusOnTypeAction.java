@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -26,7 +25,6 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 public class FocusOnTypeAction extends Action {
 			
 	private TypeHierarchyViewPart fViewPart;
-	private ISelectionProvider fSelectionProvider;
 	
 	public FocusOnTypeAction(TypeHierarchyViewPart part) {
 		super(TypeHierarchyMessages.getString("FocusOnTypeAction.label")); //$NON-NLS-1$

@@ -41,15 +41,18 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */		
-	public void updateContent() {
+	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
-		TraditionalHierarchyContentProvider contentProvider= (TraditionalHierarchyContentProvider) getContentProvider();
-		int expandLevel= contentProvider.getExpandLevel();
-		if (isMethodFiltering()) {
-			expandLevel++;
+		
+		if (expand) {
+			TraditionalHierarchyContentProvider contentProvider= (TraditionalHierarchyContentProvider) getContentProvider();
+			int expandLevel= contentProvider.getExpandLevel();
+			if (isMethodFiltering()) {
+				expandLevel++;
+			}
+			expandToLevel(expandLevel);
 		}
-		expandToLevel(expandLevel);
 		getTree().setRedraw(true);
 	}	
 

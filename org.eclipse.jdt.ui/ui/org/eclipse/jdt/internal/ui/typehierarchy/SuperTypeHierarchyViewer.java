@@ -36,10 +36,12 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */	
-	public void updateContent() {
+	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
-		expandAll();
+		if (expand) {
+			expandAll();
+		}
 		getTree().setRedraw(true);
 	}
 	

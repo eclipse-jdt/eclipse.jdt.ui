@@ -36,14 +36,17 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */
-	public void updateContent() {
+	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
-		int expandLevel= 2;
-		if (isMethodFiltering()) {
-			expandLevel++;
+		
+		if (expand) {
+			int expandLevel= 2;
+			if (isMethodFiltering()) {
+				expandLevel++;
+			}
+			expandToLevel(expandLevel);
 		}
-		expandToLevel(expandLevel);
 		getTree().setRedraw(true);
 	}
 	
