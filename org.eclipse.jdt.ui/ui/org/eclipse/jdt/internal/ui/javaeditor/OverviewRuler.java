@@ -432,6 +432,7 @@ public class OverviewRuler {
 				fTextViewer.revealRange(p.getOffset(), p.getLength());
 				fTextViewer.setSelectedRange(p.getOffset(), p.getLength());
 			}
+			fTextViewer.getTextWidget().setFocus();
 		}
 	}
 }
