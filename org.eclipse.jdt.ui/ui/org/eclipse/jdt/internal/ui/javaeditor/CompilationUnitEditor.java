@@ -112,65 +112,22 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.StructureSelectEnclosingAction;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.StructureSelectHistoryAction;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.StructureSelectNextAction;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.StructureSelectPreviousAction;
-import org
-	.eclipse
-	.jdt
-	.internal
-	.ui
-	.javaeditor
-	.selectionactions
-	.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
-
-
 
 /**
  * Java specific text editor.
@@ -400,6 +357,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return false;
 			return super.requestWidgetToken(requester);
 		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
+		 */
+		public void configure(SourceViewerConfiguration configuration) {
+			super.configure(configuration);
+			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
+		}
+
 	};
 	
 	static class TabConverter implements ITextConverter {

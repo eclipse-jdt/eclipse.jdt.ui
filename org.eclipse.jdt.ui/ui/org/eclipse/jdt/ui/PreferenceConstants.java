@@ -726,6 +726,16 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public final static String EDITOR_CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether the 'close braces' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_CLOSE_BRACES= "closeBraces"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the 'close java docs' feature is
@@ -1668,15 +1678,15 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 
+		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
+		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACES, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, true);
-
-		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_DEFAULT_HOVER, JavaPlugin.ID_BESTMATCH_HOVER);
 		store.setDefault(PreferenceConstants.EDITOR_NONE_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
