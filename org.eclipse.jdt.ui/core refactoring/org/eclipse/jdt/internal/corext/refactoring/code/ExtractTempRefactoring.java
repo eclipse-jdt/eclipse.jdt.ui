@@ -137,10 +137,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 7); //$NON-NLS-1$
-			if (fSelectionStart < 0)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression")); //$NON-NLS-1$
-			pm.worked(1);
+			pm.beginTask("", 6); //$NON-NLS-1$
 			
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
 			if (result.hasFatalError())
