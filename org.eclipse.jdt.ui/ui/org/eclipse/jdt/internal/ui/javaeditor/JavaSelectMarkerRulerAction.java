@@ -79,9 +79,12 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation) iter.next();
 			if (annotation instanceof IJavaAnnotation) {
-				Position position= model.getPosition(annotation);
-				if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections((IJavaAnnotation) annotation))
-					return position;
+				IJavaAnnotation javaAnnotation= (IJavaAnnotation)annotation;
+				if (javaAnnotation.isRelevant()) {
+					Position position= model.getPosition(annotation);
+					if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(javaAnnotation))
+						return position;
+				}
 			}
 		}
 		return null;
