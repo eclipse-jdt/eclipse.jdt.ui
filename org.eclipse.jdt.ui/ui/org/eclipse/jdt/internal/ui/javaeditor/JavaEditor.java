@@ -354,7 +354,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		/**
 		 * Initialize with the given options.
 		 * 
-		 * @param options The options to wrap.
+		 * @param options The options to wrap
+		 * @param mockupPreferenceStore the mockup preference store
+		 * @param filter the property change filter
 		 */
 		public OptionsAdapter(Map options, IPreferenceStore mockupPreferenceStore, IPropertyChangeEventFilter filter) {
 			fMockupPreferenceStore= mockupPreferenceStore;
@@ -827,7 +829,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 		/**
 		 * Creates a color from the information stored in the given preference store.
-		 * Returns <code>null</code> if there is no such information available.
+		 * 
+		 * @param store the preference store
+		 * @param key the key
+		 * @param display the display
+		 * @return the color or <code>null</code> if there is no such information available 
 		 */
 		private Color createColor(IPreferenceStore store, String key, Display display) {
 		
@@ -1356,6 +1362,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		/**
 		 * Creates a dispatch action.
+		 * 
+		 * @param resourceBundle the resource bundle
+		 * @param prefix the prefix
+		 * @param textOperationAction the text operation action
 		 */
 		public InformationDispatchAction(ResourceBundle resourceBundle, String prefix, final TextOperationAction textOperationAction) {
 			super(resourceBundle, prefix, JavaEditor.this);
@@ -1575,7 +1585,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			
-				// Check whether we are in a java code partititon and the preference is enabled
+				// Check whether we are in a java code partition and the preference is enabled
 				final IPreferenceStore store= getNewPreferenceStore();
 				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
@@ -1754,7 +1764,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - 1;
 			
-				// Check whether we are in a java code partititon and the preference is enabled
+				// Check whether we are in a java code partition and the preference is enabled
 				final IPreferenceStore store= getNewPreferenceStore();
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
@@ -2095,12 +2105,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	abstract protected IJavaElement getElementAt(int offset);
 	
 	/**
-	 * Returns the java element of this editor's input corresponding to the given IJavaElement
+	 * Returns the java element of this editor's input corresponding to the given IJavaElement.
+	 * 
+	 * @param element the java element
+	 * @return the corresponding Java element
 	 */
 	abstract protected IJavaElement getCorrespondingElement(IJavaElement element);
 	
 	/**
 	 * Sets the input of the editor's outline page.
+	 * 
+	 * @param page the Java outline page
+	 * @param input the editor input
 	 */
 	abstract protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input);
 	
@@ -2175,6 +2191,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * Creates and returns the preference store for this Java editor with the given input.
 	 *
 	 * @param input The editor input for which to create the preference store
+	 * @return the preference store for this editor
 	 *
 	 * @since 3.0
 	 */
@@ -2209,13 +2226,17 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 	/**
 	 * Sets the outliner's context menu ID.
+	 * 
+	 * @param menuId the menu ID 
 	 */
 	protected void setOutlinerContextMenuId(String menuId) {
 		fOutlinerContextMenuId= menuId;
 	}
 			
 	/**
-	 *  Returns the standard action group of this editor.
+	 * Returns the standard action group of this editor.
+	 * 
+	 * @return returns this editor's standard action group 
 	 */
 	protected ActionGroup getActionGroup() {
 		return fActionGroups;
@@ -2238,6 +2259,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	
 	/**
 	 * Creates the outline page used with this editor.
+	 * 
+	 * @return the created Java outline page
 	 */
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= new JavaOutlinePage(fOutlinerContextMenuId, this);
@@ -2461,7 +2484,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		IJavaElement corresponding= getCorrespondingElement(element);
 		if (corresponding instanceof ISourceReference) {
 			ISourceReference reference= (ISourceReference) corresponding;
-			// set hightlight range
+			// set highlight range
 			setSelection(reference, true);
 			// set outliner selection
 			if (fOutlinePage != null) {
@@ -2922,7 +2945,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * Returns a segmentation of the given line appropriate for bidi rendering. The default
 	 * implementation returns only the string literals of a java code line as segments.
 	 * 
-	 * @param lineOffset the offset of the line
+	 * @param widgetLineOffset the offset of the line
 	 * @param line the content of the line
 	 * @return the line's bidi segmentation
 	 */
@@ -3117,7 +3140,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			} catch (IllegalAccessException x) {
 			} catch (InvocationTargetException x) {
 			}
-			// ignore exceptions, don't update any of the lists, just set statusline
+			// ignore exceptions, don't update any of the lists, just set status line
 		}			
 	}
 	
@@ -3234,7 +3257,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	/**
 	 * Updates the occurrences annotations based
 	 * on the current selection.
-	 *
+	 * 
+	 * @param selection the text selection
+	 * @param astRoot the compilation unit AST
 	 * @since 3.0
 	 */
 	protected void updateOccurrenceAnnotations(ITextSelection selection, CompilationUnit astRoot) {
@@ -3461,7 +3486,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * </p>
 	 * 
 	 * @param sourceViewer the source viewer
-	 * @return a region denoting the current signed selection, for a resulting RtoL selections lenght is < 0 
+	 * @return a region denoting the current signed selection, for a resulting RtoL selections length is < 0 
 	 */
 	protected IRegion getSignedSelection(ISourceViewer sourceViewer) {
 		StyledText text= sourceViewer.getTextWidget();
