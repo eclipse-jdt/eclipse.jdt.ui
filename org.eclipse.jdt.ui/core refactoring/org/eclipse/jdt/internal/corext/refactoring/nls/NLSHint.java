@@ -56,7 +56,12 @@ public class NLSHint {
 		
 		AccessorClassReference firstAccessInfo= findFirstAccessorReference(lines, astRoot);
 		
-		Properties props= firstAccessInfo != null ? NLSHintHelper.getProperties(project, firstAccessInfo.getBinding()) : new Properties();
+		Properties props= null;
+		if (firstAccessInfo != null)
+			props= NLSHintHelper.getProperties(project, firstAccessInfo.getBinding());
+		
+		if (props == null)
+			props= new Properties();
 		
 		fSubstitutions= createSubstitutions(lines, props, astRoot);
 		
@@ -95,7 +100,7 @@ public class NLSHint {
 				if (nlsElement.hasTag()) {
 					AccessorClassReference accessorClassReference= NLSHintHelper.getAccessorClassReference(astRoot, nlsElement);
 					if (accessorClassReference == null) {
-						// no accessorclass => not translated				        
+						// no accessor class => not translated				        
 						result.add(new NLSSubstitution(NLSSubstitution.IGNORED, stripQuotes(nlsElement.getValue()), nlsElement));
 					} else {
 						String key= stripQuotes(nlsElement.getValue());

@@ -96,7 +96,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		
 		Properties properties= NLSHintHelper.getProperties(je.getJavaProject(), ref.getBinding());
 		
-		if (properties.isEmpty())
+		if (properties == null || properties.isEmpty())
 			return null;
 		
 		String value= properties.getProperty(stringLiteral.getLiteralValue(), null);

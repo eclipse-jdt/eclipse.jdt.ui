@@ -235,9 +235,17 @@ public class NLSHintHelper {
 		return null;
 	}
 	
-	public static Properties getProperties(IJavaProject project, ITypeBinding accessorBinding) {
+	/**
+	 * Reads the properties from the given storage and
+	 * returns it.
+	 * 
+	 * @param javaProject the Java project
+	 * @param accessorBinding the accessor binding
+	 * @return the properties or <code>null</code> if it was not successfully read
+	 */
+	public static Properties getProperties(IJavaProject javaProject, ITypeBinding accessorBinding) {
 		try {
-			IStorage storage= NLSHintHelper.getResourceBundle(project, accessorBinding);
+			IStorage storage= NLSHintHelper.getResourceBundle(javaProject, accessorBinding);
 			return getProperties(storage);
 		} catch (JavaModelException ex) {
 			// sorry no properties
@@ -245,6 +253,13 @@ public class NLSHintHelper {
 		}
 	}
 	
+	/**
+	 * Reads the properties from the given storage and
+	 * returns it.
+	 * 
+	 * @param storage the storage
+	 * @return the properties or <code>null</code> if it was not successfully read
+	 */
 	public static Properties getProperties(IStorage storage) {
 		if (storage == null)
 			return null;
@@ -270,12 +285,15 @@ public class NLSHintHelper {
 			
 		} catch (IOException e) {
 			// sorry no properties
+			return null;
 		} catch (CoreException e) {
 			// sorry no properties
+			return null;
 		} finally {
 			if (is != null) try {
 				is.close();
 			} catch (IOException e) {
+				// return properties anyway but log
 				JavaPlugin.log(e);
 			}
 		}
