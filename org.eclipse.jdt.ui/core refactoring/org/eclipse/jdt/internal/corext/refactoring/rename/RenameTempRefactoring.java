@@ -41,11 +41,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAnalyzer;
 
 public class RenameTempRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	
+	private final int fSelectionStart;
+	private final int fSelectionLength;
+	private final ICompilationUnit fCu;
+	
+	//the following fields are set or modified after the construction
 	private boolean fUpdateReferences;
-	private int fSelectionStart;
-	private int fSelectionLength;
-	private int fSelectionEnd;
-	private ICompilationUnit fCu;
 	private String fCurrentName;
 	private String fNewName;
 	private LocalDeclaration fTempDeclaration;
@@ -53,10 +54,12 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private Map fAlreadyUsedNames;//String -> ISourceRange
 	
 	public RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		Assert.isTrue(selectionStart >= 0);
+		Assert.isTrue(selectionLength >= 0);
+		Assert.isTrue(cu.exists());
 		fUpdateReferences= true;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
 		fCu= cu;
 	}
 	
@@ -85,7 +88,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 * @see IReferenceUpdatingRefactoring#setUpdateReferences()
 	 */
 	public void setUpdateReferences(boolean updateReferences) {
-		fUpdateReferences = updateReferences;
+		fUpdateReferences= updateReferences;
 	}
 	
 	/*
@@ -110,19 +113,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		return fCurrentName;
 	}
 
-	/*
-	 * @see IRenameRefactoring#checkNewName()
-	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkFieldName(fNewName));
-		if (! Checks.startsWithLowerCase(fNewName))
-			result.addWarning("By convention, all names of  local variables start with lowercase letters.");
-		if (fAlreadyUsedNames.containsKey(fNewName))
-			result.addError("Name '" + fNewName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(fNewName)));
-		return result;		
-	}
-
 	//--- preconditions 
 		
 	/* non java-doc
@@ -141,30 +131,28 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	
 		return checkSelection();	
 	}
+
+	/*
+	 * @see IRenameRefactoring#checkNewName()
+	 */
+	public RefactoringStatus checkNewName() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(Checks.checkFieldName(fNewName));
+		if (! Checks.startsWithLowerCase(fNewName))
+			result.addWarning("By convention, all names of  local variables start with lowercase letters.");
+		if (fAlreadyUsedNames.containsKey(fNewName))
+			result.addError("Name '" + fNewName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(fNewName)));
+		return result;		
+	}
 	
-	private RefactoringStatus checkSelection()throws JavaModelException {
-		SelectionAnalyzer analyzer= createSelectionValidator();
+	private RefactoringStatus checkSelection() throws JavaModelException {
 		fAST= new AST(fCu);
-		fAST.accept(analyzer.getParentTracker());
-		
-		RefactoringStatus errorStatus= RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
-		AstNode[] selected= analyzer.getSelectedNodes();
-		if (selected == null || selected.length != 1){
-			return errorStatus;
-		} else if (selected[0] instanceof LocalDeclaration && (!(selected[0] instanceof Argument))){
-			initializeTempDeclaration((LocalDeclaration)selected[0]);
-			return new RefactoringStatus();
-		} else if (selected[0] instanceof NameReference){
-			NameReference reference= (NameReference)selected[0];
-			if (reference.binding instanceof LocalVariableBinding){
-				LocalVariableBinding localBinding= (LocalVariableBinding)reference.binding;
-				if (! localBinding.isArgument){
-					initializeTempDeclaration(localBinding.declaration);
-					return new RefactoringStatus();
-				}	
-			}
-		}
-		return errorStatus;		
+		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
+		if (local == null)
+			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+
+		initializeTempDeclaration(local);
+		return new RefactoringStatus();
 	}
 	
 	private void initializeTempDeclaration(LocalDeclaration localDeclaration){
@@ -173,10 +161,12 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		fCurrentName= fTempDeclaration.name();		
 	}
 	
+	//String -> ISourceRange
 	private static Map getLocalNames(LocalDeclaration localDeclaration){
 		return getLocalNames(localDeclaration.binding.declaringScope);
 	}
 	
+	//String -> ISourceRange
 	private static Map getLocalNames(BlockScope scope){
 		if (scope.locals == null)
 			return new HashMap(0);
@@ -202,41 +192,13 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		}	
 		return result;	
 	}
-	
-	private SelectionAnalyzer createSelectionValidator() 	throws JavaModelException {
-		/*
-		 * overriding is needed to support activation when only a part of the LocalDeclaration node is selected
-		 */
-		return new SelectionAnalyzer(fCu.getBuffer(), fSelectionStart, fSelectionLength){
-			private AstNode fNode;
-			
-			public boolean visit(LocalDeclaration node, BlockScope scope) {
-				int start= node.declarationSourceStart;
-				int end= node.sourceEnd();
-				if (fSelection.start >= start && fSelection.end <= end ){
-					fNode= node;
-					return true;
-				}
-				return super.visit(node, scope);
-			}
-			public AstNode[] getSelectedNodes() {
-				if (fNode != null)
-					return new AstNode[]{fNode};
-				return super.getSelectedNodes();	
-			}
-		};
-	}
-	
+		
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm)	throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
-		
-//			if (Arrays.asList(getUnsavedFiles()).contains(Refactoring.getResource(fCu)))
-//					return RefactoringStatus.createFatalErrorStatus("Compilation unit '" + fCu.getElementName() + "'  must be saved before this refactoring.");
-			
+			pm.beginTask("", 1);	
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName());
 			result.merge(analyzeAST());
@@ -284,7 +246,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		RenameTempOccurrenceOffsetFinder offsetFinder= new RenameTempOccurrenceOffsetFinder(fTempDeclaration, fUpdateReferences);
+		TempOccurrenceFinder offsetFinder= new TempOccurrenceFinder(fTempDeclaration, fUpdateReferences, true);
 		fAST.accept(offsetFinder);
 		return offsetFinder.getOccurrenceOffsets();
 	}
