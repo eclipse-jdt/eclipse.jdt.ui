@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
@@ -69,7 +70,7 @@ public class NLSScanner {
 		return (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
 	}
 	
-	private static void parseTags(NLSLine line, Scanner scanner) throws InvalidInputException {
+	private static void parseTags(NLSLine line, IScanner scanner) throws InvalidInputException {
 		String s= new String(scanner.getCurrentTokenSource());
 		int pos= s.indexOf(NLSElement.TAG_PREFIX);
 		while (pos != -1) {
@@ -87,7 +88,7 @@ public class NLSScanner {
 			}
 			if (line.exists(i)) {
 				NLSElement element= line.get(i);
-				element.setTagPosition(scanner.startPosition + pos, end - pos + 1);
+				element.setTagPosition(scanner.getCurrentTokenStartPosition() + pos, end - pos + 1);
 			} else {
 				return; //no error recovery
 			}
