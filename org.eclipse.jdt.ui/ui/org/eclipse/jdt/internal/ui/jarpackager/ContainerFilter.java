@@ -6,14 +6,9 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import org.eclipse.core.resources.IContainer;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 

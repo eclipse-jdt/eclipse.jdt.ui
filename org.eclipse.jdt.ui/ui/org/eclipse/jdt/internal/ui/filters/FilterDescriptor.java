@@ -12,43 +12,28 @@ package org.eclipse.jdt.internal.ui.filters;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.search.ui.ISearchPageScoreComputer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
-
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Represents a custom filter which is provided by the

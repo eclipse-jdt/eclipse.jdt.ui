@@ -12,9 +12,7 @@ Contributors:
 package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -59,12 +57,12 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
+
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-
-import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 
 /**
  * The Java working set page allows the user to create

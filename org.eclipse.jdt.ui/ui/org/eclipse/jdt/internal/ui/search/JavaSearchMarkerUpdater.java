@@ -4,13 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Position;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.ui.texteditor.IMarkerUpdater;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -19,7 +20,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaSearchMarkerUpdater implements IMarkerUpdater {

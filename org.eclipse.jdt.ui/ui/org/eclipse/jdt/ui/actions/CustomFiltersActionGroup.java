@@ -394,7 +394,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			return;
 		List userDefinedPatterns= new ArrayList(Arrays.asList(fUserDefinedPatterns));
 		FilterDescriptor[] filters= FilterDescriptor.getFilterDescriptors(fPart.getViewSite().getId());
-		Set filtersIdsToEnable= new HashSet(filters.length);
 
 		for (int i= 0; i < filters.length; i++) {
 			if (filters[i].isPatternFilter()) {

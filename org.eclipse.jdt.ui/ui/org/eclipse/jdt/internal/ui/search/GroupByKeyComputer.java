@@ -5,15 +5,12 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.search.ui.IGroupByKeyComputer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class GroupByKeyComputer implements IGroupByKeyComputer {

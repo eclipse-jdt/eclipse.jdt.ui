@@ -4,11 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
@@ -16,10 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -37,9 +31,10 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.ui.browsing.JavaElementTypeComparator;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * This class contains some utility methods for J Search.
