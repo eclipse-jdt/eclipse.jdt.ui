@@ -1941,9 +1941,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * Quick format action to format the enclosing java element.
+	 * Format element action to format the enclosing java element.
 	 * <p>
-	 * The quick format action works as follows:
+	 * The format element action works as follows:
 	 * <ul>
 	 * <li>If there is no selection and the caret is positioned on a Java element,
 	 * only this element is formatted. If the element has some accompanying comment,
@@ -1955,7 +1955,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.0
 	 */
-	protected class QuickFormatAction extends Action {
+	protected class FormatElementAction extends Action {
 
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
@@ -2894,9 +2894,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 		
-		action= new QuickFormatAction();
+		action= new FormatElementAction();
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
-		setAction(IJavaEditorActionDefinitionIds.QUICK_FORMAT, action);
+		setAction("QuickFormat", action); //$NON-NLS-1$
 
 		action= new RemoveOccurrenceAnnotations(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);

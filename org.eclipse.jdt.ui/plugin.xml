@@ -1777,6 +1777,13 @@
                id="org.eclipse.jdt.ui.actions.Indent">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.quick.format"
+               label="%FormatElementAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+               id="org.eclipse.jdt.ui.actions.FormatElement">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.format"
                label="%FormatAction.label"
                retarget="true"
@@ -2469,6 +2476,18 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
+            string="Ctrl+/"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Ctrl+7"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
             platform="carbon"
             string="Ctrl+Shift+C"
             scope="org.eclipse.jdt.ui.javaEditorScope"
@@ -2478,6 +2497,34 @@
       <keyBinding
             platform="carbon"
             string="Command+Shift+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Ctrl+/"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+/"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Ctrl+7"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+7"
             scope="org.eclipse.jdt.ui.javaEditorScope"
             command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">

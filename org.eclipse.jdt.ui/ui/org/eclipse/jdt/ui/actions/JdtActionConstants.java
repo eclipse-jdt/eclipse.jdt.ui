@@ -157,6 +157,13 @@ public class JdtActionConstants {
 	public static final String FORMAT= "org.eclipse.jdt.ui.actions.Format"; //$NON-NLS-1$
 	
 	/**
+	 * Source menu: name of standard Format Element global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.FormatElement"</code>).
+	 * @since 3.0
+	 */
+	public static final String FORMAT_ELEMENT= "org.eclipse.jdt.ui.actions.FormatElement"; //$NON-NLS-1$
+	
+	/**
 	 * Source menu: name of standard Add Import global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.AddImport"</code>).
 	 */
