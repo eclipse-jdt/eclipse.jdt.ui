@@ -93,6 +93,7 @@
 
 return ${name};</template>
 <template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
+<template name="non-nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true">//$$NON-NLS$$-${N}</template>
 <template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java" enabled="true">System.out.println(${word_selection}${});${cursor}</template>
 <template name="syserr" description="%Templates.syserr" id="org.eclipse.jdt.ui.templates.syserr" context="java" enabled="true">System.err.println(${word_selection}${});${cursor}</template>
 <template name="&lt;code&gt;" description="%Templates.code_tag" id="org.eclipse.jdt.ui.templates.code_tag" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${}&lt;/code&gt;${cursor}</template>
