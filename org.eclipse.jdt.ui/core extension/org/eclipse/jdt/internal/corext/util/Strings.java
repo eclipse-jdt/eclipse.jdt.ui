@@ -354,5 +354,15 @@ public class Strings {
 		}
 		return buffer.toString();
 	}
+	
+	public static boolean equals(String s, char[] c) {
+		if (s.length() != c.length)
+			return false;
+
+		for (int i = c.length; --i >= 0;)
+			if (s.charAt(i) != c[i])
+				return false;
+		return true;
+	}
 }
 

@@ -1,53 +1,91 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+public abstract class TypeInfo {
 
-public class TypeInfo {
-
-	private final String fName;
-	private final String fPackage;
-	private final char[][] fEnclosingNames;
-	private final boolean fIsInterface;
-	private final String fPath;
-
-	public TypeInfo(char[] pkg, char[] name, char[][] enclosingTypes, String path, boolean isInterface) {
-		this(new String(pkg), new String(name), enclosingTypes, path, isInterface);
-	}
+	final String fName;
+	final String fPackage;
+	final char[][] fEnclosingNames;
+	final boolean fIsInterface;
 	
-	public TypeInfo(String pkg, String name, char[][] enclosingTypes, String path, boolean isInterface) {
-		fPath= path;
+	public static final int DEFAULT_TYPE_INFO= 1;
+	public static final int JAR_FILE_ENTRY_TYPE_INFO= 2;
+	public static final int IFILE_TYPE_INFO= 3;
+	
+	static final char SEPARATOR= '/';
+	static final char EXTENSION_SEPARATOR= '.';
+	static final char PACKAGE_PART_SEPARATOR='.';
+	
+	protected TypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface) {
 		fPackage= pkg;
 		fName= name;
 		fIsInterface= isInterface;
 		fEnclosingNames= enclosingTypes;
 	}	
 	
+	/**
+	 * Returns this type info's kind encoded as an integer.
+	 * 
+	 * @return the type info's kind
+	 */
+	public abstract int getElementType();
+	
+	/**
+	 * Returns the path reported by the <tt>ITypeNameRequestor</tt>.
+	 * 
+	 * @return the path of the type info
+	 */
+	protected abstract String getPath();
+	
+	/**
+	 * Returns the <tt>IJavaElement</tt> this type info stands for.
+	 *  
+	 * @param scope the scope used to resolve the <tt>IJavaElement</tt>.
+	 * @return the <tt>IJavaElement</tt> this info stands for.
+	 * @throws JavaModelException if an error occurs while access the Java
+	 * model.
+	 */
+	protected abstract IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException;
+	
+	/**
+	 * Returns the package fragment root path of this type info.
+	 * 
+	 * @return the package fragment root as an <tt>IPath</tt>.
+	 */
+	public abstract IPath getPackageFragmentRootPath();
+	
+	/**
+	 * Returns the type name.
+	 * 
+	 * @return the info's type name.
+	 */
 	public String getTypeName() {
 		return fName;
 	}
-	 
+	
+	/**
+	 * Returns the package name.
+	 * 
+	 * @return the info's package name.
+	 */ 
 	public String getPackageName() {
 		return fPackage;
 	}
@@ -63,7 +101,7 @@ public class TypeInfo {
 	 * Returns true if the info is enclosed in the given scope
 	 */
 	public boolean isEnclosed(IJavaSearchScope scope) {
-		return scope.encloses(fPath);
+		return scope.encloses(getPath());
 	}
 
 	/**
@@ -142,27 +180,6 @@ public class TypeInfo {
 	}	
 	
 	/**
-	 * Contructs the package fragment root name from the type ref path.
-	 */	
-	public IPath getPackageFragmentRootPath() {
-		int index= fPath.indexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
-		if (index > 0) {
-			return new Path(fPath.substring(0, index));
-		} else {
-			int removeSegments= 1; // the file name
-			int packNameLen= fPackage.length();
-			if (packNameLen > 0) {
-				removeSegments++;
-				for (int i= 0; i < packNameLen; i++) {
-					if (fPackage.charAt(i) == '.')
-						removeSegments++;
-				}
-			}
-			return (new Path(fPath)).removeLastSegments(removeSegments);
-		}
-	}	
-	
-	/**
 	 * Resolves the type in a scope if was searched for.
 	 * The parent project of JAR files is the first project found in scope.
 	 * Returns null if the type could not be resolved
@@ -176,53 +193,13 @@ public class TypeInfo {
 		return null;
 	}
 
-	private IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		int index= fPath.indexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
-		if (index > 0) 
-			return findJarInScope(root, scope, fPath.substring(0, index), new Path(fPath.substring(index + 1)));
-		else 
-			return findInFile(root);
-	}
-
-	private IJavaElement findJarInScope(IWorkspaceRoot workspaceRoot, IJavaSearchScope scope, String jarPath, IPath elementPath) throws JavaModelException {
-		IJavaModel jmodel= JavaCore.create(workspaceRoot);
-		IPath[] enclosedPaths= scope.enclosingProjectsAndJars();
-		for (int i= 0; i < enclosedPaths.length; i++) {
-			IPath curr= enclosedPaths[i];
-			if (curr.segmentCount() == 1) {
-				IJavaProject jproject= jmodel.getJavaProject(curr.segment(0));
-				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(jarPath);
-				if (root.exists()) {
-					return jproject.findElement(elementPath);
-				}
-			}
-		}
-		List paths= Arrays.asList(enclosedPaths);
-		IJavaProject[] projects= jmodel.getJavaProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IJavaProject jproject= projects[i];
-			if (!paths.contains(jproject.getPath())) {
-				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(jarPath);
-				if (root.exists()) {
-					return jproject.findElement(elementPath);
-				}
-			}
-		}
-		return null;
-	}	
-	
-	private IJavaElement findInFile(IWorkspaceRoot root) throws JavaModelException {
-		return JavaCore.create(root.findMember(new Path(fPath)));
-	}	
-		
 	/* non java-doc
 	 * debugging only
 	 */		
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("path= "); //$NON-NLS-1$
-		buf.append(fPath);
+		buf.append(getPath());
 		buf.append("; pkg= "); //$NON-NLS-1$
 		buf.append(fPackage);
 		buf.append("; enclosing= "); //$NON-NLS-1$

@@ -13,6 +13,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -27,6 +29,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.IFileTypeInfo;
+import org.eclipse.jdt.internal.corext.util.JarFileEntryTypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
@@ -168,4 +173,85 @@ public class TypeInfoTest extends TestCase {
 			}
 		}
 	}
+	
+	public void testNoSourceFolder() throws Exception {
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "");
+		IPackageFragment pack1= root.createPackageFragment("", true, null);
+		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
+		cu1.createType("public class A {\n}\n", null, true, null);		
+
+		IPackageFragment pack2= root.createPackageFragment("org.eclipse", true, null);
+		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
+		cu2.createType("public class B {\n}\n", null, true, null);
+		
+		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		for (int i= 0; i < result.length; i++) {
+			TypeInfo info= result[i];
+			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
+				IFileTypeInfo fileInfo= (IFileTypeInfo)info;
+				if (info.getTypeName().equals("A")) {
+					assertEquals(info.getPackageName(), "");
+					assertEquals(fileInfo.getProject(), "TestProject1");
+					assertNull(fileInfo.getFolder());
+					assertEquals(fileInfo.getFileName(), "A");
+					assertEquals(fileInfo.getExtension(), "java");
+				} else if (info.getTypeName().equals("B")) {
+					assertEquals(info.getPackageName(), "org.eclipse");
+					assertEquals(fileInfo.getProject(), "TestProject1");
+					assertNull(fileInfo.getFolder());
+					assertEquals(fileInfo.getFileName(), "B");
+					assertEquals(fileInfo.getExtension(), "java");
+				}
+			}
+		}
+	}
+
+	public void testSourceFolder() throws Exception {
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= root.createPackageFragment("", true, null);
+		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
+		cu1.createType("public class A {\n}\n", null, true, null);		
+
+		IPackageFragment pack2= root.createPackageFragment("org.eclipse", true, null);
+		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
+		cu2.createType("public class B {\n}\n", null, true, null);
+		
+		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		for (int i= 0; i < result.length; i++) {
+			TypeInfo info= result[i];
+			if (info.getElementType() == TypeInfo.IFILE_TYPE_INFO) {
+				IFileTypeInfo fileInfo= (IFileTypeInfo)info;
+				if (info.getTypeName().equals("A")) {
+					assertEquals(info.getPackageName(), "");
+					assertEquals(fileInfo.getProject(), "TestProject1");
+					assertEquals(fileInfo.getFolder(), "src");
+					assertEquals(fileInfo.getFileName(), "A");
+					assertEquals(fileInfo.getExtension(), "java");
+				} else if (info.getTypeName().equals("B")) {
+					assertEquals(info.getPackageName(), "org.eclipse");
+					assertEquals(fileInfo.getProject(), "TestProject1");
+					assertEquals(fileInfo.getFolder(), "src");
+					assertEquals(fileInfo.getFileName(), "B");
+					assertEquals(fileInfo.getExtension(), "java");
+				}
+			}
+		}
+	}
+	
+	public void testJar() throws Exception {
+		TypeInfo[] result= AllTypesCache.getAllTypes(new NullProgressMonitor());
+		for (int i= 0; i < result.length; i++) {
+			TypeInfo info= result[i];
+			if (info.getElementType() == TypeInfo.JAR_FILE_ENTRY_TYPE_INFO) {
+				JarFileEntryTypeInfo jarInfo= (JarFileEntryTypeInfo)info;
+				if (info.getTypeName().equals("Object")) {
+					assertEquals(info.getPackageName(), "java.lang");
+					assertTrue(jarInfo.getJar().endsWith("rtstubs.jar"));
+					assertEquals(jarInfo.getFileName(), "Object");
+					assertEquals(jarInfo.getExtension(), "class");
+				}
+			}
+		}		
+	}
+
 }
