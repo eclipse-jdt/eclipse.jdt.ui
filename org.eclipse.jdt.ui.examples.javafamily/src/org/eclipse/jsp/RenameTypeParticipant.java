@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -37,10 +38,10 @@ public class RenameTypeParticipant extends RenameParticipant {
 	private IType fType;
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor, java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object element) {
-		super.initialize(refactoring);
+	public void initialize(IRefactoringProcessor processor, Object element) throws CoreException {
+		super.initialize(processor);
 		fType= (IType)element;
 	}
 
@@ -101,7 +102,8 @@ public class RenameTypeParticipant extends RenameParticipant {
 		String currentName= fType.getFullyQualifiedName();
 		int pos= currentName.lastIndexOf('.');
 		if (pos == -1)
-			return getRefactoring().getNewName();
-		return currentName.substring(0, pos + 1) + getRefactoring().getNewName();
+			return getNewName();
+		return currentName.substring(0, pos + 1) + getNewName();
 	}
+
 }
