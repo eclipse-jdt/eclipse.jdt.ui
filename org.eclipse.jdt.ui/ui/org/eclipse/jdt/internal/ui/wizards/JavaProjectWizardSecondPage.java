@@ -148,14 +148,21 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					final IPath projectPath= fCurrProject.getFullPath();
 
 					// configure the classpath entries, including the default jre library.
-					final List cpEntries= new ArrayList();
+					List cpEntries= new ArrayList();
 					cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
 					cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
-					entries= new IClasspathEntry[cpEntries.size()];
-					cpEntries.toArray(entries);
+					entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
 					
 					// configure the output location
 					outputLocation= projectPath.append(binPath);
+				} else {
+					IPath projectPath= fCurrProject.getFullPath();
+					List cpEntries= new ArrayList();
+					cpEntries.add(JavaCore.newSourceEntry(projectPath));
+					cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+					entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
+
+					outputLocation= projectPath;
 				}
 				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
 			}
