@@ -47,8 +47,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
@@ -61,11 +65,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 /*
  * Open items:
@@ -87,7 +86,6 @@ public class InlineMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fInitialCUnit;
 	private ASTNode fInitialNode;
-	private CodeGenerationSettings fCodeGenerationSettings;
 	private TextChangeManager fChangeManager;
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
@@ -95,38 +93,36 @@ public class InlineMethodRefactoring extends Refactoring {
 	private Mode fCurrentMode;
 	private Mode fInitialMode;
 
-	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node, CodeGenerationSettings settings) {
+	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node) {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(node);
-		Assert.isNotNull(settings);
 		fInitialCUnit= unit;
 		fInitialNode= node;
-		fCodeGenerationSettings= settings;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
-		this(unit, (ASTNode)node, settings);
+	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node) {
+		this(unit, (ASTNode)node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, SuperMethodInvocation node, CodeGenerationSettings settings) {
-		this(unit, (ASTNode)node, settings);
+	private InlineMethodRefactoring(ICompilationUnit unit, SuperMethodInvocation node) {
+		this(unit, (ASTNode)node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, ConstructorInvocation node, CodeGenerationSettings settings) {
-		this(unit, (ASTNode)node, settings);
+	private InlineMethodRefactoring(ICompilationUnit unit, ConstructorInvocation node) {
+		this(unit, (ASTNode)node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
-		this(unit, (ASTNode)node, settings);
+	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node) {
+		this(unit, (ASTNode)node);
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fInitialMode= fCurrentMode= Mode.INLINE_ALL;
@@ -137,18 +133,18 @@ public class InlineMethodRefactoring extends Refactoring {
 		return Checks.isAvailable(method);		
 	}
 	
-	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length, CodeGenerationSettings settings) {
+	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length) {
 		ASTNode node= getTargetNode(unit, offset, length);
 		if (node == null)
 			return null;
 		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (MethodInvocation)node, settings);
+			return new InlineMethodRefactoring(unit, (MethodInvocation)node);
 		} else if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			return new InlineMethodRefactoring(unit, (MethodDeclaration)node, settings);
+			return new InlineMethodRefactoring(unit, (MethodDeclaration)node);
 		} else if (node.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)node, settings);
+			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)node);
 		} else if (node.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (ConstructorInvocation)node, settings);
+			return new InlineMethodRefactoring(unit, (ConstructorInvocation)node);
 		}
 		return null;
 	}
@@ -217,7 +213,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				MultiTextEdit root= new MultiTextEdit();
 				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
 				change.setEdit(root);
-				inliner= new CallInliner(unit, fSourceProvider, fCodeGenerationSettings);
+				inliner= new CallInliner(unit, fSourceProvider);
 				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];

@@ -10,32 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.Hashtable;
-
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-
-public class InlineMethodTestSetup extends TestSetup {
-
-	private IJavaProject fJavaProject;
-	private IPackageFragmentRoot fRoot;
-	private static final String CONTAINER= "src";
+public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 	private IPackageFragment fInvalid;
 	private IPackageFragment fSimple;
@@ -47,46 +27,27 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fReceiver;
 	private IPackageFragment fImport;
 	private IPackageFragment fCast;
+	private IPackageFragment fEnum;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
 	}
 
-	public IPackageFragmentRoot getRoot() {
-		return fRoot;
-	}
-		
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		Hashtable options= TestOptions.getFormatterOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		JavaCore.setOptions(options);
-		TestOptions.initializeCodeGenerationOptions();
-		JavaPlugin.getDefault().getCodeTemplateStore().load();		
-		
-		fJavaProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
-		JavaProjectHelper.addRTJar(fJavaProject);
-		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
-		
-		RefactoringCore.getUndoManager().flush();
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IWorkspaceDescription description= workspace.getDescription();
-		description.setAutoBuilding(false);
-		workspace.setDescription(description);
-		
-		fInvalid= fRoot.createPackageFragment("invalid", true, null);
-		fSimple= fRoot.createPackageFragment("simple_in", true, null);		
-		fArgument= fRoot.createPackageFragment("argument_in", true, null);
-		fNameConflict= fRoot.createPackageFragment("nameconflict_in", true, null);
-		fCall= fRoot.createPackageFragment("call_in", true, null);
-		fExpression= fRoot.createPackageFragment("expression_in", true, null);
-		fControlStatement= fRoot.createPackageFragment("controlStatement_in", true, null);
-		fReceiver= fRoot.createPackageFragment("receiver_in", true, null);
-		fImport= fRoot.createPackageFragment("import_in", true, null);
-		fCast= fRoot.createPackageFragment("cast_in", true, null);
+				
+		IPackageFragmentRoot root= getDefaultSourceFolder();
+		fInvalid= root.createPackageFragment("invalid", true, null);
+		fSimple= root.createPackageFragment("simple_in", true, null);		
+		fArgument= root.createPackageFragment("argument_in", true, null);
+		fNameConflict= root.createPackageFragment("nameconflict_in", true, null);
+		fCall= root.createPackageFragment("call_in", true, null);
+		fExpression= root.createPackageFragment("expression_in", true, null);
+		fControlStatement= root.createPackageFragment("controlStatement_in", true, null);
+		fReceiver= root.createPackageFragment("receiver_in", true, null);
+		fImport= root.createPackageFragment("import_in", true, null);
+		fCast= root.createPackageFragment("cast_in", true, null);
+		fEnum= root.createPackageFragment("enum_in", true, null);
 		
 		fImport.createCompilationUnit(
 			"Provider.java",
@@ -120,21 +81,21 @@ public class InlineMethodTestSetup extends TestSetup {
 			"		List[] lists= null;\n" +
 			"	}\n" +
 			"	public void useInLocalClass() {\n" +
-			"		class Local extends File implements Comparable {\n" +
+			"		class Local extends File {\n" +
+			"			private static final long serialVersionUID = 1L;\n" +
 			"			public Local(String s) {\n" +
 			"				super(s);\n" +
 			"			}\n" +
 			"			public void foo(Map map) {\n" +
 			"			}\n" +
-			"			public int compareTo(Object o) {\n" +
-			"				return 0;\n" +
+			"			public void bar(Byte b) {\n" +
 			"			}\n" +
 			"		}\n" +
 			"	}\n" +
 			"}\n", 
 			true, null);
 			
-			IPackageFragment importUse= fRoot.createPackageFragment("import_use", true, null);
+			IPackageFragment importUse= root.createPackageFragment("import_use", true, null);
 			importUse.createCompilationUnit("List.java",
 			"package import_use;" +
 			"" +
@@ -144,12 +105,6 @@ public class InlineMethodTestSetup extends TestSetup {
 			
 	}
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		RefactoringTest.performDummySearch(fJavaProject);
-		JavaProjectHelper.delete(fJavaProject);
-	}
-	
 	public IPackageFragment getInvalidPackage() {
 		return fInvalid;
 	}
@@ -188,5 +143,9 @@ public class InlineMethodTestSetup extends TestSetup {
 
 	public IPackageFragment getCastPackage() {
 		return fCast;
-	}	
+	}
+	
+	public IPackageFragment getEnumPackage() {
+		return fEnum;
+	}
 }

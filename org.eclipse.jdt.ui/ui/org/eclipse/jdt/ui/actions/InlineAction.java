@@ -139,8 +139,7 @@ public class InlineAction extends SelectionDispatchAction {
 	
 	private boolean tryInlineMethod(ICompilationUnit cu, ITextSelection selection){
 		InlineMethodRefactoring inlineMethodRef= InlineMethodRefactoring.create(
-			cu, selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+			cu, selection.getOffset(), selection.getLength());
 		if (inlineMethodRef == null)	
 			return false;
 		fInlineMethod.run(selection);

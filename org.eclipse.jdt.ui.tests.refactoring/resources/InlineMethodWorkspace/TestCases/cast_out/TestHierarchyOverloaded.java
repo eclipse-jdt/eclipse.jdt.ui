@@ -1,26 +1,26 @@
 package cast_out;
 
-class Woo {
+class Woo1 {
 }
 
-class Zoo extends Woo {
+class Zoo1 extends Woo1 {
 }
 
-class Base {
-	public void foo(Woo w) {
+class Base1 {
+	public void foo(Woo1 w) {
 	}
 }
 
-class Derived extends Base {
-	public void foo(Zoo z) {
+class Derived1 extends Base1 {
+	public void foo(Zoo1 z) {
 	}
 }
 
 public class TestHierarchyOverloaded {
-	public Woo goo() {
-		return new Zoo();
+	public Woo1 goo() {
+		return new Zoo1();
 	}
-	public void main(Derived d) {
-		d.foo((Woo) new Zoo());
+	public void main(Derived1 d) {
+		d.foo((Woo1) new Zoo1());
 	}
 }

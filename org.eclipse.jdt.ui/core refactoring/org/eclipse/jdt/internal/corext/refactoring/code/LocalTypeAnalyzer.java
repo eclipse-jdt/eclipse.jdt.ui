@@ -61,32 +61,18 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 	}
 
 	public boolean visit(TypeDeclaration node) {
-		int mode= fSelection.getVisitSelectionMode(node);
-		switch (mode) {
-			case Selection.BEFORE:
-				fTypeDeclarationsBefore.add(node);
-				break;
-			case Selection.SELECTED:
-				fTypeDeclarationsSelected.add(node);
-				break;
-		}
-		return true;
+		return visitType(node);
 	}
 
 	public boolean visit(AnnotationTypeDeclaration node) {
-		int mode= fSelection.getVisitSelectionMode(node);
-		switch (mode) {
-			case Selection.BEFORE:
-				fTypeDeclarationsBefore.add(node);
-				break;
-			case Selection.SELECTED:
-				fTypeDeclarationsSelected.add(node);
-				break;
-		}
-		return true;
+		return visitType(node);
 	}
 
 	public boolean visit(EnumDeclaration node) {
+		return visitType(node);
+	}
+
+	private boolean visitType(AbstractTypeDeclaration node) {
 		int mode= fSelection.getVisitSelectionMode(node);
 		switch (mode) {
 			case Selection.BEFORE:

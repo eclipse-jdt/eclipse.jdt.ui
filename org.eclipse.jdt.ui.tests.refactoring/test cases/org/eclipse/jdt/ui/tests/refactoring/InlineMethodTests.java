@@ -29,13 +29,9 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
 public class InlineMethodTests extends AbstractSelectionTestCase {
-	private static final boolean BUG_79516= true;
-	
 	private static InlineMethodTestSetup fgTestSetup;
 	
 	public InlineMethodTests(String name) {
@@ -48,7 +44,8 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
+		fgTestSetup= new InlineMethodTestSetup(someTest);
+		return fgTestSetup;
 	}	
 	
 	protected String getResourceLocation() {
@@ -64,8 +61,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
-			unit, selection[0], selection[1],
-			JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject()));
+			unit, selection[0], selection[1]);
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -486,10 +482,6 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 		
 	public void testUseInLocalClass() throws Exception {
-		if (BUG_79516) {
-			System.out.println("testUseInLocalClass disabled (bug 79516)");
-			return;
-		}
 		performImportTest();
 	}	
 
@@ -533,5 +525,19 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testNoCast() throws Exception {
 		performCastTest();
+	}
+	
+	/* *********************** Cast Tests ******************************* */
+
+	private void performEnumTest() throws Exception {
+		performTest(fgTestSetup.getEnumPackage(), getName(), COMPARE_WITH_OUTPUT, "enum_out");
+	}
+	
+	public void testBasic() throws Exception {
+		performEnumTest();
+	}
+	
+	public void testAnonymousEnum() throws Exception {
+		performEnumTest();
 	}
 }

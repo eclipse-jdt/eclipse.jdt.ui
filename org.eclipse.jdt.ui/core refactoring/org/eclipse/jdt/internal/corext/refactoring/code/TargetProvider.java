@@ -29,9 +29,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -198,15 +201,30 @@ abstract class TargetProvider {
 			}
 			return true;
 		}
-		
-		// TODO account for enums and annotations
-	
 		public boolean visit(TypeDeclaration node) {
+			return visitType();
+		}
+		public void endVisit(TypeDeclaration node) {
+			endVisitType();
+		}
+		public boolean visit(EnumDeclaration node) {
+			return visitType();
+		}
+		public void endVisit(EnumDeclaration node) {
+			endVisitType();
+		}
+		public boolean visit(AnnotationTypeDeclaration node) {
+			return visitType();
+		}
+		public void endVisit(AnnotationTypeDeclaration node) {
+			endVisitType();
+		}
+		private boolean visitType() {
 			fBodies.add(fCurrent);
 			fCurrent= null;
 			return true;
 		}
-		public void endVisit(TypeDeclaration node) {
+		private void endVisitType() {
 			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
 		}
 		public boolean visit(FieldDeclaration node) {
@@ -218,7 +236,7 @@ abstract class TargetProvider {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
+			endVisitType();
 		}
 		public boolean visit(MethodDeclaration node) {
 			fBodies.add(fCurrent);
@@ -229,7 +247,7 @@ abstract class TargetProvider {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
+			endVisitType();
 			
 		}
 		public boolean visit(Initializer node) {
@@ -241,7 +259,7 @@ abstract class TargetProvider {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
+			endVisitType();
 		}
 	}
 	
@@ -257,7 +275,7 @@ abstract class TargetProvider {
 		}
 		public void initialize() {
 			InvocationFinder finder= new InvocationFinder(fDeclaration.resolveBinding());
-			ASTNode type= ASTNodes.getParent(fDeclaration, ASTNode.TYPE_DECLARATION);
+			ASTNode type= ASTNodes.getParent(fDeclaration, AbstractTypeDeclaration.class);
 			type.accept(finder);
 			fBodies= finder.result;
 		}

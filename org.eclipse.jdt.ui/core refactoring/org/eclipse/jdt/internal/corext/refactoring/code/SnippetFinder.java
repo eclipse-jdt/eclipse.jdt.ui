@@ -164,7 +164,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		--fTypes;
 		super.endVisit(node);
 	}
-
+	
 	public boolean visit(EnumDeclaration node) {
 		if (++fTypes > 1)
 			return false;
@@ -175,7 +175,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		--fTypes;
 		super.endVisit(node);
 	}
-
+	
 	public boolean visit(AnnotationTypeDeclaration node) {
 		if (++fTypes > 1)
 			return false;

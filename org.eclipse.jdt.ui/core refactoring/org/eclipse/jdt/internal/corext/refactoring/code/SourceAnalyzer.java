@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -143,13 +144,28 @@ class SourceAnalyzer  {
 	private class UpdateCollector extends ASTVisitor {
 		private int fTypeCounter;
 		public boolean visit(TypeDeclaration node) {
+			return visitType(node);
+		}
+		public void endVisit(TypeDeclaration node) {
+			fTypeCounter--;
+		}
+		public boolean visit(EnumDeclaration node) {
+			return visitType(node);
+		}
+		public void endVisit(EnumDeclaration node) {
+			fTypeCounter--;
+		}
+		public boolean visit(AnnotationTypeDeclaration node) {
+			return visitType(node);
+		}
+		public void endVisit(AnnotationTypeDeclaration node) {
+			fTypeCounter--;
+		}
+		private boolean visitType(AbstractTypeDeclaration node) {
 			if (fTypeCounter++ == 0) {
 				addNameData(node.getName());
 			}
 			return true;
-		}
-		public void endVisit(TypeDeclaration node) {
-			fTypeCounter--;
 		}
 		public boolean visit(AnonymousClassDeclaration node) {
 			fTypeCounter++;
@@ -160,7 +176,7 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor()) {
-				TypeDeclaration decl= (TypeDeclaration) ASTNodes.getParent(node, ASTNode.TYPE_DECLARATION);
+				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 				NameData name= (NameData)fNames.get(decl.getName().resolveBinding());
 				if (name != null) {
 					name.addReference(node.getName());
