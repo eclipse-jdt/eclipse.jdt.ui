@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
@@ -38,7 +39,7 @@ public class RefactoringAnalyzeUtil {
 		for (int i= 0; i < edits.length; i++) {
 			change.addTextEdit("", edits[i]);
 		}
-		ICompilationUnit wc= RefactoringAnalyzeUtil.getNewWorkingCopy(cu);
+		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
 		Assert.isTrue(! cu.equals(wc));
 		wc.getBuffer().setContents(change.getPreviewTextBuffer().getContent());
 		return wc;
@@ -131,16 +132,7 @@ public class RefactoringAnalyzeUtil {
 		return getFullBindingKey((VariableDeclaration)declarationNameNode.getParent());
 	}
 
-	private static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
-		return (ICompilationUnit)(getOriginal(cu).getWorkingCopy());
-	}
 
-	private static ICompilationUnit getOriginal(ICompilationUnit cu){
-		if (! cu.isWorkingCopy())
-			return cu;
-		else
-			return (ICompilationUnit)cu.getOriginalElement();	
-	}
 
 	private static SimpleName getSimpleName(ASTNode node){
 		if (node instanceof SimpleName)
