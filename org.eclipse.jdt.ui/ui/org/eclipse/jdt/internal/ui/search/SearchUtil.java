@@ -41,9 +41,19 @@ public class SearchUtil extends JavaModelUtil {
 
 	public static IJavaElement getJavaElement(IMarker marker) {
 		try {
-			IJavaElement je= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
-			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false))
-				return je;
+			String handleId= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
+			IJavaElement je= JavaCore.create(handleId);
+			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)) {
+				if (je != null&& je.exists())
+					return je;
+				else {
+					IJavaElement fixedJe= fixCUName(marker, handleId);
+					if (fixedJe != null)
+						return fixedJe;
+					else
+						return je;
+				}
+			}
 
 			ICompilationUnit cu= findCompilationUnit(je);
 			if (cu == null)
@@ -65,6 +75,45 @@ public class SearchUtil extends JavaModelUtil {
 			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
+	}
+
+	private static IJavaElement fixCUName(IMarker marker, String handle) {
+			// FIXME: This is a dirty fix for 1GCE1EI: ITPJUI:WINNT - Can't handle rename of resource
+			if (handle != null) {
+				String resourceName= ""; //$NON-NLS-1$
+				if (marker.getResource() != null)
+					resourceName= marker.getResource().getName();
+				if (!handleContainsWrongCU(handle, resourceName)) {
+				 	handle= computeFixedHandle(handle, resourceName);
+					IJavaElement je= JavaCore.create(handle);
+				 	if (je != null && je.exists()) {
+				 		try {
+							marker.setAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, handle);
+				 		} catch (CoreException ex) {
+				 			// leave old attribute
+				 		} finally {
+							return je;
+				 		}
+				 	}
+				}
+			}
+			return null;
+	}
+	
+	private static boolean handleContainsWrongCU(String handle, String resourceName) {
+		int start= handle.indexOf('{');
+		int end= handle.indexOf(".java"); //$NON-NLS-1$
+		if (start >= end)
+			return false;
+		String name= handle.substring(start + 1, end + 5);
+		return name.equals(resourceName);
+	}
+	
+	private static String computeFixedHandle(String handle, String resourceName) {
+		int start= handle.indexOf('{');
+		int end= handle.indexOf(".java"); //$NON-NLS-1$
+		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
+		return handle;
 	}
 
 	// --------------- Util methods needed for working copies ---------------

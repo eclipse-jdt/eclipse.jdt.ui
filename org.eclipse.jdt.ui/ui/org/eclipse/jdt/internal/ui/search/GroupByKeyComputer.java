@@ -30,7 +30,7 @@ public class GroupByKeyComputer implements IGroupByKeyComputer {
 			// no help from JavaModel to rename yet
 			// return getJavaElement(marker);
 			return fLastHandle;
-		}	
+		}
 		return null;
 	}
 
@@ -52,19 +52,8 @@ public class GroupByKeyComputer implements IGroupByKeyComputer {
 		}
 		
 		if (!handle.equals(fLastHandle)) {
-			fLastHandle= handle;
 			fLastJavaElement= SearchUtil.getJavaElement(marker);
-			IResource handleResource= null;
-			try {
-				if (fLastJavaElement != null)
-					handleResource= fLastJavaElement.getCorrespondingResource();
-			} catch (JavaModelException  ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
-				// handleResource= null;
-			}
-			if (fLastJavaElement != null && marker.getResource().equals(handleResource)) {
-				// need to get and set new handle here
-			}
+			fLastHandle= fLastJavaElement.getHandleIdentifier();
 		}
 		return fLastJavaElement;
 	}
