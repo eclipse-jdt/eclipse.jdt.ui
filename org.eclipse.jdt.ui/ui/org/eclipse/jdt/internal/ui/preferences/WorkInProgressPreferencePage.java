@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
 public class WorkInProgressPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
+	public static final String PREF_OVERRIDE_INDICATOR= "PackagesView.overrideindicator"; //$NON-NLS-1$
+
 
 	public WorkInProgressPreferencePage() {
 		super(GRID);
@@ -66,7 +68,19 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
         );
         stringEditor.getLabelControl(parent).setToolTipText(JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.pkgNamePatternForPackagesView.tooltip")); //$NON-NLS-1$
 		addField(stringEditor);
+		
+		boolEditor= new BooleanFieldEditor(
+			PREF_OVERRIDE_INDICATOR,
+			"&Show override indicator in outliner", //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
+ 		
 	}
+	
+	public static boolean showOverrideIndicators() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_OVERRIDE_INDICATOR);
+	}	
 
 	static public boolean isCompressingPkgNameInPackagesView() {
 		return getPkgNamePatternForPackagesView().length() > 0;

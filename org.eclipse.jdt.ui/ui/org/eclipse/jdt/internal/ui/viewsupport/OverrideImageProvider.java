@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.ITypeHierarchyLifeCycleListener;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
 
@@ -24,6 +25,11 @@ public class OverrideImageProvider extends ErrorTickImageProvider {
 	 */
 	protected int computeExtraAdornmentFlags(Object element) {
 		int adornmentFlags= super.computeExtraAdornmentFlags(element);
+		if (!WorkInProgressPreferencePage.showOverrideIndicators()) {
+			return adornmentFlags;
+		}
+		
+		
 		if (element instanceof IMethod) {
 			try {
 				IMethod method= (IMethod) element;
