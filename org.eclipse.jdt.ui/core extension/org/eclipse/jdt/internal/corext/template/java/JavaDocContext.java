@@ -34,12 +34,6 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(ContextType type, IDocument document, int completionOffset,
-		ICompilationUnit compilationUnit)
-	{
-		super(type, document, completionOffset, 0, compilationUnit);
-	}
-
 	public JavaDocContext(ContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)
 	{
@@ -51,10 +45,13 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	public boolean canEvaluate(Template template) {
 		String key= getKey();
+		
+		if (fForceEvaluation)
+			return true;
 
-		return template.matches(key, getContextType().getName()) &&
-			(fForceEvaluation || 
-			((key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase())));
+		return
+			template.matches(key, getContextType().getName()) &&
+			(key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase());
 	}
 
 	/*
@@ -90,6 +87,9 @@ public class JavaDocContext extends CompilationUnitContext {
 
 				int start= getCompletionOffset();
 				int end= getCompletionOffset() + getCompletionLength();
+
+				while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+					start--;
 				
 				while (start != end && Character.isWhitespace(document.getChar(start)))
 					start++;
@@ -127,6 +127,28 @@ public class JavaDocContext extends CompilationUnitContext {
 		} catch (BadLocationException e) {
 			return super.getEnd();
 		}		
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getKey()
+	 */
+	public String getKey() {
+
+		if (getCompletionLength() == 0)		
+			return super.getKey();
+
+		try {
+			IDocument document= getDocument();
+
+			int start= getStart();
+			int end= getCompletionOffset();
+			return start <= end
+				? document.get(start, end - start)
+				: ""; //$NON-NLS-1$
+			
+		} catch (BadLocationException e) {
+			return super.getKey();			
+		}
 	}
 
 	/*

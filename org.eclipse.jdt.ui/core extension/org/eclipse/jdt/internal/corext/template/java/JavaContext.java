@@ -100,9 +100,12 @@ public class JavaContext extends CompilationUnitContext {
 	public boolean canEvaluate(Template template) {
 		String key= getKey();
 
-		return template.matches(key, getContextType().getName()) &&
-			(fForceEvaluation || 
-			((key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase())));
+		if (fForceEvaluation)
+			return true;
+
+		return
+			template.matches(key, getContextType().getName()) &&
+			key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
 	}
 
 	/*
@@ -128,6 +131,9 @@ public class JavaContext extends CompilationUnitContext {
 
 				int start= getCompletionOffset();
 				int end= getCompletionOffset() + getCompletionLength();
+				
+				while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+					start--;
 				
 				while (start != end && Character.isWhitespace(document.getChar(start)))
 					start++;
@@ -165,6 +171,28 @@ public class JavaContext extends CompilationUnitContext {
 		} catch (BadLocationException e) {
 			return super.getEnd();
 		}		
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getKey()
+	 */
+	public String getKey() {
+
+		if (getCompletionLength() == 0)		
+			return super.getKey();
+
+		try {
+			IDocument document= getDocument();
+
+			int start= getStart();
+			int end= getCompletionOffset();
+			return start <= end
+				? document.get(start, end - start)
+				: ""; //$NON-NLS-1$
+			
+		} catch (BadLocationException e) {
+			return super.getKey();			
+		}
 	}
 
 	/**
@@ -418,6 +446,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * Evaluates a 'java' template in thecontext of a compilation unit
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException {
+
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$

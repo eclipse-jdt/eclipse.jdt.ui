@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -46,7 +47,6 @@ public class TemplateEngine {
 	/**
 	 * Empties the collector.
 	 * 
-	 * @param viewer the text viewer  
 	 * @param unit   the compilation unit (may be <code>null</code>)
 	 */
 	public void reset() {
@@ -80,31 +80,44 @@ public class TemplateEngine {
 			return;
 
 		Point selection= viewer.getSelectedRange();
-		
+
+		// remember selected text
+		String selectedText= null;
+		if (selection.y != 0) {
+			try {
+				selectedText= document.get(selection.x, selection.y);
+			} catch (BadLocationException e) {}
+		}
+
 		((CompilationUnitContextType) fContextType).setContextParameters(document, completionPosition, selection.y, compilationUnit);
 		CompilationUnitContext context= (CompilationUnitContext) fContextType.createContext();
+		context.setVariable("selection", selectedText); //$NON-NLS-1$
 		int start= context.getStart();
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
 		Template[] templates= Templates.getInstance().getTemplates();
 
-		if (selection.y == 0) {	
+		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)
 				if (context.canEvaluate(templates[i]))
 					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 
 		} else {
 			final String CURSOR= "${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + '}'; //$NON-NLS-1$ //$NON-NLS-2$
-			
-			context.setForceEvaluation(true);
+
+			if (context.getKey().length() == 0)
+				context.setForceEvaluation(true);
+				
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];				
-				if (context.canEvaluate(template) && template.getPattern().indexOf(CURSOR) != -1)
-					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));			
+				if (context.canEvaluate(template) &&
+					template.getContextTypeName().equals(context.getContextType().getName()) &&				
+					template.getPattern().indexOf(CURSOR) != -1)
+				{
+					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+				}
 			}
 		}
 	}
-
 }
-
