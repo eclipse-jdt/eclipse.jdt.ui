@@ -281,25 +281,26 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		
 	private Object[] getResources(IFolder folder) {
 		try {
-			// filter out folders that are package fragment roots
-			Object[] members= folder.members();
+			IResource[] members= folder.members();
+			IJavaProject javaProject= JavaCore.create(folder.getProject());
+			if (javaProject == null || !javaProject.exists())
+				return members;
+			boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
 			List nonJavaResources= new ArrayList();
+			// Can be on classpath but as a member of non-java resource folder
 			for (int i= 0; i < members.length; i++) {
-				Object o= members[i];
-				// A folder can also be a package fragment root in the following case
-				// Project
-				//  + src <- source folder
-				//    + excluded <- excluded from class path
-				//      + included  <- a new source folder.
-				// Included is a member of excluded, but since it is rendered as a source
-				// folder we have to exclude it as a normal child.
-				if (o instanceof IFolder) {
-					IJavaElement element= JavaCore.create((IFolder)o);
-					if (element instanceof IPackageFragmentRoot && element.exists()) {
-						continue;
-					}
+				IResource member= members[i];
+				// A resource can also be a java element
+				// in the case of exclusion and inclusion filters.
+				// We therefore exclude Java elements from the list
+				// of non-Java resources.
+				if (isFolderOnClasspath) {
+					if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
+						nonJavaResources.add(member);
+					} 
+				} else if (!javaProject.isOnClasspath(member)) {
+					nonJavaResources.add(member);
 				}
-				nonJavaResources.add(o);
 			}
 			return nonJavaResources.toArray();
 		} catch(CoreException e) {
