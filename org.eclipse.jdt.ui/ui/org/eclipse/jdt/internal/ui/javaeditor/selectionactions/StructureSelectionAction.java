@@ -65,8 +65,8 @@ public abstract class StructureSelectionAction extends Action {
 			sourceRange= source.getSourceRange();
 			if (sourceRange == null || sourceRange.getLength() == 0) {
 				MessageDialog.openInformation(fEditor.getEditorSite().getShell(), 
-					JavaEditorMessages.getString("StructureSelect.error.title"), 
-					JavaEditorMessages.getString("StructureSelect.error.message"));
+					JavaEditorMessages.getString("StructureSelect.error.title"),  //$NON-NLS-1$
+					JavaEditorMessages.getString("StructureSelect.error.message")); //$NON-NLS-1$
 				return;
 			}
 		} catch (JavaModelException e) {
