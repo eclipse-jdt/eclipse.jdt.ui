@@ -92,8 +92,15 @@ public class CoreUtility {
 	 * @param project The project to build or <code>null</code> to build the workspace.
 	 */
 	public static void startBuildInBackground(final IProject project) {
-		
-		Job buildJob = new Job(JavaUIMessages.getString("CoreUtility.job.title")){  //$NON-NLS-1$
+		getBuildJob(project).schedule();
+	}
+
+	/**
+	 * Returns a build job
+	 * @param project The project to build or <code>null</code> to build the workspace.
+	 */
+	public static Job getBuildJob(final IProject project) {
+		Job buildJob= new Job(JavaUIMessages.getString("CoreUtility.job.title")){  //$NON-NLS-1$
 			/* (non-Javadoc)
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
@@ -123,7 +130,7 @@ public class CoreUtility {
 		};
 		
 		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		buildJob.setUser(true); 
-		buildJob.schedule();
+		buildJob.setUser(true);
+		return buildJob;
 	}
 }

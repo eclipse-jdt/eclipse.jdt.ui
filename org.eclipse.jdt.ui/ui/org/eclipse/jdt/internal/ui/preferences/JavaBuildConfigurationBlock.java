@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -73,8 +75,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private IStatus fMaxNumberProblemsStatus, fResourceFilterStatus;
 
-	public JavaBuildConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getKeys());
+	public JavaBuildConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getKeys(), container);
 		fMaxNumberProblemsStatus= new StatusInfo();
 		fResourceFilterStatus= new StatusInfo();
 	}

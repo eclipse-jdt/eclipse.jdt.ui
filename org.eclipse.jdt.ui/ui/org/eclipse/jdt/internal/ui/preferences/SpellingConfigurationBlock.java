@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -233,8 +234,8 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param project
 	 *                   The Java project
 	 */
-	public SpellingConfigurationBlock(final IStatusChangeListener context, final IProject project) {
-		super(context, project, getAllKeys());
+	public SpellingConfigurationBlock(final IStatusChangeListener context, final IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getAllKeys(), container);
 
 		IStatus status= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
 		if (status.getSeverity() != IStatus.OK)

@@ -31,6 +31,8 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -285,8 +287,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private StringDialogField fExceptionName;
 
 	
-	public NameConventionConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getAllKeys());
+	public NameConventionConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getAllKeys(), container);
 		
 		NameConventionAdapter adapter=  new NameConventionAdapter();
 		String[] buttons= new String[] {

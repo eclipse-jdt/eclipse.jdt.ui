@@ -61,7 +61,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		}
 	}
 
-	private SpellingConfigurationBlock fBlock= new SpellingConfigurationBlock(new NullStatusChangeListener(), null);
+	private SpellingConfigurationBlock fBlock= new SpellingConfigurationBlock(new NullStatusChangeListener(), null, null);
 	
 	private SpellingPreferenceBlock.StatusChangeListenerAdapter fStatusMonitor;
 	

@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,7 +44,8 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fConfigurationBlock= new NameConventionConfigurationBlock(getNewStatusChangedListener(), getProject());
+		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
+		fConfigurationBlock= new NameConventionConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
@@ -100,6 +102,16 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 			return false;
 		}	
 		return super.performOk();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
+	 */
+	public void performApply() {
+		if (fConfigurationBlock != null) {
+			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
+			fConfigurationBlock.performApply(enabled);
+		}
 	}
 	
 

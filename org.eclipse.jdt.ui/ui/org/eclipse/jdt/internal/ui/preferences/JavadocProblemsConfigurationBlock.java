@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -63,8 +65,8 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private Composite fJavadocComposite;
 
 
-	public JavadocProblemsConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getKeys());
+	public JavadocProblemsConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getKeys(), container);
 	}
 	
 	private static Key[] getKeys() {

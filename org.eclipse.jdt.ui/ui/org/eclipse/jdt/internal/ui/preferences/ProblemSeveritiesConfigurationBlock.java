@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -97,8 +99,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private PixelConverter fPixelConverter;
 	
-	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getKeys());
+	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getKeys(), container);
 		
 		// compatibilty code for the merge of the two option PB_SIGNAL_PARAMETER: 
 		if (ENABLED.equals(getValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {

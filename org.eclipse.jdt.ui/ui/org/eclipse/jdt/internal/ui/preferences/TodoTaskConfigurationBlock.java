@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -138,8 +140,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	private SelectionButtonDialogField fCaseSensitiveCheckBox;
 
 
-	public TodoTaskConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getKeys());
+	public TodoTaskConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getKeys(), container);
 						
 		TaskTagAdapter adapter=  new TaskTagAdapter();
 		String[] buttons= new String[] {

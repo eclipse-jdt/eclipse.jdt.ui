@@ -35,6 +35,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -165,8 +167,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	
 	private PixelConverter fPixelConverter;
 	
-	public ImportOrganizeConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getAllKeys());
+	public ImportOrganizeConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getAllKeys(), container);
 	
 		String[] buttonLabels= new String[] { 
 			/* 0 */  PreferencesMessages.getString("ImportOrganizeConfigurationBlock.order.add.button"), //$NON-NLS-1$

@@ -12,14 +12,12 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -49,6 +47,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.preferences.WorkingCopyManager;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -90,13 +91,21 @@ public abstract class OptionsConfigurationBlock {
 			return fKey;
 		}
 		
-		public String getStoredValue(IScopeContext context) {
-			return context.getNode(fQualifier).get(fKey, null);
+		private IEclipsePreferences getNode(IScopeContext context, IWorkingCopyManager manager) {
+			IEclipsePreferences node= context.getNode(fQualifier);
+			if (manager != null) {
+				return manager.getWorkingCopy(node);
+			}
+			return node;
 		}
 		
-		public String getStoredValue(IScopeContext[] lookupOrder, boolean ignoreTopScope) {
+		public String getStoredValue(IScopeContext context, IWorkingCopyManager manager) {
+			return getNode(context, manager).get(fKey, null);
+		}
+		
+		public String getStoredValue(IScopeContext[] lookupOrder, boolean ignoreTopScope, IWorkingCopyManager manager) {
 			for (int i= ignoreTopScope ? 1 : 0; i < lookupOrder.length; i++) {
-				String value= getStoredValue(lookupOrder[i]);
+				String value= getStoredValue(lookupOrder[i], manager);
 				if (value != null) {
 					return value;
 				}
@@ -104,11 +113,11 @@ public abstract class OptionsConfigurationBlock {
 			return null;
 		}
 		
-		public void setStoredValue(IScopeContext context, String value) {
+		public void setStoredValue(IScopeContext context, String value, IWorkingCopyManager manager) {
 			if (value != null) {
-				context.getNode(fQualifier).put(fKey, value);
+				getNode(context, manager).put(fKey, value);
 			} else {
-				context.getNode(fQualifier).remove(fKey);
+				getNode(context, manager).remove(fKey);
 			}
 		}
 			
@@ -161,8 +170,6 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
-	
-	private Map fWorkingValues;
 
 	protected final ArrayList fCheckBoxes;
 	protected final ArrayList fComboBoxes;
@@ -181,10 +188,20 @@ public abstract class OptionsConfigurationBlock {
 	
 	private Shell fShell;
 
-	public OptionsConfigurationBlock(IStatusChangeListener context, IProject project, Key[] allKeys) {
+	private final IWorkingCopyManager fManager;
+	private IWorkbenchPreferenceContainer fContainer;
+
+	public OptionsConfigurationBlock(IStatusChangeListener context, IProject project, Key[] allKeys, IWorkbenchPreferenceContainer container) {
 		fContext= context;
 		fProject= project;
 		fAllKeys= allKeys;
+		fContainer= container;
+		if (container == null) {
+			fManager= new WorkingCopyManager();
+		} else {
+			fManager= container.getWorkingCopyManager();
+		}
+		
 		if (fProject != null) {
 			fLookupOrder= new IScopeContext[] {
 				new ProjectScope(fProject),
@@ -198,8 +215,8 @@ public abstract class OptionsConfigurationBlock {
 			};
 		}
 		
-		fWorkingValues= getOptions();
-		testIfOptionsComplete(fWorkingValues, allKeys);
+		testIfOptionsComplete(allKeys);
+		settingsUpdated();
 		
 		fCheckBoxes= new ArrayList();
 		fComboBoxes= new ArrayList();
@@ -221,39 +238,34 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 		
-	private void testIfOptionsComplete(Map workingValues, Key[] allKeys) {
+	private void testIfOptionsComplete(Key[] allKeys) {
 		for (int i= 0; i < allKeys.length; i++) {
-			if (workingValues.get(allKeys[i]) == null) {
+			if (allKeys[i].getStoredValue(fLookupOrder, false, fManager) == null) {
 				JavaPlugin.logErrorMessage("preference option missing: " + allKeys[i] + " (" + this.getClass().getName() +')');  //$NON-NLS-1$//$NON-NLS-2$
 			}
 		}
 	}
 	
-	protected Map getOptions() {
-		Map workingValues= new HashMap();
-		for (int i= 0; i < fAllKeys.length; i++) {
-			Key curr= fAllKeys[i];
-			workingValues.put(curr, curr.getStoredValue(fLookupOrder, false));
-		}
-		return workingValues;
+	protected void settingsUpdated() {
 	}
 	
-	protected Map getDefaultOptions() {
+	
+	/*protected Map getDefaultOptions() {
 		Map workingValues= new HashMap();
 		DefaultScope defaultScope= new DefaultScope();
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
-			workingValues.put(curr, curr.getStoredValue(defaultScope));
+			workingValues.put(curr, curr.getStoredValue(defaultScope, fManager));
 		}
 		return workingValues;
-	}	
+	}	*/
 	
 	public final boolean hasProjectSpecificOptions(IProject project) {
 		if (project != null) {
 			IScopeContext projectContext= new ProjectScope(project);
 			Key[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
-				if (allKeys[i].getStoredValue(projectContext) != null) {
+				if (allKeys[i].getStoredValue(projectContext, fManager) != null) {
 					return true;
 				}
 			}
@@ -507,7 +519,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected String getValue(Key key) {
-		return (String) fWorkingValues.get(key);
+		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
 	
 	protected boolean getBooleanValue(Key key) {
@@ -515,7 +527,9 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected String setValue(Key key, String value) {
-		return (String) fWorkingValues.put(key, value);
+		String oldValue= getValue(key);
+		key.setStoredValue(fLookupOrder[0], value, fManager);
+		return oldValue;
 	}
 	
 	protected String setValue(Key key, boolean value) {
@@ -556,18 +570,18 @@ public abstract class OptionsConfigurationBlock {
 		boolean needsBuild= false;
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key key= fAllKeys[i];
-			String oldVal= key.getStoredValue(currContext);
+			String oldVal= key.getStoredValue(currContext, null);
 			if (enabled) {
 				String val= getValue(key);
 				if (val != null && !val.equals(oldVal)) {
 					changedSettings.add(new PropertyChange(key, oldVal, val));
-					needsBuild |= (oldVal != null) || !val.equals(key.getStoredValue(fLookupOrder, true)); // if oldVal was null the needs build if new value differs from inherited value
+					needsBuild |= (oldVal != null) || !val.equals(key.getStoredValue(fLookupOrder, true, fManager)); // if oldVal was null the needs build if new value differs from inherited value
 				}
 			} else {
 				String val= null; // clear value
 				if (oldVal != null) {
 					changedSettings.add(new PropertyChange(key, oldVal, val));
-					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true)); // new val is null: needs build if oldValue is different than the inherited value
+					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager)); // new val is null: needs build if oldValue is different than the inherited value
 				}
 			}
 		}
@@ -575,10 +589,18 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	public boolean performOk(boolean enabled) {
+		return processChanges(enabled, fContainer);
+	}
+	
+	public boolean performApply(boolean enabled) {
+		return processChanges(enabled, null); // apply directly
+	}
+	
+	public boolean processChanges(boolean enabled, IWorkbenchPreferenceContainer container) {
 
 		IScopeContext currContext= fLookupOrder[0];
 	
-		List /* <Change>*/ changedOptions= new ArrayList();
+		List /* <PropertyChange>*/ changedOptions= new ArrayList();
 		boolean needsBuild= getChanges(currContext, enabled, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
@@ -597,46 +619,45 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		}
-		
-		Set modifiedNodes= new HashSet();
-		MockupPreferenceStore store= JavaPlugin.getDefault().getMockupPreferenceStore();
-		for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
-			PropertyChange curr= (PropertyChange) iter.next();
-			Key key= curr.key;
-			key.setStoredValue(currContext, curr.newValue);
-			if (fProject != null) {
-				store.firePropertyChangeEvent(fProject, key.getName(), curr.oldValue, curr.newValue);
+		if (!enabled) {
+			// need to remove the settings
+			for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
+				PropertyChange elem= (PropertyChange) iter.next();
+				elem.key.setStoredValue(currContext, elem.newValue, fManager);
 			}
-			modifiedNodes.add(key.getQualifier());
 		}
-
-		for (Iterator iter= modifiedNodes.iterator(); iter.hasNext();) {
+		if (container != null) {
+			// no need to apply the changes to the original store: will be done by the page  container
+			if (doBuild) { // post build
+				container.registerUpdateJob(CoreUtility.getBuildJob(fProject));
+			}
+		} else {
+			// apply changes right away
 			try {
-				String curr= (String) iter.next();
-				currContext.getNode(curr).flush();
+				fManager.applyChanges();
 			} catch (BackingStoreException e) {
 				JavaPlugin.log(e);
-			}
-		}
-
-		if (doBuild) {
-			boolean res= doFullBuild();
-			if (!res) {
 				return false;
 			}
+			if (doBuild) {
+				CoreUtility.getBuildJob(fProject).schedule();
+			}
+			
 		}
 		return true;
 	}
 	
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
-		
-	protected boolean doFullBuild() {
-		CoreUtility.startBuildInBackground(fProject);
-		return true;
-	}		
+			
 	
 	public void performDefaults() {
-		fWorkingValues= getDefaultOptions();
+		DefaultScope defaultScope= new DefaultScope();
+		for (int i= 0; i < fAllKeys.length; i++) {
+			Key curr= fAllKeys[i];
+			String defValue= curr.getStoredValue(defaultScope, null);
+			curr.setStoredValue(fLookupOrder[0], defValue, fManager);
+		}
+		settingsUpdated();
 		updateControls();
 		validateSettings(null, null, null);
 	}
@@ -645,7 +666,12 @@ public abstract class OptionsConfigurationBlock {
 	 * @since 3.1
 	 */
 	public void performRevert() {
-		fWorkingValues= getOptions();
+		for (int i= 0; i < fAllKeys.length; i++) {
+			Key curr= fAllKeys[i];
+			String origValue= curr.getStoredValue(fLookupOrder, false, null);
+			curr.setStoredValue(fLookupOrder[0], origValue, fManager);
+		}
+		settingsUpdated();
 		updateControls();
 		validateSettings(null, null, null);
 	}

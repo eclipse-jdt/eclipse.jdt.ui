@@ -12,10 +12,10 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -91,8 +93,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private IStatus fComplianceStatus;
 
-	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project) {
-		super(context, project, getKeys());
+	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getKeys(), container);
 		
 		fComplianceControls= new ArrayList();
 			
@@ -116,18 +118,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER
 			};
 	}
-	
-	protected final Map getOptions() {
-		Map map= super.getOptions();
-		map.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance(map));
-		return map;
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#settingsUpdated()
+	 */
+	protected void settingsUpdated() {
+		setValue(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
+		super.settingsUpdated();
 	}
-	
-	protected final Map getDefaultOptions() {
-		Map map= super.getDefaultOptions();
-		map.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance(map));
-		return map;
-	}	
 	
 	
 	/*
@@ -459,23 +457,23 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * Evaluate if the current compliance setting correspond to a default setting
 	 */
-	private static String getCurrentCompliance(Map map) {
-		Object complianceLevel= map.get(PREF_COMPLIANCE);
+	private String getCurrentCompliance() {
+		Object complianceLevel= getValue(PREF_COMPLIANCE);
 		if ((VERSION_1_3.equals(complianceLevel)
-				&& IGNORE.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& IGNORE.equals(map.get(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_1.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
+				&& IGNORE.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& IGNORE.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& VERSION_1_3.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_1.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_4.equals(complianceLevel)
-				&& WARNING.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& WARNING.equals(map.get(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
+				&& WARNING.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& WARNING.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& VERSION_1_3.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_2.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_5.equals(complianceLevel)
-				&& ERROR.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& ERROR.equals(map.get(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_5.equals(map.get(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_5.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& VERSION_1_5.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_5.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;

@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -45,7 +46,8 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fConfigurationBlock= new ImportOrganizeConfigurationBlock(getNewStatusChangedListener(), getProject());
+		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
+		fConfigurationBlock= new ImportOrganizeConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.ORGANIZE_IMPORTS_PREFERENCE_PAGE);
@@ -102,6 +104,16 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 			return false;
 		}	
 		return super.performOk();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
+	 */
+	public void performApply() {
+		if (fConfigurationBlock != null) {
+			boolean enabled= !isProjectPreferencePage() || useProjectSettings();
+			fConfigurationBlock.performApply(enabled);
+		}
 	}
 	
 	/* (non-Javadoc)
