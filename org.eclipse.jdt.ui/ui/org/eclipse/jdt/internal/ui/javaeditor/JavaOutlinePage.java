@@ -756,7 +756,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				handleKeyReleased(e);
 			}
 		});
-		initDragAndDrop();
 	}
 
 	public void dispose() {
@@ -818,28 +817,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	public IAction getAction(String actionID) {
 		Assert.isNotNull(actionID);
 		return (IAction) fActions.get(actionID);
-	}
-	
-	private void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE;
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance()
-			};
-		
-		// Drop Adapter
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
-			new SelectionTransferDropAdapter(fOutlineViewer)
-		};
-		fOutlineViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
-		
-		// Drag Adapter
-		Control control= fOutlineViewer.getControl();
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(fOutlineViewer)
-		};
-		DragSource source= new DragSource(control, ops);
-		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners));
 	}
 
 	/**
