@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -23,4 +24,20 @@ class NLSMessages {
 			return '!' + key + '!';
 		}
 	}
+	
+	public static String getFormattedString(String key, String[] args) {
+		try{
+			return MessageFormat.format(fgResourceBundle.getString(key), args);
+		} catch (MissingResourceException e) {
+			return '!' + key + '!';
+		}	
+	}
+	
+	public static String getFormattedString(String key, String arg) {
+		try{
+			return MessageFormat.format(fgResourceBundle.getString(key), new String[] { arg });
+		} catch (MissingResourceException e) {
+			return '!' + key + '!';
+		}	
+	}	
 }
