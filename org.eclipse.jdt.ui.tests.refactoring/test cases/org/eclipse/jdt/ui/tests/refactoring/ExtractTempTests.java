@@ -21,8 +21,6 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final Class clazz= ExtractTempTests.class;
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
-	private static final String COMPACT= JavaCore.COMPACT;
-
 	private Object fCompactPref; 
 		
 	public ExtractTempTests(String name) {
@@ -65,7 +63,7 @@ public class ExtractTempTests extends RefactoringTest {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
 		fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
-		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, COMPACT);
+		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, JavaCore.COMPACT);
 		JavaCore.setOptions(options);
 	}
 	
