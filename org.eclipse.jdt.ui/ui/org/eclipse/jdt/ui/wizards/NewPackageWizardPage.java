@@ -203,7 +203,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
 					// if the bin folder is inside of our root, dont allow to name a package
 					// like the bin folder
-					IPath packagePath= pack.getUnderlyingResource().getFullPath();
+					IPath packagePath= pack.getPath();
 					if (outputPath.isPrefixOf(packagePath)) {
 						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.IsOutputFolder")); //$NON-NLS-1$
 						return status;
@@ -251,8 +251,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					createPackage(monitor);
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} 
