@@ -264,6 +264,11 @@ public class NewJavaProjectWizardPage extends WizardPage {
 				}				
 				monitor.beginTask(NewWizardMessages.getString("NewJavaProjectWizardPage.op_desc"), 10); //$NON-NLS-1$
 				int workLeft= 10;
+
+				// initialize if needed
+				if (fProjectModified || isNewProjectHandle()) {
+					initBuildPaths();
+				}
 				
 				// create the project
 				IWorkspace workspace= ResourcesPlugin.getWorkspace();
@@ -285,10 +290,6 @@ public class NewJavaProjectWizardPage extends WizardPage {
 					}
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				}
-				// create the java project
-				if (fProjectModified || isNewProjectHandle()) {
-					initBuildPaths();
 				}
 				IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
 				jrunnable.run(new SubProgressMonitor(monitor, workLeft));
