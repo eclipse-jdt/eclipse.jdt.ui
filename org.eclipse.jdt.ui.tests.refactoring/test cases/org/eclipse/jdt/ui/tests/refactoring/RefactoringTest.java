@@ -198,7 +198,8 @@ public abstract class RefactoringTest extends TestCase {
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++)
-			if (JavaModelUtil.getTypeQualifiedName(types[i]).equals(name))
+			if (JavaModelUtil.getTypeQualifiedName(types[i]).equals(name) ||
+			    types[i].getElementName().equals(name))
 				return types[i];
 		return null;
 	}
