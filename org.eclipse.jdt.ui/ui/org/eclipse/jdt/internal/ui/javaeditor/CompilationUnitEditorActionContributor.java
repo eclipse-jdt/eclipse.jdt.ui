@@ -126,6 +126,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	private RetargetTextEditorAction fStructureSelectHistoryAction;	
 	private RetargetTextEditorAction fGotoNextMemberAction;	
 	private RetargetTextEditorAction fGotoPreviousMemberAction;	
+	private RetargetTextEditorAction fGotoMatchingBracket;	
 	
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
@@ -167,6 +168,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fStructureSelectHistoryAction= new RetargetTextEditorAction(b, "StructureSelectHistory."); //$NON-NLS-1$
 		fGotoNextMemberAction= new RetargetTextEditorAction(b, "GotoNextMember."); //$NON-NLS-1$
 		fGotoPreviousMemberAction= new RetargetTextEditorAction(b, "GotoPreviousMember."); //$NON-NLS-1$
+		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		
 		// actions that are "contributed" to editors, they are consider belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
@@ -204,6 +206,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoPreviousMemberAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoNextMemberAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
 		}
 	}
 	
@@ -238,6 +241,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fStructureSelectHistoryAction.setAction(getAction(textEditor, StructureSelectionAction.HISTORY));		
 		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
+		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 
 		IActionBars bars= getActionBars();		
 		

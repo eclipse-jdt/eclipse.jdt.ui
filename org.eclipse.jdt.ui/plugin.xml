@@ -1510,6 +1510,7 @@ JavaStructureDiffViewerCreator
 		configurationId="org.eclipse.ui.emacsAcceleratorConfiguration">
 
 		<!-- edit --> 
+		<accelerator key="Ctrl+Shift+P" id="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket" />
 		<accelerator key="Ctrl+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
 		<accelerator key="Ctrl+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
 		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
@@ -1592,6 +1593,7 @@ JavaStructureDiffViewerCreator
 		configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
 
 		<!-- edit -->
+		<accelerator key="Ctrl+Shift+P" id="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket" />
 		<accelerator key="Ctrl+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
 		<accelerator key="Ctrl+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
 		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />

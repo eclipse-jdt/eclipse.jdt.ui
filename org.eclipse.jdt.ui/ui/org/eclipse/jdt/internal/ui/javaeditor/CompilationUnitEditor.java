@@ -112,6 +112,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -495,6 +496,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private PaintManager fPaintManager;
 	/** The editor's bracket painter */
 	private BracketPainter fBracketPainter;
+	/** The editor's bracket matcher */
+	private JavaPairMatcher fBracketMatcher;
 	/** The editor's line painter */
 	private LinePainter fLinePainter;
 	/** The editor's print margin ruler painter */
@@ -572,6 +575,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
+
+		action= new GotoMatchingBracketAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
+		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
 
 		action= GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);				
@@ -804,9 +811,59 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 		}
 	}
+
+	/**
+	 * Jumps to the matching bracket.
+	 */
+	public void gotoMatchingBracket() {
+
+		if (fBracketMatcher == null)
+			fBracketMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+
+		ISourceViewer sourceViewer= getSourceViewer();
+		IDocument document= sourceViewer.getDocument();
+		if (document == null)
+			return;
+		
+		ISelectionProvider provider= getSelectionProvider();
+		ITextSelection selection= (ITextSelection) provider.getSelection();
+
+		int selectionLength= Math.abs(selection.getLength());
+		if (selectionLength > 1) {
+			// invalid selection
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		IRegion region= fBracketMatcher.match(document, selection.getOffset());
+		if (region == null) {
+			// no bracket found
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;		
+		}
+		
+		int offset= region.getOffset();
+		int length= region.getLength();
+		
+		if (length < 1)
+			return;
+			
+		int anchor= fBracketMatcher.getAnchor();
+		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset : offset + length - 1;
+
+		IRegion visibleRegion= sourceViewer.getVisibleRegion();
+		if (targetOffset < visibleRegion.getOffset() || targetOffset >= visibleRegion.getOffset() + visibleRegion.getLength()) {
+			// bracket outside of visible region
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		sourceViewer.setSelectedRange(targetOffset, selectionLength);
+		sourceViewer.revealRange(targetOffset, selectionLength);
+	}
 	
 	/**
-	 * Sets the given message as error message to this editor's status line.
+	 * Ses the given message as error message to this editor's status line.
 	 * @param msg message to be set
 	 */
 	protected void setStatusLineErrorMessage(String msg) {

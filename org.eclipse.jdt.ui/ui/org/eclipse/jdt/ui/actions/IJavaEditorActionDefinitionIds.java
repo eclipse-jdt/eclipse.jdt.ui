@@ -26,6 +26,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	// edit
 
 	/**
+	 * Action definition ID of the edit -> go to matching bracket action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"</code>).
+	 *
+	 * @since 2.1
+	 */
+	public static final String GOTO_MATCHING_BRACKET= "org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the edit -> go to next member action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.next.member"</code>).
 	 *
