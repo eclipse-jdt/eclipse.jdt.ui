@@ -47,6 +47,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				IJavaSearchScope scope,
 				String scopeDescription,
 				JavaSearchResultCollector collector) {
+		super(null);
 		fWorkspace= workspace;
 		fLimitTo= limitTo;
 		fScope= scope;

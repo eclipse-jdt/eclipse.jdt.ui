@@ -101,7 +101,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		if (results == null)
 			return;
 
-		IRunnableWithProgress runnable= new WorkspaceModifyOperation() 	 {
+		IRunnableWithProgress runnable= new WorkspaceModifyOperation(null) 	 {
 			/*
 			 * @see org.eclipse.ui.actions.WorkspaceModifyOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
 			 */
