@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -596,19 +597,27 @@ public class UnresolvedElementsSubProcessor {
 		// corrections
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 		
-		ArrayList parameterMismatchs= new ArrayList();
+		HashSet suggestedRenames= new HashSet();
 		for (int i= 0; i < bindings.length; i++) {
 			IMethodBinding binding= (IMethodBinding) bindings[i];
 			String curr= binding.getName();
-			if (curr.equals(methodName) && isOnlyParameterMismatch) {
-				parameterMismatchs.add(binding);
-			} else if (binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr)) {
+			if (!curr.equals(methodName) && binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr) && suggestedRenames.add(curr)) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
 				proposals.add(new RenameNodeCompletionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, 6));
 			}
 		}
-			
-		addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
+		suggestedRenames= null;
+		
+		if (isOnlyParameterMismatch) {
+			ArrayList parameterMismatchs= new ArrayList();
+			for (int i= 0; i < bindings.length; i++) {
+				IMethodBinding binding= (IMethodBinding) bindings[i];
+				if (binding.getName().equals(methodName)) {
+					parameterMismatchs.add(binding);
+				}
+			}
+			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
+		}
 		
 		// new method
 		ITypeBinding binding= null;
