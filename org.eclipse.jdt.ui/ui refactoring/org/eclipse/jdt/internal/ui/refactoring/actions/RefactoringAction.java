@@ -66,8 +66,9 @@ public abstract class RefactoringAction extends Action {
 			if (status.getEntries().size() == 1){
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
 			}else{
-				ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell(),	status, dialogTitle,"",
-																			new RefactoringStatusContentProvider(), new RefactoringStatusEntryLabelProvider());
+				ListDialog dialog= new ListDialog(
+						JavaPlugin.getActiveWorkbenchShell(),	status, dialogTitle,"",
+						new RefactoringStatusContentProvider(), new RefactoringStatusEntryLabelProvider());
 				dialog.open();															
 			}	
 		}	

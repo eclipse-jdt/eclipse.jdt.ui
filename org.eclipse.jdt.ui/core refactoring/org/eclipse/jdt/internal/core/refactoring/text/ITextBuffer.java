@@ -48,6 +48,13 @@ public interface ITextBuffer {
 	public String getContent(int offset, int length);
 	
 	/**
+	 * Returns the preferred line delimiter to be used for this text buffer.
+	 * 
+	 * @return the preferred line delimiter
+	 */
+	public String getLineDelimiter();
+	
+	/**
 	 * Returns the line delimiter used for the given line number. Returns <code>
 	 * null</code> if the line number is out of range.
 	 *
@@ -62,6 +69,14 @@ public interface ITextBuffer {
 	 * @return the line for the given line number or <code>null</code>
 	 */
 	public String getLineContent(int line);
+	
+	/**
+	 * Returns the line indent for the given line. If there isn't any line for the
+	 * given line number, <code>-1</code> is returned.
+	 * 
+	 * @return the line indent for the given line number of <code>-1</code>
+	 */
+	public int getLineIndent(int line, int tabWidth);
 	
 	/**
 	 * Returns a description of the specified line. The line is described by its

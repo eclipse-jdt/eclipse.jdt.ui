@@ -7,28 +7,29 @@ package org.eclipse.jdt.internal.core.refactoring.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 
 import org.eclipse.jdt.core.IBuffer;
+
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
-import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypes;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
+import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
-import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
-import org.eclipse.jdt.internal.core.refactoring.ASTParentTrackingAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.util.ASTs;
-import org.eclipse.jdt.internal.core.refactoring.util.Selection;
 
 /**
  * Analyzer to check if a selection covers a valid set of nodes of an abstract syntax
@@ -881,7 +882,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			return;
 		int pos= fBuffer.indexOfStatementCharacter(fSelection.start);
 		AstNode node= (AstNode)fSelectedNodes.get(0);
-		if (ASTs.getSourceStart(node) != pos) {
+		if (ASTUtil.getSourceStart(node) != pos) {
 			invalidSelection("Beginning of selection contains characters that do not belong to a statement.");
 			return;
 		}	
@@ -889,14 +890,14 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		for (int i= 0; i < fSelectedNodes.size() - 1; i++) {
 			AstNode first= (AstNode)fSelectedNodes.get(i);
 			AstNode second= (AstNode)fSelectedNodes.get(i + 1);
-			pos= fBuffer.indexOfStatementCharacter(ASTs.getSourceEnd(first) + 1);
-			if (pos != ASTs.getSourceStart(second)) {
+			pos= fBuffer.indexOfStatementCharacter(ASTUtil.getSourceEnd(first) + 1);
+			if (pos != ASTUtil.getSourceStart(second)) {
 				invalidSelection("Selected statements do not belong to the same category. For example, a while statement's expression and action are selected.");
 				return;
 			}
 		}
 		node= getLastSelectedNode();	
-		pos= fBuffer.indexOfStatementCharacter(ASTs.getSourceEnd(node) + 1);
+		pos= fBuffer.indexOfStatementCharacter(ASTUtil.getSourceEnd(node) + 1);
 		if (pos != -1 && pos <= fSelection.end)
 			invalidSelection("End of selection contains characters that do not belong to a statement.");
 	}		

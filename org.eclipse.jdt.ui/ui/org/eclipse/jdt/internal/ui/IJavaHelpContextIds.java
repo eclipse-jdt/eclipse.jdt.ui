@@ -110,6 +110,7 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_TYPE_ERROR_WIZARD_PAGE= PREFIX + "rename_type_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_FIELD_WIZARD_PAGE= PREFIX + "rename_field_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_FIELD_ERROR_WIZARD_PAGE= PREFIX + "rename_field_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String SEF_WIZARD_PAGE= PREFIX + "self_encapsulate_field_wizard_page_context"; //$NON-NLS-1$
 
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$

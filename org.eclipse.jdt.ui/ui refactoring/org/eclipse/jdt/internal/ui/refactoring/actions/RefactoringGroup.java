@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
@@ -29,14 +30,14 @@ import org.eclipse.ui.actions.SelectionProviderAction;
  */
 public class RefactoringGroup extends ContextMenuGroup {
 	
-	private RefactoringAction[] fOpenWizardActions;
+	private RefactoringAction[] fRefactoringActions;
 	private boolean fIntitialized= false;
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
 		
-		for (int i= 0; i < fOpenWizardActions.length; i++) {
-			RefactoringAction action= fOpenWizardActions[i];
+		for (int i= 0; i < fRefactoringActions.length; i++) {
+			RefactoringAction action= fRefactoringActions[i];
 			action.update();
 			if (action.isEnabled())
 				manager.add(action);
@@ -50,8 +51,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);	
 		ITextBufferChangeCreator changeCreator= createChangeCreator();
 		
-		fOpenWizardActions= new RefactoringAction[]{
-			createRenameParametersAction(provider, changeCreator)
+		fRefactoringActions= new RefactoringAction[]{
+			createRenameParametersAction(provider, changeCreator) //,
+			// new SelfEncapsulateFieldAction(provider)
 		};
 		
 		fIntitialized= true;

@@ -7,14 +7,20 @@ package org.eclipse.jdt.internal.core.refactoring;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -24,7 +30,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 /**
  * Convenience wrapper for <code>SearchEngine</code> - performs searching and sorts the results.
  */
-public class RefactoringSearchEngine{
+public class RefactoringSearchEngine {
 
 	private static Comparator fgSearchResultComparator;
 	private static SearchEngine fgSearchEngine= new SearchEngine();
@@ -33,15 +39,38 @@ public class RefactoringSearchEngine{
 	private RefactoringSearchEngine(){
 	}
 	
+	public static ICompilationUnit[] findAffectedCompilationUnits(final IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
+		final Set matches= new HashSet(5);
+		IJavaSearchResultCollector collector = new IJavaSearchResultCollector() {
+			private IResource fLastMatch;
+			public void aboutToStart() {};
+			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
+				if (fLastMatch != resource) {
+					matches.add(resource);	
+					fLastMatch= resource;
+				}
+			}
+			public void done() {};
+			public IProgressMonitor getProgressMonitor() {
+				return pm;
+			};
+		};
+		fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+		List result= new ArrayList(matches.size());
+		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
+			IResource resource= (IResource)iter.next();
+			IJavaElement element= JavaCore.create(resource);
+			if (element instanceof ICompilationUnit)
+				result.add(element);
+		}
+		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
+	}
+	
 	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector) throws JavaModelException {
 		if (pattern == null)
 			return;
 		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$
-		try{
-			fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-		} catch (CoreException e){
-			throw new JavaModelException(e);
-		}	
+		fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 	}
 	
 	/**

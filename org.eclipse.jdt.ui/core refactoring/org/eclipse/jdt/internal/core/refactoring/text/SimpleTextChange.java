@@ -64,7 +64,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	 * @return additional simple text changes to be considered by the text buffer change. The
 	 *  method can return <code>null</code>.
 	 */
-	protected SimpleTextChange[] adjust(ITextBuffer buffer) {
+	protected SimpleTextChange[] adjust(ITextBuffer buffer) throws JavaModelException {
 		return null;
 	}
 	

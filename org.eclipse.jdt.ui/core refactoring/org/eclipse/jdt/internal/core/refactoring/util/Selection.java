@@ -71,8 +71,8 @@ public class Selection {
 	 * @see #AFTER
 	 */
 	public int getSelectionMode(AstNode node) {
-		int nodeStart= ASTs.getSourceStart(node);
-		int nodeEnd= ASTs.getSourceEnd(node);
+		int nodeStart= ASTUtil.getSourceStart(node);
+		int nodeEnd= ASTUtil.getSourceEnd(node);
 		if (nodeEnd < start)
 			return BEFORE;
 		else if (covers(nodeStart, nodeEnd))

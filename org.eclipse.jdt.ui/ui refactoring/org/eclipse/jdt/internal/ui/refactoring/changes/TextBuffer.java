@@ -82,6 +82,16 @@ public class TextBuffer implements ITextBuffer {
 	/* Non-Javadoc
 	 * Method declared in ITextBuffer
 	 */
+	public String getLineDelimiter() {
+		String lineDelimiter= getLineDelimiter(0);
+		if (lineDelimiter == null)
+			lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		return lineDelimiter;
+	}
+	
+	/* Non-Javadoc
+	 * Method declared in ITextBuffer
+	 */
 	public String getLineDelimiter(int line) {
 		try {
 			return fDocument.getLineDelimiter(line);
@@ -100,6 +110,37 @@ public class TextBuffer implements ITextBuffer {
 		} catch (BadLocationException e) {
 			return null;
 		}
+	}
+	
+	/* Non-Javadoc
+	 * Method declared in ITextBuffer
+	 */
+	public int getLineIndent(int lineNumber, int tabWidth) {
+		String line= getLineContent(lineNumber);
+		if (line == null)
+			return -1;
+		int result= 0;
+		int blanks= 0;
+		int size= line.length();
+		for (int i= 0; i < size; i++) {
+			char c= line.charAt(i);
+			switch (c) {
+				case '\t':
+					result++;
+					blanks= 0;
+					break;
+				case	' ':
+					blanks++;
+					if (blanks == tabWidth) {
+						result++;
+						blanks= 0;
+					}
+					break;
+				default:
+					return result;
+			}
+		}
+		return result;			
 	}
 	
 	/* Non-Javadoc
