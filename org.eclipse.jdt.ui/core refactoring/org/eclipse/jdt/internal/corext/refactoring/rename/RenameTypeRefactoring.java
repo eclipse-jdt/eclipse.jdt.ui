@@ -107,6 +107,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return cu.getType(fNewName);
 	}
 	
+	public IType getType(){
+		return fType;
+	}
+	
 	/*
 	 * @see ITextUpdatingRefactoring#canEnableTextUpdating()
 	 */
