@@ -505,6 +505,10 @@ class UseSupertypeWherePossibleUtil {
 					IBinding binding= ((SimpleName)lhs).resolveBinding();
 					if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding)))
 						return false;
+				} else if (lhs instanceof FieldAccess){
+					IBinding binding= ((FieldAccess)lhs).getName().resolveBinding();
+					if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding)))
+						return false;
 				}
 			}
 		} else if (isInvocation(parent)) {
