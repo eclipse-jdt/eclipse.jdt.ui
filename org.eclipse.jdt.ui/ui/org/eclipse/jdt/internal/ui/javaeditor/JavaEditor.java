@@ -146,8 +146,8 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
-import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -179,7 +179,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -2095,9 +2097,46 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Tells whether the occurrence annotations are sticky
 	 * i.e. whether they stay even if there's no valid Java
 	 * element at the current caret position.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
 	 * @since 3.0
 	 */
 	private boolean fStickyOccurrenceAnnotations;
+	/**
+	 * Tells whether to mark type occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkTypeOccurrences;
+	/**
+	 * Tells whether to mark method occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkMethodOccurrences;
+	/**
+	 * Tells whether to mark constant occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkConstantOccurrences;
+	/**
+	 * Tells whether to mark field occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkFieldOccurrences;
+	/**
+	 * Tells whether to mark local variable occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkLocalVariableypeOccurrences;
+	/**
+	 * Tells whether to mark exception occurrences in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkExceptionOccurrences;
 	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
@@ -2176,6 +2215,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, this, IJavaPartitions.JAVA_PARTITIONING));
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
+		fMarkTypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES);
+		fMarkMethodOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES);
+		fMarkConstantOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES);
+		fMarkFieldOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES);
+		fMarkLocalVariableypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES);
+		fMarkExceptionOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES);
 	}
 	
 	/*
@@ -2899,17 +2944,39 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
+			if (PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkTypeOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkMethodOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkConstantOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkFieldOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkLocalVariableypeOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkExceptionOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
 			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean) {
-					boolean stickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
-					if (stickyOccurrenceAnnotations != fStickyOccurrenceAnnotations) {
-						fStickyOccurrenceAnnotations= stickyOccurrenceAnnotations;
-//						if (!fMarkOccurrenceAnnotations)
-//							uninstallOccurrencesFinder();
-//						else
-//							installOccurrencesFinder();
-					}
-				}
+				if (event.getNewValue() instanceof Boolean)
+					fStickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
 				return;
 			}
 			if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(property)) {
@@ -3425,12 +3492,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (document == null)
 			return;
 				
-		
-		ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
-		String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
 		List matches= new ArrayList();
-		if (message == null) {
-			matches= exceptionFinder.perform();
+		String message;
+		if (fMarkExceptionOccurrences || fMarkTypeOccurrences) {
+			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
+			message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= exceptionFinder.perform();
+			}
 		}
 		if (matches.size() == 0) {
 			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
@@ -3444,11 +3513,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (binding == null && fStickyOccurrenceAnnotations)
 				return;
 			
+			if (!markOccurrencesOfType(binding)) {
+				if (!fStickyOccurrenceAnnotations)
+					removeOccurrenceAnnotations();
+				return;
+			}
+			
 			// Find the matches && extract positions so we can forget the AST
 			OccurrencesFinder finder = new OccurrencesFinder(binding);
 			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
 			if (message == null)
 				matches= finder.perform();
+		} else if (!fMarkExceptionOccurrences) {
+			if (!fStickyOccurrenceAnnotations)
+				removeOccurrenceAnnotations();
+			return;
 		}
 		
 		Position[] positions= new Position[matches.size()];
@@ -3494,6 +3573,35 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	
 	protected boolean isMarkingOccurrences() {
 		return fMarkOccurrenceAnnotations;
+	}
+	
+	boolean markOccurrencesOfType(IBinding binding) {
+		
+		if (binding == null)
+			return false;
+		
+		int kind= binding.getKind();
+
+		if (fMarkTypeOccurrences && kind == IBinding.TYPE)
+			return true;
+
+		if (fMarkMethodOccurrences && kind == IBinding.METHOD)
+			return true;
+
+		if (kind == IBinding.VARIABLE) {
+			IVariableBinding variableBinding= (IVariableBinding)binding;
+			if (variableBinding.isField()) {
+				boolean isConstant= (variableBinding.getModifiers() & (IModifierConstants.ACC_STATIC | IModifierConstants.ACC_FINAL)) != 0; 
+				if (isConstant)
+					return fMarkConstantOccurrences;
+				else
+					return fMarkFieldOccurrences;
+			}
+			
+			return fMarkLocalVariableypeOccurrences;
+		}
+
+		return false;
 	}
 	
 	void removeOccurrenceAnnotations() {
