@@ -241,7 +241,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			// format
 			String prefix= document.get(lineOffset, offset - lineOffset);
-			String indent= getIndent(document, command) + createIndent(1); // add one indent level 
+			String blockIndent= getIndent(document, command);
+			String indent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level 
 			boolean formatFirstLine= prefix.trim().length() == 0;
 			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
 			
@@ -275,7 +276,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private String getIndent(IDocument d, DocumentCommand c) {
 		if (c.offset < 0)
-			return ""; //$NON-NLS-1$
+			return null;
 		
 		try {
 			int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
@@ -290,7 +291,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException excp) {
 			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
 		}
-		return ""; //$NON-NLS-1$
+		return null;
 	}
 	
 	private static final class LineIterator implements Iterator {
