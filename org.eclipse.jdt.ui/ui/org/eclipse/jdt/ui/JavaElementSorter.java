@@ -34,11 +34,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -209,6 +209,22 @@ public class JavaElementSorter extends ViewerSorter {
 		
 		String name1= ((IJavaElement) e1).getElementName();
 		String name2= ((IJavaElement) e2).getElementName();
+		
+		if (e1 instanceof IType) { // hanlde anonymous types
+			if (name1.length() == 0) {
+				if (name2.length() == 0) {
+					try {
+						return getCollator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
+					} catch (JavaModelException e) {
+						return 0;
+					}
+				} else {
+					return 1;
+				}
+			} else if (name2.length() == 0) {
+				return -1;
+			}
+		}
 		
 		// java element are sorted by name
 		int cmp= getCollator().compare(name1, name2);
