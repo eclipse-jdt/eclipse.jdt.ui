@@ -138,7 +138,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public SourceViewerInformationControl(Shell parent, int shellStyle, int style) {
 		
-		fShell= new Shell(parent, shellStyle);
+		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		fViewer= new JavaSourceViewer(fShell, null, null, false, style);
 		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
 		fViewer.setEditable(false);
