@@ -126,6 +126,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		if (hasCursorPositionElement(fEditor, members, fInsertPositions)) {
 			fLabels.add(ActionMessages.getString("SourceActionDialog.cursor")); //$NON-NLS-1$
 			fCurrentPositionIndex= 2;
+		} else {
+			// code is needed to deal with bogus values already present in the dialog store.
+			fCurrentPositionIndex= Math.max(fCurrentPositionIndex, 0);
+			fCurrentPositionIndex= Math.min(fCurrentPositionIndex, 1);
 		}
 		
 		for (int i = 0; i < methods.length; i++) {
@@ -215,7 +219,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 */
 	private void setInsertPosition(int insert) {
 		fCurrentPositionIndex= insert;
-		fSettings.put(SETTINGS_INSERTPOSITION, insert);
 	}	
 	
 	public void setCommentString(String string) {
