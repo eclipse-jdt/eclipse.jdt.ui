@@ -112,7 +112,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			jarPackage.setSaveManifest(false);
 			jarPackage.setSaveDescription(false);
 		} catch (CoreException ex) {
-				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
+				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getStatus().getMessage()); //$NON-NLS-1$
 				addToStatus(readStatus, jarPackage, message, ex);
 				return null;
 		} finally {
