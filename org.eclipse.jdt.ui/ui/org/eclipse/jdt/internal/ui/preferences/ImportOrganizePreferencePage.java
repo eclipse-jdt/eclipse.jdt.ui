@@ -324,7 +324,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}
 		String fileName= dialog.open();
 		if (fileName != null) {
-			getPreferenceStore().putValue(PREF_LASTLOADPATH, dialog.getFilterPath());
+			getPreferenceStore().setValue(PREF_LASTLOADPATH, dialog.getFilterPath());
 					
 			Properties properties= new Properties();
 			FileInputStream fis= null;
@@ -360,7 +360,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}
 		String fileName= dialog.open();
 		if (fileName != null) {
-			getPreferenceStore().putValue(PREF_LASTSAVEPATH, dialog.getFilterPath());
+			getPreferenceStore().setValue(PREF_LASTSAVEPATH, dialog.getFilterPath());
 			
 			Properties properties= new Properties();
 			for (int i= 0; i < elements.size(); i++) {
