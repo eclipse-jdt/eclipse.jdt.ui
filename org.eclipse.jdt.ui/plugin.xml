@@ -1096,6 +1096,51 @@ JavaStructureDiffViewerCreator
 
       	<!-- context menu group  -->
 		<menu
+			id="writeAccessSubMenu"
+			label="%writeAccessSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
+			id="readAccessSubMenu"
+			label="%readAccessSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
 			id="implementorsSubMenu"
 			label="%implementorsSubMenu.label"
 			path="org.eclipse.search.menu/contextMenuActionsGroup">
@@ -1134,49 +1179,6 @@ JavaStructureDiffViewerCreator
       			allowLabelUpdate="true"
 				retarget="true" />	
 
-		<menu
-			id="writeAccessSubMenu"
-			label="%writeAccessSubMenu.label"
-			path="org.eclipse.search.menu/contextMenuActionsGroup">
-			<separator name="group1"/>
-		</menu>
-			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"
-    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
-      			label="%InWorkingSet.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
-			<action id="org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"
-    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
-      			label="%InHierarchy.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
-			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"
-    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
-      			label="%InWorkspace.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
-
-		<menu
-			id="readAccessSubMenu"
-			label="%readAccessSubMenu.label"
-			path="org.eclipse.search.menu/contextMenuActionsGroup">
-			<separator name="group1"/>
-		</menu>
-			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet"
-    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
-      			label="%InWorkingSet.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
-			<action id="org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"
-    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
-      			label="%InHierarchy.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
-			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"
-    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
-      			label="%InWorkspace.label"
-      			allowLabelUpdate="true"
-				retarget="true" />	
 
 		<menu
 			id="referencesSubMenu"
@@ -1199,7 +1201,6 @@ JavaStructureDiffViewerCreator
       			label="%ReferencesInWorkspace.label"
       			allowLabelUpdate="true"
 				retarget="true" />	
-
 	</actionSet>			
 </extension>
 
