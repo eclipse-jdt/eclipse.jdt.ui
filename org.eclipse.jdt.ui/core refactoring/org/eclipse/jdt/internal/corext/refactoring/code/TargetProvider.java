@@ -96,7 +96,7 @@ abstract class TargetProvider {
 		if (type.isLocal())
 			return new LocalTypeTargetProvider(cu, declaration);
 		else
-			return new MemberTypeTargetProvider(cu, declaration);
+			return new MemberTypeTargetProvider(declaration);
 	}
 
 	static void fastDone(IProgressMonitor pm) {
@@ -319,13 +319,10 @@ abstract class TargetProvider {
 	}
 	
 	private static class MemberTypeTargetProvider extends TargetProvider {
-		private ICompilationUnit fCUnit;
 		private MethodDeclaration fMethod;
 		private Map fCurrentBodies;
-		public MemberTypeTargetProvider(ICompilationUnit unit, MethodDeclaration method) {
-			Assert.isNotNull(unit);
+		public MemberTypeTargetProvider(MethodDeclaration method) {
 			Assert.isNotNull(method);
-			fCUnit= unit;
 			fMethod= method;
 		}
 		public void initialize() {
