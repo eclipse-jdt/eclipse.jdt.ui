@@ -1,7 +1,14 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
@@ -11,14 +18,17 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -71,7 +81,13 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	
 	private String generateStub(ImportEdit importEdit) {
 		StringBuffer buf= new StringBuffer();
-		buf.append("private void ");
+		
+		ITypeBinding returnType= evaluateMethodType(importEdit);
+		String returnTypeName= returnType.getName();
+	
+		buf.append("private ");
+		buf.append(returnTypeName);
+		buf.append(' ');
 		buf.append(fMethodName);
 		buf.append("(");
 		if (fParamTypes.length > 0) {
@@ -90,9 +106,36 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 				buf.append(paramNames[i]);
 			}
 		}
-		buf.append(") {\n}\n");
+		buf.append(") {\n");
+
+		if (!returnType.isPrimitive()) {
+			buf.append("return null;\n");
+		} else if (returnTypeName.equals("boolean")) {
+			buf.append("return false;\n");
+		} else if (!returnTypeName.equals("void")) {
+			buf.append("return 0;\n");
+		}
+		buf.append("}\n");
 		return buf.toString();
 	}
+	
+	private ITypeBinding evaluateMethodType(ImportEdit importEdit) {
+		ProblemPosition pos= getProblemPosition(); 
+		CompilationUnit cu= AST.parseCompilationUnit(getCompilationUnit(), true);
+
+		ASTNode node= ASTResolving.findSelectedNode(cu, pos.getOffset(), pos.getLength());
+		
+
+		ITypeBinding binding= ASTResolving.getTypeBinding(node.getParent());
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			return binding;
+		}
+		return cu.getAST().resolveWellKnownType("void");
+	}	
 		
 	/*
 	 * @see ICompletionProposal#getImage()

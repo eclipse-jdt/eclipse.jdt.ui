@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -13,11 +23,12 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -28,7 +39,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	/**
 	 * Constructor for CorrectionAssistant.
 	 */
-	public JavaCorrectionAssistant(CompilationUnitEditor editor) {
+	public JavaCorrectionAssistant(IEditorPart editor) {
 		super();
 		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(editor); 
 		

@@ -1,8 +1,17 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -11,13 +20,22 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -63,7 +81,11 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	
 	private String generateStub(ImportEdit importEdit) {
 		StringBuffer buf= new StringBuffer();
-		buf.append("private Object ");
+		String varType= evaluateVariableType(importEdit);
+		
+		buf.append("private ");
+		buf.append(varType);
+		buf.append(' ');
 		buf.append(fVariableName);
 		buf.append(";\n");
 		return buf.toString();
@@ -75,5 +97,24 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 	}
+	
+	private String evaluateVariableType(ImportEdit importEdit) {
+		ProblemPosition pos= getProblemPosition(); 
+		CompilationUnit cu= AST.parseCompilationUnit(getCompilationUnit(), true);
+
+		ASTNode node= ASTResolving.findSelectedNode(cu, pos.getOffset(), pos.getLength());
+
+		ITypeBinding binding= ASTResolving.getTypeBinding(node);
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			return binding.getName();
+		}
+		return "Object";
+	}
+	
+
 
 }

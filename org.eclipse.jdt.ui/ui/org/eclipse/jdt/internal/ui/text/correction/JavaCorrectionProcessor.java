@@ -1,10 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -17,6 +26,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,20 +35,19 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
-	private CompilationUnitEditor fCompilationUnitEditor;
+	private IEditorPart fEditor;
 
 	/**
 	 * Constructor for JavaCorrectionProcessor.
 	 */
-	public JavaCorrectionProcessor(CompilationUnitEditor editor) {
-		fCompilationUnitEditor= editor;
+	public JavaCorrectionProcessor(IEditorPart editor) {
+		fEditor= editor;
 	}
 
 	/*
@@ -47,10 +56,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit cu= manager.getWorkingCopy(fCompilationUnitEditor.getEditorInput());
+		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
 		
 		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
+		IAnnotationModel model= provider.getAnnotationModel(fEditor.getEditorInput());
 
 		ArrayList proposals= new ArrayList();
 		HashSet idsProcessed= new HashSet();
@@ -112,6 +121,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					break;	
 				default:
 					//proposals.add(new NoCorrectionProposal(problemPos));
+				
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
