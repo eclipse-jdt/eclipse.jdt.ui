@@ -60,7 +60,6 @@ public class TemplateSet {
 		}
 	}
 
-	private static final String TEMPLATE_TAG= "template"; //$NON-NLS-1$
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
@@ -68,7 +67,7 @@ public class TemplateSet {
 
 	private List fTemplates= new ArrayList();
 	private Comparator fTemplateComparator= new TemplateComparator();
-	private Template[] fSortedTemplates= new Template[0];
+	private Template[] fSortedTemplates= new Template[0];	
 	
 	/**
 	 * Convenience method for reading templates from a file.
@@ -92,6 +91,11 @@ public class TemplateSet {
 			} catch (IOException e) {}
 		}		
 	}
+	
+	protected String getTemplateTag() {
+		return "template"; //$NON-NLS-1$
+	}
+	
 
 	/**
 	 * Reads templates from a XML stream and adds them to the template set.
@@ -101,7 +105,8 @@ public class TemplateSet {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder parser= factory.newDocumentBuilder();		
 			Document document= parser.parse(new InputSource(stream));
-			NodeList elements= document.getElementsByTagName(TEMPLATE_TAG);
+			
+			NodeList elements= document.getElementsByTagName(getTemplateTag());
 			
 			int count= elements.getLength();
 			for (int i= 0; i != count; i++) {
@@ -186,13 +191,13 @@ public class TemplateSet {
 			DocumentBuilder builder= factory.newDocumentBuilder();		
 			Document document= builder.newDocument();
 
-			Node root= document.createElement("templates"); // $NON-NLS-1$ //$NON-NLS-1$
+			Node root= document.createElement("templates"); //$NON-NLS-1$
 			document.appendChild(root);
 			
 			for (int i= 0; i != fTemplates.size(); i++) {
 				Template template= (Template) fTemplates.get(i);
 				
-				Node node= document.createElement("template"); // $NON-NLS-1$ //$NON-NLS-1$
+				Node node= document.createElement(getTemplateTag());
 				root.appendChild(node);
 				
 				NamedNodeMap attributes= node.getAttributes();

@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -155,19 +154,5 @@ public abstract class ContextType implements ITemplateEditor {
 		 	variable.setOffsets(offsets);   
 		}
 	}
-
-	/**
-	 * Returns the templates associated with this context type.
-	 */
-	public Template[] getTemplates() {
-		Template[] templates= Templates.getInstance().getTemplates();
-		
-		Vector vector= new Vector();
-		for (int i= 0; i != templates.length; i++)
-			if (templates[i].getContextTypeName().equals(fName))
-				vector.add(templates[i]);
-
-		return (Template[]) vector.toArray(new Template[vector.size()]);
-	}	
 
 }

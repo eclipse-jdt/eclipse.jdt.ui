@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
@@ -64,6 +65,7 @@ public class ContextTypeRegistry {
 	private ContextTypeRegistry() {
 		add(new JavaContextType());
 		add(new JavaDocContextType());
+		add(new CodeTemplateContextType());
 	}
 
 }

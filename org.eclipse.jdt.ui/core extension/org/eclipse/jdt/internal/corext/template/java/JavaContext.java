@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -88,8 +90,11 @@ public class JavaContext extends CompilationUnitContext {
 
 		if (lineDelimiter == null)
 			lineDelimiter= PLATFORM_LINE_DELIMITER;
+			
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
 		
-		ITemplateEditor formatter= new JavaFormatter(lineDelimiter);
+		ITemplateEditor formatter= new JavaFormatter(lineDelimiter, useCodeFormatter);
 		formatter.edit(buffer, this);
 
 		return buffer;

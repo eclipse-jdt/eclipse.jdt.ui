@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -205,16 +204,17 @@ public class EditTemplateDialog extends StatusDialog {
 	private Combo fContextCombo;
 	private SourceViewer fPatternEditor;	
 	private Button fInsertVariableButton;
+	private boolean fIsNameModifiable;
 
 	private TemplateTranslator fTranslator= new TemplateTranslator();	
 	private boolean fSuppressError= true; // #4354	
 	private Map fGlobalActions= new HashMap(10);
 	private List fSelectionActions = new ArrayList(3);	
-	private Vector fContextTypes= new Vector();
+	private String[] fContextTypes;
 	
 	private final TemplateVariableProcessor fProcessor= new TemplateVariableProcessor();
 		
-	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
+	public EditTemplateDialog(Shell parent, Template template, boolean edit, boolean isNameModifiable, String[] contextTypes) {
 		super(parent);
 		
 		setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
@@ -225,14 +225,14 @@ public class EditTemplateDialog extends StatusDialog {
 		setTitle(title);
 
 		fTemplate= template;
+		fIsNameModifiable= isNameModifiable;
 		
-		ContextTypeRegistry registry= ContextTypeRegistry.getInstance();
-		for (Iterator iterator= registry.iterator(); iterator.hasNext(); )
-			fContextTypes.add(iterator.next());
-
-		if (fContextTypes.size() > 0)
-			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType((String) fContextTypes.get(0)));
+		fContextTypes= contextTypes;
+		
+		if (fContextTypes.length > 0)
+			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(fContextTypes[0]));
 	}
+	
 	
 	/*
 	 * @see Dialog#createDialogArea(Composite)
@@ -244,38 +244,41 @@ public class EditTemplateDialog extends StatusDialog {
 		parent.setLayout(layout);
 		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
-		
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layout= new GridLayout();		
-		layout.numColumns= 3;
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		composite.setLayout(layout);
+		if (fIsNameModifiable) {
+			createLabel(parent, TemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
+			
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			layout= new GridLayout();		
+			layout.numColumns= 3;
+			layout.marginWidth= 0;
+			layout.marginHeight= 0;
+			composite.setLayout(layout);
 
-		fNameText= createText(composite);
-		fNameText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fSuppressError && (fNameText.getText().trim().length() != 0))
-					fSuppressError= false;
+			fNameText= createText(composite);
+			
+			fNameText.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					if (fSuppressError && (fNameText.getText().trim().length() != 0))
+						fSuppressError= false;
 
-				updateButtons();
+					updateButtons();
+				}
+			});
+			createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
+			fContextCombo= new Combo(composite, SWT.READ_ONLY);
+	
+			for (int i= 0; i < fContextTypes.length; i++) {
+				fContextCombo.add(fContextTypes[i]);
 			}
-		});
-
-		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
-		fContextCombo= new Combo(composite, SWT.READ_ONLY);
-
-		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); )
-			fContextCombo.add((String) iterator.next());
-
-		fContextCombo.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				String name= fContextCombo.getText();
-				fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));				
-			}
-		});
+	
+			fContextCombo.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					String name= fContextCombo.getText();
+					fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));				
+				}
+			});
+		}
 		
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(parent);
@@ -287,7 +290,7 @@ public class EditTemplateDialog extends StatusDialog {
 		Label filler= new Label(parent, SWT.NONE);		
 		filler.setLayoutData(new GridData());
 		
-		composite= new Composite(parent, SWT.NONE);
+		Composite composite= new Composite(parent, SWT.NONE);
 		layout= new GridLayout();		
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
@@ -306,9 +309,11 @@ public class EditTemplateDialog extends StatusDialog {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 
-		fNameText.setText(fTemplate.getName());
+		if (fIsNameModifiable) {
+			fNameText.setText(fTemplate.getName());
+			fContextCombo.select(getIndex(fTemplate.getContextTypeName()));
+		}
 		fDescriptionText.setText(fTemplate.getDescription());
-		fContextCombo.select(getIndex(fTemplate.getContextTypeName()));
 
 		initializeActions();
 
@@ -513,21 +518,27 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		if (context == null)
 			return -1;
-			
-		return fContextTypes.indexOf(context);
+		
+		for (int i= 0; i < fContextTypes.length; i++) {
+			if (context.equals(fContextTypes[i])) {
+				return i;	
+			}
+		}
+		return -1;
 	}
 	
 	protected void okPressed() {
-		fTemplate.setName(fNameText.getText());
+		if (fIsNameModifiable) {
+			fTemplate.setName(fNameText.getText());
+			fTemplate.setContext(fContextCombo.getText());
+		}		
 		fTemplate.setDescription(fDescriptionText.getText());
-		fTemplate.setContext(fContextCombo.getText());
 		fTemplate.setPattern(fPatternEditor.getTextWidget().getText());
-		
 		super.okPressed();
 	}
 	
 	private void updateButtons() {		
-		boolean valid= fNameText.getText().trim().length() != 0;
+		boolean valid= fNameText == null || fNameText.getText().trim().length() != 0;
 
 		StatusInfo status= new StatusInfo();
 		
