@@ -74,6 +74,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 1, fTextBounds.y + 1, false);
 			SWTEventHelper.mouseDownEvent(fDisplay, 1, false);
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 1, fTextBounds.y + fTextBounds.height + 1, false);
+			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 2, fTextBounds.y + fTextBounds.height + 1, false); // needed for GTK
 		}
 		
 		public void driveFromBackground() {
@@ -113,7 +114,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				while (fTopPixel < fMaxTopPixel) {
 					fPoster.driveFromBackground();
 					fOldTopPixel= fTopPixel;
-					if (!fCondition.busyWaitFor(1000)) {
+					if (!fCondition.busyWaitFor(1000, false)) {
 						System.out.println("Timeout in " + MouseScrollEditorTest.this.getClass().getName() + "#" + getName() + "()");
 						break;
 					}
@@ -157,6 +158,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 						fDisplay.sleep();
 				fPerformanceMeter.stop();
 				assertEquals(fMaxTopPixel, fText.getTopPixel());
+				EditorTestHelper.calmDown(100, 1000, 100);
 				fText.setTopPixel(0);
 				EditorTestHelper.calmDown(100, 1000, 100);
 			}

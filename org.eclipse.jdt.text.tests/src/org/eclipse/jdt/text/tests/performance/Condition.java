@@ -15,11 +15,11 @@ public abstract class Condition {
 
 	public abstract boolean isTrue();
 	
-	public boolean busyWaitFor(long maxTime) {
+	public boolean busyWaitFor(long maxTime, boolean strict) {
 		long maxEndTime= System.currentTimeMillis() + maxTime;
 		while (System.currentTimeMillis() < maxEndTime)
 			if (isTrue())
-				return System.currentTimeMillis() < maxEndTime;
+				return !strict || System.currentTimeMillis() < maxEndTime;
 		return false;
 	}
 }
