@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -81,13 +82,17 @@ public class JavadocConfigurationBlock {
 		fJavaDocField.doFillIntoGrid(topComp, 3);
 
 		PixelConverter converter= new PixelConverter(topComp);
-		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(10));
+		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(40));
 		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
-		
+
+		// Fillers;
+		new Label(topComp, SWT.LEFT);
+		new Label(topComp, SWT.LEFT);
 		
 		fValidateButton= new Button(topComp, SWT.PUSH);
 		fValidateButton.setText(JavaUIMessages.getString("JavadocConfigurationBlock.ValidateButton.label")); //$NON-NLS-1$
-		fValidateButton.setLayoutData(new GridData());
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END);
+		fValidateButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fValidateButton);
 		
 		fValidateButton.addSelectionListener(new SelectionAdapter() {
