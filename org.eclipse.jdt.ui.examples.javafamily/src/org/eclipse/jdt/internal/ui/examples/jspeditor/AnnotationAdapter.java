@@ -13,9 +13,7 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.IReconcileResult;
-
-import org.eclipse.ui.texteditor.IAnnotationExtension;
-
+import org.eclipse.jface.text.source.Annotation;
 
 
 /**
@@ -30,7 +28,7 @@ public abstract class AnnotationAdapter implements IReconcileResult {
 	 * 
 	 * @return an annotation (can be temporary or persistent)
 	 */
-	public abstract IAnnotationExtension createAnnotation();
+	public abstract Annotation createAnnotation();
 	
 	/**
 	 * The position of the annotation adapted by this adapter.

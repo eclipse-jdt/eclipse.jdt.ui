@@ -25,8 +25,6 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.texteditor.IAnnotationExtension;
-
 
 /**
  * Determines all annotations for the given line, collects,
@@ -83,15 +81,15 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 		while (e.hasNext()) {
 			Object o= e.next();
 
-			if (o instanceof IAnnotationExtension) {
+			if (o instanceof Annotation) {
 			
-				IAnnotationExtension a= (IAnnotationExtension)o;
+				Annotation a= (Annotation)o;
 				
-				Position position= model.getPosition((Annotation)a);
+				Position position= model.getPosition(a);
 				if (position == null)
 					continue;
 
-				if (isDuplicateAnnotation(messagesAtPosition, position, a.getMessage()))
+				if (isDuplicateAnnotation(messagesAtPosition, position, a.getText()))
 					continue;
 
 				switch (compareRulerLine(position, document, line)) {
@@ -141,8 +139,8 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 			if (annotations.size() == 1) {
 			
 				// optimization
-				IAnnotationExtension annotation= (IAnnotationExtension)annotations.get(0);
-				String message= annotation.getMessage();
+				Annotation annotation= (Annotation) annotations.get(0);
+				String message= annotation.getText();
 				if (message != null && message.trim().length() > 0)
 					return formatSingleMessage(message);
 				
@@ -152,8 +150,8 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 			
 				Iterator e= annotations.iterator();
 				while (e.hasNext()) {
-					IAnnotationExtension annotation= (IAnnotationExtension)e.next();
-					String message= annotation.getMessage();
+					Annotation annotation= (Annotation) e.next();
+					String message= annotation.getText();
 					if (message != null && message.trim().length() > 0)
 						messages.add(message.trim());
 				}

@@ -36,7 +36,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
@@ -117,8 +116,8 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 					AnnotationAdapter result= (AnnotationAdapter)results[i];
 					Position pos= result.getPosition();
 					
-					IAnnotationExtension annotation= result.createAnnotation();
-					getAnnotationModel().addAnnotation((Annotation)annotation, pos);
+					Annotation annotation= result.createAnnotation();
+					getAnnotationModel().addAnnotation(annotation, pos);
 				}
 			}
 		};
@@ -144,9 +143,9 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		Iterator iter= getAnnotationModel().getAnnotationIterator();
 		while (iter.hasNext())  {
 			Object annotation= iter.next();
-			if (annotation instanceof IAnnotationExtension)  {
-				IAnnotationExtension extension= (IAnnotationExtension)annotation;
-					if (extension.isTemporary())
+			if (annotation instanceof Annotation)  {
+				Annotation extension= (Annotation)annotation;
+					if (!extension.isPersistent())
 						getAnnotationModel().removeAnnotation((Annotation)annotation);
 			}
 		}

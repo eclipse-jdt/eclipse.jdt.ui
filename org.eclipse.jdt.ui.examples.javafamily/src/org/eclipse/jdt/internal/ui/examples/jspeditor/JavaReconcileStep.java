@@ -23,13 +23,13 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.AbstractReconcileStep;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.reconciler.IReconcileStep;
-import org.eclipse.jface.text.reconciler.IReconcileResult;
-import org.eclipse.jface.text.reconciler.IReconcilableModel;
 import org.eclipse.jface.text.reconciler.DocumentAdapter;
+import org.eclipse.jface.text.reconciler.IReconcilableModel;
+import org.eclipse.jface.text.reconciler.IReconcileResult;
+import org.eclipse.jface.text.reconciler.IReconcileStep;
+import org.eclipse.jface.text.source.Annotation;
 
 import org.eclipse.ui.texteditor.DefaultAnnotation;
-import org.eclipse.ui.texteditor.IAnnotationExtension;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -85,7 +85,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			return fPosition;
 		}
 
-		public IAnnotationExtension createAnnotation() {
+		public Annotation createAnnotation() {
 			int start= fProblem.getSourceStart();
 			if (start < 0)
 				return null;

@@ -22,8 +22,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-import org.eclipse.ui.texteditor.IAnnotationExtension;
-
 /**
  * A simple text hover to show annotation information.
  * 
@@ -54,11 +52,9 @@ public class AnnotationTextHover implements ITextHover {
 			Annotation a= (Annotation) e.next();
 			Position p= fModel.getPosition(a);
 			if (p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
-				if (a instanceof IAnnotationExtension)  {
-					String msg= ((IAnnotationExtension) a).getMessage();
-					if (msg != null && msg.trim().length() > 0)
-						return msg;
-				}
+				String msg= a.getText();
+				if (msg != null && msg.trim().length() > 0)
+					return msg;
 			}
 		}
 		
@@ -77,11 +73,9 @@ public class AnnotationTextHover implements ITextHover {
 			Annotation a= (Annotation) e.next();
 			Position p= fModel.getPosition(a);
 			if (p.overlapsWith(offset, 0)) {
-				if (a instanceof IAnnotationExtension)  {
-					String msg= ((IAnnotationExtension) a).getMessage();
-					if (msg != null && msg.trim().length() > 0)
-						return new Region(p.offset, p.length);
-				}
+				String msg= a.getText();
+				if (msg != null && msg.trim().length() > 0)
+					return new Region(p.offset, p.length);
 			}
 		}
 		return null;
