@@ -25,9 +25,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -35,6 +36,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * For given fields, method stubs for getters and setters are created.
  */
 public class AddGetterSetterOperation implements IWorkspaceRunnable {
+	
+	private final String[] EMPTY= new String[0];
+	
 	private IField[] fGetterFields;
 	private IField[] fSetterFields;
 	private List fCreatedAccessors;
@@ -132,7 +136,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}	
 	
-	private void generateGetter(IField field) throws JavaModelException, OperationCanceledException {
+	private void generateGetter(IField field) throws CoreException, OperationCanceledException {
 		String fieldName= field.getElementName();
 		
 		boolean isStatic= Flags.isStatic(field.getFlags());
@@ -146,16 +150,18 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		int indent= StubUtility.getIndentUsed(field);
 
 		String getterName= GetterSetterUtil.getGetterName(field, null);
-		IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
+		IMethod existingGetter= JavaModelUtil.findMethod(getterName, EMPTY, false, parentType);
 		boolean doCreateGetter= ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
 
 		if (doCreateGetter) {			
 			// create the getter stub
 			StringBuffer buf= new StringBuffer();
 			if (addComments) {
-				buf.append("/**\n"); //$NON-NLS-1$
-				buf.append(" * @return "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
-				buf.append(" */\n"); //$NON-NLS-1$
+				String comment= CodeGeneration.getMethodComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, EMPTY, EMPTY, field.getTypeSignature(), null, String.valueOf('\n'));
+				if (comment != null) {
+					buf.append(comment);
+					buf.append('\n');
+				}					
 			}
 			buf.append("public "); //$NON-NLS-1$
 			if (isStatic) {
@@ -176,16 +182,20 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private void generateSetter(IField field) throws JavaModelException, OperationCanceledException {
+	private void generateSetter(IField field) throws CoreException, OperationCanceledException {
 		String fieldName= field.getElementName();
 		IJavaProject project= field.getJavaProject();
 		
-		String argname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
+		String returnSig= field.getTypeSignature();
+		
+		String returnElementType= Signature.toString(Signature.getElementType(returnSig));
+
+		String argname= NamingConventions.suggestArgumentNames(project, Signature.getQualifier(returnElementType), Signature.getSimpleName(returnElementType), Signature.getArrayCount(returnSig), EMPTY)[0];
 		
 		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
 
-		String typeName= Signature.toString(field.getTypeSignature());
+		String typeName= Signature.toString(returnSig);
 		
 		IType parentType= field.getDeclaringType();
 		
@@ -195,7 +205,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 		String setterName= GetterSetterUtil.getSetterName(field, null);
 
-		String[] args= new String[] { field.getTypeSignature() };		
+		String[] args= new String[] { returnSig };		
 		IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 		boolean doCreateSetter= ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));
 
@@ -203,10 +213,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			// create the setter stub
 			StringBuffer buf= new StringBuffer();
 			if (addComments) {
-				buf.append("/**\n"); //$NON-NLS-1$
-				buf.append(" * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				buf.append(" * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
-				buf.append(" */\n"); //$NON-NLS-1$
+				String comment= CodeGeneration.getMethodComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, new String[] { argname }, EMPTY, Signature.SIG_VOID, null, String.valueOf('\n'));
+				if (comment != null) {
+					buf.append(comment);
+					buf.append('\n');
+				}
 			}
 			buf.append("public "); //$NON-NLS-1$
 			if (isStatic) {
