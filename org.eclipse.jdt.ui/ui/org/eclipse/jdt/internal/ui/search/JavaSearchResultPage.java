@@ -54,6 +54,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IActionBars;
@@ -396,6 +397,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		cp.setLevel(grouping);
 		updateGroupingActions();
 		getSettings().put(KEY_GROUPING, fCurrentGrouping);
+		getViewPart().updateLabel();
 	}
 	
 	protected StructuredViewer getViewer() {
@@ -675,12 +677,12 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	private int getFilteredMatchCount() {
-		IContentProvider cp= getViewer().getContentProvider();
-		if (cp instanceof ITreeContentProvider) {
-			ITreeContentProvider tp= (ITreeContentProvider) cp;
+		StructuredViewer viewer= getViewer();
+		if (viewer instanceof TreeViewer) {
+			ITreeContentProvider tp= (ITreeContentProvider) viewer.getContentProvider();
 			return getMatchCount(tp, getRootElements((TreeViewer) getViewer()));
 		} else {
-			return getMatchCount((IStructuredContentProvider) cp);
+			return getMatchCount((TableViewer) viewer);
 		}
 	}
 	
@@ -693,6 +695,17 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 		return elements;
 	}
+	
+	private Object[] getRootElements(TableViewer viewer) {
+		Table t= viewer.getTable();
+		Item[] roots= t.getItems();
+		Object[] elements= new Object[roots.length];
+		for (int i = 0; i < elements.length; i++) {
+			elements[i]= roots[i].getData();
+		}
+		return elements;
+	}
+
 
 	private int getMatchCount(ITreeContentProvider cp, Object[] elements) {
 		int count= 0;
@@ -704,8 +717,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return count;
 	}
 	
-	private int getMatchCount(IStructuredContentProvider cp) {
-		Object[] elements= cp.getElements(getInput());
+	private int getMatchCount(TableViewer viewer) {
+		Object[] elements=	getRootElements(viewer);
 		int count= 0;
 		for (int i = 0; i < elements.length; i++) {
 			count+= getDisplayedMatchCount(elements[i]);
