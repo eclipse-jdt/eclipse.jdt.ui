@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
-public class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
+class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
 
 	private Clipboard fClipboard;
 	private SelectionDispatchAction fPasteAction;
@@ -92,7 +92,7 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 	private static TypedSource[] convertToTypedSourceArray(ISourceReference[] refs) throws JavaModelException {
 		TypedSource[] elems= new TypedSource[refs.length];
 		for (int i= 0; i < refs.length; i++) {
-			elems[i]= new TypedSource(refs[i]);
+			elems[i]= TypedSource.create(refs[i]);
 		}
 		return elems;
 	}

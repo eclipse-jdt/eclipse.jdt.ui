@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
+class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
 	private Clipboard fClipboard;
