@@ -117,9 +117,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * Method declared on IWizard.
 	 */
 	public boolean performFinish() {
-		
-		System.out.println("c= " + fJarPackageWizardPage.getSelectedContainers().size());
-		
 		if (!executeExportOperation(new JarFileExportOperation(fJarPackage, getShell())))
 			return false;
 		
