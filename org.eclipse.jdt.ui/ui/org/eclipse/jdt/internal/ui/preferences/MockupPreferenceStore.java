@@ -31,34 +31,42 @@ public class MockupPreferenceStore implements IPreferenceStore {
 	/** Listeners on this store */
 	private ListenerList fListeners= new ListenerList();
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#addPropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		fListeners.add(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#removePropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
 		fListeners.remove(listener);
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#contains(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean contains(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#firePropertyChangeEvent(java.lang.String, java.lang.Object, java.lang.Object)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 		firePropertyChangeEvent(this, name, oldValue, newValue);
 	}
 
+	/**
+	 * Fires a property change event with the given source, property name, old and new value. Used
+	 * when the event source should be different from this mockup preference store.
+	 * @param source The event source 
+	 * @param name The property name
+	 * @param oldValue The property's old value
+	 * @param newValue The property's new value
+	 */
 	public void firePropertyChangeEvent(Object source, String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent event= new PropertyChangeEvent(source, name, oldValue, newValue);
 		Object[] listeners= fListeners.getListeners();
@@ -66,197 +74,197 @@ public class MockupPreferenceStore implements IPreferenceStore {
 			((IPropertyChangeListener) listeners[i]).propertyChange(event);
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getBoolean(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean getBoolean(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultBoolean(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean getDefaultBoolean(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultDouble(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public double getDefaultDouble(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultFloat(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public float getDefaultFloat(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultInt(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public int getDefaultInt(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultLong(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public long getDefaultLong(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultString(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getDefaultString(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getDouble(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public double getDouble(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getFloat(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public float getFloat(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getInt(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public int getInt(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getLong(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public long getLong(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#getString(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getString(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#isDefault(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isDefault(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#needsSaving()
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean needsSaving() {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#putValue(java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void putValue(String name, String value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, double)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, double value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, float)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, float value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, int value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, long value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, String defaultObject) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, boolean)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setDefault(String name, boolean value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setToDefault(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setToDefault(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, double)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, double value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, float)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, float value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, int value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, long value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, String value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, boolean)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setValue(String name, boolean value) {
 		throw new UnsupportedOperationException();

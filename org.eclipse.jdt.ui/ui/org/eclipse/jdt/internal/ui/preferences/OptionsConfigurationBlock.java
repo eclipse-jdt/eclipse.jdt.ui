@@ -146,15 +146,18 @@ public abstract class OptionsConfigurationBlock {
 		
 	protected void setOptions(Map map) {
 		if (fProject != null) {
-			firePropertyChangeEvents(fProject.getOptions(false), map);
 			fProject.setOptions(map);
+			firePropertyChangeEvents(fProject.getOptions(false), map);
 		} else {
 			JavaCore.setOptions((Hashtable) map);
 		}	
 	} 
 	
 	/**
-	 * @param newOptions
+	 * Computes the differences between the given old and new options and fires corresponding
+	 * property change events on the Java plugin's mockup preference store.
+	 * @param oldOptions The old options
+	 * @param newOptions The new options
 	 */
 	private void firePropertyChangeEvents(Map oldOptions, Map newOptions) {
 		oldOptions= new HashMap(oldOptions);
