@@ -179,7 +179,6 @@ public class CodeGeneration {
 	 * types names (dot separated).
 	 * @param methodName The name of the setter method.
 	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}.
-	 * @param fieldType The type of the field that is to set, corresponding to the template variable for ${field_type}.
 	 * @param paramName The parameter passed to the setter method, corresponding to the template variable for $(param).
 	 * @return Returns the constructed body content or <code>null</code> if
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
