@@ -32,32 +32,6 @@ public class Binding extends ASTAttribute {
 	private Object fParent;
 	private boolean fIsRequired;
 	
-	public Binding(Object parent, IBinding binding) {
-		fParent= parent;
-		fBinding= binding;
-		if (binding == null) {
-			fLabel= ">binding"; //$NON-NLS-1$
-		} else {
-			switch (binding.getKind()) {
-				case IBinding.VARIABLE:
-					fLabel= ">variable binding"; //$NON-NLS-1$
-					break;
-				case IBinding.TYPE:
-					fLabel= ">type binding"; //$NON-NLS-1$
-					break;
-				case IBinding.METHOD:
-					fLabel= ">method binding"; //$NON-NLS-1$
-					break;
-				case IBinding.PACKAGE:
-					fLabel= ">package binding"; //$NON-NLS-1$
-					break;
-				default:
-					fLabel= ">unknown binding"; //$NON-NLS-1$
-			}
-		}
-		fIsRequired= true;
-	}
-	
 	public Binding(Object parent, String label, IBinding binding, boolean isRequired) {
 		fParent= parent;
 		fBinding= binding;

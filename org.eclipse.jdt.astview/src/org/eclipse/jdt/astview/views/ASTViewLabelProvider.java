@@ -74,6 +74,9 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		buf.append(", "); //$NON-NLS-1$
 		buf.append(node.getLength());
 		buf.append(']');
+		if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
+			buf.append(" (malformed)"); //$NON-NLS-1$
+		}
 	}
 	
 	
@@ -108,10 +111,12 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 				return fRed;
 			}
 			return fBlue;
+		} else if (element instanceof NodeProperty) {
+			return null; // normal color
 		} else if (element instanceof BindingProperty) {
 			return fBlue;
 		}
-		return null;
+		return fDarkGray; // all extra properties
 	}
 
 	/* (non-Javadoc)
@@ -156,11 +161,13 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			int end= start + node.getLength();
 			
 			ASTNode parent= node.getParent();
-			int parentstart= parent.getStartPosition();
-			int parentend= start + parent.getLength();
-			
-			if (start < parentstart || end > parentend) {
-				return fBold;
+			if (parent != null) {
+				int parentstart= parent.getStartPosition();
+				int parentend= start + parent.getLength();
+				
+				if (start < parentstart || end > parentend) {
+					return fBold;
+				}
 			}
 		}
 		return null;

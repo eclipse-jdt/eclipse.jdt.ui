@@ -55,11 +55,13 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
@@ -101,9 +103,23 @@ public class ASTView extends ViewPart {
 		}
 	}
 	
-	private class ListenerMix implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener {
+	private static class ListenerMix implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener, IPartListener2 {
+		
+		private boolean fASTViewVisible= true;
+		private ASTView fView;
+		
+		public ListenerMix(ASTView view) {
+			fView= view;
+		}
+		
+		public void dispose() {
+			fView= null;
+		}
+
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			handleEditorPostSelectionChanged(part, selection);
+			if (fASTViewVisible) {
+				fView.handleEditorPostSelectionChanged(part, selection);
+			}
 		}
 
 		/* (non-Javadoc)
@@ -117,7 +133,7 @@ public class ASTView extends ViewPart {
 		 */
 		public void bufferDisposed(IFileBuffer buffer) {
 			if (buffer instanceof ITextFileBuffer) {
-				handleDocumentDisposed(((ITextFileBuffer) buffer).getDocument());
+				fView.handleDocumentDisposed(((ITextFileBuffer) buffer).getDocument());
 			}
 		}
 
@@ -179,24 +195,81 @@ public class ASTView extends ViewPart {
 		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentChanged(DocumentEvent event) {
-			handleDocumentChanged(event.getDocument());
+			fView.handleDocumentChanged(event.getDocument());
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
-			handleSelectionChanged(event.getSelection());
+			fView.handleSelectionChanged(event.getSelection());
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
 		 */
 		public void doubleClick(DoubleClickEvent event) {
-			handleDoubleClick(event);
+			fView.handleDoubleClick(event);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partHidden(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partHidden(IWorkbenchPartReference partRef) {
+			IWorkbenchPart part= partRef.getPart(false);
+			if (part == fView) {
+				fASTViewVisible= false;
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partVisible(IWorkbenchPartReference partRef) {
+			IWorkbenchPart part= partRef.getPart(false);
+			if (part == fView) {
+				fASTViewVisible= true;
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partActivated(IWorkbenchPartReference partRef) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partBroughtToTop(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partClosed(IWorkbenchPartReference partRef) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partDeactivated(IWorkbenchPartReference partRef) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partOpened(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partOpened(IWorkbenchPartReference partRef) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IPartListener2#partInputChanged(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partInputChanged(IWorkbenchPartReference partRef) {
 		}
 	}
 	
+	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	
 	private TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
@@ -222,7 +295,7 @@ public class ASTView extends ViewPart {
 	
 	public ASTView() {
 		fSuperListener= null;
-		fDoLinkWithEditor= false;
+		fDoLinkWithEditor= ASTViewPlugin.getDefault().getDialogSettings().getBoolean(SETTINGS_LINK_WITH_EDITOR);
 		fCurrentASTLevel= AST.JLS2;
 	}
 	
@@ -232,10 +305,11 @@ public class ASTView extends ViewPart {
 	public void init(IViewSite site) throws PartInitException {
 		super.setSite(site);
 		if (fSuperListener == null) {
-			fSuperListener= new ListenerMix();
+			fSuperListener= new ListenerMix(this);
 			
 			ISelectionService service= site.getWorkbenchWindow().getSelectionService();
 			service.addPostSelectionListener(fSuperListener);
+			site.getPage().addPartListener(fSuperListener);
 			FileBuffers.getTextFileBufferManager().addFileBufferListener(fSuperListener);
 		}
 	}
@@ -322,7 +396,7 @@ public class ASTView extends ViewPart {
 		String version= root.getAST().apiLevel() == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
-		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (bindings not included)."; //$NON-NLS-1$
+		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} AST nodes, {4,number} bytes."; //$NON-NLS-1$
 		Object[] args= { element.getElementName(), version, new Long(time),  new Integer(collector.getNumberOfNodes()), new Integer(collector.getSize())};
 		setContentDescription(MessageFormat.format(msg, args));
 
@@ -332,19 +406,21 @@ public class ASTView extends ViewPart {
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+		ASTViewPlugin.getDefault().getDialogSettings().put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
+		
 		if (fSuperListener != null) {
 			if (fEditor != null) {
 				uninstallModificationListener();
 			}
 			ISelectionService service= getSite().getWorkbenchWindow().getSelectionService();
 			service.removePostSelectionListener(fSuperListener);
+			getSite().getPage().removePartListener(fSuperListener);
 			FileBuffers.getTextFileBufferManager().removeFileBufferListener(fSuperListener);
+			fSuperListener.dispose(); // removes reference to view
 			fSuperListener= null;
 		}
 		super.dispose();
 	}
-	
-
 	
 	private IStatus getErrorStatus(String message, Throwable th) {
 		return new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), IStatus.ERROR, message, th);
@@ -366,7 +442,18 @@ public class ASTView extends ViewPart {
 		hookContextMenu();
 		contributeToActionBars();
 		
-		performRefresh();
+		try {
+			IEditorPart part= EditorUtility.getActiveEditor();
+			if (part instanceof ITextEditor) {
+				setInput((ITextEditor) part);
+			}
+		} catch (CoreException e) {
+			// ignore
+		}
+		if (fOpenable == null) {
+			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
+		}
+		
 		setASTUptoDate(fOpenable != null);
 	}
 
@@ -398,7 +485,7 @@ public class ASTView extends ViewPart {
 		}
 	}
 
-	private void fillContextMenu(IMenuManager manager) {
+	protected void fillContextMenu(IMenuManager manager) {
 		manager.add(fFocusAction);
 		manager.add(fRefreshAction);
 		manager.add(fCollapseAction);
@@ -478,7 +565,7 @@ public class ASTView extends ViewPart {
 				performLinkWithEditor();
 			}
 		};
-		fLinkWithEditor.setChecked(false);
+		fLinkWithEditor.setChecked(fDoLinkWithEditor);
 		fLinkWithEditor.setText("Link with editor"); //$NON-NLS-1$
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
@@ -558,14 +645,14 @@ public class ASTView extends ViewPart {
 	}
 
 	protected void handleEditorPostSelectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!fDoLinkWithEditor || fRoot == null || !(selection instanceof ITextSelection)) {
+		if (!fDoLinkWithEditor || !(selection instanceof ITextSelection)) {
 			return;
 		}
-		if (part != fEditor && part instanceof ITextEditor && (EditorUtility.getJavaInput((ITextEditor) part) != null)) {
+		if ((fRoot == null || part != fEditor) && part instanceof ITextEditor && (EditorUtility.getJavaInput((ITextEditor) part) != null)) {
 			try {
 				setInput((ITextEditor) part);
 			} catch (CoreException e) {
-				// ignore
+				setContentDescription(e.getStatus().getMessage());
 			}
 			return;
 		}
@@ -584,7 +671,7 @@ public class ASTView extends ViewPart {
 		}
 	}
 	
-	public void handleDoubleClick(DoubleClickEvent event) {
+	protected void handleDoubleClick(DoubleClickEvent event) {
 		fDoubleClickAction.run();
 	}
 	
@@ -664,6 +751,10 @@ public class ASTView extends ViewPart {
 				fViewer.reveal(declaring);
 				fViewer.setSelection(new StructuredSelection(declaring));
 			}
+			return;
+		} else if (obj instanceof ProblemNode) {
+			ProblemNode problemNode= (ProblemNode) obj;
+			EditorUtility.selectInEditor(fEditor, problemNode.getOffset(), problemNode.getLength());
 			return;
 		}
 		

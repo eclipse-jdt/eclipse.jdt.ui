@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MemberRef;
@@ -29,13 +30,28 @@ import org.eclipse.jdt.core.dom.Type;
 
 public class ASTViewContentProvider implements IStructuredContentProvider, ITreeContentProvider {
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
 	public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 	}
+	
+	/*(non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+	 */
 	public void dispose() {
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+	 */
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+	 */
 	public Object getParent(Object child) {
 		if (child instanceof ASTNode) {
 			ASTNode node= (ASTNode) child;
@@ -50,6 +66,9 @@ public class ASTViewContentProvider implements IStructuredContentProvider, ITree
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+	 */
 	public Object[] getChildren(Object parent) {
 		if (parent instanceof ASTAttribute) {
 			return ((ASTAttribute) parent).getChildren();
@@ -64,29 +83,61 @@ public class ASTViewContentProvider implements IStructuredContentProvider, ITree
 
 		if (node instanceof Name) {
 			IBinding binding= ((Name) node).resolveBinding();
-			res.add(new Binding(node, binding)); //$NON-NLS-1$
+			res.add(createBinding(node, binding));
 		} else if (node instanceof MethodRef) {
 			IBinding binding= ((MethodRef) node).resolveBinding();
-			res.add(new Binding(node, binding)); //$NON-NLS-1$
+			res.add(createBinding(node, binding));
 		} else if (node instanceof MemberRef) {
 			IBinding binding= ((MemberRef) node).resolveBinding();
-			res.add(new Binding(node, binding)); //$NON-NLS-1$
+			res.add(createBinding(node, binding));
 		} else if (node instanceof Expression) {
 			IBinding binding= ((Expression) node).resolveTypeBinding();
-			res.add(new Binding(node, binding)); //$NON-NLS-1$
+			res.add(createBinding(node, binding));
 		} else if (node instanceof Type) {
 			IBinding binding= ((Type) node).resolveBinding();
-			res.add(new Binding(node, binding)); //$NON-NLS-1$
+			res.add(createBinding(node, binding));
 		}
-		
+ 		
 		List list= node.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
 			StructuralPropertyDescriptor curr= (StructuralPropertyDescriptor) list.get(i);
 			res.add(new NodeProperty(node, curr));
 		}
 		
+		if (node instanceof CompilationUnit) {
+			CompilationUnit root= (CompilationUnit) node;
+			res.add(new CommentsProperty(root));
+			res.add(new ProblemsProperty(root));
+		}
+		
 		return res.toArray();
 	}
+	
+	private Binding createBinding(ASTNode parent, IBinding binding) {
+		String label;
+		if (binding == null) {
+			label= ">binding"; //$NON-NLS-1$
+		} else {
+			switch (binding.getKind()) {
+				case IBinding.VARIABLE:
+					label= "> variable binding"; //$NON-NLS-1$
+					break;
+				case IBinding.TYPE:
+					label= "> type binding"; //$NON-NLS-1$
+					break;
+				case IBinding.METHOD:
+					label= "> method binding"; //$NON-NLS-1$
+					break;
+				case IBinding.PACKAGE:
+					label= "> package binding"; //$NON-NLS-1$
+					break;
+				default:
+					label= "> unknown binding"; //$NON-NLS-1$
+			}
+		}
+		return new Binding(parent, label, binding, true);
+	}
+	
 	
 	public boolean hasChildren(Object parent) {
 		return getChildren(parent).length > 0;

@@ -120,15 +120,4 @@ public class NodeProperty extends ASTAttribute {
 		return getLabel();
 
 	}
-
-
-
-
-
-
-
-
-
-
-	
 }
