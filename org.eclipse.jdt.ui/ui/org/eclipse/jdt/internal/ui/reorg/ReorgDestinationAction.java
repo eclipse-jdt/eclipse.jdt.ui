@@ -305,7 +305,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 																																	 new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS	),
 																																	 cp,
 																																	 refactoring);
-		initDialog(dialog, getActionName(), getDestinationDialogMessage(), refactoring);
+		initDialog(dialog, getActionName(), getDestinationDialogMessage(), refactoring, null);
 		
 		return openDialog(dialog);
 	}
@@ -316,7 +316,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		return null;
 	}
 
-	public static void initDialog(ElementTreeSelectionDialog dialog, String title, String message, ReorgRefactoring refactoring) {
+	public static void initDialog(ElementTreeSelectionDialog dialog, String title, String message, ReorgRefactoring refactoring, Object selection) {
 		dialog.setTitle(title);
 		dialog.setValidator(new ReorgSelectionValidator(refactoring));
 		dialog.addFilter(new ContainerFilter(refactoring));
@@ -324,9 +324,11 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		dialog.setMessage(message);
 		dialog.setSize(60, 18);
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
-		dialog.setInitialSelection(computeCommonParent(refactoring.getElementsToReorg()));
+		if (selection == null)
+			selection= computeCommonParent(refactoring.getElementsToReorg());
+		dialog.setInitialSelection(selection);
 	}
-		
+	
 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
 		return new ElementTreeSelectionDialog(parent, labelProvider, cp);
 	}

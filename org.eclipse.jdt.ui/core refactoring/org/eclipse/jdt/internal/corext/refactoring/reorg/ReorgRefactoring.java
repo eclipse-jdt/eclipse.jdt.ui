@@ -172,7 +172,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return isValidDestinationForCusAndFiles(dest);
 	}
 
-	Object getDestination() {
+	public Object getDestination() {
 		return fDestination;
 	}
 	

@@ -1,16 +1,16 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.ui.reorg.ReorgMessages;
-
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
 	public MoveMembersWizard(MoveStaticMembersRefactoring ref) {
-		super(
+		this(
 			ref, 
-			ReorgMessages.getString("moveAction.name"), //$NON-NLS-1$
-			ReorgMessages.getString("moveAction.destination.label") //$NON-NLS-1$
+			RefactoringMessages.getString("RefactoringGroup.move_Members"), //$NON-NLS-1$
+			IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE
 		);
 	}
 
