@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A ParameterTypeVariable is a ConstraintVariable which stands for
  * the type of a method parameter.
  */
-public final class ParameterTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public final class ParameterTypeVariable2 extends ConstraintVariable2 implements ISourceConstraintVariable {
 
 	private final int fParameterIndex;
 	private final String fKey;

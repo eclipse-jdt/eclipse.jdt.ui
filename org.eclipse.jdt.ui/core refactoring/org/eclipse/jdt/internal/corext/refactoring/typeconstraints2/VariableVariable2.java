@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * the type of a variable, namely a field or a local variable
  * Use {@link ParameterTypeVariable2} for method parameters).
  */
-public final class VariableVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public final class VariableVariable2 extends ConstraintVariable2 implements ISourceConstraintVariable {
 
 	private final String fKey;
 	private ICompilationUnit fCompilationUnit;

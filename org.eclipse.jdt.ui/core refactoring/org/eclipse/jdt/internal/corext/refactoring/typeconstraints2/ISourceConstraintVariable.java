@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-public interface IDeclaredConstraintVariable {
+public interface ISourceConstraintVariable {
 
 	public ICompilationUnit getCompilationUnit();
 

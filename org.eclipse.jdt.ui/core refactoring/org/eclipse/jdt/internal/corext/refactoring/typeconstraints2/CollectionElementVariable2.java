@@ -68,8 +68,8 @@ public class CollectionElementVariable2 extends ConstraintVariable2 {
 	}
 	
 	public ICompilationUnit getCompilationUnit() {
-		if (fParentCv instanceof IDeclaredConstraintVariable)
-			return ((IDeclaredConstraintVariable) fParentCv).getCompilationUnit();
+		if (fParentCv instanceof ISourceConstraintVariable)
+			return ((ISourceConstraintVariable) fParentCv).getCompilationUnit();
 		else
 			return null;
 //			//TODO: assert in constructor(s)

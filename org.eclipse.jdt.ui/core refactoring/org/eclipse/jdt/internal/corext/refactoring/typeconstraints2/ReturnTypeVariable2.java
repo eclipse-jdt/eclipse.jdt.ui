@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A ReturnTypeVariable is a ConstraintVariable which stands for
  * the return type of a method.
  */
-public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public final class ReturnTypeVariable2 extends ConstraintVariable2 implements ISourceConstraintVariable {
 
 	private final String fKey;
 	private ICompilationUnit fCompilationUnit;

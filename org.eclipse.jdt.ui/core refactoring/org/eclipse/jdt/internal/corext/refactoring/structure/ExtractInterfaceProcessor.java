@@ -98,7 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
@@ -1119,9 +1119,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
 			TType type= null;
-			IDeclaredConstraintVariable variable= null;
+			ISourceConstraintVariable variable= null;
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
-				variable= (IDeclaredConstraintVariable) iterator.next();
+				variable= (ISourceConstraintVariable) iterator.next();
 				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 				if (type != null && variable instanceof ITypeConstraintVariable) {
 					if (unit.getPrimary().equals(subUnit))
