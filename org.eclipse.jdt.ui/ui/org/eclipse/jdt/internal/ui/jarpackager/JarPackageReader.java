@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -7,9 +7,10 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +19,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -37,11 +39,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 /**
  * Reads data from an InputStream and returns a JarPackage
  */
-public class JarPackageReader extends Object {
+public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	protected InputStream fInputStream;
 
@@ -57,31 +63,45 @@ public class JarPackageReader extends Object {
 		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.getString("JarPackageReader.jarPackageReaderWarnings"), null); //$NON-NLS-1$
 	}
 
+	public void read(JarPackageData jarPackage) throws CoreException {
+		try {
+			readXML(jarPackage);
+		} catch (IOException ex) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+		} catch (SAXException ex) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+		}
+	}
+
+
 	/**
      * Closes this stream.
 	 * It is the clients responsiblity to close the stream.
 	 * 
-	 * @exception IOException
+	 * @exception CoreException
      */
-    public void close() throws IOException {
+    public void close() throws CoreException {
     	if (fInputStream != null)
-			fInputStream.close();
+    		try {
+				fInputStream.close();
+    		} catch (IOException ex) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			}
 	}
 
-	public JarPackage readXML() throws IOException, SAXException {
-		JarPackage jarPackage= new JarPackage();
+	public JarPackageData readXML(JarPackageData jarPackage) throws IOException, SAXException {
 	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
     	factory.setValidating(false);
 		DocumentBuilder parser= null;
 		try {
 			parser= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
-			throw new IOException(ex.getMessage());
+			throw new IOException(ex.getLocalizedMessage());
 		} finally {
 			// Note: Above code is ok since clients are responsible to close the stream
 		}
 		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
-		if (!xmlJarDesc.getNodeName().equals(JarPackage.DESCRIPTION_EXTENSION)) {
+		if (!xmlJarDesc.getNodeName().equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.badFormat")); //$NON-NLS-1$
 		}
 		NodeList topLevelElements= xmlJarDesc.getChildNodes();
@@ -98,12 +118,12 @@ public class JarPackageReader extends Object {
 		return jarPackage;
 	}
 
-	private void xmlReadJarLocation(JarPackage jarPackage, Element element) {
-		if (element.getNodeName().equals(JarPackage.EXTENSION))
+	private void xmlReadJarLocation(JarPackageData jarPackage, Element element) {
+		if (element.getNodeName().equals(JarPackagerUtil.JAR_EXTENSION))
 			jarPackage.setJarLocation(new Path(element.getAttribute("path"))); //$NON-NLS-1$
 	}
 
-	private void xmlReadOptions(JarPackage jarPackage, Element element) throws java.io.IOException {
+	private void xmlReadOptions(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("options")) { //$NON-NLS-1$
 			jarPackage.setOverwrite(getBooleanAttribute(element, "overwrite")); //$NON-NLS-1$
 			jarPackage.setCompress(getBooleanAttribute(element, "compress")); //$NON-NLS-1$
@@ -118,7 +138,7 @@ public class JarPackageReader extends Object {
 		}
 	}
 
-	private void xmlReadManifest(JarPackage jarPackage, Element element) throws java.io.IOException {
+	private void xmlReadManifest(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("manifest")) { //$NON-NLS-1$
 			jarPackage.setManifestVersion(element.getAttribute("manifestVersion")); //$NON-NLS-1$
 			jarPackage.setUsesManifest(getBooleanAttribute(element, "usesManifest")); //$NON-NLS-1$
@@ -126,12 +146,12 @@ public class JarPackageReader extends Object {
 			jarPackage.setSaveManifest(getBooleanAttribute(element,"saveManifest")); //$NON-NLS-1$
 			jarPackage.setGenerateManifest(getBooleanAttribute(element, "generateManifest")); //$NON-NLS-1$
 			jarPackage.setManifestLocation(new Path(element.getAttribute("manifestLocation"))); //$NON-NLS-1$
-			jarPackage.setMainClass(getMainClass(element));
+			jarPackage.setManifestMainClass(getMainClass(element));
 			xmlReadSealingInfo(jarPackage, element);
 		}
 	}
 
-	private void xmlReadSealingInfo(JarPackage jarPackage, Element element) throws java.io.IOException {
+	private void xmlReadSealingInfo(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		/*
 		 * Try to find sealing info. Could ask for single child node
 		 * but this would stop others from adding more child nodes to
@@ -151,26 +171,28 @@ public class JarPackageReader extends Object {
 		}
 	}
 
-	private void xmlReadSelectedElements(JarPackage jarPackage, Element element) throws java.io.IOException {
+	private void xmlReadSelectedElements(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("selectedElements")) { //$NON-NLS-1$
 			jarPackage.setExportClassFiles(getBooleanAttribute(element, "exportClassFiles")); //$NON-NLS-1$
 			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
+			Set elementsToExport= new HashSet(selectedElements.getLength());
 			for (int j= 0; j < selectedElements.getLength(); j++) {
 				Node selectedNode= selectedElements.item(j);
 				if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 				Element selectedElement= (Element)selectedNode;
 				if (selectedElement.getNodeName().equals("file")) //$NON-NLS-1$
-					addFile(jarPackage.getSelectedElements(), selectedElement);
+					addFile(elementsToExport, selectedElement);
 				else if (selectedElement.getNodeName().equals("folder")) //$NON-NLS-1$
-					addFolder(jarPackage.getSelectedElements() ,selectedElement);
+					addFolder(elementsToExport,selectedElement);
 				else if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
-					addProject(jarPackage.getSelectedElements() ,selectedElement);
+					addProject(elementsToExport ,selectedElement);
 				else if (selectedElement.getNodeName().equals("javaElement")) //$NON-NLS-1$
-					addJavaElement(jarPackage.getSelectedElements() ,selectedElement);
+					addJavaElement(elementsToExport, selectedElement);
 				// Note: Other file types are not handled by this writer
 			}
+			jarPackage.setElements(elementsToExport.toArray());
 		}
 	}
 
@@ -190,7 +212,7 @@ public class JarPackageReader extends Object {
 		throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.illegalValueForBooleanAttribute")); //$NON-NLS-1$
 	}
 
-	private void addFile(List selectedElements, Element element) throws IOException {
+	private void addFile(Set selectedElements, Element element) throws IOException {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFile file= JavaPlugin.getWorkspace().getRoot().getFile(path);
@@ -199,7 +221,7 @@ public class JarPackageReader extends Object {
 		}
 	}
 
-	private void addFolder(List selectedElements, Element element) throws IOException {
+	private void addFolder(Set selectedElements, Element element) throws IOException {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFolder folder= JavaPlugin.getWorkspace().getRoot().getFolder(path);
@@ -208,7 +230,7 @@ public class JarPackageReader extends Object {
 		}
 	}
 
-	private void addProject(List selectedElements, Element element) throws IOException {
+	private void addProject(Set selectedElements, Element element) throws IOException {
 		String name= element.getAttribute("name"); //$NON-NLS-1$
 		if (name.equals("")) //$NON-NLS-1$
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagNameNotFound")); //$NON-NLS-1$
@@ -224,7 +246,7 @@ public class JarPackageReader extends Object {
 		return new Path(element.getAttribute("path")); //$NON-NLS-1$
 	}
 	
-	private void addJavaElement(List selectedElements, Element element) throws IOException {
+	private void addJavaElement(Set selectedElements, Element element) throws IOException {
 		String handleId= element.getAttribute("handleIdentifier"); //$NON-NLS-1$
 		if (handleId.equals("")) //$NON-NLS-1$
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagHandleIdentifierNotFoundOrEmpty")); //$NON-NLS-1$
@@ -270,12 +292,14 @@ public class JarPackageReader extends Object {
 	}
 
 	/**
-	 * Returns the warnings of this operation. If there are no
-	 * warnings, a status object with IStatus.OK is returned.
+	 * Returns the status of the reader.
+	 * If there were any errors, the result is a status object containing
+	 * individual status objects for each error.
+	 * If there were no errors, the result is a status object with error code <code>OK</code>.
 	 *
 	 * @return the status of this operation
 	 */
-	public IStatus getWarnings() {
+	public IStatus getStatus() {
 		if (fWarnings.getChildren().length == 0)
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 		else

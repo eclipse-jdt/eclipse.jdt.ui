@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -9,13 +9,15 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.util.Assert;
 
@@ -26,6 +28,12 @@ import org.w3c.dom.Element;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+
 import org.apache.xml.serialize.Method;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
@@ -34,7 +42,7 @@ import org.apache.xml.serialize.SerializerFactory;
 /**
  * Writes a JarPackage to an underlying OutputStream
  */
-public class JarPackageWriter extends Object {
+public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	
 	protected OutputStream fOutputStream;
 	
@@ -46,6 +54,14 @@ public class JarPackageWriter extends Object {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
 	}
+	
+	public void write(JarPackageData jarPackage) throws CoreException {
+		try  {
+			writeXML(jarPackage);
+		} catch (IOException ex) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+		}
+	}
 
 	/**
 	 * Writes a XML representation of the JAR specification
@@ -53,7 +69,7 @@ public class JarPackageWriter extends Object {
 	 * 
 	 * @exception IOException	if writing to the underlying stream fails
 	 */
-	public void writeXML(JarPackage jarPackage) throws IOException {
+	public void writeXML(JarPackageData jarPackage) throws IOException {
 		Assert.isNotNull(jarPackage);
 		DocumentBuilder docBuilder= null;
 		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -66,7 +82,7 @@ public class JarPackageWriter extends Object {
 		Document document= docBuilder.newDocument();
 		
 		// Create the document
-		Element xmlJarDesc= document.createElement(JarPackage.DESCRIPTION_EXTENSION);
+		Element xmlJarDesc= document.createElement(JarPackagerUtil.DESCRIPTION_EXTENSION);
 		document.appendChild(xmlJarDesc);
 		xmlWriteJarLocation(jarPackage, document, xmlJarDesc);
 		xmlWriteOptions(jarPackage, document, xmlJarDesc);
@@ -81,18 +97,18 @@ public class JarPackageWriter extends Object {
 		serializer.asDOMSerializer().serialize(document);
 	}
 
-	private void xmlWriteJarLocation(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
-		Element jar= document.createElement(JarPackage.EXTENSION);
+	private void xmlWriteJarLocation(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+		Element jar= document.createElement(JarPackagerUtil.JAR_EXTENSION);
 		xmlJarDesc.appendChild(jar);
 		jar.setAttribute("path", jarPackage.getJarLocation().toString()); //$NON-NLS-1$
 	}
 
-	private void xmlWriteOptions(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+	private void xmlWriteOptions(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element options= document.createElement("options"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(options);
 		options.setAttribute("overwrite", "" + jarPackage.allowOverwrite()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("compress", "" + jarPackage.isCompressed()); //$NON-NLS-2$ //$NON-NLS-1$
-		options.setAttribute("exportErrors", "" + jarPackage.exportErrors()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("exportErrors", "" + jarPackage.areErrorsExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("logErrors", "" + jarPackage.logErrors()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("logWarnings", "" + jarPackage.logWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -102,7 +118,7 @@ public class JarPackageWriter extends Object {
 		options.setAttribute("buildIfNeeded", "" + jarPackage.isBuildingIfNeeded()); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 
-	private void xmlWriteManifest(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+	private void xmlWriteManifest(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element manifest= document.createElement("manifest"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(manifest);
 		manifest.setAttribute("manifestVersion", jarPackage.getManifestVersion()); //$NON-NLS-1$
@@ -111,12 +127,12 @@ public class JarPackageWriter extends Object {
 		manifest.setAttribute("saveManifest", "" + jarPackage.isManifestSaved()); //$NON-NLS-2$ //$NON-NLS-1$
 		manifest.setAttribute("generateManifest", "" + jarPackage.isManifestGenerated()); //$NON-NLS-2$ //$NON-NLS-1$
 		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toString()); //$NON-NLS-1$
-		if (jarPackage.getMainClass() != null)
-			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getMainClass().getHandleIdentifier()); //$NON-NLS-1$
+		if (jarPackage.getManifestMainClass() != null)
+			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getManifestMainClass().getHandleIdentifier()); //$NON-NLS-1$
 		xmlWriteSealingInfo(jarPackage, document, manifest);
 	}
 
-	private void xmlWriteSealingInfo(JarPackage jarPackage, Document document, Element manifest) throws DOMException {
+	private void xmlWriteSealingInfo(JarPackageData jarPackage, Document document, Element manifest) throws DOMException {
 		Element sealing= document.createElement("sealing"); //$NON-NLS-1$
 		manifest.appendChild(sealing);
 		sealing.setAttribute("sealJar", "" + jarPackage.isJarSealed()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -128,14 +144,14 @@ public class JarPackageWriter extends Object {
 		add(jarPackage.getPackagesToUnseal(), packagesToUnSeal, document);
 	}
 
-	private void xmlWriteSelectedElements(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+	private void xmlWriteSelectedElements(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element selectedElements= document.createElement("selectedElements"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
 		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
-		Iterator iter= jarPackage.getSelectedElementsClosure();
-		while (iter.hasNext()) {
-			Object element= iter.next();
+		Object[] elements= jarPackage.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
 			if (element instanceof IResource)
 				add((IResource)element, selectedElements, document);
 			else if (element instanceof IJavaElement)
@@ -149,13 +165,11 @@ public class JarPackageWriter extends Object {
      * to to the underlying stream.
      * @exception IOException	Writing to the underlying stream.
      */
-    public void writeString(JarPackage jarPackage) throws IOException {
+    public void writeString(JarPackageData jarPackage) throws IOException {
     	Assert.isNotNull(jarPackage);
 		OutputStreamWriter streamWriter= new OutputStreamWriter(fOutputStream);
 		BufferedWriter writer= new BufferedWriter(streamWriter);
 		writer.write(JarPackagerMessages.getString("JarWriter.output.title")); //$NON-NLS-1$
-		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.usedToInit", jarPackage.isUsedToInitialize())); //$NON-NLS-1$
 		writer.newLine();
 		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportBin", jarPackage.areClassFilesExported())); //$NON-NLS-1$
 		writer.newLine();
@@ -183,9 +197,7 @@ public class JarPackageWriter extends Object {
 		writer.newLine();
 		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.jarSealed", jarPackage.isJarSealed())); //$NON-NLS-1$
 		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.mainClass", jarPackage.getMainClassName())); //$NON-NLS-1$
-		writer.newLine();
-		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.downloadExtensionPath", jarPackage.getDownloadExtensionsPath())); //$NON-NLS-1$
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.mainClass", JarPackagerUtil.getMainClassName(jarPackage))); //$NON-NLS-1$
 		writer.flush();
     }
 
@@ -193,11 +205,15 @@ public class JarPackageWriter extends Object {
      * Closes this stream.
      * It is the client's responsibility to close the stream.
      * 
-	 * @exception IOException
+     * @throws CoreException
      */
-    public void close() throws IOException {
+    public void close() throws CoreException {
     	if (fOutputStream != null) {
-			fOutputStream.close();
+			try {
+				fOutputStream.close();
+			} catch (IOException ex) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+			}
     	}
 	}
 
@@ -229,5 +245,12 @@ public class JarPackageWriter extends Object {
 			parent.appendChild(pkg);
 			pkg.setAttribute("handleIdentifier", packages[i].getHandleIdentifier()); //$NON-NLS-1$
 		}
+	}
+
+	/*
+	 * This writer always returns OK
+	 */
+	public IStatus getStatus() {
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -55,19 +55,22 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
 /**
  *	Page 1 of the JAR Package wizard
  */
-public class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPackageWizardPage {
+class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPackageWizardPage {
 
-	private JarPackage fJarPackage;
+	private JarPackageData fJarPackage;
 	private IStructuredSelection fInitialSelection;
 	private CheckboxTreeAndListGroup fInputGroup;
 	private boolean fFirstTime= true;
@@ -107,7 +110,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	/**
 	 *	Create an instance of this class
 	 */
-	public JarPackageWizardPage(JarPackage jarPackage, IStructuredSelection selection) {
+	public JarPackageWizardPage(JarPackageData jarPackage, IStructuredSelection selection) {
 		super(PAGE_NAME, selection);
 		setTitle(JarPackagerMessages.getString("JarPackageWizardPage.title")); //$NON-NLS-1$
 		setDescription(JarPackagerMessages.getString("JarPackageWizardPage.description")); //$NON-NLS-1$
@@ -207,7 +210,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 *	@return java.lang.String
 	 */
 	protected String getOutputSuffix() {
-		return "." + JarPackage.EXTENSION; //$NON-NLS-1$
+		return "." + JarPackagerUtil.JAR_EXTENSION; //$NON-NLS-1$
 	}
 
 	/**
@@ -259,7 +262,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 *	last time this wizard was used to completion.
 	 */
 	protected void restoreWidgetValues() {
-		if (!fJarPackage.isUsedToInitialize())
+		if (!((JarPackageWizard)getWizard()).isInitializingFromJarPackage())
 			initializeJarPackage();
 
 		fExportClassFilesCheckbox.setSelection(fJarPackage.areClassFilesExported());
@@ -293,7 +296,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			// source
-			fJarPackage.setSelectedElements(getSelectedResources());
+			fJarPackage.setElements(getSelectedElements());
 			fJarPackage.setExportClassFiles(settings.getBoolean(STORE_EXPORT_CLASS_FILES));
 			fJarPackage.setExportJavaFiles(settings.getBoolean(STORE_EXPORT_JAVA_FILES));
 
@@ -317,14 +320,14 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			return;
 		
 		// source
-		fJarPackage.setSelectedElements(getSelectedResources());
+		fJarPackage.setElements(getSelectedElements());
 		fJarPackage.setExportClassFiles(fExportClassFilesCheckbox.getSelection());
 		fJarPackage.setExportJavaFiles(fExportJavaFilesCheckbox.getSelection());
 
 		// destination
 		IPath path= getPathFromString(fDestinationNamesCombo.getText());
 		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
-			path= path.addFileExtension(JarPackage.EXTENSION);
+			path= path.addFileExtension(JarPackagerUtil.JAR_EXTENSION);
 		fJarPackage.setJarLocation(path);
 
 		// options
@@ -406,7 +409,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getResult();
-			path= path.removeFileExtension().addFileExtension(JarPackage.DESCRIPTION_EXTENSION);
+			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());
 		}
 	}
@@ -551,7 +554,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			IResource resource= JavaPlugin.getWorkspace().getRoot().findMember(path);
 			if (resource != null) {
 				// test if included
-				if (fJarPackage.getSelectedResources().contains(resource)) {
+				if (JarPackagerUtil.asResources(fJarPackage.getElements()).contains(resource)) {
 					setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.cantExportJARIntoItself")); //$NON-NLS-1$
 					return false;
 				}
@@ -662,10 +665,10 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			updatePageCompletion();
 	}
 
-	void setSelectedElementsWithoutContainedChildren() {
+	Object[] getSelectedElementsWithoutContainedChildren() {
 		Set closure= removeContainedChildren(fInputGroup.getWhiteCheckedTreeItems());
 		closure.addAll(getExportedNonContainers());
-		fJarPackage.setSelectedElementsClosure(closure);
+		return closure.toArray();
 	}
 
 	private Set removeContainedChildren(Set elements) {
@@ -752,5 +755,9 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			}
 		}
 		return javaElementResources;
+	}
+
+	private Object[] getSelectedElements() {
+		return getSelectedResources().toArray();
 	}
 }
