@@ -292,8 +292,22 @@ public class ImportsStructure implements IImportsStructure {
 	 */			
 	public void addImport(String packageName, String enclosingTypeName, String typeName) {
 		addImport(JavaModelUtil.concatenateName(packageName, enclosingTypeName), typeName);
-	}	
-		
+	}
+	
+	/**
+	 * Removes an import from the structure.
+	 */
+	public void removeImport(String qualifiedTypeName) {
+		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
+		int nPackages= fPackageEntries.size();
+		for (int i= 0; i < nPackages; i++) {
+			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
+			if (entry.getName().equals(typeContainerName)) {
+				entry.remove(qualifiedTypeName);
+				return;
+			}
+		}
+	}		
 	
 	/**
 	 * Creates all new elements in the import structure.
@@ -606,6 +620,17 @@ public class ImportsStructure implements IImportsStructure {
 				fNumberOfComments++;
 			}			
 		}
+		
+		public void remove(String fullName) {
+			int nInports= fImportEntries.size();
+			for (int i= 0; i < nInports; i++) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (!curr.isComment() && fullName.equals(curr.getElementName())) {
+					fImportEntries.remove(i);
+					return;
+				}
+			}
+		}		
 		
 		public final ImportDeclEntry getImportAt(int index) {
 			return (ImportDeclEntry) fImportEntries.get(index);
