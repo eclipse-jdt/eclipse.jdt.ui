@@ -45,13 +45,15 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void helper(String className, String newInterfaceName) throws Exception {
+	private void helper(String className, String newInterfaceName, boolean extractAll) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
 		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setNewInterfaceName(newInterfaceName);
+		if (extractAll)
+			ref.setExtractedMembers(ref.getExtractableMembers());
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 //		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
 
@@ -62,23 +64,22 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	//---------------tests ----------------------
 	
 	public void test0() throws Exception{
-		helper("A", "I");
+		helper("A", "I", true);
 	}
 
 	public void test1() throws Exception{
-		helper("A", "I");
+		helper("A", "I", true);
 	}
 
 	public void test2() throws Exception{
-		helper("A", "I");
+		helper("A", "I", true);
 	}
 
 	public void test3() throws Exception{
-		helper("A", "I");
+		helper("A", "I", true);
 	}
 
 	public void test4() throws Exception{
-		helper("A", "I");
+		helper("A", "I", true);
 	}
-
 }
