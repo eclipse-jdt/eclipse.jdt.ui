@@ -169,10 +169,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
 				
 		fErrorTickManager= new ErrorTickManager();
-		
-		Hashtable options = JavaCore.getOptions();
-		options.put(JavaCore.CORE_JAVA_BUILD_ORDER, JavaCore.IGNORE);
-		JavaCore.setOptions(options);
 	}
 		
 	/* (non - Javadoc)
