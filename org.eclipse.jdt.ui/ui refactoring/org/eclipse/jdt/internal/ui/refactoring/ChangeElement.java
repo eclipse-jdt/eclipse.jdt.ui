@@ -4,8 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jface.util.Assert;
-import org.eclipse.swt.graphics.Image;
+
 
 /**
  * Instances of <code>ChangeElement<code> are used to present <code>

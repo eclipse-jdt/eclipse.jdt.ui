@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import java.util.HashSet;
+
 
 class ConditionalFlowInfo extends FlowInfo {
 	

@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopyQueries implements ICopyQueries {

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.jdt.core.JavaModelException;
+
 
 /**
  * An <code>ChangeExceptionHandler</code> is informed about any exception that occurrs during

@@ -6,12 +6,12 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.jdt.core.ISourceRange;
 
 public class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
 

@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-
 import org.eclipse.jdt.core.JavaModelException;
 
 

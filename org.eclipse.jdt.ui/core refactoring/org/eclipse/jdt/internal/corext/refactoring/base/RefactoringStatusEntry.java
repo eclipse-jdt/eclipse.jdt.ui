@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
 /**

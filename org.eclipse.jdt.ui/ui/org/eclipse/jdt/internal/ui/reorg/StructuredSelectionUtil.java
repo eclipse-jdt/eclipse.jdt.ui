@@ -8,11 +8,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 class StructuredSelectionUtil {

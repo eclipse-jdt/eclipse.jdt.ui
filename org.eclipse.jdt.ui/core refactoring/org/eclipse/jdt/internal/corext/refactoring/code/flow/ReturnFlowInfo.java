@@ -4,10 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import java.util.HashSet;
-
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 

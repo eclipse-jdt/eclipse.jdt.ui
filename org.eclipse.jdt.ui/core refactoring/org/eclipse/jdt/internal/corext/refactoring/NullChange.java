@@ -6,10 +6,9 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 public class NullChange extends Change {
 

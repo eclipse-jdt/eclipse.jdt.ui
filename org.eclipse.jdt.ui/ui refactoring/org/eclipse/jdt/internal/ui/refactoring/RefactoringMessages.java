@@ -4,9 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.text.MessageFormat;
 
 public class RefactoringMessages {
 

@@ -15,17 +15,15 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.compare.contentmergeviewer.IMergeViewerContentProvider;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class MergeTextViewerContentProvider implements IMergeViewerContentProvider {
 

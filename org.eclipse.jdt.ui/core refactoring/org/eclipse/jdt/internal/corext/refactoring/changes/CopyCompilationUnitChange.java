@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;

@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 

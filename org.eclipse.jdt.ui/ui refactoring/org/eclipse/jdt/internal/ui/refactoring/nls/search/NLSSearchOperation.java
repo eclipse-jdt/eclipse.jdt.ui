@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 
 class NLSSearchOperation extends WorkspaceModifyOperation {

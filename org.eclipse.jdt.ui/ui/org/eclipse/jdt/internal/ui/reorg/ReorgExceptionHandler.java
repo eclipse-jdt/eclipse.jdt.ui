@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.text.MessageFormat;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -17,15 +16,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**

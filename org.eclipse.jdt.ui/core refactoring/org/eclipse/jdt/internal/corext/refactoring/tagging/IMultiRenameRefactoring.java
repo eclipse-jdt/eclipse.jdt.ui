@@ -5,7 +5,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
 import java.util.Map;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 

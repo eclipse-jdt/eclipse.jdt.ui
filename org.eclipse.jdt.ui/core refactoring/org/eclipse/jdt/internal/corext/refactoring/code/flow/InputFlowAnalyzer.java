@@ -4,9 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;

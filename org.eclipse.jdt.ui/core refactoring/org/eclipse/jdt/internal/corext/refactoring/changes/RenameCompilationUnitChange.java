@@ -14,7 +14,6 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChan
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 

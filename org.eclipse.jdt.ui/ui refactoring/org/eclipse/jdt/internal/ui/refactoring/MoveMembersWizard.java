@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 public class MoveMembersWizard extends RefactoringWizard {
 

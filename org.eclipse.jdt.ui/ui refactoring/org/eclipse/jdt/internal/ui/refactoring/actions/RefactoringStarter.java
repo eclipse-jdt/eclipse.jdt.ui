@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IResource;

@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import java.util.HashSet;
-
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 class LocalFlowInfo extends FlowInfo {

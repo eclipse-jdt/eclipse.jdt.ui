@@ -4,11 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 
 class NLSSubstitutionContentProvider implements IStructuredContentProvider {
 

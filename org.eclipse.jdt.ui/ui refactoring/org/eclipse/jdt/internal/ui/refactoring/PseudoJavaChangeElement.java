@@ -7,9 +7,10 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.core.IJavaElement;
 
 /* package */ class PseudoJavaChangeElement extends ChangeElement {
 
