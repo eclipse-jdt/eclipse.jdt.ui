@@ -128,14 +128,7 @@ public class EditorTestHelper {
 	}
 	
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
-		// work around failures in N20041013's performance tests:
-		// http://fullmoon.rtp.raleigh.ibm.com/downloads/drops/N-N20041013-200410130010/performance/html/org.eclipse.jdt.text.tests_win32perf.html
-		// TODO: investigate further when working with multiple WorkbenchWindows
-		if (window == null && workbench.getWorkbenchWindowCount() > 0)
-			return workbench.getWorkbenchWindows()[0];
-		return window;
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	}
 
 	public static IWorkbenchPage getActivePage() {
@@ -148,12 +141,12 @@ public class EditorTestHelper {
 		return window != null ? window.getShell().getDisplay() : null;
 	}
 
-	public void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
+	public static void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
 		joinBackgroundActivities();
 		joinReconciler(sourceViewer, 0, Long.MAX_VALUE, 500);
 	}
 	
-	public void joinBackgroundActivities() throws CoreException {
+	public static void joinBackgroundActivities() throws CoreException {
 		// Join Building
 		boolean interrupted= true;
 		while (interrupted) {
