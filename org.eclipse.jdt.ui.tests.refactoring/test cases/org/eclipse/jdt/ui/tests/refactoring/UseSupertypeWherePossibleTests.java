@@ -227,6 +227,16 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
        validatePassingTest("A", new String[]{"A"}, "java.util.Vector");
     }
 
+	public void testNew36() throws Exception{
+	//		printTestDisabledMessage("bug 26288");
+	   validatePassingTest("A", new String[]{"A"}, "p.B");
+	}
+
+	public void testNew37() throws Exception{
+	//		printTestDisabledMessage("bug 26288");
+	   validatePassingTest("A", new String[]{"A"}, "p.B");
+	}
+
 	/* i had to rename tests 0-15 because of cvs problems*/
 	
 	
