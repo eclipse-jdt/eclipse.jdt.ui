@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.text;
  */
 
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -16,6 +17,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 
 
  
@@ -100,5 +103,29 @@ public class JavaReconciler extends MonoReconciler {
 		fPartListener= null;
 		
 		super.uninstall();
+	}
+	
+    /*
+	 * @see AbstractReconciler#forceReconciling()
+	 */
+	protected void forceReconciling() {
+		super.forceReconciling();
+        IReconcilingStrategy strategy= getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+        if (strategy instanceof JavaReconcilingStrategy) {
+			JavaReconcilingStrategy java= (JavaReconcilingStrategy) strategy;
+			java.notifyParticipants(false);
+		}
+	}
+    
+	/*
+	 * @see AbstractReconciler#reconcilerReset()
+	 */
+	protected void reconcilerReset() {
+		super.reconcilerReset();
+        IReconcilingStrategy strategy= getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+        if (strategy instanceof JavaReconcilingStrategy) {
+			JavaReconcilingStrategy java= (JavaReconcilingStrategy) strategy;
+			java.notifyParticipants(true);
+		}
 	}
 }

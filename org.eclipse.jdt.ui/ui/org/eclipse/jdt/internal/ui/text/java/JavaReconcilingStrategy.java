@@ -40,6 +40,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private IDocumentProvider fDocumentProvider;
 	private ICompilationUnit fUnit;
 	private IProgressMonitor fProgressMonitor;
+	private boolean fNotify= true;
 	
 	
 	public JavaReconcilingStrategy(ITextEditor editor) {
@@ -75,13 +76,17 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					extension.setProgressMonitor(null);
 				
 				// update participants
-				if (fEditor instanceof IReconcilingParticipant && !fProgressMonitor.isCanceled()) {
-					IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
-					p.reconciled();
+				try {
+					if (fEditor instanceof IReconcilingParticipant && fNotify && !fProgressMonitor.isCanceled()) {
+						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
+						p.reconciled();
+					}
+				} finally {
+					fNotify= true;
 				}
 				
 			} catch (JavaModelException x) {
-				// ignored
+				// swallow exception
 			}
 		}
 	}
@@ -118,5 +123,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 */
 	public void initialReconcile() {
 		reconcile();
+	}
+	
+	/**
+	 * Tells this strategy whether to inform its participants.
+	 * 
+	 * @param notify <code>true</code> if participant should be notified
+	 */
+	public void notifyParticipants(boolean notify) {
+		fNotify= notify;
 	}
 }
