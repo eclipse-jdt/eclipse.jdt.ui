@@ -37,6 +37,10 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -144,6 +148,17 @@ public class JavaProjectHelper {
 		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	}
+	
+	/**
+	 * Sets the compiler options to 1.4
+	 * @param options The compiler options to configure
+	 */	
+	public static void set14CompilerOptions(Map options) {
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
 	}
 	
 	/**
