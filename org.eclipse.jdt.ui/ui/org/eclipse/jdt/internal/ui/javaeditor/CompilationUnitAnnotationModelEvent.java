@@ -14,7 +14,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
  */
 public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 	
-	private boolean fIncludesMarkerAnnotationChanges= false;
+	private boolean fIncludesMarkerAnnotationChanges;
 	
 	
 	/**
