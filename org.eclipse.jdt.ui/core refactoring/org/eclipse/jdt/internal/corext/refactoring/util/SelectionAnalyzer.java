@@ -426,10 +426,6 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		return visitAbstractMethodDeclaration(clinit, scope);
 	}
 	
-	public boolean visit(TypeDeclaration node, ClassScope scope) {
-		return visitTypeDeclaration(node, scope);
-	}
-	
 	public boolean visit(MemberTypeDeclaration node, ClassScope scope) {
 		return visitTypeDeclaration(node, scope);
 	}
@@ -468,7 +464,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	
 	//---- Methods ----------------------------------------------------------------
 	
-	public boolean visit(LocalTypeDeclaration node, MethodScope scope) {
+	public boolean visit(LocalTypeDeclaration node, BlockScope scope) {
 		return visitTypeDeclaration(node, scope);
 	}
 	
@@ -478,13 +474,9 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	
 	//---- Methods / Block --------------------------------------------------------
 	
-	public boolean visit(TypeDeclaration node, BlockScope scope) {
-		return visitTypeDeclaration(node, scope);
-	}
-	
 	public boolean visit(AnonymousLocalTypeDeclaration node, BlockScope scope) {
 		return visitTypeDeclaration(node, scope);
-	}
+	}	
 	
 	public boolean visit(LocalDeclaration node, BlockScope scope) {
 		// XXX: 1GF089K: ITPJCORE:WIN2000 - AbstractLocalDeclaration.declarationSourceStart includes preceeding comment

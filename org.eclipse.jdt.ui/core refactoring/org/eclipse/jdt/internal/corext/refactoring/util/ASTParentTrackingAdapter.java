@@ -271,7 +271,7 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		fVisitor.endVisit(localDeclaration, scope);	
 	}
 
-	public void endVisit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
+	public void endVisit(LocalTypeDeclaration localTypeDeclaration, BlockScope scope) {
 		popParent();
 		fVisitor.endVisit(localTypeDeclaration, scope);	
 	}
@@ -404,16 +404,6 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {
 		popParent();
 		fVisitor.endVisit(tryStatement, scope);	
-	}
-
-	public void endVisit(TypeDeclaration typeDeclaration, BlockScope scope) {
-		popParent();
-		fVisitor.endVisit(typeDeclaration, scope);	
-	}
-
-	public void endVisit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		popParent();
-		fVisitor.endVisit(typeDeclaration, scope);	
 	}
 
 	public void endVisit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
@@ -695,7 +685,7 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		return result;
 	}
 
-	public boolean visit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
+	public boolean visit(LocalTypeDeclaration localTypeDeclaration, BlockScope scope) {
 		boolean result= fVisitor.visit(localTypeDeclaration, scope);
 		pushParent(localTypeDeclaration);
 		return result;
@@ -854,18 +844,6 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 	public boolean visit(TryStatement tryStatement, BlockScope scope) {
 		boolean result= fVisitor.visit(tryStatement, scope);
 		pushParent(tryStatement);
-		return result;
-	}
-
-	public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
-		boolean result= fVisitor.visit(typeDeclaration, scope);
-		pushParent(typeDeclaration);
-		return result;
-	}
-
-	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		boolean result= fVisitor.visit(typeDeclaration, scope);
-		pushParent(typeDeclaration);
 		return result;
 	}
 

@@ -487,7 +487,7 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		}
 	}
 
-	public void endVisit(LocalTypeDeclaration node, MethodScope scope) {
+	public void endVisit(LocalTypeDeclaration node, BlockScope scope) {
 		process(node);
 	}
 
@@ -688,14 +688,6 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 			}
 		}
 		info.mergeFinally(getFlowInfo(node.finallyBlock), fFlowContext);
-	}
-
-	public void endVisit(TypeDeclaration node, BlockScope scope) {
-		process(node);
-	}
-
-	public void endVisit(TypeDeclaration node, ClassScope scope) {
-		process(node);
 	}
 
 	public void endVisit(TypeDeclaration node, CompilationUnitScope scope) {
@@ -942,7 +934,7 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
 	}
 
-	public boolean visit(LocalTypeDeclaration node, MethodScope scope) {
+	public boolean visit(LocalTypeDeclaration node, BlockScope scope) {
 		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
 	}
 
@@ -1040,14 +1032,6 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 
 	public boolean visit(TryStatement node, BlockScope scope) {
 		return traverseNode(node);
-	}
-
-	public boolean visit(TypeDeclaration node, BlockScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(TypeDeclaration node, ClassScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
 	}
 
 	public boolean visit(TypeDeclaration node, CompilationUnitScope scope) {

@@ -722,11 +722,11 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 
 	//---- Methods ----------------------------------------------------------------
 	
-	public boolean visit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
+	public boolean visit(LocalTypeDeclaration localTypeDeclaration, BlockScope scope) {
 		return visitLocalTypeDeclaration(localTypeDeclaration, scope);
 	}
 	
-	public void endVisit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
+	public void endVisit(LocalTypeDeclaration localTypeDeclaration, BlockScope scope) {
 		endVisitRange(localTypeDeclaration.declarationSourceStart, localTypeDeclaration.declarationSourceEnd,
 			localTypeDeclaration, scope);
 	}

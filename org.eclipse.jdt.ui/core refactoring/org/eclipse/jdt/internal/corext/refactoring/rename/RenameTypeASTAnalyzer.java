@@ -12,10 +12,12 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
+import org.eclipse.jdt.internal.compiler.ast.AnonymousLocalTypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
@@ -148,23 +150,18 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 		return true;
 	}
 
-	public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
+	public boolean visit(LocalTypeDeclaration typeDeclaration, BlockScope scope){
 		analyzeTypeDeclaration(typeDeclaration);
 		return true;
-	}
+	} 
 
-	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		analyzeTypeDeclaration(typeDeclaration);
+	public boolean visit(AnonymousLocalTypeDeclaration anonymousTypeDeclaration, BlockScope scope){
+		analyzeTypeDeclaration(anonymousTypeDeclaration);
 		return true;
-	}
-
+	} 
+	
 	public boolean visit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
 		analyzeTypeDeclaration(typeDeclaration);
-		return true;
-	}
-
-	public boolean visit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
-		analyzeTypeDeclaration(localTypeDeclaration);
 		return true;
 	}
 

@@ -130,14 +130,6 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 		endVisitAbstractMethodDeclaration(node, scope);
 	}
 	
-	public boolean visit(TypeDeclaration node, ClassScope scope) {
-		return visitTypeDeclaration(node, scope);
-	}
-	
-	public void endVisit(TypeDeclaration node, ClassScope scope) {
-		endVisitTypeDeclaration(node, scope);
-	}
-	
 	public boolean visit(MemberTypeDeclaration node, ClassScope scope) {
 		return visitTypeDeclaration(node, scope);
 	}
@@ -212,11 +204,11 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	
 	//---- Methods ----------------------------------------------------------------
 	
-	public boolean visit(LocalTypeDeclaration node, MethodScope scope) {
+	public boolean visit(LocalTypeDeclaration node, BlockScope scope) {
 		return visitTypeDeclaration(node, scope);
 	}
 	
-	public void endVisit(LocalTypeDeclaration node, MethodScope scope) {
+	public void endVisit(LocalTypeDeclaration node, BlockScope scope) {
 		endVisitTypeDeclaration(node, scope);
 	}
 	
@@ -229,14 +221,6 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 	
 	//---- Methods / Block --------------------------------------------------------
-	
-	public boolean visit(TypeDeclaration node, BlockScope scope) {
-		return visitTypeDeclaration(node, scope);
-	}
-	
-	public void endVisit(TypeDeclaration node, BlockScope scope) {
-		endVisitTypeDeclaration(node, scope);
-	}
 	
 	public boolean visit(AnonymousLocalTypeDeclaration node, BlockScope scope) {
 		return visitTypeDeclaration(node, scope);

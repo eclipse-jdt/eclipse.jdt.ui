@@ -28,7 +28,10 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AnonymousLocalTypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.internal.compiler.ast.LocalTypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MemberTypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -472,7 +475,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		final CompilationUnit cu= (CompilationUnit)cunit;
 		final RefactoringStatus result= new RefactoringStatus();
 		cu.accept(new AbstractSyntaxTreeVisitorAdapter(){
-			public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
+			public boolean visit(MemberTypeDeclaration typeDeclaration, ClassScope scope) {
 				if ( new String(typeDeclaration.name).equals(newName) 	&& isInType(type.getElementName(), scope)){
 						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
 																				new String[]{type.getElementName(), newName});
@@ -490,7 +493,14 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				return true;
 			}
 			
-			public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
+			public boolean visit(LocalTypeDeclaration typeDeclaration, BlockScope scope) {
+				return visitTypeDeclaration(typeDeclaration, scope);
+			}
+			public boolean visit(AnonymousLocalTypeDeclaration typeDeclaration, BlockScope scope) {
+				return  visitTypeDeclaration(typeDeclaration, scope);
+			}
+			
+			private boolean visitTypeDeclaration(TypeDeclaration typeDeclaration, BlockScope scope) {
 				if (new String(typeDeclaration.name).equals(newName)   && isInType(type.getElementName(), scope)){
 					String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
 																					new String[]{type.getElementName(), newName});
