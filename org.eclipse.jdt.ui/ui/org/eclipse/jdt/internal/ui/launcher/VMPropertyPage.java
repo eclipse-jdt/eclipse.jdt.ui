@@ -96,9 +96,12 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	public void setVisible(boolean visible) {
 		if (visible && fFirstTime) {
 			fFirstTime= false;
-			setTitle("Java Runtime Environment Launch Settings");		
+			setTitle("Java Runtime Environment Launch Settings");
+			// fix: 1GET9NJ: ITPJUI:ALL - NPE looking at JRE properties for closed project		
+			if (isCreated())
+				initFromProject(getJavaProject());
+			// end fix.
 		}
-		initFromProject(getJavaProject());
 		super.setVisible(visible);
 	}
 	

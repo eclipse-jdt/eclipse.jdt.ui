@@ -101,8 +101,8 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		fCaughtBox.setSelection(fIsCaughtSelected);
 		
 		fUncaughtBox= new Button(parent, SWT.CHECK);
-		fUncaughtBox.setLayoutData(new GridData());
-		fUncaughtBox.setText("Unaught");
+		fUncaughtBox.setLayoutData(new GridData());		// fix: 1GEUWCI: ITPDUI:Linux - Add Exception box has confusing checkbox
+		fUncaughtBox.setText("Uncaught");		// end fix.
 		fUncaughtBox.setSelection(fIsUncaughtSelected);				
 		//fAddFromTextRadio.setSelection(true);
 		//addFromTextSelected(true);
