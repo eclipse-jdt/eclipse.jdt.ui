@@ -14,17 +14,23 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 
 public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 	
 	private static final Class THIS= MouseScrollTextEditorTest.class;
 	
-	private static final String FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
+	private static final String THUMB_SCROLLING_FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
 	
-	private static final String ORIG_FILE= FILE_PREFIX + ".java";
+	private static final String THUMB_SCROLLING_ORIG_FILE= THUMB_SCROLLING_FILE_PREFIX + ".java";
 
-	private static final String FILE= FILE_PREFIX + ".txt";
+	private static final String THUMB_SCROLLING_FILE= THUMB_SCROLLING_FILE_PREFIX + ".txt";
+
+	private static final String AUTO_SCROLLING_FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
+	
+	private static final String AUTO_SCROLLING_ORIG_FILE= AUTO_SCROLLING_FILE_PREFIX + ".java";
+
+	private static final String AUTO_SCROLLING_FILE= AUTO_SCROLLING_FILE_PREFIX + ".txt";
 
 	private static final int N_OF_RUNS= 5;
 
@@ -32,25 +38,15 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 		return new TestSuite(THIS);
 	}
 	
-	protected void setUp() throws Exception {
-		ResourceTestHelper.copy(ORIG_FILE, FILE);
-		super.setUp();
+	public void testThumbScrollTextEditor1() throws CoreException {
+		ResourceTestHelper.copy(THUMB_SCROLLING_ORIG_FILE, THUMB_SCROLLING_FILE);
+		measureScrolling(N_OF_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
+		ResourceTestHelper.delete(THUMB_SCROLLING_FILE);
 	}
 	
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		ResourceTestHelper.delete(FILE);
-	}
-	
-	protected IFile getFile() {
-		return ResourceTestHelper.findFile(FILE);
-	}
-	
-	public void testThumbScrollTextEditor1() {
-		measureScrolling(N_OF_RUNS, new ThumbScrollPoster());
-	}
-	
-	public void testAutoScrollTextEditor1() {
-		measureScrolling(N_OF_RUNS, new AutoScrollPoster());
+	public void testAutoScrollTextEditor1() throws CoreException {
+		ResourceTestHelper.copy(AUTO_SCROLLING_ORIG_FILE, AUTO_SCROLLING_FILE);
+		measureScrolling(N_OF_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
+		ResourceTestHelper.delete(AUTO_SCROLLING_FILE);
 	}
 }

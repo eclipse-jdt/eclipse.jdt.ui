@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
 
 public abstract class MouseScrollEditorTest extends TestCase {
 	
@@ -81,8 +82,6 @@ public abstract class MouseScrollEditorTest extends TestCase {
 
 	private PerformanceMeter fPerformanceMeter;
 
-	private IEditorPart fEditor;
-
 	private volatile boolean fDone;
 
 	private Display fDisplay;
@@ -130,41 +129,40 @@ public abstract class MouseScrollEditorTest extends TestCase {
 	protected void setUp() throws Exception {
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 		EditorTestHelper.bringToTop();
-		fEditor= EditorTestHelper.openInEditor(getFile(), true);
-		EditorTestHelper.calmDown(5000, 10000, 100);
-
-		fText= (StyledText) fEditor.getAdapter(Control.class);
-		fDisplay= fText.getDisplay();
-		
-		fText.setTopPixel(Integer.MAX_VALUE);
-		fMaxTopPixel= fText.getTopPixel();
-		fText.setTopPixel(0);
-		EditorTestHelper.calmDown(100, 1000, 100);
 	}
 
-	protected void tearDown() throws Exception {
-		EditorTestHelper.closeAllEditors();
-	}
-
-	protected abstract IFile getFile();
-
-	protected void measureScrolling(int nOfRuns, Poster poster) {
-		fPoster= poster;
-		
-		for (int i= 0; i < nOfRuns; i++) {
-			fPoster.initializeFromForeground(fText);
+	protected void measureScrolling(int nOfRuns, Poster poster, IFile file) throws PartInitException {
+		try {
+			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
+			EditorTestHelper.calmDown(5000, 10000, 100);
 			
-			fDone= false;
-			new Thread(fThreadRunnable).start();
-			fPerformanceMeter.start();
-			while (!fDone)
-				if (!fDisplay.readAndDispatch())
-					fDisplay.sleep();
-			fPerformanceMeter.stop();
-			assertEquals(fMaxTopPixel, fText.getTopPixel());
+			fText= (StyledText) editor.getAdapter(Control.class);
+			fDisplay= fText.getDisplay();
+			
+			fText.setTopPixel(Integer.MAX_VALUE);
+			fMaxTopPixel= fText.getTopPixel();
 			fText.setTopPixel(0);
 			EditorTestHelper.calmDown(100, 1000, 100);
+			
+			fPoster= poster;
+			
+			for (int i= 0; i < nOfRuns; i++) {
+				fPoster.initializeFromForeground(fText);
+				
+				fDone= false;
+				new Thread(fThreadRunnable).start();
+				fPerformanceMeter.start();
+				while (!fDone)
+					if (!fDisplay.readAndDispatch())
+						fDisplay.sleep();
+				fPerformanceMeter.stop();
+				assertEquals(fMaxTopPixel, fText.getTopPixel());
+				fText.setTopPixel(0);
+				EditorTestHelper.calmDown(100, 1000, 100);
+			}
+			fPerformanceMeter.commit();
+		} finally {
+			EditorTestHelper.closeAllEditors();
 		}
-		fPerformanceMeter.commit();
 	}
 }

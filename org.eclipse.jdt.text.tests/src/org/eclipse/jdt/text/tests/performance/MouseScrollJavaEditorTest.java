@@ -14,13 +14,15 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.ui.PartInitException;
 
 public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 
 	private static final Class THIS= MouseScrollJavaEditorTest.class;
 	
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String THUMB_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	
+	private static final String AUTO_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 	
 	private static final int N_OF_RUNS= 5;
 	
@@ -28,15 +30,11 @@ public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 		return new TestSuite(THIS);
 	}
 	
-	protected IFile getFile() {
-		return ResourceTestHelper.findFile(FILE);
+	public void testThumbScrollJavaEditor1() throws PartInitException {
+		measureScrolling(N_OF_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
 	}
 	
-	public void testThumbScrollJavaEditor1() {
-		measureScrolling(N_OF_RUNS, new ThumbScrollPoster());
-	}
-	
-	public void testAutoScrollJavaEditor1() {
-		measureScrolling(N_OF_RUNS, new AutoScrollPoster());
+	public void testAutoScrollJavaEditor1() throws PartInitException {
+		measureScrolling(N_OF_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
 	}
 }
