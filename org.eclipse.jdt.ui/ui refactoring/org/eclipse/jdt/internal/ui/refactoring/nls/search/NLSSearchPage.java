@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -50,7 +49,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -82,8 +83,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -277,6 +276,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		layout.makeColumnsEqualWidth= true;
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
+		result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		RowLayouter layouter= new RowLayouter(layout.numColumns);
 		gd= new GridData();
@@ -711,7 +711,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider);
 		dialog.setAllowMultiple(false);
 		dialog.setDoubleClickSelects(true);
-		dialog.setValidator(new ISelectionValidator() {
+		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				// only single selection
 				if (selection.length == 1 && (selection[0] instanceof IFile) && (((IFile) selection[0]).getFileExtension().equalsIgnoreCase("properties"))) //$NON-NLS-1$
