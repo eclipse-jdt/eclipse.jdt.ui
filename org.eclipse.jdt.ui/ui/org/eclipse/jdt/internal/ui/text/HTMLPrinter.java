@@ -14,7 +14,12 @@ package org.eclipse.jdt.internal.ui.text;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -69,20 +74,36 @@ public class HTMLPrinter {
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB) {
-		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"" + convertToHtmlColor(bgRGB) + "\"><font size=-1>"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (bgRGB == null)
+			insertPageProlog(buffer, position);
+		else {
+			StringBuffer pageProlog= new StringBuffer(60);
+			pageProlog.append("<html><body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
+			appendColor(pageProlog, bgRGB);
+			pageProlog.append("\"><font size=-1>"); //$NON-NLS-1$
+			buffer.insert(position,  pageProlog.toString());
+		}
 	}
 	
-	private static String convertToHtmlColor(RGB rgb) {
-		StringBuffer buf= new StringBuffer(7);
-		buf.append('#');
-		buf.append(Integer.toHexString(rgb.red));
-		buf.append(Integer.toHexString(rgb.green));
-		buf.append(Integer.toHexString(rgb.blue));
-		return buf.toString();
+	private static void appendColor(StringBuffer buffer, RGB rgb) {
+		buffer.append('#');
+		buffer.append(Integer.toHexString(rgb.red));
+		buffer.append(Integer.toHexString(rgb.green));
+		buffer.append(Integer.toHexString(rgb.blue));
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
-		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>"); //$NON-NLS-1$
+		RGB bgColor= null;
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null) {
+			Display display= window.getShell().getDisplay();
+			if (display != null && !display.isDisposed())
+				bgColor= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
+		}
+		if (bgColor == null)
+			bgColor= new RGB(255,255, 225); // RGB value of info bg color on WindowsXP
+			
+		insertPageProlog(buffer, position, bgColor); //$NON-NLS-1$
 	}
 	
 	public static void addPageProlog(StringBuffer buffer) {
