@@ -427,7 +427,10 @@ public final class JavaModelUtil {
 		}
 		IType superClass= hierarchy.getSuperclass(type);
 		if (superClass != null) {
-			return findMethodInHierarchy(hierarchy, superClass, name, paramTypes, isConstructor);
+			IMethod res=  findMethodInHierarchy(hierarchy, superClass, name, paramTypes, isConstructor);
+			if (res != null) {
+				return res;
+			}
 		}
 		if (!isConstructor) {
 			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
