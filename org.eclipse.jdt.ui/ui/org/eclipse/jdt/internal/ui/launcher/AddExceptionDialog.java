@@ -1,12 +1,12 @@
 package org.eclipse.jdt.internal.ui.launcher;import java.util.List;
-import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.SelectionList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.SelectionList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;
 
 /**
  * Lots of stuff commented out because pending API change in 
  * Debugger
  */
-public class AddExceptionDialog extends StatusDialog {
-
+public class AddExceptionDialog extends StatusDialog {		private static final String DIALOG_SETTINGS= "AddExceptionDialog";	private static final String SETTING_CAUGHT_CHECKED= "caughtChecked";
+	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked";
 	//private Text fExceptionName;
 	private SelectionList fTypeList;
 	private boolean fTypeListInitialized= false;
@@ -51,10 +51,9 @@ public class AddExceptionDialog extends StatusDialog {
 	}
 	
 	protected Control createDialogArea(Composite ancestor) {
-		Composite parent= new Composite(ancestor, SWT.NULL);
+		initFromDialogSettings();		Composite parent= new Composite(ancestor, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		parent.setLayout(layout);
-		
+		parent.setLayout(layout);		
 		/*fAddFromTextRadio= new Button(parent, SWT.RADIO);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.verticalAlignment= gd.BEGINNING;
@@ -104,8 +103,7 @@ public class AddExceptionDialog extends StatusDialog {
 		fUncaughtBox= new Button(parent, SWT.CHECK);
 		fUncaughtBox.setLayoutData(new GridData());
 		fUncaughtBox.setText("Unaught");
-		fUncaughtBox.setSelection(fIsUncaughtSelected);
-		
+		fUncaughtBox.setSelection(fIsUncaughtSelected);				
 		//fAddFromTextRadio.setSelection(true);
 		//addFromTextSelected(true);
 		addFromListSelected(true);
@@ -154,7 +152,7 @@ public class AddExceptionDialog extends StatusDialog {
 		}
 		fIsCaughtSelected= fCaughtBox.getSelection();
 		fIsUncaughtSelected= fUncaughtBox.getSelection();
-		fResult= resolvedType;
+		fResult= resolvedType;				saveDialogSettings();		
 		super.okPressed();
 	}
 	
@@ -234,5 +232,5 @@ public class AddExceptionDialog extends StatusDialog {
 		String text= fExceptionName.getText();
 		IStatus status= JavaConventions.validateJavaTypeName(text);
 		updateStatus(status);
-	}*/
+	}*/		private void initFromDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		if (section == null) {			section= allSetttings.addNewSection(DIALOG_SETTINGS);			section.put(SETTING_CAUGHT_CHECKED, true);			section.put(SETTING_UNCAUGHT_CHECKED, true);		}		fIsCaughtSelected= section.getBoolean(SETTING_CAUGHT_CHECKED);		fIsUncaughtSelected= section.getBoolean(SETTING_UNCAUGHT_CHECKED);	}		private void saveDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		// won't be null since we initialize it in the method above.		section.put(SETTING_CAUGHT_CHECKED, fIsCaughtSelected);		section.put(SETTING_UNCAUGHT_CHECKED, fIsUncaughtSelected);	}
 }
