@@ -9,7 +9,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.test.harness.DialogCheck;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,6 +27,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard;
 
+import org.eclipse.jdt.junit.eclipse.util.DialogCheck;
 
 public class WizardsTest extends TestCase {
 	private static final int SIZING_WIZARD_WIDTH    = 470;

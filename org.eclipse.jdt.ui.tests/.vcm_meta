@@ -5,7 +5,6 @@
 	<reference project-name="org.eclipse.jdt.ui"/>
 	<reference project-name="org.eclipse.ui"/>
 	<reference project-name="org.eclipse.jdt.launching"/>
-	<reference project-name="org.eclipse.ui.test.harness"/>
 	<reference project-name="org.eclipse.core.boot"/>
 	<reference project-name="org.eclipse.core.runtime"/>
 	<reference project-name="org.junit"/>
@@ -13,7 +12,7 @@
 	<reference project-name="org.apache.xerces"/>
 	<reference project-name="org.eclipse.swt"/>
 	<reference project-name="Refactoring Tests Resources"/>
-	<reference project-name="Eclipse Core Launcher"/>
+	<reference project-name="org.eclipse.jdt.junit.eclipse"/>
 	<builder name="org.eclipse.jdt.core.javabuilder">
 	</builder>
 </project-description>

@@ -26,7 +26,6 @@ import org.eclipse.ui.internal.dialogs.PropertyDialog;
 import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
 import org.eclipse.ui.internal.dialogs.PropertyPageManager;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-import org.eclipse.ui.test.harness.DialogCheck;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,6 +36,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+
+import org.eclipse.jdt.junit.eclipse.util.DialogCheck;
 
 public class PreferencesTest extends TestCase {
 

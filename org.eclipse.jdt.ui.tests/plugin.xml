@@ -15,7 +15,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
 	  <import plugin="org.eclipse.jdt.launching"/>
-	  <import plugin="org.eclipse.ui.test.harness"/>
+	  <import plugin="org.eclipse.jdt.junit.eclipse"/>
 	  <import plugin="Refactoring Tests Resources"/>
    </requires>
 

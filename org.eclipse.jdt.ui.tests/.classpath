@@ -13,10 +13,9 @@
     <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
-    <classpathentry kind="src" path="/org.eclipse.ui.test.harness"/>
     <classpathentry kind="src" path="/Refactoring Tests Resources"/>
-    <classpathentry exported="true" kind="lib" path="javauitests.jar" sourcepath="/org.eclipse.jdt.ui.tests/javauitestssrc.zip"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
-    <classpathentry kind="src" path="/Eclipse Core Launcher"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.junit.eclipse"/>
+    <classpathentry kind="lib" path="startup.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
