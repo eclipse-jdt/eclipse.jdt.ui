@@ -840,7 +840,7 @@ public class StubUtility {
 				// 1G4CKUS
 				if (!Flags.isStatic(curr.getFlags())) {
 					IMethod impl= findMethod(curr, allMethods);
-					if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Flags.isFinal(impl.getFlags()))) {
+					if (impl == null || prefereInterfaceMethod(hierarchy, curr, impl)) {
 						if (impl != null) {
 							allMethods.remove(impl);
 						}
@@ -862,6 +862,20 @@ public class StubUtility {
 			}
 		}
 		return (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
+	}
+	
+	private static boolean prefereInterfaceMethod(ITypeHierarchy hierarchy, IMethod interfaceMethod, IMethod curr) throws JavaModelException {
+		if (Flags.isFinal(curr.getFlags())) {
+			return false;
+		}
+		IType interfaceType= interfaceMethod.getDeclaringType();
+		IType[] interfaces= hierarchy.getAllSuperInterfaces(curr.getDeclaringType());
+		for (int i= 0; i < interfaces.length; i++) {
+			if (interfaces[i] == interfaceType) {
+				return false;
+			}
+		}
+		return curr.getExceptionTypes().length > interfaceMethod.getExceptionTypes().length;
 	}
 	
 	/**
