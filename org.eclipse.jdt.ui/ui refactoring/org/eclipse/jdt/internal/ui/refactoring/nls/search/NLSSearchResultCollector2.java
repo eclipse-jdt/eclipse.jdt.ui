@@ -27,6 +27,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 import org.eclipse.jface.text.Position;
@@ -67,7 +71,7 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 	 * @see IJavaSearchResultCollector#accept(IResource, int, int, IJavaElement, int)
 	 */
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
-		if (enclosingElement == null)
+		if (enclosingElement == null || start == -1 || end == -1)
 			return;
 		
 		// ignore matches in import declarations:
@@ -81,17 +85,15 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 			if (source != null && fgGetClassNameMatcher.match(source))
 				return;
 		}
-		/*
-		 * Found reference to NLS Wrapper - now check if the key is there
-		 */
-		Position keyPosition= new Position(start, Math.max(0, end - start));
-		String key= findKey(end, enclosingElement, keyPosition); //TODO: updates keyPosition!
+		
+		// found reference to NLS Wrapper - now check if the key is there:
+		Position mutableKeyPosition= new Position(start, end - start);
+		//TODO: What to do if argument string not found? Currently adds a match with type name.
+		String key= findKey(mutableKeyPosition, start, enclosingElement);
 		if (key != null && isKeyDefined(key))
 			return;
 
-		start= keyPosition.getOffset();
-		
-		fResult.addMatch(new Match(enclosingElement, Math.max(start, 0), keyPosition.getLength()));
+		fResult.addMatch(new Match(enclosingElement, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
 	}
 
 	/*
@@ -110,11 +112,11 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 
 	/**
 	 * Checks if the key is defined in the property file
+	 * and adds it to the list of used properties.
 	 */
 	private boolean isKeyDefined(String key) {
-		// Parse error - don't check key
 		if (key == null)
-			return true;
+			return true; // Parse error - don't check key
 
 		if (key != null && fProperties.getProperty(key) != null) {
 			fUsedPropertyNames.add(key);
@@ -127,36 +129,45 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 	 * Finds the key defined by the given match. The assumption is that
 	 * the key is the first argument and it is a string i.e. quoted ("...").
 	 * 
+	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
+	 * @param typeNameStart start offset of search result
+	 * @param enclosingElement enclosing java element
 	 * @return a string denoting the key, null if no key can be found
 	 */
-	private String findKey(int end, IJavaElement enclosingElement, Position keyPosition) throws CoreException {
+	private String findKey(Position keyPositionResult, int typeNameStart, IJavaElement enclosingElement) throws CoreException {
 		if (enclosingElement instanceof ISourceReference) {
-			int offset= ((ISourceReference) enclosingElement).getSourceRange().getOffset();
-			int searchStart= end - offset;
-			int matchStart= end;
+			int sourceRangeOffset= ((ISourceReference) enclosingElement).getSourceRange().getOffset();
 			String source= ((ISourceReference) enclosingElement).getSource();
-			if (source == null || searchStart >= source.length())
+			if (source == null)
 				return null;
-			source= source.substring(searchStart);
-			if (source.charAt(0) != '.' || Character.isWhitespace(source.charAt(0)))
-				// TODO: doesn't work with whitespace after class name! Need to scan.
+			source= source.substring(typeNameStart - sourceRangeOffset);
+			
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(source.toCharArray());
+			
+			try {
+				int tok= scanner.getNextToken();
+				// skip type and method names:
+				while (tok != ITerminalSymbols.TokenNameEOF && 
+						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
+					tok= scanner.getNextToken();
+				}
+				// next must be '('
+				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
+					return null;
+				tok= scanner.getNextToken();
+				// next must be key string:
+				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
+					return null;
+				// found it:
+				int keyStart= scanner.getCurrentTokenStartPosition() + 1;
+				int keyEnd= scanner.getCurrentTokenEndPosition();
+				keyPositionResult.setOffset(typeNameStart + keyStart);
+				keyPositionResult.setLength(keyEnd - keyStart);
+				return source.substring(keyStart, keyEnd);
+			} catch (InvalidInputException e) {
 				return null;
-			int firstBraket= source.indexOf('(');
-
-			int searchEnd= source.indexOf(')');
-			if (searchEnd == -1 || firstBraket == -1 || searchEnd <= firstBraket)
-				return null;
-
-			int firstQuote= source.indexOf('"');
-			matchStart += firstQuote + 1;
-			int secondQuote= source.indexOf('"', firstQuote + 1);
-
-			if (secondQuote == -1 || secondQuote <= firstQuote)
-				return null;
-
-			keyPosition.setOffset(matchStart);
-			keyPosition.setLength(Math.max(1, secondQuote - firstQuote - 1));
-			return source.substring(firstQuote + 1, secondQuote);
+			}
 		}
 		return null;
 	}

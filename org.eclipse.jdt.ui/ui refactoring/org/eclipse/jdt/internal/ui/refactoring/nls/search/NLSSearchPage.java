@@ -156,7 +156,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	//---- Action Handling ------------------------------------------------
 
 	public boolean performAction() {
-		if (false) //TODO: remove old search support
+		if (true) //TODO: remove old search support
 			return performNewSearch();
 		else
 			return performOldSearch();
