@@ -411,6 +411,20 @@ public class ASTResolving {
 		return type.getAST().newNullLiteral();
 	}
 	
+	public static Expression getInitExpression(AST ast, ITypeBinding type) {
+		if (type.isPrimitive()) {
+			String name= type.getName();
+			if ("boolean".equals(name)) {
+				return ast.newBooleanLiteral(false);
+			} else if ("void".equals(name)) {
+				return null;
+			} else {
+				return ast.newNumberLiteral("0");
+			}
+		}
+		return ast.newNullLiteral();
+	}	
+	
 	private static class NodeFoundException extends RuntimeException {
 		public ASTNode node;
 	}

@@ -402,5 +402,43 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void addUninitializedLocalVariableProposal(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= context.getCoveringNode();
+		if (!(selectedNode instanceof Name)) {
+			return;
+		}
+		Name name= (Name) selectedNode;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding)) {
+			return;
+		}
+		IVariableBinding varBinding= (IVariableBinding) binding;
+		
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode node= astRoot.findDeclaringNode(binding);
+		if (node instanceof VariableDeclarationFragment) {
+			ASTRewrite rewrite= new ASTRewrite(node.getParent());
+			
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) node;
+			if (fragment.getInitializer() != null) {
+				return;
+			}
+			Expression expression= ASTResolving.getInitExpression(astRoot.getAST(), varBinding.getType());
+			if (expression == null) {
+				return;
+			}
+			fragment.setInitializer(expression);
+			rewrite.markAsInserted(expression);
+
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.uninitializedvariable.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			proposal.ensureNoModifications();
+			proposals.add(proposal);			
+		}
+	}
+
 
 }
