@@ -9,10 +9,8 @@
 		<project>org.eclipse.jdt.core</project>
 		<project>org.eclipse.jdt.ui</project>
 		<project>org.eclipse.jface</project>
-		<project>org.eclipse.jface.text</project>
 		<project>org.eclipse.search</project>
-		<project>org.eclipse.ui.workbench</project>
-		<project>org.eclipse.ui.workbench.texteditor</project>
+		<project>org.eclipse.ui</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
