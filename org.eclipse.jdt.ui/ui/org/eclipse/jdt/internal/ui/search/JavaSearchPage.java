@@ -46,6 +46,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -56,6 +58,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -90,71 +93,102 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			this(searchFor, limitTo, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 		
-		public SearchPatternData(int s, int l, String p, boolean i, IJavaElement element, int scope, IWorkingSet[] workingSets) {
-			setSearchFor(s);
-			setLimitTo(l);
-			setPattern(p);
-			setCaseSensitive(i);
-			setJavaElement(element);
-			this.setScope(scope);
-			this.setWorkingSets(workingSets);
-		}
-
-		public void setCaseSensitive(boolean isCaseSensitive) {
+		public SearchPatternData(int searchFor, int limitTo, String pattern, boolean isCaseSensitive, IJavaElement element, int scope, IWorkingSet[] workingSets) {
+			this.searchFor= searchFor;
+			this.limitTo= limitTo;
+			this.pattern= pattern;
 			this.isCaseSensitive= isCaseSensitive;
+			this.scope= scope;
+			this.workingSets= workingSets;
+			
+			setJavaElement(element);
+		}
+		
+		public void setJavaElement(IJavaElement javaElement) {
+			this.javaElement= javaElement;
 		}
 
 		public boolean isCaseSensitive() {
 			return isCaseSensitive;
 		}
 
-		public void setJavaElement(IJavaElement javaElement) {
-			this.javaElement= javaElement;
-		}
-
 		public IJavaElement getJavaElement() {
 			return javaElement;
-		}
-
-		public void setLimitTo(int limitTo) {
-			this.limitTo= limitTo;
 		}
 
 		public int getLimitTo() {
 			return limitTo;
 		}
 
-		public void setPattern(String pattern) {
-			this.pattern= pattern;
-		}
-
 		public String getPattern() {
 			return pattern;
-		}
-
-		public void setScope(int scope) {
-			this.scope= scope;
 		}
 
 		public int getScope() {
 			return scope;
 		}
 
-		public void setSearchFor(int searchFor) {
-			this.searchFor= searchFor;
-		}
-
 		public int getSearchFor() {
 			return searchFor;
-		}
-
-		public void setWorkingSets(IWorkingSet[] workingSets) {
-			this.workingSets= workingSets;
 		}
 
 		public IWorkingSet[] getWorkingSets() {
 			return workingSets;
 		}
+		
+		public void store(IDialogSettings settings) {
+			settings.put("searchFor", searchFor); //$NON-NLS-1$
+			settings.put("scope", scope); //$NON-NLS-1$
+			settings.put("pattern", pattern); //$NON-NLS-1$
+			settings.put("limitTo", limitTo); //$NON-NLS-1$
+			settings.put("javaElement", javaElement != null ? javaElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
+			settings.put("isCaseSensitive", isCaseSensitive); //$NON-NLS-1$
+			if (workingSets != null) {
+				String[] wsIds= new String[workingSets.length];
+				for (int i= 0; i < workingSets.length; i++) {
+					wsIds[i]= workingSets[i].getId();
+				}
+				settings.put("workingSets", wsIds); //$NON-NLS-1$
+			} else {
+				settings.put("workingSets", new String[0]); //$NON-NLS-1$
+			}
+
+		}
+		
+		public static SearchPatternData create(IDialogSettings settings) {
+			String pattern= settings.get("pattern"); //$NON-NLS-1$
+			if (pattern.length() == 0) {
+				return null;
+			}
+			IJavaElement elem= JavaCore.create(settings.get("javaElement")); //$NON-NLS-1$
+			if (elem == null) {
+				return null;
+			}
+			String[] wsIds= settings.getArray("workingSets"); //$NON-NLS-1$
+			IWorkingSet[] workingSets= null;
+			if (wsIds != null && wsIds.length > 0) {
+				IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
+				workingSets= new IWorkingSet[wsIds.length];
+				for (int i= 0; workingSets != null && i < wsIds.length; i++) {
+					workingSets[i]= workingSetManager.getWorkingSet(wsIds[i]);
+					if (workingSets[i] == null) {
+						workingSets= null;
+					}
+				}
+			}
+
+			try {
+				int searchFor= settings.getInt("searchFor"); //$NON-NLS-1$
+				int scope= settings.getInt("scope"); //$NON-NLS-1$
+				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
+				boolean isCaseSensitive= settings.getBoolean("isCaseSensitive"); //$NON-NLS-1$
+
+				return 	new SearchPatternData(searchFor, limitTo, pattern, isCaseSensitive, elem, scope, workingSets);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		
 	}
 	
 	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.queryParticipants"; //$NON-NLS-1$
@@ -165,8 +199,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
-	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; //$NON-NLS-1$
-	private static List fgPreviousSearchPatterns= new ArrayList(20);
+	private final static String STORE_CASE_SENSITIVE= "CASE_SENSITIVE"; //$NON-NLS-1$
+	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
+	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
+	
+	private final List fPreviousSearchPatterns;
 	
 	private SearchPatternData fInitialData;
 	private IJavaElement fJavaElement;
@@ -199,7 +236,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private static final int INDEX_REFERENCES= 2;
 	private static final int INDEX_ALL= 3;
 
-
+	/**
+	 * 
+	 */
+	public JavaSearchPage() {
+		fPreviousSearchPatterns= new ArrayList();
+	}
+	
+	
 	//---- Action Handling ------------------------------------------------
 	
 	public boolean performAction() {
@@ -306,10 +350,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	private String[] getPreviousSearchPatterns() {
 		// Search results are not persistent
-		int patternCount= fgPreviousSearchPatterns.size();
+		int patternCount= fPreviousSearchPatterns.size();
 		String [] patterns= new String[patternCount];
 		for (int i= 0; i < patternCount; i++)
-			patterns[i]= ((SearchPatternData) fgPreviousSearchPatterns.get(patternCount - 1 - i)).getPattern();
+			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(patternCount - 1 - i)).getPattern();
 		return patterns;
 	}
 	
@@ -328,7 +372,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator iter= fgPreviousSearchPatterns.iterator(); iter.hasNext();) {
+		for (Iterator iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
 			SearchPatternData element= (SearchPatternData) iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
@@ -345,7 +389,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		String pattern= getPattern();
 		SearchPatternData match= findInPrevious(pattern);
 		if (match != null) {
-			fgPreviousSearchPatterns.remove(match);
+			fPreviousSearchPatterns.remove(match);
 		}
 		match= new SearchPatternData(
 				getSearchFor(),
@@ -356,7 +400,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				getContainer().getSelectedScope(),
 				getContainer().getSelectedWorkingSets());
 			
-		fgPreviousSearchPatterns.add(match);
+		fPreviousSearchPatterns.add(match);
 		return match;
 	}
 
@@ -528,11 +572,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fIsCaseSensitive= fCaseSensitive.getSelection();
-				writeConfiguration();
 			}
 		});
 		
 		return result;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		writeConfiguration();
+		super.dispose();
 	}
 
 	private void updateCaseSensitiveCheckbox() {
@@ -549,8 +600,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private void handlePatternSelected() {
 		if (fPattern.getSelectionIndex() < 0)
 			return;
-		int index= fgPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
-		fInitialData= (SearchPatternData) fgPreviousSearchPatterns.get(index);
+		int index= fPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
+		fInitialData= (SearchPatternData) fPreviousSearchPatterns.get(index);
 		for (int i= 0; i < fSearchFor.length; i++)
 			fSearchFor[i].setSelection(false);
 		for (int i= 0; i < fLimitTo.length; i++)
@@ -565,6 +616,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fCaseSensitive.setEnabled(fJavaElement == null);
 		fCaseSensitive.setSelection(fInitialData.isCaseSensitive());
 
+		
 		if (fInitialData.getWorkingSets() != null)
 			getContainer().setSelectedWorkingSets(fInitialData.getWorkingSets());
 		else
@@ -758,8 +810,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	private SearchPatternData getDefaultInitValues() {
-		if (!fgPreviousSearchPatterns.isEmpty()) {
-			return (SearchPatternData) fgPreviousSearchPatterns.get(fgPreviousSearchPatterns.size() - 1);
+		if (!fPreviousSearchPatterns.isEmpty()) {
+			return (SearchPatternData) fPreviousSearchPatterns.get(fPreviousSearchPatterns.size() - 1);
 		}
 		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
 	}	
@@ -807,6 +859,21 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private void readConfiguration() {
 		IDialogSettings s= getDialogSettings();
 		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
+		
+		try {
+			int historySize= s.getInt(STORE_HISTORY_SIZE);
+			for (int i= 0; i < historySize; i++) {
+				IDialogSettings histSettings= s.getSection(STORE_HISTORY + i);
+				if (histSettings != null) {
+					SearchPatternData data= SearchPatternData.create(histSettings);
+					if (data != null) {
+						fPreviousSearchPatterns.add(data);
+					}
+				}
+			}
+		} catch (NumberFormatException e) {
+			// ignore
+		}
 	}
 	
 	/**
@@ -815,5 +882,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private void writeConfiguration() {
 		IDialogSettings s= getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
+		
+		int historySize= Math.min(fPreviousSearchPatterns.size(), 6);
+		s.put(STORE_HISTORY_SIZE, historySize);
+		for (int i= 0; i < historySize; i++) {
+			IDialogSettings histSettings= s.addNewSection(STORE_HISTORY + i);
+			SearchPatternData data= ((SearchPatternData) fPreviousSearchPatterns.get(i));
+			data.store(histSettings);
+		}
 	}
 }
