@@ -422,7 +422,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.getControl().setRedraw(true);
 	}
 	
-	private PackageExplorerContentProvider createContentProvider() {
+	/**
+	 * This method should only be called inside this class
+	 * and from test cases.
+	 */
+	public PackageExplorerContentProvider createContentProvider() {
 		boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
 		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
 		return new PackageExplorerContentProvider(showCUChildren, reconcile);
