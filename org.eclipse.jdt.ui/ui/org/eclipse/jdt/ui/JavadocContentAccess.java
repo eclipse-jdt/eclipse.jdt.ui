@@ -41,10 +41,12 @@ public class JavadocContentAccess {
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
 	 * The content does contain only the text from the comment without the Javadoc leading star characters.
-	 * Returns null if the member does not contain a Javadoc comment or if no source is available.
+	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
+	 * @return Returns a reader for the Javadoc comment content or <code>null</code> if the member
+	 * does not contain a Javadoc comment or if no source is available
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
 	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
@@ -90,10 +92,12 @@ public class JavadocContentAccess {
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
 	 * and renders the tags in HTML. 
-	 * Returns null if the member does not contain a Javadoc comment or if no source is available.
+	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
+	 * @return Returns a reader for the Javadoc comment content in HTLM or <code>null</code> if the member
+	 * does not contain a Javadoc comment or if no source is available
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
 	public Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
