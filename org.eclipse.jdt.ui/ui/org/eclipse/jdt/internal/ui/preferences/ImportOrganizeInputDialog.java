@@ -73,7 +73,9 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		fNameDialogField= new StringButtonDialogField(adapter);
 		fNameDialogField.setLabelText(JavaUIMessages.getString("ImportOrganizeInputDialog.message"));
 		fNameDialogField.setButtonLabel(JavaUIMessages.getString("ImportOrganizeInputDialog.browse.button"));
-		fNameDialogField.setDialogFieldListener(adapter);		
+		fNameDialogField.setDialogFieldListener(adapter);
+		
+		fNameDialogField.setText("");		
 	}
 	
 	public void setInitialString(String input) {
