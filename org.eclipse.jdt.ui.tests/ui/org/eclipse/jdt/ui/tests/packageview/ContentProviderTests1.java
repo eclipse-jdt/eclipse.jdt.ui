@@ -13,11 +13,13 @@ package org.eclipse.jdt.ui.tests.packageview;
 
 
 import java.util.ArrayList;
-import java.util.zip.ZipFile;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -41,9 +43,6 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -96,7 +95,6 @@ public class ContentProviderTests1 extends TestCase {
 	private ICompilationUnit fCUAllTests;
 	private ICompilationUnit fCUVectorTest;
 	private ICompilationUnit fCUSimpleTest;
-	private ZipFile zipfile;
 	private boolean fEnableAutoBuildAfterTesting;
 	private ICompilationUnit fCU3;
 	
@@ -381,7 +379,6 @@ public class ContentProviderTests1 extends TestCase {
 	protected void tearDown() throws Exception {
 		fArchiveFragmentRoot.close();
 			
-		zipfile.close();
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
 		page.hideView(fMyPart);
