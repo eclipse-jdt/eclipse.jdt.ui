@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -531,7 +532,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		
 		fEditButton= new Button(buttonComp, SWT.PUSH);
-        fEditButton.setText("Edit &Key...");
+        fEditButton.setText(RefactoringMessages.getString("ExternalizeWizardPage.Edit_Key")); //$NON-NLS-1$
         fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         SWTUtil.setButtonDimensionHint(fEditButton);
         fEditButton.setEnabled(false);
@@ -548,7 +549,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			Set selected= getSelectedTableEntries();
 			Assert.isTrue(selected.size() == 1);
 			NLSSubstitution nls= (NLSSubstitution)selected.iterator().next();
-			InputDialog dialog= new InputDialog(getShell(), "Externalize Strings", "Enter New Key:", nls.key, createKeyValidator()); 
+			InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ExternalizeWizardPage.Externalize_Strings"), RefactoringMessages.getString("ExternalizeWizardPage.Enter_New_Key"), nls.key, createKeyValidator());  //$NON-NLS-1$ //$NON-NLS-2$
 			if (dialog.open() == InputDialog.CANCEL)
 				return;
 			nls.key= dialog.getValue();

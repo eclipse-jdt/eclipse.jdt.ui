@@ -8,11 +8,12 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class MoveInnerToTopWizard extends RefactoringWizard {
 
 	public MoveInnerToTopWizard(Refactoring ref) {
-		super(ref, "Move Inner Type to Top Level", IJavaHelpContextIds.MOVE_INNER_TO_TOP_ERROR_WIZARD_PAGE);
+		super(ref, RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner"), IJavaHelpContextIds.MOVE_INNER_TO_TOP_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 //		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
 	}
 

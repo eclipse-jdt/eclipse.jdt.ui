@@ -28,15 +28,16 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PromoteTempInputPage extends UserInputWizardPage {
 
 	private static final String DESCRIPTION = RefactoringMessages.getString("PromoteTempInputPage.description");//$NON-NLS-1$
 	public static final String PAGE_NAME= "PromoteTempInputPage";//$NON-NLS-1$
 	private static final String[] RADIO_BUTTON_LABELS= {
-						"Field decla&ration",
-						"&Current method",
-						"C&lass constructor(s)"};
+						RefactoringMessages.getString("PromoteTempInputPage.Field_declaration"), //$NON-NLS-1$
+						RefactoringMessages.getString("PromoteTempInputPage.Current_method"), //$NON-NLS-1$
+						RefactoringMessages.getString("PromoteTempInputPage.constructors")}; //$NON-NLS-1$
     private static final Integer[] RADIO_BUTTON_DATA= {
         				new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
         				new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
@@ -69,7 +70,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
 
     private void addFieldNameField(Composite result) {
         Label nameLabel= new Label(result, SWT.NONE);
-        nameLabel.setText("F&ield name:");
+        nameLabel.setText(RefactoringMessages.getString("PromoteTempInputPage.Field_name")); //$NON-NLS-1$
         nameLabel.setLayoutData(new GridData());
         
         final Text nameField= new Text(result, SWT.BORDER | SWT.SINGLE);
@@ -91,7 +92,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
     private void addInitizeInRadioButtonGroup(Composite result) {
         GridData gd;		
         Group initializeIn= new Group(result, SWT.NONE);
-        initializeIn.setText("Initialize in");
+        initializeIn.setText(RefactoringMessages.getString("PromoteTempInputPage.Initialize")); //$NON-NLS-1$
         initializeIn.setLayout(new GridLayout());
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan= 2;
@@ -146,7 +147,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
         fDeclareStaticCheckbox= new Button(result, SWT.CHECK);
         fDeclareStaticCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingStatic());
         fDeclareStaticCheckbox.setSelection(getPromoteTempRefactoring().getDeclareStatic());
-        fDeclareStaticCheckbox.setText("D&eclare field as 'static'");
+        fDeclareStaticCheckbox.setText(RefactoringMessages.getString("PromoteTempInputPage.declare_static")); //$NON-NLS-1$
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan= 2;
         fDeclareStaticCheckbox.setLayoutData(gd);
@@ -163,7 +164,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
         fDeclareFinalCheckbox= new Button(result, SWT.CHECK);
         fDeclareFinalCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingFinal());
         fDeclareFinalCheckbox.setSelection(getPromoteTempRefactoring().getDeclareFinal());
-        fDeclareFinalCheckbox.setText("Decl&are field as 'final'");
+        fDeclareFinalCheckbox.setText(RefactoringMessages.getString("PromoteTempInputPage.declare_final")); //$NON-NLS-1$
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan= 2;
         fDeclareFinalCheckbox.setLayoutData(gd);

@@ -25,11 +25,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class InlineMethodInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "InlineMethodInputPage";//$NON-NLS-1$
-	private static final String DESCRIPTION = "Specify where to inline the method invocation.";
+	private static final String DESCRIPTION = RefactoringMessages.getString("InlineMethodInputPage.description"); //$NON-NLS-1$
 
 	private InlineMethodRefactoring fRefactoring;
 	private Group fInlineMode;
@@ -55,11 +56,11 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		fInlineMode= new Group(result, SWT.NONE);
 		fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fInlineMode.setLayout(new GridLayout());
-		fInlineMode.setText("Inline");
+		fInlineMode.setText(RefactoringMessages.getString("InlineMethodInputPage.inline")); //$NON-NLS-1$
 		
 		Button radio= new Button(fInlineMode, SWT.RADIO);
 		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText("All invocations");
+		radio.setText(RefactoringMessages.getString("InlineMethodInputPage.all_invocations")); //$NON-NLS-1$
 		radio.setSelection(all);
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -73,7 +74,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
-		fRemove.setText("Delete method declaration");
+		fRemove.setText(RefactoringMessages.getString("InlineMethodInputPage.delete_declaration")); //$NON-NLS-1$
 		fRemove.setEnabled(all);
 		fRemove.setSelection(fRefactoring.getDeleteSource());
 		fRemove.addSelectionListener(new SelectionAdapter() {
@@ -85,7 +86,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		
 		radio= new Button(fInlineMode, SWT.RADIO);
 		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText("Only the selected invocation");
+		radio.setText(RefactoringMessages.getString("InlineMethodInputPage.only_selected")); //$NON-NLS-1$
 		radio.setSelection(!all);
 		if (all) {
 			radio.setEnabled(false);

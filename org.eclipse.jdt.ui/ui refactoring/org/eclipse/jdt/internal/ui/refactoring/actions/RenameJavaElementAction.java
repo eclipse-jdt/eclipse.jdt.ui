@@ -145,7 +145,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 	
 	private IJavaElement getJavaElement(ITextSelection selection) {
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name"));
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
 		if (elements == null || elements.length != 1)
 			return null;
 		return elements[0];

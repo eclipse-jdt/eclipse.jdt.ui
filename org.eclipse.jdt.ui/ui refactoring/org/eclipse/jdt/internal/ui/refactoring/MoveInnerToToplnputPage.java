@@ -15,15 +15,16 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class MoveInnerToToplnputPage extends TextInputWizardPage{
 
 	private final boolean fIsInitialInputValid;
-	private static final String DESCRIPTION = "Specify a name for the field that will be used to access the enclosing instance";
+	private static final String DESCRIPTION = RefactoringMessages.getString("MoveInnerToToplnputPage.description"); //$NON-NLS-1$
 	
 	public MoveInnerToToplnputPage(String initialValue) {
 		super(DESCRIPTION, true, initialValue);
-		fIsInitialInputValid= ! ("".equals(initialValue));
+		fIsInitialInputValid= ! ("".equals(initialValue)); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {
@@ -38,14 +39,14 @@ class MoveInnerToToplnputPage extends TextInputWizardPage{
 		newControl.setLayout(layout);
 		
 		Label label= new Label(newControl, SWT.NONE);
-		label.setText("Enter &name for enclosing instance:");
+		label.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
 		
 		Text text= createTextInputField(newControl);
 		text.selectAll();
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		final Button finalCheckBox= new Button(newControl, SWT.CHECK);
-		finalCheckBox.setText("Mark the enclosing instance field as 'final'");
+		finalCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.instance_final")); //$NON-NLS-1$
 		finalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;

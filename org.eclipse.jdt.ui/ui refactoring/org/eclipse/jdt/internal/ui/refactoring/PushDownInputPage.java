@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class PushDownInputPage extends UserInputWizardPage {
 	
@@ -138,9 +139,9 @@ public class PushDownInputPage extends UserInputWizardPage {
 
 		static String getActionLabel(int action) {
 			switch(action){
-				case MemberActionInfo.NO_ACTION: 				return "";
-				case MemberActionInfo.PUSH_ABSTRACT_ACTION:	return "leave abstract declaration";
-				case MemberActionInfo.PUSH_DOWN_ACTION:		return "push down";
+				case MemberActionInfo.NO_ACTION: 				return ""; //$NON-NLS-1$
+				case MemberActionInfo.PUSH_ABSTRACT_ACTION:	return RefactoringMessages.getString("PushDownInputPage.leave_abstract"); //$NON-NLS-1$
+				case MemberActionInfo.PUSH_DOWN_ACTION:		return RefactoringMessages.getString("PushDownInputPage.push_down"); //$NON-NLS-1$
 				default:
 					Assert.isTrue(false);
 					return null;
@@ -201,7 +202,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 
 	private void createMemberTableLabel(Composite parent) {
 		Label label= new Label(parent, SWT.NONE) ;
-		label.setText("&Specify actions for members:");
+		label.setText(RefactoringMessages.getString("PushDownInputPage.Specify_actions")); //$NON-NLS-1$
 		GridData gd0= new GridData();
 		label.setLayoutData(gd0);
 	}
@@ -238,10 +239,10 @@ public class PushDownInputPage extends UserInputWizardPage {
 		table.setLayout(tableLayout);
 
 		TableColumn column0= new TableColumn(table, SWT.NONE);		
-		column0.setText("Member");
+		column0.setText(RefactoringMessages.getString("PushDownInputPage.Member")); //$NON-NLS-1$
 
 		TableColumn column1= new TableColumn(table, SWT.NONE);
-		column1.setText("Action");
+		column1.setText(RefactoringMessages.getString("PushDownInputPage.Action")); //$NON-NLS-1$
 		
 		fTableViewer= new PullPushCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
@@ -301,7 +302,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		fEditButton= new Button(composite, SWT.PUSH);
-		fEditButton.setText("&Edit...");
+		fEditButton.setText(RefactoringMessages.getString("PushDownInputPage.Edit")); //$NON-NLS-1$
 		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEditButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditButton);
@@ -312,7 +313,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		});
 
 		Button addButton= new Button(composite, SWT.PUSH);
-		addButton.setText("&Add Required");
+		addButton.setText(RefactoringMessages.getString("PushDownInputPage.Add_Required")); //$NON-NLS-1$
 		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter(){
@@ -337,7 +338,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 				}
 			});
 		} catch(InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), "Push Down", "Internal Error. See log for details.");
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PushDownInputPage.Push_Down"), RefactoringMessages.getString("PushDownInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(InterruptedException e) {
 			Assert.isTrue(false);//not cancellable
 		}
@@ -346,8 +347,8 @@ public class PushDownInputPage extends UserInputWizardPage {
 	private void editSelectedMembers() {
 		ISelection preserved= fTableViewer.getSelection();
 		try{
-			String shellTitle= "Edit members";
-			String labelText= "&Mark selected member(s) as:";
+			String shellTitle= RefactoringMessages.getString("PushDownInputPage.Edit_members"); //$NON-NLS-1$
+			String labelText= RefactoringMessages.getString("PushDownInputPage.Mark_selected_members"); //$NON-NLS-1$
 			Map stringMapping= createStringMappingForSelectedElements();
 			String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 			Arrays.sort(keys);
@@ -409,7 +410,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 
 	private void checkPageCompletionStatus() {
 		if (areAllElementsMarkedAsNoAction()){
-			setErrorMessage("Select member(s) to push down or declare abstract");
+			setErrorMessage(RefactoringMessages.getString("PushDownInputPage.Select_members_to_push_down")); //$NON-NLS-1$
 			setPageComplete(false);
 		} else {
 			setErrorMessage(null);

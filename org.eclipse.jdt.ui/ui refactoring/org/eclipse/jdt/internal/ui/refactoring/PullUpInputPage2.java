@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PullUpInputPage2 extends UserInputWizardPage {
 
@@ -177,7 +178,7 @@ class PullUpInputPage2 extends UserInputWizardPage {
 				return fHierarchy.getSuperclass((IType) element);
 			if (element instanceof IMember)
 				return ((IMember) element).getDeclaringType();
-			Assert.isTrue(false, "Should not get here");
+			Assert.isTrue(false, "Should not get here"); //$NON-NLS-1$
 			return null;
 		}
 	
@@ -260,7 +261,7 @@ class PullUpInputPage2 extends UserInputWizardPage {
 		buttonComposite.setLayout(bcl);
 	
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText("&Select Pulled Up");
+		button.setText(RefactoringMessages.getString("PullUpInputPage2.Select")); //$NON-NLS-1$
 		button.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -410,7 +411,7 @@ class PullUpInputPage2 extends UserInputWizardPage {
 	private void createSourceViewerLabel(Composite c) {
 		  Label label= new Label(c, SWT.WRAP);
 		  GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-   		  label.setText("Source");
+   		  label.setText(RefactoringMessages.getString("PullUpInputPage2.Source")); //$NON-NLS-1$
 		  label.setLayoutData(gd);
 	}
 	

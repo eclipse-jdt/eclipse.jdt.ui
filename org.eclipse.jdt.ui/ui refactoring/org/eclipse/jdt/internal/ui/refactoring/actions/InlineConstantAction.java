@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Inlines a constant.
@@ -47,7 +48,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	private static final String DIALOG_TITLE= "Inline Constant";
+	private static final String DIALOG_TITLE= RefactoringMessages.getString("InlineConstantAction.dialog_title"); //$NON-NLS-1$
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -60,7 +61,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	public InlineConstantAction(IWorkbenchSite site) {
 		super(site);
-		setText("Inline &Constant...");
+		setText(RefactoringMessages.getString("InlineConstantAction.inline_Constant")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);		
 	}
 
@@ -107,7 +108,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 			IField field= (IField) first;
 			run(field.getNameRange().getOffset(), field.getNameRange().getLength(), field.getCompilationUnit());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");	
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
  	}	
 	
@@ -127,13 +128,13 @@ public class InlineConstantAction extends SelectionDispatchAction {
 			cu, selectionOffset, selectionLength,
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No constant reference or declaration selected.");
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.no_constant_reference_or_declaration")); //$NON-NLS-1$
 			return;
 		}
 		try {
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");	
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception"));	 //$NON-NLS-1$
 		}		
 	}
 	

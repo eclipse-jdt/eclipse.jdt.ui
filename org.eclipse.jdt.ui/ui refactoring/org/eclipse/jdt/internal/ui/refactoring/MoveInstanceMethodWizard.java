@@ -3,11 +3,12 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class MoveInstanceMethodWizard extends RefactoringWizard {
 
 	public MoveInstanceMethodWizard(MoveInstanceMethodRefactoring ref) {
-		super(ref, "Move Method", IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE);
+		super(ref, RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method"), IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 	}
 
 	/* non java-doc

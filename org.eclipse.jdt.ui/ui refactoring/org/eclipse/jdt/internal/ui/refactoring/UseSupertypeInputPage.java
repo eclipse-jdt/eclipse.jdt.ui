@@ -43,13 +43,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class UseSupertypeInputPage extends UserInputWizardPage{
 
 	public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
 	private TableViewer fTableViewer; 
 	private final Map fFileCount;  //IType -> Integer
-	private final static String MESSAGE= "Select the supertype to use";
+	private final static String MESSAGE= RefactoringMessages.getString("UseSupertypeInputPage.Select_supertype"); //$NON-NLS-1$
 	private JavaElementLabelProvider fTableLabelProvider;
 
 	public UseSupertypeInputPage() {
@@ -64,7 +65,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		composite.setLayout(new GridLayout());
 		
 		final Button checkbox= new Button(composite, SWT.CHECK);
-		checkbox.setText("&Use the selected supertype in 'instanceof' expressions");
+		checkbox.setText(RefactoringMessages.getString("UseSupertypeInputPage.Use_in_instanceof")); //$NON-NLS-1$
 		checkbox.setLayoutData(new GridData());
 		checkbox.setSelection(getUseSupertypeRefactoring().getUseSupertypeInInstanceOf());
 		checkbox.addSelectionListener(new SelectionAdapter(){
@@ -78,7 +79,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		});
 		
 		Label label= new Label(composite, SWT.NONE);
-		label.setText("&Select the supertype to use:");
+		label.setText(RefactoringMessages.getString("UseSupertypeInputPage.Select_supertype_to_use")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 		
 		addTableComponent(composite);
@@ -94,7 +95,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection ss= (IStructuredSelection)event.getSelection();
 				if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){
-					setMessage("No updates possible for the selected supertype", DialogPage.INFORMATION);
+					setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), DialogPage.INFORMATION); //$NON-NLS-1$
 					setPageComplete(false);
 				} else {
 					setMessage(MESSAGE);
@@ -106,7 +107,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		try {
 			fTableViewer.setInput(getUseSupertypeRefactoring().getSuperTypes());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Use Supertype", "Internal Error. See log for details");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("UseSupertypeInputPage.Use_Supertype"), RefactoringMessages.getString("UseSupertypeInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
 			fTableViewer.setInput(new IType[0]);
 		}
 		fTableViewer.getTable().setSelection(0);
@@ -125,7 +126,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 			IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
 			IType selectedType= (IType)ss.getFirstElement();
 			if (nextPage == this){
-				setMessage("No updates possible for the selected supertype", DialogPage.INFORMATION);
+				setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), DialogPage.INFORMATION); //$NON-NLS-1$
 				setPageComplete(false);
 				fFileCount.put(selectedType, new Integer(0));
 			} else if (nextPage instanceof IPreviewWizardPage){
@@ -182,13 +183,13 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 				return superText;
 			int count= ((Integer)fFileCount.get(element)).intValue();
 			if (count == 0){
-				String pattern= "{0} - no possible updates found";
+				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.no_possible_updates"); //$NON-NLS-1$
 				return MessageFormat.format(pattern, new String[]{superText});
 			} else if (count == 1){
-				String pattern= "{0} - updates possible in 1 file";
+				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.updates_possible_in_file"); //$NON-NLS-1$
 				return MessageFormat.format(pattern, new String[]{superText});
 			}	else {
-				String pattern= "{0} - updates possible in {1} files";
+				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.updates_possible_in_files"); //$NON-NLS-1$
 				return MessageFormat.format(pattern, new String[]{superText, String.valueOf(count)});
 			}	
 		}

@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class InlineConstantInputPage extends UserInputWizardPage {
 
@@ -43,11 +44,11 @@ class InlineConstantInputPage extends UserInputWizardPage {
 		fInlineMode= new Group(result, SWT.NONE);
 		fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fInlineMode.setLayout(new GridLayout());
-		fInlineMode.setText("Inline");
+		fInlineMode.setText(RefactoringMessages.getString("InlineConstantInputPage.Inline")); //$NON-NLS-1$
 		
 		final Button all= new Button(fInlineMode, SWT.RADIO);
 		all.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		all.setText("&All references");
+		all.setText(RefactoringMessages.getString("InlineConstantInputPage.All_references")); //$NON-NLS-1$
 		all.setSelection(fRefactoring.getReplaceAllReferences());
 		all.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -62,7 +63,7 @@ class InlineConstantInputPage extends UserInputWizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
-		fRemove.setText("&Delete constant declaration");
+		fRemove.setText(RefactoringMessages.getString("InlineConstantInputPage.Delete_constant")); //$NON-NLS-1$
 		fRemove.setEnabled(all.getSelection());
 		fRemove.setSelection(fRefactoring.getRemoveDeclaration());
 		fRemove.addSelectionListener(new SelectionAdapter() {
@@ -74,7 +75,7 @@ class InlineConstantInputPage extends UserInputWizardPage {
 		
 		final Button onlySelected= new Button(fInlineMode, SWT.RADIO);
 		onlySelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		onlySelected.setText("&Only the selected reference");
+		onlySelected.setText(RefactoringMessages.getString("InlineConstantInputPage.Only_selected")); //$NON-NLS-1$
 		onlySelected.setSelection(!fRefactoring.getReplaceAllReferences());
 		onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
 		onlySelected.addSelectionListener(new SelectionAdapter() {

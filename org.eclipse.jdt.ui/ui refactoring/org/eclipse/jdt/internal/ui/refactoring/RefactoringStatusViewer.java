@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RefactoringStatusViewer extends SashForm {
 
@@ -281,7 +282,7 @@ public class RefactoringStatusViewer extends SashForm {
 		setLayout(layout);
 		
 		ViewerPane contextPane= new ViewerPane(this, SWT.BORDER | SWT.FLAT);
-		contextPane.setText("Found problems");
+		contextPane.setText(RefactoringMessages.getString("RefactoringStatusViewer.Found_problems")); //$NON-NLS-1$
 		ToolBarManager tbm= contextPane.getToolBarManager();
 		tbm.add(fNextProblem= new NextProblem());
 		tbm.add(fPreviousProblem= new PreviousProblem());
@@ -354,7 +355,7 @@ public class RefactoringStatusViewer extends SashForm {
 			}
 		}
 		if (title == null || title.length() == 0)
-			title= "Problem context";
+			title= RefactoringMessages.getString("RefactoringStatusViewer.Problem_context"); //$NON-NLS-1$
 		fContextViewerPane.setText(title);
 		if (imageDescriptor != null) {
 			if (fPaneImage != null) {

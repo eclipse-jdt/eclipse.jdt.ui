@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Inlines a method.
@@ -46,7 +47,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	private static final String DIALOG_TITLE= "Inline Method";
+	private static final String DIALOG_TITLE= RefactoringMessages.getString("InlineMethodAction.dialog_title"); //$NON-NLS-1$
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -59,7 +60,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	public InlineMethodAction(IWorkbenchSite site) {
 		super(site);
-		setText("I&nline Method...");
+		setText(RefactoringMessages.getString("InlineMethodAction.inline_Method")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
@@ -101,7 +102,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			IMethod method= (IMethod) first;
 			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
 		}
 	}
 
@@ -110,13 +111,13 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			cu, selectionOffset, selectionLength,
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method invocation or declaration selected.");
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.no_method_invocation_or_declaration_selected")); //$NON-NLS-1$
 			return;
 		}
 		try {
 			activate(refactoring);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
 		}
 	}
 

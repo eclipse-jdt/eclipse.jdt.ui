@@ -1,6 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
-
-import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -15,9 +23,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class RenameFieldInputWizardPage extends RenameInputWizardPage {
 
@@ -83,7 +92,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	}
 	
 	private String getRenameGetterLabel(){
-		String defaultLabel= RefactoringMessages.getString("RenameFiledInputWizardPage.rename_getter"); //$NON-NLS-1$
+		String defaultLabel= RefactoringMessages.getString("RenameFieldInputWizardPage.rename_getter"); //$NON-NLS-1$
 		if (fGetterRenamingErrorMessage != null)
 			return constructDisabledGetterRenamingLabel(defaultLabel);
 		try {
@@ -91,7 +100,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			if (getter == null || ! getter.exists())
 				return defaultLabel;
 			String getterSig= JavaElementUtil.createMethodSignature(getter);
-			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_getter_to", new String[]{getterSig, createNewGetterName()}); //$NON-NLS-1$
+			return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_getter_to", new String[]{getterSig, createNewGetterName()}); //$NON-NLS-1$
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return defaultLabel;			
@@ -99,7 +108,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	}
 		
 	private String getRenameSetterLabel(){
-		String defaultLabel= RefactoringMessages.getString("RenameFiledInputWizardPage.rename_setter"); //$NON-NLS-1$
+		String defaultLabel= RefactoringMessages.getString("RenameFieldInputWizardPage.rename_setter"); //$NON-NLS-1$
 		if (fSetterRenamingErrorMessage != null)
 			return constructDisabledSetterRenamingLabel(defaultLabel);
 		try {
@@ -107,22 +116,24 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			if (setter == null || ! setter.exists())
 				return defaultLabel;
 			String setterSig= JavaElementUtil.createMethodSignature(setter);
-			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_setter_to", new String[]{setterSig, createNewSetterName()});//$NON-NLS-1$
+			return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_setter_to", new String[]{setterSig, createNewSetterName()});//$NON-NLS-1$
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return defaultLabel;			
 		}
 	}
 	private String constructDisabledSetterRenamingLabel(String defaultLabel) {
-		if (fSetterRenamingErrorMessage.equals(""))
+		if (fSetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
 			return defaultLabel;
-		return MessageFormat.format("{0} ({1})", new String[]{defaultLabel, fSetterRenamingErrorMessage});
+		String[] keys= {defaultLabel, fSetterRenamingErrorMessage};
+		return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.setter_label", keys); //$NON-NLS-1$
 	}
 	
 	private String constructDisabledGetterRenamingLabel(String defaultLabel) {
-		if (fGetterRenamingErrorMessage.equals(""))
+		if (fGetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
 			return defaultLabel;
-		return MessageFormat.format("{0} ({1})", new String[]{defaultLabel, fGetterRenamingErrorMessage});
+		String[] keys= {defaultLabel, fGetterRenamingErrorMessage};
+		return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.getter_label", keys);			 //$NON-NLS-1$
 	}
 	
 	private String createNewGetterName() throws JavaModelException {
@@ -141,7 +152,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			return fGetterRenamingErrorMessage;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return "";
+			return ""; //$NON-NLS-1$
 		} 
 	}
 
@@ -153,7 +164,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			return fSetterRenamingErrorMessage;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return "";
+			return ""; //$NON-NLS-1$
 		} 
 	}
 	

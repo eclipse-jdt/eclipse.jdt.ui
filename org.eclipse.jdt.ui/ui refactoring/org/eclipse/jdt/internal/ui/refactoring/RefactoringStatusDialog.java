@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class RefactoringStatusDialog extends Dialog {
 	
@@ -66,9 +67,9 @@ class RefactoringStatusDialog extends Dialog {
 		messagePane.setBackground(background);
 		Label label= new Label(messagePane, SWT.LEFT | SWT.WRAP);
 		if (fStatus.hasFatalError())
-			label.setText("Cannot proceed due to the following problems.");
+			label.setText(RefactoringMessages.getString("RefactoringStatusDialog.Cannot_proceed")); //$NON-NLS-1$
 		else 
-			label.setText("Please look at the information given in the list below. If you want to proceed, please press 'Continue'.");
+			label.setText(RefactoringMessages.getString("RefactoringStatusDialog.Please_look")); //$NON-NLS-1$
 		label.setBackground(background);
 		messagePane.setContent(label);
 		RefactoringStatusViewer viewer= new RefactoringStatusViewer(result, SWT.NONE);
@@ -78,7 +79,7 @@ class RefactoringStatusDialog extends Dialog {
 	}
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (!fStatus.hasFatalError()) {
-			createButton(parent, IDialogConstants.OK_ID, "Con&tinue", true);
+			createButton(parent, IDialogConstants.OK_ID, RefactoringMessages.getString("RefactoringStatusDialog.Continue"), true); //$NON-NLS-1$
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		} else {
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);

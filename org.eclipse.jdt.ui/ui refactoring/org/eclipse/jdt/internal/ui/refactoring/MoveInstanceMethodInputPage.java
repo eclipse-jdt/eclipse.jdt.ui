@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
@@ -109,7 +110,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 			}
 		}
 	}
-	private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE"; 
+	private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE";  //$NON-NLS-1$
 	private static final int ROW_COUNT= 7;
 	
 	public MoveInstanceMethodInputPage() {
@@ -131,7 +132,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 	
 	private void createOriginalReceiverParameterNameField(Composite result) {
 		Label label= new Label(result, SWT.SINGLE);
-		label.setText("&Original receiver parameter name:");
+		label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Original_parameter")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 		
 		final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
@@ -147,7 +148,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 	
 	private void createNewMethodNameField(Composite result) {
 		Label label= new Label(result, SWT.SINGLE);
-		label.setText("New &method name:");
+		label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.New_name")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 
 		final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
@@ -163,7 +164,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
 	private void createNewReceiverList(Composite result) {
 		Label label= new Label(result, SWT.SINGLE);
-		label.setText("&New receiver:");
+		label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.New_receiver")); //$NON-NLS-1$
 		GridData gd0= new GridData();
 		gd0.horizontalSpan= 2;
 		label.setLayoutData(gd0);
@@ -176,11 +177,11 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		table.setLinesVisible(false);		
 
 		TableColumn column0= new TableColumn(table, SWT.NONE);		
-		column0.setText("Name");
+		column0.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Name")); //$NON-NLS-1$
 		column0.setResizable(true); 
 
 		TableColumn column1= new TableColumn(table, SWT.NONE);
-		column1.setText("Type Name");
+		column1.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Type_Name")); //$NON-NLS-1$
 		column1.setResizable(true);
 		 
 		TableViewer viewer= new TableViewer(table);

@@ -3,13 +3,14 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class InlineConstantWizard extends RefactoringWizard {
 
-	private static final String MESSAGE = "Specify where to inline references to the constant.";
+	private static final String MESSAGE = RefactoringMessages.getString("InlineConstantWizard.message"); //$NON-NLS-1$
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
-		super(ref, "Inline Constant", IJavaHelpContextIds.INLINE_CONSTANT_ERROR_WIZARD_PAGE);
+		super(ref, RefactoringMessages.getString("InlineConstantWizard.Inline_Constant"), IJavaHelpContextIds.INLINE_CONSTANT_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 
@@ -21,7 +22,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 		String message= null;
 		int messageType= IMessageProvider.NONE;			
 		if(!getInlineConstantRefactoring().isInitializerAllStaticFinal()) {
-			message= "This constant's initializer refers to non-final or non-static fields";
+			message= RefactoringMessages.getString("InlineConstantWizard.initializer_refers_to_fields"); //$NON-NLS-1$
 			messageType= IMessageProvider.INFORMATION;
 		} else {	
 			message= MESSAGE;

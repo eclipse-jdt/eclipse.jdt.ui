@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInstanceMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * <p> This class may be instantiated; it is not intended to be subclassed.
@@ -44,7 +45,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	private static final String DIALOG_TITLE= "Move Method";
+	private static final String DIALOG_TITLE= RefactoringMessages.getString("MoveInstanceMethodAction.dialog_title"); //$NON-NLS-1$
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -57,7 +58,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 
 	public MoveInstanceMethodAction(IWorkbenchSite site) {
 		super(site);
-		setText("Move Method...");
+		setText(RefactoringMessages.getString("MoveInstanceMethodAction.Move_Method")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);		
 	}
 
@@ -104,7 +105,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 			IMethod method= (IMethod) first;
 			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");	
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
  	}	
 	
@@ -124,13 +125,13 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 			cu, selectionOffset, selectionLength,
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method reference or declaration selected.");
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration")); //$NON-NLS-1$
 			return;
 		}
 		try {
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");	
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
 		}		
 	}
 	

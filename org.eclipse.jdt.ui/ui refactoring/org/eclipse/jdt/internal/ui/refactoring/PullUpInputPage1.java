@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PullUpInputPage1 extends UserInputWizardPage {
 	
@@ -121,9 +122,9 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		static final int DECLARE_ABSTRACT_ACTION= 1;//values are important here
 		static final int NO_ACTION= 				2;
 
-		private static final String NO_LABEL= "";
-		private static final String PULL_UP_LABEL= "pull up";
-		private static final String DECLARE_ABSTRACT_LABEL= "declare abstract in destination";
+		private static final String NO_LABEL= ""; //$NON-NLS-1$
+		private static final String PULL_UP_LABEL= RefactoringMessages.getString("PullUpInputPage1.pull_up"); //$NON-NLS-1$
+		private static final String DECLARE_ABSTRACT_LABEL= RefactoringMessages.getString("PullUpInputPage1.declare_abstract"); //$NON-NLS-1$
 		private static final String[] FIELD_LABELS= {NO_LABEL};
 		private static final String[] METHOD_LABELS;//indices correspond to values
 		static{
@@ -264,7 +265,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	private Button fCreateStubsButton;
 	public PullUpInputPage1() {
 		super(PAGE_NAME, false);
-		setMessage("Select the members to pull up and the desired new declaring class for them.\n" +							"If you select methods, them press Next to specify which matching methods you wish to delete.");
+		setMessage(RefactoringMessages.getString("PullUpInputPage1.page_message")); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {
@@ -286,7 +287,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	
 	private void createStubCheckbox(Composite parent) {
 		fCreateStubsButton= new Button(parent, SWT.CHECK);
-		fCreateStubsButton.setText("&Create necessary methods stubs in non-abstract subclasses of the destination class");
+		fCreateStubsButton.setText(RefactoringMessages.getString("PullUpInputPage1.Create_stubs")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
 		fCreateStubsButton.setLayoutData(gd);
@@ -326,7 +327,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	}
 	private void createSuperTypeCombo(IProgressMonitor pm, Composite parent) throws JavaModelException {
 		Label label= new Label(parent, SWT.NONE) ;
-		label.setText("&Select destination class:");
+		label.setText(RefactoringMessages.getString("PullUpInputPage1.Select_destination")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 		
 		fSuperclassCombo= new Combo(parent, SWT.READ_ONLY);
@@ -357,7 +358,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 
 	private void createMemberTableLabel(Composite parent) {
 		Label label= new Label(parent, SWT.NONE) ;
-		label.setText("&Specify actions for members:");
+		label.setText(RefactoringMessages.getString("PullUpInputPage1.Specify_actions")); //$NON-NLS-1$
 		GridData gd0= new GridData();
 		gd0.horizontalSpan= 2;
 		label.setLayoutData(gd0);
@@ -372,7 +373,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		fEditButton= new Button(composite, SWT.PUSH);
-		fEditButton.setText("&Edit...");
+		fEditButton.setText(RefactoringMessages.getString("PullUpInputPage1.Edit")); //$NON-NLS-1$
 		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEditButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditButton);
@@ -383,7 +384,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		});
 
 		Button addButton= new Button(composite, SWT.PUSH);
-		addButton.setText("&Add Required");
+		addButton.setText(RefactoringMessages.getString("PullUpInputPage1.Add_Required")); //$NON-NLS-1$
 		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter(){
@@ -396,8 +397,8 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	private void editSelectedMembers() {
 		ISelection preserved= fTableViewer.getSelection();
 		try{
-			String shellTitle= "Edit members";
-			String labelText= "&Mark selected member(s) as:";
+			String shellTitle= RefactoringMessages.getString("PullUpInputPage1.Edit_members"); //$NON-NLS-1$
+			String labelText= RefactoringMessages.getString("PullUpInputPage1.Mark_selected_members"); //$NON-NLS-1$
 			Map stringMapping= createStringMappingForSelectedMembers();
 			String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 			Arrays.sort(keys);
@@ -494,10 +495,10 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		table.setLayout(tableLayout);
 
 		TableColumn column0= new TableColumn(table, SWT.NONE);		
-		column0.setText("Member");
+		column0.setText(RefactoringMessages.getString("PullUpInputPage1.Member")); //$NON-NLS-1$
 
 		TableColumn column1= new TableColumn(table, SWT.NONE);
-		column1.setText("Action");
+		column1.setText(RefactoringMessages.getString("PullUpInputPage1.Action")); //$NON-NLS-1$
 		
 		fTableViewer= new PullPushCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
@@ -582,7 +583,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		
 	private void checkPageCompletionStatus() {
 		if (areAllMembersMarkedAsWithNoAction()){
-			setErrorMessage("Select member(s) to pull up or declare abstract");
+			setErrorMessage(RefactoringMessages.getString("PullUpInputPage1.Select_members_to_pull_up")); //$NON-NLS-1$
 			setPageComplete(false);
 		} else {
 			setErrorMessage(null);

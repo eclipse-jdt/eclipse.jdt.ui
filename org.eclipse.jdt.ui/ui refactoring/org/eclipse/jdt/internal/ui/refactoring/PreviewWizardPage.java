@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Presents the changes made by the refactoring.
@@ -374,7 +375,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		result.setLayout(layout);
 		Label label= new Label(result, SWT.CENTER);
-		label.setText("The refactoring doesn't change any source code.");
+		label.setText(RefactoringMessages.getString("PreviewWizardPage.no_source_code_change")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		return result;
 	}

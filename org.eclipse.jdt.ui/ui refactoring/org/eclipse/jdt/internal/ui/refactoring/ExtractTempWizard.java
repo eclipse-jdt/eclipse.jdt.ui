@@ -18,7 +18,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		try {
 			addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempName()));
 		} catch (JavaModelException e) {
-			addPage(new ExtractTempInputPage(""));
+			addPage(new ExtractTempInputPage("")); //$NON-NLS-1$
 		}
 	}
 	

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class VisibilityControlUtil {
 	private VisibilityControlUtil(){}
@@ -33,7 +34,7 @@ class VisibilityControlUtil {
 			return null;
 		
 		Group group= new Group(parent, SWT.NONE);
-		group.setText("Access modifier");
+		group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
@@ -41,10 +42,10 @@ class VisibilityControlUtil {
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
-			"&public",
-			"pro&tected",
-			"defa&ult",
-			"pri&vate"
+			"&public", //$NON-NLS-1$
+			"pro&tected", //$NON-NLS-1$
+			RefactoringMessages.getString("VisibilityControlUtil.defa&ult_4"), //$NON-NLS-1$
+			"pri&vate" //$NON-NLS-1$
 		};
 		Integer[] data= new Integer[] {
 					new Integer(Modifier.PUBLIC),
