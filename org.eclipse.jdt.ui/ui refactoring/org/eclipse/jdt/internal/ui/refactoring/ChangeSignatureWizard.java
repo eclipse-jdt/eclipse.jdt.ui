@@ -325,7 +325,10 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void updateStatus(boolean displayErrorMessage) {
 			try{
 				if (getChangeMethodSignatureRefactoring().isSignatureSameAsInitial()){
-					setErrorMessage(null);
+					if (displayErrorMessage)
+						setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.unchanged")); //$NON-NLS-1$
+					else
+						setErrorMessage(null);
 					setPageComplete(false);
 					return;
 				}
