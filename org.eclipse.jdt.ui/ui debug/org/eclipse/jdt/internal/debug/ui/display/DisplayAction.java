@@ -10,6 +10,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.jdt.debug.core.IJavaThread;
+import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -57,7 +58,11 @@ public class DisplayAction extends EvaluateAction {
 		
 		String resultString= " "; //$NON-NLS-1$
 		try {
-			String sig= result.getSignature();
+			String sig= null;
+			IJavaType type= result.getJavaType();
+			if (type != null) {
+				sig= type.getSignature();
+			}
 			if ("V".equals(sig)) { //$NON-NLS-1$
 				resultString= DisplayMessages.getString("Display.no_result_value"); //$NON-NLS-1$
 			} else {
