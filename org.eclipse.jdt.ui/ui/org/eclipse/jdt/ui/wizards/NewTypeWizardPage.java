@@ -1494,7 +1494,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;
 					} else {
-						if (type.isClass()) {
+						if (!type.isInterface()) {
 							status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
 							return status;
 						}

@@ -236,11 +236,11 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				run((IType) firstElement, new IField[0], false);
 			} else if (firstElement instanceof ICompilationUnit) {
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
-				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.interface_not_applicable")); //$NON-NLS-1$					
-					return;
-				} else if (type.isAnnotation()) {
+				if (type.isAnnotation()) {
 					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.annotation_not_applicable")); //$NON-NLS-1$					
+					return;
+				} else if (type.isInterface()) {
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.interface_not_applicable")); //$NON-NLS-1$					
 					return;
 				} else if (type.isEnum()) {
 					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.enum_not_applicable")); //$NON-NLS-1$					

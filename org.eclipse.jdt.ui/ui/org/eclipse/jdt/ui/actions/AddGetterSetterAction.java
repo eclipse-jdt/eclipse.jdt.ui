@@ -190,11 +190,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			else if (firstElement instanceof ICompilationUnit) {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
-				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
-					return;
-				} else if (type.isAnnotation()) {
+				if (type.isAnnotation()) {
 					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+					return;
+				} else if (type.isInterface()) {
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
@@ -244,11 +244,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
-		if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
-			return;
-		} else if (type.isAnnotation()) {
+		if (type.isAnnotation()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+			return;
+		} else if (type.isInterface()) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 			return;
 		}
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
