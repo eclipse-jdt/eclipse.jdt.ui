@@ -997,13 +997,13 @@
       </page>      
       <page
             name="%editorPrefName"
-            category="org.eclipse.ui.preferencePages.Languages"
+            category="org.eclipse.ui.preferencePages.Editors"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage">
       </page>
       <page
             name="%propertiesFileEditorPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            category="org.eclipse.ui.preferencePages.Editors"
             class="org.eclipse.jdt.internal.ui.preferences.PropertiesFileEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
       </page>
