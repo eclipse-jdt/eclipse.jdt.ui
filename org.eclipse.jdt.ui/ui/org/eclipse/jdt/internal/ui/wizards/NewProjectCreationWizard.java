@@ -76,6 +76,12 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	 * Updates the perspective for the active page within the window.
 	 */
 	protected void updatePerspective() {
+		// When there is no config info the wizard didn't get created
+		// from the New wizard. Don't switch the perspective in this
+		// case since we are already in the Java context.
+		if (fConfigElement == null)
+			return;
+			
 		// Read final persp from config.
 		String perspID = fConfigElement.getAttribute("finalPerspective");
 		if (perspID == null)
