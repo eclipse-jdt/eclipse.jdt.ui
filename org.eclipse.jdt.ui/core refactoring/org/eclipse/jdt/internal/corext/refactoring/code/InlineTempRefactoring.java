@@ -9,12 +9,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.BinaryExpression;
 import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
-import org.eclipse.jdt.internal.compiler.ast.Literal;
+import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.PostfixExpression;
 import org.eclipse.jdt.internal.compiler.ast.PrefixExpression;
@@ -172,7 +172,6 @@ public class InlineTempRefactoring extends Refactoring {
 		int end= fTempDeclaration.declarationSourceEnd;
 		int length= end - offset + 1;
 		String changeName= "Remove local variable '" + getTempName() + "'"; 
-		//DebugUtils.dump("temp<" + fCu.getSource().substring(offset, end + 1) + "/>");
 		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
 	}
 	
@@ -181,7 +180,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int start= fTempDeclaration.initialization.sourceStart;
 		int end= fTempDeclaration.initialization.sourceEnd;
 		String rawSource= fCu.getSource().substring(start, end + 1);
-		if (! needsBracketsAroundReferences())
+		if (! needsBracketsAroundReferences(fTempDeclaration.initialization))
 			return rawSource;
 		else 
 			return "(" + rawSource + ")";
@@ -193,14 +192,18 @@ public class InlineTempRefactoring extends Refactoring {
 		return offsetFinder.getOccurrenceOffsets();
 	}	
 	
-	private boolean needsBracketsAroundReferences(){
-		if (fTempDeclaration.initialization instanceof Literal)
-			return false;
-		if (fTempDeclaration.initialization instanceof MessageSend)	
-			return false;
-		if (fTempDeclaration.initialization instanceof ArrayReference)	
-			return false;
-		return true;	
+	private static boolean needsBracketsAroundReferences(Expression expression){
+		if (expression instanceof BinaryExpression)	
+			return true;	
+		if (expression instanceof PrefixExpression)	
+			return true;	
+		if (expression instanceof PostfixExpression)	
+			return true;	
+		if (expression instanceof ConditionalExpression)	
+			return true;	
+		if (expression instanceof Assignment)//for estetic reasons
+			return true;	
+		return false;		
 	}
 	
 	//--- private helper classes
