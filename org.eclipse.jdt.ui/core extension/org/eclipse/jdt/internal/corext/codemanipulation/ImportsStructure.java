@@ -636,6 +636,9 @@ public class ImportsStructure implements IImportsStructure {
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
 				if (!curr.isComment()) {
+					if (curr.isOnDemand()) {
+						return; // star imported
+					}
 					int cmp= fullImportName.compareTo(curr.getElementName());
 					if (cmp == 0) {
 						return; // exists already
