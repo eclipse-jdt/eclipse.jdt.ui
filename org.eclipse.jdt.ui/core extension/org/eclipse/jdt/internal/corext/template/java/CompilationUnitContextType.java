@@ -44,6 +44,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 				return null;
 			}
 		}
+	 	
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		protected boolean isUnambiguous(TemplateContext context) {
+			return resolve(context) != null;
+		}
 	}
 
 	protected static class File extends TemplateVariableResolver {
@@ -54,6 +61,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			
 			return (unit == null) ? null : unit.getElementName();
+		}
+	 	
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		protected boolean isUnambiguous(TemplateContext context) {
+			return resolve(context) != null;
 		}
 	}
 	
@@ -69,6 +83,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 			String elementName= unit.getElementName();
 			return elementName.substring(0, elementName.lastIndexOf('.'));
 		}
+	 	
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		protected boolean isUnambiguous(TemplateContext context) {
+			return resolve(context) != null;
+		}
 	}
 
 	protected static class EnclosingJavaElement extends TemplateVariableResolver {
@@ -81,6 +102,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
 			return (element == null) ? null : element.getElementName();			
+		}
+	 	
+		/*
+		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
+		 */
+		protected boolean isUnambiguous(TemplateContext context) {
+			return resolve(context) != null;
 		}
 	}
 	

@@ -142,7 +142,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			for (int i= 0; i != variables.length; i++) {
 				TemplateVariable variable= variables[i];
 
-				if (variable.isResolved())
+				if (variable.isUnambiguous())
 					continue;
 				
 				LinkedPositionGroup group= new LinkedPositionGroup();
