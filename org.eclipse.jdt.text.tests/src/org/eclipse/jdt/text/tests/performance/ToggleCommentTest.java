@@ -23,12 +23,23 @@ public class ToggleCommentTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private static final int N_OF_RUNS= 10;
+	private static final int N_OF_RUNS= 5;
 
-	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
+	private PerformanceMeter fCommentMeter;
 
-	protected void setUp() {
-		EditorTestHelper.runEventQueue();
+	private PerformanceMeter fUncommentMeter;
+
+	private ITextEditor fEditor;
+
+	protected void setUp() throws Exception {
+		fCommentMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "comment");
+		fUncommentMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "uncomment");
+		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
+		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
+	}
+	
+	protected void tearDown() throws Exception {
+		EditorTestHelper.closeAllEditors();
 	}
 
 	public void testToggleComment1() throws PartInitException {
@@ -42,25 +53,24 @@ public class ToggleCommentTest extends TestCase {
 	}
 
 	private void measureToggleComment() throws PartInitException {
-		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		try {
-			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
-			
-			editor.getAction(ITextEditorActionConstants.SELECT_ALL).run();
-			EditorTestHelper.runEventQueue();
-			
-			IAction action= editor.getAction("ToggleComment");
-			for (int i= 0; i < N_OF_RUNS; i++) {
-				performanceMeter.start();
-				action.run();
-				EditorTestHelper.runEventQueue();
-				performanceMeter.stop();
-				sleep(5000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-			}
-		} finally {
-			EditorTestHelper.closeAllEditors();
-			performanceMeter.commit();
+		IAction toggleComment= fEditor.getAction("ToggleComment");
+		for (int i= 0; i < N_OF_RUNS; i++) {
+			fCommentMeter.start();
+			runAction(toggleComment);
+			fCommentMeter.stop();
+			sleep(5000);
+			fUncommentMeter.start();
+			runAction(toggleComment);
+			fUncommentMeter.stop();
+			sleep(5000);
 		}
+		fCommentMeter.commit();
+		fUncommentMeter.commit();
+	}
+
+	private void runAction(IAction action) {
+		action.run();
+		EditorTestHelper.runEventQueue();
 	}
 
 	private synchronized void sleep(int time) {
