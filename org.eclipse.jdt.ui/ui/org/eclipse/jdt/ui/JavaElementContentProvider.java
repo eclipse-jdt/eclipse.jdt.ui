@@ -17,9 +17,8 @@ import org.eclipse.swt.widgets.*;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * @deprecated use the StandardJavaElementContentProvider
+ * @deprecated use the StandardJavaElementContentProvider instead
  * @see StandardJavaElementContentProvider
- * @see PackageExplorerPart
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
