@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 public class ExtractTempWizard extends RefactoringWizard {
@@ -13,6 +15,15 @@ public class ExtractTempWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage(new ExtractTempInputPage());
+		try {
+			addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempName()));
+		} catch (JavaModelException e) {
+			addPage(new ExtractTempInputPage(""));
+		}
 	}
+	
+	private ExtractTempRefactoring getExtractTempRefactoring(){
+		return (ExtractTempRefactoring)getRefactoring();
+	}
+	
 }
