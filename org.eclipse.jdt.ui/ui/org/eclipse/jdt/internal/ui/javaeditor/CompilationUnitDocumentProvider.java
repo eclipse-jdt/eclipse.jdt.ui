@@ -144,7 +144,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private void initializeImages() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
 				if (!fQuickFixImagesInitialized) {
-					if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)) {
+					if (isProblem() && indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)) { // no light bulb for tasks
 						if (!fgQuickFixImagesInitialized) {
 							fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
@@ -205,7 +205,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see IJavaAnnotation#getId()
 			 */
 			public int getId() {
-				return isProblem() ? fProblem.getID() : -1;
+				return fProblem.getID();
 			}
 
 			/*

@@ -107,6 +107,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryArgumentCast:
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
+			case IProblem.Task:
 				return true;
 			default:
 				return false;
@@ -297,6 +298,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryCast:
 			case IProblem.UnnecessaryArgumentCast:
 				LocalCorrectionsSubProcessor.addUnnecessaryCastProposal(context, problem, proposals);
+				break;
+			case IProblem.Task:
+				proposals.add(new TaskMarkerProposal(context.getCompilationUnit(), problem, 10));
 				break;
 			default:
 		}

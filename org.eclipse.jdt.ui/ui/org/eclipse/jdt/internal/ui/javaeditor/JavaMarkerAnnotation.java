@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -182,8 +183,21 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 */
 	public int getId() {
 		IMarker marker= getMarker();
-		if (marker != null  && marker.exists() && isProblem())
+		if (marker == null  || !marker.exists())
+			return -1;
+		
+		if (isProblem())
 			return marker.getAttribute(IJavaModelMarker.ID, -1);
+			
+		if (fType == AnnotationType.TASK) {
+			try {
+				if (marker.isSubtypeOf(IJavaModelMarker.TASK_MARKER)) {
+					return IProblem.Task;
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e); // should no happen, we test for marker.exists
+			}
+		}
 		return -1;
 	}
 	
@@ -245,7 +259,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		if (hasOverlay())
 			newImageType= OVERLAY_IMAGE;
 		else if (isRelevant()) {
-			if (mustShowQuickFixIcon()) {
+			if (isProblem() && mustShowQuickFixIcon()) { // no light bulb for tasks
 				if (fType == AnnotationType.ERROR)
 					newImageType= QUICKFIX_ERROR_IMAGE;
 				else
