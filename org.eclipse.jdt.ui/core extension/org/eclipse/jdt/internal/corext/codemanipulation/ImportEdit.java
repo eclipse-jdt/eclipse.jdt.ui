@@ -58,20 +58,15 @@ public final class ImportEdit extends SimpleTextEdit {
 	 */
 	public String addImport(String qualifiedTypeName) {
 		//XXX workaround for 11622, 11537 and related problems with array types
-		qualifiedTypeName= removeTrailingBrackets(qualifiedTypeName);
-		
+		int bracketOffset= qualifiedTypeName.indexOf('[');
+		if (bracketOffset != -1) {
+			return fImportsStructure.addImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
+		}			
 		return fImportsStructure.addImport(qualifiedTypeName);
 	}
 	
 	public void removeImport(String qualifiedTypeName) {
 		fImportsStructure.removeImport(qualifiedTypeName);
-	}
-	
-	private static String removeTrailingBrackets(String s){
-		if (s.indexOf('[') == -1)
-			return s;
-		else
-			return s.substring(0, s.indexOf('['));	
 	}
 	
 	/**
