@@ -251,11 +251,11 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 					if (getProvideWorkingCopy())
 						postRefresh(null);
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
-					if (element instanceof IWorkingCopy) {
+					if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 						// working copy removed from system - refresh
 						postRefresh(null);
 					}
-				} else if (element instanceof IWorkingCopy && parent != null && parent.equals(fInput))
+				} else if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy() && parent != null && parent.equals(fInput))
 				// closed editor - removing working copy
 					postRefresh(null);
 				else
@@ -263,7 +263,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			}
 				
 			if (fBrowsingPart.isAncestorOf(element, fInput)) {
-				if (element instanceof IWorkingCopy) {
+				if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 					postAdjustInputAndSetSelection(((IWorkingCopy)element).getOriginal((IJavaElement)fInput));
 				} else
 					postAdjustInputAndSetSelection(null);
@@ -285,7 +285,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 						postAdd(parent, ((ICompilationUnit)element).getAllTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
-				} else if (element instanceof IWorkingCopy) {
+				} else if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 					// new working copy comes to live
 					postRefresh(null);
 				} else
