@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -711,7 +710,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void createConstructor(TypeDeclaration declaration, ASTRewrite rewrite, boolean addRefToEnclosing) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(format(getNewConstructorSource(addRefToEnclosing), 0), ASTRewrite.METHOD_DECLARATION);
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(addRefToEnclosing), 0), ASTRewrite.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}
@@ -1130,8 +1129,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return fieldAccess.resolveFieldBinding();
 	}
 
-	private String format(String src, int indentationLevel){
-		return ToolFactory.createDefaultCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
+	private String formatConstructorSource(String src, int indentationLevel){
+		return CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, src, indentationLevel, null, getLineSeperator(), null);
 	}
 
 	private static String getFullyQualifiedImportName(ITypeBinding type) {

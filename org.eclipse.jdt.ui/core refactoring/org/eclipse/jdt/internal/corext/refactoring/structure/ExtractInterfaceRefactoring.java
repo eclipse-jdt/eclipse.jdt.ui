@@ -17,12 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -33,7 +32,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -44,6 +42,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -74,8 +74,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.jdt.ui.CodeGeneration;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
@@ -302,7 +300,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 			setContent(typeCu, change.getPreviewContent());
 			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputClassPackage(), getCuNameForNewInterface(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			setContent(newCuWC, formatSource(createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1))));
+			setContent(newCuWC, createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1)));
 			IType theInterface= newCuWC.getType(fNewInterfaceName);
 			
 			CompilationUnitRange[] updatedRanges= ExtractInterfaceUtil.updateReferences(manager, theType, theInterface, fWorkingCopyOwner, false, new SubProgressMonitor(pm, 9), status);
@@ -435,7 +433,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputClassPackage(), getCuNameForNewInterface(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			Assert.isTrue(! fReplaceOccurrences || fSource != null);
 			Assert.isTrue(fSource == null || fReplaceOccurrences);
-			String formattedSource= fSource != null ? fSource: formatSource(createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1)));
+			String formattedSource= fSource != null ? fSource: createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1));
 			return new CreateTextFileChange(interfaceCuPath, formattedSource, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
@@ -444,8 +442,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private String formatSource(String source) {
-		return ToolFactory.createDefaultCodeFormatter(null).format(source, 0, null, getLineSeperator());
+	private String formatCuSource(String source) {
+		return CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, source, 0, null, getLineSeperator(), null);
 	}
 	
 	private String getCuNameForNewInterface() {
@@ -472,7 +470,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			compilationUnitContent= ""; //$NON-NLS-1$
 		newCu.getBuffer().setContents(compilationUnitContent);
 		addImportsToNewCu(newCu, pm, cuNode);
-		return newCu.getSource();
+		return formatCuSource(newCu.getSource());
 	}
 
 	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm, CompilationUnit cuNode) throws CoreException {
