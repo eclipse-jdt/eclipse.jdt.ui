@@ -70,8 +70,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-
 public class ASTNodes {
 
 	public static final int NODE_ONLY=				0;
@@ -798,7 +796,7 @@ public class ASTNodes {
 
 	public static String getQualifier(Name name) {
 		if (name.isQualifiedName()) {
-			return ASTResolving.getFullName(((QualifiedName) name).getQualifier());
+			return ((QualifiedName) name).getQualifier().getFullyQualifiedName();
 		}
 		return ""; //$NON-NLS-1$
 	}
