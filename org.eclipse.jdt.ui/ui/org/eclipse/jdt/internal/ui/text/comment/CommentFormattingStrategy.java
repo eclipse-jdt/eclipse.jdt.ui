@@ -144,7 +144,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				return CodeFormatter.K_MULTI_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_DOC.equals(type))
 				return CodeFormatter.K_JAVA_DOC;
-		return -1;
+		return CodeFormatter.K_UNKNOWN;
 	}
 	
 	/**
