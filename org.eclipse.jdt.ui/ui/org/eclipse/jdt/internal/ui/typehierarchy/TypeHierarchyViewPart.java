@@ -523,7 +523,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
 		fPaneLabelProvider.dispose();
 		
-		fMethodsViewer.dispose();
+		if (fMethodsViewer != null) {
+			fMethodsViewer.dispose();
+		}
 		
 		if (fPropertyChangeListener != null) {
 			JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
