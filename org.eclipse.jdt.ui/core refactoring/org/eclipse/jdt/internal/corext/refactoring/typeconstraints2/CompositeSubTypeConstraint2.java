@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public final class OrOrSubTypeConstraint2 implements ITypeConstraint2 {
+public final class CompositeSubTypeConstraint2 implements ITypeConstraint2 {
 	
 	private final ConstraintVariable2 fLeft;
 	private final ConstraintVariable2 fRight;
 
-	public OrOrSubTypeConstraint2(ConstraintVariable2 left, ConstraintVariable2 right) {
+	public CompositeSubTypeConstraint2(ConstraintVariable2 left, ConstraintVariable2 right) {
 		Assert.isNotNull(left);
 		Assert.isNotNull(right);
 		fLeft= left;
@@ -41,7 +41,7 @@ public final class OrOrSubTypeConstraint2 implements ITypeConstraint2 {
 	 */
 	public boolean equals(Object other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
-		if (other.getClass() != OrOrSubTypeConstraint2.class)
+		if (other.getClass() != CompositeSubTypeConstraint2.class)
 			return false;
 		
 		ITypeConstraint2 otherTC= (ITypeConstraint2) other;
