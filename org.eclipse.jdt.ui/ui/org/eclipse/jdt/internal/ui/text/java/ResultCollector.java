@@ -88,7 +88,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName)) {
+		if (TypeFilter.isFiltered(packageName, typeName)) {
 			return;
 		}
 		
@@ -115,7 +115,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end, int relevance) {
 		
-		if (TypeFilter.isFiltered(declaringTypePackageName)) {
+		if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
 			return;
 		}
 		
@@ -144,7 +144,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName)) {
+		if (TypeFilter.isFiltered(packageName, typeName)) {
 			return;
 		}
 		
@@ -162,7 +162,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 			char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
-		if (TypeFilter.isFiltered(superTypePackageName)) {
+		if (TypeFilter.isFiltered(superTypePackageName, superTypeName)) {
 			return;
 		}
 		
@@ -231,7 +231,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		if (completionName == null)
 			return;
 		
-		if (TypeFilter.isFiltered(declaringTypePackageName)) {
+		if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
 			return;
 		}
 	
@@ -277,7 +277,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName)) {
+		if (TypeFilter.isFiltered(new String(packageName))) {
 			return;
 		}
 		
@@ -288,7 +288,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	 * @see ICompletionRequestor#acceptType
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName)) {
+		if (TypeFilter.isFiltered(packageName, typeName)) {
 			return;
 		}
 		

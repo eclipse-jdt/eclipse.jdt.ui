@@ -186,10 +186,10 @@ public class AllTypesCache {
 			}
 		
 			ITypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
-				protected boolean inScope(char[] packageName) {
+				protected boolean inScope(char[] packageName, char[] typeName) {
 					if (fRestart)
 						throw new RequestorAbort();
-					return super.inScope(packageName);
+					return super.inScope(packageName, typeName);
 				}
 			};
 

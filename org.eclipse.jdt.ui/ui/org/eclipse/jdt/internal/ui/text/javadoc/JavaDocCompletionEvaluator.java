@@ -367,21 +367,21 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		if (preparedCU != null) {
 			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
 				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName)) {
+					if (TypeFilter.isFiltered(packageName, className)) {
 						return;
 					}
 					fResult.add(createSeeTypeCompletion(true, start, end, completionName, className, packageName, severity));
 				}
 
 				public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName)) {
+					if (TypeFilter.isFiltered(packageName, interfaceName)) {
 						return;
 					}
 					fResult.add(createSeeTypeCompletion(false, start, end, completionName, interfaceName, packageName, severity));
 				}
 
 				public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName)) {
+					if (TypeFilter.isFiltered(packageName, typeName)) {
 						return;
 					}
 					fResult.add(createSeeTypeCompletion(true, start, end, completionName, typeName, packageName, severity));

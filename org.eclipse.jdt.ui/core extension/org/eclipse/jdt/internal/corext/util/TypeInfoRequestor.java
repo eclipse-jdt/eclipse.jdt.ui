@@ -32,8 +32,8 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 		fFactory= new TypeInfoFactory();
 	}
 	
-	protected boolean inScope(char[] packageName) {
-		return !TypeFilter.isFiltered(new String(packageName));
+	protected boolean inScope(char[] packageName, char[] typeName) {
+		return !TypeFilter.isFiltered(packageName, typeName);
 	}
 
 	
@@ -41,7 +41,7 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 	 * @see ITypeNameRequestor#acceptInterface
 	 */
 	public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames,String path) {
-		if (inScope(packageName)) {
+		if (inScope(packageName, typeName)) {
 			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, true, path));
 		}
 	}
@@ -50,7 +50,7 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 	 * @see ITypeNameRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-		if (inScope(packageName)) {
+		if (inScope(packageName, typeName)) {
 			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, false, path));
 		}
 	}

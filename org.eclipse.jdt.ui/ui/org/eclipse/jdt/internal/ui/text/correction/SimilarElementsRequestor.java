@@ -176,7 +176,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	}
 	
 	private void addType(int kind, char[] packageName, char[] typeName, char[] completionName, int relevance) {
-		if (TypeFilter.isFiltered(packageName)) {
+		if (TypeFilter.isFiltered(packageName, typeName)) {
 			return;
 		}
 		
@@ -195,7 +195,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	}
 	
 	private void addVariable(int kind, char[] name, char[] typePackageName, char[] typeName, int relevance) {
-		if (TypeFilter.isFiltered(typePackageName)) {
+		if (TypeFilter.isFiltered(typePackageName, typeName)) {
 			return;
 		}
 		
@@ -251,7 +251,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	 */
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & METHODS) != 0) {
-			if (TypeFilter.isFiltered(declaringTypePackageName)) {
+			if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
 				return;
 			}
 			

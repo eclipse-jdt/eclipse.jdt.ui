@@ -36,18 +36,22 @@ public class TypeFilter implements IPropertyChangeListener {
 		return fgDefault;
 	}
 	
-	public static boolean isFiltered(String packageName) {
-		return getDefault().filter(packageName);
+	public static boolean isFiltered(String fullTypeName) {
+		return getDefault().filter(fullTypeName);
 	}
 	
-	public static boolean isFiltered(char[] packageName) {
-		return getDefault().filter(new String(packageName));
+	public static boolean isFiltered(char[] fullTypeName) {
+		return getDefault().filter(new String(fullTypeName));
+	}
+		
+	public static boolean isFiltered(char[] packageName, char[] typeName) {
+		return getDefault().filter(JavaModelUtil.concatenateName(packageName, typeName));
 	}
 	
 	public static boolean isFiltered(IType type) {
 		TypeFilter typeFilter = getDefault();
 		if (typeFilter.hasFilters()) {
-			return typeFilter.filter(JavaModelUtil.getTypeContainerName(type));
+			return typeFilter.filter(JavaModelUtil.getFullyQualifiedName(type));
 		}
 		return false;
 	}
@@ -87,11 +91,11 @@ public class TypeFilter implements IPropertyChangeListener {
 	}
 	
 	
-	public boolean filter(String packageName) {
+	public boolean filter(String fullTypeName) {
 		StringMatcher[] matchers= getStringMatchers();
 		for (int i= 0; i < matchers.length; i++) {
 			StringMatcher curr= matchers[i];
-			if (curr.match(packageName)) {
+			if (curr.match(fullTypeName)) {
 				return true;
 			}
 		}
@@ -108,4 +112,6 @@ public class TypeFilter implements IPropertyChangeListener {
 			AllTypesCache.forceCacheFlush();
 		}
 	}
+
+
 }
