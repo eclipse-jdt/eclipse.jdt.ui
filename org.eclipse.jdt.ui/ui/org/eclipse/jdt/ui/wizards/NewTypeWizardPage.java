@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -1258,12 +1257,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String typename= getSuperClass();
 		if (fIsClass && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
-			buf.append(Signature.getSimpleName(typename));
-			if (fSuperClass != null) {
-				imports.addImport(JavaModelUtil.getFullyQualifiedName(fSuperClass));
-			} else {
-				imports.addImport(typename);
-			}
+			
+			String qualifiedName= fSuperClass != null ? JavaModelUtil.getFullyQualifiedName(fSuperClass) : typename; 
+			buf.append(imports.addImport(qualifiedName));
 		}
 	}
 	
@@ -1278,8 +1274,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			for (int i= 0; i <= last; i++) {
 				String typename= (String) interfaces.get(i);
-				imports.addImport(typename);
-				buf.append(Signature.getSimpleName(typename));
+				buf.append(imports.addImport(typename));
 				if (i < last) {
 					buf.append(',');
 				}

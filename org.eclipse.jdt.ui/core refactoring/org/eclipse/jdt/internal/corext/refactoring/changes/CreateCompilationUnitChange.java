@@ -113,7 +113,7 @@ public class CreateCompilationUnitChange extends Change {
 				String superClass= superTypes[0];
 				if (!superClass.equals("java.lang.Object")) { //$NON-NLS-1$
 					buf.append(" extends "); //$NON-NLS-1$
-					buf.append(Signature.getSimpleName(superClass));
+					buf.append(imports.addImport(superClass));
 				}
 				if (superTypes.length > 1) {
 					buf.append(" implements "); //$NON-NLS-1$
@@ -127,13 +127,9 @@ public class CreateCompilationUnitChange extends Change {
 				if (commaNeeded) {
 					buf.append(", "); //$NON-NLS-1$
 				}
-				buf.append(Signature.getSimpleName(superTypes[k++]));
+				buf.append(imports.addImport(superTypes[k++]));
 				commaNeeded= true;
 			}
-			for (int i= 0; i < superTypes.length; i++) {
-				imports.addImport(superTypes[i]);
-			}
-			
 		}
 		buf.append(" {\n\n}\n"); //$NON-NLS-1$
 	}

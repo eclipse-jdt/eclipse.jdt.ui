@@ -111,11 +111,11 @@ public class ImportEdit extends SimpleTextEdit {
 		TextBuffer buffer= editor.getTextBuffer();
 		ImportsStructure importStructure= new ImportsStructure(fCUnit, fSettings.importOrder, fSettings.importThreshold, true);
 		importStructure.setFilterImplicitImports(fFilterImplicitImports);
-		for (Iterator iter= fAddedImports.iterator(); iter.hasNext();) {
-			importStructure.addImport((String)iter.next());
-		}
 		for (Iterator iter= fRemovedImports.iterator(); iter.hasNext();) {
 			importStructure.removeImport((String)iter.next());
+		}
+		for (Iterator iter= fAddedImports.iterator(); iter.hasNext();) {
+			importStructure.addImport((String)iter.next());
 		}
 		
 		TextRange range= importStructure.getReplaceRange(buffer);

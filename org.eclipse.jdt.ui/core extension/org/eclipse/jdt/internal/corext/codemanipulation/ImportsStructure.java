@@ -297,8 +297,14 @@ public class ImportsStructure implements IImportsStructure {
 	 */			
 	public String addImport(String typeContainerName, String typeName) {
 		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
-		if (hasImport(typeName)) {
-			return fullTypeName;
+		
+		String existing= findImport(typeName);
+		if (existing != null) {
+			if (fullTypeName.equals(existing)) {
+				return typeName;
+			} else {
+				return fullTypeName;
+			}
 		}
 		
 		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
@@ -345,15 +351,16 @@ public class ImportsStructure implements IImportsStructure {
 	/**
 	 * Looks if there already is single import for the given type name.
 	 */	
-	public boolean hasImport(String simpleName) {
+	public String findImport(String simpleName) {
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (entry.find(simpleName) != null) {
-				return true;
+			ImportDeclEntry found= entry.find(simpleName);
+			if (found != null) {
+				return found.getElementName();
 			}
 		}
-		return false;		
+		return null;		
 	}
 	
 	/**

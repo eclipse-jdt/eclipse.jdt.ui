@@ -210,8 +210,7 @@ public class StubUtility {
 		if (resolvedTypeName != null) {
 			StringBuffer buf= new StringBuffer();
 			if (imports != null) {
-				imports.addImport(resolvedTypeName);
-				buf.append(Signature.getSimpleName(resolvedTypeName));
+				buf.append(imports.addImport(resolvedTypeName));
 			} else {
 				buf.append(resolvedTypeName);
 			}
