@@ -885,16 +885,16 @@
 		description="%JavaActionSet.description">
 
 		<action id="openTypeInHierarchy"
+			definitionId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
 			menubarPath="navigate/open.ext2"
 			label="%OpenTypeInHierarchyAction.label"
-			accelerator="Ctrl+Shift+H"
 			tooltip="%OpenTypeInHierarchyAction.tooltip"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
+			definitionId="org.eclipse.jdt.ui.navigate.open.type"
 			menubarPath="navigate/open.ext2"
 			toolbarPath="Normal/Search"			
 			label="%OpenTypeAction.label"
-			accelerator="Ctrl+Shift+T"
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
@@ -1489,7 +1489,7 @@
 </extension>
 
 <!-- =========================================================================== -->
-<!-- Java Editor Action Definition IDs -->
+<!-- Java Editor Action Definition IDs                                           -->
 <!-- =========================================================================== -->
 <extension point="org.eclipse.ui.actionDefinitions">
 	<!-- edit -->
@@ -1686,7 +1686,7 @@
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
 		name= "%ActionDefinition.convertNestedToTopLevel.name"
-		description= "%ActionDefinition.convertNestedorg.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.levelToTopLevel.description"
+		description= "%ActionDefinition.convertNestedToTopLevel.description"
 	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.use.supertype"
@@ -1705,6 +1705,16 @@
 	/>
 
 	<!-- navigate -->
+	<actionDefinition
+		id="org.eclipse.jdt.ui.navigate.open.type"
+		name= "%ActionDefinition.openType.name"
+		description= "%ActionDefinition.openType.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+		name= "%ActionDefinition.openTypeInHierarchy.name"
+		description= "%ActionDefinition.openTypeInHierarchy.description"
+	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.open.editor"
 		name= "%ActionDefinition.openEditor.name"
@@ -1886,6 +1896,10 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
 		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
 		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
+		
+		<accelerator key="Ctrl+Shift+T" id="org.eclipse.jdt.ui.navigate.open.type" />
+		<accelerator key="Ctrl+Shift+H" id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy" />
+		
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
 
@@ -1969,6 +1983,10 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
 		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
 		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
+		
+		<accelerator key="Ctrl+Shift+T" id="org.eclipse.jdt.ui.navigate.open.type" />
+		<accelerator key="Ctrl+Shift+H" id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy" />
+		
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
 
