@@ -131,12 +131,22 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fWorkbench= workbench;
 		// ignore the selection argument since the main export wizard changed it
 		fSelection= getValidSelection();
-		if (isDescriptionSelected(fSelection))
-			fJarPackage= JarPackage.readJarPackage(getDescriptionFile(fSelection));
-		else {
-			fJarPackage= new JarPackage();
-		}
-			
+		fJarPackage= new JarPackage();
+		setWindowTitle("JAR Packager");
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
+		setNeedsProgressMonitor(true);
+	}
+	/**
+	 * Initializes this wizard from the given JAR package description.
+	 * 
+	 * @param workbench	the workbench which launched this wizard
+	 * @param jarPackage the JAR package description used to initialize this wizard
+	 */
+	public void init(IWorkbench workbench, JarPackage jarPackage) {
+		Assert.isNotNull(workbench);
+		Assert.isNotNull(jarPackage);		
+		fWorkbench= workbench;
+		fJarPackage= new JarPackage();
 		setWindowTitle("JAR Packager");
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
@@ -218,11 +228,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		if (file.isAccessible() && extension != null && extension.equals(JarPackage.DESCRIPTION_EXTENSION))
 			return true;
 		return false;
-	}
-
-	protected IFile getDescriptionFile(IStructuredSelection selection) {
-		Assert.isLegal(isDescriptionSelected(selection));
-		return (IFile)selection.getFirstElement();
 	}
 
 	protected void saveManifest() throws CoreException, IOException {

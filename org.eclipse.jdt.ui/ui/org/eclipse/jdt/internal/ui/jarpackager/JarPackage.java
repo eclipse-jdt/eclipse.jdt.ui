@@ -102,36 +102,6 @@ transient 	private IType fMainClass;
 		setManifestLocation(new Path(""));
 		setDownloadExtensionsPath("");		setExportErrors(true);		setExportWarnings(true);		
 		setLogErrors(true);		setLogWarnings(true);			}
-	/**
-	 * Reads the JAR package spec from file.
-	 */
-	public static JarPackage readJarPackage(IFile description) {
-		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Move to caller and use JarPackageReader");
-		Assert.isLegal(description.isAccessible());
-		Assert.isNotNull(description.getFileExtension());
-		Assert.isLegal(description.getFileExtension().equals(DESCRIPTION_EXTENSION));
-		JarPackageReader objectInput= null;
-		try {
-			objectInput= new JarPackageReader(description.getContents());
-			return (JarPackage)objectInput.readObject();
-		} catch (CoreException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		} finally {
-			try {
-				if (objectInput != null)
-					objectInput.close();
-			}
-			catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return null;
-	}
-
 	// ----------- Accessors -----------
 		/**	 * Tells whether the JAR is compressed or not.	 * 	 * @return	<code>true</code> if the JAR is compressed	 */
 	public boolean isCompressed() {

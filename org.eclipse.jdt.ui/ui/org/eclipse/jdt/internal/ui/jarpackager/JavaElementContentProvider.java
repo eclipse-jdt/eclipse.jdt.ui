@@ -379,7 +379,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		// workaround for 1GE2T86: ITPJUI:WIN2000 - Null pointer exception in packages view
 		// getNonJavaResources sometimes returns null!
 		Object[] nonJavaResources= root.getNonJavaResources();
-		if (nonJavaResources == null)
+		if (nonJavaResources == null || !fShowPackageContent)
 			return fragments;
 		return ArrayUtility.merge(fragments, nonJavaResources);
 	}
