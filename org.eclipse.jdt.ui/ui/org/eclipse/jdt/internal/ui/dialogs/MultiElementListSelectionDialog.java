@@ -91,7 +91,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	public int open() {
 		List selection= getInitialSelections();
-		if (selection == null) {
+		if (selection == null || selection.size() != fNumberOfPages) {
 			setInitialSelections(new Object[fNumberOfPages]);
 			selection= getInitialSelections();
 		}
