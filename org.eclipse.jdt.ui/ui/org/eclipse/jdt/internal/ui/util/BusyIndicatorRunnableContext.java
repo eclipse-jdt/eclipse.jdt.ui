@@ -100,6 +100,13 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 	}
 	
 	private static void internalRun(boolean fork, final IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
+		Thread thread= Thread.currentThread();
+		// Do not spawn another thread if we are already in a modal context
+		// thread or inside a busy context thread.
+		JdtHackFinder.fixme("1GDRCUC: ITPJUI:WINNT - SEVERE: Deadlock in type hierarchy after catchup");
+		if (thread instanceof ThreadContext || thread.getClass().getName().equals("org.eclipse.jface.operation.ModalContext$ModalContextThread"))
+			fork= false;
+			
 		if (fork) {
 			final ThreadContext t= new ThreadContext(runnable);
 			t.start();
