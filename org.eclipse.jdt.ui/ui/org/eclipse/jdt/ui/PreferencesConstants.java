@@ -40,12 +40,12 @@ public class PreferencesConstants {
 	public static final String APPEARANCE_OVERRIDE_INDICATOR= AppearancePreferencePage.PREF_OVERRIDE_INDICATOR;
 
 	/**
-	 * Enable / Disable showing the package name compression. Boolean value.
+	 * Package name compression pattern. String value.
 	 */	
 	public static final String APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW= AppearancePreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW;
 
 	/**
-	 * Package name compression pattern. String value.
+	 * Enable / Disable showing the package name compression. Boolean value.
 	 */	
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= AppearancePreferencePage.PREF_COMPRESS_PACKAGE_NAMES;
 
