@@ -269,12 +269,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				attrib.setValue(null);
-				selElements.remove(i);
+				attrib.getParent().setAttribute(attrib.getKey(), null);
+				selElements.remove(i);				
 			}
 		}
 		if (selElements.isEmpty()) {
 			fLibrariesList.refresh();
+			fClassPathList.dialogFieldChanged(); // validate
 		} else {
 			fLibrariesList.removeElements(selElements);
 		}

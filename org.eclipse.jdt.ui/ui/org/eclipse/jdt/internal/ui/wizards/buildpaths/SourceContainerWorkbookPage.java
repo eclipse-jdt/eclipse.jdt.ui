@@ -338,16 +338,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.getKey().equals(CPListElement.EXCLUSION)) {
-					attrib.setValue(new Path[0]);
-				} else {
-					attrib.setValue(null);
-				}
+				String key= attrib.getKey();
+				Object value= key.equals(CPListElement.EXCLUSION) ? new Path[0] : null;
+				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
 			}
 		}
 		if (selElements.isEmpty()) {
 			fFoldersList.refresh();
+			fClassPathList.dialogFieldChanged(); // validate
 		} else {
 			fFoldersList.removeElements(selElements);
 		}
