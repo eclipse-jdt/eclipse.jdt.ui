@@ -19,11 +19,12 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.IAnnotationExtension;
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
@@ -40,7 +41,8 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 
 	private MarkerAnnotationPreferences fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
-
+	private IAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess(fMarkerAnnotationPreferences);
+	
 	/*
 	 * Formats a message as HTML text.
 	 */
@@ -70,11 +72,9 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
 
-				if (a instanceof IAnnotationExtension) {
-					AnnotationPreference preference= getAnnotationPreference((IAnnotationExtension)a);
-					if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
-						continue;
-				}
+				AnnotationPreference preference= getAnnotationPreference(a);
+				if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
+					continue;
 
 				Position p= model.getPosition(a);
 				if (a.getLayer() > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
@@ -104,17 +104,16 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the annotation preference for the given marker.
-	 * 
+	 *
 	 * @param marker
 	 * @return the annotation preference or <code>null</code> if none
 	 */	
-	private AnnotationPreference getAnnotationPreference(IAnnotationExtension annotation) {
-		String markerType= annotation.getMarkerType();
-		int severity= annotation.getSeverity();		
+	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
+		Object type= fAnnotationAccess.getType(annotation);
 		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (e.hasNext()) {
-			AnnotationPreference info= (AnnotationPreference) e.next();
-			if (info.getMarkerType().equals(markerType) && severity == info.getSeverity())
+			AnnotationPreference info= (AnnotationPreference)e.next();
+			if (info.getAnnotationType().equals(type))
 				return info;
 			}
 		return null;
