@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,7 +25,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,22 +32,19 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class OpenTypeHierarchyUtil {
 	
@@ -83,7 +75,9 @@ public class OpenTypeHierarchyUtil {
 			
 		IJavaElement input= null;
 		if (candidates.length > 1) {
-			input= selectCandidate(candidates, window.getShell());
+			String title= JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.title");  //$NON-NLS-1$
+			String message= JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.message"); //$NON-NLS-1$
+			input= OpenActionUtil.selectJavaElement(candidates, window.getShell(), title, message);			
 		} else {
 			input= candidates[0];
 		}
@@ -162,23 +156,6 @@ public class OpenTypeHierarchyUtil {
 			IWorkbenchPage page= pages[i];
 			if (page.getPerspective().equals(pd))
 				return page;
-		}
-		return null;
-	}
-	
-	private static IJavaElement selectCandidate(IJavaElement[] candidates, Shell shell) {		
-		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
-
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell,			
-			new JavaElementLabelProvider(flags));
-		dialog.setTitle(JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.title"));  //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.message")); //$NON-NLS-1$
-		dialog.setElements(candidates);
-
-		if (dialog.open() == dialog.OK) {
-			Object[] elements= dialog.getResult();
-			if ((elements != null) && (elements.length == 1))
-				return (IJavaElement) elements[0];
 		}
 		return null;
 	}
