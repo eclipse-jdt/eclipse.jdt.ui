@@ -100,7 +100,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private boolean fReplaceOccurrences= true; //XXX 
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
-	private Map fASTs; //ICompilationUnit -> CompilationUnit
+	private Map fCUsToCuNodes;//ICompilationUnit -> CompilationUnit
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -109,7 +109,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
 		fBadVarSet= new HashSet(0);
-		fASTs= new HashMap(0);
+		fCUsToCuNodes= new HashMap(0);
 	}
 	
 	/*
@@ -305,8 +305,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private void addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
-		pm.beginTask("", resultGroups.length);
-		Map mapping= getNodeMapping(resultGroups); //ASTNode -> ICompilationUnit
+		Map mapping= getNodeMapping(resultGroups, pm); //ASTNode -> ICompilationUnit
 		Set updatedCus= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
@@ -319,11 +318,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (! getInputClassPackage().equals(cu.getParent()))
 				addInterfaceImport(manager, cu);			
 		}
-		pm.done();
 	}
 
 	//ASTNode -> ICompilationUnit
-	private Map getNodeMapping(SearchResultGroup[] resultGroups) throws JavaModelException {
+	private Map getNodeMapping(SearchResultGroup[] resultGroups, IProgressMonitor pm) throws JavaModelException {
 		Map mapping= new HashMap();
 		for (int i= 0; i < resultGroups.length; i++) {
 			SearchResultGroup searchResultGroup= resultGroups[i];
@@ -331,30 +329,30 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (!(element instanceof ICompilationUnit))
 				continue;
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			CompilationUnit cuNode= getAST(cu);
-			ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), cuNode);
+			ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), getAST(cu));
 			for (int j= 0; j < nodes.length; j++) {
 				mapping.put(nodes[j], cu);
 			}			
 		}
-		retainUpdatableNodes(mapping);
+		retainUpdatableNodes(mapping, pm);
 		return mapping;
 	}
 
 	//ASTNode -> ICompilationUnit
-	private void retainUpdatableNodes(Map mapping) throws JavaModelException {
-		Collection nodesToRemove= computeNodesToRemove(mapping);
+	private void retainUpdatableNodes(Map mapping, IProgressMonitor pm) throws JavaModelException {
+		Collection nodesToRemove= computeNodesToRemove(mapping, pm);
 		for (Iterator iter= nodesToRemove.iterator(); iter.hasNext();) {
 			mapping.remove(iter.next());
 		}
 	}
 	
 	//ASTNode -> ICompilationUnit	
-	private Collection computeNodesToRemove(Map mapping) throws JavaModelException{
+	private Collection computeNodesToRemove(Map mapping, IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", mapping.keySet().size()); //XXX
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			if (hadDirectProblems(node))
+			if (hadDirectProblems(node, new SubProgressMonitor(pm, 1)))
 				nodesToRemove.add(node);	
 		}
 		boolean reiterate;
@@ -368,6 +366,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				}
 			}
 		} while (reiterate);	
+		pm.done();
 		return nodesToRemove;
 	}
 
@@ -444,51 +443,85 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return parent;
 	}
 	
-	private boolean hadDirectProblems(ASTNode node) throws JavaModelException {
-		ASTNode parentNode= getUnparenthesizedParent(node);
-		if (parentNode instanceof ClassInstanceCreation){
-			if (node == ((ClassInstanceCreation)parentNode).getName())
-				return true;
-		}	
-		if (parentNode instanceof TypeLiteral)
-			return true;
-		if (parentNode instanceof MethodDeclaration){
-			if (((MethodDeclaration)parentNode).thrownExceptions().contains(node))
-				return true;
-		}	
-
-		if (parentNode instanceof SingleVariableDeclaration && parentNode.getParent() instanceof CatchClause)
-			return true;
-			
-		if (parentNode instanceof TypeDeclaration){
-			if(node == ((TypeDeclaration)parentNode).getSuperclass())
-			 	return true;
-		}
-		if (parentNode instanceof VariableDeclarationStatement){
-			VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
-			if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds))
-				return true; 
-		}	
-
-		if (parentNode instanceof SingleVariableDeclaration){
-			if (! areAllTempReferencesOK((SingleVariableDeclaration)parentNode)){
-				addToBadVarSet((SingleVariableDeclaration)parentNode);
-				return true;
-			}	
-		} 
-		if (parentNode instanceof CastExpression){
-			ASTNode pp= getUnparenthesizedParent(parentNode);
-			//XXX code dup
-			if (pp instanceof FieldAccess)
-				return true;
-			if (pp instanceof MethodInvocation){
-				MethodInvocation mi= (MethodInvocation)pp;
-				if (parentNode.getParent() == mi.getExpression() && ! isMethodInvocationOk(mi))
+	private boolean hadDirectProblems(ASTNode node, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);
+		try{
+			ASTNode parentNode= getUnparenthesizedParent(node);
+			if (parentNode instanceof ClassInstanceCreation){
+				if (node == ((ClassInstanceCreation)parentNode).getName())
 					return true;
 			}	
-		}
-		return false;	
+			if (parentNode instanceof TypeLiteral)
+				return true;
+				
+			if (parentNode instanceof MethodDeclaration){
+				MethodDeclaration md= (MethodDeclaration)parentNode;
+				if (md.thrownExceptions().contains(node))
+					return true;
+				if (node == md.getReturnType()){
+					ICompilationUnit cu= getCompilationUnit(node);
+					IMethodBinding binding= md.resolveBinding();
+					if (binding == null)
+						return true; //XXX
+					IMethod method= Binding2JavaModel.find(binding, cu.getJavaProject());
+					if (method != null){
+						ISearchPattern pattern= SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
+						IJavaSearchScope scope= RefactoringScopeFactory.create(method);
+						SearchResultGroup[] groups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+						for (int i= 0; i < groups.length; i++) {
+							ICompilationUnit referencedCU= groups[i].getCompilationUnit();
+							if (referencedCU == null)
+								continue;
+							SearchResult[] searchResults= groups[i].getSearchResults();
+							ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
+							for (int j= 0; j < referenceNodes.length; j++) {
+								ASTNode aSTNode= referenceNodes[j];
+								if (aSTNode.getParent() instanceof MethodInvocation){
+									if (! isMethodInvocationOk((MethodInvocation)aSTNode.getParent())	)
+										return true;
+								}
+							}
+						}
+					}	
+				}
+			}	
+	
+			if (parentNode instanceof SingleVariableDeclaration && parentNode.getParent() instanceof CatchClause)
+				return true;
+				
+			if (parentNode instanceof TypeDeclaration){
+				if(node == ((TypeDeclaration)parentNode).getSuperclass())
+				 	return true;
+			}
+			if (parentNode instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
+				if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds))
+					return true; 
+			}	
+	
+			if (parentNode instanceof SingleVariableDeclaration){
+				if (! areAllTempReferencesOK((SingleVariableDeclaration)parentNode)){
+					addToBadVarSet((SingleVariableDeclaration)parentNode);
+					return true;
+				}	
+			} 
+			if (parentNode instanceof CastExpression){
+				ASTNode pp= getUnparenthesizedParent(parentNode);
+				//XXX code dup
+				if (pp instanceof FieldAccess)
+					return true;
+				if (pp instanceof MethodInvocation){
+					MethodInvocation mi= (MethodInvocation)pp;
+					if (parentNode.getParent() == mi.getExpression() && ! isMethodInvocationOk(mi))
+						return true;
+				}	
+			}
+			return false;	
+		} finally {
+			pm.done();
+		}	
 	}
+
 	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
@@ -859,10 +892,26 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private CompilationUnit getAST(ICompilationUnit cu){
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		if (fASTs.containsKey(wc))
-			return (CompilationUnit)fASTs.get(wc);
+		if (fCUsToCuNodes.containsKey(wc)){
+			return (CompilationUnit)fCUsToCuNodes.get(wc);
+		}	
 		CompilationUnit cuNode= AST.parseCompilationUnit(wc, true);
-		fASTs.put(wc, cuNode);
+		fCUsToCuNodes.put(wc, cuNode);
 		return cuNode;	
 	}
+	
+	private ICompilationUnit getCompilationUnit(ASTNode node) {
+		CompilationUnit cuNode= (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
+		Assert.isTrue(fCUsToCuNodes.containsValue(cuNode)); //the cu node must've been created before
+		
+		for (Iterator iter= fCUsToCuNodes.keySet().iterator(); iter.hasNext();) {
+			ICompilationUnit cu= (ICompilationUnit) iter.next();
+			if (fCUsToCuNodes.get(cu) == cuNode)
+				return cu;
+		}	
+		Assert.isTrue(false); //checked before
+		return null;
+	}
+
+	
 }
