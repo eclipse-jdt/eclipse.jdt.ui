@@ -12,8 +12,10 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility; 
+import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage; 
 
 
 
@@ -50,7 +52,11 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 		formatter.options.setLineSeparator(lineDelimiter);
 
 		formatter.setPositionsToMap(positions);
-		formatter.setInitialIndentationLevel(fInitialIndentation == null ? 0 : fInitialIndentation.length());
+		int indent= 0;
+		if (fInitialIndentation != null) {
+			indent= TextUtilities.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
+		}
+		formatter.setInitialIndentationLevel(indent);
 		return formatter.formatSourceString(content);
 	}	
 }

@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
@@ -401,31 +402,16 @@ public class StubUtility {
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
-				int i= ((ISourceReference)elem).getSourceRange().getOffset();
-				int result= 0;
-				int blanks= 0;			
-				while (i > 0) {
+				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
+				int i= offset;
+				// find beginning of line
+				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) {
 					i--;
-					char ch= buf.getChar(i);
-					switch (ch) {
-						case '\t':
-							result++;
-							blanks= 0;
-							break;
-						case ' ':
-							blanks++;
-							if (blanks == tabWidth) {
-								result++;
-								blanks= 0;
-							}
-							break;
-						default:
-							return result;
-					}
 				}
+				return TextUtilities.getIndent(buf.getText(i, offset - i), tabWidth);
 			}
 		}
 		return 0;

@@ -162,7 +162,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			IType parentType= field.getDeclaringType();
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-			int indent= StubUtility.getIndentUsed(parentType) + 1;
+			int indent= StubUtility.getIndentUsed(field);
 			
 			// test if the getter already exists
 			String getterName= "get" + accessorName; //$NON-NLS-1$
