@@ -98,7 +98,7 @@ public class CodeFormatterUtil {
 	public static String format(int kind, String string, int offset, int length, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
 		if (edit == null) {
-			JavaPlugin.logErrorMessage("formatter failed to format (null returned). Will use unformatted instead. kind: " + kind + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
+			JavaPlugin.logErrorMessage("formatter failed to format (no edit returned). Will use unformatted text instead. kind: " + kind + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
 			return string;
 		}
 		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
