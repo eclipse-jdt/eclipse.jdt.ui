@@ -172,7 +172,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				if (field != null) {
 					fieldName = field.getElementName();
 				}
-				if (wp.isAccess()) {
+				if (wp.isAccessSuspend()) {
 					if (thread.isSystemThread()) {
 						return getFormattedString(ACCESS_SYS, new String[] {thread.getName(), fieldName, typeName});
 					} else {
