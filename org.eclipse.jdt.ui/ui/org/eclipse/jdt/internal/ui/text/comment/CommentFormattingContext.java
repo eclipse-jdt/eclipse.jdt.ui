@@ -42,61 +42,109 @@ public class CommentFormattingContext extends FormattingContext {
 		/** Backing Map */
 		private Map fBackingMap;
 		
+		/**
+		 * Initialize with the given mapping for keys and backing store.
+		 * 
+		 * @param keyMap the mapping for keys
+		 * @param backingMap the backing store
+		 */
 		public KeyMappingMap(Map keyMap, Map backingMap) {
 			fKeyMap= keyMap;
 			fBackingMap= backingMap;
 		}
 
+		/**
+		 * Map the given key according to the key map.
+		 * 
+		 * @param key the key
+		 * @return the mapped key or the original if it is not mapped
+		 */
 		private Object map(Object key) {
 			if (fKeyMap.containsKey(key))
 				return fKeyMap.get(key);
 			return key;
 		}
 
+		/*
+		 * @see java.util.Map#size()
+		 */
 		public int size() {
 			return fBackingMap.size();
 		}
 
+		/*
+		 * @see java.util.Map#clear()
+		 */
 		public void clear() {
 			fBackingMap.clear();
 		}
 
+		/*
+		 * @see java.util.Map#isEmpty()
+		 */
 		public boolean isEmpty() {
 			return fBackingMap.isEmpty();
 		}
 
+		/*
+		 * @see java.util.Map#containsKey(java.lang.Object)
+		 */
 		public boolean containsKey(Object key) {
 			return fBackingMap.containsKey(map(key));
 		}
 
+		/*
+		 * @see java.util.Map#containsValue(java.lang.Object)
+		 */
 		public boolean containsValue(Object value) {
 			return fBackingMap.containsValue(value);
 		}
 
+		/*
+		 * @see java.util.Map#values()
+		 */
 		public Collection values() {
 			return fBackingMap.values();
 		}
 
+		/*
+		 * @see java.util.Map#putAll(java.util.Map)
+		 */
 		public void putAll(Map t) {
 			throw new UnsupportedOperationException();
 		}
 
+		/*
+		 * @see java.util.Map#entrySet()
+		 */
 		public Set entrySet() {
 			throw new UnsupportedOperationException();
 		}
 
+		/*
+		 * @see java.util.Map#keySet()
+		 */
 		public Set keySet() {
 			throw new UnsupportedOperationException();
 		}
 
+		/*
+		 * @see java.util.Map#get(java.lang.Object)
+		 */
 		public Object get(Object key) {
 			return fBackingMap.get(map(key));
 		}
 
+		/*
+		 * @see java.util.Map#remove(java.lang.Object)
+		 */
 		public Object remove(Object key) {
 			return fBackingMap.remove(map(key));
 		}
 
+		/*
+		 * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+		 */
 		public Object put(Object key, Object value) {
 			return fBackingMap.put(map(key), value);
 		}
