@@ -44,6 +44,11 @@ public class SourceReferenceSourceRangeComputer {
 	
 	public static ISourceRange computeSourceRange(ISourceReference element, ICompilationUnit cu) throws JavaModelException{
 		try{
+			if ((element instanceof IJavaElement) && ! ((IJavaElement)element).exists())
+				return element.getSourceRange();
+			if (! cu.exists())
+				return element.getSourceRange();
+			
 		 	SourceReferenceSourceRangeComputer inst= new SourceReferenceSourceRangeComputer(element, cu);
 		 	int offset= inst.computeOffset();
 		 	int end= inst.computeEnd();
