@@ -929,6 +929,11 @@ public class RenameTypeTests extends RefactoringTest {
 	public void test57() throws Exception {
 		helper2_0("A", "A", "B", "B", true, true, true, true);
 	}
+	
+	public void test58() throws Exception {
+		printTestDisabledMessage("bug#16751");
+//		helper2("A", "B");
+	}
 		
 	public void test5() throws Exception { 
 		helper2("A", "B");		
