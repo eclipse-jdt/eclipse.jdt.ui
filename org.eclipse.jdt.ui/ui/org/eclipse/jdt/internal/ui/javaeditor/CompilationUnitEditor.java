@@ -72,6 +72,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -445,6 +446,11 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	};
 	
+	/* Preference key for code formatter tab size */
+	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	
+	/* Preference key for code formatter tab character */
+	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	
+
 	/** Preference key for matching brackets */
 	public final static String MATCHING_BRACKETS=  "matchingBrackets";
 	/** Preference key for matching brackets color */
@@ -968,6 +974,14 @@ public class CompilationUnitEditor extends JavaEditor {
 			if (isv != null) {
 					
 				String p= event.getProperty();		
+
+				if (CODE_FORMATTER_TAB_SIZE.equals(p) || CODE_FORMATTER_TAB_CHAR.equals(p)) {
+				    SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+
+					String[] types= configuration.getConfiguredContentTypes(isv);					
+					for (int i= 0; i < types.length; i++)
+					    isv.setIndentPrefixes(configuration.getIndentPrefixes(isv, types[i]), types[i]);
+				}
 				
 				if (MATCHING_BRACKETS.equals(p)) {
 					if (isBracketHighlightingEnabled())
