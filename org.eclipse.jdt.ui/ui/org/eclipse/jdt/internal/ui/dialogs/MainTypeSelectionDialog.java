@@ -36,7 +36,11 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	}
 	
 	public MainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
-		super(shell, "", null, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS), 
+		super(
+			shell,
+			"",
+			null,
+			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
 			new PackageRenderer(),
 			ignoreCase, true); 
 		fRunnableContext= context;
