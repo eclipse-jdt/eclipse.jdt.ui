@@ -185,7 +185,7 @@ public class ResultCollector implements ICompletionRequestor {
 					buf.append(' ');
 				}
 				buf.append(parameterTypeNames[i]);
-				if (parameterNames[i] != null) {
+				if (parameterNames != null && parameterNames[i] != null) {
 					buf.append(' ');
 					buf.append(parameterNames[i]);
 				}
