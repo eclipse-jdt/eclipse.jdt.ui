@@ -1,13 +1,12 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
 import java.util.Stack;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
@@ -17,9 +16,6 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -178,52 +174,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 	 */	
 	private static IPath getCorrespondingPath(Object element) {
 		if (element instanceof IJavaElement) {
-			return getJavaElementPath((IJavaElement)element);
+			return JavaModelUtil.getUnderlyingPath((IJavaElement)element);
 		} else if (element instanceof IResource) {
 			return ((IResource)element).getFullPath();
 		}
 		return null;
 	}
 	
-	/**
-	 * Gets the path of the underlying resource without throwing
-	 * a JavaModelException if the resource does not exist.
-	 */
-	private static IPath getJavaElementPath(IJavaElement elem) {
-		switch (elem.getElementType()) {
-			case IJavaElement.JAVA_MODEL:
-				return null;
-			case IJavaElement.JAVA_PROJECT:
-				return ((IJavaProject)elem).getProject().getFullPath();
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				IPackageFragmentRoot root= (IPackageFragmentRoot)elem;
-				if (!root.isArchive()) {
-					return root.getPath();
-				}
-				return null;
-			case IJavaElement.PACKAGE_FRAGMENT:
-				String packName= elem.getElementName();
-				IPath rootPath= getJavaElementPath(elem.getParent());
-				if (rootPath != null && packName.length() > 0) {
-					rootPath= rootPath.append(packName.replace('.', '/'));
-				}
-				return rootPath;		
-			case IJavaElement.CLASS_FILE:
-			case IJavaElement.COMPILATION_UNIT:
-				IPath packPath= getJavaElementPath(elem.getParent());
-				if (packPath != null) {
-					packPath= packPath.append(elem.getElementName());
-				}
-				return packPath;
-			default:
-				IOpenable openable= JavaModelUtil.getOpenable(elem);
-				if (openable instanceof IJavaElement) {
-					return getJavaElementPath((IJavaElement)openable);
-				}
-				return null;
-		}
-	}	
-
-
-
 }

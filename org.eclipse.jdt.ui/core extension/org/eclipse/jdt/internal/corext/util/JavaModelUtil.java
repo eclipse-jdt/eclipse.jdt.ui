@@ -284,6 +284,46 @@ public class JavaModelUtil {
 			return type.getPackageFragment().getElementName();
 		}
 	}
+	
+	
+	/**
+	 * Gets the path of the underlying resource without throwing
+	 * a JavaModelException if the resource does not exist.
+	 */
+	public static IPath getUnderlyingPath(IJavaElement elem) {
+		switch (elem.getElementType()) {
+			case IJavaElement.JAVA_MODEL:
+				return null;
+			case IJavaElement.JAVA_PROJECT:
+				return ((IJavaProject)elem).getProject().getFullPath();
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				IPackageFragmentRoot root= (IPackageFragmentRoot)elem;
+				if (!root.isArchive()) {
+					return root.getPath();
+				}
+				return null;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				String packName= elem.getElementName();
+				IPath rootPath= getUnderlyingPath(elem.getParent());
+				if (rootPath != null && packName.length() > 0) {
+					rootPath= rootPath.append(packName.replace('.', '/'));
+				}
+				return rootPath;		
+			case IJavaElement.CLASS_FILE:
+			case IJavaElement.COMPILATION_UNIT:
+				IPath packPath= getUnderlyingPath(elem.getParent());
+				if (packPath != null) {
+					packPath= packPath.append(elem.getElementName());
+				}
+				return packPath;
+			default:
+				IOpenable openable= JavaModelUtil.getOpenable(elem);
+				if (openable instanceof IJavaElement) {
+					return getUnderlyingPath((IJavaElement)openable);
+				}
+				return null;
+		}
+	}	
 		
 	/**
 	 * Returns the raw class path entry corresponding to a package fragment root
