@@ -850,6 +850,7 @@ JavaStructureDiffViewerCreator
       		menubarPath="navigate/open.ext"
       		label="%OpenTypeHierarchyAction.label"
       		accelerator="F4"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Open"
@@ -858,6 +859,7 @@ JavaStructureDiffViewerCreator
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
 			accelerator="F3"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.open.editor"
 			retarget="true" 
 			allowLabelUpdate="true"/>
 	</actionSet>			
@@ -895,6 +897,7 @@ JavaStructureDiffViewerCreator
       		menubarPath="navigate/open.ext"
       		label="%OpenExternalJavadocAction.label"
       		accelerator="Shift+F2"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OpenSuperImplementation"
@@ -902,18 +905,21 @@ JavaStructureDiffViewerCreator
       		label="%OpenSuperImplementationAction.label"
 			tooltip="%OpenSuperImplementationAction.tooltip"
 			description="%OpenSuperImplementationAction.description"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
       		menubarPath="navigate/show.ext"
       		label="%ShowInNavigatorViewAction.label"
       		tooltip="%ShowInNavigatorViewAction.tooltip"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShowInPackagesView"
       		menubarPath="navigate/show.ext"
       		label="%ShowInPackageViewAction.label"
       		tooltip="%ShowInPackageViewAction.tooltip"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.GoToPackage"
@@ -957,31 +963,37 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.ModifyParameters"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.modifyParametersAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.PullUp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.pullUpAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.pull.up"
 			retarget="true" />
 
 		<action id="org.eclipse.jdt.ui.actions.ExtractInterface"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.extractInterfaceAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.interface"
 			retarget="true" />
 
 		<action id="org.eclipse.jdt.ui.actions.MoveInnerToTop"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.moveInnerToTopAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 			retarget="true" />
 		
 		<action id="org.eclipse.jdt.ui.actions.Move"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.moveAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.move.element"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Rename"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.renameAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.rename.element"
 			retarget="true" />
 			
 		<!-- coding group  -->
@@ -989,21 +1001,25 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
 			label="%Refactoring.selfEncapsulateFieldAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
 			retarget="true"/>
 			
 		<action id="org.eclipse.jdt.ui.actions.InlineTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.inlineTempAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.local.variable"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractTempAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
 			retarget="true" />
 
 		<action id="org.eclipse.jdt.ui.actions.ExtractMethod"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractMethodAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.method"
 			retarget="true" />
 			
 		<!-- =========================================================================== -->
@@ -1026,16 +1042,19 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.FindStringsToExternalize"
       		menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
       		label="%FindStringsToExternalizeAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ExternalizeStrings"
       		menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
       		label="%ExternalizeStringsAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.externalize.strings"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.SurroundWithTryCatch"
       		menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
       		label="%SurroundWithTryCatchAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
 			retarget="true" />
 			
 		<!-- Generate Group -->	
@@ -1048,6 +1067,7 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%AddConstructorFromSuperclassAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.GenerateGetterSetter"
@@ -1058,6 +1078,7 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.OverrideMethods"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%OverrideMethodsAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.override.methods"
 			retarget="true" />
 			
 		<!-- Import Group -->	
@@ -1066,12 +1087,14 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%AddImportAction.label"
       		accelerator="Ctrl+Shift+M"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.add.import"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%OrganizeImportsAction.label"
       		accelerator="Ctrl+Shift+O"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.organize.imports"
 			retarget="true" />
 			
 			
@@ -1081,6 +1104,7 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%FormatAction.label"
       		accelerator="Ctrl+Shift+F"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.format"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShiftLeft"
@@ -1097,12 +1121,14 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%UncommentAction.label"
       		accelerator="Ctrl+Shift+\\"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.uncomment"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Comment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%CommentAction.label"
       		accelerator="Ctrl+Shift+/"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.comment"
 			retarget="true" />
 
 		<!-- convert group -->	
@@ -1189,16 +1215,19 @@ JavaStructureDiffViewerCreator
     	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
       			label="%InWorkingSet.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"
     	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
       			label="%InWorkspace.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
 				retarget="true" />	
 
 		<menu
@@ -1212,16 +1241,19 @@ JavaStructureDiffViewerCreator
     	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
       			label="%InWorkingSet.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"
     	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
       			label="%InWorkspace.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
 				retarget="true" />	
 
 		<menu
@@ -1234,11 +1266,13 @@ JavaStructureDiffViewerCreator
     	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
       			label="%InWorkingSet.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
       			label="%InWorkspace.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
 				retarget="true" />	
 
 		<menu
@@ -1251,17 +1285,20 @@ JavaStructureDiffViewerCreator
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%InWorkingSet.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.DeclarationsInHierarchy"
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%DeclarationsInWorkspace.label"
       			accelerator="Ctrl+G"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
 				retarget="true" />	
 
 		<menu
@@ -1274,17 +1311,20 @@ JavaStructureDiffViewerCreator
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
       			label="%InWorkingSet.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReferencesInHierarchy"
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
       			label="%ReferencesInWorkspace.label"
       			accelerator="Ctrl+Shift+G"
       			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
 				retarget="true" />	
 	</actionSet>			
 </extension>
@@ -1386,6 +1426,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
@@ -1464,6 +1505,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
 	
