@@ -27,6 +27,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 	
 	protected StructureSelectionAction(String text) {
 		super(text);
+		setText("Enclosing Element@Alt+ARROW_UP");
 	}
 	
 	public StructureSelectionAction() {
@@ -46,7 +47,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 			if (! cu.isStructureKnown())
 				return oldSourceRange;
 			AST ast= new AST(cu);
-			if (ast.isMalformed())
+			if (ast.hasProblems())
 				return oldSourceRange;	
 			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(cu.getBuffer(), oldSourceRange.getOffset(), oldSourceRange.getLength());
 			ast.accept(selAnalyzer);
