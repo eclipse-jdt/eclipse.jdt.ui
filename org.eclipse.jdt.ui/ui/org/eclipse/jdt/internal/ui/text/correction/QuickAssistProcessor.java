@@ -442,10 +442,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
 			rewrite.remove(catchClause, null);
 		} else {
-			List statements= tryStatement.getBody().statements();
-			if (statements.size() > 0) {
-				ASTNode placeholder= rewrite.collapseNodes(statements, 0, statements.size());
-				rewrite.replace(tryStatement, rewrite.createCopy(placeholder), null);
+			Block block= tryStatement.getBody();
+			List statements= block.statements();
+			if (statements.size() > 0) {			
+				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				ASTNode first= (ASTNode) statements.get(0);
+				ASTNode last= (ASTNode) statements.get(statements.size() - 1);
+				ASTNode placeholder= listRewrite.createCopyTarget(first, last);
+				rewrite.replace(tryStatement, placeholder, null);
 			} else {
 				rewrite.remove(tryStatement, null);
 			}
@@ -507,8 +511,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (nStatements == 1) {
 				return rewrite.createCopy((ASTNode) innerStatements.get(0));
 			} else if (nStatements > 1) {
-				ASTNode placeholder= rewrite.collapseNodes(innerStatements, 0, nStatements);
-				return rewrite.createCopy(placeholder);
+				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				ASTNode first= (ASTNode) innerStatements.get(0);
+				ASTNode last= (ASTNode) innerStatements.get(nStatements - 1);
+				return listRewrite.createCopyTarget(first, last);
 			}
 			return null;
 		} else {

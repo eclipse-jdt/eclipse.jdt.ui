@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import org.eclipse.jdt.internal.corext.dom.RewriteEventStore.CopySourceInfo;
+
 /**
  * For describing manipulations to a child list property of an AST node.
  * <p>
@@ -238,6 +240,45 @@ public final class ListRewrite {
 		}
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
+		}
+	}
+	
+	private ASTNode createTargetNode(ASTNode first, ASTNode last, boolean isMove) {
+		if (first == null || last == null) {
+			throw new IllegalArgumentException();
+		}
+		//validateIsInsideAST(node);
+		CopySourceInfo info= getRewriteStore().markAsRangeCopySource(fParent, fChildProperty, first, last, isMove);
+	
+		NodeInfoStore nodeStore= fRewriter.getNodeStore();
+		ASTNode placeholder= nodeStore.newPlaceholderNode(first.getNodeType()); // revisit: could use list type
+		if (placeholder == null) {
+			throw new IllegalArgumentException("Creating a target node is not supported for nodes of type" + first.getClass().getName()); //$NON-NLS-1$
+		}
+		nodeStore.markAsCopyTarget(placeholder, info);
+		
+		return placeholder;		
+	}
+	
+	/**
+	 * Creates and returns a placeholder node for a true copy of a range of nodes of the
+	 * current list.
+	 * The placeholder node can either be inserted as new or used to replace an
+	 * existing node. When the document is rewritten, a copy of the source code 
+	 * for the given node range is inserted into the output document at the position
+	 * corresponding to the placeholder (indentation is adjusted).
+	 * 
+	 * @param first the node that starts the range
+	 * @param last the node that ends the range
+	 * @return the new placeholder node
+	 * @throws IllegalArgumentException if the node is null, or if the node
+	 * is not part of this rewriter's AST
+	 */
+	public final ASTNode createCopyTarget(ASTNode first, ASTNode last) {
+		if (first == last) {
+			return fRewriter.createCopyTarget(first);
+		} else {
+			return createTargetNode(first, last, false);
 		}
 	}
 	

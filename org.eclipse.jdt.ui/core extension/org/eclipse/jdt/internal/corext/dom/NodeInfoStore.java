@@ -65,7 +65,7 @@ public final class NodeInfoStore {
 	
 	/**
 	 * Creates a placeholder node of the given type. <code>null</code> if the type is not supported
-	 * @param nodeType Type of the node to create. Use the type constants in {@link NodeInfoStore}.
+	 * @param nodeType Type of the node to create as ASTNode node type constant. See {@link ASTNode#getNodeType()}
 	 * @return Returns a place holder node.
 	 */
 	public final ASTNode newPlaceholderNode(int nodeType) {
@@ -219,7 +219,7 @@ public final class NodeInfoStore {
 				return ast.newThrowStatement();
 			case ASTNode.TRY_STATEMENT :
 				TryStatement tryStatement= ast.newTryStatement();
-				tryStatement.setFinally(ast.newBlock()); // have to set at least a finally clock to be legal code
+				tryStatement.setFinally(ast.newBlock()); // have to set at least a finally block to be legal code
 				return tryStatement;
 			case ASTNode.TYPE_DECLARATION :
 				return ast.newTypeDeclaration();
@@ -240,7 +240,7 @@ public final class NodeInfoStore {
 			case ASTNode.WILDCARD_TYPE :
 				return ast.newWildcardType();
 		}
-		throw new IllegalArgumentException();
+		return null;
 	}
 	
 	
