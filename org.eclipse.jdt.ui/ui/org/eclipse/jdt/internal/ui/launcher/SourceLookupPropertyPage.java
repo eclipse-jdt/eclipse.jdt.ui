@@ -71,7 +71,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 		fListField.setDownButtonLabel(JavaLaunchUtils.getResourceString(DOWN));
 		fListField.setRemoveButtonLabel(JavaLaunchUtils.getResourceString(REMOVE) );
 
-		Group parent= new Group(ancestor, SWT.NONE);
+		Composite parent= new Composite(ancestor, SWT.NULL);
 		parent.setLayoutData(new GridData());
 		MGridLayout gl= new MGridLayout();
 		gl.numColumns= 3;
