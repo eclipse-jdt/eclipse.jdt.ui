@@ -260,7 +260,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			int offset= -1;
 			boolean foundComment= false;
 			int terminal= scanner.getNextToken();
-			while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
+			while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || terminal == ITerminalSymbols.TokenNameenum || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
 				
 				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC)
 					offset= scanner.getCurrentTokenStartPosition();
