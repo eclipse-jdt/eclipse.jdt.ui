@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
@@ -59,7 +60,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveMembersRefactoring extends Refactoring {
 	
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fMembers;
 	private IType fDestinationType;
@@ -80,7 +81,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Move Members";
+		return RefactoringCoreMessages.getString("MoveMembersRefactoring.Move_Members"); //$NON-NLS-1$
 	}
 
 	public IType getDestinationType() {
@@ -107,7 +108,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkAllElements());
@@ -116,7 +117,7 @@ public class MoveMembersRefactoring extends Refactoring {
 				return result;
 			
 			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus("All selected elements must be declared in the same type.");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.same_type"));			 //$NON-NLS-1$
 			pm.worked(1);
 			
 			result.merge(checkDeclaringType());
@@ -136,7 +137,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Checking preconditions", 5);
+			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 5); //$NON-NLS-1$
 			
 			RefactoringStatus result= new RefactoringStatus();	
 			
@@ -172,43 +173,60 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkDestinationType() throws JavaModelException {			
-		if (fDestinationType == null)
-			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationTypeName + "\' not be found.");
+		if (fDestinationType == null){
+			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.not_found", fDestinationTypeName);//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 		
-		if (fDestinationType.equals(getDeclaringType()))
-			return RefactoringStatus.createFatalErrorStatus("Destination and source types are the same (" + JavaElementUtil.createSignature(fDestinationType) + ")");	
+		if (fDestinationType.equals(getDeclaringType())){
+			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.same", //$NON-NLS-1$
+				JavaElementUtil.createSignature(fDestinationType));
+			return RefactoringStatus.createFatalErrorStatus(message);	
+		}	
 		
-		if (! fDestinationType.exists())
-			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' does not exist.");
+		if (! fDestinationType.exists()){
+			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.not_exist", //$NON-NLS-1$
+				JavaElementUtil.createSignature(fDestinationType));
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 			
-		if (fDestinationType.isBinary())	
-			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' is binary.");
+		if (fDestinationType.isBinary()){
+			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.dest_binary", //$NON-NLS-1$
+				JavaElementUtil.createSignature(fDestinationType));
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 
-		if (fDestinationType.isInterface() && ! getDeclaringType().isInterface())
-			return RefactoringStatus.createFatalErrorStatus("Currently, only fields declared in an interface can be moved to another interface.");
+		if (fDestinationType.isInterface() && ! getDeclaringType().isInterface()){
+			String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.interface_fields"); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 
-		if (! fDestinationType.isInterface() && getDeclaringType().isInterface())
-			return RefactoringStatus.createFatalErrorStatus("Currently, members declared in an interface can be moved only to another interface.");
+		if (! fDestinationType.isInterface() && getDeclaringType().isInterface()){
+			String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.interface_members"); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 
 		RefactoringStatus result= new RefactoringStatus();				
 		
-		if (! canDeclareStaticMembers(fDestinationType))	
-			result.addError("Static members can be declared only in top level or static types.");
+		if (! canDeclareStaticMembers(fDestinationType)){
+			String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.static_declaration"); //$NON-NLS-1$
+			result.addError(message);
+		}	
 				
 		return result;	
 	}
 	
 	private RefactoringStatus checkNativeMovedMethods(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fMembers.length);
+		pm.beginTask("", fMembers.length); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fMembers.length; i++) {
 			if (fMembers[i].getElementType() != IJavaElement.METHOD)
 				continue;
 			if (! JdtFlags.isNative(fMembers[i]))
 				continue;
-			String msg= "Moved method \'" + JavaElementUtil.createMethodSignature((IMethod)fMembers[i])
-						+ "\' is native. You will need to update native libraries.";
-			result.addWarning(msg, JavaSourceContext.create(fMembers[i]));
+			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.native", //$NON-NLS-1$
+				JavaElementUtil.createMethodSignature((IMethod)fMembers[i]));
+			result.addWarning(message, JavaSourceContext.create(fMembers[i]));
 			pm.worked(1);
 		}
 		pm.done();
@@ -216,13 +234,13 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fMembers.length);
+		pm.beginTask("", fMembers.length); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fMembers.length; i++) {
 			//XXX issues too many warnings - should check references to moved members
 			if (! isVisibleFrom(fMembers[i], fMembers[i].getDeclaringType(), fDestinationType)){
-				String msg= "Moved " + createNonAccessibleMemberMessage(fMembers[i], fMembers[i].getDeclaringType());
-				result.addWarning(msg, JavaSourceContext.create(fMembers[i]));
+				String message= createNonAccessibleMemberMessage(fMembers[i], fMembers[i].getDeclaringType(), true);
+				result.addWarning(message, JavaSourceContext.create(fMembers[i]));
 			}	
 			pm.worked(1);
 		}
@@ -230,20 +248,45 @@ public class MoveMembersRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private static String createNonAccessibleMemberMessage(IMember member, IType type) throws JavaModelException{
+	private static String createNonAccessibleMemberMessage(IMember member, IType type, boolean moved) throws JavaModelException{
 		switch (member.getElementType()){
-			case IJavaElement.FIELD: 
-				return "field \'" + JavaElementUtil.createFieldSignature((IField)member)
-						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
-			case IJavaElement.METHOD: 
-				return "method \'" + JavaElementUtil.createMethodSignature((IMethod)member)
-						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
-			case IJavaElement.TYPE:
-				return "type \'" + JavaModelUtil.getFullyQualifiedName(((IType)member)) 
-						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
+			case IJavaElement.FIELD: {
+				String key;
+				if (moved)
+					key= "MoveMembersRefactoring.moved_field"; //$NON-NLS-1$
+				else
+					key= "MoveMembersRefactoring.accessed_field"; //$NON-NLS-1$
+				String message= RefactoringCoreMessages.getFormattedString(key, 
+					new String[]{JavaElementUtil.createFieldSignature((IField)member), 
+								 createAccessModifierString(member),
+								 JavaModelUtil.getFullyQualifiedName(type)});
+				return message;
+			}			
+			case IJavaElement.METHOD: {
+				String key;
+				if (moved)
+					key= "MoveMembersRefactoring.moved_method"; //$NON-NLS-1$
+				else
+					key= "MoveMembersRefactoring.accessed_method"; //$NON-NLS-1$
+				
+				String message= RefactoringCoreMessages.getFormattedString(key,
+					new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
+								 createAccessModifierString(member),
+								 JavaModelUtil.getFullyQualifiedName(type)});
+				return message;		
+			}			
+			case IJavaElement.TYPE:{
+				String key;
+				if (moved)
+					key= "MoveMembersRefactoring.moved_type"; //$NON-NLS-1$
+				else
+					key= "MoveMembersRefactoring.accessed_type"; //$NON-NLS-1$
+				String message= RefactoringCoreMessages.getFormattedString(key,
+						new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
+									createAccessModifierString(member),
+									JavaModelUtil.getFullyQualifiedName(type)});
+				return message;
+			}			
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -252,17 +295,17 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	private static String createAccessModifierString(IMember member) throws JavaModelException{
 		if (JdtFlags.isPublic(member))
-			return "public";
+			return RefactoringCoreMessages.getString("MoveMembersRefactoring.public"); //$NON-NLS-1$
 		else if (JdtFlags.isProtected(member))
-			return "protected";
+			return RefactoringCoreMessages.getString("MoveMembersRefactoring.protected"); //$NON-NLS-1$
 		else if (JdtFlags.isPrivate(member))
-			return "private";
+			return RefactoringCoreMessages.getString("MoveMembersRefactoring.private"); //$NON-NLS-1$
 		else	
-			return "package-visible";
+			return RefactoringCoreMessages.getString("MoveMembersRefactoring.package-visible"); //$NON-NLS-1$
 	}
 	
 	private RefactoringStatus checkAccessedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAccessedMethodsAvailability(new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFieldsAvailability(new SubProgressMonitor(pm, 1)));
@@ -281,7 +324,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (! JdtFlags.isStatic(accessedMethods[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedMethods[i], fDestinationType, accessedMethods[i].getDeclaringType())){
-				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType);
+				String msg= createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType, false);
 				result.addWarning(msg, JavaSourceContext.create(accessedMethods[i]));
 			}	
 		}
@@ -298,7 +341,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (! JdtFlags.isStatic(accessedTypes[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedTypes[i], fDestinationType, accessedTypes[i].getDeclaringType())){
-				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType);					
+				String msg= createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType, false);
 				result.addWarning(msg, JavaSourceContext.create(accessedTypes[i]));
 			}	
 		}
@@ -315,7 +358,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (! JdtFlags.isStatic(accessedFields[i])) //safely ignore non-static 
 				continue;
 			if (! isVisibleFrom(accessedFields[i], fDestinationType, accessedFields[i].getDeclaringType())){
-				String msg= "Accessed " + createNonAccessibleMemberMessage(accessedFields[i], fDestinationType);					
+				String msg= createNonAccessibleMemberMessage(accessedFields[i], fDestinationType, false);
 				result.addWarning(msg, JavaSourceContext.create(accessedFields[i]));
 			}	
 		}
@@ -359,27 +402,27 @@ public class MoveMembersRefactoring extends Refactoring {
 
 			if (member.getElementType() != IJavaElement.METHOD && 
 				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus("Move allowed only on fields and methods.");			
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.fields_methods"));			 //$NON-NLS-1$
 			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on elements that do not exist.");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.exist"));			 //$NON-NLS-1$
 	
 			if (member.isBinary())
-				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on binary elements.");	
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.binary_elements"));	 //$NON-NLS-1$
 
 			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on read-only meelementsthods.");					
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.read_only_elements"));					 //$NON-NLS-1$
 
 			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on elements with unknown structure.");					
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.structure"));					 //$NON-NLS-1$
 
 			if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
-				return RefactoringStatus.createFatalErrorStatus("Move is not allowed on interface methods.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.interface_methods")); //$NON-NLS-1$
 				
 			if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
-				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static methods.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.static_methods")); //$NON-NLS-1$
 
 			if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
-				return RefactoringStatus.createFatalErrorStatus("Move is allowed only on static elements (and interface fields).");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.static_elements")); //$NON-NLS-1$
 			
 			if (member.getElementType() == IJavaElement.METHOD)
 				return checkMethod((IMethod)member);
@@ -389,7 +432,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus("Move is not allowed on constructors.");			
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.constructors"));			 //$NON-NLS-1$
 			
 		return null;	
 	}
@@ -397,14 +440,14 @@ public class MoveMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkDeclaringType() throws JavaModelException{
 		IType declaringType= getDeclaringType();
 				
-		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object"))
-			return RefactoringStatus.createFatalErrorStatus("Move is not allowed on members declared in java.lang.Object.");	
+		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.Object"));	 //$NON-NLS-1$
 
 		if (declaringType.isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on members of binary types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.binary"));	 //$NON-NLS-1$
 
 		if (declaringType.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on members of read-only types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.read_only"));	 //$NON-NLS-1$
 		
 		return null;
 	}
@@ -438,7 +481,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			return new CompositeChange("Move members", fChangeManager.getAllChanges());
+			return new CompositeChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
@@ -446,7 +489,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("Analyzing", 6);
+			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.analyzing"), 6); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
 			addCopyMembersChange(new SubProgressMonitor(pm, 1), manager);
 			
@@ -474,7 +517,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit) iter.next());
 			ImportEdit edit= (ImportEdit)fImportEdits.get(cu);
 			if (edit != null && ! edit.isEmpty())
-				manager.get(cu).addTextEdit("Update imports", edit);
+				manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveMembersRefactoring.update_imports"), edit); //$NON-NLS-1$
 		}
 	}
 
@@ -487,7 +530,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 
 	private void addCopyMembersChange(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", fMembers.length);	
+		pm.beginTask("", fMembers.length);	 //$NON-NLS-1$
 		for (int i = fMembers.length - 1; i >= 0; i--) { //backwards - to preserve order
 			addCopyMemberChange(manager, fMembers[i], new SubProgressMonitor(pm, 1));
 		}
@@ -496,7 +539,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	private void addCopyMemberChange(TextChangeManager manager, IMember member, IProgressMonitor pm) throws CoreException {
 		String source= computeNewSource(member, pm);
-		String changeName= "Copy " + member.getElementName();								
+		String changeName= RefactoringCoreMessages.getString("MoveMembersRefactoring.Copy") + member.getElementName();								 //$NON-NLS-1$
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fDestinationType.getCompilationUnit());
 		manager.get(cu).addTextEdit(changeName, createAddMemberEdit(source, member.getElementType()));
 	}
@@ -521,7 +564,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private Map getStaticMemberAccessesInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		Map resultMap= new HashMap();
 		resultMap.putAll(getFieldAccessModificationsInMovedMember(member, new SubProgressMonitor(pm, 1)));
 		resultMap.putAll(getMethodSendsInMovedMember(member, new SubProgressMonitor(pm, 1)));
@@ -538,9 +581,9 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addDeleteMembersChange(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", fMembers.length);
+		pm.beginTask("", fMembers.length); //$NON-NLS-1$
 		for (int i = 0; i < fMembers.length; i++) {
-			String changeName= "Delete " + fMembers[i].getElementName();
+			String changeName= RefactoringCoreMessages.getString("MoveMembersRefactoring.delete") + fMembers[i].getElementName(); //$NON-NLS-1$
 			DeleteSourceReferenceEdit edit= new DeleteSourceReferenceEdit(fMembers[i], fMembers[i].getCompilationUnit());
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMembers[i].getCompilationUnit());
 			manager.get(cu).addTextEdit(changeName, edit);
@@ -572,7 +615,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addModifyReferencesToMovedMembers(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", fMembers.length);
+		pm.beginTask("", fMembers.length); //$NON-NLS-1$
 		for (int i= 0; i < fMembers.length; i++) {
 			addModifyReferencesToMovedMember(fMembers[i], new SubProgressMonitor(pm, 1), manager);	
 		}
@@ -580,7 +623,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addModifyReferencesToMovedMember(IMember member, IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		
 		SearchResultGroup[] results= findReferencesToMember(member, new SubProgressMonitor(pm, 1));
 		
@@ -616,11 +659,11 @@ public class MoveMembersRefactoring extends Refactoring {
 
 	private void modifyReferencesToMovedMember(IMember member, TextChangeManager manager, SearchResultGroup searchResultGroup, ICompilationUnit cu) throws JavaModelException, CoreException {
 		ISourceRange[] ranges= findMemberReferences(member.getElementType(), searchResultGroup);
-		String text= fDestinationType.getElementName() + "." + member.getElementName();
+		String text= fDestinationType.getElementName() + "." + member.getElementName(); //$NON-NLS-1$
 		for (int i= 0; i < ranges.length; i++) {
 			ISourceRange iSourceRange= ranges[i];
 			TextEdit edit= SimpleTextEdit.createReplace(iSourceRange.getOffset(), iSourceRange.getLength(), text);
-			manager.get(cu).addTextEdit("Convert reference to fully qualified", edit);
+			manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveMembersRefactoring.convert"), edit); //$NON-NLS-1$
 		}	
 	}
 
@@ -640,7 +683,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	//ISourceRange -> String (new source)
 	private Map getFieldAccessModificationsInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		Map result= new HashMap();
 		IField[] fields= ReferenceFinderUtil.getFieldsReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
@@ -649,7 +692,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			IField field= (IField)interestingFields[i];
 			//XX side effect
 			addImportTo(field.getDeclaringType(), cu);
-			String newSource= field.getDeclaringType().getElementName() + "." + field.getElementName();
+			String newSource= field.getDeclaringType().getElementName() + "." + field.getElementName(); //$NON-NLS-1$
 			SearchResult[] searchResults= findReferencesInMember(member, field, new SubProgressMonitor(pm, 1));
 			ISourceRange[] ranges= FieldReferenceFinder.findFieldReferenceRanges(searchResults, cu);
 			putAllToMap(result, newSource, ranges);		
@@ -659,7 +702,7 @@ public class MoveMembersRefactoring extends Refactoring {
 
 	//ISourceRange -> String (new source)
 	private Map getMethodSendsInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		Map result= new HashMap();
 		IMethod[] methods= ReferenceFinderUtil.getMethodsReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
@@ -668,7 +711,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			IMethod method= (IMethod)interestingMethods[i];
 			//XX side effect
 			addImportTo(method.getDeclaringType(), cu);
-			String newSource= method.getDeclaringType().getElementName() + "." + method.getElementName();
+			String newSource= method.getDeclaringType().getElementName() + "." + method.getElementName(); //$NON-NLS-1$
 			SearchResult[] searchResults= findReferencesInMember(member, method, new SubProgressMonitor(pm, 1));
 			ISourceRange[] ranges= MethodInvocationFinder.findMessageSendRanges(searchResults, cu);
 			putAllToMap(result, newSource, ranges);
@@ -678,7 +721,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	//ISourceRange -> String (new source)
 	private Map getTypeReferencesInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		Map result= new HashMap();
 		IType[] types= ReferenceFinderUtil.getTypesReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
@@ -687,7 +730,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			IType type= (IType)interestingMethods[i];
 			//XX side effect
 			addImportTo(type.getDeclaringType(), cu);
-			String newSource= type.getDeclaringType().getElementName() + "." + type.getElementName();
+			String newSource= type.getDeclaringType().getElementName() + "." + type.getElementName(); //$NON-NLS-1$
 			SearchResult[] searchResults= findReferencesInMember(member, type, new SubProgressMonitor(pm, 1));
 			ISourceRange[] ranges= TypeReferenceFinder.findTypeReferenceRanges(searchResults, cu);
 			putAllToMap(result, newSource, ranges);
