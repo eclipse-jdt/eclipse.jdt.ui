@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.PartInitException;
 
 public abstract class OpenEditorTest extends TestCase {
-	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
+	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
 	protected void measureOpenInEditor(IFile[] files) throws PartInitException {
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);

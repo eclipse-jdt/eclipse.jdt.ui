@@ -24,7 +24,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public abstract class RevertEditorTest extends TestCase {
 	protected static final String REPLACE_TEXT= "XXX";
 	
-	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
+	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
 	protected void measureRevert(IFile[] files) throws PartInitException, BadLocationException {
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);

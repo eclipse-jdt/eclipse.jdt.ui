@@ -24,6 +24,6 @@ public class PerformanceTestCase extends TestCase {
 	}
 
 	protected PerformanceMeterFactory createPerformanceMeterFactory() {
-		return new OSPerformanceMeterFactory();
+		return Performance.createPerformanceMeterFactory();
 	}
 }
