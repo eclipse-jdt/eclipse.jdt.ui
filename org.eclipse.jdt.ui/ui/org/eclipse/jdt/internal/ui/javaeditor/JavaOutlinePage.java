@@ -10,8 +10,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -25,6 +23,8 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -64,19 +64,17 @@ import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
@@ -85,7 +83,6 @@ import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
-import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
@@ -358,7 +355,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 				
 				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
-					if (element instanceof IMember)
+					if (element instanceof IMember && !(element instanceof IInitializer))
 						return ((IMember) element).getNameRange();
 					if (element instanceof ISourceReference)
 						return ((ISourceReference) element).getSourceRange();
