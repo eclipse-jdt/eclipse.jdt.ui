@@ -845,7 +845,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			Assert.isTrue(fReplaceAllReferences);
 	}
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 4); //$NON-NLS-1$
 	
@@ -1046,7 +1046,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return null;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		fTargetCompilationUnits= InlineTargetCompilationUnit.prepareTargets(this, pm, result);
 		if(result.hasFatalError())

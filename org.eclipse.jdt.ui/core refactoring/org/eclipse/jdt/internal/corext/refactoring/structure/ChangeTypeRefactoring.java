@@ -284,7 +284,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fCu == null || !fCu.isStructureKnown())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.invalidSelection")); //$NON-NLS-1$
 		return checkSelection(new SubProgressMonitor(pm, 1));
@@ -454,7 +454,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 1); //$NON-NLS-1$	
 			
 		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(fAffectedUnits));

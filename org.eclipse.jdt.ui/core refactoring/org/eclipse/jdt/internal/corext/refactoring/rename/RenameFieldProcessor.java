@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.core.expressions.EvaluationContext;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -54,6 +57,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -73,6 +77,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
+	
 	public RenameFieldProcessor(IField field) {
 		initialize(field);
 	}
@@ -97,7 +103,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fRenameSetter= false;
 	}
 	
-	public boolean isAvailable() throws CoreException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws CoreException {
 		if (fField == null)
 			return false;
 		return Checks.isAvailable(fField);
@@ -109,7 +119,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			new String[]{fField.getElementName(), getNewElementName()});
 	 }
 	
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fField);
 	}
 
@@ -118,25 +128,30 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		String[] natures= RefactoringProcessors.getNatures(getAffectedProjects());
 		List result= new ArrayList();
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
 			if (getter != null) {
-				addParticipants(result, getter, getNewGetterName());
+				addParticipants(result, getter, getNewGetterName(), natures);
 			}
 		}
 		if (fRenameSetter) {
 			IMethod setter= getSetter();
 			if (setter != null) {
-				addParticipants(result, setter, getNewSetterName());
+				addParticipants(result, setter, getNewSetterName(), natures);
 			}
 		}
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
-	private void addParticipants(List result, IMethod method, String methodName) throws CoreException {
+	private void addParticipants(List result, IMethod method, String methodName, String[] natures) throws CoreException {
 		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		RenameParticipant[] participants= ExtensionManagers.getRenameParticipants(this, new Object[] {method}, getSharedParticipants());
+		Object[] elements= new Object[] {method};
+		EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(this, 
+			elements, natures);
+		RenameParticipant[] participants= ExtensionManagers.getRenameParticipants(this, elements, 
+			evalContext, getSharedParticipants());
 		for (int i= 0; i < participants.length; i++) {
 			participants[i].setArguments(args);
 		}
@@ -269,7 +284,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	// -------------- Preconditions -----------------------
 	
-	public RefactoringStatus checkActivation() throws CoreException{
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException{
 		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.deleted", //$NON-NLS-1$
@@ -281,7 +296,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return Checks.checkIfCuBroken(fField);
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 18); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$

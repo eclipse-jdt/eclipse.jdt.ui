@@ -114,7 +114,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			inputStatus= wizard.checkInput();
 		} else {
 			CreateChangeOperation create= new CreateChangeOperation(
-				new CheckConditionsOperation(refactoring, CheckConditionsOperation.INPUT),
+				new CheckConditionsOperation(refactoring, CheckConditionsOperation.FINAL_CONDITIONS),
 				threshold);
 			PerformChangeOperation perform= new PerformChangeOperation(create);
 			

@@ -566,11 +566,11 @@ public class PasteAction extends SelectionDispatchAction{
 				return sources != null && sources.length > 0;
 			}
 
-			public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+			public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 				return new RefactoringStatus();
 			}
 
-			public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+			public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 				RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{getDestinationCu()}));
 				return result;
 			}

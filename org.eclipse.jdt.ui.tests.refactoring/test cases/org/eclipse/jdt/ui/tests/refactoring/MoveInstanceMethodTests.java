@@ -129,7 +129,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		assertNotNull("refactoring should be created", ref);
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
 
@@ -140,7 +140,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		if(newMethodName != null)
 			ref.setNewMethodName(newMethodName);
 
-		preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
+		preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 
 		assertTrue("precondition was supposed to pass",preconditionResult.isOK());
 
@@ -181,7 +181,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		if (ref == null) {
 			assertTrue(errorCode != 0);
 		} else  {
-			RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());
+			RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
 
 			if(!result.isOK()) {
 				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
@@ -196,7 +196,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 				if(newMethodName != null)
 					ref.setNewMethodName(newMethodName);
 	
-				result.merge(ref.checkInput(new NullProgressMonitor()));
+				result.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 	
 				assertTrue("precondition checking is expected to fail.", !result.isOK());
 				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());

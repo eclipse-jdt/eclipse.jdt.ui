@@ -29,10 +29,22 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
  */
 public class JavaProcessors {
 
+	public static String[] computeAffectedNatures(IJavaElement element) throws CoreException {
+		IProject[] projects= computeScope(element);
+		Set result= new HashSet();
+		for (int i= 0; i < projects.length; i++) {
+			String[] pns= projects[i].getDescription().getNatureIds();
+			for (int p = 0; p < pns.length; p++) {
+				result.add(pns[p]);
+			}
+		}
+		return (String[])result.toArray(new String[result.size()]);
+	}
+	
 	public static IProject[] computeScope(IJavaElement element) throws CoreException {
 		if (element instanceof IMember) {
 			IMember member= (IMember)element;
-			if (JdtFlags.isPrivate(member) || JdtFlags.isPackageVisible(member)) {
+			if (JdtFlags.isPrivate(member)) {
 				return new IProject[] { element.getJavaProject().getProject() };
 			}
 		}

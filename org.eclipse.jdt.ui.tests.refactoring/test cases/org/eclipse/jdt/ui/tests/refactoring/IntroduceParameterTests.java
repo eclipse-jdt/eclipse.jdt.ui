@@ -89,7 +89,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 			JavaPreferencesSettings.getCodeGenerationSettings());		
 
 		NullProgressMonitor pm= new NullProgressMonitor();
-		RefactoringStatus status= refactoring.checkActivation(pm);
+		RefactoringStatus status= refactoring.checkInitialConditions(pm);
 		assertEquals("wrong activation status", expectedActivationStatus, status.getSeverity());
 		if (! status.isOK())
 			return;
@@ -102,7 +102,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 			refactoring.setParameterName(names[1]);
 		}
 
-		status.merge(refactoring.checkInput(pm));
+		status.merge(refactoring.checkFinalConditions(pm));
 		assertEquals("wrong input status", expectedInputStatus, status.getSeverity());
 		if (status.getSeverity() == RefactoringStatus.FATAL)
 			return;

@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenamePrivateMethodTests extends RefactoringTest {
 	
@@ -45,7 +45,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		refactoring.setNewName(newMethodName);
+		processor.setNewElementName(newMethodName);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}
@@ -155,7 +155,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		IType classB= getType(cu, "B");
 		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classB.getMethod("m", new String[]{"I"}));
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
-		refactoring.setNewName("kk");
+		processor.setNewElementName("kk");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());

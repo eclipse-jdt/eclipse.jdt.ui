@@ -94,7 +94,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("activation was supposed to be successful", null, preconditionResult);
@@ -104,9 +104,9 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ref.setVisibility(visibility);
 		
 		if (preconditionResult == null)
-			preconditionResult= ref.checkInput(new NullProgressMonitor());
+			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
 		else	
-			preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
+			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
@@ -125,7 +125,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("activation was supposed to be successful", null, preconditionResult);
@@ -135,9 +135,9 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ref.setVisibility(visibility);
 		
 		if (preconditionResult == null)
-			preconditionResult= ref.checkInput(new NullProgressMonitor());
+			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
 		else	
-			preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
+			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertNotNull("precondition was supposed to fail",preconditionResult);
@@ -150,7 +150,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	    ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 	    ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
-	    RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+	    RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 	    assertEquals("activation was supposed to fail", expectedSeverity, preconditionResult.getSeverity());
 	}	
 

@@ -234,7 +234,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 6); //$NON-NLS-1$
 			
@@ -379,7 +379,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fTempName= newName;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());

@@ -80,7 +80,7 @@ public class SefTests extends AbstractSelectionTestCase {
 
 
 		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
-		RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
+		RefactoringStatus status= refactoring.checkAllConditions(new NullProgressMonitor());
 		assertTrue(status.hasError());
 	}	
 	

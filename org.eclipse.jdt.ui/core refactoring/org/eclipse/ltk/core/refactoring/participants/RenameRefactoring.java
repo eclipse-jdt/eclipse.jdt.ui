@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.rename;
+package org.eclipse.ltk.core.refactoring.participants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,126 +17,76 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.IProcessorBasedRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.internal.core.refactoring.Assert;
 import org.eclipse.ltk.internal.core.refactoring.DelegatingValidationStateChange;
 
 
-public class RenameRefactoring extends Refactoring implements IProcessorBasedRefactoring, IRenameRefactoring {
+public class RenameRefactoring extends Refactoring {
 
 	private RenameProcessor fProcessor;
 	private RenameParticipant[] fElementParticipants;
 	private RefactoringParticipant[] fSecondaryParticipants;
 	
+	private CheckConditionsContext fContext;
+	
 	public RenameRefactoring(RenameProcessor processor) throws CoreException {
 		Assert.isNotNull(processor);
 		fProcessor= processor;
+		fContext= new CheckConditionsContext();
+		IConditionChecker checker= new ValidateEditChecker(null);
+		fContext.add(checker);
 	}
 	
 	public boolean isAvailable() throws CoreException {
-		return fProcessor.isAvailable();
+		return fProcessor.isApplicable();
 	}
 		
-	public Object getAdapter(Class clazz) {
-		if (clazz.isInstance(fProcessor))
-			return fProcessor;
-		return super.getAdapter(clazz);
-	}
-	
-	public RefactoringProcessor getProcessor() {
+	public RenameProcessor getProcessor() {
 		return fProcessor;
 	}
 	
 	public int getStyle() {
 		return fProcessor.getStyle();
 	}
-		
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getNewName()
-	 */
-	public String getNewName() {
-		return fProcessor.getNewElementName();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#setNewName(java.lang.String)
-	 */
-	public void setNewName(String newName) {
-		fProcessor.setNewElementName(newName);
-	}
 
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentName() {
-		return fProcessor.getCurrentElementName();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getNewElement()
-	 */
-	public Object getNewElement() throws JavaModelException {
-		try {
-			return fProcessor.getNewElement();
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#checkNewName(java.lang.String)
-	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		try {
-			result.merge(fProcessor.checkNewElementName(newName));
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-		return result;
-	}
-		
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getName() {
 		return fProcessor.getProcessorName();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(fProcessor.checkActivation());
+		pm.beginTask("", 4); //$NON-NLS-1$
+		result.merge(fProcessor.checkInitialConditions(new SubProgressMonitor(pm, 3), fContext));
+		if (result.hasFatalError())
+			return result;
 		fElementParticipants= fProcessor.getElementParticipants();		
+		IProgressMonitor sm= new SubProgressMonitor(pm, 1);
+		sm.beginTask("", fElementParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			RenameParticipant participant= fElementParticipants[i];
-			result.merge(participant.checkActivation());
+			result.merge(participant.checkInitialConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		return result;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		
 		pm.beginTask("", 3); //$NON-NLS-1$
 		
-		result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
+		result.merge(fProcessor.checkFinalConditions(new SubProgressMonitor(pm, 1), fContext));
 		if (result.hasFatalError())
 			return result;
 			
@@ -145,7 +95,7 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			RenameParticipant participant= fElementParticipants[i];
 			fProcessor.setArgumentsTo(participant);
-			result.merge(participant.checkInput(new SubProgressMonitor(sm, 1)));
+			result.merge(participant.checkFinalConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		if (result.hasFatalError())
 			return result;
@@ -154,13 +104,13 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 		sm.beginTask("", fSecondaryParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fSecondaryParticipants.length; i++) {
 			RefactoringParticipant participant= fSecondaryParticipants[i];
-			result.merge(participant.checkInput(new SubProgressMonitor(sm, 1)));
+			result.merge(participant.checkFinalConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		return result;		
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fElementParticipants.length + fSecondaryParticipants.length + 1); //$NON-NLS-1$
@@ -176,6 +126,28 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 			changes.add(participant.createChange(new SubProgressMonitor(pm, 1)));
 		}
 		return new DelegatingValidationStateChange((Change[]) changes.toArray(new Change[changes.size()]));		
+	}
+	
+	/**
+	 * Adapts the refactoring to the given type. The adapter is resolved
+	 * as follows:
+	 * <ol>
+	 *   <li>the refactoring itself is checked whether it is an instance
+	 *       of the requested type.</li>
+	 *   <li>its processor is checked whether it is an instance of the
+	 *       requested type.</li>
+	 *   <li>the request is delegated to the super class.</li>
+	 * </ol>
+	 * 
+	 * @return the requested adapter or <code>null</code>if no adapter
+	 *  exists. 
+	 */
+	public Object getAdapter(Class clazz) {
+		if (clazz.isInstance(this))
+			return this;
+		if (clazz.isInstance(fProcessor))
+			return fProcessor;
+		return super.getAdapter(clazz);
 	}
 	
 	/* non java-doc

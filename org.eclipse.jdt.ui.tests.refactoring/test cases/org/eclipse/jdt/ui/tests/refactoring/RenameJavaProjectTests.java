@@ -17,9 +17,9 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameJavaProjectTests extends RefactoringTest {
 
@@ -53,9 +53,10 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			JavaProjectHelper.addRTJar(p1);
 
-			RenameRefactoring ref= new RenameRefactoring(new RenameJavaProjectProcessor(p1));
+			RenameJavaProjectProcessor processor= new RenameJavaProjectProcessor(p1);
+			RenameRefactoring ref= new RenameRefactoring(processor);
 			assertTrue(ref.isAvailable());
-			ref.setNewName(newProjectName);
+			processor.setNewElementName(newProjectName);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("not expected to fail", null, result);
 			assertTrue("p1 is gone", !p1.exists());

@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -54,7 +55,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
 
@@ -69,6 +73,8 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	private IReorgQueries fDeleteQueries;	
 
 	private Change fDeleteChange;
+	
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
 	
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
@@ -87,8 +93,12 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		fJavaElements= getJavaElements(elements);
 		fStyle= getStyle(fResources, fJavaElements);
 	}
+
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
 	
-	public boolean isAvailable() throws CoreException {
+	public boolean isApplicable() throws CoreException {
 		if (fElements.length == 0)
 			return false;
 		if (fElements.length != fResources.length + fJavaElements.length)
@@ -182,7 +192,13 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return fStyle;
 	}
 	
+	public DeleteParticipant[] getElementParticipants() throws CoreException {
+		return ExtensionManagers.getDeleteParticipants(this, getElements(), getAffectedProjects(), getSharedParticipants());
+	}
+
 	public RefactoringParticipant[] getSecondaryParticipants() throws CoreException {
+		String[] natures= RefactoringProcessors.getNatures(getAffectedProjects());
+		
 		ResourceModifications modifications= new ResourceModifications();
 		for (int p= 0; p < fJavaElements.length; p++) {
 			IJavaElement element= fJavaElements[p];
@@ -196,7 +212,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 				}
 			}
 		}
-		return modifications.getParticipants(this, getSharedParticipants());
+		return modifications.getParticipants(this, natures, getSharedParticipants());
 	}
 	
 	
@@ -260,7 +276,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fResources))));
@@ -279,7 +295,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("DeleteRefactoring.1"), 1); //$NON-NLS-1$
 		try{
 			fWasCanceled= false;

@@ -244,7 +244,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     	return buff.toString();
     }
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 8); //$NON-NLS-1$
 	
@@ -397,7 +397,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return getContainingType().getField(getConstantName()).exists();
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 		
 		/* Note: some checks are performed on change of input widget

@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
 
@@ -38,6 +39,8 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 
 	private IJavaProject fProject;
 	private boolean fUpdateReferences;
+	
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 	
@@ -59,7 +62,11 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		fUpdateReferences= true;
 	}
 
-	public boolean isAvailable() throws CoreException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws CoreException {
 		if (fProject == null)
 			return false;
 		if (! Checks.isAvailable(fProject))	
@@ -75,7 +82,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			new String[]{getCurrentElementName(), getNewElementName()});
 	}
 	
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fProject);
 	}
 	
@@ -118,7 +125,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		return fProject.getElementName();
 	}
 	
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		return new RefactoringStatus();
 	}
 	
@@ -134,7 +141,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		return new RefactoringStatus();
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (isReadOnly()){

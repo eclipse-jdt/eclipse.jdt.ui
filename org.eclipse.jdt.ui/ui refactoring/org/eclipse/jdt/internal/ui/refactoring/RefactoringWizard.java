@@ -300,7 +300,7 @@ public class RefactoringWizard extends Wizard {
 
 	private IWizardPage computeUserInputSuccessorPage(IWizardPage caller, IRunnableContext context) {
 		Change change= createChange(new CreateChangeOperation(
-			new CheckConditionsOperation(fRefactoring, CheckConditionsOperation.INPUT),
+			new CheckConditionsOperation(fRefactoring, CheckConditionsOperation.FINAL_CONDITIONS),
 			RefactoringStatus.OK), true, context);
 		// Status has been updated since we have passed true
 		RefactoringStatus status= getStatus();
@@ -414,7 +414,7 @@ public class RefactoringWizard extends Wizard {
 	//---- Condition checking ------------------------------------------------------------
 
 	public RefactoringStatus checkInput() {
-		return internalCheckCondition(getContainer(), CheckConditionsOperation.INPUT);
+		return internalCheckCondition(getContainer(), CheckConditionsOperation.FINAL_CONDITIONS);
 	}
 	
 	/**
@@ -456,11 +456,11 @@ public class RefactoringWizard extends Wizard {
 	 * @see CheckConditionsOperation
 	 */
 	protected void setStatus(RefactoringStatus status, int style) {
-		if ((style & CheckConditionsOperation.PRECONDITIONS) == CheckConditionsOperation.PRECONDITIONS)
+		if ((style & CheckConditionsOperation.ALL_CONDITIONS) == CheckConditionsOperation.ALL_CONDITIONS)
 			setStatus(status);
-		else if ((style & CheckConditionsOperation.ACTIVATION) == CheckConditionsOperation.ACTIVATION)
+		else if ((style & CheckConditionsOperation.INITIAL_CONDITONS) == CheckConditionsOperation.INITIAL_CONDITONS)
 			setActivationStatus(status);
-		else if ((style & CheckConditionsOperation.INPUT) == CheckConditionsOperation.INPUT)
+		else if ((style & CheckConditionsOperation.FINAL_CONDITIONS) == CheckConditionsOperation.FINAL_CONDITIONS)
 			setInputStatus(status);
 	}
 
@@ -492,7 +492,7 @@ public class RefactoringWizard extends Wizard {
 	
 	public void addPages() {
 		if (checkActivationOnOpen()) {
-			internalCheckCondition(new BusyIndicatorRunnableContext(), CheckConditionsOperation.ACTIVATION);
+			internalCheckCondition(new BusyIndicatorRunnableContext(), CheckConditionsOperation.INITIAL_CONDITONS);
 		}
 		if (fActivationStatus.hasFatalError()) {
 			addErrorPage();

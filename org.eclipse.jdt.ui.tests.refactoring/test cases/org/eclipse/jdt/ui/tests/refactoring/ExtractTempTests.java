@@ -95,7 +95,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 		                                                       JavaPreferencesSettings.getCodeGenerationSettings());
 																
-		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 																									
 		ref.setReplaceAllOccurrences(replaceAll);
@@ -104,7 +104,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
 
-		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 	
 		performChange(ref, false);
@@ -122,7 +122,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 															   JavaPreferencesSettings.getCodeGenerationSettings());
 																
-		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 																									
 		ref.setReplaceAllOccurrences(replaceAll);
@@ -131,7 +131,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
 
-		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertEquals("status", expectedStatus, checkInputResult.getSeverity());
 	
 		performChange(ref, false);

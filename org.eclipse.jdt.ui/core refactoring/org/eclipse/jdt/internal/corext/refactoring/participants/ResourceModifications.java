@@ -18,10 +18,14 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.core.expressions.EvaluationContext;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
 import org.eclipse.ltk.core.refactoring.participants.CopyParticipant;
+import org.eclipse.ltk.core.refactoring.participants.CreateArguments;
 import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
+import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
@@ -33,7 +37,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 /**
- * A default implementation of <code>IResourceModifications</code>.
+ * A data structure to collect resource modifications.
  * 
  * @since 3.0
  */
@@ -136,32 +140,50 @@ public class ResourceModifications {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
 	 */
-	public RefactoringParticipant[] getParticipants(RefactoringProcessor processor, SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] getParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList(5);
 		if (fDelete != null) {
-			DeleteParticipant[] deletes= ExtensionManagers.getDeleteParticipants(processor, fDelete.toArray(), shared);
+			Object[] elements= fDelete.toArray();
+			EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(processor, elements, natures);
+			DeleteParticipant[] deletes= ExtensionManagers.getDeleteParticipants(processor, elements, evalContext, shared);
+			DeleteArguments arguments= new DeleteArguments();
+			for (int i= 0; i < deletes.length; i++) {
+				deletes[i].setArguments(arguments);
+			}
 			result.addAll(Arrays.asList(deletes));
 		}
 		if (fCreate != null) {
-			CreateParticipant[] creates= ExtensionManagers.getCreateParticipants(processor, fCreate.toArray(), shared);
+			Object[] elements= fCreate.toArray();
+			EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(processor, elements, natures);
+			CreateParticipant[] creates= ExtensionManagers.getCreateParticipants(processor, elements, evalContext, shared);
+			CreateArguments arguments= new CreateArguments();
+			for (int i= 0; i < creates.length; i++) {
+				creates[i].setArguments(arguments);
+			}
 			result.addAll(Arrays.asList(creates));
 		}
 		if (fMove != null) {
-			MoveParticipant[] moves= ExtensionManagers.getMoveParticipants(processor, fMove.toArray(), shared);
+			Object[] elements= fMove.toArray();
+			EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(processor, elements, natures);
+			MoveParticipant[] moves= ExtensionManagers.getMoveParticipants(processor, elements, evalContext, shared);
 			for (int i= 0; i < moves.length; i++) {
 				moves[i].setArguments(fMoveArguments);
 			}
 			result.addAll(Arrays.asList(moves));
 		}
 		if (fCopy != null) {
-			CopyParticipant[] copies= ExtensionManagers.getCopyParticipants(processor, fCopy.toArray(), shared);
+			Object[] elements= fCopy.toArray();
+			EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(processor, elements, natures);
+			CopyParticipant[] copies= ExtensionManagers.getCopyParticipants(processor, elements, evalContext, shared);
 			for (int i= 0; i < copies.length; i++) {
 				copies[i].setArguments(fCopyArguments);
 			}
 			result.addAll(Arrays.asList(copies));
 		}
 		if (fRename != null) {
-			RenameParticipant[] renames= ExtensionManagers.getRenameParticipants(processor, new Object[] {fRename}, shared);
+			Object[] elements= new Object[] {fRename};
+			EvaluationContext evalContext= ExtensionManagers.createStandardEvaluationContext(processor, elements, natures);
+			RenameParticipant[] renames= ExtensionManagers.getRenameParticipants(processor, elements, evalContext, shared);
 			for (int i= 0; i < renames.length; i++) {
 				renames[i].setArguments(fRenameArguments);
 			}

@@ -117,7 +117,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
         PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
         ref.setFieldName(newName);
@@ -126,7 +126,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         ref.setInitializeIn(initializeIn);
         ref.setVisibility(accessModifier);
 		
-		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass", checkInputResult.isOK());
 
 		performChange(ref, false);
@@ -149,13 +149,13 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
         PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 		
-		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());	
         ref.setFieldName(newName);
         ref.setDeclareFinal(declareFinal);
         ref.setDeclareStatic(declareStatic);
         ref.setInitializeIn(initializeIn);
         ref.setVisibility(accessModifier);
-		result.merge(ref.checkInput(new NullProgressMonitor()));
+		result.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (result.isOK())
 			result= null;
 		assertNotNull("precondition was supposed to fail",result);
@@ -177,7 +177,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		ICompilationUnit cu= createCUfromEnablementTestFile(getPackageP());
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
         PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
-		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
 		ref.setFieldName(newName);
         ref.setDeclareFinal(declareFinal);
         ref.setDeclareStatic(declareStatic);

@@ -96,14 +96,14 @@ public class InlineConstantTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
 
 		ref.setReplaceAllReferences(replaceAll);
 		ref.setRemoveDeclaration(removeDeclaration);
 		
-		preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
+		preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 
 		assertTrue("precondition was supposed to pass",preconditionResult.isOK());
 
@@ -137,7 +137,7 @@ public class InlineConstantTests extends RefactoringTest {
 		JavaPreferencesSettings.getCodeGenerationSettings());
 		if (ref == null)
 			return;
-		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());	
 
 		if(!result.isOK()) {
 			assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
@@ -147,7 +147,7 @@ public class InlineConstantTests extends RefactoringTest {
 			ref.setReplaceAllReferences(replaceAll);
 			ref.setRemoveDeclaration(removeDeclaration);
 			
-			result.merge(ref.checkInput(new NullProgressMonitor()));
+			result.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 	
 			assertTrue("precondition checking is expected to fail.", !result.isOK());
 			assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());

@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
@@ -63,6 +64,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private IMethod fMethod;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
+	
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
 	public RenameMethodProcessor(IMethod method) {
 		initialize(method);
@@ -89,7 +92,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		fUpdateReferences= true;
 	}
 
-	public boolean isAvailable() throws CoreException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws CoreException {
 		if (fMethod == null)
 			return false;
 		if (! Checks.isAvailable(fMethod))
@@ -107,7 +114,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fMethod);
 	}
 
@@ -158,7 +165,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	//----------- preconditions ------------------
 
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		IMethod orig= getOriginalMethod(fMethod);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
@@ -179,7 +186,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return (IMethod)WorkingCopyUtil.getOriginal(method);
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			pm.beginTask("", 4); //$NON-NLS-1$

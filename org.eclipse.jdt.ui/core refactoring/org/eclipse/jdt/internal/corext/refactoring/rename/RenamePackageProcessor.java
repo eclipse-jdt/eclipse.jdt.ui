@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
@@ -110,6 +111,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 	
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
+	
 	//---- IRefactoringProcessor ---------------------------------------------------
 	
 	public RenamePackageProcessor(IPackageFragment fragment) {
@@ -131,7 +134,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		fUpdateTextualMatches= false;
 	}
 
-	public boolean isAvailable() throws CoreException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws CoreException {
 		if (fPackage == null)
 			return false;
 		if (! Checks.isAvailable(fPackage))
@@ -146,7 +153,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 						new String[]{fPackage.getElementName(), getNewElementName()});
 	}
 	
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fPackage);
 	}
 	
@@ -263,11 +270,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return root.getPackageFragment(getNewElementName());
 	}
 	
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		return new RefactoringStatus();
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 20); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$

@@ -18,7 +18,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
@@ -26,6 +25,8 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameResourceAction extends SelectionDispatchAction {
 
@@ -40,7 +41,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		} else {
 			RenameResourceProcessor processor= new RenameResourceProcessor(element);
 			try {
-				setEnabled(processor.isAvailable());
+				setEnabled(processor.isApplicable());
 			} catch (CoreException e) {
 				setEnabled(false);
 			}
@@ -50,7 +51,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		RenameResourceProcessor processor= new RenameResourceProcessor(getResource(selection));
 		try {
-			if(!processor.isAvailable())
+			if(!processor.isApplicable())
 				return;
 			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(refactoring);

@@ -215,7 +215,7 @@ public class NLSRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
 			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
@@ -224,9 +224,9 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * @see Refactoring#checkInput(IProgressMonitor)
+	 * @see Refactoring#checkFinalConditions(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(NLSMessages.getString("NLSrefactoring.checking"), 7); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();

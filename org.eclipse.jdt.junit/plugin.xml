@@ -290,12 +290,12 @@
 			id="org.eclipse.jdt.junit.renameTypeParticipant" 
 			class="org.eclipse.jdt.internal.junit.ui.TypeRenameParticipant">
          <enablement>
-           <with variable="affectedProjects">
+           <with variable="affectedNatures">
              <iterate>
-               <test property="org.eclipse.jdt.ui.projectNature" value="org.eclipse.jdt.core.javanature"/>
+               <equals value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
-           <with variable="selection">
+           <with variable="elements">
              <count value="1"/>
              <iterate>
                <instanceof value="org.eclipse.jdt.core.IType"/>

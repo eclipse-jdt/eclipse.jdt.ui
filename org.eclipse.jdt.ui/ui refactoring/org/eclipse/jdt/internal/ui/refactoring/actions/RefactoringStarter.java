@@ -63,7 +63,7 @@ public class RefactoringStarter {
 		
 	private RefactoringStatus checkActivation(Refactoring refactoring){		
 		try {
-			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ACTIVATION);
+			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.INITIAL_CONDITONS);
 			IRunnableContext context= new BusyIndicatorRunnableContext();
 			context.run(false, false, new WorkbenchRunnableAdapter(cco));
 			return cco.getStatus();

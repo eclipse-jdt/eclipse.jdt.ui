@@ -278,7 +278,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 
 	//---- Activation checking ------------------------------------
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
@@ -327,7 +327,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	//---- Input checking ------------------------------------
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 10); //$NON-NLS-1$
 			

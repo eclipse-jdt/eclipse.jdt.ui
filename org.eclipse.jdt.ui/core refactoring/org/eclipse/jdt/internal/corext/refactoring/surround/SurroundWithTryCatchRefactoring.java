@@ -141,7 +141,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
 		return checkActivationBasics(rootNode, pm);
 	}
@@ -149,7 +149,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		return Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}));
 	}
 

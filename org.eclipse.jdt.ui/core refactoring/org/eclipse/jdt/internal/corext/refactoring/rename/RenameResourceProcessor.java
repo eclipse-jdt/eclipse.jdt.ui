@@ -26,14 +26,21 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.ExtensionManagers;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
-public class RenameResourceProcessor extends RenameProcessor {
+public class RenameResourceProcessor extends RenameProcessor implements INameUpdating {
 
 	private IResource fResource;
+	private String fNewElementName;
+		
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 	
 	public RenameResourceProcessor(IResource resource) {
 		fResource= resource;
@@ -42,6 +49,17 @@ public class RenameResourceProcessor extends RenameProcessor {
 		}
 	}
 
+	//---- INameUpdating ---------------------------------------------------
+	
+	public void setNewElementName(String newName) {
+		Assert.isNotNull(newName);
+		fNewElementName= newName;
+	}
+
+	public String getNewElementName() {
+		return fNewElementName;
+	}
+	
 	//---- IRenameProcessor methods ---------------------------------------
 		
 	public RenameResourceProcessor() {
@@ -59,7 +77,11 @@ public class RenameResourceProcessor extends RenameProcessor {
 		setNewElementName(fResource.getName());
 	}
 	
-	public boolean isAvailable() throws JavaModelException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws JavaModelException {
 		if (fResource == null)
 			return false;
 		if (! fResource.exists())
@@ -95,9 +117,13 @@ public class RenameResourceProcessor extends RenameProcessor {
 		return true;
 	}
 	
+	public RenameParticipant[] getElementParticipants() throws CoreException {
+		return ExtensionManagers.getRenameParticipants(this, getElements(), getAffectedProjects(), getSharedParticipants());
+	}
+	
 	//--- Condition checking --------------------------------------------
 
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		return new RefactoringStatus();
 	}
 	
@@ -125,7 +151,7 @@ public class RenameResourceProcessor extends RenameProcessor {
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new RefactoringStatus();

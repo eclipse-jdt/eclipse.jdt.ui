@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
@@ -91,6 +92,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
+	
 	public RenameTypeProcessor(IType type) {
 		initialize(type);
 	}
@@ -116,7 +119,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fUpdateTextualMatches= false;
 	}
 
-	public boolean isAvailable() throws CoreException {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() throws CoreException {
 		if (fType == null)
 			return false;
 		if (fType.isAnonymous())
@@ -134,7 +141,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
 	}
 	
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fType);
 	}
 
@@ -241,7 +248,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	//------------- Conditions -----------------
 	
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.does_not_exist", //$NON-NLS-1$
@@ -256,7 +263,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	/* non java-doc
 	 * @see Refactoring#checkInput
 	 */		
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		Assert.isNotNull(fType, "type"); //$NON-NLS-1$
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();

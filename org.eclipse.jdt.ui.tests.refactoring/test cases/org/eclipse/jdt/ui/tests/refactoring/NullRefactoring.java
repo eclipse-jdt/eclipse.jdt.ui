@@ -31,14 +31,14 @@ public class NullRefactoring extends Refactoring {
 	}
 
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
 		pm.done();
 		return new RefactoringStatus();
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
 		pm.done();

@@ -80,11 +80,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	
 		// TODO Set parameters on your refactoring instance from arguments...
 	
-		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 	
 		assertTrue("activation was supposed to be successful:" + activationResult.toString(), activationResult.isOK());																
 	
-		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 	
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 	

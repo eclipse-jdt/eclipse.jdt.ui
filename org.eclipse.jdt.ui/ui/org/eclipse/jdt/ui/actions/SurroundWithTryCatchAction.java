@@ -112,7 +112,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		if (refactoring == null)
 			return;
 		try {
-			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
+			RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				RefactoringErrorDialogUtil.open(getDialogTitle(), status, getShell());
 				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);

@@ -13,9 +13,10 @@ package org.eclipse.ltk.core.refactoring.participants;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class SharableParticipants {
-	private Map fMap= new HashMap(); 
+	
+	private Map fMap= new HashMap();
+	
 	/* package */ void put(ParticipantDescriptor descriptor, RefactoringParticipant participant) {
 		fMap.put(descriptor, participant);		
 	}

@@ -29,18 +29,23 @@ public class DeleteRefactoring extends Refactoring {
 	private DeleteParticipant[] fElementParticipants;
 	private RefactoringParticipant[] fSecondaryParticipants;
 
+	private CheckConditionsContext fContext;
+	
 	/**
 	 * Constructs a new delete refactoring for the given processor.
 	 * 
 	 * @param processor the delete processor
 	 */
-	public DeleteRefactoring(DeleteProcessor processor) {
+	public DeleteRefactoring(DeleteProcessor processor) throws CoreException {
 		Assert.isNotNull(processor);
 		fProcessor= processor;
+		fContext= new CheckConditionsContext();
+		IConditionChecker checker= new ValidateEditChecker(null);
+		fContext.add(checker);
 	}
 	
 	public boolean isAvailable() throws CoreException {
-		return fProcessor.isAvailable();
+		return fProcessor.isApplicable();
 	}
 
 	public int getStyle() {
@@ -62,22 +67,28 @@ public class DeleteRefactoring extends Refactoring {
 		return fProcessor;
 	}
 		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(fProcessor.checkActivation());
-		fElementParticipants= fProcessor.getElementParticipants();		
+		pm.beginTask("", 4); //$NON-NLS-1$
+		result.merge(fProcessor.checkInitialConditions(new SubProgressMonitor(pm, 3), fContext));
+		if (result.hasFatalError())
+			return result;
+		
+		fElementParticipants= fProcessor.getElementParticipants();
+		IProgressMonitor sm= new SubProgressMonitor(pm, 1);
+		sm.beginTask("", fElementParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			DeleteParticipant participant= fElementParticipants[i];
-			result.merge(participant.checkActivation());
+			result.merge(participant.checkInitialConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		return result;
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 3); //$NON-NLS-1$
 		
-		result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
+		result.merge(fProcessor.checkFinalConditions(new SubProgressMonitor(pm, 1), fContext));
 		if (result.hasFatalError())
 			return result;
 			
@@ -85,7 +96,8 @@ public class DeleteRefactoring extends Refactoring {
 		sm.beginTask("", fElementParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			DeleteParticipant participant= fElementParticipants[i];
-			result.merge(participant.checkInput(new SubProgressMonitor(sm, 1)));
+			fProcessor.setArgumentsTo(participant);
+			result.merge(participant.checkFinalConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		if (result.hasFatalError())
 			return result;
@@ -94,7 +106,7 @@ public class DeleteRefactoring extends Refactoring {
 		sm.beginTask("", fSecondaryParticipants.length); //$NON-NLS-1$
 		for (int i= 0; i < fSecondaryParticipants.length; i++) {
 			RefactoringParticipant participant= fSecondaryParticipants[i];
-			result.merge(participant.checkInput(new SubProgressMonitor(sm, 1)));
+			result.merge(participant.checkFinalConditions(new SubProgressMonitor(sm, 1), fContext));
 		}
 		return result;		
 	}

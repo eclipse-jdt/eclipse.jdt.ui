@@ -72,7 +72,7 @@ public class RenameTempTests extends RefactoringTest{
 //		IType classA= getType(cu, "A");
 		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
-		ref.setNewName(newName);
+		ref.setNewElementName(newName);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -114,7 +114,7 @@ public class RenameTempTests extends RefactoringTest{
 	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws Exception {
 		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
-		ref.setNewName(newName);
+		ref.setNewElementName(newName);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);

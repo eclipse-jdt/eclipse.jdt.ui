@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
@@ -49,6 +50,8 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	private RenameTypeProcessor fRenameTypeProcessor;
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
+	
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor --------------------------------
 	
@@ -76,7 +79,11 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		}
 	}
 	
-	public boolean isAvailable() {
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	public boolean isApplicable() {
 		if (fCu == null)
 			return false;
 		if (! fCu.exists())
@@ -94,7 +101,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			new String[]{fCu.getElementName(), getNewElementName()});
 	}
 
-	public IProject[] getAffectedProjects() throws CoreException {
+	protected IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fCu);
 	}
 
@@ -228,7 +235,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	
 	//--- preconditions ----------------------------------
 	
-	public RefactoringStatus checkActivation() throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		if (fRenameTypeProcessor != null && ! fCu.isStructureKnown()){
 			fRenameTypeProcessor= null;
 			fWillRenameType= false;
@@ -247,7 +254,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		return new RefactoringStatus();
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			if (fWillRenameType && (!fCu.isStructureKnown())){
 				RefactoringStatus result1= new RefactoringStatus();
@@ -262,7 +269,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			}	
 		
 			if (fWillRenameType)
-				return fRenameTypeProcessor.checkInput(pm);
+				return fRenameTypeProcessor.checkFinalConditions(pm, context);
 			else
 				return Checks.checkCompilationUnitNewName(fCu, getNewElementName());
 		} finally{

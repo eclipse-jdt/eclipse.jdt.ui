@@ -37,7 +37,7 @@ import org.eclipse.ltk.internal.core.refactoring.Assert;
  * </p>
  * 
  * @see RefactoringStatusEntry
- * @see Refactoring#checkPreconditions(IProgressMonitor)
+ * @see Refactoring#checkAllConditions(IProgressMonitor)
  * 
  * @since 3.0
  */

@@ -35,12 +35,11 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 /**
  * Central access point to execute rename refactorings.
@@ -307,7 +307,7 @@ public class RenameSupport {
 	private static void initialize(RenameRefactoring refactoring, String newName, int flags) {
 		if (refactoring.getProcessor() == null)
 			return;
-		setNewName(refactoring, newName);
+		setNewName((INameUpdating)refactoring.getAdapter(INameUpdating.class), newName);
 		IReferenceUpdating reference= (IReferenceUpdating)refactoring.getAdapter(IReferenceUpdating.class);
 		if (reference != null) {
 			reference.setUpdateReferences(updateReferences(flags));
@@ -318,9 +318,9 @@ public class RenameSupport {
 		}
 	}
 	
-	private static void setNewName(IRenameRefactoring refactoring, String newName) {
+	private static void setNewName(INameUpdating refactoring, String newName) {
 		if (newName != null)
-			refactoring.setNewName(newName);
+			refactoring.setNewElementName(newName);
 	}
 	
 	private static boolean updateReferences(int flags) {

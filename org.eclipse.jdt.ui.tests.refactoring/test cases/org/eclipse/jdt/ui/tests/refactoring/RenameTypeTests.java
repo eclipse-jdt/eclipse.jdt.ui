@@ -24,13 +24,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -58,7 +58,7 @@ public class RenameTypeTests extends RefactoringTest {
 	private RenameRefactoring createRefactoring(IType type, String newName) throws CoreException {
 		RenameTypeProcessor processor= new RenameTypeProcessor(type);
 		RenameRefactoring ref= new RenameRefactoring(processor);
-		ref.setNewName(newName);
+		processor.setNewElementName(newName);
 		return ref;
 	}
 	

@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
@@ -41,17 +42,17 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		super(method);
 	}
 	
-	public boolean isAvailable() throws CoreException {
-		return super.isAvailable() && !MethodChecks.isVirtual(getMethod());
+	public boolean isApplicable() throws CoreException {
+		return super.isApplicable() && !MethodChecks.isVirtual(getMethod());
 	}
 	
 	//----------- preconditions --------------
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
+			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 			

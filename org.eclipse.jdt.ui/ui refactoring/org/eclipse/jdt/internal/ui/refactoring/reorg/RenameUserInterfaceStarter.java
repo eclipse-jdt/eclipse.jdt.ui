@@ -29,6 +29,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
@@ -110,6 +112,8 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		SelectionState state= new SelectionState(processor.getElements());
 		super.activate(refactoring, parent, save);
-		state.restore(processor.getNewElement());
+		INameUpdating nameUpdating= (INameUpdating)refactoring.getAdapter(INameUpdating.class);
+		if (nameUpdating != null)
+			state.restore(nameUpdating.getNewElement());
 	}
 }

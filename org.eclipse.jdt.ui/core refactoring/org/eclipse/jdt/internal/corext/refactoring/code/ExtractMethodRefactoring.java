@@ -203,7 +203,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param pm a progress monitor to report progress during activation checking.
 	 * @return the refactoring status describing the result of the activation check.	 
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		
 		if (fSelectionStart < 0 || fSelectionLength == 0)
@@ -336,7 +336,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * Method declared in Refactoring
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
 		pm.subTask(EMPTY);
 		

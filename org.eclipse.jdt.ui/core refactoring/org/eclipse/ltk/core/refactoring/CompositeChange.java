@@ -45,7 +45,7 @@ public class CompositeChange extends Change {
 	
 	/**
 	 * Creates a new composite change with a generic name. The change
-	 * is marked as generic and should therefore not be persented in
+	 * is marked as generic and should therefore not be presented in
 	 * the user interface.
 	 */
 	public CompositeChange() {
@@ -67,7 +67,7 @@ public class CompositeChange extends Change {
 	 * of children.
 	 * 
 	 * @param name the change's name
-	 * @param children the initiale array of children
+	 * @param children the initialize array of children
 	 */
 	public CompositeChange(String name, Change[] children) {
 		this(name, new ArrayList(children.length));
@@ -317,7 +317,7 @@ public class CompositeChange extends Change {
 	 * <code>null</code> if all changes were executed successfully.
 	 * 
 	 * @return the undo object containing all undo changes of those children
-	 *  that got successfully executed while performming this change
+	 *  that got successfully executed while performing this change
 	 */
 	public Change getUndoUntilException() {
 		return fUndoUntilException;

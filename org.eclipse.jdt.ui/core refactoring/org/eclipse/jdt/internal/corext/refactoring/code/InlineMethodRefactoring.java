@@ -170,7 +170,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return fTargetProvider.checkActivation();
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
 			fSourceProvider= resolveSourceProvider(result, fInitialCUnit, fInitialNode);
@@ -183,7 +183,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();

@@ -220,10 +220,10 @@ public abstract class Change implements IAdaptable {
 	}
 	 
 	/**
-	 * Returns the language element modified by this <code>IChange</code>. The method
-	 * may return <code>null</code> if the change isn't related to a language element.
+	 * Returns the element modified by this <code>Change</code>. The method may return 
+	 * <code>null</code> if the change isn't related to a element.
 	 * 
-	 * @return the language element modified by this change
+	 * @return the element modified by this change
 	 */
 	public abstract Object getModifiedElement();
 	

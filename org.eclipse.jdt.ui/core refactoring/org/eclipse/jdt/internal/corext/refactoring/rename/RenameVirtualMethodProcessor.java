@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
@@ -52,14 +53,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		fOriginalMethod= getMethod();
 	}
 
-	public boolean isAvailable() throws CoreException {
-		return super.isAvailable() && MethodChecks.isVirtual(getMethod());
+	public boolean isApplicable() throws CoreException {
+		return super.isApplicable() && MethodChecks.isVirtual(getMethod());
 	}
 	
 	//------------ preconditions -------------
 	
-	public RefactoringStatus checkActivation() throws CoreException {
-		RefactoringStatus result= super.checkActivation();
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+		RefactoringStatus result= super.checkInitialConditions(pm, context);
 		if (result.hasFatalError())
 			return result;
 			
@@ -87,12 +88,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return result;
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 12); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 
-			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
+			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 

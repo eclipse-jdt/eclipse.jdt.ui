@@ -75,7 +75,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
 			String[] keys= {fInputType.getCompilationUnit().getElementName()};
@@ -107,7 +107,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);//$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();		

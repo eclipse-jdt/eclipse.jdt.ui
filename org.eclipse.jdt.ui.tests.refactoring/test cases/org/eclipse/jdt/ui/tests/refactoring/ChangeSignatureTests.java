@@ -360,12 +360,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ref.setVisibility(newVisibility);
 
 		// from RefactoringTest#performRefactoring():
-		RefactoringStatus status= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("checkActivation was supposed to pass", status.isOK());
 	
 		mangleExceptions(ref.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
 	
-		status= ref.checkInput(new NullProgressMonitor());
+		status= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("checkInput was supposed to pass", status.isOK());
 		Change undo= performChange(ref, true);
 		assertNotNull(undo);
@@ -387,12 +387,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 	
 		// from RefactoringTest#performRefactoring():
-		RefactoringStatus status= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("checkActivation was supposed to pass", status.isOK());
 	
 		mangleExceptions(ref.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
 	
-		status= ref.checkInput(new NullProgressMonitor());
+		status= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("checkInput was supposed to pass", status.isOK());
 		Change undo= performChange(ref, true);
 		assertNotNull(undo);

@@ -72,7 +72,7 @@ public class PushDownTests extends RefactoringTest {
 		
 		PushDownRefactoring ref= createRefactoring(selectedMembers);
 //		assertTrue("preactivation", ref.checkPreactivation().isOK());
-		assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		
 		prepareForInputCheck(ref, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
 		return ref;
@@ -110,7 +110,7 @@ public class PushDownTests extends RefactoringTest {
 		try{
 			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
 
-			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.isOK());	
 			performChange(ref, false);
 
@@ -177,7 +177,7 @@ public class PushDownTests extends RefactoringTest {
 		
 			PushDownRefactoring ref= createRefactoring(selectedMembers);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
-			assertEquals("activation was expected to fail", expectedSeverity, ref.checkActivation(new NullProgressMonitor()).getSeverity());
+			assertEquals("activation was expected to fail", expectedSeverity, ref.checkInitialConditions(new NullProgressMonitor()).getSeverity());
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -194,7 +194,7 @@ public class PushDownTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cu);
-			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertEquals("precondition was expected to fail", expectedSeverity, checkInputResult.getSeverity());	
 		} finally{
 			performDummySearch();
@@ -212,7 +212,7 @@ public class PushDownTests extends RefactoringTest {
 			IMember[] members= merge(methods, fields);
 			PushDownRefactoring ref= createRefactoring(members);
 //			assertTrue("preactivation", ref.checkPreactivation().isOK());
-			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
 			ref.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
 			List required= getMembersToPushDown(ref);

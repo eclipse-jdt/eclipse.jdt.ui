@@ -85,7 +85,7 @@ public class CutAction extends SelectionDispatchAction{
 	private boolean isDeleteEnabled(IStructuredSelection selection) throws CoreException {
 		Object[] elements= selection.toArray();
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-		return processor.isAvailable();
+		return processor.isApplicable();
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {

@@ -91,7 +91,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		if (renameTempRefactoring == null)
 			return false;
 		try {
-			return (renameTempRefactoring.checkActivation(new NullProgressMonitor()).isOK());
+			return (renameTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK());
 		} catch(CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"), RefactoringMessages.getString("RenameTempAction.exception"));//$NON-NLS-1$ //$NON-NLS-2$
 			return false;

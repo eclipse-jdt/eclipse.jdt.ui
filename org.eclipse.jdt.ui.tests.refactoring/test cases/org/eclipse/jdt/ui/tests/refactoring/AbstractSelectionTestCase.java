@@ -139,6 +139,6 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	}
 	
 	protected int getCheckingStyle() {
-		return CheckConditionsOperation.PRECONDITIONS;
+		return CheckConditionsOperation.ALL_CONDITIONS;
 	}
 }

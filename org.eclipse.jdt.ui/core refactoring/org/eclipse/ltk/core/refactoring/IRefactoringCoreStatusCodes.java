@@ -43,5 +43,11 @@ public abstract class IRefactoringCoreStatusCodes {
 	 */
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10002;
 	
+	/**
+	 * Status code (value 10003) indicating that a condition checker already exists
+	 * in a shared condition checking context.
+	 */
+	public static final int CHECKER_ALREADY_EXISTS_IN_CONTEXT= 10003;
+	
 	
 }

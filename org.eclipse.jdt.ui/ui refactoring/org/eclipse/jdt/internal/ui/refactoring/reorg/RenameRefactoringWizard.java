@@ -15,8 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -24,6 +23,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
@@ -52,14 +52,14 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages() {
-		String initialSetting= getRenameRefactoring().getCurrentName();
+		String initialSetting= getNameUpdating().getCurrentElementName();
 		RenameInputWizardPage inputPage= createInputPage(fInputPageDescription, initialSetting);
 		inputPage.setImageDescriptor(fInputPageImageDescriptor);
 		addPage(inputPage);
 	}
 
-	private IRenameRefactoring getRenameRefactoring() {
-		return (IRenameRefactoring)getRefactoring();	
+	private INameUpdating getNameUpdating() {
+		return (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);	
 	}
 	
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
@@ -71,10 +71,10 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	}
 	
 	protected RefactoringStatus validateNewName(String newName) {
-		IRenameRefactoring ref= getRenameRefactoring();
-		ref.setNewName(newName);
+		INameUpdating ref= getNameUpdating();
+		ref.setNewElementName(newName);
 		try{
-			return ref.checkNewName(newName);
+			return ref.checkNewElementName(newName);
 		} catch (CoreException e){
 			//XXX: should log the exception
 			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$

@@ -60,7 +60,7 @@ public class DeleteAction extends SelectionDispatchAction {
 		try {
 			Object[] elements= selection.toArray();
 			JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-			setEnabled(processor.isAvailable());
+			setEnabled(processor.isApplicable());
 		} catch (CoreException e) {
 			//no ui here - this happens on selection changes
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253

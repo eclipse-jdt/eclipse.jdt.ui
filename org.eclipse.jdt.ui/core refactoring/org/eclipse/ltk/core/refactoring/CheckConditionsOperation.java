@@ -29,11 +29,11 @@ public class CheckConditionsOperation implements IWorkspaceRunnable {
 	private int fStyle;
 	private RefactoringStatus fStatus;
 	
-	public final static int NONE=			0;
-	public final static int ACTIVATION=    	1 << 1;
-	public final static int INPUT=	   		1 << 2;
-	public final static int PRECONDITIONS= 	ACTIVATION | INPUT;
-	private final static int LAST=          1 << 3;
+	public final static int NONE=				0;
+	public final static int INITIAL_CONDITONS=	1 << 1;
+	public final static int FINAL_CONDITIONS=	1 << 2;
+	public final static int ALL_CONDITIONS=		INITIAL_CONDITONS | FINAL_CONDITIONS;
+	private final static int LAST=          	1 << 3;
 	
 	/**
 	 * Creates a new <code>CheckConditionsOperation</code>.
@@ -56,12 +56,12 @@ public class CheckConditionsOperation implements IWorkspaceRunnable {
 	public void run(IProgressMonitor pm) throws CoreException {
 		try {
 			fStatus= null;
-			if ((fStyle & PRECONDITIONS) == PRECONDITIONS)
-				fStatus= fRefactoring.checkPreconditions(pm);
-			else if ((fStyle & ACTIVATION) == ACTIVATION)
-				fStatus= fRefactoring.checkActivation(pm);
-			else if ((fStyle & INPUT) == INPUT)
-				fStatus= fRefactoring.checkInput(pm);
+			if ((fStyle & ALL_CONDITIONS) == ALL_CONDITIONS)
+				fStatus= fRefactoring.checkAllConditions(pm);
+			else if ((fStyle & INITIAL_CONDITONS) == INITIAL_CONDITONS)
+				fStatus= fRefactoring.checkInitialConditions(pm);
+			else if ((fStyle & FINAL_CONDITIONS) == FINAL_CONDITIONS)
+				fStatus= fRefactoring.checkFinalConditions(pm);
 		} finally {
 			pm.done();
 		}

@@ -30,6 +30,7 @@ public class ParticipantDescriptor {
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
+	private static final String NATURES= "natures"; //$NON-NLS-1$
 	
 	public ParticipantDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;

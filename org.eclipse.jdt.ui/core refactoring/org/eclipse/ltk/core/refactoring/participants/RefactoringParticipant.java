@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2003 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v0.5 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v05.html
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- ******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.ltk.core.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
@@ -47,11 +47,11 @@ public abstract class RefactoringParticipant {
 	
 	public abstract void initialize(RefactoringProcessor processor, Object element) throws CoreException;
 	
-	public abstract boolean isAvailable() throws CoreException;
+	public abstract boolean isApplicable() throws CoreException;
 	
-	public abstract RefactoringStatus checkActivation() throws CoreException;
+	public abstract RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException;
 	
-	public abstract RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException;
+	public abstract RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException;
 	
 	public abstract Change createChange(IProgressMonitor pm) throws CoreException;
 }

@@ -24,13 +24,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
 public class RenamePackageTests extends RefactoringTest {
@@ -64,8 +64,9 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	// -------------
 	private RenameRefactoring createRefactoring(IPackageFragment pack, String newName) throws CoreException {
-		RenameRefactoring result= new RenameRefactoring(new RenamePackageProcessor(pack));
-		result.setNewName(newName);
+		RenamePackageProcessor processor= new RenamePackageProcessor(pack);
+		RenameRefactoring result= new RenameRefactoring(processor);
+		processor.setNewElementName(newName);
 		return result;
 	}
 

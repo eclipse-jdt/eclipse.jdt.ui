@@ -86,7 +86,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);
-		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
+		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 		switch (mode) {
 			case VALID_SELECTION:
 				assertTrue(status.isOK());
@@ -120,7 +120,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	protected int getCheckingStyle() {
-		return CheckConditionsOperation.INPUT;
+		return CheckConditionsOperation.FINAL_CONDITIONS;
 	}
 	
 	protected void invalidSelectionTest() throws Exception {

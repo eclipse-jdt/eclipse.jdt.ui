@@ -89,7 +89,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());		
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 		assertEquals("contant name not guessed", expectedGuessedName, ref.guessConstantName());
 	}
@@ -99,7 +99,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 
 		if(!allowLoadtime)
@@ -111,7 +111,7 @@ public class ExtractConstantTests extends RefactoringTest {
 
 		assertEquals("constant name incorrectly guessed", guessedConstantName, ref.guessConstantName());
 
-		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
 		
 		performChange(ref, false);

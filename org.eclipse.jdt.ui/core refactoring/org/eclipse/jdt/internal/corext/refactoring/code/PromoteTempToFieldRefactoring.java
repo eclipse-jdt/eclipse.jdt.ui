@@ -243,7 +243,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
 		if (result.hasFatalError())
 			return result;
@@ -367,7 +367,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+    public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     	try{
 	        RefactoringStatus result= new RefactoringStatus();
 	        

@@ -10,37 +10,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
- * Represents a refactoring that renames an <code>IJavaElement</code>.
+ * Represents processors in the JDT space the rename elements.
  */
-public interface IRenameRefactoring {
+public interface INameUpdating {
 	
 	/**
 	 * Sets new name for the entity that this refactoring is working on.
 	 */
-	public void setNewName(String newName);
+	public void setNewElementName(String newName);
 	
 	/**
 	 * Get the name for the entity that this refactoring is working on.
 	 */
-	public String getNewName();
+	public String getNewElementName();
 
 	/**
 	 * Gets the current name of the entity that this refactoring is working on.
 	 */
-	public String getCurrentName();
+	public String getCurrentElementName();
 	
 	/**
 	 * Gets the element after renaming.
 	 */	
-	public Object getNewElement() throws JavaModelException;
+	public Object getNewElement() throws CoreException;
 
 	/**
 	 * Checks if the new name is valid for the entity that this refactoring renames.
 	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException;
+	public RefactoringStatus checkNewElementName(String newName) throws CoreException;
 }

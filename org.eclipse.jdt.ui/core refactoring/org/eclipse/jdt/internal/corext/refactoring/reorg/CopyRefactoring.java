@@ -64,7 +64,7 @@ public final class CopyRefactoring extends Refactoring{
 		fReorgQueries= queries;
 	}
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
 		IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
@@ -92,7 +92,7 @@ public final class CopyRefactoring extends Refactoring{
 		return fCopyPolicy.setDestination(destination);
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
 		return fCopyPolicy.checkInput(pm, fReorgQueries);

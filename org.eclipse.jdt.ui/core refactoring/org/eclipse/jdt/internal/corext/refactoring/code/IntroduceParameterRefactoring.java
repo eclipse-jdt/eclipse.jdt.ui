@@ -117,7 +117,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	//--- checkActivation
 		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
 			
@@ -307,7 +307,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	
 //--- checkInput
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.preview"), 5); //$NON-NLS-1$
 		RefactoringStatus result= checkExcludedParameterNames();
 		if (result.hasFatalError())

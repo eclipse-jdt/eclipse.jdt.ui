@@ -48,14 +48,14 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
-public class RenameTempRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdating {
+public class RenameTempRefactoring extends Refactoring implements INameUpdating, IReferenceUpdating {
 	private static class ProblemNodeFinder {
 	
 		private ProblemNodeFinder() {
@@ -184,7 +184,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/*
 	 * @see IRenameRefactoring#setNewName
 	 */
-	public void setNewName(String newName) {
+	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
@@ -192,14 +192,14 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/*
 	 * @see IRenameRefactoring#getNewName()
 	 */
-	public String getNewName() {
+	public String getNewElementName() {
 		return fNewName;
 	}
 
 	/*
 	 * @see IRenameRefactoring#getCurrentName()
 	 */
-	public String getCurrentName() {
+	public String getCurrentElementName() {
 		return fCurrentName;
 	}
 
@@ -208,7 +208,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
@@ -232,7 +232,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/*
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
 			result.addWarning(RefactoringCoreMessages.getString("RenameTempRefactoring.lowercase")); //$NON-NLS-1$
@@ -242,7 +242,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm)	throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)	throws CoreException {
 		try {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();			
@@ -250,7 +250,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			if (result.hasFatalError())
 				return result;
 			
-			result.merge(checkNewName(fNewName));
+			result.merge(checkNewElementName(fNewName));
 			if (result.hasFatalError())
 				return result;
 			result.merge(analyzeAST());

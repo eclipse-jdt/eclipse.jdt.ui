@@ -173,11 +173,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		ref.setProtectConstructor(protectConstructor);
 
-		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 
-		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
 		if (!checkInputResult.isOK()) {
 			performChange(ref, false);
@@ -249,13 +249,13 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 												   JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 
 		ref.setNewMethodName(factoryMethodName);
 
-		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
@@ -286,11 +286,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength(), 
 												   JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 
-		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
+		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
