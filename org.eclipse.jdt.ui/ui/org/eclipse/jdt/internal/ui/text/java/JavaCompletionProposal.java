@@ -166,7 +166,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 				StringBuffer buffer= new StringBuffer(fReplacementString);
 
 				// fix for PR #5533. Assumes that no eating takes place.
-				if ((fReplacementLength < buffer.length() && buffer.charAt(fReplacementLength) != trigger)) {
+				if ((fCursorPosition > 0 && fCursorPosition <= buffer.length() && buffer.charAt(fCursorPosition - 1) != trigger)) {
 					buffer.insert(fCursorPosition, trigger);
 					++fCursorPosition;
 				}
