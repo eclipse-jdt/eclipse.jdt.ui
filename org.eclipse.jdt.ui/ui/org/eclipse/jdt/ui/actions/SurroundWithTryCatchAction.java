@@ -12,14 +12,15 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -33,9 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
@@ -89,7 +88,11 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, 
 			JavaPreferencesSettings.getCodeGenerationSettings(),
 			new Query(getShell()));
+		IRewriteTarget target= null;
 		try {
+			target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
+			if (target != null)
+				target.beginCompoundChange();
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				RefactoringErrorDialogUtil.open(getDialogTitle(), status);
@@ -112,6 +115,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// not cancelable
+		} finally {
+			if (target != null)
+				target.endCompoundChange();
 		}
 	}
 
