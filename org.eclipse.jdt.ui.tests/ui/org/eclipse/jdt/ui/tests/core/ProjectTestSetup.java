@@ -68,8 +68,9 @@ public class ProjectTestSetup extends TestSetup {
 		
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
-		JavaCore.setOptions(TestOptions.getDefault());
-		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
+		JavaCore.setOptions(TestOptions.getFormatterOptions());
+		TestOptions.initializeCodeGenerationOptions();
+		JavaPlugin.getDefault().getCodeTemplateStore().load();		
 	}
 
 	protected void tearDown() throws Exception {

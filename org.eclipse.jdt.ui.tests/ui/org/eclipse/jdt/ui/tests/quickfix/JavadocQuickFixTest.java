@@ -62,7 +62,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 
 
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefault();
+		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);

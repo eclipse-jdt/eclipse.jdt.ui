@@ -65,7 +65,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefault();
+		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));

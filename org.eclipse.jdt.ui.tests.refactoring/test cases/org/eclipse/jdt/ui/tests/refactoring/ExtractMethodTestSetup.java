@@ -67,12 +67,13 @@ public class ExtractMethodTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		Hashtable options= TestOptions.getDefault();
+		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
-		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
+		TestOptions.initializeCodeGenerationOptions();
+		JavaPlugin.getDefault().getCodeTemplateStore().load();		
 		
 		fJavaProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fJavaProject);

@@ -63,7 +63,7 @@ public class TypeRulesTest extends CoreTests {
 	}
 
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefault();
+		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);

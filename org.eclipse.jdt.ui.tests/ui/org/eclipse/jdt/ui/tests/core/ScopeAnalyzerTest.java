@@ -64,7 +64,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
-		Hashtable options= TestOptions.getDefault();
+		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK, JavaCore.IGNORE);
 		
 		JavaCore.setOptions(options);		

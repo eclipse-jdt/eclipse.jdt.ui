@@ -25,7 +25,9 @@ public class TestOptionsSetup extends TestSetup {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		JavaCore.setOptions(TestOptions.getDefault());
-		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
+		JavaCore.setOptions(TestOptions.getFormatterOptions());
+		TestOptions.initializeCodeGenerationOptions();
+		// Use load since restore doesn't really restore the defaults.
+		JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 }
