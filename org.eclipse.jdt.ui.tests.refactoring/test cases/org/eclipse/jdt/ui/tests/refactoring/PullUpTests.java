@@ -140,14 +140,13 @@ public class PullUpTests extends RefactoringTest {
 		}	
 	}
 
-	private void fieldHelper1(String[] fieldNames, boolean deleteAllInSourceType, boolean deleteAllMatchingFields, int targetClassIndex) throws Exception{
+	private void fieldHelper1(String[] fieldNames, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
 			IField[] fields= TestUtil.getFields(type, fieldNames);
 			
 			PullUpRefactoring ref= createRefactoring(fields);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setTargetClass(ref, targetClassIndex);
 		
@@ -170,7 +169,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cu, "B");
 			IField[] fields= TestUtil.getFields(type, fieldNames);
 			PullUpRefactoring ref= createRefactoring(fields);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setTargetClass(ref, targetClassIndex);
 
@@ -844,6 +842,28 @@ public class PullUpTests extends RefactoringTest {
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	public void test43() throws Exception{
+//		printTestDisabledMessage("bug 35562 Method pull up wrongly indents javadoc comment [refactoring]");
+		
+		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] selectedTypeNames= {};
+		String[] namesOfMethodsToPullUp= selectedMethodNames;
+		String[][] signaturesOfMethodsToPullUp= selectedMethodSignatures;
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfTypesToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
+
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
@@ -1184,7 +1204,7 @@ public class PullUpTests extends RefactoringTest {
 
 	//----------------------------------------------------------
 	public void testField0() throws Exception{
-		fieldHelper1(new String[]{"i"}, true, false, 0);
+		fieldHelper1(new String[]{"i"}, 0);
 	}
 	
 	public void testFieldFail0() throws Exception{
