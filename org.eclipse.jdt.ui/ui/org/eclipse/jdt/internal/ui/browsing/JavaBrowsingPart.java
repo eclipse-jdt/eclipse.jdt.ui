@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
@@ -269,8 +270,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		int ops= DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(), 
-			ResourceTransfer.getInstance(),
-			FileTransfer.getInstance()};
+			ResourceTransfer.getInstance()};
 		
 		// Drop Adapter
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
@@ -286,7 +286,18 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		};
 		DragSource source= new DragSource(control, ops);
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners));
+		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
+			public void dragStart(DragSourceEvent event) {
+				IStructuredSelection selection= (IStructuredSelection)getSelectionProvider().getSelection();
+				for (Iterator iter= selection.iterator(); iter.hasNext(); ) {
+					if (iter.next() instanceof IMember) {
+						setPossibleListeners(new TransferDragSourceListener[] {new SelectionTransferDragAdapter(fViewer)});
+						break;
+					}
+				}
+				super.dragStart(event);
+			}
+		});
 	}
 	
 	protected void fillActionBars() {
