@@ -188,7 +188,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		IEditorInput input= editor.getEditorInput();
 		if (input instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)input).getClassFile();
-		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
+		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
 	} 
 		
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
