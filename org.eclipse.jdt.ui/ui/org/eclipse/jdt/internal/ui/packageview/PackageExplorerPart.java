@@ -898,8 +898,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		getLibraryFilter().setShowLibraries(show);
 	}
 
-
-	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;
@@ -923,19 +921,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			setTitle(title);
 			setTitleToolTip(getToolTipText(input));
 		} 
-	}
-	
-	/**
-	 * Sets the decorator for the package explorer.
-	 *
-	 * @param decorator a label decorator or <code>null</code> for no decorations.
-	 * @deprecated To be removed
-	 */
-	public void setLabelDecorator(ILabelDecorator decorator) {
-		if (decorator == null)
-			fViewer.setLabelProvider(fJavaElementLabelProvider);
-		else
-			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
 	}
 	
 	/*
@@ -1014,4 +999,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 		};
 	}
+	
+	/**
+	 * Sets the decorator for the package explorer.
+	 *
+	 * @param decorator a label decorator or <code>null</code> for no decorations.
+	 * @deprecated To be removed
+	 */
+	public void setLabelDecorator(ILabelDecorator decorator) {
+	}
+
 }
