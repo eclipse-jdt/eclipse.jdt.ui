@@ -90,13 +90,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			curr.typeHierarchyChanged(this, changedTypes);
 		}
 	}
-	
-	public void ensureRefreshedTypeHierarchy() throws JavaModelException {
-		if (fHierarchy != null) {
-			ensureRefreshedTypeHierarchy(fInputElement);
-		}
-	}
-	
+		
 	public void ensureRefreshedTypeHierarchy(final IJavaElement element) throws JavaModelException {
 		if (element == null) {
 			freeHierarchy();
@@ -116,7 +110,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			};
 			
 			try {
-				new BusyIndicatorRunnableContext().run(true, false, op);
+				new BusyIndicatorRunnableContext().run(false, false, op);
 			} catch (InvocationTargetException e) {
 				Throwable th= e.getTargetException();
 				if (th instanceof JavaModelException) {
