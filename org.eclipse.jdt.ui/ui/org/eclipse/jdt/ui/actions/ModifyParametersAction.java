@@ -41,8 +41,8 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Modifies the signature of a method. supports swapping and renaming of
- * arguments.
+ * Action to start the modify parameters refactoring. The refactoring supports 
+ * swapping and renaming of arguments.
  * <p>
  * This action is applicable to selections containing a method with one or
  * more arguments.

@@ -1477,7 +1477,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	/**
 	 * Hook method that gets called from <code>createType</code> to support adding of 
-	 * unanticipated methods, fields, inner types, etc. for the newly created type.
+	 * unanticipated methods, fields, and inner types to the created type.
 	 * <p>
 	 * Implementers can use any methods defined on <code>IType</code> to manipulate the
 	 * new type.
@@ -1489,7 +1489,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * </p>
 	 * 
 	 * @param newType the new type created via <code>createType</code>
-	 * @param imports an import manager responsible to add the needed imports
+	 * @param imports an import manager which can be used to add new imports
 	 * @param monitor a progress monitor to report progress. Must not be <code>null</code>
 	 * 
 	 * @see #createType(IProgressMonitor)

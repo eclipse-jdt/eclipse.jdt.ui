@@ -181,7 +181,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * Returns the Java project handle by converting the result of
 	 * <code>getProjectHandle()</code> into a Java project.
 	 *
-	 * @returns the Java project handle
+	 * @return the Java project handle
 	 * @see #getProjectHandle()
 	 */	
 	public IJavaProject getNewJavaProject() {

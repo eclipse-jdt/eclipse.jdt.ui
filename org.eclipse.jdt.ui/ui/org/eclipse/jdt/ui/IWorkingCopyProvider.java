@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui;
 /**
  * Interface used for Java element content providers to indicate that
  * the content provider can return working copy elements for members
- * below compilation units (e.g. types, fields, methods, etc.).
+ * below compilation units.
  * 
  * <p>
  * This interface is not intended to be implemented by clients.

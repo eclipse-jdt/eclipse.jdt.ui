@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * Writes the description file of a JAR package data object
+ * Writes the description file of a JAR package data object.
  * <p>
  * The format is defined by the client who implements the
  * reader/writer pair.

@@ -71,8 +71,8 @@ public interface ISharedImages {
 	/** Key to access the shared image or image descriptor for a private member. */
 	public static final String IMG_OBJS_PRIVATE= JavaPluginImages.IMG_MISC_PRIVATE;
 	
-	/** Key to access the shared image or image descriptor for a class member (e.g. fields
-	 *  and method with default visibility.
+	/** Key to access the shared image or image descriptor for class members with
+	 * default visibility.
 	 */
 	public static final String IMG_OBJS_DEFAULT= JavaPluginImages.IMG_MISC_DEFAULT;
 	

@@ -243,7 +243,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	/**
 	 * Returns the content of the package input field.
 	 * 
-	 * @returns the content of the package input field
+	 * @return the content of the package input field
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
