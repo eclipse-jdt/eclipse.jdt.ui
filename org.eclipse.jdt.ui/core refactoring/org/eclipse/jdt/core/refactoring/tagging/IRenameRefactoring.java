@@ -22,11 +22,16 @@ public interface IRenameRefactoring {
 	 * This name is then validated in <code>checkNewName</code>.
 	 */
 	public void setNewName(String newName);
-	
+
+	/**
+	 * Gets the current name of the entity that this refactoring is working on.
+	 */
+	public String getCurrentName();
 	
 	/**
 	 * Checks if the new name (set in <code>setNewName</code>) is valid for
 	 * the entity that this refactoring renames.
 	 */
 	public RefactoringStatus checkNewName();
+	
 }

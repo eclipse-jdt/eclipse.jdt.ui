@@ -96,7 +96,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenamePackageAction(provider, changeCreator),
 			createRenamePrivateFieldAction(provider, changeCreator),
 			createRenameNonPrivateFieldAction(provider, changeCreator),
-			createMoveCompilationUnitAction(provider, changeCreator),			
+			createMoveCompilationUnitAction(provider, changeCreator)
 		};
 		fIntitialized= true;
 	}
@@ -150,6 +150,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
+	
+
 		
 	// -------------------- type refactorings ----------------------
 	

@@ -91,12 +91,22 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		Assert.isTrue(javaElement.exists(), "package must exist");	
 		fPackage= (IPackageFragment)javaElement;
 	}
-	
+
+	/**
+	 * @see IRenameRefactoring#setNewName
+	 */	
 	public final void setNewName(String newName){
 		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
 	
+	/**
+	 * @see IRenameRefactoring#getCurrentName
+	 */
+	public final String getCurrentName(){
+		return fPackage.getElementName();
+	}
+		
 	public final String getNewName(){
 		return fNewName;
 	}

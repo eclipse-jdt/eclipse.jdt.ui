@@ -81,10 +81,20 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	public final String getNewName(){
 		return fNewName;
 	}
-	
+
+	/**
+	 * @see IRenameRefactoring#setNewName
+	 */
 	public final void setNewName(String newName){
 		Assert.isNotNull(newName);
 		fNewName= newName;
+	}
+	
+	/**
+	 * @see IRenameRefactoring#getCurrentName
+	 */
+	public final String getCurrentName(){
+		return getType().getElementName();
 	}
 	
 	/**

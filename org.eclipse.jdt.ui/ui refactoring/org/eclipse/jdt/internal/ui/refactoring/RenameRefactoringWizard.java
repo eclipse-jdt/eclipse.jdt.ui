@@ -6,7 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
@@ -18,7 +18,8 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage( new TextInputWizardPage(true) {
+		String initialSetting= ((IRenameRefactoring)getRefactoring()).getCurrentName();
+		addPage( new TextInputWizardPage(true, initialSetting) {
 			protected RefactoringStatus validatePage() {
 				return validateNewName(getNewName());
 			}	

@@ -9,11 +9,12 @@ import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jface.util.Assert;
 
 public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 
 	private StringDialogField fStringInput;
+	private String fInitialSetting;
 	
 	/**
 	 * Creates a new text input page.
@@ -21,7 +22,19 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	 *  user input page. Otherwise <code>false</code>.
 	 */
 	public TextInputWizardPage(boolean isLastUserPage) {
+		this(isLastUserPage, "");
+	}
+	
+	/**
+	 * Creates a new text input page.
+	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
+	 *  user input page. Otherwise <code>false</code>.
+	 * @param initialSetting the initialSetting.
+	 */
+	public TextInputWizardPage(boolean isLastUserPage, String initialSetting) {
 		super(isLastUserPage);
+		Assert.isNotNull(initialSetting);
+		fInitialSetting= initialSetting;
 	}
 	
 	/**
@@ -86,7 +99,7 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	}
 	
 	protected String getInitialValue() {
-		return "";
+		return fInitialSetting;
 	}
 
 	/* (non-JavaDoc)

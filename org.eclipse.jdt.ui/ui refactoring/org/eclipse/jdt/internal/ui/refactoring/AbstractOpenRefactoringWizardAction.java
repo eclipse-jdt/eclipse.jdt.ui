@@ -49,8 +49,8 @@ public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWi
 	}
 	
 	/**
-    	 * The user has invoked this action.
-     	 */
+     * The user has invoked this action.
+     */
 	public void run() {
 		WizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createRefactoringWizard());
 		dialog.open();

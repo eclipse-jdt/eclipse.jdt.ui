@@ -69,6 +69,13 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
+	
+	/**
+	 * @see IRenameRefactoring#getCurrentName
+	 */
+	public final String getCurrentName(){
+		return getField().getElementName();
+	}
 		
 	public final String getNewName(){
 		return fNewName;

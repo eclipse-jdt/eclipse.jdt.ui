@@ -67,9 +67,19 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		Assert.isNotNull(fTextBufferChangeCreator, "change creator");
 	}
 
+	/**
+	 * @see IRenameRefactoring#setNewName
+	 */
 	public final void setNewName(String newName){
 		Assert.isNotNull(newName);
 		fNewName= newName;
+	}
+	
+	/**
+	 * @see IRenameRefactoring#getCurrentName
+	 */
+	public final String getCurrentName(){
+		return getMethod().getElementName();
 	}
 		
 	public final String getNewName(){
