@@ -11,8 +11,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -21,12 +24,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -101,10 +107,10 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private static final String THIS_KEYWORD= "this"; //$NON-NLS-1$
-	private IType fType;
-	private TextChangeManager fChangeManager;
 	private final ImportEditManager fImportEditManager;
 	private final CodeGenerationSettings fCodeGenerationSettings;
+	private IType fType;
+	private TextChangeManager fChangeManager;
 	private String fEnclosingInstanceFieldName;
 	private ASTNodeMappingManager fASTManager;
 	private DeleteSourceReferenceEdit fCutTypeEdit; 
@@ -130,14 +136,33 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private String getInitialNameForEnclosingInstanceField() {
-		if (getEnclosingType() == null)
+		IType enclosingType= getEnclosingType();
+		if (enclosingType == null)
 			return ""; //$NON-NLS-1$
-		String name= getEnclosingType().getElementName();
+		String qualifiedTypeName= getTypeOfEnclosingInstanceField();
+		String packageName = enclosingType.getPackageFragment().getElementName();
+		String[] suggestedNames= NamingConventions.suggestFieldNames(enclosingType.getJavaProject(), packageName, qualifiedTypeName, 0, getEnclosingInstanceAccessModifiers(), getFieldNames(fType));
+		if (suggestedNames.length > 0)
+			return suggestedNames[0];
+		String name= enclosingType.getElementName();
 		if (name.equals("")) //$NON-NLS-1$
 			return ""; //$NON-NLS-1$
 		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
 	}
 	
+	private static String[] getFieldNames(IType type) {
+		try {
+			IField[] fields = type.getFields();
+			List result= new ArrayList(fields.length);
+			for (int i = 0; i < fields.length; i++) {
+				result.add(fields[i].getElementName());
+			}
+			return (String[]) result.toArray(new String[result.size()]);
+		} catch (JavaModelException e) {
+			return null;
+		}
+	}
+
 	public IType getInputType(){
 		return fType;
 	}
@@ -280,7 +305,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.move_to_Top")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createCompilationUnitForMovedType(new SubProgressMonitor(pm, 1)));
-			return builder;	
+			return builder;
+		} catch (JavaModelException e){
+			throw e;	
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		}	
@@ -432,7 +459,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private TextEdit createAddParameterToConstructorEdit(MethodDeclaration decl) throws JavaModelException {
 		int scanStart= ASTNodes.getExclusiveEnd(decl.getName());
 		int offset= computeOffsetForFirstArgumentOrParameter(decl.parameters(), getInputTypeCu(), scanStart);
-		String parameterDeclarationSource= createDeclarationForEnclosingInstance();
+		String parameterDeclarationSource= createDeclarationForEnclosingInstanceConstructorParameter();
 		if (decl.parameters().isEmpty())
 			return SimpleTextEdit.createInsert(offset, parameterDeclarationSource);
 		else 
@@ -449,7 +476,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		String constructorBody= StubUtility.getMethodBodyContent(true, fType.getJavaProject(), fType.getElementName(), fType.getElementName(), createEnclosingInstanceInitialization());
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
-		return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstance() + "){" +  //$NON-NLS-1$
+		return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
 						getLineSeperator() + constructorBody + getLineSeperator() + '}';
 	}
 
@@ -474,6 +501,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return "private final "; //$NON-NLS-1$
 		else 
 			return "private "; //$NON-NLS-1$
+	}
+	
+	private int getEnclosingInstanceAccessModifiers(){
+		if (fMarkInstanceFieldAsFinal)
+			return Modifier.PRIVATE | Modifier.FINAL;
+		else 
+			return Modifier.PRIVATE;
 	}
 
 	private void removeUnusedTypeModifiers(TextChangeManager manager) throws CoreException {
@@ -913,12 +947,36 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return THIS_KEYWORD + '.' + fEnclosingInstanceFieldName;
 	}
 
-	private String createEnclosingInstanceInitialization() {
-		return createReadAccessForEnclosingInstance() + '=' + fEnclosingInstanceFieldName + ';';
+	private String createEnclosingInstanceInitialization() throws JavaModelException {
+		return createReadAccessForEnclosingInstance() + '=' + getNameForEnclosingInstanceConstructorParameter() + ';';
+	}
+
+	private String getNameForEnclosingInstanceConstructorParameter() throws JavaModelException {
+		IType enclosingType= getEnclosingType();
+		String[] excludedNames= getParameterNamesOfAllConstructors(fType);
+		String qualifiedTypeName= getTypeOfEnclosingInstanceField();
+		String packageName= enclosingType.getPackageFragment().getElementName();
+		String[] suggestedNames= NamingConventions.suggestArgumentNames(enclosingType.getJavaProject(), packageName, qualifiedTypeName, 0, excludedNames);
+		if (suggestedNames.length > 0)
+			return suggestedNames[0];
+		return fEnclosingInstanceFieldName;
+	}
+
+	private static String[] getParameterNamesOfAllConstructors(IType type) throws JavaModelException {
+		IMethod[] construcotrs= JavaElementUtil.getAllConstructors(type);
+		Set result= new HashSet();
+		for (int i= 0; i < construcotrs.length; i++) {
+			result.addAll(Arrays.asList(construcotrs[i].getParameterNames()));
+		}
+		return (String[])result.toArray(new String[result.size()]);
 	}
 
 	private String createDeclarationForEnclosingInstance() {
 		return getTypeOfEnclosingInstanceField() + ' ' + fEnclosingInstanceFieldName;
+	}
+
+	private String createDeclarationForEnclosingInstanceConstructorParameter() throws JavaModelException {
+		return getTypeOfEnclosingInstanceField() + ' ' + getNameForEnclosingInstanceConstructorParameter();
 	}
 
 	private String getTypeOfEnclosingInstanceField() {
