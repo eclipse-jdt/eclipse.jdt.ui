@@ -18,6 +18,7 @@ Eclipse*JDT*Builds/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jdt.ui.tests.refactoring/resources/*
 platform-search-home/*
+platform-text-home/*
 jdt-ui-home/*
 org.eclipse.jdt.ui/core*extension\org/eclipse/jdt/internal/corext/template/default-codetemplates.xml
 org.eclipse.platform.doc.isv/buildDoc.xml
@@ -31,8 +32,8 @@ org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
 org.eclipse.pde.build/*
 org.eclipse.debug.core/*
-org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
+org.eclipse.jdt.debug/*
 org.eclipse.debug.ui/*
 org.eclipse.releng.tools/*
 org.eclipse.ui.console/*
