@@ -167,6 +167,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		
 		if (!fIsFlatLayout && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			fPackageFragmentProvider.processDelta(delta);
+			if (processResourceDeltas(delta.getResourceDeltas(), element))
+			    return;
 			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();			
 			processAffectedChildren(affectedChildren);
 			return;
