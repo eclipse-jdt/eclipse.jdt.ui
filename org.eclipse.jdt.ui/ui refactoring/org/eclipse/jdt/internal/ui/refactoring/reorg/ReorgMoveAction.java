@@ -8,18 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.DeleteResourceAction;
+import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,39 +27,29 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 
-public class DeleteAction extends SelectionDispatchAction{
 
-	private boolean fSuggestGetterSetterDeletion;
+public class ReorgMoveAction extends SelectionDispatchAction {
 
-	public DeleteAction(IWorkbenchSite site) {
+	public ReorgMoveAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Delete");
-		setDescription("Deletes the selected elements");
-		fSuggestGetterSetterDeletion= true;//default
-		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
-		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
-		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));		
-		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_HOVER));
+		setText("&Move...");
+		setDescription("Move the selected elements");
 
 		update(getSelection());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.DELETE_ACTION);
-	}
-	
-	public void setSuggestGetterSetterDeletion(boolean suggest){
-		fSuggestGetterSetterDeletion= suggest;
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
-	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)){
+		if (canDelegateToWorkbenchAction(selection)) {
 			setEnabled(createWorkbenchAction(selection).isEnabled());
 			return;
 		}
@@ -75,28 +63,24 @@ public class DeleteAction extends SelectionDispatchAction{
 				setEnabled(canEnable(resources, javaElements));
 		} catch (JavaModelException e) {
 			//no ui here - this happens on selection changes
-			JavaPlugin.log(e);
 			setEnabled(false);
 		}
+	}
+	
+	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+		return MoveRefactoring2.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+	}
+
+	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
+		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
+		action.selectionChanged(selection);
+		return action;
 	}
 	
 	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
 		return ReorgUtils2.containsOnlyProjects(selection.toList());
 	}
 
-	private static IAction createWorkbenchAction(IStructuredSelection selection) {
-		DeleteResourceAction action= new DeleteResourceAction(JavaPlugin.getActiveWorkbenchShell());
-		action.selectionChanged(selection);
-		return action;
-	}
-
-	private static boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		return DeleteRefactoring2.isAvailable(resources, javaElements);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	public void run(IStructuredSelection selection) {
 		if (canDelegateToWorkbenchAction(selection)){
 			createWorkbenchAction(selection).run();
@@ -110,28 +94,26 @@ public class DeleteAction extends SelectionDispatchAction{
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}		
+		}
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		DeleteRefactoring2 refactoring= createRefactoring(resources, javaElements);
+		MoveRefactoring2 refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
-		refactoring.setQueries(new ReorgQueries(wizard));
-		if (refactoring != null)
-			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
+		refactoring.setReorgQueries(new ReorgQueries(wizard));
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}
 
-	private static RefactoringWizard createWizard(DeleteRefactoring2 refactoring){
-		return new DeleteWizard(refactoring);
+	private RefactoringWizard createWizard(MoveRefactoring2 refactoring) {
+		return new ReorgMoveWizard(refactoring);
 	}
-		
-	private DeleteRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
-		ref.setSuggestGetterSetterDeletion(fSuggestGetterSetterDeletion);
-		return ref;
+
+	private MoveRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+		return MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
+
 }

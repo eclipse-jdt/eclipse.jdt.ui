@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,11 +47,13 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSource;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgEnablementPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.HashSet;
 import java.util.Iterator;

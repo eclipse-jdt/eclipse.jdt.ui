@@ -20,9 +20,6 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteAction;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.PasteAction;
 
 public class ReorgActionFactory {
 

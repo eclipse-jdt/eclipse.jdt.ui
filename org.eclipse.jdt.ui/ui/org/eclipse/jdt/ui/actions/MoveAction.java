@@ -37,9 +37,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveInstanceMethodAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveStaticMembersAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgMoveAction;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 

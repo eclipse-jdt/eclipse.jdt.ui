@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.MoveProjectAction;
+import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -33,16 +33,19 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 
-public class ReorgMoveAction extends SelectionDispatchAction {
 
-	public ReorgMoveAction(IWorkbenchSite site) {
+public class ReorgCopyAction extends SelectionDispatchAction {
+
+	public ReorgCopyAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Move...");
-		setDescription("Move the selected elements");
+		setText("&Copy...");
+		setDescription("Copy the selected elements");
 
 		update(getSelection());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
@@ -65,11 +68,11 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return MoveRefactoring2.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		return CopyRefactoring2.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
-		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
+	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
+		CopyProjectAction action= new CopyProjectAction(JavaPlugin.getActiveWorkbenchShell());
 		action.selectionChanged(selection);
 		return action;
 	}
@@ -95,22 +98,22 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		MoveRefactoring2 refactoring= createRefactoring(resources, javaElements);
+		CopyRefactoring2 refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
+		refactoring.setNewNameQueries(new NewNameQueries(wizard));
 		refactoring.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
-	private RefactoringWizard createWizard(MoveRefactoring2 refactoring) {
-		return new ReorgMoveWizard(refactoring);
+	private RefactoringWizard createWizard(CopyRefactoring2 refactoring) {
+		return new ReorgCopyWizard(refactoring);
 	}
 
-	private MoveRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+	private CopyRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+		return CopyRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
-
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.text.MessageFormat;
 
@@ -21,10 +21,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.*;
+import org.eclipse.jdt.internal.ui.refactoring.MessageInputPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteWizard extends RefactoringWizard{

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -34,7 +34,6 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.DestinationContentProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 

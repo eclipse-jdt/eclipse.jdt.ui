@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -50,6 +50,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 
 public class PasteAction extends SelectionDispatchAction{
 

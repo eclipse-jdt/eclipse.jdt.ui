@@ -8,11 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.reorg2;
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.JavaModelException;
 
-public interface IConfirmQuery {
-	public boolean confirm(String question) throws OperationCanceledException;
-	public boolean confirm(String question, Object[] elements) throws OperationCanceledException;
+public interface IReorgEnablementPolicy {
+	public boolean canEnable() throws JavaModelException;
 }

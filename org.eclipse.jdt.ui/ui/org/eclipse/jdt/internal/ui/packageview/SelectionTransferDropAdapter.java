@@ -34,13 +34,13 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.MoveRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgCopyStarter;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgMoveStarter;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
