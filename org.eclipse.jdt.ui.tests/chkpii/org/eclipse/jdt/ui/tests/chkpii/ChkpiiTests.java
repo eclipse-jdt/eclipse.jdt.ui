@@ -15,13 +15,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
-
 import org.eclipse.osgi.service.environment.Constants;
 
 import org.eclipse.core.runtime.Platform;
@@ -48,6 +49,50 @@ public class ChkpiiTests extends TestCase {
 		public String toString() {
 			return fName.toUpperCase();
 		}
+	}
+	private static class StreamConsumer extends Thread {
+		StringBuffer fStrBuffer;
+		BufferedReader fReader;
+		
+
+		public String getContents() {
+			return fStrBuffer.toString();
+		}
+		
+		public StreamConsumer(InputStream inputStream) {
+			super();
+			setDaemon(true);
+			try {
+				fReader = new BufferedReader(new InputStreamReader(inputStream, "LATIN1"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				fReader = new BufferedReader(new InputStreamReader(inputStream));
+			}
+			fStrBuffer= new StringBuffer();
+		}
+
+		public void run() {
+			try {
+				char[] buf= new char[1024];
+				int count;
+				while (0 < (count = fReader.read(buf))) {
+					fStrBuffer.append(buf, 0, count);
+				}
+				fReader.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		public void terminate() {
+			interrupt();
+			try {
+				fReader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 	
 	private final FileCategory HTML= new FileCategory("HTML") {
@@ -81,32 +126,29 @@ public class ChkpiiTests extends TestCase {
 	private boolean executeChkpiiProcess(FileCategory type) {
 		Runtime aRuntime= Runtime.getRuntime();
 		String chkpiiString= getChkpiiString(type);
-		BufferedReader aBufferedReader= null;
-		StringBuffer consoleLog= new StringBuffer();
+		
+		StreamConsumer err= null;
+		StreamConsumer out= null;
 		try {
-			Process aProcess= aRuntime.exec(chkpiiString);
-			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-			String line= aBufferedReader.readLine();
-			while (line != null) {
-				consoleLog.append(line);
-				consoleLog.append('\n');
-				line= aBufferedReader.readLine();
-			}
-			aProcess.waitFor();
+			Process process= aRuntime.exec(chkpiiString);
+			err= new StreamConsumer(process.getErrorStream());
+			out= new StreamConsumer(process.getInputStream());
+			err.start();
+			out.start();
+			process.waitFor();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		} catch (InterruptedException e) {
 			return false;
 		} finally {
-			if (aBufferedReader != null)
-				try {
-					aBufferedReader.close();
-				} catch (IOException ex) {
-				}
+			out.terminate();
+			err.terminate();
 		}
-		if (!new File(type.getOutputFile()).exists()) {
-			System.out.println(consoleLog.toString());
+		
+ 		if (err.getContents().length() > 0 || !new File(type.getOutputFile()).exists()) {
+			System.out.println(out.getContents());
+			System.out.println(err.getContents());
 			System.out.flush();
 			return false;
 		}
