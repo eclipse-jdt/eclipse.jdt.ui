@@ -1,15 +1,10 @@
 package org.eclipse.jdt.ui.tests.text;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-
-import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class StringsTest extends TestCase {
 
