@@ -5,9 +5,13 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -19,6 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -32,7 +37,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
@@ -307,12 +314,63 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private RefactoringStatus checkPackageName(String newName) throws JavaModelException{		
+		RefactoringStatus status= new RefactoringStatus();
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
+		Set topLevelTypeNames= getTopLevelTypeNames();
 		for (int i= 0; i < roots.length; i++) {
-			if (! isPackageNameOkInRoot(newName, roots[i]))
-				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.aleady_exists", fNewName));//$NON-NLS-1$
+			if (! isPackageNameOkInRoot(newName, roots[i])){
+				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.aleady_exists", new Object[]{fNewName, roots[i].getElementName()});//$NON-NLS-1$
+				status.merge(RefactoringStatus.createWarningStatus(message));
+				status.merge(checkTypeNameConflicts(roots[i], newName, topLevelTypeNames)); 
+			}
 		}
-		return new RefactoringStatus();
+		return status;
+	}
+	
+	private Set getTopLevelTypeNames() throws JavaModelException {
+		ICompilationUnit[] cus= fPackage.getCompilationUnits();
+		Set result= new HashSet(2 * cus.length); 
+		for (int i= 0; i < cus.length; i++) {
+			result.addAll(getTopLevelTypeNames(cus[i]));
+		}
+		return result;
+	}
+	
+	private static Collection getTopLevelTypeNames(ICompilationUnit iCompilationUnit) throws JavaModelException {
+		IType[] types= iCompilationUnit.getTypes();
+		List result= new ArrayList(types.length);
+		for (int i= 0; i < types.length; i++) {
+			result.add(types[i].getElementName());
+		}
+		return result;
+	}
+	
+	private RefactoringStatus checkTypeNameConflicts(IPackageFragmentRoot root, String newName, Set topLevelTypeNames) throws JavaModelException {
+		IPackageFragment otherPack= root.getPackageFragment(newName);
+		if (fPackage.equals(otherPack))
+			return null;
+		ICompilationUnit[] cus= otherPack.getCompilationUnits();
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < cus.length; i++) {
+			result.merge(checkTypeNameConflicts(cus[i], topLevelTypeNames));
+		}
+		return result;
+	}
+	
+	private RefactoringStatus checkTypeNameConflicts(ICompilationUnit iCompilationUnit, Set topLevelTypeNames) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		IType[] types= iCompilationUnit.getTypes();
+		String packageName= iCompilationUnit.getParent().getElementName();
+		for (int i= 0; i < types.length; i++) {
+			String name= types[i].getElementName();
+			if (topLevelTypeNames.contains(name)){
+				String pattern= "Package ''{0}'' already contains a type named ''{1}''";
+				String msg= MessageFormat.format(pattern, new String[]{packageName, name});
+				Context context= JavaSourceContext.create(types[i]);
+				result.addError(msg, context);
+			}	
+		}
+		return result;
 	}
 		
 	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
