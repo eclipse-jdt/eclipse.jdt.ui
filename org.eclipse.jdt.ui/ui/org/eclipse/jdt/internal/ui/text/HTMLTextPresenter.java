@@ -81,9 +81,12 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 	}
 	
 	private String getIndent(String line) {
+		int length= line.length();
+		
 		int i= 0;
-		while (Character.isWhitespace(line.charAt(i))) ++ i;
-		return (line.substring(0, i) + " ");
+		while (i < length && Character.isWhitespace(line.charAt(i))) ++i;
+		
+		return (i == length ? line : line.substring(0, i)) + " ";
 	}
 	
 	/*
