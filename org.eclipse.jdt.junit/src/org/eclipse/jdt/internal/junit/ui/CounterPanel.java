@@ -70,12 +70,9 @@ public class CounterPanel extends Composite {
 	}
 
 	public void reset() {
-		fNumberOfErrors.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
-		fNumberOfFailures.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
-		fNumberOfErrors.setText(" 0 "); //$NON-NLS-1$
-		fNumberOfFailures.setText(" 0 "); //$NON-NLS-1$
-		String runString= JUnitMessages.getFormattedString("CounterPanel.runcount", new String[] { Integer.toString(0), Integer.toString(0) }); //$NON-NLS-1$
-		fNumberOfRuns.setText(runString); 
+		setErrorValue(0);
+		setFailureValue(0);
+		setRunValue(0);
 		fTotal= 0;
 	}
 	
