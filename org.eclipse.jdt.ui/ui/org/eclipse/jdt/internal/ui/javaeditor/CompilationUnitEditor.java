@@ -775,7 +775,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		while (e.hasNext()) {
 			
 			IProblemAnnotation a= (IProblemAnnotation) e.next();
-			if (a.hasOverlay())
+			if (a.hasOverlay() || !a.isProblem())
 				continue;
 				
 			Position p= model.getPosition((Annotation) a);
