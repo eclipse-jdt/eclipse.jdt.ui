@@ -43,7 +43,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
