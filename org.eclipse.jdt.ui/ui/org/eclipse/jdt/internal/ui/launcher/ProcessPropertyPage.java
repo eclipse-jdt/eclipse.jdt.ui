@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.ui.dialogs.PropertyPage;
+package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.PropertyPage;
 public class ProcessPropertyPage extends PropertyPage {
 
 	/**
@@ -24,8 +24,7 @@ public class ProcessPropertyPage extends PropertyPage {
 		gd.verticalAlignment= gd.BEGINNING;
 		l1.setLayoutData(gd);
 		
-		Label l2= new Label(parent, SWT.WRAP | SWT.BORDER);
-		gd= new GridData(gd.FILL_HORIZONTAL);
+		Text l2= new Text(parent, SWT.WRAP | SWT.BORDER | SWT.V_SCROLL | SWT.READ_ONLY);		gd= new GridData(gd.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(80);
 		gd.heightHint= convertHeightInCharsToPixels(15);
 		l2.setLayoutData(gd);
@@ -35,7 +34,7 @@ public class ProcessPropertyPage extends PropertyPage {
 		return parent;
 	}
 	
-	private void initCommandLineLabel(Label l) {
+	private void initCommandLineLabel(Text l) {
 		Object o= getElement();
 		if (o instanceof IDebugTarget)
 			o= ((IDebugTarget)o).getProcess();

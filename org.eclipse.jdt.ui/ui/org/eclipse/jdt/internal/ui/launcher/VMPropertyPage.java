@@ -16,6 +16,7 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	
 	public VMPropertyPage() {
 		fVMSelector= new VMSelector();
+		setDescription("Select the VM used to run Java programs");
 	}
 	
 	protected Control createJavaContents(Composite ancestor) {
