@@ -16,8 +16,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -108,6 +110,17 @@ public class JavaSearchScopeFactory {
 		}
 		return createJavaSearchScope(javaProjects);
 	}
+	
+	public int getEnclosingProjectsCount(IJavaSearchScope scope) {
+		IPath[] paths= scope.enclosingProjectsAndJars();
+		int count= 0;
+		for (int i= 0; i < paths.length; i++) {
+			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(paths[i]);
+			if (resource != null && resource.getType() == IResource.PROJECT)
+				count++;
+		}
+		return count;
+	}
 
 	private Set getJavaElements(ISelection selection) {
 		Set javaElements;
@@ -168,6 +181,10 @@ public class JavaSearchScopeFactory {
 		javaElements.add(javaElement);
 	}
 
+	private void addJavaElements(Set javaElements, IJavaElement javaElement) {
+		javaElements.add(javaElement);
+	}
+	
 	private void addJavaElements(Set javaElements, IWorkingSet workingSet) {
 		if (workingSet == null)
 			return;
