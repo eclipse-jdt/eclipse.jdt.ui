@@ -90,7 +90,8 @@ public class ParameterEditDialog extends StatusDialog {
 						validate((Text)e.widget);
 					}
 				});
-			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(fContext, true, false);
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
+			processor.setPackageFragment(fContext);
 			ControlContentAssistHelper.createTextContentAssistant(fType, processor);
 		}
 

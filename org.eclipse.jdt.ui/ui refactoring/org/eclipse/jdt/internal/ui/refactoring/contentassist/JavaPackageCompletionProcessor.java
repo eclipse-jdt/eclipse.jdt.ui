@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -33,31 +32,27 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaPackageCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
-	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
-	
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private JavaCompletionProposalComparator fComparator;
+	private JavaElementLabelProvider fImageProvider;
 
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 
 	/**
-	 * Creates a <code>JavaPackageCompletionProcessor</code> to complete existing packages
-	 * in the context of <code>packageFragmentRoot</code>.
-	 *  
-	 * @param packageFragmentRoot the context for package completion
+	 * Creates a <code>JavaPackageCompletionProcessor</code>.
+	 * The completion context must be set via {@link #setPackageFragmentRoot(IPackageFragmentRoot)}.
 	 */
-	public JavaPackageCompletionProcessor(IPackageFragmentRoot packageFragmentRoot) {
-		fPackageFragmentRoot= packageFragmentRoot;
+	public JavaPackageCompletionProcessor() {
 		fComparator= new JavaCompletionProposalComparator();
+		fImageProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
@@ -129,10 +124,16 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	 *      int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
+		if (fPackageFragmentRoot == null)
+			return null;
 		String input= contentAssistSubject.getDocument().get();
 		ICompletionProposal[] proposals= createPackagesProposals(documentOffset, input);
 		Arrays.sort(proposals, fComparator);
 		return proposals;
+	}
+	
+	public void setPackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot) {
+		fPackageFragmentRoot= packageFragmentRoot;
 	}
 
 	private ICompletionProposal[] createPackagesProposals(int documentOffset, String input) {
@@ -145,7 +146,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 				String packName= pack.getElementName();
 				if (packName.length() == 0 || ! packName.startsWith(prefix))
 					continue;
-				Image image= getImage(JavaPluginImages.DESC_OBJS_PACKAGE);
+				Image image= fImageProvider.getImage(pack);
 				JavaCompletionProposal proposal= new JavaCompletionProposal(packName, 0, input.length(), image, packName, 0);
 				proposals.add(proposal);
 			}
@@ -153,9 +154,5 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 			JavaPlugin.log(e);
 		}
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-	}
-
-	private static Image getImage(ImageDescriptor descriptor) {
-		return (descriptor == null) ? null : JavaPackageCompletionProcessor.IMAGE_DESC_REGISTRY.get(descriptor);
 	}
 }

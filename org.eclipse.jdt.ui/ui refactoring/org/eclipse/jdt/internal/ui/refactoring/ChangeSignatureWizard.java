@@ -136,7 +136,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					}
 				});
 				
-				JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(getPackageFragment(), true, true);
+				JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
+				processor.setPackageFragment(getPackageFragment());
 				ControlContentAssistHelper.createTextContentAssistant(text, processor);
 		}
 

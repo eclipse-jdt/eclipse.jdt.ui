@@ -72,15 +72,13 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	private char[] fProposalAutoActivationSet;
 	
 	/**
-	 * Creates a <code>JavaTypeCompletionProcessor</code> to complete existing types
-	 * in the context of <code>packageFragment</code>.
+	 * Creates a <code>JavaTypeCompletionProcessor</code>.
+	 * The completion context must be set via {@link #setPackageFragment(IPackageFragment)}.
 	 * 
-	 * @param packageFragment the context for type completion
 	 * @param enableBaseTypes complete java base types iff <code>true</code>
 	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
 	 */
-	public JavaTypeCompletionProcessor(IPackageFragment packageFragment, boolean enableBaseTypes, boolean enableVoid) {
-		fPackageFragment= packageFragment;
+	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid) {
 		fEnableBaseTypes= enableBaseTypes;
 		fEnableVoid= enableVoid;
 		fComparator= new JavaCompletionProposalComparator();
@@ -88,6 +86,13 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet = triggers.toCharArray();
+	}
+
+	/**
+	 * @param currPackage the new completion context
+	 */
+	public void setPackageFragment(IPackageFragment packageFragment) {
+		fPackageFragment= packageFragment;
 	}
 
 	/**
@@ -149,10 +154,15 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
-		String input= contentAssistSubject.getDocument().get();
-		if (documentOffset == 0)
+		if (fPackageFragment == null)
 			return null;
-		ICompletionProposal[] proposals= internalComputeCompletionProposals(documentOffset, input);
+		String input= contentAssistSubject.getDocument().get();
+		ICompletionProposal[] proposals;
+		if (documentOffset == 0) {
+			proposals= internalComputeCompletionProposals(1, "a"); //$NON-NLS-1$
+		} else {
+			proposals= internalComputeCompletionProposals(documentOffset, input);
+		}
 		Arrays.sort(proposals, fComparator);
 		return proposals;
 	}

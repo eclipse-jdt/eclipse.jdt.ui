@@ -168,8 +168,9 @@ public class MoveMembersWizard extends RefactoringWizard {
 			} else {
 				setPageComplete(false);
 			}
-			IPackageFragment root= (IPackageFragment) getMoveRefactoring().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(root, false, false);
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false);
+			IPackageFragment context= (IPackageFragment) getMoveRefactoring().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			processor.setPackageFragment(context);
 			fContentAssistant= ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
 			
 			Button button= new Button(composite, SWT.PUSH);

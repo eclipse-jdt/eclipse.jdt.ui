@@ -601,7 +601,8 @@ public class ChangeParametersControl extends Composite {
 		if (! (control instanceof Text))
 			return;
 		Text text= (Text) control;
-		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(fTypeContext, true, false);
+		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
+		processor.setPackageFragment(fTypeContext);
 		ControlContentAssistHelper.createTextContentAssistant(text, processor);
 	}
 
