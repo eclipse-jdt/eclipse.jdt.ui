@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -51,7 +52,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 			return null;			
 			
 		IJavaElement curr= result[0];
-		if ((curr instanceof IMember || curr instanceof ILocalVariable) && curr instanceof ISourceReference) {
+		if ((curr instanceof IMember || curr instanceof ILocalVariable || curr instanceof ITypeParameter) && curr instanceof ISourceReference) {
 			try {
 				String source= ((ISourceReference) curr).getSource();
 				if (source == null)
@@ -70,7 +71,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 				String firstLine= sourceLines[0];
 				if (!Character.isWhitespace(firstLine.charAt(0)))
 					sourceLines[0]= ""; //$NON-NLS-1$
-				Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth());
+				Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth(curr.getJavaProject()));
 
 				if (!Character.isWhitespace(firstLine.charAt(0)))
 					sourceLines[0]= firstLine;
