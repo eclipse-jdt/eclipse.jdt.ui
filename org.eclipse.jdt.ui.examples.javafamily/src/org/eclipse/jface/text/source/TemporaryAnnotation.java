@@ -137,14 +137,7 @@ public class TemporaryAnnotation extends Annotation implements IAnnotationExtens
 	public boolean isError()  {
 		return fSeverity == ERROR;
 	}
-	
-	/*
-	 * @see IJavaAnnotation#isRelevant()
-	 */
-	public boolean isRelevant() {
-		return true;
-	}
-	
+
 	/*
 	 * @see IAnnotationExtension#getMessage()
 	 */

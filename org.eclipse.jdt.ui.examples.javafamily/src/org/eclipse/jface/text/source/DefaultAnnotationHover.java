@@ -20,15 +20,11 @@ import java.util.Map;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationHover;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 
 /**
- * Determines all annotations for the given line and collects, concatenates, and formats
- * their messages.
+ * Determines all annotations for the given line, collects,
+ * concatenates, and formats their messages.
  * 
  * @since 3.0
  */
@@ -79,8 +75,11 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 		HashMap messagesAtPosition= new HashMap();
 		while (e.hasNext()) {
 			Object o= e.next();
+
 			if (o instanceof IAnnotationExtension) {
+			
 				IAnnotationExtension a= (IAnnotationExtension)o;
+				
 				Position position= model.getPosition((Annotation)a);
 				if (position == null)
 					continue;
@@ -163,16 +162,10 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 		return null;
 	}
 
-	/*
-	 * Formats a message as HTML text.
-	 */
 	private String formatSingleMessage(String message) {
 		return message;
 	}
 
-	/*
-	 * Formats several message as HTML text.
-	 */
 	private String formatMultipleMessages(List messages) {
 		StringBuffer buffer= new StringBuffer();
 		Iterator e= messages.iterator();
