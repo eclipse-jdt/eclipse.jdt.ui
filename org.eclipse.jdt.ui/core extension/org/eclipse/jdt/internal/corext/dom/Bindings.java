@@ -52,7 +52,20 @@ public class Bindings {
 			return k2.equals(k1);
 	}
 		
-	public static String asString(IMethodBinding method) {
+	public static String asString(IBinding binding){
+		if (binding instanceof IMethodBinding)
+			return asString((IMethodBinding)binding);
+		else if (binding instanceof ITypeBinding)
+			return asString((ITypeBinding)binding);
+		else
+			return binding.toString();
+	}
+
+	private static String asString(ITypeBinding type) {
+		return type.getQualifiedName();
+	}
+		
+	private static String asString(IMethodBinding method) {
 		StringBuffer result= new StringBuffer(method.getName());
 		result.append('(');
 		ITypeBinding[] parameters= method.getParameterTypes();
