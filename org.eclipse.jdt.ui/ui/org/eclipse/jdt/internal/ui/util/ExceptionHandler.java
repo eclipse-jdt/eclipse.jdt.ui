@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -121,7 +122,7 @@ public class ExceptionHandler {
 			msg.write("\n\n"); //$NON-NLS-1$
 		}
 		if (exceptionMessage == null || exceptionMessage.length() == 0)
-			msg.write(t.toString());
+			msg.write(JavaUIMessages.getString("ExceptionDialog.seeErrorLogMessage")); //$NON-NLS-1$
 		else
 			msg.write(exceptionMessage);
 		MessageDialog.openError(shell, title, msg.toString());			
