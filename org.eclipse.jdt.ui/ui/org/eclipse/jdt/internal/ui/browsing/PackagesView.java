@@ -565,7 +565,7 @@ public class PackagesView extends JavaBrowsingPart{
 	void adjustInputAndSetSelection(IJavaElement je) {
 
 		IJavaElement jElementToSelect= getSuitableJavaElement(findElementToSelect(je));
-		LogicalPackgesContentProvider p= (LogicalPackgesContentProvider) fWrappedViewer.getContentProvider();
+		LogicalPackagesProvider p= (LogicalPackagesProvider) fWrappedViewer.getContentProvider();
 
 		Object elementToSelect= jElementToSelect;
 		if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {

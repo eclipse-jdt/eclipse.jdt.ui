@@ -118,8 +118,8 @@ class PackageViewerWrapper extends StructuredViewer {
 
 			//try and give the two a common super class
 			IContentProvider provider= fViewer.getContentProvider();
-			if (provider instanceof LogicalPackgesContentProvider) {
-				LogicalPackgesContentProvider fprovider= (LogicalPackgesContentProvider) provider;
+			if (provider instanceof LogicalPackagesProvider) {
+				LogicalPackagesProvider fprovider= (LogicalPackagesProvider) provider;
 
 				Object object= sel.getFirstElement();
 				if (object instanceof IPackageFragment) {

@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * but might be required to later.
  * </p>
  */
-class PackagesViewHierarchicalContentProvider extends LogicalPackgesContentProvider implements ITreeContentProvider, IElementChangedListener {
+class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider implements ITreeContentProvider, IElementChangedListener {
 	private boolean fProjectViewState= true;
 	
 	public PackagesViewHierarchicalContentProvider(StructuredViewer viewer){

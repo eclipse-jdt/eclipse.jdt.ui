@@ -25,14 +25,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class LogicalPackgesContentProvider implements IPropertyChangeListener {
+class LogicalPackagesProvider implements IPropertyChangeListener {
 
 	protected Map fMapToLogicalPackage;
 	protected Map fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
 	
-	public LogicalPackgesContentProvider(StructuredViewer viewer){
+	public LogicalPackagesProvider(StructuredViewer viewer){
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
 		fMapToLogicalPackage= new HashMap();

@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * but might be required to later.
  * </p>
  */
-class PackagesViewFlatContentProvider extends LogicalPackgesContentProvider implements IStructuredContentProvider, IElementChangedListener, IPropertyChangeListener{
+class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider, IElementChangedListener, IPropertyChangeListener{
 	PackagesViewFlatContentProvider(StructuredViewer viewer) {
 		super(viewer);
 	}
