@@ -38,7 +38,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -101,6 +101,322 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacing0EmptyLines() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacing1EmptyLine() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacing2EmptyLines() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    \n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    \n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacingComment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("//comment\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("//comment\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacingJavadoc() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * javadoc\n");
+		buf.append("     */\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * javadoc\n");
+		buf.append("     */\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int goo(Vector vec, boolean b) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testMethodSpacingNonJavadoc() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     * non javadoc\n");
+		buf.append("     */\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        int i= goo(vec, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    void fred() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     * non javadoc\n");
+		buf.append("     */\n");
 		buf.append("    void foo(Vector vec) {\n");
 		buf.append("        int i= goo(vec, true);\n");
 		buf.append("    }\n");
