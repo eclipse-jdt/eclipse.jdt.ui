@@ -142,7 +142,7 @@ public class MoveCuUpdateCreator {
 				}	
 				if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
 					ImportEdit importEdit= getImportEdit(referencingCu);
-					IType primaryType= JavaModelUtil.findPrimaryType(movedUnit);
+					IType primaryType= movedUnit.findPrimaryType();
 					importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(primaryType));
 					importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName()); //$NON-NLS-1$
 				}	
