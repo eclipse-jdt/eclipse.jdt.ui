@@ -10,6 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -27,12 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-
-import org.eclipse.jdt.junit.ITestRunListener;
 
 
 /**
@@ -109,8 +111,22 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	public String getAllFailedTestNames() {
 		StringBuffer trace= new StringBuffer();
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
-		for (int i= 0; i < fTable.getItemCount(); i++) 
-			trace.append(getTestInfo(fTable.getItem(i)).getTestName()).append(lineDelim);
+		for (int i= 0; i < fTable.getItemCount(); i++) {
+			TestRunInfo testInfo= getTestInfo(fTable.getItem(i));
+			trace.append(testInfo.getTestName()).append(lineDelim);
+			String failureTrace= testInfo.getTrace();
+			if (failureTrace != null) {
+				StringReader stringReader= new StringReader(failureTrace);
+				BufferedReader bufferedReader= new BufferedReader(stringReader);
+				String line;
+				try {
+					while ((line= bufferedReader.readLine()) != null) 
+						trace.append(line+lineDelim);
+				} catch (IOException e) {
+					trace.append(lineDelim);
+				}	
+			}
+		}
 		return trace.toString();
 	}
 	
