@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.util.Iterator;
+
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.graphics.GC;
@@ -150,10 +152,22 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 	
 	public void setOverlay(IProblemAnnotation problemAnnotation) {
+		if (fOverlay != null)
+			fOverlay.removeOverlaid(this);
+			
 		fOverlay= problemAnnotation;
 		fNotRelevant= (fNotRelevant || fOverlay != null);
+		
+		if (problemAnnotation != null)
+			problemAnnotation.addOverlaid(this);
 	}
 	
+	/*
+	 * @see IProblemAnnotation#hasOverlay()
+	 */
+	public boolean hasOverlay() {
+		return fOverlay != null;
+	}
 	
 	/*
 	 * @see MarkerAnnotation#getImage(Display)
@@ -165,5 +179,27 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 				return image;
 		}
 		return super.getImage(display);
+	}
+	
+	/*
+	 * @see IProblemAnnotation#addOverlaid(IProblemAnnotation)
+	 */
+	public void addOverlaid(IProblemAnnotation annotation) {
+		// not supported
+	}
+
+	/*
+	 * @see IProblemAnnotation#removeOverlaid(IProblemAnnotation)
+	 */
+	public void removeOverlaid(IProblemAnnotation annotation) {
+		// not supported
+	}
+	
+	/*
+	 * @see IProblemAnnotation#getOverlaidIterator()
+	 */
+	public Iterator getOverlaidIterator() {
+		// not supported
+		return null;
 	}
 }

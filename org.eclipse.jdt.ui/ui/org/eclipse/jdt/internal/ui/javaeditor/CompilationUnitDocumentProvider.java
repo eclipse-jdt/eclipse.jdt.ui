@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +112,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IProblemAnnotation {
 			
+			private List fOverlaids;
 			private IProblem fProblem;
 			private Image fImage;
 			private static Image fgImage;
@@ -196,6 +198,122 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			public boolean isRelevant() {
 				return true;
 			}
+			
+			/*
+			 * @see IProblemAnnotation#hasOverlay()
+			 */
+			public boolean hasOverlay() {
+				return false;
+			}
+			
+			/*
+			 * @see IProblemAnnotation#addOverlaid(IProblemAnnotation)
+			 */
+			public void addOverlaid(IProblemAnnotation annotation) {
+				if (fOverlaids == null)
+					fOverlaids= new ArrayList(1);
+				fOverlaids.add(annotation);
+			}
+
+			/*
+			 * @see IProblemAnnotation#removeOverlaid(IProblemAnnotation)
+			 */
+			public void removeOverlaid(IProblemAnnotation annotation) {
+				if (fOverlaids != null) {
+					fOverlaids.remove(annotation);
+					if (fOverlaids.size() == 0)
+						fOverlaids= null;
+				}
+			}
+			
+			/*
+			 * @see IProblemAnnotation#getOverlaidIterator()
+			 */
+			public Iterator getOverlaidIterator() {
+				if (fOverlaids != null)
+					return fOverlaids.iterator();
+				return null;
+			}
+		};
+		
+		/**
+		 * Internal structure for mapping positions to some value. 
+		 * The reason for this specific structure is that positions can
+		 * change over time. Thus a lookup is based on value and not
+		 * on hash value.
+		 */
+		protected static class ReverseMap {
+			
+			static class Entry {
+				Position fPosition;
+				Object fValue;
+			};
+			
+			private List fList= new ArrayList(2);
+			private int fAnchor= 0;
+			
+			public ReverseMap() {
+			}
+			
+			public Object get(Position position) {
+				
+				Entry entry;
+				
+				// behind anchor
+				int length= fList.size();
+				for (int i= fAnchor; i < length; i++) {
+					entry= (Entry) fList.get(i);
+					if (entry.fPosition.equals(position)) {
+						fAnchor= i;
+						return entry.fValue;
+					}
+				}
+				
+				// before anchor
+				for (int i= 0; i < fAnchor; i++) {
+					entry= (Entry) fList.get(i);
+					if (entry.fPosition.equals(position)) {
+						fAnchor= i;
+						return entry.fValue;
+					}
+				}
+				
+				return null;
+			}
+			
+			private int getIndex(Position position) {
+				Entry entry;
+				int length= fList.size();
+				for (int i= 0; i < length; i++) {
+					entry= (Entry) fList.get(i);
+					if (entry.fPosition.equals(position))
+						return i;
+				}
+				return -1;
+			}
+			
+			public void put(Position position,  Object value) {
+				int index= getIndex(position);
+				if (index == -1) {
+					Entry entry= new Entry();
+					entry.fPosition= position;
+					entry.fValue= value;
+					fList.add(entry);
+				} else {
+					Entry entry= (Entry) fList.get(index);
+					entry.fValue= value;
+				}
+			}
+			
+			public void remove(Position position) {
+				int index= getIndex(position);
+				if (index > -1)
+					fList.remove(index);
+			}
+			
+			public void clear() {
+				fList.clear();
+			}
 		};
 		
 		/**
@@ -210,7 +328,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
 			
-			private Map fReverseMap= new HashMap();
+			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyShadowed= null; 
 			private List fCurrentlyShadowed= new ArrayList();
 			

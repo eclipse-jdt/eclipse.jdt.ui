@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.util.Iterator;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -15,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
 public interface IProblemAnnotation {
 	
 	boolean isProblem();
-
+	
 	String getMessage();
 	
 	String[] getArguments();
@@ -28,8 +30,18 @@ public interface IProblemAnnotation {
 	boolean isWarning();
 	
 	boolean isError();
-		
-	boolean isRelevant();
+	
 	
 	Image getImage(Display display);
+	
+	boolean isRelevant();
+	
+	boolean hasOverlay();
+	
+	
+	Iterator getOverlaidIterator();
+	
+	void addOverlaid(IProblemAnnotation annotation);
+	
+	void removeOverlaid(IProblemAnnotation annotation);
 }

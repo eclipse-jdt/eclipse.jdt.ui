@@ -685,21 +685,38 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
-		IMarker nextError= getNextError(s.getOffset(), forward);
+		Position errorPosition= new Position(0, 0);
+		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
 		
 		if (nextError != null) {
 			
-			gotoMarker(nextError);
+			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
+//			setStatusLineErrorMessage(nextError.getMessage());
 			
-			IWorkbenchPage page= getSite().getPage();
-			
-			IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
-			if (view instanceof TaskList) {
-				StructuredSelection ss= new StructuredSelection(nextError);
-				((TaskList) view).setSelection(ss, true);
+			IMarker marker= null;
+			if (nextError instanceof MarkerAnnotation)
+				marker= ((MarkerAnnotation) nextError).getMarker();
+			else {
+				Iterator e= nextError.getOverlaidIterator();
+				if (e != null) {
+					while (e.hasNext()) {
+						Object o= e.next();
+						if (o instanceof MarkerAnnotation) {
+							marker= ((MarkerAnnotation) o).getMarker();
+							break;
+						}
+					}
+				}
 			}
 			
-			setStatusLineErrorMessage(nextError.getAttribute(IMarker.MESSAGE, "")); //$NON-NLS-1$
+			if (marker != null) {
+				IWorkbenchPage page= getSite().getPage();
+				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
+				if (view instanceof TaskList) {
+					StructuredSelection ss= new StructuredSelection(marker);
+					((TaskList) view).setSelection(ss, true);
+				}
+			}
 			
 		} else {
 			
@@ -733,46 +750,49 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	private IMarker getNextError(int offset, boolean forward) {
+	private IProblemAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
 		
-		IMarker nextError= null;
+		IProblemAnnotation nextError= null;
+		Position nextErrorPosition= null;
 		
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
 		int endOfDocument= document.getLength(); 
 		int distance= 0;
 		
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= model.getAnnotationIterator();
+		Iterator e= new ProblemAnnotationIterator(model, false);
 		while (e.hasNext()) {
-			Annotation a= (Annotation) e.next();
-			if (a instanceof MarkerAnnotation) {
-				MarkerAnnotation ma= (MarkerAnnotation) a;
-				IMarker marker= ma.getMarker();
-		
-				if (MarkerUtilities.isMarkerType(marker, IMarker.PROBLEM)) {
-					Position p= model.getPosition(a);
-					if (!p.includes(offset)) {
-						
-						int currentDistance= 0;
-						
-						if (forward) {
-							currentDistance= p.getOffset() - offset;
-							if (currentDistance < 0)
-								currentDistance= endOfDocument - offset + p.getOffset();
-						} else {
-							currentDistance= offset - p.getOffset();
-							if (currentDistance < 0)
-								currentDistance= offset + endOfDocument - p.getOffset();
-						}						
-												
-						if (nextError == null || currentDistance < distance) {
-							distance= currentDistance;
-							nextError= marker;
-						}
-					}
+			
+			IProblemAnnotation a= (IProblemAnnotation) e.next();
+			if (a.hasOverlay())
+				continue;
+				
+			Position p= model.getPosition((Annotation) a);
+			if (!p.includes(offset)) {
+				
+				int currentDistance= 0;
+				
+				if (forward) {
+					currentDistance= p.getOffset() - offset;
+					if (currentDistance < 0)
+						currentDistance= endOfDocument - offset + p.getOffset();
+				} else {
+					currentDistance= offset - p.getOffset();
+					if (currentDistance < 0)
+						currentDistance= offset + endOfDocument - p.getOffset();
+				}						
+										
+				if (nextError == null || currentDistance < distance) {
+					distance= currentDistance;
+					nextError= a;
+					nextErrorPosition= p;
 				}
-		
 			}
+		}
+		
+		if (nextErrorPosition != null) {
+			errorPosition.setOffset(nextErrorPosition.getOffset());
+			errorPosition.setLength(nextErrorPosition.getLength());
 		}
 		
 		return nextError;
