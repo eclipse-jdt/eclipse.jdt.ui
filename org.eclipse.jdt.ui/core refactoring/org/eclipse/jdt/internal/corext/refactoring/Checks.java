@@ -25,6 +25,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -47,6 +50,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -59,7 +63,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -373,24 +378,49 @@ public class Checks {
 	}
 	
 	//---- Selection checks --------------------------------------------------------------------
-	
+
 	public static boolean isExtractableExpression(ASTNode[] selectedNodes, ASTNode coveringNode) {
 		ASTNode node= coveringNode;
+		if (isEnumCase(node))
+			return false;
 		if (selectedNodes != null && selectedNodes.length == 1)
 			node= selectedNodes[0];
 		return isExtractableExpression(node);
 	}
-	
+
+	public static boolean isEnumCase(ASTNode node) {
+		if (node instanceof SwitchCase) {
+			final SwitchCase caze= (SwitchCase) node;
+			final Expression expression= caze.getExpression();
+			if (expression instanceof Name) {
+				final Name name= (Name) expression;
+				final IBinding binding= name.resolveBinding();
+				if (binding != null) {
+					final IJavaElement element= binding.getJavaElement();
+					if (element instanceof IMember) {
+						final IMember member= (IMember) element;
+						try {
+							return Flags.isEnum(member.getFlags());
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	public static boolean isExtractableExpression(ASTNode node) {
-		if (! (node instanceof Expression))
+		if (!(node instanceof Expression))
 			return false;
 		if (node instanceof Name) {
-			IBinding binding= ((Name)node).resolveBinding();
-			return ! (binding instanceof ITypeBinding);
+			IBinding binding= ((Name) node).resolveBinding();
+			return !(binding instanceof ITypeBinding);
 		}
 		return true;
 	}
-	
+
 	public static boolean isInsideJavadoc(ASTNode node) {
 		do {
 			if (node.getNodeType() == ASTNode.JAVADOC)
