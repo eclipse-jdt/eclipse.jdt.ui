@@ -691,22 +691,21 @@ public final class ImportsStructure implements IImportsStructure {
 
 	/**
 	 * Removes an import from the structure.
-	 * @param qualifiedTypeName The qualified type name to remove from the imports
-	 * @param isStaticImport
+	 * @param qualifiedName The qualified type name to remove from the imports
 	 * @return Returns <code>true</code> if the import was found and removed
 	 */
-	public boolean removeImport(String qualifiedTypeName, boolean isStaticImport) {
-		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
-		int bracketOffset= qualifiedTypeName.indexOf('[');
+	public boolean removeImport(String qualifiedName) {
+		String typeContainerName= Signature.getQualifier(qualifiedName);
+		int bracketOffset= qualifiedName.indexOf('[');
 		if (bracketOffset != -1) {
-			qualifiedTypeName= qualifiedTypeName.substring(0, bracketOffset);
+			qualifiedName= qualifiedName.substring(0, bracketOffset);
 		}		
 		
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.getName().equals(typeContainerName)) {
-				if (entry.remove(qualifiedTypeName, isStaticImport)) {
+				if (entry.remove(qualifiedName, false)) {
 					fHasChanges= true;
 					return true;
 				}
@@ -717,17 +716,39 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Removes an import from the structure.
+	 * @param qualifiedName The qualified member name to remove from the imports
+	 * @return Returns <code>true</code> if the import was found and removed
+	 */
+	public boolean removeStaticImport(String qualifiedName) {
+		String containerName= Signature.getQualifier(qualifiedName);
+		
+		int nPackages= fPackageEntries.size();
+		for (int i= 0; i < nPackages; i++) {
+			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
+			if (entry.getName().equals(containerName)) {
+				if (entry.remove(qualifiedName, true)) {
+					fHasChanges= true;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Removes an import from the structure.
 	 * @param binding The type to remove from the imports
 	 * @return Returns <code>true</code> if the import was found and removed
 	 */
-	public boolean removeImport(ITypeBinding binding, boolean isStaticImport) {
+	public boolean removeImport(ITypeBinding binding) {
 		binding= Bindings.normalizeTypeBinding(binding);
 		if (binding == null) {
 			return false;
 		}		
 		String qualifiedName= Bindings.getRawQualifiedName(binding);
 		if (qualifiedName.length() > 0) {
-			return removeImport(qualifiedName, isStaticImport);
+			return removeImport(qualifiedName);
 		}
 		return false;
 	}	

@@ -152,7 +152,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
-		return fImportsStructure.removeImport(binding, false);
+		return fImportsStructure.removeImport(binding);
 	}
 	
 	/**
@@ -161,7 +161,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(String qualifiedTypeName) {
-		return fImportsStructure.removeImport(qualifiedTypeName, false);
+		return fImportsStructure.removeImport(qualifiedTypeName);
 	}
 	
 	/**
@@ -170,7 +170,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeStaticImport(String qualifiedName) {
-		return fImportsStructure.removeImport(qualifiedName, true);
+		return fImportsStructure.removeStaticImport(qualifiedName);
 	}
 	
 	/**

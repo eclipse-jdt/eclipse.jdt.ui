@@ -176,8 +176,8 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java", "com", "pack" };
 		
 		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
-		imports.removeImport("java.util.Set", false);
-		imports.removeImport("pack.List", false);
+		imports.removeImport("java.util.Set");
+		imports.removeImport("pack.List");
 		
 		imports.create(true, null);
 
