@@ -1,9 +1,10 @@
+package org.eclipse.jdt.internal.ui.snippeteditor;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.snippeteditor;
-
+ 
 import org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IMenuManager;
@@ -14,7 +15,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 
 
 /**
- * Contributions of the Snippet Editor to the Workbench's tool and menu bar.
+ * Contributions of the Java Snippet Editor to the Workbench's tool and menu bar.
  */
 public class SnippetEditorActionContributor extends BasicEditorActionContributor {
  	
@@ -41,9 +42,9 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		super.contributeToToolBar(toolBarManager);
 		
 		toolBarManager.add(new Separator());
-		toolBarManager.add(fRunAction);
-		toolBarManager.add(fDisplayAction);
 		toolBarManager.add(fInspectAction);
+		toolBarManager.add(fDisplayAction);
+		toolBarManager.add(fRunAction);		
 		toolBarManager.add(fStopAction);
 		toolBarManager.add(fRunInAction);
 	}
@@ -59,10 +60,10 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		if (editMenu != null) {	
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelectionAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelectionAction);
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));			
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspectAction);		
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplayAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fRunAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspectAction);
 		}
 	}
 	

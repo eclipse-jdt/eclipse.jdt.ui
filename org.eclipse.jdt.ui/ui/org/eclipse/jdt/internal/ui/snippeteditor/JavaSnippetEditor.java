@@ -147,15 +147,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		setAction("ContentAssistProposal", new TextOperationAction(SnippetMessages.getBundle(), "SnippetEditor.ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-2$ //$NON-NLS-1$
 		setAction("OpenOnSelection", new SnippetOpenOnSelectionAction(this));			 //$NON-NLS-1$
 		setAction("OpenHierarchyOnSelection", new SnippetOpenHierarchyOnSelectionAction(this));  //$NON-NLS-1$
+		setAction("Stop", new StopAction(this));
+		setAction("RunIn", new RunInPackageAction(this));
 	} 
-	
-	/**
-	 * @see IEditorPart#saveState(IMemento)
-	 */
-	/*public void saveState(IMemento memento) {
-		IFile file= (IFile) getEditorInput();
-		memento.putString(TAG, file.getFullPath().toString());
-	}*/
 	
 	/**
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(MenuManager)
@@ -171,6 +165,8 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Inspect"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Display"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Run"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Stop"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "RunIn"); //$NON-NLS-1$
 	}
 
 	public boolean isVMLaunched() {
@@ -348,7 +344,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		getShell().getDisplay().asyncExec(r);
 	}
 	
-	void evaluate(final String snippet) {
+	protected void evaluate(final String snippet) {
 		if (fAttempts < 200 && getThread() == null) {
 			// wait for our main thread to suspend
 			fAttempts++;
@@ -554,7 +550,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		}
 	}
 	
-	IJavaProject findJavaProject() throws JavaModelException {
+	protected IJavaProject findJavaProject() throws JavaModelException {
 		Object input= getEditorInput();
 		if (input instanceof IFileEditorInput) {
 			IFileEditorInput file= (IFileEditorInput)input;
@@ -570,7 +566,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		return null;
 	}
 		
-	boolean classPathHasChanged() {
+	protected boolean classPathHasChanged() {
 		String[] classpath= getClassPath(getJavaProject());
 		if (fLaunchedClassPath != null && !classPathsEqual(fLaunchedClassPath, classpath)) {
 			MessageDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.warning"), SnippetMessages.getString("SnippetEditor.warning.cpchange")); //$NON-NLS-2$ //$NON-NLS-1$
@@ -579,7 +575,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		return false;
 	}
 	
-	boolean classPathsEqual(String[] path1, String[] path2) {
+	protected boolean classPathsEqual(String[] path1, String[] path2) {
 		if (path1.length != path2.length)
 			return false;
 		for (int i= 0; i < path1.length; i++) {
@@ -589,7 +585,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		return true;
 	}
 		
-	synchronized void evaluationStarts() {
+	protected synchronized void evaluationStarts() {
 		if (fThread != null) {
 			try {
 				fThread.resume();
@@ -624,7 +620,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		}
 	}
 		
-	void evaluationEnds() {
+	protected void evaluationEnds() {
 		fEvaluating= false;
 		setTitleImage();
 		fireEvalStateChanged();
@@ -632,13 +628,13 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		getSourceViewer().setEditable(true);
 	}
 	
-	void showStatus(String message) {
+	protected void showStatus(String message) {
 		IEditorSite site=(IEditorSite)getSite();
 		EditorActionBarContributor contributor= (EditorActionBarContributor)site.getActionBarContributor();
 		contributor.getActionBars().getStatusLineManager().setMessage(message);
 	}
 	
-	String[] getClassPath(IJavaProject project) {
+	protected String[] getClassPath(IJavaProject project) {
 		try {
 			return JavaRuntime.computeDefaultRuntimeClassPath(project);
 		} catch (CoreException e) {
