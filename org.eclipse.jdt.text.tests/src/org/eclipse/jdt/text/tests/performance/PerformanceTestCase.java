@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 import junit.framework.TestCase;
 
 public class PerformanceTestCase extends TestCase {

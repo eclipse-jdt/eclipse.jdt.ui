@@ -19,6 +19,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.texteditor.ITextEditor;

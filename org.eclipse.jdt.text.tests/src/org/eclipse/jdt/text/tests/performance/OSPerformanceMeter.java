@@ -13,6 +13,8 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.perfmsr.core.IPerformanceMonitor;
 import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.perfmsr.core.PerfMsrCorePlugin;

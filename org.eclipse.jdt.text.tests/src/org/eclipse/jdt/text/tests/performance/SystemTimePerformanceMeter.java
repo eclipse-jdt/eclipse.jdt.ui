@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.jdt.text.tests.performance.data.Assert;
 import org.eclipse.jdt.text.tests.performance.data.DataPoint;
 import org.eclipse.jdt.text.tests.performance.data.MeteringSession;

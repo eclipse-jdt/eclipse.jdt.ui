@@ -14,6 +14,8 @@ package org.eclipse.jdt.text.tests.performance;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import junit.framework.TestCase;
 
 public abstract class PerformanceMeterFactory {

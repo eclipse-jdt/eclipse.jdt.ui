@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 public class SystemTimePerformanceMeterFactory extends PerformanceMeterFactory {
 
 	protected PerformanceMeter doCreatePerformanceMeter(String scenario) {

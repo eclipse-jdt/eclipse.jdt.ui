@@ -9,11 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.text.tests.performance;
+package org.eclipse.test.performance;
 
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+import org.eclipse.jdt.text.tests.performance.OSPerformanceMeterFactory;
+import org.eclipse.jdt.text.tests.performance.PerformanceMeterFactory;
 
 public class Performance {
 

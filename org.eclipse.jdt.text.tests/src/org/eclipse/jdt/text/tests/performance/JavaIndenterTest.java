@@ -16,6 +16,9 @@ import junit.framework.TestCase;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.jface.text.IDocument;

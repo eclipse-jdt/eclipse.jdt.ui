@@ -20,6 +20,9 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
