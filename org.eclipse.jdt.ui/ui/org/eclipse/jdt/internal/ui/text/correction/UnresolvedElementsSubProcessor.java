@@ -202,7 +202,7 @@ public class UnresolvedElementsSubProcessor {
 				break;
 			case ASTNode.THROW_STATEMENT:
 			case ASTNode.CLASS_INSTANCE_CREATION:
-				kind= SimilarElementsRequestor.CLASSES;
+				kind= SimilarElementsRequestor.REF_TYPES;
 				break;
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
 				int superParent= parent.getParent().getNodeType();
