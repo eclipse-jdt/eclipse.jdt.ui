@@ -61,6 +61,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private TextPresentation fTextPresentation;
 	private int fBold= 0;
 	private int fStartOffset= -1;
+	private boolean fInParagraph= false;
 
 	/**
 	 * Transforms the html text from the reader to formatted text.
@@ -140,14 +141,19 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return ""; //$NON-NLS-1$
 		}
 
-		if ("p".equals(html)) //$NON-NLS-1$
+		if ("p".equals(html))  { //$NON-NLS-1$
+			fInParagraph= true;
 			return LINE_DELIM;
+		}
 
 		if ("br".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
 		
-		if ("/p".equals(html)) //$NON-NLS-1$
-			return LINE_DELIM;
+		if ("/p".equals(html))  { //$NON-NLS-1$
+			boolean inParagraph= fInParagraph;
+			fInParagraph= false;
+			return inParagraph ? "" : LINE_DELIM; //$NON-NLS-1$
+		}
 			
 		if ("/h5".equals(html) || "/dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
 			stopBold();
@@ -204,11 +210,11 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		 
 		return html2Text(buf.toString());
 	}
-
+	
 	private void unread(int ch) throws IOException {
 		((PushbackReader) getReader()).unread(ch);
 	}
-
+	
 	protected String entity2Text(String symbol) {
 		if (symbol.length() > 1 && symbol.charAt(0) == '#') {
 			int ch;

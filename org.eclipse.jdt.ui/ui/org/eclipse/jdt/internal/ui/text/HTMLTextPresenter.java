@@ -111,13 +111,14 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			
 			String line=reader.readLine();
 			boolean lineFormatted= reader.isFormattedLine();
+			boolean firstLineProcessed= false;
 			
 			while (line != null) {
 				
 				if (fEnforceUpperLineLimit && maxNumberOfLines <= 0)
 					break;
 				
-				if (buffer.length() > 0) {
+				if (firstLineProcessed) {
 					if (!lastLineFormatted)
 						append(buffer, LINE_DELIM, null);
 					else {
@@ -128,6 +129,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 				}
 				
 				append(buffer, line, null);
+				firstLineProcessed= true;
 				
 				lastLineFormatted= lineFormatted;
 				if (!lineFormatted)
