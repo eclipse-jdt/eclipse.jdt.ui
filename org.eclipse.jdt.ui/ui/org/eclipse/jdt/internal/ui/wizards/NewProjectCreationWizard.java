@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.core.runtime.Platform;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.launcher.VMWizardPage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.WorkbenchException;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.ui.IWorkbenchPreferenceConstants;import org.eclipse.ui.plugin.AbstractUIPlugin;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.core.runtime.Platform;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.WorkbenchException;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.ui.IWorkbenchPreferenceConstants;import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class NewProjectCreationWizard extends NewElementWizard implements IExecutableExtension {
 
@@ -18,7 +18,6 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 
 	private NewJavaProjectWizardPage fJavaPage;
 	private WizardNewProjectCreationPage fMainPage;
-	private VMWizardPage fVMPage;
 	private IConfigurationElement fConfigElement;
 
 	public NewProjectCreationWizard() {
@@ -41,8 +40,6 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
 		fJavaPage= new NewJavaProjectWizardPage(root, fMainPage);
 		addPage(fJavaPage);
-		fVMPage= new VMWizardPage(fMainPage);
-		addPage(fVMPage);
 	}		
 	
 
@@ -61,7 +58,6 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		} catch  (InterruptedException e) {
 			return false;
 		}
-		fVMPage.finish();
 		updatePerspective();
 		selectAndReveal(fJavaPage.getNewJavaProject().getProject());
 		return true;

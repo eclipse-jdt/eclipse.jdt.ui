@@ -135,9 +135,6 @@ public class ResourceReorgSupport  implements ICopySupport, IMoveSupport, INamin
 	private IContainer getDestination(Object dest) {
 		IPackageFragment pkg= null;
 		try {
-			pkg= ReorgSupport.getDestinationAsPackageFragement(dest);
-			if (pkg != null && !pkg.isReadOnly())
-				dest= pkg.getCorrespondingResource();
 			if (dest instanceof IJavaElement) {
 				dest= ((IJavaElement)dest).getCorrespondingResource();
 			}

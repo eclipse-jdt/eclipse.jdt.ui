@@ -49,6 +49,8 @@ public class ReorgSupportFactory {
 			return (ICopySupport)getReorgSupport((IPackageFragment)first, elements);
 		if (first instanceof ICompilationUnit)
 			return (ICopySupport)getReorgSupport((ICompilationUnit)first, elements);
+		if (first instanceof IFile) 
+			return (ICopySupport)getReorgSupport((IFile)first, elements);
 		if (first instanceof IResource) {
 			return (ICopySupport)getReorgSupport((IResource)first, elements);
 		}
@@ -131,6 +133,21 @@ public class ReorgSupportFactory {
 		return fgCUReorgSupport;
 	}
 
+	private static Object getReorgSupport(IFile file, List elements) {
+		boolean cuFound= false;
+		for (int i= 0; i < elements.size(); i++) {
+			Object o= elements.get(i);
+			if (o instanceof ICompilationUnit)
+				cuFound= true;
+			if (!(o instanceof ICompilationUnit || o instanceof IFile))
+				return NoReorgSupport.getInstance();
+		}
+		if (cuFound)
+			return fgCUReorgSupport;
+		else 
+			return fgResourceReorgSupport;
+	}
+	
 	private static Object getReorgSupport(IResource res, List elements) {
 		for (int i= 0; i < elements.size(); i++) {
 			Object o= elements.get(i);
@@ -151,6 +168,9 @@ public class ReorgSupportFactory {
 			return (IMoveSupport)getReorgSupport((IPackageFragment)first, elements);
 		if (first instanceof ICompilationUnit)
 			return (IMoveSupport)getReorgSupport((ICompilationUnit)first, elements);
+		if (first instanceof IFile) 
+			return (IMoveSupport)getReorgSupport((IFile)first, elements);
+			
 		if (first instanceof IResource) {
 			return (IMoveSupport)getReorgSupport((IResource)first, elements);
 		}
