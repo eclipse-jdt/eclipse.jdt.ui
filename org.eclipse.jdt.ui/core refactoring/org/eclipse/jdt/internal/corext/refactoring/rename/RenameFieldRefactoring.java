@@ -200,7 +200,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 
 	public String getNewGetterName() throws JavaModelException {
-		boolean isBoolean=	fField.getTypeSignature() == Signature.SIG_BOOLEAN;
+		boolean isBoolean=	Signature.SIG_BOOLEAN.equals(fField.getTypeSignature());
 		return new NameProposer(fPrefixes, fSuffixes).proposeGetterName(fNewName, isBoolean);
 	}
 	
