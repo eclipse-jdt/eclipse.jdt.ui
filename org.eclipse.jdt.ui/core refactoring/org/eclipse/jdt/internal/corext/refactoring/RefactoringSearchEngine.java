@@ -105,7 +105,11 @@ public class RefactoringSearchEngine {
 	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, ICompilationUnit[] workingCopies) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		search(scope, pattern, collector, workingCopies);	
-		Map grouped= groupByResource(collector.getResults());
+		return groupByResource(createSearchResultArray(collector.getResults()));
+	}
+	
+	public static SearchResultGroup[] groupByResource(SearchResult[] results){
+		Map grouped= groupByResource(Arrays.asList(results));
 		
 		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
 		int i= 0;
@@ -115,7 +119,7 @@ public class RefactoringSearchEngine {
 			result[i]= new SearchResultGroup(resource, createSearchResultArray(searchResults));
 			i++;
 		}
-		return result;
+		return result;		
 	}
 	
 	private static SearchResult[] createSearchResultArray(List searchResults){
