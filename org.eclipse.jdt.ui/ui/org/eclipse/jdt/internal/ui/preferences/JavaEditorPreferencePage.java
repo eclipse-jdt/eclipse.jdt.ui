@@ -135,10 +135,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.ERROR_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.WARNING_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.TASK_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION),
+		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE),
@@ -314,6 +320,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.TASK_INDICATION, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.TASK_INDICATION_COLOR, new RGB(0, 128, 255));
+		
+		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
+		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
+		store.setDefault(CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, true);
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
@@ -767,12 +777,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "Highlight errors in text";
 		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION, 0);
 		
+		label= "Show errors in overview ruler";
+		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, 0);
+		
 		label= "Highlight warnings in text";
 		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION, 0);
+		
+		label= "Show warnings in overview ruler";
+		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, 0);
 		
 		label= "Highlight tasks in text";
 		addCheckBox(composite, label, CompilationUnitEditor.TASK_INDICATION, 0);
 
+		label= "Show tasks in overview ruler";
+		addCheckBox(composite, label, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, 0);
+		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		

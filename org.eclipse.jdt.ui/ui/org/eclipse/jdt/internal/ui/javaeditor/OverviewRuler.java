@@ -176,6 +176,12 @@ public class OverviewRuler {
 	private Cursor fHitDetectionCursor;
 	/** The last cursor */
 	private Cursor fLastCursor;
+	/** Flag indicating the presentation of errors */
+	private boolean fShowErrors= false;
+	/** Flag indicating the presentation of warnings */
+	private boolean fShowWarnings= false;
+	/** Flag indicating the presentation of tasks */
+	private boolean fShowTasks= false;
 	
 	
 	/**
@@ -355,6 +361,9 @@ public class OverviewRuler {
 		
 		for (int l= 0 ; l < LAYERS.length; l++) {
 			
+			if (skipLayer(LAYERS[l]))
+				continue;
+			
 			Iterator e= new FilterIterator(LAYERS[l]);
 			Color fill= getColor(COLORS[LAYERS[l]][0]);
 			Color stroke= getColor(COLORS[LAYERS[l]][1]);
@@ -510,5 +519,27 @@ public class OverviewRuler {
 				fLastCursor= cursor;
 			}
 		}				
+	}
+	
+	public void showErrors(boolean showErrors) {
+		fShowErrors= showErrors;
+	}
+	
+	public void showWarnings(boolean showWarnings) {
+		fShowWarnings= showWarnings;
+	}
+	
+	public void showTasks(boolean showTasks) {
+		fShowTasks= showTasks;
+	}
+	
+	private boolean skipLayer(int layer) {
+		if (!fShowErrors && (layer == TEMPORARY_ERROR || layer == COMPILE_ERROR))
+			return true;
+		if (!fShowWarnings && (layer == TEMPORARY_WARNING || layer == COMPILE_WARNING))
+			return true;
+		if (!fShowTasks && (layer == TEMPORARY_TASK || layer == COMPILE_TASK))
+			return true;
+		return false;
 	}
 }

@@ -469,6 +469,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
 	public final static String OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
+	/** Preference key for error indication in overview ruler */
+	public final static String ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for warning indication in overview ruler */
+	public final static String WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for task indication in overview ruler */
+	public final static String TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
 	/** Preference key for automatically closing strings */
 	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
 	/** Preference key for automatically wrapping Java strings */
@@ -1095,6 +1101,48 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(TASK_INDICATION);
 	}
 	
+	private boolean isErrorIndicationInOverviewRulerEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(ERROR_INDICATION_IN_OVERVIEW_RULER);
+	}
+	
+	private boolean isWarningIndicationInOverviewRulerEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(WARNING_INDICATION_IN_OVERVIEW_RULER);
+	}
+	
+	private boolean isTaskIndicationInOverviewRulerEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(TASK_INDICATION_IN_OVERVIEW_RULER);
+	}
+	
+	private void showErrorIndicationInOverviewRuler(boolean show) {
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+		OverviewRuler ruler= asv.getOverviewRuler();
+		if (ruler != null) {
+			ruler.showErrors(show);
+			ruler.update();
+		}
+	}
+	
+	private void showWarningIndicationInOverviewRuler(boolean show) {
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+		OverviewRuler ruler= asv.getOverviewRuler();
+		if (ruler != null) {
+			ruler.showWarnings(show);
+			ruler.update();
+		}
+	}
+
+	private void showTaskIndicationInOverviewRuler(boolean show) {
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+		OverviewRuler ruler= asv.getOverviewRuler();
+		if (ruler != null) {
+			ruler.showTasks(show);
+			ruler.update();
+		}
+	}
+
 	private void configureTabConverter() {
 		if (fTabConverter != null) {
 			IDocumentProvider provider= getDocumentProvider();
@@ -1140,6 +1188,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private void showOverviewRuler() {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		asv.showOverviewRuler();
+		
+		if (isErrorIndicationInOverviewRulerEnabled())
+			showErrorIndicationInOverviewRuler(true);
+		if (isWarningIndicationInOverviewRulerEnabled())
+			showWarningIndicationInOverviewRuler(true);
+		if (isTaskIndicationInOverviewRulerEnabled())
+			showTaskIndicationInOverviewRuler(true);
 	}
 	
 	private void hideOverviewRuler() {
@@ -1524,6 +1579,31 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 						hideOverviewRuler();
 					return;
 				}
+				
+				if (ERROR_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
+					if (isErrorIndicationInOverviewRulerEnabled())
+						showErrorIndicationInOverviewRuler(true);
+					else
+						showErrorIndicationInOverviewRuler(false);
+					return;
+				}
+				
+				if (WARNING_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
+					if (isWarningIndicationInOverviewRulerEnabled())
+						showWarningIndicationInOverviewRuler(true);
+					else
+						showWarningIndicationInOverviewRuler(false);
+					return;
+				}
+				
+				if (TASK_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
+					if (isTaskIndicationInOverviewRulerEnabled())
+						showTaskIndicationInOverviewRuler(true);
+					else
+						showTaskIndicationInOverviewRuler(false);
+					return;
+				}
+
 				
 				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)

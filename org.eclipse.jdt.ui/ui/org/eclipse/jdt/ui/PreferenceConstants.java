@@ -465,6 +465,48 @@ public class PreferenceConstants {
 	public final static String EDITOR_PROBLEM_INDICATION_COLOR= CompilationUnitEditor.ERROR_INDICATION_COLOR;
 
 	/**
+	 * A named preference that controls whether the editor shows warning indicators in text (squiggly lines). 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public final static String EDITOR_WARNING_INDICATION= CompilationUnitEditor.WARNING_INDICATION;
+
+	/**
+	 * A named preference that holds the color used to render warning indicators.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see #EDITOR_WARNING_INDICATION
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 */
+	public final static String EDITOR_WARNING_INDICATION_COLOR= CompilationUnitEditor.WARNING_INDICATION_COLOR;
+	
+	/**
+	 * A named preference that controls whether the editor shows task indicators in text (squiggly lines). 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public final static String EDITOR_TASK_INDICATION= CompilationUnitEditor.TASK_INDICATION;
+
+	/**
+	 * A named preference that holds the color used to render task indicators.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see #EDITOR_TASK_INDICATION
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 */
+	public final static String EDITOR_TASK_INDICATION_COLOR= CompilationUnitEditor.TASK_INDICATION_COLOR;
+
+	/**
 	 * A named preference that controls if correction indicators are shown in the UI.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
