@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 /**
  * Working set filter for Java viewers.
@@ -114,7 +115,7 @@ public class WorkingSetFilter extends ViewerFilter {
 		IPath elementPath= null; // will be lazy computed if needed
 		
 		int length= cachedWorkingSet.length;
-		for (int i = 0; i < length; i++) {
+		for (int i= 0; i < length; i++) {
 			IJavaElement scopeElement= (IJavaElement)cachedWorkingSet[i].getAdapter(IJavaElement.class);
 			if (scopeElement != null) {
 				// compare Java elements
@@ -122,8 +123,14 @@ public class WorkingSetFilter extends ViewerFilter {
 				while (scopeElement != null && searchedElement != null) {
 					if (searchedElement.equals(scopeElement))
 						return true;
-					else
-						searchedElement = searchedElement.getParent();
+					else {
+						searchedElement= searchedElement.getParent();
+						if (searchedElement != null && searchedElement.getElementType() == IJavaElement.COMPILATION_UNIT) {
+							ICompilationUnit cu= (ICompilationUnit)searchedElement;
+							if (cu.isWorkingCopy())
+								searchedElement= cu.getOriginalElement();
+						}
+					}
 				}
 				while (scopeElement != null && element != null) {
 					if (element.equals(scopeElement))
