@@ -11,14 +11,17 @@ import org.eclipse.core.runtime.CoreException;
  */
 public abstract class TemplateContext {
 
-	/** context type of this context */
+	/** The context type of this context */
 	private final ContextType fContextType;
+	/** A flag to indicate that the context should not be modified. */
+	private boolean fReadOnly;
 
 	/**
 	 * Creates a template context of a particular context type.
 	 */
 	protected TemplateContext(ContextType contextType) {
 		fContextType= contextType;
+		fReadOnly= true;
 	}
 
 	/**
@@ -26,6 +29,17 @@ public abstract class TemplateContext {
 	 */
 	public ContextType getContextType() {
 	 	return fContextType;   
+	}
+	
+	/**
+	 * Sets or clears the read only flag.
+	 */
+	public void setReadOnly(boolean readOnly) {
+		fReadOnly= readOnly;	
+	}
+	
+	public boolean isReadOnly() {
+		return fReadOnly;	
 	}
 
 	/**

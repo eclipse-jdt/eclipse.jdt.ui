@@ -12,9 +12,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -24,7 +28,6 @@ import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
@@ -70,13 +73,24 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
-	    try {	        
-		    if (fTemplateBuffer == null)
-				fTemplateBuffer= fContext.evaluate(fTemplate);
+	    try {
+			Position position= new Position(fRegion.getOffset(), fRegion.getLength());
+			final String category= "__template_position_" + System.currentTimeMillis(); // $NON-NLS-1$
+			IPositionUpdater updater= new DefaultPositionUpdater(category);
+			document.addPositionCategory(category);
+			document.addPositionUpdater(updater);
+			document.addPosition(position);
 
-			int start= fRegion.getOffset();
-			int end= fRegion.getOffset() + fRegion.getLength();
+		    fContext.setReadOnly(false);
+			fTemplateBuffer= fContext.evaluate(fTemplate);
 			
+			document.removePosition(position);
+			document.removePositionUpdater(updater);
+			document.removePositionCategory(category);
+			
+			int start= position.getOffset();
+			int end= position.getOffset() + position.getLength();
+
 			// insert template string
 			String templateString= fTemplateBuffer.getString();	
 			document.replace(start, end - start, templateString);	
@@ -105,7 +119,11 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);	
-			openErrorDialog(e);		    	    
+			openErrorDialog(e);		    	
+			
+	    } catch (BadPositionCategoryException e) {    
+			JavaPlugin.log(e);	
+			openErrorDialog(e);		    	
 
 	    } catch (CoreException e) {
 			handleException(e);
@@ -136,8 +154,8 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 */
 	public String getAdditionalProposalInfo() {
 	    try {
-			if (fTemplateBuffer == null)
-				fTemplateBuffer= fContext.evaluate(fTemplate);
+		    fContext.setReadOnly(true);
+			fTemplateBuffer= fContext.evaluate(fTemplate);
 
 			return textToHTML(fTemplateBuffer.getString());
 
@@ -206,7 +224,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		return buffer.toString();
 	}
 
-	private void openErrorDialog(BadLocationException e) {
+	private void openErrorDialog(Exception e) {
 		Shell shell= fViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}

@@ -4,15 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.Collection;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
@@ -67,11 +58,17 @@ public class JavaContextType extends CompilationUnitContextType {
 	}
 
 	protected static class Iterator extends TemplateVariable {
+
 	    public Iterator() {
 		    super(JavaTemplateMessages.getString("JavaContextType.variable.name.iterator"), JavaTemplateMessages.getString("JavaContextType.variable.description.iterator")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	    public String evaluate(TemplateContext context) {
-	        return ((JavaContext) context).getIterator();
+	    	JavaContext javaContext= (JavaContext) context;
+
+			if (!context.isReadOnly())
+		    	javaContext.addIteratorImport();
+	    	
+	        return javaContext.getIterator();
 	    }	    
 	}
 /*

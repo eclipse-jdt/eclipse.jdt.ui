@@ -8,19 +8,22 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
@@ -32,9 +35,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * A context for java source.
@@ -304,6 +306,20 @@ public class JavaContext extends CompilationUnitContext {
 		}
 
 		return null;
+	}
+
+
+	public void addIteratorImport() {
+	
+		try {
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			ImportsStructure structure= new ImportsStructure(getCompilationUnit(), settings.importOrder, settings.importThreshold, true);
+			structure.addImport("java.util.Iterator"); //$NON-NLS-1$
+			structure.create(false, null);
+
+		} catch (CoreException e) {
+			handleException(null, e);
+		}
 	}
 	
 	/**
