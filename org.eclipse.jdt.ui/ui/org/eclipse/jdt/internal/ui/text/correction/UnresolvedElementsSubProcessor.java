@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -180,7 +181,11 @@ public class UnresolvedElementsSubProcessor {
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken().trim();
+			String str= tok.nextToken().trim();
+			if (str.startsWith("<")) {
+				str= "java.lang.Object";
+			}
+			res[i]= str;
 		}
 		return res;
 	}	
