@@ -380,8 +380,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		fillActionBars(getViewSite().getActionBars());
-		
-		setHelp();
 	}
 	
 	/**
@@ -391,9 +389,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (key == IShowInSource.class) {
 			return getShowInSource();
 		}
-		if (key == IContextProvider.class) {
-			JavaUIHelp.getHelpContextProvider(this, getHelpContextId());
-		}
+		if (key == IContextProvider.class)
+			return JavaUIHelp.getHelpContextProvider(this, getHelpContextId());
+
 		return super.getAdapter(key);
 	}
 
@@ -930,10 +928,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			selection= new StructuredSelection(input);
 		}
 		selectionChanged(null, selection);
-	}
-
-	protected final void setHelp() {
-		JavaUIHelp.setHelp(fViewer, getHelpContextId());
 	}
 
 	/**
