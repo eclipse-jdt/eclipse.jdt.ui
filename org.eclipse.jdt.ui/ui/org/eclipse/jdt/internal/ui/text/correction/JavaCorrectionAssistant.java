@@ -63,7 +63,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		
-		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(editor); 
+		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this); 
 		
 		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 		setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
@@ -90,6 +90,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		setProposalSelectorBackground(c);
 	}
 	
+	public IEditorPart getEditor() {
+		return fEditor;
+	}
+	
+		
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -174,7 +179,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		int endOffset= startOffset + lineInfo.getLength();
 		
 		int result= computeOffsetWithCorrection(startOffset, endOffset, initalOffset);
-		if (result > 0)
+		if (result > 0 && result != initalOffset)
 			return result;
 		else
 			return -1;
@@ -262,4 +267,12 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		}
 		fPosition= null;
 	}
+	
+	/**
+	 * Returns true if the last invoked completion was called with an updated offset.
+	 */
+	public boolean isUpdatedOffset() {
+		return fPosition != null;
+	}
+	
 }

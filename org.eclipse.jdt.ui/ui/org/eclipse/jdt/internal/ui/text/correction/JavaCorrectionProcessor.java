@@ -164,21 +164,23 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return false;
 	}	
 	
-	private IEditorPart fEditor;
+	private JavaCorrectionAssistant fAssistant;
 
 	/**
 	 * Constructor for JavaCorrectionProcessor.
 	 */
-	public JavaCorrectionProcessor(IEditorPart editor) {
-		fEditor= editor;
+	public JavaCorrectionProcessor(JavaCorrectionAssistant assistant) {
+		fAssistant= assistant;
 	}
 
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
-		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
-		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		IEditorPart part= fAssistant.getEditor();
+		
+		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
+		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
 
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
 		AssistContext context= new AssistContext(cu, documentOffset, length);
@@ -229,7 +231,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}	
 		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
 		collectCorrections(context, problemLocations, proposals);
-		collectAssists(context, problemLocations, proposals);
+		if (!fAssistant.isUpdatedOffset()) {
+			collectAssists(context, problemLocations, proposals);
+		}
 	}
 
 	public static void collectCorrections(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
