@@ -26,18 +26,15 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 public class ParticipantTesting {
 	
 	public static void reset() {
-		TestCopyParticipantShared.reset();
 		TestCreateParticipantShared.reset();
 		TestDeleteParticipantShared.reset();
 		TestMoveParticipantShared.reset();
 		TestRenameParticipantShared.reset();
 		
-		TestCopyParticipantSingle.reset();
 		TestCreateParticipantSingle.reset();
 		TestDeleteParticipantSingle.reset();
 		TestMoveParticipantSingle.reset();
 		TestRenameParticipantSingle.reset();
-		
 	}
 	
 	public static String[] createHandles(Object object) {
