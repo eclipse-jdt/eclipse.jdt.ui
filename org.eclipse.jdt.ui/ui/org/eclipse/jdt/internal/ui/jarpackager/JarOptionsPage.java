@@ -20,6 +20,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	// widgets
 	private Button		fExportErrorsCheckbox;
 	private Button		fExportWarningsCheckbox;
+	private Button		fUseSourceFoldersCheckbox;
 	private Composite	fDescriptionFileGroup;
 	private Button		fSaveDescriptionCheckbox;
 	private Label		fDescriptionFileLabel;
@@ -33,7 +34,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	private final static String STORE_EXPORT_ERRORS= PAGE_NAME + ".EXPORT_ERRORS"; //$NON-NLS-1$
 	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
 	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION"; //$NON-NLS-1$
-
+	private final static String STORE_USE_SRC_FOLDERS= PAGE_NAME + ".STORE_USE_SRC_FOLDERS"; //$NON-NLS-1$
 	/**
 	 *	Create an instance of this class
 	 */
@@ -85,9 +86,16 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fExportErrorsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportErrors.text")); //$NON-NLS-1$
 		fExportErrorsCheckbox.addListener(SWT.Selection, this);
 
-		fExportWarningsCheckbox	= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fExportWarningsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportWarningsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportWarnings.text")); //$NON-NLS-1$
 		fExportWarningsCheckbox.addListener(SWT.Selection, this);
+
+		createSpacer(optionsGroup);
+
+		fUseSourceFoldersCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fUseSourceFoldersCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.useSourceFoldersHierarchy")); //$NON-NLS-1$
+		fUseSourceFoldersCheckbox.addListener(SWT.Selection, this);
+		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
 
 		createSpacer(optionsGroup);
 
@@ -109,6 +117,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (settings != null) {
 			settings.put(STORE_EXPORT_WARNINGS, fJarPackage.exportWarnings());
 			settings.put(STORE_EXPORT_ERRORS, fJarPackage.exportErrors());
+			settings.put(STORE_USE_SRC_FOLDERS, fJarPackage.useSourceFolderHierarchy());
 			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
 			settings.put(STORE_DESCRIPTION_LOCATION, fJarPackage.getDescriptionLocation().toString());
 		}
@@ -130,6 +139,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 
 		fExportWarningsCheckbox.setSelection(fJarPackage.exportWarnings());
 		fExportErrorsCheckbox.setSelection(fJarPackage.exportErrors());
+		fUseSourceFoldersCheckbox.setSelection(fJarPackage.useSourceFolderHierarchy());
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
 		fDescriptionFileText.setText(fJarPackage.getDescriptionLocation().toString());
 	}
@@ -141,6 +151,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (settings != null) {
 			fJarPackage.setExportWarnings(settings.getBoolean(STORE_EXPORT_WARNINGS));
 			fJarPackage.setExportErrors(settings.getBoolean(STORE_EXPORT_ERRORS));
+			fJarPackage.setUseSourceFolderHierarchy(settings.getBoolean(STORE_USE_SRC_FOLDERS));
 			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
 			String pathStr= settings.get(STORE_DESCRIPTION_LOCATION);
 			if (pathStr == null)
@@ -158,6 +169,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fJarPackage.setExportErrors(fExportErrorsCheckbox.getSelection());
 		fJarPackage.setSaveDescription(fSaveDescriptionCheckbox.getSelection());
 		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
+		fJarPackage.setUseSourceFolderHierarchy(fUseSourceFoldersCheckbox.getSelection());
 	}
 	/**
 	 *	Open an appropriate destination browser so that the user can specify a source
@@ -318,6 +330,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 */
 	protected void updatePageCompletion() {
 		boolean pageComplete= computePageCompletion() && fJarPackage.areClassFilesExported();
+		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
 		setPageComplete(pageComplete);
 		if (pageComplete) {
 			setErrorMessage(null);

@@ -4,7 +4,40 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.BufferedInputStream;import java.io.IOException;import java.io.InputStream;import java.io.ObjectInputStream;import java.util.ArrayList;import java.util.List;import javax.xml.parsers.DocumentBuilder;import javax.xml.parsers.DocumentBuilderFactory;import javax.xml.parsers.ParserConfigurationException;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jface.util.Assert;import org.w3c.dom.Element;import org.w3c.dom.Node;import org.w3c.dom.NodeList;import org.xml.sax.InputSource;import org.xml.sax.SAXException;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.util.Assert;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Reads data from an InputStream and returns a JarPackage
  */
@@ -23,11 +56,13 @@ public class JarPackageReader extends Object {
 		fInputStream= new BufferedInputStream(inputStream);
 		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.getString("JarPackageReader.jarPackageReaderWarnings"), null); //$NON-NLS-1$
 	}
+
 	/**
 	 * Hook for possible subclasses
 	 **/
 	protected JarPackageReader() {
 	}
+
 	/**
      * Reads the JAR specification from the underlying stream.
      * 
@@ -41,6 +76,7 @@ public class JarPackageReader extends Object {
 		jarPackage= (JarPackage)objectInput.readObject();
 		return jarPackage;
     }
+
 	/**
      * Closes this stream.
 	 * It is the clients responsiblity to close the stream.
@@ -86,6 +122,7 @@ public class JarPackageReader extends Object {
 				jarPackage.setLogErrors(getBooleanAttribute(element, "logErrors")); //$NON-NLS-1$
 				jarPackage.setLogWarnings(getBooleanAttribute(element, "logWarnings")); //$NON-NLS-1$
 				jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
+				jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
 				jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
 			}
 			if (element.getNodeName().equals("manifest")) { //$NON-NLS-1$
@@ -136,6 +173,13 @@ public class JarPackageReader extends Object {
 			}
 		}
 		return jarPackage;
+	}
+
+	protected boolean getBooleanAttribute(Element element, String name, boolean defaultValue) throws IOException {
+		if (element.hasAttribute(name))
+			return getBooleanAttribute(element, name);
+		else
+			return defaultValue;
 	}
 
 	protected boolean getBooleanAttribute(Element element, String name) throws IOException {
@@ -225,6 +269,7 @@ public class JarPackageReader extends Object {
 		addWarning(JarPackagerMessages.getString("JarPackageReader.warning.mainClassDoesNotExist"), null); //$NON-NLS-1$
 		return null;
 	}
+
 	/**
 	 * Returns the warnings of this operation. If there are no
 	 * warnings, a status object with IStatus.OK is returned.

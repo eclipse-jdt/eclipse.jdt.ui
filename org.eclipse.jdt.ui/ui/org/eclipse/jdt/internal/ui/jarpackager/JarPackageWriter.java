@@ -24,11 +24,13 @@ public class JarPackageWriter extends Object {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
 	}
+
 	/**
 	 * Hook for possible subclasses
 	 **/
 	protected JarPackageWriter() {
 	}
+
 	/**
      * Writes the specified object to the underlying stream.
      * 
@@ -39,6 +41,7 @@ public class JarPackageWriter extends Object {
     	Assert.isNotNull(jarPackage);
 		new ObjectOutputStream(fOutputStream).writeObject(jarPackage);
 	}
+
 	/**
      * Writes a XML representation of the JAR specification
      * to to the underlying stream.
@@ -76,7 +79,7 @@ public class JarPackageWriter extends Object {
 		options.setAttribute("logWarnings", "" + jarPackage.logWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString()); //$NON-NLS-1$
-
+		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$
 		// Manifest
 		Element manifest= document.createElement("manifest"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(manifest);
@@ -121,6 +124,7 @@ public class JarPackageWriter extends Object {
 		Serializer serializer= serializerFactory.makeSerializer(fOutputStream,	format);
 		serializer.asDOMSerializer().serialize(document);
     }
+
 	/**
      * Writes a String representation of the JAR specification
      * to to the underlying stream.
@@ -165,6 +169,7 @@ public class JarPackageWriter extends Object {
 		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.downloadExtensionPath", jarPackage.getDownloadExtensionsPath())); //$NON-NLS-1$
 		writer.flush();
     }
+
 	/**
      * Closes this stream.
      * It is the client's responsibility to close the stream.

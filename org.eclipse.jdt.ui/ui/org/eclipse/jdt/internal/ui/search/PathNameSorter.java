@@ -50,7 +50,7 @@ public class PathNameSorter extends ViewerSorter {
 			resource= entry1.getResource();
 		if (resource != null && entry2 != null && resource == entry2.getResource()) {
 
-			if (resource instanceof IProject || resource.getFileExtension().equalsIgnoreCase("jar") || resource.getFileExtension().equalsIgnoreCase("zip"))
+			if (resource instanceof IProject || resource.getFileExtension().equalsIgnoreCase("jar") || resource.getFileExtension().equalsIgnoreCase("zip")) //$NON-NLS-2$ //$NON-NLS-1$
 				// binary archives
 				return getCollator().compare(name1, name2);
 

@@ -53,7 +53,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				if (isAccurate) 
 					return fLabelProvider.getText(fLastMarker.getResource());
 				else
-					return "?: " + fLabelProvider.getText(fLastMarker.getResource());
+					return "?: " + fLabelProvider.getText(fLastMarker.getResource()); //$NON-NLS-1$
 			}
 			else
 				return ""; //$NON-NLS-1$
@@ -64,7 +64,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (isAccurate) 
 			return fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
 		else
-			return "?: " + fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
+			return "?: " + fTextLabelProvider.getTextLabel((IJavaElement)javaElement); //$NON-NLS-1$
 	}
 
 	public Image getImage(Object o) {
