@@ -12,7 +12,8 @@ public interface I {
 	/**JD*/
 	public abstract void b();
 	//destruct
-	public abstract void c()/* Comments*/
+	public abstract void c()
+	/* Comments*/
 	/** en */
 	// gros!
 	; //post
