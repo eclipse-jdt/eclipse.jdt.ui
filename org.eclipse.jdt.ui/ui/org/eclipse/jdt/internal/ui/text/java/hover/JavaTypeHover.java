@@ -20,11 +20,11 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 public class JavaTypeHover implements IJavaEditorTextHover {
 	
-	private IJavaEditorTextHover fProblemHover;
+	private IJavaEditorTextHover fAnnotationHover;
 	private IJavaEditorTextHover fJavadocHover;
 	
 	public JavaTypeHover() {
-		fProblemHover= new JavaProblemHover();
+		fAnnotationHover= new AnnotationHover();
 		fJavadocHover= new JavadocHover();
 	}
 
@@ -32,7 +32,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
 	public void setEditor(IEditorPart editor) {
-		fProblemHover.setEditor(editor);
+		fAnnotationHover.setEditor(editor);
 		fJavadocHover.setEditor(editor);
 	}
 	
@@ -47,7 +47,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		String hoverInfo= fProblemHover.getHoverInfo(textViewer, hoverRegion);
+		String hoverInfo= fAnnotationHover.getHoverInfo(textViewer, hoverRegion);
 		if (hoverInfo != null)
 			return hoverInfo;
 

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
@@ -20,7 +22,10 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -31,7 +36,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
-public class JavaProblemHover extends AbstractJavaEditorTextHover {
+public class AnnotationHover extends AbstractJavaEditorTextHover {
+
+	private MarkerAnnotationPreferences fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
+	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
 
 	/*
 	 * Formats a message as HTML text.
@@ -59,6 +67,13 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 			Iterator e= new JavaAnnotationIterator(model, true);
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
+
+				if (a instanceof IAnnotationExtension) {
+					AnnotationPreference preference= getAnnotationPreference((IAnnotationExtension)a);
+					if (preference == null || !fStore.getBoolean(preference.getTextPreferenceKey()))
+						continue;
+				}
+
 				Position p= model.getPosition(a);
 				if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 					String msg= ((IJavaAnnotation) a).getMessage();
@@ -79,6 +94,24 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 			super.setEditor(editor);
 		else
 			super.setEditor(null);
+	}
+
+	/**
+	 * Returns the annotation preference for the given marker.
+	 * 
+	 * @param marker
+	 * @return the annotation preference or <code>null</code> if none
+	 */	
+	private AnnotationPreference getAnnotationPreference(IAnnotationExtension annotation) {
+		String markerType= annotation.getMarkerType();
+		int severity= annotation.getSeverity();		
+		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
+		while (e.hasNext()) {
+			AnnotationPreference info= (AnnotationPreference) e.next();
+			if (info.getMarkerType().equals(markerType) && severity == info.getSeverity())
+				return info;
+			}
+		return null;
 	}
 
 	static boolean isJavaProblemHover(String id) {

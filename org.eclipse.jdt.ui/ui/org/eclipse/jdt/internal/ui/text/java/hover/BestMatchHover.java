@@ -52,10 +52,10 @@ public class BestMatchHover extends AbstractJavaEditorTextHover implements IText
 			if (id0 != null && id0.equals(id1))
 				return 0;
 			
-			if (id0 != null && JavaProblemHover.isJavaProblemHover(id0))
+			if (id0 != null && AnnotationHover.isJavaProblemHover(id0))
 				return -1;
 
-			if (id1 != null && JavaProblemHover.isJavaProblemHover(id1))
+			if (id1 != null && AnnotationHover.isJavaProblemHover(id1))
 				return +1;
 
 

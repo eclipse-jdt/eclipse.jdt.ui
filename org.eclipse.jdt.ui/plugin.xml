@@ -114,10 +114,10 @@
 <extension
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
-         class="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
-         id="org.eclipse.jdt.ui.ProblemHover"
-         label="%problemHover"
-         description="%problemHoverDescription">
+         class="org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover"
+         id="org.eclipse.jdt.ui.AnnotationHover"
+         label="%annotationHover"
+         description="%annotationHoverDescription">
    </hover>
 </extension>
 
