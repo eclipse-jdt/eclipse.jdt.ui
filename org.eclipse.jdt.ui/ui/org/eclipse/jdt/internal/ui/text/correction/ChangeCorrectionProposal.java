@@ -25,11 +25,19 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class ChangeCorrectionProposal implements IJavaCompletionProposal {
+	
+	private static class CorrectionChangeExceptionHandler implements IChangeExceptionHandler {
+		public void handle(ChangeContext context, IChange change, Exception e) {
+			throw new ChangeAbortException(e);
+		}
+	}
 
 	private Change fChange;
 	private String fName;
@@ -55,14 +63,19 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		try {
 			change= getChange();
 			if (change != null) {
-				ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler());
+				ChangeContext context= new ChangeContext(new CorrectionChangeExceptionHandler());
 				change.aboutToPerform(context, new NullProgressMonitor());
 				change.perform(context, new NullProgressMonitor());
 			}
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		} catch (ChangeAbortException e) {
-			JavaPlugin.log(e);
-		} catch(CoreException e) {
-			JavaPlugin.log(e);
+			Throwable wrapped= e.getThrowable();
+			if (wrapped instanceof CoreException) {
+				ExceptionHandler.handle((CoreException) wrapped, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+			} else {
+				throw e;
+			}
 		} finally {
 			if (change != null) {
 				change.performed();
