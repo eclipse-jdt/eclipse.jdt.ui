@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,5 +30,9 @@ public class FindHierarchyDeclarationsAction extends FindDeclarationsAction {
 	
 	protected boolean shouldUserBePrompted() {
 		return true;
+	}
+
+	protected String getScopeDescription(IType type) {
+		return SearchMessages.getFormattedString("HierarchyScope", new String[] {type.getElementName()});
 	}
 }

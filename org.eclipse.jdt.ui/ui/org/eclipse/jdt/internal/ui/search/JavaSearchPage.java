@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -35,6 +36,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -45,10 +47,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.IWorkbenchAdapter;
 
+import org.eclipse.search.internal.ui.SearchManager;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
+import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -102,31 +106,60 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private IJavaElement fJavaElement;
 	
 	private static class SearchPatternData {
+
+		int				searchFor;
+		int				limitTo;
+		String			pattern;
+		IJavaElement	javaElement;
+		int				scope;
+		IWorkingSet	 	workingSet;
+		
 		public SearchPatternData(int s, int l, String p, IJavaElement element) {
+			this(s, l, p, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
+		}
+		
+		public SearchPatternData(int s, int l, String p, IJavaElement element, int scope, IWorkingSet workingSet) {
 			searchFor= s;
 			limitTo= l;
 			pattern= p;
 			javaElement= element;
+			this.scope= scope;
+			this.workingSet= workingSet;
 		}
-		int			searchFor;
-		int			limitTo;
-		String		pattern;
-		IJavaElement	javaElement;
 	}
 
 	//---- Action Handling ------------------------------------------------
 	
 	public boolean performAction() {
 		SearchPatternData data= getPatternData();
+
 		IWorkspace workspace= JavaPlugin.getWorkspace();
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+
+		// Setup search scope
+		IJavaSearchScope scope= null;
+		String scopeDescription= "";
+		switch (getContainer().getSelectedScope()) {
+			case ISearchPageContainer.WORKSPACE_SCOPE:
+				scopeDescription= SearchMessages.getString("WorkspaceScope");
+				scope= SearchEngine.createWorkspaceScope();
+				break;
+			case ISearchPageContainer.SELECTION_SCOPE:
+				scopeDescription= SearchMessages.getString("SelectionScope");
+				scope= getSelectedResourcesScope();
+				break;
+			case ISearchPageContainer.WORKING_SET_SCOPE:
+				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
+				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()});
+				scope= SearchEngine.createJavaSearchScope(getContainer().getSelectedWorkingSet().getResources());
+		}		
+		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
 		JavaSearchOperation op= null;
 		if (data.javaElement != null && getPattern().equals(fInitialPattern))
-			op= new JavaSearchOperation(workspace, data.javaElement, data.limitTo, scope, collector);
+			op= new JavaSearchOperation(workspace, data.javaElement, data.limitTo, scope, scopeDescription, collector);
 		else {
 			data.javaElement= null;
-			op= new JavaSearchOperation(workspace, data.pattern, data.searchFor, data.limitTo, scope, collector);
+			op= new JavaSearchOperation(workspace, data.pattern, data.searchFor, data.limitTo, scope, scopeDescription, collector);
 		}
 		Shell shell= getControl().getShell();
 		try {
@@ -187,13 +220,21 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				match= null;
 		};
 		if (match == null) {
-			match= new SearchPatternData(getSearchFor(), getLimitTo(), getPattern(), fJavaElement);
+			match= new SearchPatternData(
+							getSearchFor(),
+							getLimitTo(),
+							getPattern(),
+							fJavaElement,
+							getContainer().getSelectedScope(),
+							getContainer().getSelectedWorkingSet());
 			fgPreviousSearchPatterns.add(match);
 		}
 		else {
 			match.searchFor= getSearchFor();
 			match.limitTo= getLimitTo();
 			match.javaElement= fJavaElement;
+			match.scope= getContainer().getSelectedScope();
+			match.workingSet= getContainer().getSelectedWorkingSet();
 		};
 		return match;
 	}
@@ -310,6 +351,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fInitialPattern= values.pattern;
 		fPattern.setText(fInitialPattern);
 		fJavaElement= values.javaElement;
+		if (values.workingSet != null)
+			getContainer().setSelectedWorkingSet(values.workingSet);
+		else
+			getContainer().setSelectedScope(values.scope);
 	}
 
 	private void handleSearchForSelected(boolean state) {
@@ -614,5 +659,23 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return page.getActiveEditor();
 		}
 		return null;
+	}
+
+	private IJavaSearchScope getSelectedResourcesScope() {
+		ArrayList resources= new ArrayList(10);
+		if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection) {
+			Iterator iter= ((IStructuredSelection)getSelection()).iterator();
+			while (iter.hasNext()) {
+				Object selection= iter.next();
+				if (selection instanceof IResource)
+					resources.add(selection);
+				else if (selection instanceof IAdaptable) {
+					IResource resource= (IResource)((IAdaptable)selection).getAdapter(IResource.class);
+					if (resource != null)
+						resources.add(resource);
+				}
+			}
+		}
+		return SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
 	}
 }

@@ -28,26 +28,43 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 	private String fStringPattern;
 	private int fSearchFor;
 	private IJavaSearchScope fScope;
+	private String fScopeDescription;
 	private JavaSearchResultCollector fCollector;
 	
-	protected JavaSearchOperation(IWorkspace workspace, int limitTo,
-			IJavaSearchScope scope, JavaSearchResultCollector collector) {
+	protected JavaSearchOperation(
+				IWorkspace workspace,
+				int limitTo,
+				IJavaSearchScope scope,
+				String scopeDescription,
+				JavaSearchResultCollector collector) {
 		fWorkspace= workspace;
 		fLimitTo= limitTo;
 		fScope= scope;
+		fScopeDescription= scopeDescription;
 		fCollector= collector;
 		fCollector.setOperation(this);
 	}
 	
-	public JavaSearchOperation(IWorkspace workspace, IJavaElement pattern, int limitTo,
-			IJavaSearchScope scope, JavaSearchResultCollector collector) {
-		this(workspace, limitTo, scope, collector);
+	public JavaSearchOperation(
+				IWorkspace workspace,
+				IJavaElement pattern,
+				int limitTo,
+				IJavaSearchScope scope,
+				String scopeDescription,
+				JavaSearchResultCollector collector) {
+		this(workspace, limitTo, scope, scopeDescription, collector);
 		fElementPattern= pattern;
 	}
 	
-	public JavaSearchOperation(IWorkspace workspace, String pattern, int searchFor, 
-			int limitTo, IJavaSearchScope scope, JavaSearchResultCollector collector) {
-		this(workspace, limitTo, scope, collector);
+	public JavaSearchOperation(
+				IWorkspace workspace,
+				String pattern,
+				int searchFor, 
+				int limitTo,
+				IJavaSearchScope scope,
+				String scopeDescription,
+				JavaSearchResultCollector collector) {
+		this(workspace, limitTo, scope, scopeDescription, collector);
 		fStringPattern= pattern;
 		fSearchFor= searchFor;
 	}
@@ -75,7 +92,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		else
 			desc= fStringPattern;
 
-		String[] args= new String[] {desc, "{0}"}; //$NON-NLS-1$
+		String[] args= new String[] {desc, "{0}", fScopeDescription}; //$NON-NLS-1$
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
 				return SearchMessages.getFormattedString("JavaSearchOperation.implementorsPostfix", args); //$NON-NLS-1$

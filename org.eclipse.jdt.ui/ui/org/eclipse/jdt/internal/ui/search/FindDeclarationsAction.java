@@ -36,7 +36,7 @@ public class FindDeclarationsAction extends ElementSearchAction {
 			int searchFor= IJavaSearchConstants.TYPE;
 			String pattern= PrettySignature.getUnqualifiedTypeSignature(type);
 			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern,
-				searchFor, getLimitTo(), getScope(type), getCollector());
+				searchFor, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
 		}
 		else if (element.getElementType() == IJavaElement.METHOD) {
 			IMethod method= (IMethod)element;
@@ -46,7 +46,7 @@ public class FindDeclarationsAction extends ElementSearchAction {
 			IType type= method.getDeclaringType();
 			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
 			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern,
-				searchFor, getLimitTo(), getScope(type), getCollector());
+				searchFor, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
 		}
 		else
 			return super.makeOperation(element);
@@ -58,5 +58,9 @@ public class FindDeclarationsAction extends ElementSearchAction {
 
 	protected boolean shouldUserBePrompted() {
 		return false;
+	}
+	
+	protected String getScopeDescription(IType type) {
+		return super.getScopeDescription(type);
 	}
 }

@@ -22,6 +22,25 @@ public class FindHierarchyReferencesAction extends FindReferencesAction {
 	}
 
 	protected IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		IType type= getType(element);
+		if (type == null)
+			return super.getScope(element);
+		return SearchEngine.createHierarchyScope(getType(element));
+	}
+	
+	protected boolean shouldUserBePrompted() {
+		return true;
+	}
+
+	protected String getScopeDescription(IJavaElement element) {
+		IType type= getType(element);
+		String typeName= "";
+		if (type != null)
+			typeName= type.getElementName();
+		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName});
+	}
+
+	private IType getType(IJavaElement element) {
 		IType type= null;
 		if (element.getElementType() == IJavaElement.TYPE)
 			type= (IType)element;
@@ -29,15 +48,11 @@ public class FindHierarchyReferencesAction extends FindReferencesAction {
 			IMethod method= (IMethod)element;
 			type= method.getDeclaringType();
 		}
-		if (type == null)
-			return super.getScope(element);
-		ICompilationUnit cu= type.getCompilationUnit();
-		if (cu != null && cu.isWorkingCopy())
-			type= (IType)cu.getOriginal(type);
-		return SearchEngine.createHierarchyScope(type);
-	}
-	
-	protected boolean shouldUserBePrompted() {
-		return true;
+		if (type != null) {
+			ICompilationUnit cu= type.getCompilationUnit();
+			if (cu != null && cu.isWorkingCopy())
+				return (IType)cu.getOriginal(type);
+		}
+		return null;
 	}
 }
