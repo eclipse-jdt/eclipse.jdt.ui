@@ -53,7 +53,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "RenameParametersInputPage"; //$NON-NLS-1$
 	
-	private static final String[] PROPERTIES= {"type", "old", "new"}; //$NON-NLS-2$ //$NON-NLS-1$
+	private static final String[] PROPERTIES= {"type", "old", "new"}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 	private static final int TYPE_PROP= 0; 
 	private static final int OLDNAME_PROP= 1; 
 	private static final int NEWNAME_PROP= 2;
