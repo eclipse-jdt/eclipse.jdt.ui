@@ -15,10 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -64,9 +67,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
@@ -849,18 +849,21 @@ public final class MemberVisibilityAdjustor {
 			final int referencingType= referencing.getElementType();
 			final int referencedType= referenced.getElementType();
 			switch (referencedType) {
-				case IJavaElement.TYPE:
+				case IJavaElement.TYPE: {
 					final IType typeReferenced= (IType) referenced;
 					switch (referencingType) {
-						case IJavaElement.COMPILATION_UNIT:
+						case IJavaElement.COMPILATION_UNIT: {
 							final ICompilationUnit unit= (ICompilationUnit) referencing;
-							if (typeReferenced.getCompilationUnit().equals(unit))
+							final ICompilationUnit referencedUnit= typeReferenced.getCompilationUnit();
+							if (referencedUnit != null && referencedUnit.equals(unit))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getCompilationUnit().getParent().equals(unit.getParent()))
+							else if (referencedUnit != null && referencedUnit.getParent().equals(unit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.TYPE:
+						}
+						case IJavaElement.TYPE: {
 							final IType type= (IType) referencing;
+							final ICompilationUnit referencedUnit= typeReferenced.getCompilationUnit();
 							if (type.equals(typeReferenced.getDeclaringType()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
 							else {
@@ -875,34 +878,40 @@ public final class MemberVisibilityAdjustor {
 									}
 								}
 							}
-							if (typeReferenced.getCompilationUnit().equals(type.getCompilationUnit())) {
+							final ICompilationUnit typeUnit= type.getCompilationUnit();
+							if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
 								if (typeReferenced.getDeclaringType() != null)
 									keyword= null;
 								else
 									keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							} else if (typeReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+							} else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.PACKAGE_FRAGMENT:
+						}
+						case IJavaElement.PACKAGE_FRAGMENT: {
 							final IPackageFragment fragment= (IPackageFragment) referencing;
 							if (typeReferenced.getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
+						}
 						default:
 							Assert.isTrue(false);
 					}
 					break;
-				case IJavaElement.FIELD:
+				}
+				case IJavaElement.FIELD: {
 					final IField fieldReferenced= (IField) referenced;
+					final ICompilationUnit referencedUnit= fieldReferenced.getCompilationUnit();
 					switch (referencingType) {
-						case IJavaElement.COMPILATION_UNIT:
+						case IJavaElement.COMPILATION_UNIT: {
 							final ICompilationUnit unit= (ICompilationUnit) referencing;
-							if (fieldReferenced.getCompilationUnit().equals(unit))
+							if (referencedUnit != null && referencedUnit.equals(unit))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (fieldReferenced.getCompilationUnit().getParent().equals(unit.getParent()))
+							else if (referencedUnit != null && referencedUnit.getParent().equals(unit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.TYPE:
+						}
+						case IJavaElement.TYPE: {
 							final IType type= (IType) referencing;
 							if (fieldReferenced.getDeclaringType().equals(type))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
@@ -918,31 +927,37 @@ public final class MemberVisibilityAdjustor {
 									}
 								}
 							}
-							if (fieldReferenced.getCompilationUnit().equals(type.getCompilationUnit()))
+							final ICompilationUnit typeUnit= type.getCompilationUnit();
+							if (referencedUnit != null && referencedUnit.equals(typeUnit))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (fieldReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+							else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.PACKAGE_FRAGMENT:
+						}
+						case IJavaElement.PACKAGE_FRAGMENT: {
 							final IPackageFragment fragment= (IPackageFragment) referencing;
 							if (fieldReferenced.getDeclaringType().getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
+						}
 						default:
 							Assert.isTrue(false);
 					}
 					break;
-				case IJavaElement.METHOD:
+				}
+				case IJavaElement.METHOD: {
 					final IMethod methodReferenced= (IMethod) referenced;
+					final ICompilationUnit referencedUnit= methodReferenced.getCompilationUnit();
 					switch (referencingType) {
-						case IJavaElement.COMPILATION_UNIT:
+						case IJavaElement.COMPILATION_UNIT: {
 							final ICompilationUnit unit= (ICompilationUnit) referencing;
-							if (methodReferenced.getCompilationUnit().equals(unit))
+							if (referencedUnit != null && referencedUnit.equals(unit))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (methodReferenced.getCompilationUnit().getParent().equals(unit.getParent()))
+							else if (referencedUnit != null && referencedUnit.getParent().equals(unit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.TYPE:
+						}
+						case IJavaElement.TYPE: {
 							final IType type= (IType) referencing;
 							if (methodReferenced.getDeclaringType().equals(type))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
@@ -958,23 +973,27 @@ public final class MemberVisibilityAdjustor {
 									}
 								}
 							}
-							if (methodReferenced.getCompilationUnit().equals(type.getCompilationUnit())) {
+							final ICompilationUnit typeUnit= type.getCompilationUnit();
+							if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
 								if (methodReferenced.getDeclaringType().getDeclaringType() != null)
 									keyword= null;
 								else
 									keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							} else if (methodReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+							} else if (referencedUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
 								keyword= null;
 							break;
-						case IJavaElement.PACKAGE_FRAGMENT:
+						}
+						case IJavaElement.PACKAGE_FRAGMENT: {
 							final IPackageFragment fragment= (IPackageFragment) referencing;
 							if (methodReferenced.getDeclaringType().getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
+						}
 						default:
 							Assert.isTrue(false);
 					}
 					break;
+				}
 				default:
 					Assert.isTrue(false);
 			}
