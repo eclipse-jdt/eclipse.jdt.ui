@@ -36,17 +36,24 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	public static final int CONSTRUCTOR= 8;
 	public static final int METHOD= 9;
 
-	private int fInitializerCount= 1;
-
 	private static Map fgImages= new Hashtable(13);	// maps the names below to SWT Images
-		
+
+	private int fInitializerCount= 1;
+	private boolean fIsEditable;
 
 	public JavaNode(JavaNode parent, int type, String name, IDocument doc, int start, int length) {
 		super(type, buildID(type, name), doc, start, length);
-		if (parent != null)
+		if (parent != null) {
 			parent.addChild(this);
+			fIsEditable= parent.isEditable();
+		}
 	}	
-	
+		
+	public JavaNode(IDocument doc, boolean editable) {
+		super(CU, buildID(CU, "root"), doc, 0, doc.getLength());
+		fIsEditable= editable;
+	}	
+
 	private static String buildID(int type, String name) {
 		StringBuffer sb= new StringBuffer();
 		switch (type) {
@@ -140,6 +147,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		return "java2";
 	}
 	
+	/* (non Javadoc)
+	 * see IEditableContent.isEditable
+	 */
+	public boolean isEditable() {
+		return fIsEditable;
+	}
+		
 	/**
 	 * Returns null if no Image exists for the type code.
 	 * @see ITypedInput@getImage

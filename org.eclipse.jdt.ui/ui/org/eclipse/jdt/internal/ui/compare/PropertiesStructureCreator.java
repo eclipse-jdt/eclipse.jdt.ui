@@ -23,11 +23,22 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
 		
-		String fValue;
+		private String fValue;
+		private boolean fIsEditable;
 		
-		public PropertyNode(int type, String id, String value, IDocument doc, int start, int length) {
+		public PropertyNode(PropertyNode parent, int type, String id, String value, IDocument doc, int start, int length) {
 			super(type, id, doc, start, length);
 			fValue= value;
+			if (parent != null) {
+				parent.addChild(this);
+				fIsEditable= parent.isEditable();
+			}
+		}
+						
+		public PropertyNode(IDocument doc, boolean editable) {
+			super(0, "root", doc, 0, doc.getLength());
+			fValue= "";
+			fIsEditable= editable;
 		}
 				
 		/**
@@ -49,6 +60,13 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		 */
 		public Image getImage() {
 			return CompareUI.getImage(getType());
+		}
+		
+		/* (non Javadoc)
+		 * see IEditableContent.isEditable
+		 */
+		public boolean isEditable() {
+			return fIsEditable;
 		}
 	};
 	
@@ -76,7 +94,11 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			
 		Document doc= new Document(s != null ? s : "");
 				
-		PropertyNode root= new PropertyNode(0, "root", "", doc, 0, 0);		
+		boolean isEditable= false;
+		if (input instanceof IEditableContent)
+			isEditable= ((IEditableContent) input).isEditable();
+
+		PropertyNode root= new PropertyNode(doc, isEditable);		
 				
 		try {
 			load(root, doc);
@@ -141,7 +163,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		return null;
 	}
 			
-	private void load(DocumentRangeNode root, IDocument doc) throws IOException {
+	private void load(PropertyNode root, IDocument doc) throws IOException {
 		
 		int start= 0;
 		
@@ -174,51 +196,51 @@ public class PropertiesStructureCreator implements IStructureCreator {
 						line= new String(loppedLine+nextLine);
 					}
 					
-                    		// Find start of key
-                    		int len = line.length();
-                    		int keyStart;
-                    		for (keyStart= 0; keyStart < len; keyStart++) {
-                       			if (whiteSpaceChars.indexOf(line.charAt(keyStart)) == -1)
-                            			break;
-                    		}
-                    		
-                    		// Find separation between key and value
-                    		int separatorIndex;
-                    		for (separatorIndex= keyStart; separatorIndex < len; separatorIndex++) {
-                        			char currentChar = line.charAt(separatorIndex);
-                        			if (currentChar == '\\')
-                            			separatorIndex++;
-                        			else if(keyValueSeparators.indexOf(currentChar) != -1)
-                            			break;
-                    		}
+            		// Find start of key
+            		int len = line.length();
+            		int keyStart;
+            		for (keyStart= 0; keyStart < len; keyStart++) {
+               			if (whiteSpaceChars.indexOf(line.charAt(keyStart)) == -1)
+                    			break;
+            		}
+            		
+            		// Find separation between key and value
+            		int separatorIndex;
+            		for (separatorIndex= keyStart; separatorIndex < len; separatorIndex++) {
+                			char currentChar = line.charAt(separatorIndex);
+                			if (currentChar == '\\')
+                    			separatorIndex++;
+                			else if(keyValueSeparators.indexOf(currentChar) != -1)
+                    			break;
+            		}
 
-                    		// Skip over whitespace after key if any
-                    		int valueIndex;
-                    		for (valueIndex=separatorIndex; valueIndex<len; valueIndex++)
-                        			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-                            			break;
+            		// Skip over whitespace after key if any
+            		int valueIndex;
+            		for (valueIndex=separatorIndex; valueIndex<len; valueIndex++)
+                			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
+                    			break;
 
-                    		// Skip over one non whitespace key value separators if any
-                    		if (valueIndex < len)
-                        			if (strictKeyValueSeparators.indexOf(line.charAt(valueIndex)) != -1)
-                            			valueIndex++;
+            		// Skip over one non whitespace key value separators if any
+            		if (valueIndex < len)
+                			if (strictKeyValueSeparators.indexOf(line.charAt(valueIndex)) != -1)
+                    			valueIndex++;
 
-                    		// Skip over white space after other separators if any
-                    		while (valueIndex < len) {
-                        			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-                            			break;
-                        			valueIndex++;
-                    		}
-                    
-                    		String key= line.substring(keyStart, separatorIndex);
-                    		String value= (separatorIndex < len) ? line.substring(valueIndex, len) : "";
+            		// Skip over white space after other separators if any
+            		while (valueIndex < len) {
+                			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
+                    			break;
+                			valueIndex++;
+            		}
+            
+            		String key= line.substring(keyStart, separatorIndex);
+            		String value= (separatorIndex < len) ? line.substring(valueIndex, len) : "";
 
-                    		// Convert then store key and value
-                    		key= loadConvert(key);
-                    		value= loadConvert(value);
-                    		
-                    		int length= (args[1]-1) - start;
-             				root.addChild(new PropertyNode(0, key, value, doc, start, length));
+            		// Convert then store key and value
+            		key= loadConvert(key);
+            		value= loadConvert(value);
+            		
+            		int length= (args[1]-1) - start;
+             		new PropertyNode(root, 0, key, value, doc, start, length);
                      
 					start= args[1];
 				}

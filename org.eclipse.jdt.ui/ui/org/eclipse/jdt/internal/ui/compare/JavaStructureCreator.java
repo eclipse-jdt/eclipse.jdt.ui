@@ -128,7 +128,11 @@ public class JavaStructureCreator implements IStructureCreator {
 			doc.setDocumentPartitioner(dp);
 			dp.connect(doc);
 			
-			JavaNode root= new JavaNode(null, 0, "root", doc, 0, n);
+			boolean isEditable= false;
+			if (input instanceof IEditableContent)
+				isEditable= ((IEditableContent) input).isEditable();
+			
+			JavaNode root= new JavaNode(doc, isEditable);
 			fgRequestor.init(root, buffer);
 			try {
 				fgParser.parseCompilationUnit(fgRequestor, false);

@@ -149,10 +149,12 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				if (target instanceof IDocumentRange)
 					range= ((IDocumentRange)target).getRange();
 		
-				String text= JavaCompareUtilities.readString(sca.getContents());	
-				if (text != null) {
-					document.replace(range.getOffset(), range.getLength(), text);
-					//	docManager.save(null);	// should not be necesssary
+				if (range != null) {	// shouldn't happen
+					String text= JavaCompareUtilities.readString(sca.getContents());	
+					if (text != null) {
+						document.replace(range.getOffset(), range.getLength(), text);
+						//	docManager.save(null);	// should not be necesssary
+					}
 				}
 			}
 
@@ -170,7 +172,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			IMember member= getEditionElement(selection);
 			if (member != null) {
 				switch (member.getElementType()) {
-					case 10:
+					case IJavaElement.INITIALIZER:
 						return "initializer";
 					default:
 						return member.getElementName();
