@@ -191,7 +191,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	private static Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
 		Map elements= refactoring.getElementsThatExistInTarget();
 		
-		ReorgQueries.OverwriteQuery overwriteQuery= new ReorgQueries.OverwriteQuery();
+		NewNameQueries.OverwriteQuery overwriteQuery= new NewNameQueries.OverwriteQuery();
 		
 		Set result= new HashSet();
 		for (Iterator iter= elements.keySet().iterator(); iter.hasNext(); ){

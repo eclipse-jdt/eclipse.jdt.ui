@@ -212,6 +212,6 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
 	private static CopyRefactoring createCopyRefactoring(Shell shell, IResource[] resourceData) throws JavaModelException {
 		IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(shell);
-		return CopyRefactoring.create(ClipboardActionUtil.getConvertedResources(resourceData), new ReorgQueries(), query);
+		return CopyRefactoring.create(ClipboardActionUtil.getConvertedResources(resourceData), new NewNameQueries(), query);
 	}
 }

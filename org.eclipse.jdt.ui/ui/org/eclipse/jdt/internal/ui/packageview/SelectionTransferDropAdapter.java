@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.reorg.ReorgMessages;
-import org.eclipse.jdt.internal.ui.reorg.ReorgQueries;
+import org.eclipse.jdt.internal.ui.reorg.NewNameQueries;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -268,7 +268,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fCopyRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fCopyRefactoring= CopyRefactoring.create(fElements, new ReorgQueries(), query);
+			fCopyRefactoring= CopyRefactoring.create(fElements, new NewNameQueries(), query);
 		}
 		
 		if (!canCopyElements())

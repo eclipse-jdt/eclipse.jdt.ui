@@ -34,7 +34,7 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	}
 
 	ReorgRefactoring createRefactoring(List elements) throws JavaModelException{
-		return CopyRefactoring.create(elements, new ReorgQueries(), createUpdateClasspathQuery(getShell()));
+		return CopyRefactoring.create(elements, new NewNameQueries(), createUpdateClasspathQuery(getShell()));
 	}
 	
 	String getActionName() {

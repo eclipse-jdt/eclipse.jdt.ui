@@ -45,16 +45,16 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class ReorgQueries implements INewNameQueries {
+public class NewNameQueries implements INewNameQueries {
 
 	private static final String INVALID_NAME_NO_MESSAGE= "";//$NON-NLS-1$
 	private final Wizard fWizard;
 
-	public ReorgQueries() {
+	public NewNameQueries() {
 		this(null);
 	}
 	
-	public ReorgQueries(Wizard wizard) {
+	public NewNameQueries(Wizard wizard) {
 		fWizard= wizard;
 	}
 

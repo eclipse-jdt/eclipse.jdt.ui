@@ -102,7 +102,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
 		//TODO fix the queries
-		refactoring.setNewNameQueries(new org.eclipse.jdt.internal.ui.reorg.ReorgQueries(wizard));
+		refactoring.setNewNameQueries(new org.eclipse.jdt.internal.ui.reorg.NewNameQueries(wizard));
 		refactoring.setReorgQueries(new ReorgQueries(wizard));
 		if (refactoring != null)
 			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
