@@ -318,7 +318,8 @@ class ReorgPolicyFactory {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
-			Assert.isTrue(! (javaElement instanceof IJavaModel));
+			if (javaElement instanceof IJavaModel)
+				return RefactoringStatus.createFatalErrorStatus("The Java Model cannot be the destination of this operation");
 	
 			if (javaElement.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus("The selected destination is read-only");
