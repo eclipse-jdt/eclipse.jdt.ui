@@ -1,10 +1,8 @@
-package org.eclipse.jdt.internal.debug.ui;
-
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.debug.ui;
 
 import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugViewAdapter;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.ui.IViewActionDelegate;import org.eclipse.ui.IViewPart;
 

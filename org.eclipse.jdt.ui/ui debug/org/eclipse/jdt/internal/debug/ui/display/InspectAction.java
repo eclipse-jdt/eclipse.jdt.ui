@@ -1,10 +1,9 @@
-package org.eclipse.jdt.internal.debug.ui.display;
-
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
- 
+package org.eclipse.jdt.internal.debug.ui.display;
+
 import java.util.ResourceBundle;import org.eclipse.debug.core.model.IValue;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.swt.widgets.Display;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 
 

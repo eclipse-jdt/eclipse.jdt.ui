@@ -1,9 +1,8 @@
-package org.eclipse.jdt.internal.debug.ui.display;
-
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.debug.ui.display;
 
 import java.util.ResourceBundle;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jface.text.ITextOperationTarget;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;
 

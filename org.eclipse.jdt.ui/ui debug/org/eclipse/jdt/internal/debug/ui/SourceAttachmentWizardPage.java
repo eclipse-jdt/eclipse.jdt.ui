@@ -1,10 +1,5 @@
-package org.eclipse.jdt.internal.debug.ui;
-/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2001
- */
- import java.lang.reflect.InvocationTargetException;import java.net.URL;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.*;import org.eclipse.jdt.core.*;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.*;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.debug.ui;
+import java.lang.reflect.InvocationTargetException;import java.net.URL;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.*;import org.eclipse.jdt.core.*;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.*;
 
 /**
  * A wizard page to attach source at debug time.
@@ -30,6 +25,8 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 		fJarRoot= jarRoot;
 	}
 	
+
+
 	/**
 	 * @see IWizardPage#isPageComplete()
 	 */

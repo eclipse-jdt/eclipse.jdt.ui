@@ -1,10 +1,8 @@
-package org.eclipse.jdt.internal.debug.ui;
-
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.debug.ui;
 
 import java.util.HashMap;import java.util.Map;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jface.wizard.Wizard;
 
@@ -25,6 +23,8 @@ public class SourceAttachmentWizard extends Wizard {
 		fJar = jar;
 		setWindowTitle(DebugUIUtils.getResourceString(TITLE));
 	}
+
+
 
 	/**
 	 * @see Wizard#addPages
