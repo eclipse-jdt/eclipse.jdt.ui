@@ -106,6 +106,10 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}
 		changeElement.addTextEdit("Add method", fMemberEdit); //$NON-NLS-1$
+		
+		if (!isLocalChange()) {
+			setElementToOpen(changedCU);
+		}
 	}
 	
 	
@@ -193,30 +197,13 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 	}
-	
-	/*
-	 * @see ICompletionProposal#apply(IDocument)
+
+	/* (non-Javadoc)
+	 * @see ChangeCorrectionProposal#getRangeToReveal()
 	 */
-	public void apply(IDocument document) {
-		super.apply(document);
-		if (isLocalChange()) {
-			return;
-		}
-		
-		if (fMemberEdit != null) {
-			try {
-				CompilationUnitChange change= getCompilationUnitChange();
-				TextRange range= change.getNewTextRange(fMemberEdit);
-			
-				IEditorPart part= EditorUtility.openInEditor(fParentType, true);
-				if (part instanceof ITextEditor && range != null) {
-					((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
-		}
-	}	
-	
+	protected TextRange getRangeToReveal() throws CoreException {
+		CompilationUnitChange change= getCompilationUnitChange();
+		return change.getNewTextRange(fMemberEdit);
+	}
 
 }

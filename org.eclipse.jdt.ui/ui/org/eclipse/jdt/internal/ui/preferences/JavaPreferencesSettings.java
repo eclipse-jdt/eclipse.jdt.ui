@@ -6,6 +6,7 @@ public class JavaPreferencesSettings  {
 	
 	public static CodeGenerationSettings getCodeGenerationSettings() {
 		CodeGenerationSettings res= new CodeGenerationSettings();
+		res.createFileComments= CodeGenerationPreferencePage.doFileComments();
 		res.createComments= CodeGenerationPreferencePage.doCreateComments();
 		res.createNonJavadocComments= CodeGenerationPreferencePage.doNonJavaDocSeeComments();
 		res.importOrder= ImportOrganizePreferencePage.getImportOrderPreference();

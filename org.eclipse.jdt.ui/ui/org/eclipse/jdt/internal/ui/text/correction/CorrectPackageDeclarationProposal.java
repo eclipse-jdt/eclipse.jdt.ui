@@ -72,15 +72,15 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();		
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				return CorrectionMessages.getString("CorrectPackageDeclarationProposal.remove.description") + decls[0].getElementName() + ";'"; //$NON-NLS-1$ //$NON-NLS-2$
+				return CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.remove.description", decls[0].getElementName()); //$NON-NLS-1$
 			}
 			if (!parentPack.isDefaultPackage() && decls.length == 0) {	
-				return (CorrectionMessages.getString("CorrectPackageDeclarationProposal.add.description") + parentPack.getElementName() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.add.description",  parentPack.getElementName())); //$NON-NLS-1$
 			}
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return (CorrectionMessages.getString("CorrectPackageDeclarationProposal.change.description") + parentPack.getElementName() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.change.description", parentPack.getElementName())); //$NON-NLS-1$
 	}	
 
 	public Image getImage() {

@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 public class CodeGenerationSettings {
 	
+	public boolean createFileComments= true;
 	public boolean createComments= true;
 	public boolean createNonJavadocComments= true;
 	

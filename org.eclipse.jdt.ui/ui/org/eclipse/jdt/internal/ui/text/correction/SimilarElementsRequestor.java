@@ -3,16 +3,24 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.HashSet;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
-	public static final int CLASSES= 1;
-	public static final int INTERFACES= 2;
-	public static final int TYPES= CLASSES | INTERFACES;
-	public static final int METHODS= 4;
-	public static final int FIELDS= 8;
-	public static final int LOCALS= 16;
+	public static final int CLASSES= 1 << 1;
+	public static final int INTERFACES= 1 << 2;
+	public static final int PRIMITIVETYPES= 1 << 3;
+	public static final int VOIDTYPE= 1 << 4;
+	public static final int REF_TYPES= CLASSES | INTERFACES;
+	public static final int ALL_TYPES= PRIMITIVETYPES | REF_TYPES;
+	public static final int METHODS= 1 << 5;
+	public static final int FIELDS= 1 << 6;
+	public static final int LOCALS= 1 << 7;
 	public static final int VARIABLES= FIELDS | LOCALS;
+
+	private static final String[] PRIM_TYPES= { "boolean", "byte", "char", "short", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	private String fPreferredType;
 	private String[] fArguments;
@@ -21,6 +29,17 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 
 	private HashSet fResult;
 	private HashSet fOthers;
+	
+
+	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind) throws JavaModelException {
+		return findSimilarElement(cu, pos, name, kind, null, null);
+	}
+	
+	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind, String[] arguments, String preferredType) throws JavaModelException {
+		SimilarElementsRequestor requestor= new SimilarElementsRequestor(name, kind, arguments, preferredType);
+		return requestor.process(cu, pos);
+	}
+	
 
 	/**
 	 * Constructor for SimilarElementsRequestor.
@@ -44,13 +63,55 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		fOthers.add(elem);
 	}	
 	
-	public HashSet getResults() {
-		if (fResult.size() == 0) {
-			if (fOthers.size() < 6) {
-				return fOthers;
+	public SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
+		try {
+			IBuffer buf= cu.getBuffer();
+			if (pos < buf.getLength() - 1) {
+				if ((fKind & REF_TYPES) != 0) {
+					pos++;
+				} else {
+					int prevPos= pos - 1;
+					while (prevPos >= 0 && Character.isWhitespace(buf.getChar(prevPos))) {
+						prevPos--;
+					}
+					if (prevPos >= 0 && buf.getChar(prevPos) == '(') {
+						pos++;
+					}
+				}
+			}
+			
+			cu.codeComplete(pos, this);
+			processKeywords();
+			
+			if (fResult.size() == 0) {
+				if (fOthers.size() < 6) {
+					fResult= fOthers;
+				}
+			}
+			return (SimilarElement[]) fResult.toArray(new SimilarElement[fResult.size()]);
+		} finally {
+			fResult.clear();
+			fOthers.clear();
+		}
+	}
+
+	/**
+	 * Method addPrimitiveTypes.
+	 */
+	private void processKeywords() {
+		if ((fKind & PRIMITIVETYPES) != 0) {
+			for (int i= 0; i < PRIM_TYPES.length; i++) {
+				if (NameMatcher.isSimilarName(fName, PRIM_TYPES[i])) {
+					addResult(new SimilarElement(PRIMITIVETYPES, PRIM_TYPES[i], 50));
+				}			
 			}
 		}
-		return fResult;
+		if ((fKind & VOIDTYPE) != 0) {
+			String voidType= "void"; //$NON-NLS-1$
+			if (NameMatcher.isSimilarName(fName, voidType)) {
+				addResult(new SimilarElement(PRIMITIVETYPES, voidType, 50));
+			}
+		}
 	}
 	
 	private void addType(int kind, char[] packageName, char[] typeName, char[] completionName, int relevance) {

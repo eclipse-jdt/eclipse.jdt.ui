@@ -6,12 +6,14 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
@@ -22,9 +24,11 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
@@ -40,15 +44,9 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		// corrections
-		int kind= SimilarElementsRequestor.VARIABLES;
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(variableName, kind, null, null);
-		cu.codeComplete(problemPos.getOffset(), requestor);
-		
-		HashSet result= requestor.getResults();
-		
-		Iterator iter= result.iterator();
-		while (iter.hasNext()) {
-			SimilarElement curr= (SimilarElement) iter.next();
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), variableName, SimilarElementsRequestor.VARIABLES);
+		for (int i= 0; i < elements.length; i++) {
+			SimilarElement curr= elements[i];
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr.getName(), 3));
 		}
@@ -70,7 +68,7 @@ public class UnresolvedElementsSubProcessor {
 		try {
 			IScanner scanner= ASTResolving.createScanner(cu, problemPos.getOffset() + problemPos.getLength());
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameDOT) {
-				getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
+				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
 			}
 		} catch (InvalidInputException e) {
 		}
@@ -92,17 +90,11 @@ public class UnresolvedElementsSubProcessor {
 			typeName= typeName.substring(0, bracketIndex);
 		}
 		
-		
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(typeName, kind, null, null);
-		cu.codeComplete(problemPos.getOffset() + 1, requestor);
-		HashSet result= requestor.getResults();
-	
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		
-		Iterator iter= result.iterator();
-		while (iter.hasNext()) {
-			SimilarElement elem= (SimilarElement) iter.next();
-			String curr= elem.getName();
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), typeName, kind);
+		for (int i= 0; i < elements.length; i++) {
+			String curr= elements[i].getName();
 			
 			ImportEdit importEdit= new ImportEdit(cu, settings);
 			importEdit.addImport(curr);
@@ -127,7 +119,21 @@ public class UnresolvedElementsSubProcessor {
 				proposal.setRelevance(5);
 			}
 		}
-				
+		
+		// add type
+		String addedCUName= typeName + ".java"; //$NON-NLS-1$
+		if (!JavaConventions.validateCompilationUnitName(addedCUName).matches(IStatus.ERROR)) {
+			IPackageFragment pack= (IPackageFragment) cu.getParent();
+			ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
+			if (!addedCU.exists()) {
+				boolean isClass= (kind & SimilarElementsRequestor.CLASSES) != 0;
+				CreateCompilationUnitChange change= new CreateCompilationUnitChange(addedCU, isClass, settings.createFileComments, settings.createComments);
+				String name= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createtype.description", typeName); //$NON-NLS-1$
+				ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, change, 0);
+				proposal.setElementToOpen(addedCU);
+				proposals.add(proposal);
+			}
+		}
 	}
 	
 	public static void getMethodProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
@@ -141,16 +147,10 @@ public class UnresolvedElementsSubProcessor {
 		// corrections
 		String methodName= args[1];
 		String[] arguments= getArguments(args[2]);
-		
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(methodName, SimilarElementsRequestor.METHODS, arguments, null);
-		cu.codeComplete(problemPos.getOffset(), requestor);
-		
-		HashSet result= requestor.getResults();
-		
-		Iterator iter= result.iterator();
-		while (iter.hasNext()) {
-			SimilarElement elem= (SimilarElement) iter.next();
-			String curr= elem.getName();
+				
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), methodName, SimilarElementsRequestor.METHODS, arguments, null);
+		for (int i= 0; i < elements.length; i++) {
+			String curr= elements[i].getName();
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
 		}

@@ -109,14 +109,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		for (Iterator iter= new ProblemAnnotationIterator(model); iter.hasNext();) {
 			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
 			Position pos= model.getPosition((Annotation) annot);
-			
-			ProblemPosition pp = new ProblemPosition(pos, annot, cu);
-			int start= pp.getOffset();
-			if (documentOffset >= start && documentOffset <= (start +  pp.getLength())) {
-				Integer probId= new Integer(annot.getId());
-				if (!idsProcessed.contains(probId)) {
-					idsProcessed.add(probId);
-					collectCorrections(pp, proposals);
+			if (pos != null) {
+				int start= pos.getOffset();
+				if (documentOffset >= start && documentOffset <= (start +  pos.getLength())) {
+					Integer probId= new Integer(annot.getId());
+					if (!idsProcessed.contains(probId)) {
+						ProblemPosition pp = new ProblemPosition(pos, annot, cu);
+						idsProcessed.add(probId);
+						collectCorrections(pp, proposals);
+					}
 				}
 			}
 		}
@@ -155,8 +156,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.UndefinedType:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.ALL_TYPES, proposals);
+					break;
 				case IProblem.ReturnTypeNotFound:
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE, proposals);
 					break;
 				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
