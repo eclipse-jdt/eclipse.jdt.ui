@@ -69,12 +69,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	}
 
 	public static ElementTreeSelectionDialog makeDialog(Shell parent, MoveRefactoring refactoring) {
-		StandardJavaElementContentProvider cp= new StandardJavaElementContentProvider() {
-			public boolean hasChildren(Object element) {
-				// prevent the + from being shown in front of packages
-				return !(element instanceof IPackageFragment) && super.hasChildren(element);
-			}
-		};
+		StandardJavaElementContentProvider cp= new DestinationDialogContentProvider(); 
 		MoveDestinationDialog dialog= new MoveDestinationDialog(
 			parent,  new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS),
 			cp, refactoring);
