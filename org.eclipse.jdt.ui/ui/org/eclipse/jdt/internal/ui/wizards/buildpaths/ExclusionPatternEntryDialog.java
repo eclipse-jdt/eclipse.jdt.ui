@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -223,10 +224,10 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		dialog.setInitialSelection(initialElement);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IResource res= (IResource) dialog.getFirstResult();
 			IPath path= res.getFullPath().removeFirstSegments(fCurrSourceFolder.getFullPath().segmentCount()).makeRelative();
-			if (curr instanceof IContainer) {
+			if (res instanceof IContainer) {
 				return path.addTrailingSeparator();
 			} else {
 				return path;
