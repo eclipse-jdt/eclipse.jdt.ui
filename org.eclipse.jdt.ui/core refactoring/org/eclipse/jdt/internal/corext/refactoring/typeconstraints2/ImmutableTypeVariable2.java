@@ -15,13 +15,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
- * A PlainTypeVariable is a ConstraintVariable which stands for a
- * plain type (without an updatable Source location)
+ * A ImmutableTypeVariable is a ConstraintVariable which stands for an
+ * immutable type (without an updatable Source location)
  */
 
-public final class PlainTypeVariable2 extends ConstraintVariable2 {
+public final class ImmutableTypeVariable2 extends ConstraintVariable2 {
 
-	public PlainTypeVariable2(TType type) {
+	public ImmutableTypeVariable2(TType type) {
 		super(type);
 		Assert.isTrue(! type.isWildcardType());
 		Assert.isTrue(! type.isTypeVariable());
@@ -40,10 +40,10 @@ public final class PlainTypeVariable2 extends ConstraintVariable2 {
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;
-		if (other.getClass() != PlainTypeVariable2.class)
+		if (other.getClass() != ImmutableTypeVariable2.class)
 			return false;
 		
-		return getType() == ((PlainTypeVariable2) other).getType();
+		return getType() == ((ImmutableTypeVariable2) other).getType();
 	}
 	
 	public String toString() {
