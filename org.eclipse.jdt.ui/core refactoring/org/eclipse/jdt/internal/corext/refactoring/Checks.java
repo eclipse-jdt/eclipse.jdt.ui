@@ -630,7 +630,7 @@ public class Checks {
 		return false;
 	}
 	
-	public static boolean isReadOnly(IResource res) throws JavaModelException{
+	public static boolean isReadOnly(IResource res) throws JavaModelException {
 		if (res.isReadOnly()) 
 			return true;
 		

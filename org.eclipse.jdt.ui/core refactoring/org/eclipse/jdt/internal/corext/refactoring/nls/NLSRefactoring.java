@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -72,7 +73,7 @@ public class NLSRefactoring extends Refactoring {
 		String cuName= cu.getElementName();
 		setPrefix(cuName.substring(0, cuName.length() - 4)); // A.java -> A. 
 
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, true, null);
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, null);
 		NLSHint nlsHint= new NLSHint(cu, astRoot);
 
 		fSubstitutions= nlsHint.getSubstitutions();

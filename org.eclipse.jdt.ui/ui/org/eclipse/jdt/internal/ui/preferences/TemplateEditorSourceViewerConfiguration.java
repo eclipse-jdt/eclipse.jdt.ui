@@ -48,7 +48,7 @@ public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerCon
 		private TemplateVariableProcessor fProcessor;
 
 		/**
-		 * @param type
+		 * @param processor the template variable processor
 		 */
 		public TemplateVariableTextHover(TemplateVariableProcessor processor) {
 			fProcessor= processor;

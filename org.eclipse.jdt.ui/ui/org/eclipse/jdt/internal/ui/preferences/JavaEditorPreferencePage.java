@@ -1398,7 +1398,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @param textLimit		the text limit
 	 * @param indentation	the field's indentation
 	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
-	 * @return
+	 * @return the array containing the label and text controls
 	 */
 	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
 		Label labelControl= new Label(composite, SWT.NONE);

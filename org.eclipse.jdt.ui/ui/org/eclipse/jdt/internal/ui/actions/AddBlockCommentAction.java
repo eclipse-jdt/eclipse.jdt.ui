@@ -100,9 +100,9 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	 * @param edits
 	 * @param factory
 	 * @param docExtension
-	 * @return
 	 * @throws BadLocationException
 	 * @throws BadPartitioningException
+	 * @return the region
 	 */
 	private ITypedRegion handleInteriorPartition(ITypedRegion partition, List edits, Edit.EditFactory factory, IDocumentExtension3 docExtension) throws BadPartitioningException, BadLocationException {
 
