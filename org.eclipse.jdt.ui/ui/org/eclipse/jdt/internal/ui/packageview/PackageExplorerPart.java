@@ -913,4 +913,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return null;
 	}
 
+	public void collapseAll() {
+		fViewer.collapseToLevel(getViewPartInput(), TreeViewer.ALL_LEVELS);
+	}
+
 }

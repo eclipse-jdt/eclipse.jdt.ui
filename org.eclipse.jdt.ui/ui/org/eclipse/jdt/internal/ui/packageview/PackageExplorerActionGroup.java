@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -85,7 +86,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private UpAction fUpAction;
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
-	
+	private CollapseAllAction fCollapseAllAction;
 	private RenameResourceAction fRenameResourceAction;
 	private MoveResourceAction fMoveResourceAction;
 	
@@ -132,6 +133,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
+		fCollapseAllAction= new CollapseAllAction(fPart);
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView");  //$NON-NLS-1$
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, fPart.getViewer());
@@ -217,6 +219,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			toolBar.add(new Separator());
 			fMemberFilterActionGroup.contributeToToolBar(toolBar);
 		}
+		toolBar.add(new Separator());
+		toolBar.add(fCollapseAllAction);
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
@@ -235,7 +239,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
-				
+		
 		addGotoMenu(menu, element, size);
 		
 		addOpenNewWindowAction(menu, element);

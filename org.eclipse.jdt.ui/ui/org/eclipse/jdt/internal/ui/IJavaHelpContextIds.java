@@ -104,7 +104,8 @@ public interface IJavaHelpContextIds {
 	public static final String DELETE_ACTION= 													PREFIX + "delete_action"; //$NON-NLS-1$	
 	public static final String SELECT_ALL_ACTION= 												PREFIX + "select_all_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
-		
+	public static final String COLLAPSE_ALL_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
+
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context"; //$NON-NLS-1$
