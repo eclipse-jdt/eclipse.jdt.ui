@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -203,8 +204,10 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 						fValidationStatus= fChange.isValid(new SubProgressMonitor(monitor, 1));
 						if (fValidationStatus.hasFatalError())
 							return;
-						if (fUndoManager != null)
+						if (fUndoManager != null) {
+							ResourcesPlugin.getWorkspace().checkpoint(false);
 							fUndoManager.aboutToPerformChange(fChange);
+						}
 						fChange.perform(fChangeContext, new SubProgressMonitor(monitor, 9));
 					} catch (ChangeAbortException e) {
 						exception= e;
@@ -221,6 +224,7 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 						throw e;
 					} finally {
 						if (fUndoManager != null) {
+							ResourcesPlugin.getWorkspace().checkpoint(false);
 							fUndoManager.changePerformed(fChange, exception);
 							if (fChange.isUndoable())
 								fUndoManager.addUndo(fUndoName, fChange.getUndoChange());
