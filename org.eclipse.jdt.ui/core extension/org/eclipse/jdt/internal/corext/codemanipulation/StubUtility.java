@@ -1104,6 +1104,11 @@ public class StubUtility {
 		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_LOCAL_PREFIXES, JavaCore.CODEASSIST_LOCAL_SUFFIXES, name);
 	}
 	
+	public static boolean hasConstantName(String name) {
+		return Character.isUpperCase(name.charAt(0));
+	}
+	
+	
 	private static boolean hasPrefixOrSuffix(IJavaProject project, String prefixKey, String suffixKey, String name) {
 		final String listSeparartor= ","; //$NON-NLS-1$
 		String prefixes= project.getOption(prefixKey, true);

@@ -147,82 +147,128 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		SimpleName simpleName= node.isSimpleName() ? (SimpleName) node : ((QualifiedName) node).getName();
-		String name= simpleName.getIdentifier();
+		boolean isWriteAccess= ASTResolving.isWriteAccess(node);
 		
-		addSimilarVariableProposals(cu, astRoot, simpleName, proposals);
-
-		// new variables
-		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
-		ITypeBinding senderBinding= binding != null ? binding : declaringTypeBinding;
-
-		if (senderBinding.isFromSource() && targetCU != null && JavaModelUtil.isEditable(targetCU)) {
-			int relevance= StubUtility.hasFieldName(cu.getJavaProject(), name) ? 9 : 6;
-			String label;
-			Image image;
-			if (binding == null) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
-				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
-			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, binding.getName() } ); //$NON-NLS-1$
-				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-			}
-			
-			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, relevance, image));
-			if (binding == null && senderBinding.isAnonymous()) {
-				ASTNode anonymDecl= astRoot.findDeclaringNode(senderBinding);
-				if (anonymDecl != null) {
-					senderBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
-					if (!senderBinding.isAnonymous()) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, senderBinding.getName() } ); //$NON-NLS-1$
-						image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-						proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, relevance, image));
-					}
-				}
-			}
-		}
+		// similar variables
+		addSimilarVariableProposals(cu, astRoot, simpleName, isWriteAccess, proposals);
+		
+		// new fields
+		addNewFieldProposals(cu, astRoot, binding, declaringTypeBinding, simpleName, isWriteAccess, proposals);
+		
+		// new parameters and local variables
 		if (binding == null) {
-			BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
-			int type= bodyDeclaration.getNodeType();
-			if (type == ASTNode.METHOD_DECLARATION) {
-				int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? 8 : 5;
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", simpleName.getIdentifier()); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, relevance, image));
-			}
-			if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
-				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, relevance, image));
-			}
-			
-			if (node.getParent().getNodeType() == ASTNode.ASSIGNMENT) {
-				Assignment assignment= (Assignment) node.getParent();
-				if (assignment.getLeftHandSide() == node && assignment.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-					ASTNode statement= assignment.getParent();
-					ASTRewrite rewrite= new ASTRewrite(statement.getParent());
-					rewrite.markAsRemoved(statement);
-			
-					String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
-					Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 4, image);
-					proposal.ensureNoModifications();
-					proposals.add(proposal);
-				}
-			}
-			
+			addNewVariableProposals(cu, node, simpleName, proposals);
 		}
 	}
 	
-	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, Collection proposals) {
+	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) throws CoreException {
+		String name= simpleName.getIdentifier();
+		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+		int type= bodyDeclaration.getNodeType();
+		if (type == ASTNode.METHOD_DECLARATION) {
+			int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? 8 : 5;
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", simpleName.getIdentifier()); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, relevance, image));
+		}
+		if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
+			int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, relevance, image));
+		}
+		
+		if (node.getParent().getNodeType() == ASTNode.ASSIGNMENT) {
+			Assignment assignment= (Assignment) node.getParent();
+			if (assignment.getLeftHandSide() == node && assignment.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+				ASTNode statement= assignment.getParent();
+				ASTRewrite rewrite= new ASTRewrite(statement.getParent());
+				rewrite.markAsRemoved(statement);
+		
+				String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
+				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 4, image);
+				proposal.ensureNoModifications();
+				proposals.add(proposal);
+			}
+		}
+	}
+
+	private static void addNewFieldProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, ITypeBinding declaringTypeBinding, SimpleName simpleName, boolean isWriteAccess, Collection proposals) throws JavaModelException {
+		// new variables
+		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
+		ITypeBinding senderBinding= binding != null ? binding : declaringTypeBinding;
+		
+		if (!senderBinding.isFromSource() || targetCU == null || !JavaModelUtil.isEditable(targetCU)) {
+			return;
+		}
+			
+		ITypeBinding outsideAnonymous= null;
+		if (binding == null && senderBinding.isAnonymous()) {
+			ASTNode anonymDecl= astRoot.findDeclaringNode(senderBinding);
+			if (anonymDecl != null) {
+				ITypeBinding bind= Bindings.getBindingOfParentType(anonymDecl.getParent());
+				if (!bind.isAnonymous()) {
+					outsideAnonymous= bind;
+				}
+			}
+		}
+		
+		String name= simpleName.getIdentifier();
+		int relevance= StubUtility.hasFieldName(cu.getJavaProject(), name) ? 9 : 6;
+
+		String label;
+		Image image;
+		if (binding == null) {
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
+			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+		} else {
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, binding.getName() } ); //$NON-NLS-1$
+			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+		}
+		
+		proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, relevance, image));
+
+		// create field in outer class (if inside anonymous)
+		if (outsideAnonymous != null) {
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, senderBinding.getName() } ); //$NON-NLS-1$
+			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, outsideAnonymous, relevance + 1, image));
+		}
+		
+		// create constant
+		
+		if (!isWriteAccess) {
+			relevance= StubUtility.hasConstantName(name) ? 9 : 4;
+			ITypeBinding target= (outsideAnonymous != null) ? outsideAnonymous : senderBinding;
+			if (binding == null) {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.description", name); //$NON-NLS-1$
+				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+			} else {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.other.description", new Object[] { name, binding.getName() } ); //$NON-NLS-1$
+				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+			}
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.CONST_FIELD, simpleName, target, relevance, image));
+		}
+	}
+
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, boolean isWriteAccess, Collection proposals) {
 		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES);
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
-			String assignedName= null;
+			String otherNameInAssign= null;
 			ASTNode parent= node.getParent();
 			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				assignedName= ((VariableDeclarationFragment) parent).getName().getIdentifier();
-			}			
+				// node must be initializer
+				otherNameInAssign= ((VariableDeclarationFragment) parent).getName().getIdentifier();
+			} else if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
+				Assignment assignment= (Assignment) parent;
+				if (isWriteAccess && assignment.getRightHandSide() instanceof SimpleName) {
+					otherNameInAssign= ((SimpleName) assignment.getRightHandSide()).getIdentifier();
+				} else if (!isWriteAccess && assignment.getLeftHandSide() instanceof SimpleName) {
+					otherNameInAssign= ((SimpleName) assignment.getLeftHandSide()).getIdentifier();
+				}
+			}
 			
 			ITypeBinding guessedType= ASTResolving.guessBindingForReference(node);
 			if (astRoot.getAST().resolveWellKnownType("java.lang.Object") == guessedType) { //$NON-NLS-1$
@@ -233,15 +279,20 @@ public class UnresolvedElementsSubProcessor {
 			for (int i= 0; i < varsInScope.length; i++) {
 				IVariableBinding curr= (IVariableBinding) varsInScope[i];
 				String currName= curr.getName();
-				if (!currName.equals(assignedName)) {
+				boolean isFinal= Modifier.isFinal(curr.getModifiers());
+				if (!currName.equals(otherNameInAssign) && !(isFinal && curr.isField() && isWriteAccess)) {
 					int relevance= 0;
 					if (NameMatcher.isSimilarName(currName, identifier)) {
 						relevance += 3; // variable with a similar name than the unresolved variable
 					}
 					ITypeBinding varType= curr.getType();
-					if (guessedType != null && varType != null && TypeRules.canAssign(guessedType, varType)) {
-						relevance += 2; // unresolved variable can be assign to this variable 						
+					if (guessedType != null && varType != null) {
+						if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
+								|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
+							relevance += 2; // unresolved variable can be assign to this variable
+						}
 					}
+								
 					if (relevance > 0) {
 						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
 						proposals.add(new ReplaceCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));

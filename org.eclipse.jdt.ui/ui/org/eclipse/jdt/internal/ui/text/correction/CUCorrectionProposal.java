@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -330,6 +329,18 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		try {
+			CompilationUnitChange change= getCompilationUnitChange();
+			return change.getPreviewContent();
+		} catch (CoreException e) {
+		}
+		return super.toString();
 	}
 
 }

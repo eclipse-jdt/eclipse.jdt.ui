@@ -372,6 +372,42 @@ public class ASTResolving {
 		}
 		return false;
 	}	
+	
+	public static boolean isWriteAccess(Name selectedNode) {
+		ASTNode curr= selectedNode;
+		ASTNode parent= curr.getParent();
+		while (parent != null) {
+			switch (parent.getNodeType()) {
+				case ASTNode.QUALIFIED_NAME:
+					if (((QualifiedName) parent).getQualifier() == curr) {
+						return false;
+					}
+					break;
+				case ASTNode.FIELD_ACCESS:
+					if (((FieldAccess) parent).getExpression() == curr) {
+						return false;
+					}
+					break;					
+				case ASTNode.SUPER_FIELD_ACCESS:
+					break;
+				case ASTNode.ASSIGNMENT:
+					return ((Assignment) parent).getLeftHandSide() == curr;
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					return ((VariableDeclaration) parent).getName() == curr;
+				case ASTNode.POSTFIX_EXPRESSION:
+				case ASTNode.PREFIX_EXPRESSION:
+					return true;
+				default:
+					return false;
+			}
+					
+			curr= parent;
+			parent= curr.getParent();
+		}
+		return false;
+	}
+	
 				
 	public static Type getTypeFromTypeBinding(AST ast, ITypeBinding binding) {
 		if (binding.isArray()) {

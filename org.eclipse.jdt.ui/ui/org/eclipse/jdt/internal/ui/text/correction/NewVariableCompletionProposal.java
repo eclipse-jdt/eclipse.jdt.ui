@@ -30,9 +30,12 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
 	public static final int PARAM= 3;
+	
+	public static final int CONST_FIELD= 4;
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+	private static final String KEY_INITIALIZER= "initializer"; //$NON-NLS-1$
 
 	private int  fVariableKind;
 	private SimpleName fOriginalNode;
@@ -51,7 +54,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		if (fVariableKind == PARAM) {
 			return doAddParam(cu);
-		} else if (fVariableKind == FIELD) {
+		} else if (fVariableKind == FIELD || fVariableKind ==CONST_FIELD) {
 			return doAddField(cu);
 		} else { // LOCAL
 			return doAddLocal(cu);
@@ -72,8 +75,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			
 			rewrite.markAsInsertBeforeOriginal(decl, ASTNodeConstants.PARAMETERS, newDecl, null, null);
 			
-			markAsLinked(rewrite, node, true, KEY_NAME);
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			markAsLinked(rewrite, node, true, KEY_NAME);
 			markAsLinked(rewrite, newDecl.getName(), false, KEY_NAME);
 			
 			return rewrite;
@@ -107,8 +110,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 						newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 						rewrite.markAsReplaced(assignment.getParent(), newDecl);
 						
-						markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
 						markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+						markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
+						
+						markAsSelection(rewrite, newDecl); // end position
 
 						return rewrite;
 					} else if (parentParentKind == ASTNode.FOR_STATEMENT) {
@@ -125,8 +130,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 							
 							rewrite.markAsReplaced(assignment, expression);
 							
-							markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
 							markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
+							markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
+							
+							markAsSelection(rewrite, expression); // end position
 							
 							return rewrite;
 						}			
@@ -142,8 +149,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDecl.setType(evaluateVariableType(ast));
 			newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
-			markAsLinked(rewrite, node, true, KEY_NAME); 
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			markAsLinked(rewrite, node, true, KEY_NAME); 
 			markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
 
 			Statement statement= ASTResolving.findParentStatement(node);
@@ -187,7 +194,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDecl.setType(type);
 						
 			newDecl.setModifiers(evaluateFieldModifiers(newTypeDecl));
-			if (fSenderBinding.isInterface()) {
+			if (fSenderBinding.isInterface() || fVariableKind == CONST_FIELD) {
 				fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, type, 0));
 			}
 		
@@ -197,11 +204,15 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
 			rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
 			
+			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 			if (!isInDifferentCU) {
 				markAsLinked(rewrite, node, true, KEY_NAME);
 			}
 			markAsLinked(rewrite, fragment.getName(), false, KEY_NAME);
-			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			
+			if (fragment.getInitializer() != null) {
+				markAsLinked(rewrite, fragment.getInitializer(), false, KEY_INITIALIZER);
+			}
 
 			return rewrite;
 		}
@@ -236,6 +247,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		if (type != null) {
 			return type;
 		}
+		if (fVariableKind == CONST_FIELD) {
+			return ast.newSimpleType(ast.newSimpleName("String")); //$NON-NLS-1$
+		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
 	
@@ -256,14 +270,18 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		int modifiers= 0;
 
-		ASTNode parent= fOriginalNode.getParent();	
-		if (parent instanceof QualifiedName) {
-			IBinding qualifierBinding= ((QualifiedName)parent).getQualifier().resolveBinding();
-			if (qualifierBinding instanceof ITypeBinding) {
+		if (fVariableKind == CONST_FIELD) {
+			modifiers |= Modifier.FINAL | Modifier.STATIC;
+		} else {
+			ASTNode parent= fOriginalNode.getParent();	
+			if (parent instanceof QualifiedName) {
+				IBinding qualifierBinding= ((QualifiedName)parent).getQualifier().resolveBinding();
+				if (qualifierBinding instanceof ITypeBinding) {
+					modifiers |= Modifier.STATIC;
+				}			
+			} else if (ASTResolving.isInStaticContext(fOriginalNode)) {
 				modifiers |= Modifier.STATIC;
-			}			
-		} else if (ASTResolving.isInStaticContext(fOriginalNode)) {
-			modifiers |= Modifier.STATIC;
+			}
 		}
 		ASTNode node= ASTResolving.findParentType(fOriginalNode);
 		if (newTypeDecl.equals(node)) {
@@ -273,6 +291,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			modifiers |= Modifier.PUBLIC;
 		}
+		
 		return modifiers;
 	}	
 
