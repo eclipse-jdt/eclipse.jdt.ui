@@ -4,11 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -18,12 +14,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
-import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 public class PackagesView extends JavaBrowsingPart {
 
@@ -37,6 +35,14 @@ public class PackagesView extends JavaBrowsingPart {
 		JavaElementPatternFilter patternFilter= new JavaElementPatternFilter();
 		patternFilter.setPatterns(new String[] {"CVS", "*.CVS"});
 		getViewer().addFilter(patternFilter);
+	}
+
+	protected ILabelProvider createLabelProvider() {
+		return new StandardJavaUILabelProvider(
+						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+						);
 	}
 
 	/**
