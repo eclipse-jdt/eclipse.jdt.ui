@@ -25,6 +25,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -304,7 +305,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (! fReplaceOccurrences)
 				return manager;
 
-			setContent(typeCu, change.getPreviewContent());
+			setContent(typeCu, change.getPreviewContent(new NullProgressMonitor()));
 			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputClassPackage(), getCuNameForNewInterface(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			setContent(newCuWC, createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1)));
 			IType theInterface= newCuWC.getType(fNewInterfaceName);
@@ -327,7 +328,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				TextEdit edit= new ReplaceEdit(offset, typeName.length(), fNewInterfaceName);
 				TextChangeCompatibility.addTextEdit(ExtractInterfaceUtil.getTextChange(manager, cu), RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_reference"), edit);  //$NON-NLS-1$
 			}
-			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent();
+			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent(new NullProgressMonitor());
 			manager.remove(newCuWC);
 			return manager;
 		} finally{

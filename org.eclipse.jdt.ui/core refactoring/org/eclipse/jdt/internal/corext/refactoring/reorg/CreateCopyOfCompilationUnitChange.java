@@ -15,6 +15,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -81,7 +82,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
 		try {
 			TextChangeManager manager= createChangeManager(pm, wc, newTypeName);
-			String result= manager.get(wc).getPreviewContent();
+			String result= manager.get(wc).getPreviewContent(new NullProgressMonitor());
 			return result;
 		} finally {
 			wc.destroy();

@@ -14,6 +14,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
@@ -82,7 +83,7 @@ class RenameAnalyzeUtil {
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
 			ICompilationUnit cu= compilationUnitsToModify[i];
 			newWorkingCopies[i]= WorkingCopyUtil.getNewWorkingCopy(cu);
-			String previewContent= manager.get(cu).getPreviewContent();
+			String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
 			newWorkingCopies[i].getBuffer().setContents(previewContent);
 			newWorkingCopies[i].reconcile(ICompilationUnit.NO_AST, false, null, new SubProgressMonitor(pm, 1));
 		}
@@ -96,7 +97,7 @@ class RenameAnalyzeUtil {
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
 			ICompilationUnit cu= compilationUnitsToModify[i];
 			newWorkingCopies[i]= cu.getWorkingCopy(owner, null, null);
-			String previewContent= manager.get(cu).getPreviewContent();
+			String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
 			newWorkingCopies[i].getBuffer().setContents(previewContent);
 			newWorkingCopies[i].reconcile(ICompilationUnit.NO_AST, false, owner, new SubProgressMonitor(pm, 1));
 		}

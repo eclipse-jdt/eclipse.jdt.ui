@@ -63,7 +63,7 @@ public class TrackPositionTest extends TestCase {
 	public void test2() throws Exception {
 		TextEdit edit= new ReplaceEdit(5, 3, "xy");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
-		IDocument preview= fChange.getPreviewDocument();
+		IDocument preview= fChange.getPreviewDocument(new NullProgressMonitor());
 		assertEquals(fDocument.get(), "0123456789");
 		assertEquals(preview.get(), "01234xy89");
 		assertEquals(fChange.getPreviewEdit(edit).getRegion(), 5, 2);

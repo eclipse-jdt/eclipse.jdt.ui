@@ -181,8 +181,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			initializeTextChange();
 			TextChange change= getTextChange();
 
-			IDocument previewContent= change.getPreviewDocument();
-			String currentConentString= change.getCurrentContent();
+			IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
+			String currentConentString= change.getCurrentContent(new NullProgressMonitor());
 			
 			ITokenComparator leftSide= new JavaTokenComparator(previewContent.get(), true); 
 			ITokenComparator rightSide= new JavaTokenComparator(currentConentString, true);
@@ -324,7 +324,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	public String getPreviewContent() throws CoreException {
 		initializeTextChange();
-		return getTextChange().getPreviewContent();
+		return getTextChange().getPreviewContent(new NullProgressMonitor());
 	}
 	
 	/* (non-Javadoc)

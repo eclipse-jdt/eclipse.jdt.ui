@@ -25,6 +25,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -375,7 +376,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		TextChange ch= new CompilationUnitChange("", processedCu); //$NON-NLS-1$
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
 		TextChangeCompatibility.addTextEdit(ch, "", edit); //$NON-NLS-1$
-		String newSource= ch.getPreviewContent();
+		String newSource= ch.getPreviewContent(new NullProgressMonitor());
 		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(newSource.toCharArray());
 		CompilationUnit cuNode= (CompilationUnit) p.createAST(null);

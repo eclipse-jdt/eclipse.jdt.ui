@@ -21,6 +21,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -421,7 +422,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
 			TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
 
-			String newCuSource= change.getPreviewContent();
+			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
 			ASTParser p= ASTParser.newParser(AST.JLS2);
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());

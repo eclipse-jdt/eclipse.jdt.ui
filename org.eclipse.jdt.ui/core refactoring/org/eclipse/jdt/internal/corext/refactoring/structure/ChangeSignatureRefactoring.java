@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -761,7 +762,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private RefactoringStatus checkCompilationofDeclaringCu() throws CoreException {
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
-		String newCuSource= change.getPreviewContent();
+		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
 		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(newCuSource.toCharArray());
 		p.setUnitName(cu.getElementName());

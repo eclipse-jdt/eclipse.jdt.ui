@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -276,7 +277,7 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 			rootEdit.addChild(allRenameEdits[i]);
 			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
 		}
-		String newCuSource= fChange.getPreviewContent();
+		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
 		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(newCuSource.toCharArray());
 		p.setUnitName(fCu.getElementName());
