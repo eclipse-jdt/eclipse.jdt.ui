@@ -243,12 +243,7 @@ public class ChangeExceptionsControl extends Composite {
 		final IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(),
-				new ProgressMonitorDialog(getShell()), IJavaSearchConstants.CLASS, scope) {
-			//TODO: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=45438
-			protected void updateOkState() {
-				validateCurrentSelection();
-			}
-		};
+				new ProgressMonitorDialog(getShell()), IJavaSearchConstants.CLASS, scope);
 		dialog.setTitle(RefactoringMessages.getString("ChangeExceptionsControl.choose.title")); //$NON-NLS-1$
 		dialog.setMessage(RefactoringMessages.getString("ChangeExceptionsControl.choose.message")); //$NON-NLS-1$
 		dialog.setFilter("*Exception*"); //$NON-NLS-1$
