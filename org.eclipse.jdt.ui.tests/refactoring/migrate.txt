@@ -1,0 +1,9 @@
+migrate refactoring:
+
+input: Map: String -> String (old package names to new package names)
+
+preconditions:
+1. keys and values are disjoint
+2. all keys and values are valid package names
+3. key set and value set have same cardinality
+4. all keys are different

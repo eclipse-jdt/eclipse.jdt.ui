@@ -56,14 +56,18 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 	
 	private void helper2(String fieldName, String newFieldName) throws Exception{
-		helper2(fieldName, newFieldName, true);
+		helper2(fieldName, newFieldName, true, false, false, false);
 	}
 	
-	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences,  boolean updateJavaDoc, 
+											boolean updateComments, boolean updateStrings) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameFieldRefactoring ref= new RenameFieldRefactoring(fgChangeCreator, classA.getField(fieldName));
 		ref.setUpdateReferences(updateReferences);
+		ref.setUpdateJavaDoc(updateJavaDoc);
+		ref.setUpdateComments(updateComments);
+		ref.setUpdateStrings(updateStrings);
 		ref.setNewName(newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("was supposed to pass", null, result);
@@ -87,7 +91,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences);
+		helper2("f", "g", updateReferences, false, false, false);
 	}
 
 	//--------- tests ----------	
@@ -131,4 +135,9 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	public void test2() throws Exception{
 		helper2(false);
 	}	
+	
+	public void test3() throws Exception{
+		helper2("f", "gg", true, true, true, true);
+	}	
+	
 }

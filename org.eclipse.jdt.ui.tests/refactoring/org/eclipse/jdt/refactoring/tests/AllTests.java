@@ -23,6 +23,7 @@ public class AllTests {
 		suite.addTest(AllChangeTests.noSetupSuite());
 		suite.addTest(UndoManagerTests.noSetupSuite());
 		suite.addTest(PathTransformationTests.noSetupSuite());
+		suite.addTest(RefactoringScannerTests.noSetupSuite());
 		return new MySetup(suite);
 	}
 }

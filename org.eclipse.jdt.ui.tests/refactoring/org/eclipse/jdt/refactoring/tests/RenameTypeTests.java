@@ -71,7 +71,8 @@ public class RenameTypeTests extends RefactoringTest {
 		helper1_0("A", "B");
 	}
 		
-	private void helper2_0(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
+	private void helper2_0(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateJavaDoc, 
+											boolean updateComments, boolean updateStrings) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldCuName);
 		IPath path= cu.getUnderlyingResource().getFullPath();
 		IType classA= getType(cu, oldName);
@@ -79,6 +80,9 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		RenameTypeRefactoring ref= createRefactoring(classA, newName);
 		ref.setUpdateReferences(updateReferences);
+		ref.setUpdateJavaDoc(updateJavaDoc);
+		ref.setUpdateComments(updateComments);
+		ref.setUpdateStrings(updateStrings);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
@@ -86,7 +90,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
-		helper2_0(oldName, oldName, newName, newCUName, updateReferences);
+		helper2_0(oldName, oldName, newName, newCUName, updateReferences, false, false, false);
 	}
 	
 	private void helper2_0(String oldName, String newName, String newCUName) throws Exception{
@@ -898,12 +902,18 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test54() throws Exception { 
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		helper2_0("A", "X", "XYZ", "A", true);		
+		helper2_0("A", "X", "XYZ", "A", true, false, false, false);		
 	}
 	
 	public void test55() throws Exception { 
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		helper2_0("A", "X", "XYZ", "A", false);		
+		helper2_0("A", "X", "XYZ", "A", false, false, false, false);		
+	}
+	
+	public void test57() throws Exception {
+		fIsVerbose= true;
+		helper2_0("A", "A", "B", "B", true, true, true, true);
+		fIsVerbose= false;
 	}
 		
 	public void test5() throws Exception { 
