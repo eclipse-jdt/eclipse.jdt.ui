@@ -223,8 +223,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		assertTrue("Refresh happened", fMyPart.wasObjectRefreshed(fPack3)); //$NON-NLS-1$
-		assertTrue("One refreshes", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
-
+		assertEquals(1, fMyPart.getRefreshedObject().size());
 	}
 	
 	public void testChangeBottomLevelPackageFragment() {
@@ -234,9 +233,7 @@ public class ContentProviderTests1 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		assertTrue("Refresh happened", fMyPart.wasObjectRefreshed(fPack6)); //$NON-NLS-1$
-		// XXX: needs work: fails on OTT build machines but not on our machines
-//		assertTrue("One refreshes", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
-
+		assertEquals(1, fMyPart.getRefreshedObject().size());
 	}
 
 	private IJavaElementDelta createDelta(IJavaElementDelta[] fragmentdeltas, int[] actions){
@@ -362,6 +359,8 @@ public class ContentProviderTests1 extends TestCase {
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			fMyPart.setFolding(false);
+			// above call might cause a property change event being sent
+			fMyPart.fRefreshedObjects.clear();
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
 	
