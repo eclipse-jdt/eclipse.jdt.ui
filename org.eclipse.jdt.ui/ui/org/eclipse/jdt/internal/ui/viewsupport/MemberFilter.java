@@ -67,7 +67,7 @@ public class MemberFilter extends ViewerFilter {
 				if (hasFilter(FILTER_STATIC) && Flags.isStatic(flags)) {
 					return false;
 				}
-				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member)) {
+				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
 					return false;
 				}
 			}			
@@ -80,5 +80,10 @@ public class MemberFilter extends ViewerFilter {
 	private boolean isMemberInInterface(IMember member) throws JavaModelException {
 		IType parent= member.getDeclaringType();
 		return parent != null && parent.isInterface();
+	}
+	
+	private boolean isTopLevelType(IMember member) throws JavaModelException {
+		IType parent= member.getDeclaringType();
+		return parent == null;
 	}		
 }
