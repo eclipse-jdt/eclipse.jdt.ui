@@ -202,6 +202,9 @@ public class ASTResolving {
 			break;
 		case ASTNode.CAST_EXPRESSION:
 			return ((CastExpression) parent).getType().resolveBinding();
+        case ASTNode.THROW_STATEMENT:
+        case ASTNode.CATCH_CLAUSE:
+            return parent.getAST().resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
 		}
 			
 		return null;

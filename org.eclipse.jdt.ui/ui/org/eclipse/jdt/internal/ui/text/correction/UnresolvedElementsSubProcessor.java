@@ -204,19 +204,12 @@ public class UnresolvedElementsSubProcessor {
 			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
 				if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
-					String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" }; //$NON-NLS-1$
-					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclass.description", typeName); //$NON-NLS-1$
-					proposals.add(new NewCUCompletionProposal(label, addedCU, true, superTypes, 0));
-                    
-                    String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, cu, true, problemPos, 0));
+					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
+                    proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, cu, true, problemPos, 0));
 				}
 				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
-					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
-					proposals.add(new NewCUCompletionProposal(label, addedCU, false, null, 0));
-                    
-                    String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, cu, false, problemPos, 0));
+					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
+                    proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, cu, false, problemPos, 0));
 				}				
 			}
 		}
