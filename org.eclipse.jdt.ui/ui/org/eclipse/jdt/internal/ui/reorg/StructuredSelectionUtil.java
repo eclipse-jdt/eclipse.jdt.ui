@@ -34,40 +34,10 @@ class StructuredSelectionUtil {
 			return new ArrayList(0);
 		List result= new ArrayList(0);
 		for (Iterator iter= ss.iterator(); iter.hasNext();) {
-			IResource resource= getResource(iter.next());
+			IResource resource= ResourceUtil.getResource(iter.next());
 			if (resource != null)
 				result.add(resource);
 		}
 		return result;
 	}
-
-	private static IResource getResource(Object o){
-		if (o instanceof IResource)
-			return (IResource)o;
-		if (o instanceof IJavaElement)
-			return getResource((IJavaElement)o);
-		return null;	
-	}
-
-	private static IResource getResource(IJavaElement element){
-		if (! element.exists())
-			return null;
-		try {
-			if (element.getCorrespondingResource() != null)
-				return element.getCorrespondingResource();
-			if (element.getElementType() == IJavaElement.COMPILATION_UNIT)	
-				return ResourceUtil.getResource((ICompilationUnit)element);
-			return null;
-		} catch(JavaModelException e) {
-			//no action - simply do not put to clipboard
-			return null;
-		}	
-	}
-
-
-
-
-
-
-
 }
