@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -631,7 +631,7 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 				else
 					unitRewriter= new CompilationUnitRewrite(currentUnit);
 				if (currentUnit.equals(sourceRewriter.getCu())) {
-					final TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode(getDeclaringType(), unitRewriter.getRoot());
+					final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDeclaringType(), unitRewriter.getRoot());
 					if (! JdtFlags.isAbstract(getDeclaringType()) && 
 					getInfosForNewMethodsToBeDeclaredAbstract().length != 0)
 						ModifierRewrite.create(unitRewriter.getASTRewrite(), declaration).setModifiers((Modifier.ABSTRACT | declaration.getModifiers()), null);
@@ -670,7 +670,7 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 			type= destinations[index];
 			mapping= TypeVariableUtil.superTypeToInheritedType(getDeclaringType(), type);
 			if (unitRewriter.getCu().equals(type.getCompilationUnit()))
-				createAll(infos, ASTNodeSearchUtil.getTypeDeclarationNode(type, unitRewriter.getRoot()), sourceRewriter.getRoot(), mapping, unitRewriter);
+				createAll(infos, ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unitRewriter.getRoot()), sourceRewriter.getRoot(), mapping, unitRewriter);
 		}
 	}
 
@@ -719,15 +719,15 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
-	private void createAll(MemberActionInfo[] members, TypeDeclaration declaration, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, CompilationUnitRewrite rewriter) throws JavaModelException {
+	private void createAll(MemberActionInfo[] members, AbstractTypeDeclaration declaration, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, CompilationUnitRewrite rewriter) throws JavaModelException {
 		for (int i= 0; i < members.length; i++) {
 			MemberActionInfo info= members[i];
 			if (info.isFieldInfo()) {
 				FieldDeclaration newField= createNewFieldDeclarationNode(info, declaringCuNode, mapping, rewriter.getASTRewrite());
-				rewriter.getASTRewrite().getListRewrite(declaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+				rewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
 			} else {
 				MethodDeclaration newMethod= createNewMethodDeclarationNode(info, declaringCuNode, mapping, rewriter.getASTRewrite());
-				rewriter.getASTRewrite().getListRewrite(declaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+				rewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
 			}
 		}
 	}

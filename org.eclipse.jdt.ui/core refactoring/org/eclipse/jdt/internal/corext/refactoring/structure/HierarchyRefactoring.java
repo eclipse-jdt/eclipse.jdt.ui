@@ -39,9 +39,11 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -102,10 +104,8 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		/**
 		 * Creates a new type variable mapper.
 		 * 
-		 * @param rewrite
-		 *        The AST rewrite to use
-		 * @param mapping
-		 *        The type variable mapping to use
+		 * @param rewrite The AST rewrite to use
+		 * @param mapping The type variable mapping to use
 		 */
 		public TypeVariableMapper(final ASTRewrite rewrite, final TypeVariableMaplet[] mapping) {
 			Assert.isNotNull(rewrite);
@@ -247,6 +247,16 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping) {
 
+				public final boolean visit(final AnnotationTypeDeclaration node) {
+					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
+					return true;
+				}
+
+				public final boolean visit(final EnumDeclaration node) {
+					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
+					return true;
+				}
+
 				public final boolean visit(final TypeDeclaration node) {
 					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 					return true;
@@ -368,7 +378,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			if (member instanceof IField)
 				node= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, cuNode);
 			else if (member instanceof IType)
-				node= ASTNodeSearchUtil.getTypeDeclarationNode((IType) member, cuNode);
+				node= ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, cuNode);
 			else if (member instanceof IMethod)
 				node= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, cuNode);
 			if (node != null)

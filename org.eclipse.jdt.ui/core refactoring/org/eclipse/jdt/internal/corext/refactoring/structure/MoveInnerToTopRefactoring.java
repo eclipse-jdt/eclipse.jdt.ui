@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -358,10 +359,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Assert.isNotNull(declaring);
 		Assert.isNotNull(type);
 		Assert.isNotNull(map);
-		final TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode(type, declaring);
+		final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, declaring);
+		if (declaration instanceof TypeDeclaration) {
 		ITypeBinding binding= null;
 		TypeParameter parameter= null;
-		for (final Iterator iterator= declaration.typeParameters().iterator(); iterator.hasNext();) {
+		for (final Iterator iterator= ((TypeDeclaration) declaration).typeParameters().iterator(); iterator.hasNext();) {
 			parameter= (TypeParameter) iterator.next();
 			binding= (ITypeBinding) parameter.resolveBinding();
 			if (binding != null && !map.containsKey(binding.getKey()))
@@ -369,6 +371,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 		if (!Flags.isStatic(type.getFlags()) && type.getDeclaringType() != null)
 			addTypeParameters(declaring, type.getDeclaringType(), map);
+		}
 	}
 
 	private String createNewSource(final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit) throws CoreException, JavaModelException {

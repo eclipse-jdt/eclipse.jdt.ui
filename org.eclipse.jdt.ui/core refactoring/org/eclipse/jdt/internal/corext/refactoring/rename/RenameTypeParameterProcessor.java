@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -77,12 +79,9 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		/**
 		 * Creates a new rename type parameter visitor.
 		 * 
-		 * @param rewrite
-		 *        the compilation unit rewrite to use
-		 * @param range
-		 *        the source range of the type parameter
-		 * @param status
-		 *        the status to update
+		 * @param rewrite the compilation unit rewrite to use
+		 * @param range the source range of the type parameter
+		 * @param status the status to update
 		 */
 		public RenameTypeParameterVisitor(final CompilationUnitRewrite rewrite, final ISourceRange range, final RefactoringStatus status) {
 			Assert.isNotNull(rewrite);
@@ -98,11 +97,28 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		 * Returns the resulting change.
 		 * 
 		 * @return the resulting change
-		 * @throws CoreException
-		 *         if the change could not be created
+		 * @throws CoreException if the change could not be created
 		 */
 		public final Change getResult() throws CoreException {
 			return fRewrite.createChange();
+		}
+
+		public final boolean visit(final AnnotationTypeDeclaration node) {
+			final String name= node.getName().getIdentifier();
+			if (name.equals(getNewElementName())) {
+				fStatus.addError(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.type_parameter_inner_class_clash", new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); //$NON-NLS-1$
+				return false;
+			}
+			return true;
+		}
+
+		public final boolean visit(final EnumDeclaration node) {
+			final String name= node.getName().getIdentifier();
+			if (name.equals(getNewElementName())) {
+				fStatus.addError(RefactoringCoreMessages.getFormattedString("RenameTypeParameterRefactoring.type_parameter_inner_class_clash", new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node))); //$NON-NLS-1$
+				return false;
+			}
+			return true;
 		}
 
 		public final boolean visit(final SimpleName node) {
@@ -142,8 +158,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	/**
 	 * Creates a new rename type parameter processor.
 	 * 
-	 * @param parameter
-	 *        the type parameter to rename
+	 * @param parameter the type parameter to rename
 	 */
 	public RenameTypeParameterProcessor(final ITypeParameter parameter) {
 		Assert.isNotNull(parameter);
@@ -240,11 +255,9 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	/**
 	 * Creates the necessary changes for the renaming of the type parameter.
 	 * 
-	 * @param monitor
-	 *        the progress monitor to display progress
+	 * @param monitor the progress monitor to display progress
 	 * @return the status of the operation
-	 * @throws CoreException
-	 *         if the change could not be generated
+	 * @throws CoreException if the change could not be generated
 	 */
 	private RefactoringStatus createRenameChanges(final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(monitor);
@@ -258,7 +271,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			if (member instanceof IMethod) {
 				declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
 			} else if (member instanceof IType) {
-				declaration= ASTNodeSearchUtil.getTypeDeclarationNode((IType) member, root);
+				declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, root);
 			} else {
 				JavaPlugin.logErrorMessage("Unexpected sub-type of IMember: " + member.getClass().getName()); //$NON-NLS-1$
 				Assert.isTrue(false);
