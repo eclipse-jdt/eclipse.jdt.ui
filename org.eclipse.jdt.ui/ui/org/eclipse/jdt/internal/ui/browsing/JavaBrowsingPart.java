@@ -340,8 +340,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setInitialSelection();
 		fMemento= null;		
 		
-		// Listen to workbench window changes
-		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		// Listen to page changes
+		getViewSite().getPage().addPostSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		fillActionBars(getViewSite().getActionBars());
@@ -429,7 +429,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	public void dispose() {
 		if (fViewer != null) {
-			getViewSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(this);
+			getViewSite().getPage().removePostSelectionListener(this);
 			getViewSite().getPage().removePartListener(fPartListener);
 			fViewer= null;
 		}
