@@ -31,9 +31,9 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 /**
  * Property page used to set the project's Javadoc location for sources
  */
-public class CompilerPropertyPage extends PropertyPage {
+public class TodoTaskPropertyPage extends PropertyPage {
 
-	private CompilerConfigurationBlock fConfigurationBlock;
+	private TodoTaskConfigurationBlock fConfigurationBlock;
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
 	private Button fUseWorkspaceSettings;
@@ -41,7 +41,7 @@ public class CompilerPropertyPage extends PropertyPage {
 	private IStatus fBlockStatus;
 	
 
-	public CompilerPropertyPage() {
+	public TodoTaskPropertyPage() {
 		fBlockStatus= new StatusInfo();
 		fBlockEnableState= null;
 	}
@@ -64,7 +64,7 @@ public class CompilerPropertyPage extends PropertyPage {
 				doStatusChanged();
 			}
 		};		
-		fConfigurationBlock= new CompilerConfigurationBlock(listener, getProject());		
+		fConfigurationBlock= new TodoTaskConfigurationBlock(listener, getProject());		
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -73,11 +73,11 @@ public class CompilerPropertyPage extends PropertyPage {
 		composite.setLayout(layout);
 				
 		fUseWorkspaceSettings= new Button(composite, SWT.RADIO);
-		fUseWorkspaceSettings.setText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label"));
+		fUseWorkspaceSettings.setText(PreferencesMessages.getString("TodoTaskPropertyPage.useworkspacesettings.label"));
 		fUseWorkspaceSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fUseProjectSettings= new Button(composite, SWT.RADIO);
-		fUseProjectSettings.setText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label"));
+		fUseProjectSettings.setText(PreferencesMessages.getString("TodoTaskPropertyPage.useprojectsettings.label"));
 		fUseProjectSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		fUseProjectSettings.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {

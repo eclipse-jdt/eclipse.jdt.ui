@@ -45,7 +45,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 
 /**
@@ -116,9 +115,9 @@ class JavaEditorHoverConfigurationBlock {
 					return config.fModifier;
 				case 1:
 					if (config.fHoverIndex == NO_HOVER_CONFIGURED_INDEX)
-						return JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
+						return PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
 					else if (config.fHoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
-						return JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
+						return PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
 					else
 						return ((JavaEditorTextHoverDescriptor)getContributedHovers().get(config.fHoverIndex)).getLabel();
 				default :
@@ -188,10 +187,10 @@ class JavaEditorHoverConfigurationBlock {
 		table.setLayout(tableLayout);
 
 		TableColumn column1= new TableColumn(table, SWT.NONE);		
-		column1.setText(JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.stateMask")); //$NON-NLS-1$
+		column1.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.stateMask")); //$NON-NLS-1$
 
 		TableColumn column2= new TableColumn(table, SWT.NONE);
-		column2.setText(JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.hover")); //$NON-NLS-1$
+		column2.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.hover")); //$NON-NLS-1$
 
 		fTableViewer= new TableViewer(table);
 
@@ -249,28 +248,28 @@ class JavaEditorHoverConfigurationBlock {
 	private void setTableInput() {
 		fHoverConfigs= new HoverConfig[8];
 		
-		String label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
 		fHoverConfigs[0]= new HoverConfig(label, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, fStore.getString(PreferenceConstants.EDITOR_DEFAULT_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.none"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.none"); //$NON-NLS-1$
 		fHoverConfigs[1]= new HoverConfig(label, SWT.NONE, fStore.getString(PreferenceConstants.EDITOR_NONE_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrl"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrl"); //$NON-NLS-1$		
 		fHoverConfigs[2]= new HoverConfig(label, SWT.CTRL, fStore.getString(PreferenceConstants.EDITOR_CTRL_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.shift"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.shift"); //$NON-NLS-1$		
 		fHoverConfigs[3]= new HoverConfig(label, SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_SHIFT_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlShift"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlShift"); //$NON-NLS-1$		
 		fHoverConfigs[4]= new HoverConfig(label, SWT.CTRL | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAlt"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAlt"); //$NON-NLS-1$		
 		fHoverConfigs[5]= new HoverConfig(label, SWT.CTRL | SWT.ALT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.altShift"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.altShift"); //$NON-NLS-1$		
 		fHoverConfigs[6]= new HoverConfig(label, SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER));
 
-		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAltShift"); //$NON-NLS-1$		
+		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAltShift"); //$NON-NLS-1$		
 		fHoverConfigs[7]= new HoverConfig(label, SWT.CTRL | SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER));
 
 		fTableViewer.setInput(fHoverConfigs);
@@ -338,9 +337,9 @@ class JavaEditorHoverConfigurationBlock {
 		String[] labels= new String[getContributedHovers().size() + additionalItemCount];
 		
 		if (!isDefaultRowSelected())
-			labels[0]= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
+			labels[0]= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
 
-		labels[additionalItemCount - 1]= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
+		labels[additionalItemCount - 1]= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
 
 		for (int i= additionalItemCount; i < labels.length; i++)
 			labels[i]= ((JavaEditorTextHoverDescriptor)getContributedHovers().get(i - additionalItemCount)).getLabel();

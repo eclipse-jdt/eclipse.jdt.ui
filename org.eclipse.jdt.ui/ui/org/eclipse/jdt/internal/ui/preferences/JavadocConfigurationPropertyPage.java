@@ -29,7 +29,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
@@ -49,11 +48,11 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
 		if (elem instanceof IPackageFragmentRoot)
-			setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
+			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
 		else if (elem instanceof IJavaProject)
-			setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description")); //$NON-NLS-1$
+			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description")); //$NON-NLS-1$
 		else
-			setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
+			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
 
 		super.createControl(parent);
 	}

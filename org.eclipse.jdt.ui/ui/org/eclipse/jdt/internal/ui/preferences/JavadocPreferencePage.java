@@ -30,7 +30,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -58,7 +57,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
 		public void changeControlPressed(DialogField field) {
-			handleFileBrowseButtonPressed(fJavadocSelection.getTextControl(fComposite), null, JavaUIMessages.getString("JavadocPreferencePage.browsedialog.title")); //$NON-NLS-1$
+			handleFileBrowseButtonPressed(fJavadocSelection.getTextControl(fComposite), null, PreferencesMessages.getString("JavadocPreferencePage.browsedialog.title")); //$NON-NLS-1$
 
 		}
 
@@ -105,7 +104,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		fComposite.setLayout(layout);
 
 		DialogField javaDocCommentLabel= new DialogField();
-		javaDocCommentLabel.setLabelText(JavaUIMessages.getString("JavadocPreferencePage.description")); //$NON-NLS-1$
+		javaDocCommentLabel.setLabelText(PreferencesMessages.getString("JavadocPreferencePage.description")); //$NON-NLS-1$
 		javaDocCommentLabel.doFillIntoGrid(fComposite, 3);
 		LayoutUtil.setWidthHint(javaDocCommentLabel.getLabelControl(null), convertWidthInCharsToPixels(80));
 
@@ -113,8 +112,8 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 
 		fJavadocSelection= new StringButtonDialogField(adapter);
 		fJavadocSelection.setDialogFieldListener(adapter);
-		fJavadocSelection.setLabelText(JavaUIMessages.getString("JavadocPreferencePage.command.label")); //$NON-NLS-1$
-		fJavadocSelection.setButtonLabel(JavaUIMessages.getString("JavadocPreferencePage.command.button")); //$NON-NLS-1$
+		fJavadocSelection.setLabelText(PreferencesMessages.getString("JavadocPreferencePage.command.label")); //$NON-NLS-1$
+		fJavadocSelection.setButtonLabel(PreferencesMessages.getString("JavadocPreferencePage.command.button")); //$NON-NLS-1$
 		fJavadocSelection.doFillIntoGrid(fComposite, 3);
 		LayoutUtil.setHorizontalGrabbing(fJavadocSelection.getTextControl(null));
 		LayoutUtil.setWidthHint(fJavadocSelection.getTextControl(null), convertWidthInCharsToPixels(10));
@@ -190,7 +189,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		if (text.length() > 0) {
 			File file= new File(text);
 			if (!file.isFile()) {
-				status.setError(JavaUIMessages.getString("JavadocPreferencePage.error.notexists"));	 //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("JavadocPreferencePage.error.notexists"));	 //$NON-NLS-1$
 			}
 		}
 		updateStatus(status);

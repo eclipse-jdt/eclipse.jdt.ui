@@ -18,10 +18,9 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.CompilerConfigurationBlock.TodoTask;
+import org.eclipse.jdt.internal.ui.preferences.TodoTaskConfigurationBlock.TodoTask;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 /**
  * Dialog to enter a na new task tag
  */
-public class CompilerTodoTaskInputDialog extends StatusDialog {
+public class TodoTaskInputDialog extends StatusDialog {
 	
 	private class CompilerTodoTaskInputAdapter implements IDialogFieldListener {
 		public void dialogFieldChanged(DialogField field) {
@@ -45,7 +44,7 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 	
 	private List fExistingNames;
 		
-	public CompilerTodoTaskInputDialog(Shell parent, TodoTask task, List existingEntries) {
+	public TodoTaskInputDialog(Shell parent, TodoTask task, List existingEntries) {
 		super(parent);
 		
 		fExistingNames= new ArrayList(existingEntries.size());
@@ -57,27 +56,27 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 		}
 		
 		if (task == null) {
-			setTitle(JavaUIMessages.getString("CompilerTodoTaskInputDialog.new.title")); //$NON-NLS-1$
+			setTitle(PreferencesMessages.getString("TodoTaskInputDialog.new.title")); //$NON-NLS-1$
 		} else {
-			setTitle(JavaUIMessages.getString("CompilerTodoTaskInputDialog.edit.title")); //$NON-NLS-1$
+			setTitle(PreferencesMessages.getString("TodoTaskInputDialog.edit.title")); //$NON-NLS-1$
 		}
 
 		CompilerTodoTaskInputAdapter adapter= new CompilerTodoTaskInputAdapter();
 
 		fNameDialogField= new StringDialogField();
-		fNameDialogField.setLabelText(JavaUIMessages.getString("CompilerTodoTaskInputDialog.name.label")); //$NON-NLS-1$
+		fNameDialogField.setLabelText(PreferencesMessages.getString("TodoTaskInputDialog.name.label")); //$NON-NLS-1$
 		fNameDialogField.setDialogFieldListener(adapter);
 		
 		fNameDialogField.setText((task != null) ? task.name : "");
 		
 		String[] items= new String[] {
-			JavaUIMessages.getString("CompilerTodoTaskInputDialog.priority.high"),
-			JavaUIMessages.getString("CompilerTodoTaskInputDialog.priority.normal"),
-			JavaUIMessages.getString("CompilerTodoTaskInputDialog.priority.low")
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.high"),
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.normal"),
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.low")
 		};
 		
 		fPriorityDialogField= new ComboDialogField(SWT.READ_ONLY);
-		fPriorityDialogField.setLabelText(JavaUIMessages.getString("CompilerTodoTaskInputDialog.priority.label"));
+		fPriorityDialogField.setLabelText(PreferencesMessages.getString("TodoTaskInputDialog.priority.label"));
 		fPriorityDialogField.setItems(items);
 		if (task != null) {
 			if (JavaCore.COMPILER_TASK_PRIORITY_HIGH.equals(task.priority)) {
@@ -134,14 +133,14 @@ public class CompilerTodoTaskInputDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.enterName")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("TodoTaskInputDialog.error.enterName")); //$NON-NLS-1$
 		} else {
 			if (newText.indexOf(',') != -1) {
-				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.comma")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("TodoTaskInputDialog.error.comma")); //$NON-NLS-1$
 			} else if (fExistingNames.contains(newText)) {
-				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.entryExists")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("TodoTaskInputDialog.error.entryExists")); //$NON-NLS-1$
 			} else if (Character.isWhitespace(newText.charAt(0)) ||  Character.isWhitespace(newText.charAt(newText.length() - 1))) {
-				status.setError(JavaUIMessages.getString("CompilerTodoTaskInputDialog.error.noSpace")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("TodoTaskInputDialog.error.noSpace")); //$NON-NLS-1$
 			}
 		}
 		updateStatus(status);

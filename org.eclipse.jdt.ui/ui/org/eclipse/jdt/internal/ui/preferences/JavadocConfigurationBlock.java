@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -64,8 +63,8 @@ public class JavadocConfigurationBlock {
 
 		fJavaDocField= new StringButtonDialogField(adapter);
 		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText(JavaUIMessages.getString("JavadocConfigurationBlock.location.label")); //$NON-NLS-1$
-		fJavaDocField.setButtonLabel(JavaUIMessages.getString("JavadocConfigurationBlock.location.button")); //$NON-NLS-1$
+		fJavaDocField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.label")); //$NON-NLS-1$
+		fJavaDocField.setButtonLabel(PreferencesMessages.getString("JavadocConfigurationBlock.location.button")); //$NON-NLS-1$
 
 		fJavaDocField.doFillIntoGrid(topComp, 3);
 
@@ -77,7 +76,7 @@ public class JavadocConfigurationBlock {
 		DialogField.createEmptySpace(topComp, 2);
 		
 		fValidateButton= new Button(topComp, SWT.PUSH);
-		fValidateButton.setText(JavaUIMessages.getString("JavadocConfigurationBlock.ValidateButton.label")); //$NON-NLS-1$
+		fValidateButton.setText(PreferencesMessages.getString("JavadocConfigurationBlock.ValidateButton.label")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END);
 		fValidateButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fValidateButton);
@@ -114,15 +113,15 @@ public class JavadocConfigurationBlock {
 		
 	private class EntryValidator implements Runnable {
 
-		private String fInvalidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
-		private String fValidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.ValidLocation.message"); //$NON-NLS-1$
-		private String fTitle=  JavaUIMessages.getString("JavadocConfigurationBlock.MessageDialog.title"); //$NON-NLS-1$
+		private String fInvalidMessage= PreferencesMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
+		private String fValidMessage= PreferencesMessages.getString("JavadocConfigurationBlock.ValidLocation.message"); //$NON-NLS-1$
+		private String fTitle=  PreferencesMessages.getString("JavadocConfigurationBlock.MessageDialog.title"); //$NON-NLS-1$
 		public void run() {
 
 			Path path = new Path(fJavaDocField.getText());
 			IPath index = path.append("index.html"); //$NON-NLS-1$
 			IPath packagelist = path.append("package-list"); //$NON-NLS-1$
-			String message = JavaUIMessages.getString("JavadocConfigurationBlock.UnableToValidateLocation.message"); //$NON-NLS-1$
+			String message = PreferencesMessages.getString("JavadocConfigurationBlock.UnableToValidateLocation.message"); //$NON-NLS-1$
 			try {
 
 				URL indexURL = new URL(index.toString());
@@ -217,8 +216,8 @@ public class JavadocConfigurationBlock {
 			initPath= (new File(fJavaDocLocation.getFile())).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(fShell);
-		dialog.setText(JavaUIMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.label")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.message")); //$NON-NLS-1$
+		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.label")); //$NON-NLS-1$
+		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
@@ -241,28 +240,28 @@ public class JavadocConfigurationBlock {
 				URL url= new URL(jdocLocation);
 				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 					if (url.getFile() == null) {
-						status.setError(JavaUIMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
+						status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
 						return status;
 					} else {
 						File dir= new File(url.getFile());
 						if (!dir.isDirectory()) {
-							status.setError(JavaUIMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
+							status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
 							return status;
 						}
 						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
 						if (!packagesFile.exists()) {
-							status.setWarning(JavaUIMessages.getString("JavadocConfigurationBlock.warning.packagelistnotfound")); //$NON-NLS-1$
+							status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.warning.packagelistnotfound")); //$NON-NLS-1$
 							// only a warning, go on
 						}						
 					}
 				}
 				fJavaDocLocation= url;
 			} catch (MalformedURLException e) {
-				status.setError(JavaUIMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
 				return status;
 			}
 		} 
-		//else status.setWarning(JavaUIMessages.getString("JavadocConfigurationBlock.EmptyJavadocLocation.warning")); //$NON-NLS-1$
+		//else status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.EmptyJavadocLocation.warning")); //$NON-NLS-1$
 		return status;
 	}
 

@@ -36,7 +36,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 	
 /*
@@ -95,7 +94,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaUIMessages.getString("JavaBasePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("JavaBasePreferencePage.description")); //$NON-NLS-1$
 	
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
@@ -192,21 +191,21 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		Group linkSettings= new Group(result, SWT.NONE);
 		linkSettings.setLayout(new GridLayout());
 		linkSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		linkSettings.setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
-		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
+		linkSettings.setText(PreferencesMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
+		addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 
 		// new Label(result, SWT.NONE); // spacer
 
 		Group updateGroup= new Group(result, SWT.NONE);
 		updateGroup.setLayout(new GridLayout());
 		updateGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		updateGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
-		addRadioButton(updateGroup, JavaUIMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
-		addRadioButton(updateGroup, JavaUIMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
+		updateGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
+		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
+		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
 		Label notice= new Label(updateGroup, SWT.WRAP);
-		notice.setText(JavaUIMessages.getString("JavaBasePreferencePage.notice.outliner"));  //$NON-NLS-1$
+		notice.setText(PreferencesMessages.getString("JavaBasePreferencePage.notice.outliner"));  //$NON-NLS-1$
 		GridData noticeData= new GridData(GridData.FILL_HORIZONTAL);
 		noticeData.grabExcessHorizontalSpace= true;
 		noticeData.widthHint= convertWidthInCharsToPixels(60);
@@ -217,18 +216,18 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		Group doubleClickGroup= new Group(result, SWT.NONE);
 		doubleClickGroup.setLayout(new GridLayout());		
 		doubleClickGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		doubleClickGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
-		addRadioButton(doubleClickGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
-		addRadioButton(doubleClickGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
+		doubleClickGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
+		addRadioButton(doubleClickGroup, PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
+		addRadioButton(doubleClickGroup, PreferencesMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
 
 		// new Label(result, SWT.NONE); // spacer
 		
 		Group typeHierarchyGroup= new Group(result, SWT.NONE);
 		typeHierarchyGroup.setLayout(new GridLayout());		
 		typeHierarchyGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		typeHierarchyGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
-		addRadioButton(typeHierarchyGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
-		addRadioButton(typeHierarchyGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
+		typeHierarchyGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
+		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
+		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
 
 		return result;
 	}

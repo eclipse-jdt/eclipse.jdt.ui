@@ -67,7 +67,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -210,25 +209,25 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR } //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR } //$NON-NLS-1$
 	};
 	
 	private final String[][] fAppearanceColorListModel= new String[][] {
-		{JavaUIMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), PreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor2"), PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), PreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
 	};
 	
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
@@ -301,7 +300,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fShowInOverviewRulerCheckBox;
 	
 	public JavaEditorPreferencePage() {
-		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
 	}
@@ -356,7 +355,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
 		backgroundComposite.setLayout(new RowLayout());
-		backgroundComposite.setText(JavaUIMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
+		backgroundComposite.setText(PreferencesMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
 	
 		SelectionListener backgroundSelectionListener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {				
@@ -368,18 +367,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		};
 
 		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundDefaultRadioButton.setText(JavaUIMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
+		fBackgroundDefaultRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
 		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
 
 		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundCustomRadioButton.setText(JavaUIMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
+		fBackgroundCustomRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
 		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
 
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
 		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
@@ -405,7 +404,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -417,14 +416,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-        fBoldCheckBox.setText(JavaUIMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
+        fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(colorComposite);
@@ -577,28 +576,28 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		appearanceComposite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
 				
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
 				
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_LINE_NUMBER_RULER, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_CURRENT_LINE, 0);
 				
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
 
@@ -609,7 +608,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		l.setLayoutData(gd);
 		
 		l= new Label(appearanceComposite, SWT.LEFT);
-		l.setText(JavaUIMessages.getString("JavaEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -638,7 +637,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(JavaUIMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
@@ -680,7 +679,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String text= "Analyse &problems while typing";
 		addCheckBox(composite, text, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 		
-		text= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
+		text= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, text, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
 		
 		Label label= new Label(composite, SWT.LEFT );
@@ -798,35 +797,35 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SPACES_FOR_TABS, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBraces"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBraces"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
 		Button button= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
 		createDependency(button, fAddJavaDocTagsButton);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);
 	
 		return composite;
@@ -855,56 +854,56 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertCompletion"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertCompletion"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_INSERT_COMPLETION, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		Button button= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		fGuessMethodArgumentsButton= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
 		createDependency(button, fGuessMethodArgumentsButton);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
 		final Button autoactivation= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
 		fAutoInsertDelayText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
 		fAutoInsertJavaTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
 		fAutoInsertJavaDocTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 								
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, 0);
 		
 		autoactivation.addSelectionListener(new SelectionAdapter(){
@@ -928,27 +927,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.general")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.general")); //$NON-NLS-1$
 		item.setControl(createAppearancePage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
 		item.setControl(createSyntaxPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
 		item.setControl(createContentAssistPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.problemIndicationTab.title")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.problemIndicationTab.title")); //$NON-NLS-1$
 		item.setControl(createProblemIndicationPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.behaviourTab.title")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.behaviourTab.title")); //$NON-NLS-1$
 		item.setControl(createBehaviourPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(fOverlayStore);
 		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
 		
@@ -1196,14 +1195,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(JavaUIMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0)
-					status.setError(JavaUIMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			} catch (NumberFormatException e) {
-				status.setError(JavaUIMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			}
 		}
 		return status;

@@ -23,14 +23,14 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 /*
  * The page to configure the compiler options.
  */
-public class CompilerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class TodoTaskPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
 
-	private CompilerConfigurationBlock fConfigurationBlock;
+	private TodoTaskConfigurationBlock fConfigurationBlock;
 
-	public CompilerPreferencePage() {
+	public TodoTaskPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("CompilerPreferencePage.description")); //$NON-NLS-1$
-		fConfigurationBlock= new CompilerConfigurationBlock(this, null);
+		setDescription(PreferencesMessages.getString("TodoTaskPreferencePage.description")); //$NON-NLS-1$
+		fConfigurationBlock= new TodoTaskConfigurationBlock(this, null);
 	}
 		
 	/*

@@ -19,7 +19,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -83,7 +82,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 	public AppearancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaUIMessages.getString("AppearancePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("AppearancePreferencePage.description")); //$NON-NLS-1$
 	
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -93,31 +92,31 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	
 		fShowMethodReturnType= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMethodReturnType.setDialogFieldListener(listener);
-		fShowMethodReturnType.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.methodreturntype.label")); //$NON-NLS-1$
+		fShowMethodReturnType.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.methodreturntype.label")); //$NON-NLS-1$
 		
 		fShowOverrideIndicator= new SelectionButtonDialogField(SWT.CHECK);
 		fShowOverrideIndicator.setDialogFieldListener(listener);
-		fShowOverrideIndicator.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.overrideindicator.label")); //$NON-NLS-1$
+		fShowOverrideIndicator.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.overrideindicator.label")); //$NON-NLS-1$
 
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
-		fShowMembersInPackageView.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.showMembersInPackagesView")); //$NON-NLS-1$
+		fShowMembersInPackageView.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.showMembersInPackagesView")); //$NON-NLS-1$
 
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
-		fStackBrowsingViewsVertically.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.stackViewsVerticallyInTheJavaBrowsingPerspective")); //$NON-NLS-1$
+		fStackBrowsingViewsVertically.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.stackViewsVerticallyInTheJavaBrowsingPerspective")); //$NON-NLS-1$
 
 		fFoldPackagesInPackageExplorer= new SelectionButtonDialogField(SWT.CHECK);
 		fFoldPackagesInPackageExplorer.setDialogFieldListener(listener);
-		fFoldPackagesInPackageExplorer.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.foldEmptyPackages")); //$NON-NLS-1$
+		fFoldPackagesInPackageExplorer.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.foldEmptyPackages")); //$NON-NLS-1$
 
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
-		fCompressPackageNames.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label")); //$NON-NLS-1$
+		fCompressPackageNames.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label")); //$NON-NLS-1$
 
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
-		fPackageNamePattern.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePattern.label")); //$NON-NLS-1$
+		fPackageNamePattern.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.pkgNamePattern.label")); //$NON-NLS-1$
 	}	
 
 	private void initFields() {
@@ -171,7 +170,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		
 		
 		DialogField field= new DialogField();
-		field.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives")); //$NON-NLS-1$
+		field.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives")); //$NON-NLS-1$
 		field.doFillIntoGrid(result, 2);
 		
 		initFields();
@@ -188,7 +187,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	
 	private IStatus getValidationStatus(){
 		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals("")) //$NON-NLS-1$
-			return new StatusInfo(IStatus.ERROR, JavaUIMessages.getString("AppearancePreferencePage.packageNameCompressionPattern.error.isEmpty")); //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("AppearancePreferencePage.packageNameCompressionPattern.error.isEmpty")); //$NON-NLS-1$
 		else	
 			return new StatusInfo();
 	}

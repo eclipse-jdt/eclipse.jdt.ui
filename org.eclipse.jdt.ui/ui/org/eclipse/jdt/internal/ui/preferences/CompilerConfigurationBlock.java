@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -21,7 +20,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,23 +38,17 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 /**
   */
@@ -94,8 +86,6 @@ public class CompilerConfigurationBlock {
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
-	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
-	private static final String PREF_COMPILER_TASK_PRIORITIES= JavaCore.COMPILER_TASK_PRIORITIES;
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
 
 
@@ -139,7 +129,7 @@ public class CompilerConfigurationBlock {
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
 			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_BUILD_CLEAN_OUTPUT_FOLDER,
-			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT
+			PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT
 		};	
 	}
 
@@ -175,54 +165,6 @@ public class CompilerConfigurationBlock {
 		}
 	}
 	
-	public static class TodoTask {
-		public String name;
-		public String priority;
-	}
-	
-	private static class TodoTaskLabelProvider extends LabelProvider implements ITableLabelProvider {
-	
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-		 */
-		public Image getImage(Object element) {
-			return null; // JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
-		public String getText(Object element) {
-			return getColumnText(element, 0);
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
-		public String getColumnText(Object element, int columnIndex) {
-			TodoTask task= (TodoTask) element;
-			if (columnIndex == 0) {
-				return task.name;
-			} else {
-				if (PRIORITY_HIGH.equals(task.priority)) {
-					return JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.high.priority");
-				} else if (PRIORITY_NORMAL.equals(task.priority)) {
-					return JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.normal.priority");
-				} else {
-					return JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.low.priority");
-				}
-			}	
-		}
-
-	}
-	
-	
 	
 	private Map fWorkingValues;
 
@@ -236,12 +178,11 @@ public class CompilerConfigurationBlock {
 	private ArrayList fComplianceControls;
 	private PixelConverter fPixelConverter;
 
-	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus;
+	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
 	private IStatusChangeListener fContext;
 	private Shell fShell;
 	private IJavaProject fProject; // project or null
-	
-	private ListDialogField fTodoTasksList;
+
 	
 
 	public CompilerConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
@@ -271,45 +212,9 @@ public class CompilerConfigurationBlock {
 			}
 		};
 		
-		IListAdapter adapter=  new IListAdapter() {
-			public void customButtonPressed(ListDialogField field, int index) {
-				doTodoButtonPressed(index);
-			}
-
-			public void selectionChanged(ListDialogField field) {
-				field.enableButton(3, field.getSelectedElements().size() == 1);
-			}
-			
-			public void doubleClicked(ListDialogField field) {
-			}	
-		};
-		String[] buttons= new String[] {
-			/* 0 */ JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.add.button"),
-			/* 1 */ JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.remove.button"),
-			null,
-			/* 3 */ JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.edit.button"),
-		};
-		fTodoTasksList= new ListDialogField(adapter, buttons, new TodoTaskLabelProvider());
-		fTodoTasksList.setLabelText(JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.label"));
-		fTodoTasksList.setRemoveButtonIndex(1);
-		
-		String[] columnsHeaders= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.name.column"),
-			JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.priority.column"),
-		};
-		
-		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, false));
-		unpackTodoTasks();
-		if (fTodoTasksList.getSize() > 0) {
-			fTodoTasksList.selectFirstElement();
-		} else {
-			fTodoTasksList.enableButton(3, false);
-		}
-		
 		fComplianceStatus= new StatusInfo();
 		fMaxNumberProblemsStatus= new StatusInfo();
 		fResourceFilterStatus= new StatusInfo();
-		fTaskTagsStatus= new StatusInfo();		
 	}
 	
 	private Map getOptions(boolean inheritJavaCoreOptions) {
@@ -367,23 +272,23 @@ public class CompilerConfigurationBlock {
 		Composite othersComposite= createOthersTabContent(folder);
 
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CompilerConfigurationBlock.warnings.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.warnings.tabtitle")); //$NON-NLS-1$
 		item.setControl(warningsComposite);
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CompilerConfigurationBlock.markers.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.tabtitle")); //$NON-NLS-1$
 		item.setControl(markersComposite);
 	
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CompilerConfigurationBlock.generation.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.generation.tabtitle")); //$NON-NLS-1$
 		item.setControl(codeGenComposite);
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CompilerConfigurationBlock.compliance.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.compliance.tabtitle")); //$NON-NLS-1$
 		item.setControl(complianceComposite);
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CompilerConfigurationBlock.others.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.others.tabtitle")); //$NON-NLS-1$
 		item.setControl(othersComposite);		
 		
 		validateSettings(null, null);
@@ -395,9 +300,9 @@ public class CompilerConfigurationBlock {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
 		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
@@ -409,37 +314,25 @@ public class CompilerConfigurationBlock {
 		layout.numColumns= 2;
 
 		Group group= new Group(markersComposite, SWT.NONE);
-		group.setText(JavaUIMessages.getString("CompilerConfigurationBlock.markers.deprecated.label"));
+		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.deprecated.label"));
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 		
-		String label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
 		addComboBox(group, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
 		addCheckBox(group, label, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, 0);
 
 		layout= new GridLayout();
 		layout.numColumns= 2;
 
 		group= new Group(markersComposite, SWT.NONE);
-		group.setText(JavaUIMessages.getString("CompilerConfigurationBlock.markers.taskmarkers.label"));
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setLayout(layout);
-		
-		fTodoTasksList.doFillIntoGrid(group, 3);
-		LayoutUtil.setHorizontalSpan(fTodoTasksList.getLabelControl(null), 2);
-		LayoutUtil.setHorizontalGrabbing(fTodoTasksList.getListControl(null));
-
-		layout= new GridLayout();
-		layout.numColumns= 2;
-
-		group= new Group(markersComposite, SWT.NONE);
-		group.setText(JavaUIMessages.getString("CompilerConfigurationBlock.markers.nls.label"));
+		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.nls.label"));
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
 		addComboBox(group, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		return markersComposite;
 	}
@@ -452,8 +345,8 @@ public class CompilerConfigurationBlock {
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
 		String[] errorWarningLabels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.warning") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning") //$NON-NLS-1$
 		};
 			
 		GridLayout layout= new GridLayout();
@@ -463,7 +356,7 @@ public class CompilerConfigurationBlock {
 		othersComposite.setLayout(layout);
 		
 		Label description= new Label(othersComposite, SWT.WRAP);
-		description.setText(JavaUIMessages.getString("CompilerConfigurationBlock.build_warnings.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.build_warnings.description")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		// gd.widthHint= convertWidthInCharsToPixels(50);
@@ -477,29 +370,29 @@ public class CompilerConfigurationBlock {
 		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
 		combos.setLayout(cl);
 		
-		String label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_incomplete_build_path.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incomplete_build_path.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);	
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_build_path_cycles.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_build_path_cycles.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
 		
 		description= new Label(othersComposite, SWT.WRAP);
-		description.setText(JavaUIMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL);
 		gd.horizontalSpan= 2;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
 		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
@@ -514,9 +407,9 @@ public class CompilerConfigurationBlock {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
 			
 		GridLayout layout= new GridLayout();
@@ -527,46 +420,46 @@ public class CompilerConfigurationBlock {
 		warningsComposite.setLayout(layout);
 
 		Label description= new Label(warningsComposite, SWT.WRAP);
-		description.setText(JavaUIMessages.getString("CompilerConfigurationBlock.warnings.description")); //$NON-NLS-1$
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.warnings.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
 
-		String label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_unreachable_code.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unreachable_code.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_invalid_import.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_import.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
 		Text text= addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT);
 		text.setTextLimit(6);
 		
@@ -582,16 +475,16 @@ public class CompilerConfigurationBlock {
 		Composite codeGenComposite= new Composite(folder, SWT.NULL);
 		codeGenComposite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("CompilerConfigurationBlock.variable_attr.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.variable_attr.label"); //$NON-NLS-1$
 		addCheckBox(codeGenComposite, label, PREF_LOCAL_VARIABLE_ATTR, generateValues, 0);
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.line_number_attr.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.line_number_attr.label"); //$NON-NLS-1$
 		addCheckBox(codeGenComposite, label, PREF_LINE_NUMBER_ATTR, generateValues, 0);		
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.source_file_attr.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.source_file_attr.label"); //$NON-NLS-1$
 		addCheckBox(codeGenComposite, label, PREF_SOURCE_FILE_ATTR, generateValues, 0);		
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.codegen_unused_local.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_unused_local.label"); //$NON-NLS-1$
 		addCheckBox(codeGenComposite, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT }, 0);	
 		
 		return codeGenComposite;
@@ -606,14 +499,14 @@ public class CompilerConfigurationBlock {
 
 		String[] values34= new String[] { VERSION_1_3, VERSION_1_4 };
 		String[] values34Labels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
 		};
 		
-		String label= JavaUIMessages.getString("CompilerConfigurationBlock.compiler_compliance.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.compiler_compliance.label"); //$NON-NLS-1$
 		addComboBox(complianceComposite, label, PREF_COMPLIANCE, values34, values34Labels, 0);	
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.default_settings.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.default_settings.label"); //$NON-NLS-1$
 		addCheckBox(complianceComposite, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT, USER }, 0);	
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
@@ -621,27 +514,27 @@ public class CompilerConfigurationBlock {
 				
 		String[] values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
 		String[] values14Labels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
 		};
 		
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
 		addComboBox(complianceComposite, label, PREF_CODEGEN_TARGET_PLATFORM, values14, values14Labels, indent);	
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.source_compatibility.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.source_compatibility.label"); //$NON-NLS-1$
 		addComboBox(complianceComposite, label, PREF_SOURCE_COMPATIBILITY, values34, values34Labels, indent);	
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			JavaUIMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
-			JavaUIMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
 
-		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_assert_as_identifier.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_assert_as_identifier.label"); //$NON-NLS-1$
 		addComboBox(complianceComposite, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);		
 
 		Control[] allChildren= complianceComposite.getChildren();
@@ -762,8 +655,6 @@ public class CompilerConfigurationBlock {
 				fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			} else if (PREF_RESOURCE_FILTER.equals(changedKey)) {
 				fResourceFilterStatus= validateResourceFilters();
-			} else if (PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
-				fTaskTagsStatus= validateTaskTags();
 			} else {
 				return;
 			}
@@ -772,9 +663,8 @@ public class CompilerConfigurationBlock {
 			fComplianceStatus= validateCompliance();
 			fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			fResourceFilterStatus= validateResourceFilters();
-			fTaskTagsStatus= validateTaskTags();
 		}		
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus });
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus });
 		fContext.statusChanged(status);
 	}
 	
@@ -782,22 +672,22 @@ public class CompilerConfigurationBlock {
 		StatusInfo status= new StatusInfo();
 		if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
 			if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerConfigurationBlock.cpl13src14.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13src14.error")); //$NON-NLS-1$
 				return status;
 			} else if (checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerConfigurationBlock.cpl13trg14.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13trg14.error")); //$NON-NLS-1$
 				return status;
 			}
 		}
 		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
 			if (!checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR)) {
-				status.setError(JavaUIMessages.getString("CompilerConfigurationBlock.src14asrterr.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14asrterr.error")); //$NON-NLS-1$
 				return status;
 			}
 		}
 		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
 			if (!checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
 		}
@@ -808,15 +698,15 @@ public class CompilerConfigurationBlock {
 		String number= (String) fWorkingValues.get(PREF_PB_MAX_PER_UNIT);
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(JavaUIMessages.getString("CompilerConfigurationBlock.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value <= 0) {
-					status.setError(JavaUIMessages.getFormattedString("CompilerConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
+					status.setError(PreferencesMessages.getFormattedString("CompilerConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
 				}
 			} catch (NumberFormatException e) {
-				status.setError(JavaUIMessages.getFormattedString("CompilerConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getFormattedString("CompilerConfigurationBlock.invalid_input", number)); //$NON-NLS-1$
 			}
 		}
 		return status;
@@ -838,7 +728,7 @@ public class CompilerConfigurationBlock {
 			}
 			IStatus status= workspace.validateName(fileName, resourceType);
 			if (status.matches(IStatus.ERROR)) {
-				String message= JavaUIMessages.getFormattedString("CompilerConfigurationBlock.filter.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
+				String message= PreferencesMessages.getFormattedString("CompilerConfigurationBlock.filter.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
 				return new StatusInfo(IStatus.ERROR, message);
 			}
 		}
@@ -906,8 +796,6 @@ public class CompilerConfigurationBlock {
 	}
 	
 	public boolean performOk(boolean enabled) {
-		packTodoTasks();
-
 		String[] allKeys= getAllKeys();
 		Map actualOptions= getOptions(false);
 		
@@ -933,12 +821,12 @@ public class CompilerConfigurationBlock {
 		
 		
 		if (hasChanges) {
-			String title= JavaUIMessages.getString("CompilerConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
+			String title= PreferencesMessages.getString("CompilerConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
 			String message;
 			if (fProject == null) {
-				message= JavaUIMessages.getString("CompilerConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
+				message= PreferencesMessages.getString("CompilerConfigurationBlock.needsfullbuild.message"); //$NON-NLS-1$
 			} else {
-				message= JavaUIMessages.getString("CompilerConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
+				message= PreferencesMessages.getString("CompilerConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
 			}				
 			
 			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
@@ -979,8 +867,8 @@ public class CompilerConfigurationBlock {
 		} catch (InterruptedException e) {
 			// cancelled by user
 		} catch (InvocationTargetException e) {
-			String title= JavaUIMessages.getString("CompilerConfigurationBlock.builderror.title"); //$NON-NLS-1$
-			String message= JavaUIMessages.getString("CompilerConfigurationBlock.builderror.message"); //$NON-NLS-1$
+			String title= PreferencesMessages.getString("CompilerConfigurationBlock.builderror.title"); //$NON-NLS-1$
+			String message= PreferencesMessages.getString("CompilerConfigurationBlock.builderror.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}		
@@ -988,8 +876,6 @@ public class CompilerConfigurationBlock {
 	public void performDefaults() {
 		fWorkingValues= JavaCore.getDefaultOptions();
 		fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
-		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, "TODO");
-		fWorkingValues.put(PREF_COMPILER_TASK_PRIORITIES, PRIORITY_NORMAL);
 		updateControls();
 		validateSettings(null, null);
 	}
@@ -1017,58 +903,7 @@ public class CompilerConfigurationBlock {
 			String currValue= (String) fWorkingValues.get(key);
 			curr.setText(currValue);
 		}
-		unpackTodoTasks();
 	}
 	
-	private void unpackTodoTasks() {
-		String currTags= (String) fWorkingValues.get(PREF_COMPILER_TASK_TAGS);	
-		String currPrios= (String) fWorkingValues.get(PREF_COMPILER_TASK_PRIORITIES);
-		String[] tags= getTokens(currTags);
-		String[] prios= getTokens(currPrios);
-		ArrayList elements= new ArrayList(tags.length);
-		for (int i= 0; i < tags.length; i++) {
-			TodoTask task= new TodoTask();
-			task.name= tags[i].trim();
-			task.priority= (i < prios.length) ? prios[i] : PRIORITY_NORMAL;
-			elements.add(task);
-		}
-		fTodoTasksList.setElements(elements);
-	}
 	
-	private void packTodoTasks() {
-		StringBuffer tags= new StringBuffer();
-		StringBuffer prios= new StringBuffer();
-		List list= fTodoTasksList.getElements();
-		for (int i= 0; i < list.size(); i++) {
-			if (i > 0) {
-				tags.append(',');
-				prios.append(',');
-			}
-			TodoTask elem= (TodoTask) list.get(i);
-			tags.append(elem.name);
-			prios.append(elem.priority);
-		}
-		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, tags.toString());
-		fWorkingValues.put(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
-	}
-		
-	private void doTodoButtonPressed(int index) {
-		TodoTask edited= null;
-		if (index != 0) {
-			edited= (TodoTask) fTodoTasksList.getSelectedElements().get(0);
-		}
-		
-		CompilerTodoTaskInputDialog dialog= new CompilerTodoTaskInputDialog(getShell(), edited, fTodoTasksList.getElements());
-		if (dialog.open() == CompilerTodoTaskInputDialog.OK) {
-			if (edited != null) {
-				fTodoTasksList.replaceElement(edited, dialog.getResult());
-			} else {
-				fTodoTasksList.addElement(dialog.getResult());
-			}
-		}
-	}
-	
-
-
-
 }

@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -93,7 +92,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */	
 	private Control createWithoutJava(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("BuildPathsPropertyPage.no_java_project.message")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("BuildPathsPropertyPage.no_java_project.message")); //$NON-NLS-1$
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -105,7 +104,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */		
 	private Control createForClosedProject(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("BuildPathsPropertyPage.closed_project.message")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("BuildPathsPropertyPage.closed_project.message")); //$NON-NLS-1$
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -153,8 +152,8 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			try {
 				new ProgressMonitorDialog(shell).run(false, true, op);
 			} catch (InvocationTargetException e) {
-				String title= JavaUIMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
+				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
+				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
 				ExceptionHandler.handle(e, shell, title, message);
 				return false;
 			} catch (InterruptedException e) {

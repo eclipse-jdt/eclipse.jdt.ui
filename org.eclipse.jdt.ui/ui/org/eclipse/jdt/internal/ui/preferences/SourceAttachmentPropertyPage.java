@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -62,7 +61,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 
 		fJarRoot= getJARPackageFragmentRoot();
 		if (fJarRoot == null) {
-			return createMessageContent(composite, JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
 		}
 		try {
 			IClasspathEntry entry= fJarRoot.getRawClasspathEntry();
@@ -72,14 +71,14 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			} else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), fJarRoot.getJavaProject());
 				String containerName= container != null ? container.getDescription() : entry.getPath().toString();
-				return createMessageContent(composite, JavaUIMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+				return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
 			}
 			IWorkspaceRoot wsroot= fJarRoot.getJavaModel().getWorkspace().getRoot();
 			fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return createMessageContent(composite, JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
 		}		
 	}
 	
@@ -109,8 +108,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(fJarRoot.getJavaProject(), getShell());		
 				new ProgressMonitorDialog(getShell()).run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
-				String title= JavaUIMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
+				String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
+				String message= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
 				ExceptionHandler.handle(e, getShell(), title, message);
 				return false;
 			} catch (InterruptedException e) {

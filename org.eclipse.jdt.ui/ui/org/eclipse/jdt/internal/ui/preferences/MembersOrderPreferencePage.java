@@ -40,7 +40,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -91,8 +90,8 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		String string= getPreferenceStore().getString(PREF_OUTLINE_SORT_OPTION);
 
-		String upLabel= JavaUIMessages.getString("MembersOrderPreferencePage.button.up"); //$NON-NLS-1$
-		String downLabel= JavaUIMessages.getString("MembersOrderPreferencePage.button.down"); //$NON-NLS-1$
+		String upLabel= PreferencesMessages.getString("MembersOrderPreferencePage.button.up"); //$NON-NLS-1$
+		String downLabel= PreferencesMessages.getString("MembersOrderPreferencePage.button.down"); //$NON-NLS-1$
 		String[] buttonlabels= new String[] { upLabel, downLabel };
 
 		fSortOrderList= new ListDialogField(null, buttonlabels, new MemberSortLabelProvider());
@@ -141,7 +140,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	private void createSortOrderListDialogField(Composite composite, int span) {
 
 		Label sortLabel= new Label(composite, SWT.NONE);
-		sortLabel.setText(JavaUIMessages.getString("MembersOrderPreferencePage.label.description")); //$NON-NLS-1$
+		sortLabel.setText(PreferencesMessages.getString("MembersOrderPreferencePage.label.description")); //$NON-NLS-1$
 
 		GridData gridData= new GridData();
 		gridData.horizontalAlignment= GridData.FILL_HORIZONTAL;
@@ -201,21 +200,21 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			if (element instanceof String) {
 				String s= (String) element;
 				if (s.equals(FIELDS)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.fields.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.fields.label"); //$NON-NLS-1$
 				} else if (s.equals(CONSTRUCTORS)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.constructors.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.constructors.label"); //$NON-NLS-1$
 				} else if (s.equals(METHODS)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.methods.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.methods.label"); //$NON-NLS-1$
 				} else if (s.equals(STATIC_FIELDS)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.staticfields.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.staticfields.label"); //$NON-NLS-1$
 				} else if (s.equals(STATIC_METHODS)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.staticmethods.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.staticmethods.label"); //$NON-NLS-1$
 				} else if (s.equals(INIT)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.initialisers.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.initialisers.label"); //$NON-NLS-1$
 				} else if (s.equals(STATIC_INIT)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.staticinitialisers.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.staticinitialisers.label"); //$NON-NLS-1$
 				} else if (s.equals(TYPES)) {
-					return JavaUIMessages.getString("MembersOrderPreferencePage.types.label"); //$NON-NLS-1$
+					return PreferencesMessages.getString("MembersOrderPreferencePage.types.label"); //$NON-NLS-1$
 				}
 			}
 			return ""; //$NON-NLS-1$

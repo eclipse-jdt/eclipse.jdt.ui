@@ -31,7 +31,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -68,13 +67,13 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		
 		fExistingEntries= existingEntries;
 		
-		setTitle(JavaUIMessages.getString("ImportOrganizeInputDialog.title")); //$NON-NLS-1$
+		setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.title")); //$NON-NLS-1$
 
 		ImportOrganizeInputAdapter adapter= new ImportOrganizeInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
-		fNameDialogField.setLabelText(JavaUIMessages.getString("ImportOrganizeInputDialog.message")); //$NON-NLS-1$
-		fNameDialogField.setButtonLabel(JavaUIMessages.getString("ImportOrganizeInputDialog.browse.button")); //$NON-NLS-1$
+		fNameDialogField.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.message")); //$NON-NLS-1$
+		fNameDialogField.setButtonLabel(PreferencesMessages.getString("ImportOrganizeInputDialog.browse.button")); //$NON-NLS-1$
 		fNameDialogField.setDialogFieldListener(adapter);
 		
 		fNameDialogField.setText("");		 //$NON-NLS-1$
@@ -128,9 +127,9 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 			
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(JavaUIMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(JavaUIMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.empty")); //$NON-NLS-1$
+		dialog.setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.description")); //$NON-NLS-1$
+		dialog.setEmptyListMessage(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(allPackages.values().toArray());
 		if (initialSelection != null) {
 			dialog.setInitialSelections(new Object[] { initialSelection });
@@ -146,14 +145,14 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.enterName")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.enterName")); //$NON-NLS-1$
 		} else {
 			IStatus val= JavaConventions.validatePackageName(newText);
 			if (val.matches(IStatus.ERROR)) {
-				status.setError(JavaUIMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
 			} else {
 				if (fExistingEntries.contains(newText)) {
-					status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
+					status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
 				}
 			}
 		}

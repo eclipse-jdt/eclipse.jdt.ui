@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -150,26 +149,26 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	public ImportOrganizePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaUIMessages.getString("ImportOrganizePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("ImportOrganizePreferencePage.description")); //$NON-NLS-1$
 	
 		String[] buttonLabels= new String[] { 
-			/* 0 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.add.button"), //$NON-NLS-1$
-			/* 1 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.edit.button"), //$NON-NLS-1$
+			/* 0 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.add.button"), //$NON-NLS-1$
+			/* 1 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.edit.button"), //$NON-NLS-1$
 			/* 2 */  null,
-			/* 3 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.up.button"), //$NON-NLS-1$
-			/* 4 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.down.button"), //$NON-NLS-1$
+			/* 3 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.up.button"), //$NON-NLS-1$
+			/* 4 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.down.button"), //$NON-NLS-1$
 			/* 5 */  null,
-			/* 6 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.remove.button"), //$NON-NLS-1$
+			/* 6 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.remove.button"), //$NON-NLS-1$
 			/* 7 */  null,
-			/* 8 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.load.button"), //$NON-NLS-1$					
-			/* 9 */  JavaUIMessages.getString("ImportOrganizePreferencePage.order.save.button") //$NON-NLS-1$			
+			/* 8 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.load.button"), //$NON-NLS-1$					
+			/* 9 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.save.button") //$NON-NLS-1$			
 		};
 				
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
 		
 		fOrderListField= new ListDialogField(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
-		fOrderListField.setLabelText(JavaUIMessages.getString("ImportOrganizePreferencePage.order.label")); //$NON-NLS-1$
+		fOrderListField.setLabelText(PreferencesMessages.getString("ImportOrganizePreferencePage.order.label")); //$NON-NLS-1$
 		fOrderListField.setUpButtonIndex(3);
 		fOrderListField.setDownButtonIndex(4);
 		fOrderListField.setRemoveButtonIndex(6);
@@ -178,10 +177,10 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
-		fThresholdField.setLabelText(JavaUIMessages.getString("ImportOrganizePreferencePage.threshold.label")); //$NON-NLS-1$
+		fThresholdField.setLabelText(PreferencesMessages.getString("ImportOrganizePreferencePage.threshold.label")); //$NON-NLS-1$
 	
 		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
-		fIgnoreLowerCaseTypesField.setLabelText(JavaUIMessages.getString("ImportOrganizePreferencePage.ignoreLowerCase.label")); //$NON-NLS-1$
+		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.getString("ImportOrganizePreferencePage.ignoreLowerCase.label")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -234,10 +233,10 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		try {
 			int threshold= Integer.parseInt(thresholdString);
 			if (threshold < 0) {
-				status.setError(JavaUIMessages.getString("ImportOrganizePreferencePage.error.invalidthreshold")); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("ImportOrganizePreferencePage.error.invalidthreshold")); //$NON-NLS-1$
 			}
 		} catch (NumberFormatException e) {
-			status.setError(JavaUIMessages.getString("ImportOrganizePreferencePage.error.invalidthreshold")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("ImportOrganizePreferencePage.error.invalidthreshold")); //$NON-NLS-1$
 		}
 		updateStatus(status);
 	}
@@ -305,7 +304,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 	private List loadImportOrder() {
 		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
-		dialog.setText(JavaUIMessages.getString("ImportOrganizePreferencePage.loadDialog.title")); //$NON-NLS-1$)
+		dialog.setText(PreferencesMessages.getString("ImportOrganizePreferencePage.loadDialog.title")); //$NON-NLS-1$)
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		String lastPath= getPreferenceStore().getString(PREF_LASTLOADPATH);
 		if (lastPath != null) {
@@ -331,8 +330,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 					try { fis.close(); } catch (IOException e) {}
 				}
 			}
-			String title= JavaUIMessages.getString("ImportOrganizePreferencePage.loadDialog.error.title"); //$NON-NLS-1$
-			String message= JavaUIMessages.getString("ImportOrganizePreferencePage.loadDialog.error.message"); //$NON-NLS-1$
+			String title= PreferencesMessages.getString("ImportOrganizePreferencePage.loadDialog.error.title"); //$NON-NLS-1$
+			String message= PreferencesMessages.getString("ImportOrganizePreferencePage.loadDialog.error.message"); //$NON-NLS-1$
 			MessageDialog.openError(getShell(), title, message);
 		}
 		return null;
@@ -340,7 +339,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 	private void saveImportOrder(List elements) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(JavaUIMessages.getString("ImportOrganizePreferencePage.saveDialog.title")); //$NON-NLS-1$)
+		dialog.setText(PreferencesMessages.getString("ImportOrganizePreferencePage.saveDialog.title")); //$NON-NLS-1$)
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setFileName("example.importorder"); //$NON-NLS-1$
 		String lastPath= getPreferenceStore().getString(PREF_LASTSAVEPATH);
@@ -361,8 +360,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 				properties.store(fos, "Organize Import Order"); //$NON-NLS-1$
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-				String title= JavaUIMessages.getString("ImportOrganizePreferencePage.saveDialog.error.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("ImportOrganizePreferencePage.saveDialog.error.message"); //$NON-NLS-1$
+				String title= PreferencesMessages.getString("ImportOrganizePreferencePage.saveDialog.error.title"); //$NON-NLS-1$
+				String message= PreferencesMessages.getString("ImportOrganizePreferencePage.saveDialog.error.message"); //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);				
 			} finally {
 				if (fos != null) {

@@ -47,7 +47,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -176,7 +175,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 	public CodeFormatterPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());		
-		setDescription(JavaUIMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 	
 		fWorkingValues= JavaCore.getOptions();
 		fCheckBoxes= new ArrayList();
@@ -243,19 +242,19 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite newlineComposite= new Composite(folder, SWT.NULL);
 		newlineComposite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_opening_braces.label"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_opening_braces.label"); //$NON-NLS-1$
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_OPENING_BRACES, insertNotInsert);	
 		
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_control_statement.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_control_statement.label"); //$NON-NLS-1$
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_CONTROL_STATEMENT, insertNotInsert);	
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_clear_lines"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_clear_lines"); //$NON-NLS-1$
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_CLEAR_ALL, new String[] { CLEAR_ALL, PRESERVE_ONE } );	
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_else_if.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_else_if.label"); //$NON-NLS-1$
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_ELSE_IF, insertNotInsert);	
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_empty_block.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_empty_block.label"); //$NON-NLS-1$
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_EMPTY_BLOCK, insertNotInsert);	
 		
 		layout= new GridLayout();
@@ -264,7 +263,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite lineSplittingComposite= new Composite(folder, SWT.NULL);
 		lineSplittingComposite.setLayout(layout);
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.split_line.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.split_line.label"); //$NON-NLS-1$
 		addTextField(lineSplittingComposite, label, PREF_LINE_SPLIT);
 
 		layout= new GridLayout();
@@ -273,25 +272,25 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite styleComposite= new Composite(folder, SWT.NULL);
 		styleComposite.setLayout(layout);
 		
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.style_compact_assignement.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.style_compact_assignement.label"); //$NON-NLS-1$
 		addCheckBox(styleComposite, label, PREF_STYLE_COMPACT_ASSIGNEMENT, new String[] { COMPACT, NORMAL } );		
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.tab_char.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.tab_char.label"); //$NON-NLS-1$
 		addCheckBox(styleComposite, label, PREF_TAB_CHAR, new String[] { TAB, SPACE } );		
 
-		label= JavaUIMessages.getString("CodeFormatterPreferencePage.tab_size.label"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.tab_size.label"); //$NON-NLS-1$
 		fTabSizeTextBox= addTextField(styleComposite, label, PREF_TAB_SIZE);		
 
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
 		item.setControl(newlineComposite);
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.linesplit.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.linesplit.tabtitle")); //$NON-NLS-1$
 		item.setControl(lineSplittingComposite);
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.style.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.style.tabtitle")); //$NON-NLS-1$
 		item.setControl(styleComposite);		
 		
 		fSourceViewer= createPreview(parent);
@@ -463,15 +462,15 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("CodeFormatterPreferencePage.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0) {
-					status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
+					status.setError(PreferencesMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
 				}
 			} catch (NumberFormatException e) {
-				status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			}
 		}
 		return status;

@@ -17,7 +17,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
@@ -31,7 +30,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	public ClasspathVariablesPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fVariableBlock= new VariableBlock(true, null);
-		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
 	}
 
 	/**

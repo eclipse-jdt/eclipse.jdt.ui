@@ -2,6 +2,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,17 +15,16 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaConventions;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -31,8 +32,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -124,7 +123,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		
 	public CodeGenerationPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(JavaUIMessages.getString("CodeGenerationPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("CodeGenerationPreferencePage.description")); //$NON-NLS-1$
 	
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -137,28 +136,28 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	
 		fUseGetterSetterPrefix= new SelectionButtonDialogField(SWT.CHECK);
 		fUseGetterSetterPrefix.setDialogFieldListener(listener);
-		fUseGetterSetterPrefix.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.prefix.checkbox")); //$NON-NLS-1$
+		fUseGetterSetterPrefix.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.prefix.checkbox")); //$NON-NLS-1$
 		
 		fGetterSetterPrefix= new StringDialogField();
 		fGetterSetterPrefix.setDialogFieldListener(listener);
-		fGetterSetterPrefix.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.prefix.list")); //$NON-NLS-1$
+		fGetterSetterPrefix.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.prefix.list")); //$NON-NLS-1$
 		
 		fUseGetterSetterSuffix= new SelectionButtonDialogField(SWT.CHECK);
 		fUseGetterSetterSuffix.setDialogFieldListener(listener);
-		fUseGetterSetterSuffix.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.suffix.checkbox")); //$NON-NLS-1$
+		fUseGetterSetterSuffix.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.suffix.checkbox")); //$NON-NLS-1$
 
 		fGetterSetterSuffix= new StringDialogField();
 		fGetterSetterSuffix.setDialogFieldListener(listener);
-		fGetterSetterSuffix.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.suffix.list")); //$NON-NLS-1$
+		fGetterSetterSuffix.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.suffix.list")); //$NON-NLS-1$
 		
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateJavaDocComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.javadoc_comment.label")); //$NON-NLS-1$
+		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.javadoc_comment.label")); //$NON-NLS-1$
 		
 		fCreateNonJavadocComments= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateNonJavadocComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.see_comment.label"));				 //$NON-NLS-1$
+		fCreateNonJavadocComments.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.see_comment.label"));				 //$NON-NLS-1$
 	
 		fCreateFileComments= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateFileComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.file_comment.label"));				 //$NON-NLS-1$
+		fCreateFileComments.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.file_comment.label"));				 //$NON-NLS-1$
 	}
 	
 	private void initFields() {
@@ -209,7 +208,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		layout.numColumns= 2;
 		javaDocGroup.setLayout(layout);
 		javaDocGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		javaDocGroup.setText(JavaUIMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
+		javaDocGroup.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
 		fCreateJavaDocComments.doFillIntoGrid(javaDocGroup, 2);
 		fCreateNonJavadocComments.doFillIntoGrid(javaDocGroup, 2);
 		fCreateFileComments.doFillIntoGrid(javaDocGroup, 2);
@@ -219,7 +218,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		layout.numColumns= 2;
 		getterSetterGroup.setLayout(layout);
 		getterSetterGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		getterSetterGroup.setText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.label")); //$NON-NLS-1$
+		getterSetterGroup.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.label")); //$NON-NLS-1$
 
 		fUseGetterSetterPrefix.doFillIntoGrid(getterSetterGroup, 2);
 		fGetterSetterPrefix.doFillIntoGrid(getterSetterGroup, 2);
@@ -268,18 +267,18 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 			String val= values[i];
 			if (val.length() == 0) {
 				if (prefix) {
-					return new StatusInfo(IStatus.ERROR, JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.error.emptyprefix")); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.error.emptyprefix")); //$NON-NLS-1$
 				} else {
-					return new StatusInfo(IStatus.ERROR, JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.error.emptysuffix")); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("CodeGenerationPreferencePage.gettersetter.error.emptysuffix")); //$NON-NLS-1$
 				}							
 			}
 			String name= prefix ? val + "x" : "x" + val; //$NON-NLS-2$ //$NON-NLS-1$
 			IStatus status= JavaConventions.validateFieldName(name);
 			if (status.matches(IStatus.ERROR)) {
 				if (prefix) {
-					return new StatusInfo(IStatus.ERROR, JavaUIMessages.getFormattedString("CodeGenerationPreferencePage.gettersetter.error.invalidprefix", val)); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("CodeGenerationPreferencePage.gettersetter.error.invalidprefix", val)); //$NON-NLS-1$
 				} else {
-					return new StatusInfo(IStatus.ERROR, JavaUIMessages.getFormattedString("CodeGenerationPreferencePage.gettersetter.error.invalidsuffix", val)); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("CodeGenerationPreferencePage.gettersetter.error.invalidsuffix", val)); //$NON-NLS-1$
 				}
 			}
 		}
