@@ -3,6 +3,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -73,6 +74,15 @@ public class JavaElementUtil {
 		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
 	}
 
+	public static IType getMainType(ICompilationUnit cu) throws JavaModelException{
+		IType[] types= cu.getTypes();
+		for (int i = 0; i < types.length; i++) {
+			if (isMainType(types[i]))
+				return types[i];
+		}
+		return null;
+	}
+	
 	public static boolean isMainType(IType type) throws JavaModelException{
 		if (! type.exists())	
 			return false;
