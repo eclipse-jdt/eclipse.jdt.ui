@@ -20,7 +20,7 @@ public class DataPoint {
 	private String fKind; // TODO this is perfmsr dependent
 	private Map fScalars;
 	
-	DataPoint(String kind, Map values) {
+	public DataPoint(String kind, Map values) {
 		fKind= kind;
 		fScalars= values;
 	}
