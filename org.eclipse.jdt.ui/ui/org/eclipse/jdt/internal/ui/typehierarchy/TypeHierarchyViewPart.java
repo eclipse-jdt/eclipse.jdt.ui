@@ -264,6 +264,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (part instanceof IEditorPart)
 					editorActivated((IEditorPart) part);
 			}
+
+		 	public void partInputChanged(IWorkbenchPartReference ref) {
+				IWorkbenchPart part= ref.getPart(false);
+				if (part instanceof IEditorPart)
+					editorActivated((IEditorPart) part);
+		 	};
+
 			public void partBroughtToTop(IWorkbenchPartReference ref) {}
 			public void partClosed(IWorkbenchPartReference ref) {}
 			public void partDeactivated(IWorkbenchPartReference ref) {}
