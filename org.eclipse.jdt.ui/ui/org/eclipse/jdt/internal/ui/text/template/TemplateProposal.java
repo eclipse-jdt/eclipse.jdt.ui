@@ -106,6 +106,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+
+		LinkedPositionManager manager= null;
+		
 		try {
 			IDocument document= viewer.getDocument();
 			
@@ -135,7 +138,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			document.replace(start, end - start, templateString);	
 
 			// translate positions
-			LinkedPositionManager manager= new LinkedPositionManager(document);
+			manager= new LinkedPositionManager(document);
 			TemplatePosition[] variables= templateBuffer.getVariables();
 			for (int i= 0; i != variables.length; i++) {
 				TemplatePosition variable= variables[i];
@@ -161,15 +164,24 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
 			fSelectedRegion= fRegion;
 			
+			if (manager != null)
+				manager.uninstall(false);
+			
 		} catch (BadPositionCategoryException e) {    
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    	
 			fSelectedRegion= fRegion;
 
+			if (manager != null)
+				manager.uninstall(false);
+
 		} catch (CoreException e) {
 			handleException(viewer.getTextWidget().getShell(), e);
 			fSelectedRegion= fRegion;
-		}	    
+
+			if (manager != null)
+				manager.uninstall(false);
+		}
 
 	}	
 	
