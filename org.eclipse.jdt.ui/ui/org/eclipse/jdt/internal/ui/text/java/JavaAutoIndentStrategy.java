@@ -5,13 +5,25 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -199,6 +211,233 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message2")); //$NON-NLS-1$
 		}
 	}
+
+	private static String getLineDelimiter(IDocument document) {
+		try {
+			if (document.getNumberOfLines() > 1)
+				return document.getLineDelimiter(0);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}	
+
+		return System.getProperty("line.separator"); //$NON-NLS-1$
+	}
+	
+	protected void pasteText(IDocument document, DocumentCommand command) {
+
+		String lineDelimiter= getLineDelimiter(document);
+		
+		try {
+			String pastedText= command.text;
+			Assert.isNotNull(pastedText);
+			Assert.isTrue(pastedText.length() > 1);
+			
+			String strippedParagraph= stripIndent(pastedText, lineDelimiter);
+			
+			// check selection
+			int offset= command.offset;
+			int line= document.getLineOfOffset(offset);
+			int lineOffset= document.getLineOffset(line);
+			
+			// format
+			String prefix= document.get(lineOffset, offset - lineOffset);
+			String indent= getIndent(document, command) + createIndent(1); // add one indent level 
+			boolean formatFirstLine= prefix.trim().length() == 0;
+			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
+			
+			// paste
+			if (formatFirstLine)
+				command.offset= lineOffset;
+			command.text= formattedParagraph;
+
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);			
+		}
+	}	
+
+	/**
+	 * Returns the displayed width of a string, taking in account the displayed tab width.
+	 * The result can be compared against the print margin.
+	 */
+	private static int calculateDisplayedWidth(String string) {
+
+		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH); 
+		
+		int column= 0;
+		for (int i= 0; i < string.length(); i++)
+			if ('\t' == string.charAt(i))
+				column += tabWidth - (column % tabWidth);
+			else
+				column++;
+				
+		return column;
+	}
+	
+	private String getIndent(IDocument d, DocumentCommand c) {
+		if (c.offset < 0)
+			return ""; //$NON-NLS-1$
+		
+		try {
+			int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
+			int line= d.getLineOfOffset(p);
+
+			// evaluate the line with the opening bracket that matches out closing bracket
+			int indLine= findMatchingOpenBracket(d, line, c.offset, 1);
+			if (indLine != -1 && indLine != line)
+				// take the indent of the found line
+				return getIndentOfLine(d, indLine);
+
+		} catch (BadLocationException excp) {
+			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	private static final class LineIterator implements Iterator {
+		/** The document to iterator over. */
+		private final IDocument fDocument;
+		/** The line index. */
+		private int fLineIndex;
+		
+		/**
+		 * Creates a line iterator.		 */
+		public LineIterator(String string) {
+			fDocument= new Document(string);	
+		}
+		
+		/*
+		 * @see java.util.Iterator#hasNext()
+		 */
+		public boolean hasNext() {
+			return fLineIndex != fDocument.getNumberOfLines();
+		}
+
+		/*
+		 * @see java.util.Iterator#next()
+		 */
+		public Object next() {
+			try {			
+				IRegion region= fDocument.getLineInformation(fLineIndex++);
+				return fDocument.get(region.getOffset(), region.getLength());
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+				throw new NoSuchElementException();	
+			}
+		}
+
+		/*
+		 * @see java.util.Iterator#remove()
+		 */
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+	
+	private static IPreferenceStore getPreferenceStore() {
+		return JavaPlugin.getDefault().getPreferenceStore();		
+	}
+	
+	private static String createIndent(int level) {
+
+		StringBuffer buffer= new StringBuffer();
+
+		if (CodeFormatterPreferencePage.useSpaces()) {
+			int tabWidth= getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH);
+			int width= level * tabWidth;
+			for (int i= 0; i != width; ++i)	
+				buffer.append(' ');
+
+		} else {
+			buffer.append('\t');
+		}
+		
+		return buffer.toString();			
+	}
+	
+	private static String createPrefix(int displayedWidth) {
+
+		StringBuffer buffer= new StringBuffer();
+
+		if (CodeFormatterPreferencePage.useSpaces()) {
+			for (int i= 0; i != displayedWidth; ++i)	
+				buffer.append(' ');
+
+		} else {
+			int tabWidth= getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH);
+			int div= displayedWidth / tabWidth;
+			int mod= displayedWidth % tabWidth;
+
+			for (int i= 0; i != div; ++i)
+				buffer.append('\t');	
+
+			for (int i= 0; i != mod; ++i)	
+				buffer.append(' ');				 
+
+		} 
+
+		return buffer.toString();
+	}
+	
+	private String stripIndent(String paragraph, String lineDelimiter) {
+
+		final StringBuffer buffer= new StringBuffer();		
+
+		// determine minimum indent width
+		int minIndentWidth= Integer.MAX_VALUE;				
+		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
+			String line= (String) iterator.next();
+			String trimmedLine= line.trim();			
+
+			if (trimmedLine.length() == 0)
+				continue;
+
+			int index= line.indexOf(trimmedLine);
+			String indent= line.substring(0, index);
+			int width= calculateDisplayedWidth(indent);
+			minIndentWidth= Math.min(minIndentWidth, width);
+		}
+
+		// strip prefixes
+		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
+			String line= (String) iterator.next();
+			String trimmedLine= line.trim();			
+
+			if (trimmedLine.length() != 0) {
+				int index= line.indexOf(trimmedLine);
+				String indent= line.substring(0, index);
+				int width= calculateDisplayedWidth(indent);
+				int strippedWidth= width - minIndentWidth;
+				String prefix= createPrefix(strippedWidth);
+	
+				buffer.append(prefix);
+				buffer.append(trimmedLine);
+			}
+
+			if (iterator.hasNext())
+				buffer.append(lineDelimiter);
+		}
+		
+		return buffer.toString();		
+	}
+	
+	private String format(String paragraph, String indent, String lineDelimiter, boolean indentFirstLine) {
+		
+		final StringBuffer buffer= new StringBuffer();		
+				
+		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
+			String line= (String) iterator.next();
+			if (indentFirstLine && line.trim().length() != 0)	
+				buffer.append(indent);
+			else
+				indentFirstLine= true;
+			buffer.append(line);
+			if (iterator.hasNext())
+				buffer.append(lineDelimiter);
+		}
+		
+		return buffer.toString();	
+	}
 	
 	private String getOneIndentLevel() {
 		return String.valueOf('\t');
@@ -219,6 +458,19 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
+	private boolean equalsDelimiter(IDocument d, String txt) {
+		
+		String[] delimiters= d.getLegalLineDelimiters();
+		
+		for (int i= 0; i < delimiters.length; i++) {
+			if (txt.equals(delimiters[i]))
+				return true;
+		}
+		
+		return false;
+	}
+
+
 	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
 		if (command.text.charAt(0) == '}')
 			smartInsertAfterBracket(document, command);
@@ -228,10 +480,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
-		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
+		if (c.length == 0 && c.text != null && equalsDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
-		else if (c.text.length() == 1) {
+		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
-		}
+		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(CompilationUnitEditor.SMART_PASTE))
+			pasteText(d, c);
 	}
 }

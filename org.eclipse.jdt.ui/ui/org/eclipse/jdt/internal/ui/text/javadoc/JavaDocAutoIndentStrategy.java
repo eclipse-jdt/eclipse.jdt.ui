@@ -327,8 +327,8 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	protected void jdocWrapParagraphOnInsert(IDocument document, DocumentCommand command) throws BadLocationException {
 
-		Assert.isTrue(command.length == 0);
-		Assert.isTrue(command.text != null && command.text.length() == 1);
+//		Assert.isTrue(command.length == 0);
+//		Assert.isTrue(command.text != null && command.text.length() == 1);
 		
 		if (!getPreferenceStore().getBoolean(CompilationUnitEditor.FORMAT_JAVADOCS))
 			return;

@@ -197,6 +197,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.GUESS_METHOD_ARGUMENTS),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SMART_PASTE),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
@@ -446,6 +447,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
 		store.setDefault(ContentAssistPreference.GUESS_METHOD_ARGUMENTS, true);
 
+		store.setDefault(CompilationUnitEditor.SMART_PASTE, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_BRACKETS, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_JAVADOCS, true);
@@ -958,6 +960,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
 		addCheckBox(composite, label, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.SMART_PASTE, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.SPACES_FOR_TABS, 1);

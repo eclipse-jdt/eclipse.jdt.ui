@@ -514,6 +514,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
 	/** Preference key for automatically formatting javadocs */
 	public final static String FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
+	/** Preference key for smart paste */
+	public final static String SMART_PASTE= "smartPaste"; //$NON-NLS-1$
 	
 	
 	private final static class AnnotationInfo {
