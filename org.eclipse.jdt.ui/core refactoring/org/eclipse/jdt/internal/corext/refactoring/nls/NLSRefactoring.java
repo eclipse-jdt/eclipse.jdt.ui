@@ -64,7 +64,6 @@ public class NLSRefactoring extends Refactoring {
 
 	private String fSubstitutionPattern;
 	private ICompilationUnit fCu;
-	private NLSHint fNlsHint;
 	private NLSSubstitution[] fSubstitutions;
 
 	private NLSRefactoring(ICompilationUnit cu) {
@@ -73,12 +72,12 @@ public class NLSRefactoring extends Refactoring {
 		fCu= cu;
 		NLSInfo nlsInfo= new NLSInfo(cu);
 		fSubstitutions= NLSHolder.create(cu, nlsInfo);
-		fNlsHint= new NLSHint(fSubstitutions, cu, nlsInfo);
+		NLSHint nlsHint= new NLSHint(fSubstitutions, cu, nlsInfo);
 
-		fAccessorClassName= fNlsHint.getMessageClass();
-		fAccessorPackage= fNlsHint.getMessageClassPackage();
-		fResourceBundleName= fNlsHint.getResourceBundle();
-		fResourceBundlePackage= fNlsHint.getResourceBundlePackage();
+		fAccessorClassName= nlsHint.getMessageClass();
+		fAccessorPackage= nlsHint.getMessageClassPackage();
+		fResourceBundleName= nlsHint.getResourceBundle();
+		fResourceBundlePackage= nlsHint.getResourceBundlePackage();
 
 		fSubstitutionPattern= getDefaultSubstitutionPattern(fAccessorClassName);
 	}
@@ -118,13 +117,9 @@ public class NLSRefactoring extends Refactoring {
 	 */
 	public String getSubstitutionPattern() {
 		if (fSubstitutionPattern == null) {
-			return getDefaultSubstitutionPattern();
+			return getDefaultSubstitutionPattern(fAccessorClassName);
 		}
 		return fSubstitutionPattern;
-	}
-
-	public String getDefaultSubstitutionPattern() {
-		return NLSRefactoring.getDefaultSubstitutionPattern(fAccessorClassName);
 	}
 
 	public static String getDefaultSubstitutionPattern(String accessorName) {
@@ -206,7 +201,7 @@ public class NLSRefactoring extends Refactoring {
 			pm.worked(1);
 
 			if (willModifySource()) {
-				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, getDefaultSubstitutionPattern(), fSubstitutionPattern, fAccessorPackage, fAccessorClassName));
+				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, fSubstitutionPattern, fAccessorPackage, fAccessorClassName));
 			}
 			pm.worked(1);
 
@@ -549,9 +544,6 @@ public class NLSRefactoring extends Refactoring {
 		return ""; //$NON-NLS-1$
 	}
 
-	public NLSHint getNlsHint() {
-		return fNlsHint;
-	}
 
 	public static String getDefaultPropertiesFilename() {
 		return DEFAULT_PROPERTY_FILENAME + PROPERTY_FILE_EXT;

@@ -37,11 +37,9 @@ public class NLSInfo {
 
 		private String fName;
 		private ITypeBinding fBinding;
-		int fOffset;
-		int fLength;
-		Region fRegion;
+		private Region fRegion;
 
-		AccessorClassHelper(ASTNode atsNode, NLSElement nlsElement) {
+		private AccessorClassHelper(ASTNode astNode, NLSElement nlsElement) {
 			if (!nlsElement.hasTag()) {
 				throw new IllegalArgumentException("NLSElement must be \"nlsed\" before."); //$NON-NLS-1$
 			}
@@ -51,7 +49,7 @@ public class NLSInfo {
 				ASTNode parent= nlsStringLiteral.getParent();
 				MethodInvocation methodInvocation= (MethodInvocation) parent;
 				List args= methodInvocation.arguments();
-				if ((args.indexOf(nlsStringLiteral) == 0) && (args.size() == 1)) {
+				if (args.indexOf(nlsStringLiteral) == 0) {
 					IMethodBinding binding= methodInvocation.resolveMethodBinding();
 					if (binding != null && Modifier.isStatic(binding.getModifiers())) {
 						fName= binding.getDeclaringClass().getName();
@@ -195,16 +193,15 @@ public class NLSInfo {
 						if (initializer != null) {
 							if (initializer instanceof StringLiteral) {
 								fResourceBundleName= ((StringLiteral) initializer).getLiteralValue();
-							} else
-								if (initializer instanceof MethodInvocation) {
-									MethodInvocation methInvocation= (MethodInvocation) initializer;
-									Expression exp= methInvocation.getExpression();
-									if ((exp != null) && (exp instanceof TypeLiteral)) {
-										SimpleType simple= (SimpleType) ((TypeLiteral) exp).getType();
-										ITypeBinding typeBinding= simple.resolveBinding();
-										fResourceBundleName= typeBinding.getQualifiedName();
-									}
+							} else if (initializer instanceof MethodInvocation) {
+								MethodInvocation methInvocation= (MethodInvocation) initializer;
+								Expression exp= methInvocation.getExpression();
+								if ((exp != null) && (exp instanceof TypeLiteral)) {
+									SimpleType simple= (SimpleType) ((TypeLiteral) exp).getType();
+									ITypeBinding typeBinding= simple.resolveBinding();
+									fResourceBundleName= typeBinding.getQualifiedName();
 								}
+							}
 						}
 					}
 				}

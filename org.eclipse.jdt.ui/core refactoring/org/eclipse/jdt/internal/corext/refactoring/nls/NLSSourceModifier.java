@@ -37,16 +37,15 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 public class NLSSourceModifier {
 
 	private final String fSubstitutionPattern;
-	private final String fDefaultSubstitution;
 
-	private NLSSourceModifier(String defaultSubstitution, String substitutionPattern) {
+	private NLSSourceModifier(String substitutionPattern) {
 		fSubstitutionPattern= substitutionPattern;
-		fDefaultSubstitution= defaultSubstitution;
+
 	}
 
-	public static Change create(ICompilationUnit cu, NLSSubstitution[] subs, String defaultSubstitution, String substitutionPattern, IPackageFragment accessorPackage, String accessorClassName) throws CoreException {
+	public static Change create(ICompilationUnit cu, NLSSubstitution[] subs, String substitutionPattern, IPackageFragment accessorPackage, String accessorClassName) throws CoreException {
 
-		NLSSourceModifier sourceModification= new NLSSourceModifier(defaultSubstitution, substitutionPattern);
+		NLSSourceModifier sourceModification= new NLSSourceModifier( substitutionPattern);
 
 		String message= "Externalize strings in ''{0}''"; //$NON-NLS-1$
 
@@ -232,12 +231,7 @@ public class NLSSourceModifier {
 	}
 
 	private String createResourceGetter(String key, String accessorName) {
-		StringBuffer buff= null;
-		if (fSubstitutionPattern.equals(fDefaultSubstitution) == true) {
-			buff= new StringBuffer(NLSRefactoring.getDefaultSubstitutionPattern(accessorName));
-		} else {
-			buff= new StringBuffer(fSubstitutionPattern);
-		}
+		StringBuffer buff= new StringBuffer(fSubstitutionPattern);
 
 		//we just replace the first occurrence of KEY in the pattern
 		int i= buff.indexOf(NLSRefactoring.KEY);
