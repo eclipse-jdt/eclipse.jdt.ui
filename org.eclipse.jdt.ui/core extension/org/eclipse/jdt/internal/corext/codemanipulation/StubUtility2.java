@@ -538,7 +538,7 @@ public final class StubUtility2 {
 	private static IMethodBinding findOverridingMethod(IMethodBinding method, List allMethods) {
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethodBinding curr= (IMethodBinding) allMethods.get(i);
-			if (Bindings.isOverriddenMethod(curr, method) || Bindings.isEqualMethod(curr, method.getName(), method.getParameterTypes()))
+			if (Bindings.areOverriddenMethods(curr, method) || Bindings.isEqualMethod(curr, method.getName(), method.getParameterTypes()))
 				return curr;
 		}
 		return null;
@@ -620,7 +620,7 @@ public final class StubUtility2 {
 			IMethodBinding method= superMethods[index];
 			if (method.isConstructor()) {
 				constuctorFound= true;
-				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.isOverriddenConstructor(methods, method))
+				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
 					constructorMethods.add(method);
 			}
 		}
@@ -629,7 +629,7 @@ public final class StubUtility2 {
 			while (superType.getSuperclass() != null)
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if (!Bindings.isOverriddenMethod(methods, method))
+			if (!Bindings.containsOverridingMethod(methods, method))
 				constructorMethods.add(method);
 		}
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);

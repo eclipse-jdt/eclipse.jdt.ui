@@ -1252,23 +1252,23 @@ public class Bindings {
 		return true;
 	}
 
-	public static boolean isOverriddenMethod(IMethodBinding[] overridden, IMethodBinding overridable) {
-		for (int index= 0; index < overridden.length; index++) {
-			if (isOverriddenMethod(overridden[index], overridable))
+	public static boolean containsOverridingMethod(IMethodBinding[] candidates, IMethodBinding overridable) {
+		for (int index= 0; index < candidates.length; index++) {
+			if (areOverriddenMethods(candidates[index], overridable))
 				return true;
 		}
 		return false;
 	}
 
-	public static boolean isOverriddenConstructor(IMethodBinding[] overridden, IMethodBinding overridable) {
-		for (int index= 0; index < overridden.length; index++) {
-			if (isOverriddenConstructor(overridden[index], overridable))
+	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
+		for (int index= 0; index < candidates.length; index++) {
+			if (isSignatureEquivalentConstructor(candidates[index], overridable))
 				return true;
 		}
 		return false;
 	}
 
-	public static boolean isOverriddenConstructor(IMethodBinding overridden, IMethodBinding overridable) {
+	public static boolean isSignatureEquivalentConstructor(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.isConstructor() || !overridable.isConstructor())
 			return false;
@@ -1276,18 +1276,18 @@ public class Bindings {
 		if (overridden.isDefaultConstructor())
 			return false;
 		
-		return isOverriddenSignature(overridden, overridable);
+		return areSubTypeCompatible(overridden, overridable);
 	}
 	
-	public static boolean isOverriddenMethod(IMethodBinding overridden, IMethodBinding overridable) {
+	public static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))
 			return false;
 
-		return isOverriddenSignature(overridden, overridable);
+		return areSubTypeCompatible(overridden, overridable);
 	}
 
-	private static boolean isOverriddenSignature(IMethodBinding overridden, IMethodBinding overridable) {
+	private static boolean areSubTypeCompatible(IMethodBinding overridden, IMethodBinding overridable) {
 		
 		if (overridden.getParameterTypes().length != overridable.getParameterTypes().length)
 			return false;
