@@ -154,7 +154,8 @@ public class AddMethodStubAction extends Action {
 	
 	
 	private int showQueryDialog(final String message) {
-		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19367
+		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
 		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null) {
 			JavaPlugin.logErrorMessage("AddMethodStubAction.showQueryDialog: No active shell found"); //$NON-NLS-1$

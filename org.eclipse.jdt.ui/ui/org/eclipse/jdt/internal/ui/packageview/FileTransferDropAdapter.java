@@ -18,7 +18,8 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 	//---- IOverwriteQuery ------------------------------------------------------------
 
 	public String queryOverwrite(String file) {
-		String[] returnCodes= {YES, NO, ALL, CANCEL};
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19367
+		String[] returnCodes= {YES, ALL, NO, CANCEL};
 		int returnVal= openDialog(getViewer().getControl(), file);
 		return returnVal < 0 ? CANCEL : returnCodes[returnVal];
 	}	

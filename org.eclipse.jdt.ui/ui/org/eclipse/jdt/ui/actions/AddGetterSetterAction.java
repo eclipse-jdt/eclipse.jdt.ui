@@ -404,7 +404,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private IRequestQuery skipSetterForFinalQuery() {
 		return new IRequestQuery() {
 			public int doQuery(IMember field) {
-				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19367
+				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
 				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
 				String fieldName= JavaElementLabels.getElementLabel(field, 0);
 				String formattedMessage= ActionMessages.getFormattedString("AddGetterSetterAction.SkipSetterForFinalDialog.message", fieldName); //$NON-NLS-1$
