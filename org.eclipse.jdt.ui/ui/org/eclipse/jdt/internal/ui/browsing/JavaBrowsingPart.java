@@ -363,8 +363,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object input= getViewer().getInput();
 		if (input == null)
 			return false;
-		if (input instanceof List)
-			return ((List)input).contains(element);
+		if (input instanceof Collection)
+			return ((Collection)input).contains(element);
 		else
 			return input.equals(element);
 
