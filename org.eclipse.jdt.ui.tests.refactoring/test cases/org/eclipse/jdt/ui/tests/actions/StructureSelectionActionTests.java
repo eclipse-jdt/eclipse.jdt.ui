@@ -214,12 +214,14 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 	
 	public void test21() throws Exception{
 		//regression test for bug#10182
-		helperSelectNext(3, 21, 3, 28);
+		printTestDisabledMessage("regression test for bug#11151");
+//		helperSelectNext(3, 21, 3, 28);
 	}
 	
 	public void test22() throws Exception{
 		//regression test for bug#10182
-		helperSelectPrevious(3, 21, 3, 28);
+		printTestDisabledMessage("regression test for bug#11151");
+//		helperSelectPrevious(3, 21, 3, 28);
 	}
 	
 	public void test23() throws Exception{
