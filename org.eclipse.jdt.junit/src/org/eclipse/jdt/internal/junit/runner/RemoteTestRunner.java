@@ -438,7 +438,7 @@ public class RemoteTestRunner implements TestListener {
 		if (fDebugMode)
 			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort); //$NON-NLS-1$ //$NON-NLS-2$
 		Exception exception= null;
-		for (int i= 1; i < 5; i++) {
+		for (int i= 1; i < 10; i++) {
 			try{
 				fClientSocket= new Socket(fHost, fPort);
 				fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
@@ -449,7 +449,7 @@ public class RemoteTestRunner implements TestListener {
 				exception= e;
 			}
 			try {
-				Thread.currentThread().sleep(200);
+				Thread.currentThread().sleep(2000);
 			} catch(InterruptedException e) {
 			}
 		}
