@@ -24,8 +24,8 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
 	
-	public ExtractTempInputPage() {
-		super(true);
+	public ExtractTempInputPage(String initialValue) {
+		super(true, initialValue);
 		setMessage(RefactoringMessages.getString("ExtractTempInputPage.enter_name")); //$NON-NLS-1$
 	}
 
@@ -51,6 +51,9 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		addDeclareFinalCheckbox(result, layouter);
 		addSeparator(result, layouter);
 		addLabel(result, layouter);
+		
+		validateTextField(text.getText());
+		
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
 	}
 	
@@ -101,7 +104,9 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		}
 	}
 	
-	//overridden
+	/*
+	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
+	 */
 	protected RefactoringStatus validateTextField(String text) {
 		getExtractTempRefactoring().setTempName(text);
 		updatePreviewLabel();
