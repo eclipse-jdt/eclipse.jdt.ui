@@ -668,12 +668,7 @@ public class Checks {
 			pm.done();
 		}	
 	}
-	
-	public static boolean isRValue(Expression e) {
-		return checkExpressionIsRValue(e) == IS_RVALUE;
-	}
-	
-	
+		
 	/**
 	 * @param e
 	 * @return int
