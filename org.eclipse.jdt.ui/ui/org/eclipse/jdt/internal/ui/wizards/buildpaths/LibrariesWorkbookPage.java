@@ -344,7 +344,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				IPath outputLocation= fCurrJProject.getOutputLocation();
 				if (outputLocation != null) {
 					IResource resource= fWorkspaceRoot.findMember(outputLocation);
-					if (resource instanceof IContainer) {
+					if (resource instanceof IFolder) { // != Project
 						res.add(resource);
 					}
 				}
