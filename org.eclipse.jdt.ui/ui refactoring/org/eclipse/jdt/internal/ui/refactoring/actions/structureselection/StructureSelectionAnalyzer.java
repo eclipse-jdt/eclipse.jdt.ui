@@ -15,7 +15,7 @@ class StructureSelectionAnalyzer extends SelectionAnalyzer{
 
 	protected boolean visitNode(ASTNode node) {
 		if (getSelection().liesOutside(node))
-			return super.visitNode(node);		
+			return false;
 		if (getSelection().covers(node))
 			return super.visitNode(node);
 		if (! getSelection().coveredBy(node))
