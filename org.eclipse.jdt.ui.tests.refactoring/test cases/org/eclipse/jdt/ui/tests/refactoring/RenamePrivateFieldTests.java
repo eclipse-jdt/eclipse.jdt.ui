@@ -40,6 +40,10 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		return new MySetup( new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}	
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -85,8 +89,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	
 	//--
 		
-	private void helper2(String fieldName, String newFieldName, boolean updateReferences,  boolean updateJavaDoc, 
-											boolean updateComments, boolean updateStrings,
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences, boolean updateTextualMatches,
 											boolean renameGetter, boolean renameSetter,
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
@@ -94,8 +97,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
-		assertTrue(updateComments == updateStrings); // will be merged
-		processor.setUpdateCommentsAndStrings(updateComments);
+		processor.setUpdateTextualMatches(updateTextualMatches);
 		assertEquals("getter rename enabled", expectedGetterRenameEnabled, processor.canEnableGetterRenaming() == null);
 		assertEquals("setter rename enabled", expectedSetterRenameEnabled, processor.canEnableSetterRenaming() == null);
 		processor.setRenameGetter(renameGetter);
@@ -120,7 +122,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences, false, false, false, false, false, false, false);
+		helper2("f", "g", updateReferences, false, false, false, false, false);
 	}
 	
 	private void helper2() throws Exception{
@@ -186,36 +188,36 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}	
 	
 	public void test3() throws Exception{
-		helper2("f", "gg", true, true, true, true, false, false, false, false);
+		helper2("f", "gg", true, true, false, false, false, false);
 	}	
 
 	public void test4() throws Exception{
-		helper2("fMe", "fYou", true, false, false, false, true, true, true, true);
+		helper2("fMe", "fYou", true, false, true, true, true, true);
 	}		
 	
 	public void test5() throws Exception{
 		//regression test for 9895
-		helper2("fMe", "fYou", true, false, false, false, true, false, true, false);
+		helper2("fMe", "fYou", true, false, true, false, true, false);
 	}		
 	
 	public void test6() throws Exception{
 		//regression test for 9895 - opposite case
-		helper2("fMe", "fYou", true, false, false, false, false, true, false, true);
+		helper2("fMe", "fYou", true, false, false, true, false, true);
 	}		
 
 	public void test7() throws Exception{
 		//regression test for 21292 
-		helper2("fBig", "fSmall", true, false, false, false, true, true, true, true);
+		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}		
 	
 	public void test8() throws Exception{
 		//regression test for 26769
-		helper2("f", "g", true, false, false, false, true, false, true, false);
+		helper2("f", "g", true, false, true, false, true, false);
 	}
 
 	public void test9() throws Exception{
 		//regression test for 30906
-		helper2("fBig", "fSmall", true, false, false, false, true, true, true, true);
+		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}		
 	
 }

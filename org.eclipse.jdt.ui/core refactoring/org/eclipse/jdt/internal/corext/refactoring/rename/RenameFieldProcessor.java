@@ -66,7 +66,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	private ICompilationUnit[] fNewWorkingCopies;
 	private boolean fUpdateReferences;
 	
-	private boolean fUpdateCommentsAndStrings;
+	private boolean fUpdateTextualMatches;
 	
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
@@ -89,7 +89,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		fField= field;
 		setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
-		fUpdateCommentsAndStrings= false;
+		fUpdateTextualMatches= false;
 		
 		fRenameGetter= false;
 		fRenameSetter= false;
@@ -182,12 +182,12 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		return true;
 	}
 	
-	public boolean getUpdateCommentsAndStrings() {
-		return fUpdateCommentsAndStrings;
+	public boolean getUpdateTextualMatches() {
+		return fUpdateTextualMatches;
 	}
 	
-	public void setUpdateCommentsAndStrings(boolean update) {
-		fUpdateCommentsAndStrings= update;
+	public void setUpdateTextualMatches(boolean update) {
+		fUpdateTextualMatches= update;
 	}
 	
 	//---- IReferenceUpdating -----------------------------------
@@ -292,7 +292,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try{
-			pm.beginTask("", 13); //$NON-NLS-1$
+			pm.beginTask("", 18); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(Checks.checkIfCuBroken(fField));
@@ -320,79 +320,26 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			if (getGetter() != null && fRenameGetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));
 				result.merge(Checks.checkIfConstructorName(getGetter(), getNewGetterName(), fField.getDeclaringType().getElementName()));
-			}	
+			} else {
+				pm.worked(1);
+			}
 				
 			if (getSetter() != null && fRenameSetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getSetter(), getNewSetterName()));
 				result.merge(Checks.checkIfConstructorName(getSetter(), getNewSetterName(), fField.getDeclaringType().getElementName()));
-			}	
-			
-			if (fUpdateReferences)
-				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
-			else
+			} else {
 				pm.worked(1);
+			}
 			
+			result.merge(createChanges(new SubProgressMonitor(pm, 10)));
 			if (result.hasFatalError())
 				return result;
-			if (fChangeManager == null)
-				fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
+			
 			result.merge(validateModifiesFiles());
 			return result;
 		} finally{
 			pm.done();
 		}
-	}
-	
-	//----------
-	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
-		try {
-			pm.beginTask("", 3); //$NON-NLS-1$
-			
-			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), fChangeManager);
-			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
-			return result;
-		} finally{
-			pm.done();
-			if (fNewWorkingCopies != null){
-				for (int i= 0; i < fNewWorkingCopies.length; i++) {
-					fNewWorkingCopies[i].destroy();
-				}
-			}	
-		}
-	}
-
-	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
-		
-		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fField.getCompilationUnit());
-		if (declaringCuWorkingCopy == null)
-			return new SearchResultGroup[0];
-		
-		IField field= getNewField(declaringCuWorkingCopy);
-		if (field == null || ! field.exists())
-			return new SearchResultGroup[0];
-		
-		ISearchPattern newPattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.ALL_OCCURRENCES);			
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
-	}
-
-	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
-		ISearchPattern oldPattern= SearchEngine.createSearchPattern(fField, IJavaSearchConstants.ALL_OCCURRENCES);				
-		return RefactoringSearchEngine.search(pm, createRefactoringScope(), oldPattern);
-	}
-	
-	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
-		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
-		String fullyTypeName= fField.getDeclaringType().getFullyQualifiedName();
-		for (int i= 0; i < allNewTypes.length; i++) {
-			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getField(fNewElementName);
-		}
-		return null;
 	}
 	
 	//----------
@@ -462,7 +409,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		return result;
 	}
 	
-	private RefactoringStatus checkEnclosingHierarchy() throws CoreException {
+	private RefactoringStatus checkEnclosingHierarchy() {
 		IType current= fField.getDeclaringType();
 		if (Checks.isTopLevel(current))
 			return null;
@@ -493,11 +440,11 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		return result;
 	}
 	
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles() {
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
@@ -510,7 +457,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException{
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
+		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 	
 	// ---------- Changes -----------------
@@ -526,39 +473,82 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		}	
 	}
 	
-	private TextChangeManager createTextChangeManager(IProgressMonitor pm) throws CoreException {
-		try{
-			pm.beginTask("", 3); //$NON-NLS-1$
-				
-			TextChangeManager manager= new TextChangeManager(true);
+	//----------
+	
+	private RefactoringStatus createChanges(IProgressMonitor pm) throws CoreException {
+		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking"), 10); //$NON-NLS-1$
+		RefactoringStatus result= new RefactoringStatus();
+		fChangeManager= new TextChangeManager(true);
+
+		addDeclarationUpdate();
 		
-			addOccurrences(new SubProgressMonitor(pm, 1), manager);
+		if (fUpdateReferences) {
+			addReferenceUpdates(new SubProgressMonitor(pm, 1));
+			result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 2)));
+			if (result.hasFatalError())
+				return result;
+		} else {
+			pm.worked(3);
+		}
 		
-			if (getGetter() != null && fRenameGetter)
-				addGetterOccurrences(new SubProgressMonitor(pm, 1), manager);
-			else
-				pm.worked(1);
-						
-			if (getSetter() != null && fRenameSetter)
-				addSetterOccurrences(new SubProgressMonitor(pm, 1), manager);
-			else
-				pm.worked(1);
+		if (getGetter() != null && fRenameGetter) {
+			addGetterOccurrences(new SubProgressMonitor(pm, 1));
+		} else {
+			pm.worked(1);
+		}
 					
-			return manager;
-		} finally{
-			pm.done();
+		if (getSetter() != null && fRenameSetter) {
+			addSetterOccurrences(new SubProgressMonitor(pm, 1));
+		} else {
+			pm.worked(1);
+		}
+
+		if (fUpdateTextualMatches) {
+			addTextMatches(new SubProgressMonitor(pm, 5));
+		} else {
+			pm.worked(5);
+		}
+		pm.done();
+		return result;
+	}
+
+	private void addDeclarationUpdate() throws CoreException { 
+		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
+		ICompilationUnit cu= fField.getCompilationUnit();
+		String groupName= RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), groupName, textEdit);
+	}
+	
+	private void addReferenceUpdates(IProgressMonitor pm) {
+		pm.beginTask("", fReferences.length); //$NON-NLS-1$
+		String editName= RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_reference"); //$NON-NLS-1$
+		for (int i= 0; i < fReferences.length; i++){
+			ICompilationUnit cu= fReferences[i].getCompilationUnit();
+			if (cu == null)
+				continue;
+			SearchResult[] results= fReferences[i].getSearchResults();
+			for (int j= 0; j < results.length; j++){
+				TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), editName, createTextChange(results[j]));
+			}
+			pm.worked(1);			
 		}
 	}
 	
-	private void addGetterOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException{
-		addAccessorOccurrences(pm, manager, getGetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_getter_occurrence"), getNewGetterName()); //$NON-NLS-1$
+	private TextEdit createTextChange(SearchResult searchResult) {
+		String oldName= fField.getElementName();
+		int offset= searchResult.getEnd() - oldName.length();
+		return new ReplaceEdit(offset, oldName.length(), fNewElementName);
 	}
 	
-	private void addSetterOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException{
-		addAccessorOccurrences(pm, manager, getSetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_setter_occurrence"), getNewSetterName()); //$NON-NLS-1$
+	private void addGetterOccurrences(IProgressMonitor pm) throws CoreException {
+		addAccessorOccurrences(pm, getGetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_getter_occurrence"), getNewGetterName()); //$NON-NLS-1$
+	}
+	
+	private void addSetterOccurrences(IProgressMonitor pm) throws CoreException {
+		addAccessorOccurrences(pm, getSetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_setter_occurrence"), getNewSetterName()); //$NON-NLS-1$
 	}
 
-	private static void addAccessorOccurrences(IProgressMonitor pm, TextChangeManager manager, IMethod accessor, String editName, String newAccessorName) throws CoreException {
+	private void addAccessorOccurrences(IProgressMonitor pm, IMethod accessor, String editName, String newAccessorName) throws CoreException {
 		Assert.isTrue(accessor.exists());
 		
 		IJavaSearchScope scope= RefactoringScopeFactory.create(accessor);
@@ -573,56 +563,65 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			SearchResult[] results= groupedResults[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
-				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 				TextEdit edit= new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName);
-				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, edit);
+				TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), editName, edit);
 			}
 		}
 	}
 	
-	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
+	private void addTextMatches(IProgressMonitor pm) throws CoreException {
+		TextMatchUpdater.perform(pm, createRefactoringScope(), this, fChangeManager, fReferences);
 	}	
 	
-	private void addOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", 5);//$NON-NLS-1$
+	//----------------
+	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
+		try {
+			pm.beginTask("", 2); //$NON-NLS-1$
+			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
+			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), fChangeManager);
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
+			return result;
+		} finally{
+			pm.done();
+			if (fNewWorkingCopies != null){
+				for (int i= 0; i < fNewWorkingCopies.length; i++) {
+					fNewWorkingCopies[i].destroy();
+				}
+			}	
+		}
+	}
 
-		addDeclarationUpdate(manager);
-		pm.worked(1);	
-		
-		if (fUpdateReferences)
-			addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
-		
-		pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching_for_text_matches")); //$NON-NLS-1$
-		addTextMatches(manager, new SubProgressMonitor(pm, 1));
+	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
+		//TODO: repeats the search for fReferences, only to get the declaration too.
+		ISearchPattern oldPattern= SearchEngine.createSearchPattern(fField, IJavaSearchConstants.ALL_OCCURRENCES);
+		return RefactoringSearchEngine.search(pm, createRefactoringScope(), oldPattern);
 	}
 	
-	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{ 
-		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fField.getCompilationUnit());
-		TextChangeCompatibility.addTextEdit(manager.get(cu), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"), textEdit);
+	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
+		pm.beginTask("", 2); //$NON-NLS-1$
+		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
+		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
+		
+		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fField.getCompilationUnit());
+		if (declaringCuWorkingCopy == null)
+			return new SearchResultGroup[0];
+		
+		IField field= getNewField(declaringCuWorkingCopy);
+		if (field == null || ! field.exists())
+			return new SearchResultGroup[0];
+		
+		ISearchPattern newPattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.ALL_OCCURRENCES);			
+		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
 	}
-	
-	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fReferences.length); //$NON-NLS-1$
-		String editName= RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_reference"); //$NON-NLS-1$
-		for (int i= 0; i < fReferences.length; i++){
-			ICompilationUnit cu= fReferences[i].getCompilationUnit();
-			if (cu == null)
-				continue;
-			SearchResult[] results= fReferences[i].getSearchResults();
-			for (int j= 0; j < results.length; j++){
-				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, createTextChange(results[j]));
-			}
-			pm.worked(1);			
+
+	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
+		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
+		String fullyTypeName= fField.getDeclaringType().getFullyQualifiedName();
+		for (int i= 0; i < allNewTypes.length; i++) {
+			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
+				return allNewTypes[i].getField(fNewElementName);
 		}
+		return null;
 	}
 	
-	private TextEdit createTextChange(SearchResult searchResult) {
-		String oldName= fField.getElementName();
-		int offset= searchResult.getEnd() - oldName.length();
-		return new ReplaceEdit(offset, oldName.length(), fNewElementName);
-	}
-		}
-		
+}

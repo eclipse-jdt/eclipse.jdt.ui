@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,10 +42,12 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+/**
+ * @deprecated will be replaced by {@link TextMatchUpdater}
+ */
 class TextMatchFinder {
 	
 	private Map fJavaDocMatches; //ICompilationUnit -> Set of Integer
@@ -85,30 +88,6 @@ class TextMatchFinder {
 		}
 	}
 	
-	/**
-	 * @todo work in progress
-	 */
-	static void findTextMatches(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating2 processor, TextChangeManager manager) throws JavaModelException{
-		try{
-			if (! isSearchingNeeded(processor))
-				return;
-			RefactoringScanner scanner = createScanner(processor);
-			Map javaDocMatches= new HashMap();
-			Map commentsMatches= new HashMap();
-			Map stringMatches= new HashMap();
-			findTextMatches(pm, scope, scanner, javaDocMatches, commentsMatches, stringMatches);
-			int patternLength= scanner.getPattern().length();
-			String newName= processor.getNewElementName();
-			addMatches(manager, newName, patternLength, javaDocMatches, RefactoringCoreMessages.getString("TextMatchFinder.javadoc")); //$NON-NLS-1$
-			addMatches(manager, newName, patternLength, commentsMatches, RefactoringCoreMessages.getString("TextMatchFinder.comment")); //$NON-NLS-1$
-			addMatches(manager, newName, patternLength, stringMatches, RefactoringCoreMessages.getString("TextMatchFinder.string")); //$NON-NLS-1$
-		} catch(JavaModelException e){
-			throw e;	
-		} catch (CoreException e){
-			throw new JavaModelException(e);
-		}
-	}
-
 	private static void addMatches(TextChangeManager manager, String newText, int patternLength, Map matches, String matchName) throws CoreException{
 		for(Iterator iter= matches.keySet().iterator(); iter.hasNext();){
 			Object key= iter.next();
@@ -131,10 +110,6 @@ class TextMatchFinder {
 		return textUpdating.getUpdateComments() || textUpdating.getUpdateJavaDoc() || textUpdating.getUpdateStrings();
 	}
 	
-	private static boolean isSearchingNeeded(ITextUpdating2 textUpdating){
-		return textUpdating.getUpdateCommentsAndStrings();
-	}
-
 	private static RefactoringScanner createScanner(ITextUpdating textUpdating) {
 		RefactoringScanner scanner= new RefactoringScanner();
 		scanner.setAnalyzeComments(textUpdating.getUpdateComments());
@@ -144,59 +119,55 @@ class TextMatchFinder {
 		return scanner;
 	}
 
-	private static RefactoringScanner createScanner(ITextUpdating2 textUpdating) {
-		RefactoringScanner scanner= new RefactoringScanner();
-		scanner.setAnalyzeComments(textUpdating.getUpdateCommentsAndStrings());
-		scanner.setAnalyzeStrings(textUpdating.getUpdateCommentsAndStrings());
-		scanner.setPattern(textUpdating.getCurrentElementName());
-		return scanner;
-	}
-	
 	private void findTextMatches(IProgressMonitor pm) throws JavaModelException{	
 		try{
-			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-			pm.beginTask("", projects.length); //$NON-NLS-1$
+			IProject[] projectsInScope= getProjectsInScope();
 			
-			Set enclosingProjectSet = createEnclosingProjectSet();
+			pm.beginTask("", projectsInScope.length); //$NON-NLS-1$
 			
-			for (int i =0 ; i < projects.length; i++){
+			for (int i =0 ; i < projectsInScope.length; i++){
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
-				if (enclosingProjectSet.contains(projects[i].getFullPath()))
-					addTextMatches(projects[i], new SubProgressMonitor(pm, 1));
-				else	
-					pm.worked(1);
+				addTextMatches(projectsInScope[i], new SubProgressMonitor(pm, 1));
 			}
 		} finally{
 			pm.done();
 		}		
 	}
 
-	private Set createEnclosingProjectSet() {
+	private IProject[] getProjectsInScope() {
 		IPath[] enclosingProjects= fScope.enclosingProjectsAndJars();
 		Set enclosingProjectSet= new HashSet();
-		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));	
-		return enclosingProjectSet;
+		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));
+		
+		ArrayList projectsInScope= new ArrayList();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for (int i =0 ; i < projects.length; i++){
+			if (enclosingProjectSet.contains(projects[i].getFullPath()))
+				projectsInScope.add(projects[i]);
+		}
+		
+		return (IProject[]) projectsInScope.toArray(new IProject[projectsInScope.size()]);
 	}
-	
+
 	private void addTextMatches(IResource resource, IProgressMonitor pm) throws JavaModelException{
 		try{
+			String task= RefactoringCoreMessages.getString("TextMatchFinder.searching") + resource.getFullPath(); //$NON-NLS-1$
 			if (resource instanceof IFile){
 				IJavaElement element= JavaCore.create(resource);
-				pm.beginTask("", 1); //$NON-NLS-1$
+				// don't start task (flickering label updates; finally {pm.done()} is enough)
 				if (!(element instanceof ICompilationUnit))
 					return;
 				if (! element.exists())
 					return;
 				if (! fScope.encloses(element))
 					return;
-				addTextMatches((ICompilationUnit)element);
-			}
-			if (resource instanceof IContainer){
+				addCuTextMatches((ICompilationUnit)element);
+			} else if (resource instanceof IContainer){
 				IContainer container= (IContainer)resource;
 				IResource[] members= container.members();
-				pm.beginTask("", members.length); //$NON-NLS-1$
-				pm.subTask(RefactoringCoreMessages.getString("TextMatchFinder.searching") + container.getFullPath()); //$NON-NLS-1$
+				pm.beginTask(task, members.length); //$NON-NLS-1$
+				pm.subTask(task);
 				for (int i = 0; i < members.length; i++) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
@@ -213,12 +184,10 @@ class TextMatchFinder {
 		}	
 	}
 	
-	private void addTextMatches(ICompilationUnit cu) throws JavaModelException{
+	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
-		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		fJavaDocMatches.put(wc, fScanner.getJavaDocResults());
-		fCommentMatches.put(wc, fScanner.getCommentResults());
-		fStringMatches.put(wc, fScanner.getStringResults());
+		fJavaDocMatches.put(cu, fScanner.getJavaDocResults());
+		fCommentMatches.put(cu, fScanner.getCommentResults());
+		fStringMatches.put(cu, fScanner.getStringResults());
 	}	
 }
-

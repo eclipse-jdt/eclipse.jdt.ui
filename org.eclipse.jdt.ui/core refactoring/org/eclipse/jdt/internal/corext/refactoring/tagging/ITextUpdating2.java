@@ -29,7 +29,7 @@ public interface ITextUpdating2 {
 	 * This call can be ignored if <code>canEnableTextUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public boolean getUpdateCommentsAndStrings();
+	public boolean getUpdateTextualMatches();
 	
 	/**
 	 * If <code>canEnableTextUpdating</code> returns <code>true</code>,
@@ -38,7 +38,7 @@ public interface ITextUpdating2 {
 	 * This call can be ignored if <code>canEnableTextUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public void setUpdateCommentsAndStrings(boolean update);
+	public void setUpdateTextualMatches(boolean update);
 	
 	/**
 	 * Returns the current name of the element to be renamed.

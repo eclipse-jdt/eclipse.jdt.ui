@@ -46,6 +46,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 	
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}	
+	
 	protected String getResourceLocation() {
 		return "InlineMethodWorkspace/TestCases/";
 	}

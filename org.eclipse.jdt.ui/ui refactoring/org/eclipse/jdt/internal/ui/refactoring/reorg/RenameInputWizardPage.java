@@ -39,15 +39,15 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private String fHelpContextID;
 	private Button fUpdateReferences;
+	private Button fUpdateTextualMatches;
 	private Button fUpdateJavaDoc;
-	private Button fUpdateCommentsAndStrings;
 	private Button fUpdateComments;
 	private Button fUpdateStrings;
 	private Button fUpdateQualifiedNames;
 	private QualifiedNameComponent fQualifiedNameComponent;
 	private static final String UPDATE_REFERENCES= "updateReferences"; //$NON-NLS-1$
 	private static final String UPDATE_JAVADOC= "updateJavaDoc"; //$NON-NLS-1$
-	private static final String UPDATE_COMMENTS_AND_STRINGS= "updateCommentsAndStrings"; //$NON-NLS-1$
+	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
 	private static final String UPDATE_COMMENTS= "updateComments"; //$NON-NLS-1$
 	private static final String UPDATE_STRINGS= "updateStrings"; //$NON-NLS-1$
 	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
@@ -111,8 +111,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	public void dispose() {
 		if (saveSettings()) {
 			saveBooleanSetting(UPDATE_REFERENCES, fUpdateReferences);
+			saveBooleanSetting(UPDATE_TEXTUAL_MATCHES, fUpdateTextualMatches);
 			saveBooleanSetting(UPDATE_JAVADOC, fUpdateJavaDoc);
-			saveBooleanSetting(UPDATE_COMMENTS_AND_STRINGS, fUpdateCommentsAndStrings);
 			saveBooleanSetting(UPDATE_COMMENTS, fUpdateComments);
 			saveBooleanSetting(UPDATE_STRINGS, fUpdateStrings);
 			saveBooleanSetting(UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
@@ -142,7 +142,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 		if (refactoring2 != null) {
 			if (refactoring2.canEnableTextUpdating()) {
-				addUpdateCommentsAndStringsCheckbox(result, layouter, refactoring2);
+				addUpdateTextualMatches(result, layouter, refactoring2);
 			} else {
 				return;
 			}
@@ -158,14 +158,14 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		addUpdateStringsCheckbox(result, layouter, refactoring);
 	}
 
-	private void  addUpdateCommentsAndStringsCheckbox(Composite result, RowLayouter layouter, final ITextUpdating2 refactoring) {
-		String title= RefactoringMessages.getString("RenameInputWizardPage.update_comment_and_string_references"); //$NON-NLS-1$
-		boolean defaultValue= getBooleanSetting(UPDATE_COMMENTS_AND_STRINGS, refactoring.getUpdateCommentsAndStrings());
-		fUpdateCommentsAndStrings= createCheckbox(result, title, defaultValue, layouter);
-		refactoring.setUpdateCommentsAndStrings(fUpdateCommentsAndStrings.getSelection());
-		fUpdateCommentsAndStrings.addSelectionListener(new SelectionAdapter(){
+	private void  addUpdateTextualMatches(Composite result, RowLayouter layouter, final ITextUpdating2 refactoring) {
+		String title= RefactoringMessages.getString("RenameInputWizardPage.update_textual_matches"); //$NON-NLS-1$
+		boolean defaultValue= getBooleanSetting(UPDATE_TEXTUAL_MATCHES, refactoring.getUpdateTextualMatches());
+		fUpdateTextualMatches= createCheckbox(result, title, defaultValue, layouter);
+		refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
+		fUpdateTextualMatches.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				refactoring.setUpdateCommentsAndStrings(fUpdateCommentsAndStrings.getSelection());
+				refactoring.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
 				updateForcePreview();
 			}
 		});		
@@ -244,7 +244,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 	
 	protected String getLabelText() {
-		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
+		return RefactoringMessages.getString("RenameInputWizardPage.new_name"); //$NON-NLS-1$
 	}
 
 	protected boolean getBooleanSetting(String key, boolean defaultValue) {
@@ -275,9 +275,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		ITextUpdating2 tu2= (ITextUpdating2) refactoring.getAdapter(ITextUpdating2.class);
 		IQualifiedNameUpdating qu= (IQualifiedNameUpdating)refactoring.getAdapter(IQualifiedNameUpdating.class);
 		if (tu2 != null) {
-			forcePreview|= tu2.getUpdateCommentsAndStrings();
-		} else
-		if (tu != null) {
+			forcePreview|= tu2.getUpdateTextualMatches();
+		} else if (tu != null) {
 			forcePreview= tu.getUpdateComments() || tu.getUpdateJavaDoc() || tu.getUpdateStrings();
 		}
 		if (qu != null) {
