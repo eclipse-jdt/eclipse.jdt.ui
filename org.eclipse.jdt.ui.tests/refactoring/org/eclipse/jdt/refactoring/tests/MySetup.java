@@ -12,7 +12,7 @@ public class MySetup extends TestSetup {
 	public MySetup(Test test) {
 		super(test);
 	}
-	private static final String CONTAINER= "src";
+	public static final String CONTAINER= "src";
 	private static IPackageFragmentRoot fgRoot;
 	private static IPackageFragment fgPackageP;
 	private static IJavaProject fgJavaTestProject;

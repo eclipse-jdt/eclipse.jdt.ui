@@ -19,6 +19,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(AllRefactoringTests.noSetupSuite());
+		suite.addTest(ReorgTests.noSetupSuite());
 		suite.addTest(AllChangeTests.noSetupSuite());
 		suite.addTest(UndoManagerTests.noSetupSuite());
 		suite.addTest(PathTransformationTests.noSetupSuite());

@@ -63,8 +63,8 @@ public abstract class RefactoringTest extends TestCase {
 		fPackageP= MySetup.getPackageP();
 		
 		if (fIsVerbose){
-			System.out.println("---------------------------------------------");
-			System.out.println("Test:" + getClass() + "." + getName());
+			System.out.println("\n---------------------------------------------");
+			System.out.println("\nTest:" + getClass() + "." + getName());
 		}	
 		Refactoring.getUndoManager().flush();
 	}
@@ -125,6 +125,11 @@ public abstract class RefactoringTest extends TestCase {
 	/****************  helpers  ******************/
 	/**** mostly not general, just shortcuts *****/
 
+	/**
+	 * @param pack
+	 * @param name
+	 * @param contents
+	 */
 	protected ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
@@ -158,7 +163,7 @@ public abstract class RefactoringTest extends TestCase {
 		return sb.toString();
 	}
 
-	private InputStream getFileInputStream(String fileName) throws IOException {
+	protected InputStream getFileInputStream(String fileName) throws IOException {
 		IPluginDescriptor plugin= Platform.getPluginRegistry().getPluginDescriptors("Refactoring Tests Resources")[0];
 		URL url= new URL(plugin.getInstallURL().toString() + fileName);
 		return url.openStream();
@@ -179,10 +184,18 @@ public abstract class RefactoringTest extends TestCase {
 		return "";
 	}
 
-	/*package*/ String getTestPath() {
+	/**
+	 *  example "RenameType/"
+	 */
+	protected String getTestPath() {
 		return TEST_PATH_PREFIX + getRefactoringPath();
 	}
 
+	/**
+	 * @param cuName
+	 * @param infix
+	 * example "RenameTest/test0 + infix + cuName.java"
+	 */
 	private String createTestFileName(String cuName, String infix) {
 		return getTestPath() + getName() + infix + cuName + ".java";
 	}
