@@ -194,7 +194,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getIndentPrefixes(ISourceViewer, String)
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
-		return new String[] {"\t", "    "};
+		return new String[] {"\t", "    ", ""};
 	}
 
 	/*
