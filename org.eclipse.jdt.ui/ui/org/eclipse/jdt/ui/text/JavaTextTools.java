@@ -43,6 +43,10 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  */
 public class JavaTextTools {
 	
+	/**
+	 * Array with legal content types.
+	 * @since 3.0
+	 */
 	private final static String[] LEGAL_CONTENT_TYPES= new String[] {
 		IJavaPartitions.JAVA_DOC,
 		IJavaPartitions.JAVA_MULTI_LINE_COMMENT,

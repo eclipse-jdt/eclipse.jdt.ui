@@ -717,6 +717,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return presenter;
 	}
 	
+	/**
+	 * Returns the settings for the given section.
+	 *
+	 * @param sectionName the section name
+	 * @return the settings
+	 * @since 3.0
+	 */
 	private IDialogSettings getSettings(String sectionName) {
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
 		if (settings == null)
