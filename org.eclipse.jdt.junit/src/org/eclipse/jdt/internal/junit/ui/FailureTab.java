@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import org.eclipse.core.internal.runtime.ListenerList;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.junit.ITestRunListener;
@@ -20,6 +21,13 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -28,6 +36,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -42,11 +51,12 @@ import org.eclipse.swt.widgets.TableItem;
 /**
  * A tab presenting the failed tests in a table.
  */
-public class FailureTab extends TestRunTab implements IMenuListener {
+public class FailureTab extends TestRunTab implements IMenuListener, ISelectionProvider {
 	private Table fTable;
 	private TestRunnerViewPart fRunnerViewPart;
 	private Clipboard fClipboard;	
 	private boolean fMoveSelection= false;
+	private ListenerList fSelectionListeners= new ListenerList();
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
@@ -77,6 +87,12 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		fTable.setLayout(gridLayout);
+		OpenStrategy handler = new OpenStrategy(fTable);
+		handler.addPostSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fireSelectionChanged();
+			}
+		});
 		
 		gridData= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
 		fTable.setLayoutData(gridData);
@@ -95,9 +111,10 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 	}
 
 	private void initMenu() {
-		MenuManager menuMgr= new MenuManager();
+		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
+		fRunnerViewPart.getSite().registerContextMenu(menuMgr, this);
 		Menu menu= menuMgr.createContextMenu(fTable);
 		fTable.setMenu(menu);
 	}
@@ -160,7 +177,10 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 				manager.add(new Separator());
 				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureTab.this, fClipboard));
 			}
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 		}
+
 	}		
 	
 	private TableItem getSelectedItem() {
@@ -332,4 +352,32 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 		TestRunInfo info= getTestInfo(item);
 		fRunnerViewPart.showTest(info);
 	}
+
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		fSelectionListeners.add(listener);
+	}
+
+	public ISelection getSelection() {
+		int index= fTable.getSelectionIndex();
+		if (index == -1)
+			return StructuredSelection.EMPTY;
+		return new StructuredSelection(getTestInfo(fTable.getItem(index)));
+	}
+
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		fSelectionListeners.remove(listener);
+	}
+
+	public void setSelection(ISelection selection) {
+	}
+	
+	private void fireSelectionChanged() {
+		SelectionChangedEvent event = new SelectionChangedEvent(this, getSelection());
+		Object[] listeners = fSelectionListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			ISelectionChangedListener listener = (ISelectionChangedListener)listeners[i];
+			listener.selectionChanged(event);
+		}	
+	}
+
 }

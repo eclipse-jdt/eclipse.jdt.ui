@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
+import org.eclipse.core.internal.runtime.ListenerList;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,6 +30,13 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -37,6 +45,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -51,7 +60,7 @@ import org.eclipse.swt.widgets.TreeItem;
  * A view that shows the contents of a test suite
  * as a tree.
  */
-public class TestHierarchyTab extends TestRunTab implements IMenuListener {
+public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISelectionProvider {
 	 
 	private Tree fTree;
 	
@@ -62,6 +71,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 	private List fExecutionPath;
 	
 	private boolean fMoveSelection= false;
+	private ListenerList fSelectionListeners= new ListenerList();
 	
 	/**
 	 * Helper used to resurrect test hierarchy
@@ -133,6 +143,13 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 		fTree= new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
 		fTree.setLayoutData(gridData);
+		OpenStrategy handler = new OpenStrategy(fTree);
+		handler.addPostSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fireSelectionChanged();
+			}
+		});
+
 		
 		initMenu();
 		addListeners();
@@ -152,9 +169,10 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 	}
 	
 	private void initMenu() {
-		MenuManager menuMgr= new MenuManager();
+		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
+		fTestRunnerPart.getSite().registerContextMenu(menuMgr, this);
 		Menu menu= menuMgr.createContextMenu(fTree);
 		fTree.setMenu(menu);	
 	}
@@ -168,7 +186,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 		if(treeItems.length == 0) 
 			return null;
 		return ((TestRunInfo)treeItems[0].getData());
-	}	
+	}	 
 	
 	private boolean isSuiteSelected() {
 		TreeItem[] treeItems= fTree.getSelection();
@@ -458,6 +476,9 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 			}
 			manager.add(new Separator());
 			manager.add(new ExpandAllAction());
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
+
 		}
 	}	
 	
@@ -704,5 +725,31 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 		for (int i= 0; i < fExecutionPath.size(); i++) {
 			refreshItem((TreeItem) fExecutionPath.get(i), false);
 		}
+	}
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		fSelectionListeners.add(listener);
+	}
+
+	public ISelection getSelection() {
+		TestRunInfo testInfo= getTestInfo();
+		if (testInfo == null)
+			return StructuredSelection.EMPTY;
+		return new StructuredSelection(testInfo);
+	}
+
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		fSelectionListeners.remove(listener);
+	}
+
+	public void setSelection(ISelection selection) {
+	}
+	
+	private void fireSelectionChanged() {
+		SelectionChangedEvent event = new SelectionChangedEvent(this, getSelection());
+		Object[] listeners = fSelectionListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			ISelectionChangedListener listener = (ISelectionChangedListener)listeners[i];
+			listener.selectionChanged(event);
+		}	
 	}
 }
