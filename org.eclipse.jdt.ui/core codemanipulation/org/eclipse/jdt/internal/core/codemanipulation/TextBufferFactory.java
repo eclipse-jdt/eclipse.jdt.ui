@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 		}
 	}
 	
-	public void release(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+	public void saveAndRelease(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
 		final Value value= (Value)fBufferValueMap.get(buffer);
 		if (value == null)
 			return;

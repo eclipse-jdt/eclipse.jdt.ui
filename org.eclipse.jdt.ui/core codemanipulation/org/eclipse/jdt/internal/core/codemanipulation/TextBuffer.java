@@ -403,7 +403,7 @@ public class TextBuffer {
 	 * 	necessary
 	 */
 	public static void saveAndRelease(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
-		fgFactory.release(buffer, force, pm);
+		fgFactory.saveAndRelease(buffer, force, pm);
 	}
 	
 	/**
