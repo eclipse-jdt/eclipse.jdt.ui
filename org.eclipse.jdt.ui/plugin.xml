@@ -1120,7 +1120,7 @@
             id="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
       </structureCreator>
       <contentTypeBinding
-			contentTypeId="org.eclipse.core.runtime.javaProperties"
+			contentTypeId="org.eclipse.jdt.core.javaProperties"
             structureCreatorId="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
 	  </contentTypeBinding>
    </extension>
@@ -1144,7 +1144,7 @@
             id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
       </viewer>
       <contentTypeBinding
-			contentTypeId="org.eclipse.core.runtime.javaProperties"
+			contentTypeId="org.eclipse.jdt.core.javaProperties"
             contentMergeViewerId="org.eclipse.compare.TextMergeViewerCreator">
 	  </contentTypeBinding>
       <contentTypeBinding
