@@ -20,12 +20,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class PullUpAction extends OpenRefactoringWizardAction {
 
 	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
+	private static final String UNAVAILABLE= "To activate this refactoring, please select the name of a method";
+	
 	public PullUpAction(CompilationUnitEditor editor) {
-		super(TITLE, editor, IMember.class);
+		super(TITLE, UNAVAILABLE, editor, IMember.class, true);
 	}
 
 	public PullUpAction(IWorkbenchSite site) {
-		super(TITLE, site, IMember.class);
+		super(TITLE, UNAVAILABLE, site, IMember.class, true);
 	}
 
 	protected Refactoring createNewRefactoringInstance(Object obj){
@@ -37,9 +39,7 @@ public class PullUpAction extends OpenRefactoringWizardAction {
 	protected boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
 		return ((PullUpRefactoring)refactoring).checkPreactivation().isOK();
 	}
-	protected boolean canOperateOnMultiSelection(){
-		return true;
-	}	
+
 	protected RefactoringWizard createWizard(Refactoring ref){
 		String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
 		//FIX ME: wrong
