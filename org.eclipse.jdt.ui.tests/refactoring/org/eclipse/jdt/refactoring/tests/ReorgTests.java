@@ -21,7 +21,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 public class ReorgTests extends RefactoringTest {
 
 	private static final Class clazz= ReorgTests.class;
-	private static final String REFACTORING_PATH= "CopyTests/";
+	private static final String REFACTORING_PATH= "ReorgTests/";
 	
 	public ReorgTests(String name) {
 		super(name);
