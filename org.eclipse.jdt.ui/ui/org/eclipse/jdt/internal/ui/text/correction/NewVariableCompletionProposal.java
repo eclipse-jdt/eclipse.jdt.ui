@@ -17,23 +17,16 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
@@ -189,18 +182,18 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 
 		String content= generateStub(importEdit, fNode);
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
+			changeElement.addTextEdit("imports", importEdit); //$NON-NLS-1$
 		}		
 
 		if (fVariableKind == LOCAL) {
 			// new local variable
-			changeElement.addTextEdit("Add local", new AddLocalVariableEdit(fNode, content, settings.tabWidth)); //$NON-NLS-1$
+			changeElement.addTextEdit("local", new AddLocalVariableEdit(fNode, content, settings.tabWidth)); //$NON-NLS-1$
 		} else if (fVariableKind == FIELD) {
 			// new field
-			changeElement.addTextEdit("Add field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
+			changeElement.addTextEdit("field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
 		} else if (fVariableKind == PARAM) {
 			// new parameter
-			changeElement.addTextEdit("Add parameter", new AddParameterEdit(fNode, content)); //$NON-NLS-1$
+			changeElement.addTextEdit("parameter", new AddParameterEdit(fNode, content)); //$NON-NLS-1$
 		}
 	}
 	
@@ -226,26 +219,13 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	}	
 
 
-	private boolean isStatic(SimpleName selectedNode) {
-		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {
-			return Modifier.isStatic(((MethodDeclaration)decl).getModifiers());
-		} else if (decl instanceof Initializer) {
-			return Modifier.isStatic(((Initializer)decl).getModifiers());
-		} else if (decl instanceof FieldDeclaration) {
-			return Modifier.isStatic(((FieldDeclaration)decl).getModifiers());
-		}
-		return false;
-	}
-
-	
 	private String generateStub(ImportEdit importEdit, SimpleName selectedNode) throws CoreException {
 		StringBuffer buf= new StringBuffer();
 		ITypeBinding varType= evaluateVariableType(importEdit, selectedNode);
 				
 		if (fVariableKind == FIELD) {
 			buf.append("private "); //$NON-NLS-1$
-			if (isStatic(selectedNode)) {
+			if (ASTResolving.isInStaticContext(selectedNode)) {
 				buf.append("static "); //$NON-NLS-1$
 			}			
 		}

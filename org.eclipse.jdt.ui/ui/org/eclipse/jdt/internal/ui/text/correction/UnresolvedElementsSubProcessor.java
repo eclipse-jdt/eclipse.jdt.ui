@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -146,7 +148,8 @@ public class UnresolvedElementsSubProcessor {
 		if (!(selectedNode.getParent() instanceof MethodInvocation)) {
 			return;
 		}
-	
+		MethodInvocation invocationNode= (MethodInvocation) nameNode.getParent();
+		
 		// corrections
 		String methodName= nameNode.getIdentifier();
 				
@@ -159,6 +162,12 @@ public class UnresolvedElementsSubProcessor {
 		
 		// new method
 		String typeName= problemPos.getArguments()[0];
+		
+		Expression senderExpr= invocationNode.getExpression();
+		if (senderExpr != null) {
+			ITypeBinding resolve= senderExpr.resolveTypeBinding();
+			resolve.isClass();
+		}
 		IType type= JavaModelUtil.findType(cu.getJavaProject(), typeName);
 		if (type != null && type.getCompilationUnit() != null) {
 			ICompilationUnit changedCU= type.getCompilationUnit();
@@ -171,8 +180,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 				}
 			}
-			
-			MethodInvocation invocationNode= (MethodInvocation) nameNode.getParent();
+		
 			String label;
 			if (cu.equals(changedCU)) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$

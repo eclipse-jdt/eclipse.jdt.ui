@@ -33,8 +33,10 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -229,7 +231,20 @@ public class ASTResolving {
 			node= node.getParent();
 		}
 		return (Statement) node;
+	}
+	
+	public static boolean isInStaticContext(ASTNode selectedNode) {
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {
+			return Modifier.isStatic(((MethodDeclaration)decl).getModifiers());
+		} else if (decl instanceof Initializer) {
+			return Modifier.isStatic(((Initializer)decl).getModifiers());
+		} else if (decl instanceof FieldDeclaration) {
+			return Modifier.isStatic(((FieldDeclaration)decl).getModifiers());
+		}
+		return false;
 	}	
+	
 	
 	public static IScanner createScanner(ICompilationUnit cu, int pos) throws InvalidInputException, JavaModelException {
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);

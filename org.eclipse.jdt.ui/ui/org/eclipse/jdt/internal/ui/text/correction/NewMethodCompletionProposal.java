@@ -31,8 +31,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -106,26 +108,37 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	
 	
 	private String generateStub(ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
-		boolean isStatic= false;
+		
 		String methodName= fNode.getName().getIdentifier();
 		List arguments= fNode.arguments();
 		
-		StringBuffer buf= new StringBuffer();
+		boolean isStatic= false;
+		Expression sender= fNode.getExpression();
+		if (sender != null) {
+			if (sender instanceof Name) {
+				IBinding binding= ((Name) sender).resolveBinding();
+				if (binding != null) {
+					isStatic= (binding.getKind() == binding.TYPE);
+				}
+			}
+		} else {
+			isStatic= ASTResolving.isInStaticContext(fNode);
+		}
 		
 		boolean isInterface= fDestType.isInterface();
 		boolean isSameType= isLocalChange();
 		
-		ITypeBinding returnType= evaluateMethodType(importEdit);
+		ITypeBinding returnType= evaluateMethodType(fNode, importEdit);
 		String returnTypeName= returnType.getName();
 		
 		String[] paramTypes= new String[arguments.size()];
-		
 		for (int i= 0; i < paramTypes.length; i++) {
 			ITypeBinding binding= evaluateParameterType((Expression) arguments.get(i), importEdit);
 			paramTypes[i]= (binding != null) ? binding.getName() : "Object"; //$NON-NLS-1$
 		}
-		
 		String[] paramNames= getParameterNames(paramTypes, arguments);
+		
+		StringBuffer buf= new StringBuffer();
 		
 		if (settings.createComments) {
 			StubUtility.genJavaDocStub("Method " + methodName, paramNames, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
@@ -193,9 +206,8 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		return (String[]) names.toArray(new String[names.size()]);
 	}
 	
-	
-	private ITypeBinding evaluateMethodType(ImportEdit importEdit) {
-		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
+	private ITypeBinding evaluateMethodType(MethodInvocation invocation, ImportEdit importEdit) {
+		ITypeBinding binding= ASTResolving.getTypeBinding(invocation);
 		if (binding != null) {
 			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
 			if (!baseType.isPrimitive()) {
@@ -203,7 +215,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			}
 			return binding;
 		}
-		return fNode.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
+		return invocation.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}
 	
 	private ITypeBinding evaluateParameterType(Expression expr, ImportEdit importEdit) {
