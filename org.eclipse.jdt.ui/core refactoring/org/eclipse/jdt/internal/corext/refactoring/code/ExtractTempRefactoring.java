@@ -232,10 +232,12 @@ public class ExtractTempRefactoring extends Refactoring {
 		
 		AstNode[] firstReplaceNodeParents= findParents(getFirstReplacedExpression());
 		AstNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
-		if (isBlock(firstReplaceNodeParents[commonPath.length -1]))
+		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
+
+		if (isBlock(firstReplaceNodeParents[commonPath.length - 1]))
 			return firstReplaceNodeParents[commonPath.length];
-		else	
-			return firstReplaceNodeParents[commonPath.length - 1];
+		else
+			return findInnermostStatement(firstReplaceNodeParents);
 	}
 	
 	private static boolean isBlock(AstNode node){
@@ -362,13 +364,17 @@ public class ExtractTempRefactoring extends Refactoring {
 		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), selection);
 		fAST.accept(selAnalyzer);
 		AstNode[] parents= selAnalyzer.getParents();
+		return findInnermostStatement(parents);	
+	}
+
+	private Statement findInnermostStatement(AstNode[] parents) {
 		if (parents.length < 2)
 			return null;
 		for (int i= parents.length - 2 ; i >= 0 ; i--) {
 			if (isBlock(parents[i]))
 				return (Statement)parents[i + 1];
 		}	
-		return null;		
+		return null;	
 	}	
 	
 	private AstNode[] getNodesToReplace() throws JavaModelException {
