@@ -27,25 +27,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 /**
  * Tries to reveal the selected element in the package navigator 
  * view.
  */
 public class ShowInPackageViewAction extends Action implements IUpdate {
 
-	private IWorkbenchPartSite fSite;
 	private ISelectionProvider fSelectionProvider;
 
 	public ShowInPackageViewAction(IWorkbenchPartSite site, ISelectionProvider provider) {
 		super(JavaUIMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
+		Assert.isNotNull(provider);
 		fSelectionProvider= provider;
-		Assert.isNotNull(fSelectionProvider);
-		fSite= site;
-		Assert.isNotNull(fSite);
-		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION });	
 	}
 	
@@ -55,31 +52,21 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 	
 	public boolean canOperateOn() {
 		ISelection s= fSelectionProvider.getSelection();
-		if (s.isEmpty() || ! (s instanceof IStructuredSelection))
-			return false;
-
-		IStructuredSelection selection= (IStructuredSelection)s;
-		if (selection.size() != 1)
-			return false;
-			
-		Object element= selection.getFirstElement();
+		Object element= SelectionUtil.getSingleElement(s);
 		if (!(element instanceof IPackageDeclaration || element instanceof IImportDeclaration || element instanceof IType))
-			return false;
-		
-		/*IAdaptable input= fSite.getPage().getInput();
-		if (!(input.getAdapter(IResource.class) instanceof IContainer))
-			return false;*/
-			
+			return false;	
 		return true;	
 	}
 	
 	public void run() {
+		if (!canOperateOn())
+			return;
 		Object o= ((IStructuredSelection)fSelectionProvider.getSelection()).getFirstElement();
 		IJavaElement element= null;
 		if (o instanceof IPackageDeclaration)
 			element= JavaModelUtility.getParent((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
 		
-		if (o instanceof IImportDeclaration) {
+		else if (o instanceof IImportDeclaration) {
 			try {
 				element= JavaModelUtility.convertFromImportDeclaration((IImportDeclaration)o);
 			} catch (JavaModelException e) {
@@ -93,8 +80,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 				element= temp;
 			}
 		}
-		
-		if (o instanceof IType) {
+		else if (o instanceof IType) {
 			ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
@@ -106,6 +92,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 				element= JavaModelUtility.getParent((IJavaElement)o, IJavaElement.CLASS_FILE);
 			}
 		}
+		
 		if (element != null) {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 			if (view != null) {
@@ -113,6 +100,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 				return;
 			}
 		}	
+		//XXX revisit need a standard way to give the user this feedback
 		JavaPlugin.getActiveWorkbenchShell().getDisplay().beep();	
 	}	
 }
