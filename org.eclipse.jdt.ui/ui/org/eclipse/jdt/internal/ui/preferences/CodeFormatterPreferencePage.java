@@ -47,7 +47,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -289,17 +288,14 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
 		item.setControl(newlineComposite);
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.linesplit.tabtitle")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(lineSplittingComposite);
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.style.tabtitle")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_REF));
 		item.setControl(styleComposite);		
 		
 		fSourceViewer= createPreview(parent);
