@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -61,6 +62,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy"; //$NON-NLS-1$
 	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
+	private static final String OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE="org.eclipse.jdt.ui.typeHierarchy.reusePerspective"; //$NON-NLS-1$
 	private static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
 
 	public static boolean useSrcAndBinFolders() {
@@ -101,6 +103,10 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static boolean openTypeHierarchInViewPart() {
 		return OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
 			JavaPlugin.getDefault().getPreferenceStore().getString(OPEN_TYPE_HIERARCHY));
+	}
+	
+	public static boolean reusePerspectiveForTypeHierarchy() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
 	}
 	
 	public static boolean doubleClickGoesInto() {
@@ -150,6 +156,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(SHOW_CU_CHILDREN, true);		
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
 		store.setDefault(SRCBIN_SRCNAME, "src");
 		store.setDefault(SRCBIN_BINNAME, "bin");
@@ -228,7 +235,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		composite.setLayout(layout);
 
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR);
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR);
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO);
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN);
 		
@@ -251,6 +257,9 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fBinFolderNameText.addModifyListener(fModifyListener);
 		
 		new Label(composite, SWT.NONE); // spacer
+		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings")); 
+		
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR);
 		
 		Label label= new Label(composite, SWT.NONE);
 		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy"));
@@ -260,9 +269,19 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginHeight= 0;
 		radioGroup.setLayout(layout);		
 
-		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE); 
+		final Button perspective= addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE); 
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 	
+		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
+		final Button reuse= addCheckBox(composite, "&Reuse Type Hierarchy perspective in same window", OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
+		reuse.setEnabled(perspective.getSelection());
+		perspective.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				reuse.setEnabled(perspective.getSelection());
+			}
+		});
+		*/
+			
 		validateFolders();
 	
 		return composite;

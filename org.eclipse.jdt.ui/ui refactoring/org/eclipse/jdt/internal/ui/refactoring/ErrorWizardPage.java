@@ -222,6 +222,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 			}
 		});	
 		Table tableControl= fTableViewer.getTable();
+		initializeDialogUnits(tableControl);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		tableControl.setLayoutData(gd);

@@ -63,11 +63,12 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
+import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
@@ -927,7 +928,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			return;
 		IType[] input= {(IType)element};
 		IWorkbenchWindow w= getSite().getWorkbenchWindow();
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, new OpenHierarchyPerspectiveItem(w, input));
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, new OpenHierarchyAction(w, input));
 	}
 
 	protected void contextMenuAboutToShow(IMenuManager menu) {

@@ -4,8 +4,32 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
+
+import org.eclipse.ui.dialogs.SelectionDialog;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 class GotoPackageAction extends Action {
 	
