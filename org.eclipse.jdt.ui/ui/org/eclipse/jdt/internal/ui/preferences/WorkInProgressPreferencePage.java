@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -54,6 +52,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	public final static String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
 	public final static String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
 	public final static String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
+	public final static String PREF_SEARCH_IGNORE_IMPORTS= "search_ignore_imports"; //$NON-NLS-1$
 	
 	private List fCheckBoxes;
 	private List fRadioButtons;
@@ -156,9 +155,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), PreferenceConstants.EDITOR_SMART_OPENING_BRACE); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartTab"), PreferenceConstants.EDITOR_SMART_TAB); //$NON-NLS-1$
-	
 		
-
 		/* line change bar */
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
@@ -282,6 +279,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
 		addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX+"search.ignore_imports"), PREF_SEARCH_IGNORE_IMPORTS); //$NON-NLS-1$
 		return result;
 	}
 	
@@ -367,6 +365,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		
 		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
+		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);
 		
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
 		
