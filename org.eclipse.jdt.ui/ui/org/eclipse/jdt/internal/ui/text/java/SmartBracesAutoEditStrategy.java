@@ -273,7 +273,6 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 
 		final int insertionLine= document.getLineOfOffset(replace.getOffset());
 		final int statementLine= document.getLineOfOffset(statement.getOffset() + statement.getLength());
-		final int statementLineBegin= document.getLineOfOffset(statement.getOffset());
 
 		final String outerSpace= (prevStatement.getOffset() + prevStatement.getLength() == replace.getOffset()) ? "" : " "; //$NON-NLS-1$ //$NON-NLS-2$
 		final String innerSpace= (replace.getOffset() + replace.getLength() == statement.getOffset()) ? "" : " "; //$NON-NLS-1$ //$NON-NLS-2$

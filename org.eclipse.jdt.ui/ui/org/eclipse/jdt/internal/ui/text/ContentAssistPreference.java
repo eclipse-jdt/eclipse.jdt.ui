@@ -81,7 +81,7 @@ public class ContentAssistPreference {
 	}
 	
 	private static JavaDocCompletionProcessor getJavaDocProcessor(ContentAssistant assistant) {
-		IContentAssistProcessor p= assistant.getContentAssistProcessor(JavaPartitionScanner.JAVA_DOC);
+		IContentAssistProcessor p= assistant.getContentAssistProcessor(IJavaPartitions.JAVA_DOC);
 		if (p instanceof JavaDocCompletionProcessor) 
 			return (JavaDocCompletionProcessor) p;
 		return null;

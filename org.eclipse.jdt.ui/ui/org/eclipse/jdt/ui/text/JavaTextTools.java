@@ -11,21 +11,20 @@
 package org.eclipse.jdt.ui.text;
 
 
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
-import org.eclipse.jface.text.rules.IPartitionTokenScanner;
-//import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
-//import org.eclipse.jface.text.rules.RuleBasedPartitioner;
-import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.IPartitionTokenScanner;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
 
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
@@ -272,10 +271,11 @@ public class JavaTextTools {
 	public IDocumentPartitioner createDocumentPartitioner() {
 		
 		String[] types= new String[] {
-			JavaPartitionScanner.JAVA_DOC,
-			JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT,
-			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT,
-			JavaPartitionScanner.JAVA_STRING
+			IJavaPartitions.JAVA_DOC,
+			IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+			IJavaPartitions.JAVA_STRING,
+			IJavaPartitions.JAVA_CHARACTER
 		};
 
 		return new DefaultPartitioner(getPartitionScanner(), types);

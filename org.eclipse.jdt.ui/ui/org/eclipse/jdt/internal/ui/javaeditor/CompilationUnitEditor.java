@@ -479,6 +479,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 				// fall through
 			
+			case '\'':
+				if (event.character == '\'') {
+					if (!fCloseStrings)
+						return;
+					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
+						return;
+				}
+				
+				// fall through
+
 			case '"':
 				if (event.character == '"') {
 					if (!fCloseStrings)
@@ -1013,9 +1023,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	private static char getEscapeCharacter(char character) {
-		if ('"' == character)
-			return '\\';
-		return 0;
+		switch (character) {
+			case '"':
+			case '\'':
+				return '\\';
+			default:
+				return 0;
+		}
 	}
 	
 	private static char getPeerCharacter(char character) {
@@ -1033,6 +1047,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return '[';
 				
 			case '"':
+				return character;
+				
+			case '\'':
 				return character;
 			
 			default:

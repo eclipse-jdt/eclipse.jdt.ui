@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
@@ -204,20 +204,25 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
 		dr= new DefaultDamagerRepairer(getJavaDocScanner());
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_DOC);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_DOC);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_DOC);
 
 		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());		
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
 		dr= new DefaultDamagerRepairer(getSinglelineCommentScanner());		
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		
 		dr= new DefaultDamagerRepairer(getStringScanner());
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_STRING);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_STRING);
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_STRING);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_STRING);
+		
+		dr= new DefaultDamagerRepairer(getStringScanner());
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_CHARACTER);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_CHARACTER);
+
 		
 		return reconciler;
 	}
@@ -234,10 +239,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			IContentAssistProcessor processor= new JavaCompletionProcessor(getEditor());
 			assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
-			assistant.setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_STRING);
-			assistant.setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
+			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 			
-			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
+			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
 			
 			ContentAssistPreference.configure(assistant, getPreferenceStore());
 			
@@ -269,10 +274,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getAutoIndentStrategy(ISourceViewer, String)
 	 */
 	public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
-				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType))
+		if (IJavaPartitions.JAVA_DOC.equals(contentType) ||
+				IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
 			return new JavaDocAutoIndentStrategy();
-		else if (JavaPartitionScanner.JAVA_STRING.equals(contentType))
+		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
 			return new JavaStringAutoIndentStrategy();
 		return new JavaAutoIndentStrategy();
 	}
@@ -281,11 +286,12 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer, String)
 	 */
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
-				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
-				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
+		if (IJavaPartitions.JAVA_DOC.equals(contentType) ||
+				IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
+				IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
 			return new DefaultTextDoubleClickStrategy();
-		else if (JavaPartitionScanner.JAVA_STRING.equals(contentType))
+		else if (IJavaPartitions.JAVA_STRING.equals(contentType) ||
+				IJavaPartitions.JAVA_CHARACTER.equals(contentType))
 			return new JavaStringDoubleClickSelector();
 		return new JavaDoubleClickSelector();
 	}
@@ -403,10 +409,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] { 
 			IDocument.DEFAULT_CONTENT_TYPE, 
-			JavaPartitionScanner.JAVA_DOC, 
-			JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT, 
-			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT,
-			JavaPartitionScanner.JAVA_STRING
+			IJavaPartitions.JAVA_DOC, 
+			IJavaPartitions.JAVA_MULTI_LINE_COMMENT, 
+			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+			IJavaPartitions.JAVA_STRING,
+			IJavaPartitions.JAVA_CHARACTER
 		};
 	}
 	
@@ -467,7 +474,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator(sourceViewer));
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
 		presenter.setSizeConstraints(60, 10, true, true);		
 		return presenter;
 	}
@@ -485,10 +492,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
-		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
-		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
-		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_STRING);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
 		presenter.setSizeConstraints(40, 20, true, false);
 		return presenter;
 	}

@@ -168,7 +168,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
@@ -1835,7 +1835,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		List segmentation= new ArrayList();
 		for (int i= 0; i < linePartitioning.length; i++) {
-			if (JavaPartitionScanner.JAVA_STRING.equals(linePartitioning[i].getType()))
+			if (IJavaPartitions.JAVA_STRING.equals(linePartitioning[i].getType()))
 				segmentation.add(linePartitioning[i]);
 		}
 		

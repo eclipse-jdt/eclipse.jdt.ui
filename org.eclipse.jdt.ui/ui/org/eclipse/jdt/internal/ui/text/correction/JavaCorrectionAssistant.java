@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 
 public class JavaCorrectionAssistant extends ContentAssistant {
@@ -64,10 +64,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(editor); 
 		
 		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_STRING);
-		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_DOC);
-		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
-		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+		setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
+		setContentAssistProcessor(processor, IJavaPartitions.JAVA_CHARACTER);
+		setContentAssistProcessor(processor, IJavaPartitions.JAVA_DOC);
+		setContentAssistProcessor(processor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		setContentAssistProcessor(processor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 	
 		enableAutoActivation(false);
 		enableAutoInsert(false);

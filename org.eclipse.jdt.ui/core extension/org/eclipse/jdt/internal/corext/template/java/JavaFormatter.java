@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * A template editor using the Java formatter to format a template buffer.
@@ -100,10 +100,11 @@ public class JavaFormatter implements ITemplateEditor {
 			String partitionType= partition.getType();
 		
 			return partitionType != null && (
-				partitionType.equals(JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT) ||
-				partitionType.equals(JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT) ||
-				partitionType.equals(JavaPartitionScanner.JAVA_STRING) ||
-				partitionType.equals(JavaPartitionScanner.JAVA_DOC));
+				partitionType.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) ||
+				partitionType.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT) ||
+				partitionType.equals(IJavaPartitions.JAVA_STRING) ||
+				partitionType.equals(IJavaPartitions.JAVA_CHARACTER) ||
+				partitionType.equals(IJavaPartitions.JAVA_DOC));
 
 		} catch (BadLocationException e) {
 			return false;	

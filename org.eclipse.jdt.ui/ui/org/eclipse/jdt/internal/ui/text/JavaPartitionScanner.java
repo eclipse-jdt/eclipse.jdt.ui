@@ -29,15 +29,7 @@ import org.eclipse.jface.text.rules.WordRule;
 /**
  * This scanner recognizes the JavaDoc comments and Java multi line comments.
  */
-public class JavaPartitionScanner extends RuleBasedPartitionScanner {
-
-	private final static String SKIP= "__skip"; //$NON-NLS-1$
-	
-	public final static String JAVA_STRING= "__java_string"; //$NON-NLS-1$
-	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
-	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
-	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
-
+public class JavaPartitionScanner extends RuleBasedPartitionScanner implements IJavaPartitions {
 	
 	/**
 	 * Detector for empty comments.
@@ -99,8 +91,8 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner {
 	public JavaPartitionScanner() {
 		super();
 		
-		IToken skip= new Token(SKIP);
 		IToken string= new Token(JAVA_STRING);
+		IToken character= new Token(JAVA_CHARACTER);
 		IToken javaDoc= new Token(JAVA_DOC);
 		IToken multiLineComment= new Token(JAVA_MULTI_LINE_COMMENT);
 		IToken singleLineComment= new Token(JAVA_SINGLE_LINE_COMMENT);
@@ -114,7 +106,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner {
 		rules.add(new SingleLineRule("\"", "\"", string, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// Add rule for character constants.
-		rules.add(new SingleLineRule("'", "'", skip, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
+		rules.add(new SingleLineRule("'", "'", character, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 
 		// Add special case word rule.
 		EmptyCommentRule wordRule= new EmptyCommentRule(multiLineComment);

@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -208,7 +208,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				IDocumentPartitioner partitioner= d.getDocumentPartitioner();
 				if (partitioner != null) {
 					ITypedRegion region= partitioner.getPartition(start);
-					if (JavaPartitionScanner.JAVA_DOC.equals(region.getType()))
+					if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
 						start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 				}
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
@@ -439,10 +439,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			IDocumentPartitioner partitioner= document.getDocumentPartitioner();
 			if (partitioner != null) {
 				ITypedRegion typedRegion= partitioner.getPartition(start);
-				if (JavaPartitionScanner.JAVA_DOC.equals(typedRegion.getType()))
+				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
 					start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
 
-				else if (JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
+				else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
 					buffer.append(COMMENT);
 					start += 2;
 				}

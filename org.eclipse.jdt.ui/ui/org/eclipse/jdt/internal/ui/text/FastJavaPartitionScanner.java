@@ -22,13 +22,7 @@ import org.eclipse.jface.text.rules.Token;
  * This scanner recognizes the JavaDoc comments, Java multi line comments, Java single line comments,
  * Java strings and Java characters.
  */
-public class FastJavaPartitionScanner implements IPartitionTokenScanner {
-
-	private final static String SKIP= "__skip"; //$NON-NLS-1$	
-	public final static String JAVA_STRING= "__java_string"; //$NON-NLS-1$
-	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
-	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
-	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
+public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPartitions {	
 
 	// states
 	private static final int JAVA= 0;	
@@ -48,7 +42,6 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	private static final int CARRIAGE_RETURN=6; // postfix for STRING, CHARACTER and SINGLE_LINE_COMMENT
 	
 	/** The scanner. */
-//	private final BufferedRuleBasedScanner fScanner= new BufferedRuleBasedScanner(1000);
 	private final BufferedDocumentScanner fScanner= new BufferedDocumentScanner(1000);	// faster implementation
 	
 	/** The offset of the last returned token. */
@@ -73,7 +66,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 		new Token(JAVA_SINGLE_LINE_COMMENT),
 		new Token(JAVA_MULTI_LINE_COMMENT),
 		new Token(JAVA_DOC),
-		new Token(SKIP),
+		new Token(JAVA_CHARACTER),
 		new Token(JAVA_STRING)
 	};
 
@@ -464,9 +457,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 		else if (contentType.equals(JAVA_STRING))
 			return STRING;
 
-		else if (contentType.equals(SKIP))
+		else if (contentType.equals(JAVA_CHARACTER))
 			return CHARACTER;
-			
+		
 		else
 			return JAVA;
 	}
