@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.jdt.core.IType;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,20 +30,21 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class UseSupertypeWizard extends RefactoringWizard{
 
-	public UseSupertypeWizard(UseSupertypeWherePossibleRefactoring ref) {
+	public UseSupertypeWizard(UseSuperTypeRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
 	}
@@ -95,7 +94,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(RefactoringMessages.getFormattedString(
 					"UseSupertypeInputPage.Select_supertype_to_use", //$NON-NLS-1$
-					JavaElementLabels.getElementLabel(getUseSupertypeRefactoring().getInputType(), JavaElementLabels.T_FULLY_QUALIFIED)));
+					JavaElementLabels.getElementLabel(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSubType(), JavaElementLabels.T_FULLY_QUALIFIED)));
 			label.setLayoutData(new GridData());
 		
 			addTableComponent(composite);
@@ -121,13 +120,10 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					fTableViewer.refresh();
 				}
 			});
-			fTableViewer.setInput(getUseSupertypeRefactoring().getSuperTypes());
+			fTableViewer.setInput(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSuperTypes());
 			fTableViewer.getTable().setSelection(0);
 		}
 	
-		private UseSupertypeWherePossibleRefactoring getUseSupertypeRefactoring(){
-			return (UseSupertypeWherePossibleRefactoring)getRefactoring();
-		}
 		/*
 		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
 		 */
@@ -187,7 +183,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private void initializeRefactoring() {
 			StructuredSelection ss= (StructuredSelection)fTableViewer.getSelection();
-			getUseSupertypeRefactoring().setSuperTypeToUse((IType)ss.getFirstElement());
+			((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setSuperType((IType)ss.getFirstElement());
 		}
 	
 		/*

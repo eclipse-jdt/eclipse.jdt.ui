@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -137,7 +137,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	
 	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
 		IType type= RefactoringActions.getEnclosingOrPrimaryType(selection);
-		return UseSupertypeWherePossibleRefactoring.isAvailable(type);
+		return UseSuperTypeRefactoring.isAvailable(type);
 	}
 	
     /*
@@ -166,18 +166,18 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	//---- helper methods ---------------------------------------------------
 	
 	private static boolean canRunOn(IType type) throws JavaModelException{
-		return UseSupertypeWherePossibleRefactoring.isAvailable(type);
+		return UseSuperTypeRefactoring.isAvailable(type);
 	}
 	
-	private static RefactoringWizard createWizard(UseSupertypeWherePossibleRefactoring refactoring){
+	private static RefactoringWizard createWizard(UseSuperTypeRefactoring refactoring){
 		return new UseSupertypeWizard(refactoring);
 	}
 	
 	private void startRefactoring(IType type) throws JavaModelException {
-		UseSupertypeWherePossibleRefactoring refactoring= UseSupertypeWherePossibleRefactoring.create(type);
+		UseSuperTypeRefactoring refactoring= UseSuperTypeRefactoring.create(type);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getUseSuperTypeProcessor().getSubType()))
 			return;
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
