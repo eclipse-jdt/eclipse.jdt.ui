@@ -246,6 +246,14 @@ public class SourceProvider {
 		return fAnalyzer.getImplicitReceivers().size();
 	}
 	
+	public boolean isVarargs() {
+		return fDeclaration.isVarargs();
+	}
+	
+	public int getVarargIndex() {
+		return fDeclaration.parameters().size() - 1;
+	}
+	
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getParent().getAST());
 		rewriter.remove(fDeclaration, null);

@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -68,6 +69,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
@@ -470,8 +472,10 @@ public class CallInliner {
 
 	private void computeRealArguments() throws BadLocationException {
 		List arguments= Invocations.getArguments(fInvocation);
-		String[] realArguments= new String[arguments.size()];
-		for (int i= 0; i < arguments.size(); i++) {
+		boolean isVarargs= fSourceProvider.isVarargs();
+		int varargIndex= fSourceProvider.getVarargIndex();
+		String[] realArguments= new String[isVarargs ? varargIndex + 1 : arguments.size()];
+		for (int i= 0; i < (isVarargs ? varargIndex : arguments.size()); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter)) {
@@ -487,6 +491,21 @@ public class CallInliner {
 					parameter.getTypeBinding(), name, 
 					(Expression)fRewrite.createCopyTarget(expression)));
 			}
+		}
+		if (isVarargs) {
+			ParameterData parameter= fSourceProvider.getParameterData(varargIndex);
+			String name= fInvocationScope.createName(parameter.getName(), true);
+			realArguments[varargIndex]= name;
+			String typeName= fImportEdit.addImport(parameter.getTypeBinding());
+			AST ast= fInvocation.getAST();
+			VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
+				ast, typeName + "[] " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+			ArrayInitializer initializer= ast.newArrayInitializer();
+			for (int i= varargIndex; i < arguments.size(); i++) {
+				initializer.expressions().add(fRewrite.createCopyTarget((ASTNode)arguments.get(i)));
+			}
+			((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);
+			fLocals.add(decl);
 		}
 		fContext.arguments= realArguments;
 	}
@@ -526,9 +545,12 @@ public class CallInliner {
 	}
 
 	private void addNewLocals() {
+		if (fLocals.isEmpty())
+			return;
+		ListRewrite statements= fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY);
 		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
-			fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(element, fInsertionIndex++, null);
+			statements.insertAt(element, fInsertionIndex++, null);
 		}
 	}
 
