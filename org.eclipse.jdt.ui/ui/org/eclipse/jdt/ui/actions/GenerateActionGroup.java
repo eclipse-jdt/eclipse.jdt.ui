@@ -32,9 +32,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
-import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
@@ -112,10 +109,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
 	private FormatAllAction fFormatAll;
-
-	private ConvertLineDelimitersAction fConvertToWindows;
-	private ConvertLineDelimitersAction fConvertToUNIX;
-	private ConvertLineDelimitersAction fConvertToMac;
 	
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 	
@@ -188,22 +181,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
 		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$		
-		
-		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
-		fConvertToWindows.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
-		fConvertToWindows.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
-		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_WINDOWS, fConvertToWindows); //$NON-NLS-1$		
-		
-		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
-		fConvertToUNIX.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
-		fConvertToUNIX.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
-		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX, fConvertToUNIX); //$NON-NLS-1$		
-	
-		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
-		fConvertToMac.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
-		fConvertToMac.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
-		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC, fConvertToMac); //$NON-NLS-1$
-		
+				
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
 		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
 		fKeyBindingService.registerAction(fQuickAccessAction);
@@ -341,11 +319,6 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());
-		
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=17709
-		fConvertToMac.update();
-		fConvertToUNIX.update();
-		fConvertToWindows.update();
 	}
 
 	/* (non-Javadoc)
@@ -463,9 +436,6 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
-		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_WINDOWS, fConvertToWindows);
-		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX, fConvertToUNIX);
-		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC, fConvertToMac);
 		if (!isEditorOwner()) {
 			// editor provides its own implementation of these actions.
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);

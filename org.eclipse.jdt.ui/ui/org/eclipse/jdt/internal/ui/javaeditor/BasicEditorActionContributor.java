@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -22,6 +21,7 @@ import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -40,37 +40,25 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	protected RetargetTextEditorAction fCorrectionAssist;
 	protected RetargetTextEditorAction fChangeEncodingAction;
 	
-	/** Convert to Windows action. */
-	protected RetargetTextEditorAction fConvertToWindows;
-	/** Convert to UNIX action. */
-	protected RetargetTextEditorAction fConvertToUNIX;
-	/** Convert to MAC action. */
-	protected RetargetTextEditorAction fConvertToMac;
-	
 	
 	public BasicEditorActionContributor() {
 		
 		fRetargetContentAssist= new RetargetAction(JdtActionConstants.CONTENT_ASSIST,  JavaEditorMessages.getString("ContentAssistProposal.label")); //$NON-NLS-1$
-		fRetargetContentAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		fRetargetContentAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		markAsPartListener(fRetargetContentAssist);
 		
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
-		fContentAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS); 
+		fContentAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS); 
 		fContentAssist.setImageDescriptor(JavaPluginImages.DESC_ELCL_CODE_ASSIST);
 		fContentAssist.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CODE_ASSIST);
 		
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
-		fContextInformation.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
+		fContextInformation.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
 		
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 		
 		fChangeEncodingAction= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "Editor.ChangeEncodingAction."); //$NON-NLS-1$
-		
-		// line delimiter conversion
-		fConvertToWindows= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "Editor.ConvertToWindows."); //$NON-NLS-1$ 
-		fConvertToUNIX= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "Editor.ConvertToUNIX."); //$NON-NLS-1$ 
-		fConvertToMac= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "Editor.ConvertToMac."); //$NON-NLS-1$
 	}
 	
 	/*
@@ -80,19 +68,15 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		
 		super.contributeToMenu(menu);
 		
+		IMenuManager conversionMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE + "/conversion"); //$NON-NLS-1$
+		if (conversionMenu != null)
+			conversionMenu.insertAfter("encoding", fChangeEncodingAction); //$NON-NLS-1$
+		
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
-			MenuManager subMenu= new MenuManager(JavaEditorMessages.getString("Editor.ConvertLineDelimiters.label")); //$NON-NLS-1$
-			subMenu.add(fConvertToWindows);
-			subMenu.add(fConvertToUNIX);
-			subMenu.add(fConvertToMac);
-			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetContentAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
-			
-			editMenu.add(subMenu);
-			editMenu.add(fChangeEncodingAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);			
 		}
 	}
 	
@@ -109,12 +93,8 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
-		fChangeEncodingAction.setAction(getAction(textEditor, ITextEditorActionConstants.CHANGE_ENCODING));
 
-		// line delimiter conversion
-		fConvertToWindows.setAction(getAction(textEditor, JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_WINDOWS));
-		fConvertToUNIX.setAction(getAction(textEditor, JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX));
-		fConvertToMac.setAction(getAction(textEditor, JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC));
+		fChangeEncodingAction.setAction(getAction(textEditor, ITextEditorActionConstants.CHANGE_ENCODING));
 		
 		IActionBars actionBars= getActionBars();
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
@@ -129,7 +109,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	 */
 	public void init(IActionBars bars, IWorkbenchPage page) {
 		super.init(bars, page);
-		
 		// register actions that have a dynamic editor. 
 		bars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, fContentAssist);
 	}	
