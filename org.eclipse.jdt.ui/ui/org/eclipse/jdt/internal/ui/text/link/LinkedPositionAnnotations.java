@@ -161,7 +161,9 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 	 * @param position
 	 */
 	public void switchToPosition(LinkedEnvironment env, LinkedPosition position) {
-		if (fDocument == null || position != null && getPosition(fFocusAnnotation) == position)
+		if (fDocument == null || 
+				(position != null && getPosition(fFocusAnnotation) == position) ||
+				(position == null && fFocusAnnotation == null))
 			return;
 		
 		LinkedPositionGroup linkedGroup= null;
