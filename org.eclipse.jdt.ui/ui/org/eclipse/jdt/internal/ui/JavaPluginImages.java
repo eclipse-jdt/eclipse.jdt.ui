@@ -92,6 +92,9 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 	
+	public static final String IMG_OBJS_ANNOTATION= NAME_PREFIX + "annotation_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM= NAME_PREFIX + "enum_obj.gif"; //$NON-NLS-1$
+	
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  			//$NON-NLS-1$
@@ -212,6 +215,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PRIVATE= createManaged(T_OBJ, IMG_OBJS_INNER_INTERFACE_PRIVATE);
 	
 	public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManaged(T_OBJ, IMG_OBJS_INTERFACEALT);
+	
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION= createManaged(T_OBJ, IMG_OBJS_ANNOTATION);
+	public static final ImageDescriptor DESC_OBJS_ENUM= createManaged(T_OBJ, IMG_OBJS_ENUM);
 	
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManaged(T_OBJ, IMG_OBJS_MISSING_JAR);

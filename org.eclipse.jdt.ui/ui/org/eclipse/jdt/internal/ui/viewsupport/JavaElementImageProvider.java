@@ -203,6 +203,12 @@ public class JavaElementImageProvider {
 				
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
+					if (type.isEnum()) {
+						return JavaPluginImages.DESC_OBJS_ENUM;
+					}
+					if (type.isAnnotation()) {
+						return JavaPluginImages.DESC_OBJS_ANNOTATION;
+					}
 					boolean isInterface= type.isInterface();
 					
 					if (useLightIcons(renderFlags)) {
