@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -664,7 +665,8 @@ public class Checks {
 	}
 	
 	public static boolean isReadOnly(IResource res) throws JavaModelException {
-		if (res.isReadOnly()) 
+		ResourceAttributes attributes= res.getResourceAttributes();
+		if (attributes != null && attributes.isReadOnly())
 			return true;
 		
 		if (! (res instanceof IContainer))	
