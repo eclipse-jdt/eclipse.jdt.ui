@@ -5,9 +5,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
@@ -20,68 +21,71 @@ public class BreakpointLocationVerifier {
 	 */
 	public int getValidBreakpointLocation(IDocument doc, int lineNumber) {
 
-		Scanner scanner= new Scanner();
-		boolean found= false;
-		int start= 0, length= 0, token= 0, lastToken= 0;
+		IScanner scanner = ToolFactory.createScanner(false, false, false);
+		boolean found = false;
+		int start = 0, length = 0, token = 0, lastToken = 0;
 
 		while (!found) {
 			try {
-				start= doc.getLineOffset(lineNumber);
-				length= doc.getLineLength(lineNumber);
-				char[] txt= doc.get(start, length).toCharArray();
-				scanner.setSourceBuffer(txt);
-				token= scanner.getNextToken();
-				if (token == TerminalSymbols.TokenNameEQUAL) {
+				start = doc.getLineOffset(lineNumber);
+				length = doc.getLineLength(lineNumber);
+				char[] txt = doc.get(start, length).toCharArray();
+				scanner.setSource(txt);
+				token = scanner.getNextToken();
+				if (token == ITerminalSymbols.TokenNameEQUAL) {
 					break;
 				}
-				lastToken= 0;
+				lastToken = 0;
 
-				while (token != TerminalSymbols.TokenNameEOF) {
-					if (token == TerminalSymbols.TokenNameERROR) {
+				while (token != ITerminalSymbols.TokenNameEOF) {
+					if (token == ITerminalSymbols.TokenNameERROR) {
 						lineNumber++;
 						break;
 					}
-					if (token == TerminalSymbols.TokenNameIdentifier) {
-						if (lastToken == TerminalSymbols.TokenNameIdentifier || isPrimitiveTypeToken(lastToken)
-						|| lastToken == TerminalSymbols.TokenNameRBRACKET) {
+					if (token == ITerminalSymbols.TokenNameIdentifier) {
+						if (lastToken == ITerminalSymbols.TokenNameIdentifier
+							|| isPrimitiveTypeToken(lastToken)
+							|| lastToken == ITerminalSymbols.TokenNameRBRACKET) {
 							//var declaration..is there initialization 
 							//OR method parameters on a line all by themselves
-							lastToken= token;
-							token= scanner.getNextToken();
-							if (token == TerminalSymbols.TokenNameEQUAL) {
-								found= true;
+							lastToken = token;
+							token = scanner.getNextToken();
+							if (token == ITerminalSymbols.TokenNameEQUAL) {
+								found = true;
 								break;
 							}
 						}
-						if (lastToken == TerminalSymbols.TokenNameMULTIPLY) {
+						if (lastToken == ITerminalSymbols.TokenNameMULTIPLY) {
 							//internal comment line starting with '*'
 							break;
 						}
 					} else if (isNonIdentifierValidToken(token)) {
-						found= true;
+						found = true;
 						break;
-					} else if (lastToken == TerminalSymbols.TokenNameIdentifier 
-								&& token != TerminalSymbols.TokenNameLBRACKET) {
-						found= true;
+					} else if (
+						lastToken == ITerminalSymbols.TokenNameIdentifier
+							&& token != ITerminalSymbols.TokenNameLBRACKET) {
+						found = true;
 						break;
-					} else if (lastToken == TerminalSymbols.TokenNameLBRACKET 
-								&& token == TerminalSymbols.TokenNameRBRACKET) {
-							//var declaration..is there initialization
-							lastToken= token;
-							token= scanner.getNextToken();
-							if (token == TerminalSymbols.TokenNameSEMICOLON) {
-								//no init
-								break;
-							} else if (token == TerminalSymbols.TokenNameEQUAL) {
-								found= true;
-								break;
-							}
-							
-							continue;
+					} else if (
+						lastToken == ITerminalSymbols.TokenNameLBRACKET
+							&& token == ITerminalSymbols.TokenNameRBRACKET) {
+						//var declaration..is there initialization
+						lastToken = token;
+						token = scanner.getNextToken();
+						if (token == ITerminalSymbols.TokenNameSEMICOLON) {
+							//no init
+							break;
+						} else if (token == ITerminalSymbols.TokenNameEQUAL) {
+							found = true;
+							break;
+						}
+
+						continue;
 					}
-						
-					lastToken= token;
-					token= scanner.getNextToken();
+
+					lastToken = token;
+					token = scanner.getNextToken();
 				}
 				if (!found) {
 					lineNumber++;
@@ -96,33 +100,32 @@ public class BreakpointLocationVerifier {
 		// add 1 to the line number - Document is 0 based, JDI is 1 based
 		return lineNumber + 1;
 	}
-	
-	
+
 	protected boolean isPrimitiveTypeToken(int token) {
-		switch(token) {
-			case TerminalSymbols.TokenNameboolean:
-			case TerminalSymbols.TokenNamebyte:
-			case TerminalSymbols.TokenNamechar:
-			case TerminalSymbols.TokenNamedouble:
-			case TerminalSymbols.TokenNamefloat:
-			case TerminalSymbols.TokenNameint:			
-			case TerminalSymbols.TokenNamelong:
-			case TerminalSymbols.TokenNameshort:
+		switch (token) {
+			case ITerminalSymbols.TokenNameboolean :
+			case ITerminalSymbols.TokenNamebyte :
+			case ITerminalSymbols.TokenNamechar :
+			case ITerminalSymbols.TokenNamedouble :
+			case ITerminalSymbols.TokenNamefloat :
+			case ITerminalSymbols.TokenNameint :
+			case ITerminalSymbols.TokenNamelong :
+			case ITerminalSymbols.TokenNameshort :
 				return true;
-			default : 
+			default :
 				return false;
-		}		
+		}
 	}
-	
+
 	protected boolean isNonIdentifierValidToken(int token) {
-		switch(token) {
-			case TerminalSymbols.TokenNamebreak:
-			case TerminalSymbols.TokenNamecontinue:
-			case TerminalSymbols.TokenNamereturn:
-			case TerminalSymbols.TokenNamethis:
-			case TerminalSymbols.TokenNamesuper:
-				return true;	
-			default:
+		switch (token) {
+			case ITerminalSymbols.TokenNamebreak :
+			case ITerminalSymbols.TokenNamecontinue :
+			case ITerminalSymbols.TokenNamereturn :
+			case ITerminalSymbols.TokenNamethis :
+			case ITerminalSymbols.TokenNamesuper :
+				return true;
+			default :
 				return false;
 		}
 	}
