@@ -56,11 +56,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AssistQuickFixTest("testUnwrapMethodInvocation"));
+			suite.addTest(new AssistQuickFixTest("testAddTypeToArrayInitializer"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -2335,4 +2335,41 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("}\n");
         assertEqualString(preview, buf.toString());
     }
+    
+    
+	public void testAddTypeToArrayInitializer() throws Exception {
+			if (true)
+				return; // can enable with jdt.core dorm > 20040505
+		
+		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        int[][] numbers= {{ 1, 2 }, { 3, 4 }, { 4, 5 }};\n");		
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			String str= "{{";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			
+			assertNumberOfProposals(proposals, 1);
+			assertCorrectLabels(proposals);
+			
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        int[][] numbers= new int[][] {{ 1, 2 }, { 3, 4 }, { 4, 5 }};\n");		
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(preview, buf.toString());	
+		}
+    
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -134,8 +135,15 @@ public class ASTResolving {
 				initializerParent= initializerParent.getParent();
 				dim++;
 			}
+			Type creationType= null;
 			if (initializerParent instanceof ArrayCreation) {
-				Type creationType= ((ArrayCreation) initializerParent).getType();
+				creationType= ((ArrayCreation) initializerParent).getType();
+			} else if (initializerParent instanceof VariableDeclaration) {
+				VariableDeclaration varDecl= (VariableDeclaration) initializerParent;
+				creationType= ASTNodes.getType(varDecl);
+				dim-= ASTNodes.getExtraDimensions(varDecl);
+			}
+			if (creationType != null) {
 				while ((creationType instanceof ArrayType) && dim > 0) {
 					creationType= ((ArrayType) creationType).getComponentType();
 					dim--;
@@ -207,12 +215,12 @@ public class ASTResolving {
 			switch (parent.getNodeType()) {
 				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
-						return ASTNodes.getType(ast, (VariableDeclaration) parent);
+						return ASTNodeFactory.newType(ast, (VariableDeclaration) parent);
 					}
 					return null;
 				case ASTNode.SINGLE_VARIABLE_DECLARATION:
 					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
-						return ASTNodes.getType(ast, (VariableDeclaration) parent);
+						return ASTNodeFactory.newType(ast, (VariableDeclaration) parent);
 					}
 					return null;
 				case ASTNode.ARRAY_ACCESS:
