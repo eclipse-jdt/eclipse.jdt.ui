@@ -86,7 +86,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String contents= buf.toString();
 		
 	
-		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, null, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, null, "\n", fJProject1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -111,7 +111,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String contents= buf.toString();
 		
 	
-		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 1, null, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 1, null, "\n", fJProject1);
 
 		buf= new StringBuffer();
 		buf.append("    package test1;\n");
@@ -201,7 +201,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		int start1= contents.indexOf(word1);
 		int[] positions= { start1, start1 + word1.length() - 1};
 		
-		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, positions, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, positions, "\n", fJProject1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
