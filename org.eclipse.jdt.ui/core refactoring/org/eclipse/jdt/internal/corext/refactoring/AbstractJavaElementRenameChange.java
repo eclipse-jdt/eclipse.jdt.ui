@@ -18,8 +18,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -101,48 +99,54 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 	}
 
 	protected static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
-		if (root == null)
-			return null;
-
-		if (!root.exists())
-			return null;
-
-		if (root.isArchive())
-			return null;
-
-		if (root.isExternal())
-			return null;
-
-		RefactoringStatus result= new RefactoringStatus();
-
-		IJavaElement[] packs= root.getChildren();
-		if (packs == null || packs.length == 0)
-			return null;
-
-		pm.beginTask("", packs.length); //$NON-NLS-1$
-		for (int i= 0; i < packs.length; i++) {
-			result.merge(checkIfModifiable((IPackageFragment)packs[i], new SubProgressMonitor(pm, 1)));
-		}
-		pm.done();
-		return result;
+		//TODO: workaround for Bug 52247: refactor rename project doesn't work
+		// should not check for locked files in project. WinXP and Linux DO rename folders with locked files.
+		return null;
+//		if (root == null)
+//			return null;
+//
+//		if (!root.exists())
+//			return null;
+//
+//		if (root.isArchive())
+//			return null;
+//
+//		if (root.isExternal())
+//			return null;
+//
+//		RefactoringStatus result= new RefactoringStatus();
+//
+//		IJavaElement[] packs= root.getChildren();
+//		if (packs == null || packs.length == 0)
+//			return null;
+//
+//		pm.beginTask("", packs.length); //$NON-NLS-1$
+//		for (int i= 0; i < packs.length; i++) {
+//			result.merge(checkIfModifiable((IPackageFragment)packs[i], new SubProgressMonitor(pm, 1)));
+//		}
+//		pm.done();
+//		return result;
 	}
 
 	protected static RefactoringStatus checkIfModifiable(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
-		ICompilationUnit[] units= pack.getCompilationUnits();
-		if (units == null || units.length == 0)
-			return null;
-
-		RefactoringStatus result= new RefactoringStatus();
-
-		pm.beginTask("", units.length); //$NON-NLS-1$
-		for (int i= 0; i < units.length; i++) {
-			pm.subTask(
-				RefactoringCoreMessages.getString("AbstractJavaElementRenameChange.checking_change")  //$NON-NLS-1$
-				+ pack.getElementName());
-			checkIfModifiable(result, units[i], true);
-			pm.worked(1);
-		}
-		pm.done();
-		return result;
+		//TODO: workaround for Bug 52247: refactor rename project doesn't work
+		// should not check for locked files in folders. WinXP and Linux DO rename folders with locked files.
+		return null;
+//		ICompilationUnit[] units= pack.getCompilationUnits(); //TODO: resources are also affected
+//		if (units == null || units.length == 0)
+//			return null;
+//
+//		RefactoringStatus result= new RefactoringStatus();
+//
+//		pm.beginTask("", units.length); //$NON-NLS-1$
+//		for (int i= 0; i < units.length; i++) {
+//			pm.subTask(
+//				RefactoringCoreMessages.getString("AbstractJavaElementRenameChange.checking_change")  //$NON-NLS-1$
+//				+ pack.getElementName());
+//			checkIfModifiable(result, units[i], true);
+//			pm.worked(1);
+//		}
+//		pm.done();
+//		return result;
 	}
 }
