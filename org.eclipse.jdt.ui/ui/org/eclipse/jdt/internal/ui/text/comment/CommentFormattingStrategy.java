@@ -83,7 +83,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				CodeFormatter commentFormatter= new CommentFormatter(fTextMeasurement, preferences);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
 				edit= commentFormatter.format(getPartitionKind(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
-				edit.moveTree(sourceOffset);
+				if (edit != null)
+					edit.moveTree(sourceOffset);
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
