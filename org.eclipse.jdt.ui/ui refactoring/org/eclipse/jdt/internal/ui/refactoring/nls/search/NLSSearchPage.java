@@ -251,7 +251,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				initSelections();
 			}
 			fWrapperClassCombo.setFocus();
-			getContainer().setPerformActionEnabled(getWrapperClassName().length() > 0 && fPropertyFileText.getText().length() > 0 && getContainer().hasValidScope());
+			getContainer().setPerformActionEnabled(getWrapperClassName().length() > 0 && fPropertyFileText.getText().length() > 0);
 		}
 		super.setVisible(visible);
 	}
@@ -325,7 +325,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			public void modifyText(ModifyEvent e) {
 				if (fWrapperClass != null && !PrettySignature.getSignature(fWrapperClass).equals(fWrapperClassCombo.getText()))
 					fWrapperClass= null;
-				getContainer().setPerformActionEnabled(fWrapperClassCombo.getText().length() > 0 && fPropertyFileText.getText().length() > 0 && getContainer().hasValidScope());
+				getContainer().setPerformActionEnabled(fWrapperClassCombo.getText().length() > 0 && fPropertyFileText.getText().length() > 0);
 			}
 		});
 		gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -364,7 +364,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		fPropertyFileText= new Text(result, SWT.SINGLE | SWT.BORDER);
 		fPropertyFileText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				getContainer().setPerformActionEnabled(fWrapperClassCombo.getText().length() > 0 && fPropertyFileText.getText().length() > 0 && getContainer().hasValidScope());
+				getContainer().setPerformActionEnabled(fWrapperClassCombo.getText().length() > 0 && fPropertyFileText.getText().length() > 0);
 			}
 		});
 		gd= new GridData(GridData.FILL_HORIZONTAL);
