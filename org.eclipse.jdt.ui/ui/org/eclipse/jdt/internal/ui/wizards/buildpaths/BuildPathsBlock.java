@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -48,7 +47,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -86,15 +84,11 @@ public class BuildPathsBlock {
 
 	public static interface IRemoveOldBinariesQuery {
 		
-		public static int YES= 0;
-		public static int NO= 1;
-		public static int CANCEL= 2;
-		
 		/**
-		 * Do the callback. Returns YES, NO, CANCEL to decide if .class files should be removed from the
+		 * Do the callback. Returns <code>true</code> if .class files should be removed from the
 		 * old output location.
 		 */
-		int doQuery(IPath oldOutputLocation);
+		boolean doQuery(IPath oldOutputLocation) throws InterruptedException;
 		
 	}
 
@@ -587,30 +581,6 @@ public class BuildPathsBlock {
 		};
 	}
 	
-	public IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
-		return new IRemoveOldBinariesQuery() {
-			public int doQuery(final IPath oldOutputLocation) {
-				final int[] res= new int[] { IRemoveOldBinariesQuery.NO };
-				shell.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
-						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
-						MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-						int returnVal= dialog.open();
-						if (returnVal == 0) {
-							res[0]= IRemoveOldBinariesQuery.YES;
-						} else if (returnVal == 1) {
-							res[0]= IRemoveOldBinariesQuery.NO;
-						} else {
-							res[0]= IRemoveOldBinariesQuery.CANCEL;
-						}
-					}
-				});
-				return res[0];
-			}
-		};
-	}
-	
 	/**
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
@@ -624,10 +594,7 @@ public class BuildPathsBlock {
 			if (!outputLocation.equals(oldOutputLocation)) {
 				IResource res= fWorkspaceRoot.findMember(oldOutputLocation);
 				if (res instanceof IContainer && hasClassfiles(res)) {
-					int result= reorgQuery.doQuery(oldOutputLocation);
-					if (result == reorgQuery.CANCEL) {
-						throw new InterruptedException();
-					} else if (result == reorgQuery.YES) {
+					if (reorgQuery.doQuery(oldOutputLocation)) {
 						removeOldClassfiles(res);
 					}
 				}
@@ -672,7 +639,7 @@ public class BuildPathsBlock {
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
 	}
 	
-	private boolean hasClassfiles(IResource resource) throws CoreException {
+	public static boolean hasClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
 			return true;
 		}		
@@ -688,7 +655,7 @@ public class BuildPathsBlock {
 	}
 	
 
-	private void removeOldClassfiles(IResource resource) throws CoreException {
+	public static void removeOldClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
 			resource.delete(false, null);
 		}
@@ -699,6 +666,28 @@ public class BuildPathsBlock {
 			}
 		}
 	}
+	
+	public static IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
+		return new IRemoveOldBinariesQuery() {
+			public boolean doQuery(final IPath oldOutputLocation) throws InterruptedException {
+				final int[] res= new int[] { 1 };
+				shell.getDisplay().syncExec(new Runnable() {
+					public void run() {
+						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
+						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
+						MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+						res[0]= dialog.open();
+					}
+				});
+				if (res[0] == 0) {
+					return true;
+				} else if (res[0] == 1) {
+					return false;
+				}
+				throw new InterruptedException();
+			}
+		};
+	}	
 
 	
 	// ---------- util method ------------
