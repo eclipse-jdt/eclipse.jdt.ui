@@ -85,13 +85,10 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
+		setEnabled(checkEnabled());
 	}
 	
-	private boolean checkEnabled(ITextSelection selection) {
-		if (selection.getLength() == 0)
-			return false;
+	private boolean checkEnabled() {
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-	
+	}	
 }

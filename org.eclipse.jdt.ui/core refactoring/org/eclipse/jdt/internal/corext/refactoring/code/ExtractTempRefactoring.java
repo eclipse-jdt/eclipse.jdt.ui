@@ -685,7 +685,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private String getInitializerSource() throws JavaModelException {
-		return removeTrailingSemicolons(fCu.getBuffer().getText(fSelectionStart, fSelectionLength));
+		IExpressionFragment fragment= getSelectedExpression();
+		return removeTrailingSemicolons(fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength()));
 	}
 	
 	//recursive
