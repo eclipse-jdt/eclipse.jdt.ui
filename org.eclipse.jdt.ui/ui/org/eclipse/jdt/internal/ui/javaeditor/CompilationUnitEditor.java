@@ -89,7 +89,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
@@ -103,7 +102,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-
 
 
 /**
@@ -1149,7 +1147,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see IReconcilingParticipant#reconciled()
 	 */
 	public void reconciled() {
-		if (!JavaEditorPreferencePage.synchronizeOutlineOnCursorMove()) {
+		if (synchronizeOutlineOnCursorMove()) {
 			Shell shell= getSite().getShell();
 			if (shell != null && !shell.isDisposed()) {
 				shell.getDisplay().asyncExec(new Runnable() {
@@ -1159,6 +1157,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				});
 			}
 		}
+	}
+	
+	private boolean synchronizeOutlineOnCursorMove() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 	
 	protected void updateStateDependentActions() {

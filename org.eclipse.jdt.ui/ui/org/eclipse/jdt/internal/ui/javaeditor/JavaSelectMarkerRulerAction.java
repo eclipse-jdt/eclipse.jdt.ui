@@ -63,14 +63,14 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			return;
 		}
 		// End Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		fPosition= getProblemPosition();
+		fPosition= getJavaAnnotationPosition();
 		if (fPosition != null)
 			setEnabled(true);
 		else
 			super.update();
 	}
 	
-	private Position getProblemPosition() {
+	private Position getJavaAnnotationPosition() {
 		AbstractMarkerAnnotationModel model= getAnnotationModel();
 		IDocument document= getDocument();
 		if (model == null)
@@ -78,9 +78,9 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation) iter.next();
-			if (annotation instanceof IProblemAnnotation) {
+			if (annotation instanceof IJavaAnnotation) {
 				Position position= model.getPosition(annotation);
-				if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections((IProblemAnnotation) annotation))
+				if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections((IJavaAnnotation) annotation))
 					return position;
 			}
 		}

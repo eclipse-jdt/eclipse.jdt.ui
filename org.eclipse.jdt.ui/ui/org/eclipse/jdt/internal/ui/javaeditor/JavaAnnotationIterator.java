@@ -1,10 +1,14 @@
+/**********************************************************************
+Copyright (c) 2000, 2003 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+	IBM Corporation - Initial implementation
+**********************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
-
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
 
 import java.util.Iterator;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -13,13 +17,13 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 /**
  * Filters problems based on their types.
  */
-public class ProblemAnnotationIterator implements Iterator {
+public class JavaAnnotationIterator implements Iterator {
 			
 	private Iterator fIterator;
-	private IProblemAnnotation fNext;
+	private IJavaAnnotation fNext;
 	private boolean fSkipIrrelevants;
 	
-	public ProblemAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
+	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
 		fIterator= model.getAnnotationIterator();
 		fSkipIrrelevants= skipIrrelevants;
 		skip();
@@ -28,8 +32,8 @@ public class ProblemAnnotationIterator implements Iterator {
 	private void skip() {
 		while (fIterator.hasNext()) {
 			Object next= fIterator.next();
-			if (next instanceof IProblemAnnotation) {
-				IProblemAnnotation a= (IProblemAnnotation) next;
+			if (next instanceof IJavaAnnotation) {
+				IJavaAnnotation a= (IJavaAnnotation) next;
 				if (fSkipIrrelevants) {
 					if (a.isRelevant()) {
 						fNext= a;

@@ -40,8 +40,8 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
@@ -167,9 +167,9 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 		int invocationOffset= -1;
 
-		Iterator iter= new ProblemAnnotationIterator(model, true);
+		Iterator iter= new JavaAnnotationIterator(model, true);
 		while (iter.hasNext()) {
-			IProblemAnnotation annot= (IProblemAnnotation)iter.next();
+			IJavaAnnotation annot= (IJavaAnnotation)iter.next();
 			Position pos= model.getPosition((Annotation)annot);
 			if (isIncluded(pos, startOffset, endOffset)) {
 				if (JavaCorrectionProcessor.hasCorrections(annot)) {

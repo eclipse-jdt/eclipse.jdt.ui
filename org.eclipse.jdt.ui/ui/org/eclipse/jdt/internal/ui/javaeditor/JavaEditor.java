@@ -962,10 +962,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
 		 */
 		public Object getType(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.getAnnotationType();
+			if (annotation instanceof IJavaAnnotation) {
+				IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+				if (javaAnnotation.isRelevant())
+					return javaAnnotation.getAnnotationType();
 			}
 			return null;
 		}
@@ -981,10 +981,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
 		 */
 		public boolean isTemporary(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.isTemporary();
+			if (annotation instanceof IJavaAnnotation) {
+				IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+				if (javaAnnotation.isRelevant())
+					return javaAnnotation.isTemporary();
 			}
 			return false;
 		}
@@ -2103,7 +2103,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
 		Position errorPosition= new Position(0, 0);
-		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
+		IJavaAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
 		
 		if (nextError != null) {
 			
@@ -2142,9 +2142,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	}
 
-	private IProblemAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
+	private IJavaAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
 		
-		IProblemAnnotation nextError= null;
+		IJavaAnnotation nextError= null;
 		Position nextErrorPosition= null;
 		
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
@@ -2152,10 +2152,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		int distance= 0;
 		
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new ProblemAnnotationIterator(model, false);
+		Iterator e= new JavaAnnotationIterator(model, false);
 		while (e.hasNext()) {
 			
-			IProblemAnnotation a= (IProblemAnnotation) e.next();
+			IJavaAnnotation a= (IJavaAnnotation) e.next();
 			if (a.hasOverlay() || !a.isProblem())
 				continue;
 				

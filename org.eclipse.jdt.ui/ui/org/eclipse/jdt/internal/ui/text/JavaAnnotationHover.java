@@ -25,7 +25,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 
 
 /**
@@ -41,10 +41,10 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		
 		if (position.getOffset() > -1 && position.getLength() > -1) {
 			try {
-				int problemAnnotationLine= document.getLineOfOffset(position.getOffset());
-				if (line == problemAnnotationLine)
+				int javaAnnotationLine= document.getLineOfOffset(position.getOffset());
+				if (line == javaAnnotationLine)
 					return 1;
-				if (problemAnnotationLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
+				if (javaAnnotationLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
 					return 2;
 			} catch (BadLocationException x) {
 			}
@@ -64,7 +64,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	/**
 	 * Returns one marker which includes the ruler's line of activity.
 	 */
-	protected List getProblemAnnotationsForLine(ISourceViewer viewer, int line) {
+	protected List getJavaAnnotationsForLine(ISourceViewer viewer, int line) {
 		
 		IDocument document= viewer.getDocument();
 		IAnnotationModel model= viewer.getAnnotationModel();
@@ -79,14 +79,14 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		HashMap messagesAtPosition= new HashMap();
 		while (e.hasNext()) {
 			Object o= e.next();
-			if (o instanceof IProblemAnnotation) {
-				IProblemAnnotation a= (IProblemAnnotation)o;
+			if (o instanceof IJavaAnnotation) {
+				IJavaAnnotation a= (IJavaAnnotation)o;
 				if (a.isRelevant()) {
 					Position position= model.getPosition((Annotation)a);
 					if (position == null)
 						continue;
 
-					if (isDuplicateProblemAnnotation(messagesAtPosition, position, a.getMessage()))
+					if (isDuplicateJavaAnnotation(messagesAtPosition, position, a.getMessage()))
 						continue;
 	
 					switch (compareRulerLine(position, document, line)) {
@@ -104,7 +104,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		return select(exact, including);
 	}
 
-	private boolean isDuplicateProblemAnnotation(Map messagesAtPosition, Position position, String message) {
+	private boolean isDuplicateJavaAnnotation(Map messagesAtPosition, Position position, String message) {
 		if (messagesAtPosition.containsKey(position)) {
 			Object value= messagesAtPosition.get(position);
 			if (message.equals(value))
@@ -131,14 +131,14 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	 * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
 	 */
 	public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
-		List problemAnnotations= getProblemAnnotationsForLine(sourceViewer, lineNumber);
-		if (problemAnnotations != null) {
+		List javaAnnotations= getJavaAnnotationsForLine(sourceViewer, lineNumber);
+		if (javaAnnotations != null) {
 			
-			if (problemAnnotations.size() == 1) {
+			if (javaAnnotations.size() == 1) {
 				
 				// optimization
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation)problemAnnotations.get(0);
-				String message= problemAnnotation.getMessage();
+				IJavaAnnotation javaAnnotation= (IJavaAnnotation)javaAnnotations.get(0);
+				String message= javaAnnotation.getMessage();
 				if (message != null && message.trim().length() > 0)
 					return formatSingleMessage(message);
 					
@@ -146,10 +146,10 @@ public class JavaAnnotationHover implements IAnnotationHover {
 					
 				List messages= new ArrayList();
 				
-				Iterator e= problemAnnotations.iterator();
+				Iterator e= javaAnnotations.iterator();
 				while (e.hasNext()) {
-					IProblemAnnotation problemAnnotation= (IProblemAnnotation)e.next();
-					String message= problemAnnotation.getMessage();
+					IJavaAnnotation javaAnnotation= (IJavaAnnotation)e.next();
+					String message= javaAnnotation.getMessage();
 					if (message != null && message.trim().length() > 0)
 						messages.add(message.trim());
 				}

@@ -16,9 +16,8 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugModelPresentation;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -26,25 +25,30 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugModelPresentation;
+
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IJavaModelMarker;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.core.Util;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 
 
-public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation {
+public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
 	
 	private static Image fgImage;
 	private static boolean fgImageInitialized= false;
 	
 	private IDebugModelPresentation fPresentation;
-	private IProblemAnnotation fOverlay;
+	private IJavaAnnotation fOverlay;
 	private boolean fNotRelevant= false;
 	private AnnotationType fType;
 	
@@ -106,7 +110,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			
 			super.initialize();
 			
-			if (JavaEditorPreferencePage.indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(marker)) {
+			if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(marker)) {
 				if (!fgImageInitialized) {
 					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 					fgImageInitialized= true;
@@ -116,8 +120,12 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 		}
 	}
 
+	private boolean indicateQuixFixableProblems() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
+	}
+
 	/*
-	 * @see IProblemAnnotation#getMessage()
+	 * @see IJavaAnnotation#getMessage()
 	 */
 	public String getMessage() {
 		IMarker marker= getMarker();
@@ -128,28 +136,14 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 
 	/*
-	 * @see IProblemAnnotation#isError()
-	 */
-	public boolean isError() {
-		return fType == AnnotationType.ERROR;
-	}
-
-	/*
-	 * @see IProblemAnnotation#isWarning()
-	 */
-	public boolean isWarning() {
-		return fType == AnnotationType.WARNING;
-	}
-	
-	/*
-	 * @see IProblemAnnotation#isTemporary()
+	 * @see IJavaAnnotation#isTemporary()
 	 */
 	public boolean isTemporary() {
 		return false;
 	}
 	
 	/*
-	 * @see IProblemAnnotation#getArguments()
+	 * @see IJavaAnnotation#getArguments()
 	 */
 	public String[] getArguments() {
 		if (isProblem())
@@ -158,7 +152,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 
 	/*
-	 * @see IProblemAnnotation#getId()
+	 * @see IJavaAnnotation#getId()
 	 */
 	public int getId() {
 		if (isProblem())
@@ -167,39 +161,37 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 	
 	/*
-	 * @see IProblemAnnotation#isProblem()
+	 * @see IJavaAnnotation#isProblem()
 	 */
 	public boolean isProblem() {
-		return isWarning() || isError();
+		return fType == AnnotationType.WARNING || fType == AnnotationType.ERROR;
 	}
 	
 	/*
-	 * @see IProblemAnnotation#isTask()
-	 */
-	public boolean isTask() {
-		return fType ==AnnotationType.TASK;
-	}	
-	
-	/*
-	 * @see IProblemAnnotation#isRelevant()
+	 * @see IJavaAnnotation#isRelevant()
 	 */
 	public boolean isRelevant() {
 		return !fNotRelevant;
 	}
-	
-	public void setOverlay(IProblemAnnotation problemAnnotation) {
+
+	/**
+	 * Overlays this annotation with the given javaAnnotation.
+	 * 
+	 * @param javaAnnotation annotation that is overlaid by this annotation
+	 */
+	public void setOverlay(IJavaAnnotation javaAnnotation) {
 		if (fOverlay != null)
 			fOverlay.removeOverlaid(this);
 			
-		fOverlay= problemAnnotation;
+		fOverlay= javaAnnotation;
 		fNotRelevant= (fNotRelevant || fOverlay != null);
 		
-		if (problemAnnotation != null)
-			problemAnnotation.addOverlaid(this);
+		if (javaAnnotation != null)
+			javaAnnotation.addOverlaid(this);
 	}
 	
 	/*
-	 * @see IProblemAnnotation#hasOverlay()
+	 * @see IJavaAnnotation#hasOverlay()
 	 */
 	public boolean hasOverlay() {
 		return fOverlay != null;
@@ -218,21 +210,21 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 	
 	/*
-	 * @see IProblemAnnotation#addOverlaid(IProblemAnnotation)
+	 * @see IJavaAnnotation#addOverlaid(IJavaAnnotation)
 	 */
-	public void addOverlaid(IProblemAnnotation annotation) {
+	public void addOverlaid(IJavaAnnotation annotation) {
 		// not supported
 	}
 
 	/*
-	 * @see IProblemAnnotation#removeOverlaid(IProblemAnnotation)
+	 * @see IJavaAnnotation#removeOverlaid(IJavaAnnotation)
 	 */
-	public void removeOverlaid(IProblemAnnotation annotation) {
+	public void removeOverlaid(IJavaAnnotation annotation) {
 		// not supported
 	}
 	
 	/*
-	 * @see IProblemAnnotation#getOverlaidIterator()
+	 * @see IJavaAnnotation#getOverlaidIterator()
 	 */
 	public Iterator getOverlaidIterator() {
 		// not supported
@@ -240,7 +232,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation#getAnnotationType()
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getAnnotationType()
 	 */
 	public AnnotationType getAnnotationType() {
 		return fType;

@@ -24,8 +24,8 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
@@ -54,12 +54,12 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
 		
 		if (model != null) {
-			Iterator e= new ProblemAnnotationIterator(model, true);
+			Iterator e= new JavaAnnotationIterator(model, true);
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
 				Position p= model.getPosition(a);
 				if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
-					String msg= ((IProblemAnnotation) a).getMessage();
+					String msg= ((IJavaAnnotation) a).getMessage();
 					if (msg != null && msg.trim().length() > 0)
 						return formatMessage(msg);
 				}

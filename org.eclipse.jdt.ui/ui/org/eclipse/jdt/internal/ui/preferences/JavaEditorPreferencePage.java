@@ -1302,19 +1302,4 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */
-	public static boolean indicateQuixFixableProblems() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	static public boolean synchronizeOutlineOnCursorMove() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
-	}
-
 }

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -79,7 +80,6 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
@@ -115,7 +115,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		/**
 		 * Annotation representating an <code>IProblem</code>.
 		 */
-		static protected class ProblemAnnotation extends Annotation implements IProblemAnnotation {
+		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation {
 			
 			private static Image fgImage;
 			private static boolean fgImageInitialized= false;
@@ -143,7 +143,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private void initializeImage() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
 				if (!fImageInitialized) {
-					if (JavaEditorPreferencePage.indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
+					if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
 						if (!fgImageInitialized) {
 							fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 							fgImageInitialized= true;
@@ -152,6 +152,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					}
 					fImageInitialized= true;
 				}
+			}
+
+			private boolean indicateQuixFixableProblems() {
+				return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 			}
 						
 			/*
@@ -164,7 +168,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see IProblemAnnotation#getImage(Display)
+			 * @see IJavaAnnotation#getImage(Display)
 			 */
 			public Image getImage(Display display) {
 				initializeImage();
@@ -172,88 +176,67 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see IProblemAnnotation#getMessage()
+			 * @see IJavaAnnotation#getMessage()
 			 */
 			public String getMessage() {
 				return fProblem.getMessage();
 			}
 
 			/*
-			 * @see IProblemAnnotation#isTemporary()
+			 * @see IJavaAnnotation#isTemporary()
 			 */
 			public boolean isTemporary() {
 				return true;
 			}
-
-			/*
-			 * @see IProblemAnnotation#isWarning()
-			 */
-			public boolean isWarning() {
-				return fType == AnnotationType.WARNING;
-			}
-
-			/*
-			 * @see IProblemAnnotation#isError()
-			 */
-			public boolean isError() {
-				return fType == AnnotationType.ERROR;
-			}
 			
 			/*
-			 * @see IProblemAnnotation#getArguments()
+			 * @see IJavaAnnotation#getArguments()
 			 */
 			public String[] getArguments() {
 				return isProblem() ? fProblem.getArguments() : null;
 			}
 
 			/*
-			 * @see IProblemAnnotation#getId()
+			 * @see IJavaAnnotation#getId()
 			 */
 			public int getId() {
 				return isProblem() ? fProblem.getID() : -1;
 			}
 
 			/*
-			 * @see IProblemAnnotation#isProblem()
+			 * @see IJavaAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return isWarning() || isError();
+				return  fType == AnnotationType.WARNING || fType == AnnotationType.ERROR;
 			}
 			
 			/*
-			 * @see IProblemAnnotation#isTask()
-			 */
-			public boolean isTask() {
-				return fType == AnnotationType.TASK;
-			}
-			
-			/*
-			 * @see IProblemAnnotation#isRelevant()
+			 * @see IJavaAnnotation#isRelevant()
 			 */
 			public boolean isRelevant() {
 				return true;
 			}
 			
 			/*
-			 * @see IProblemAnnotation#hasOverlay()
+			 * @see IJavaAnnotation#hasOverlay()
 			 */
 			public boolean hasOverlay() {
 				return false;
 			}
 			
 			/*
-			 * @see IProblemAnnotation#addOverlaid(IProblemAnnotation)
+			 * @see IJavaAnnotation#addOverlaid(IJavaAnnotation)
 			 */
-			public void addOverlaid(IProblemAnnotation annotation) {
+			public void addOverlaid(IJavaAnnotation annotation) {
 				if (fOverlaids == null)
 					fOverlaids= new ArrayList(1);
 				fOverlaids.add(annotation);
 			}
 
 			/*
-			 * @see IProblemAnnotation#removeOverlaid(IProblemAnnotation)
+			 * @see IJavaAnnotation#removeOverlaid(IJavaAnnotation)
 			 */
-			public void removeOverlaid(IProblemAnnotation annotation) {
+			public void removeOverlaid(IJavaAnnotation annotation) {
 				if (fOverlaids != null) {
 					fOverlaids.remove(annotation);
 					if (fOverlaids.size() == 0)
@@ -262,7 +245,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see IProblemAnnotation#getOverlaidIterator()
+			 * @see IJavaAnnotation#getOverlaidIterator()
 			 */
 			public Iterator getOverlaidIterator() {
 				if (fOverlaids != null)
@@ -369,8 +352,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private boolean fIsActive= false;
 			
 			private ReverseMap fReverseMap= new ReverseMap();
-			private List fPreviouslyShadowed= null; 
-			private List fCurrentlyShadowed= new ArrayList();
+			private List fPreviouslyOverlaid= null; 
+			private List fCurrentlyOverlaid= new ArrayList();
 
 			public CompilationUnitAnnotationModel(IFileEditorInput input) {
 				super(input.getFile());
@@ -391,6 +374,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					return null;
 					
 				return new Position(start, length);
+			}
+
+			protected void update(IMarkerDelta[] markerDeltas) {
+	
+				super.update(markerDeltas);
+
+				if (markerDeltas != null && markerDeltas.length > 0) {
+					try {
+						getWorkingCopy(fInput).reconcile(true, null);
+					} catch (JavaModelException ex) {
+						handleCoreException(ex, ex.getMessage());
+					}
+				}
 			}
 			
 			/*
@@ -429,8 +425,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
-				fPreviouslyShadowed= fCurrentlyShadowed;
-				fCurrentlyShadowed= new ArrayList();
+				fPreviouslyOverlaid= fCurrentlyOverlaid;
+				fCurrentlyOverlaid= new ArrayList();
 				
 				synchronized (fAnnotations) {
 					
@@ -468,8 +464,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					}
 					
 					removeMarkerOverlays(isCanceled);
-					fPreviouslyShadowed.clear();
-					fPreviouslyShadowed= null;
+					fPreviouslyOverlaid.clear();
+					fPreviouslyOverlaid= null;
 				}
 					
 				if (temporaryProblemsChanged)
@@ -478,9 +474,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			private void removeMarkerOverlays(boolean isCanceled) {
 				if (isCanceled) {
-					fCurrentlyShadowed.addAll(fPreviouslyShadowed);
+					fCurrentlyOverlaid.addAll(fPreviouslyOverlaid);
 				} else {
-					Iterator e= fPreviouslyShadowed.iterator();
+					Iterator e= fPreviouslyOverlaid.iterator();
 					while (e.hasNext()) {
 						JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
 						annotation.setOverlay(null);
@@ -488,13 +484,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				}			
 			}
 			
+			/**
+			 * Overlays value with problem annotation.
+			 * @param problemAnnotation
+			 */
 			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
 				if (value instanceof  JavaMarkerAnnotation) {
 					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) value;
 					if (annotation.isProblem()) {
 						annotation.setOverlay(problemAnnotation);
-						fPreviouslyShadowed.remove(annotation);
-						fCurrentlyShadowed.add(annotation);
+						fPreviouslyOverlaid.remove(annotation);
+						fCurrentlyOverlaid.add(annotation);
 					}
 				}
 			}

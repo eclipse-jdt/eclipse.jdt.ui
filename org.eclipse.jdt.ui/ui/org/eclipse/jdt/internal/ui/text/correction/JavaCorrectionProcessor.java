@@ -42,8 +42,8 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 
@@ -85,7 +85,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return QuickFixProcessor.hasCorrections(problemId);
 	}
 
-	public static boolean hasCorrections(IProblemAnnotation annotation) {
+	public static boolean hasCorrections(IJavaAnnotation annotation) {
 		int problemId= annotation.getId();
 		if (problemId == -1) {
 			if (annotation instanceof MarkerAnnotation) {
@@ -154,9 +154,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		
 		boolean noProbemFound= true;
 		HashSet idsProcessed= new HashSet();
-		Iterator iter= new ProblemAnnotationIterator(model, true);
+		Iterator iter= new JavaAnnotationIterator(model, true);
 		while (iter.hasNext()) {
-			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
+			IJavaAnnotation annot= (IJavaAnnotation) iter.next();
 			Position pos= model.getPosition((Annotation) annot);
 			if (isAtPosition(offset, pos)) {
 				int problemId= annot.getId();
