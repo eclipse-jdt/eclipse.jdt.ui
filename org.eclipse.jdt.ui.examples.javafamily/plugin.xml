@@ -21,7 +21,6 @@
 		<import plugin="org.eclipse.ui.workbench.texteditor"/>
 		<import plugin="org.eclipse.ui.editors"/>
 		<import plugin="org.eclipse.ui.ide"/>
-		<import plugin="org.eclipse.search"/>
 		<import plugin="org.eclipse.jdt.core"/>
 		<import plugin="org.eclipse.jdt.ui"/>
 		<import plugin="org.eclipse.debug.core"/>
@@ -54,56 +53,6 @@
 	  </renameParticipant>
 	</extension>
 	
-	<!-- =========================================================================== -->
-	<!-- Java Search Page                                                            -->
-	<!-- =========================================================================== -->
-	<extension point="org.eclipse.search.searchPages">
-	   <page id="org.eclipse.jdt.ui.JavaSearchPage2"
-	         icon="icons/full/obj16/jsearch_obj.gif"
-	         label="%JavaSearchPage.label"
-			 sizeHint="460,160"
-			 extensions="java:90, jav:90"
-			 showScopeSection="true"
-			 class="org.eclipse.jdt.internal.ui.search2.JavaSearchPage2">
-	   </page>
-	</extension>
-	
-	<extension point="org.eclipse.search.searchResultSorters">
-		<sorter
-			id="org.eclipse.search.internal.ui.ElementNameSorter"
-			pageId="org.eclipse.jdt.ui.JavaSearchPage2"
-			label="%ElementNameSorter.label"
-			tooltip="%ElementNameSorter.tooltip"
-			icon="icons/full/clcl16/search_sortmatch.gif"
-			class="org.eclipse.jdt.internal.ui.search.ElementNameSorter">
-		</sorter>
-		<sorter
-			id="org.eclipse.search.internal.ui.ParentNameSorter"
-			pageId="org.eclipse.jdt.ui.JavaSearchPage2"
-			label="%ParentNameSorter.label"
-			tooltip="%ParentNameSorter.tooltip"
-			icon="icons/full/clcl16/search_sortmatch.gif"
-			class="org.eclipse.jdt.internal.ui.search.ParentNameSorter">
-		</sorter>
-		<sorter
-			id="org.eclipse.search.internal.ui.PathNameSorter"
-			pageId="org.eclipse.jdt.ui.JavaSearchPage2"
-			label="%PathNameSorter.label"
-			tooltip="%PathNameSorter.tooltip"
-			icon="icons/full/clcl16/search_sortmatch.gif"
-			class="org.eclipse.jdt.internal.ui.search.PathNameSorter">
-		</sorter>
-			<sorter
-			id="org.eclipse.search.internal.ui.MatchPositionSorter"
-			pageId="org.eclipse.jdt.ui.JavaFileSearch2"
-			label="%PositionSorter.label"
-			tooltip="%PositionSorter.tooltip"
-			icon="icons/full/clcl16/search_sortmatch.gif"
-			class="org.eclipse.jdt.internal.ui.search.MatchPositionSorter">
-		</sorter>
-		
-	</extension>
-
 	<!-- =========================================================================== -->
 	<!-- JSP Editor                                                                  -->
 	<!-- =========================================================================== -->
