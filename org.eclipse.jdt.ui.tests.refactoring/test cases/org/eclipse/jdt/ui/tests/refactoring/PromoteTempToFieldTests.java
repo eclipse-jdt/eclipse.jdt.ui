@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 public class PromoteTempToFieldTests extends RefactoringTest{
@@ -309,6 +308,23 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 		boolean declareStatic = false;
 	  	boolean declareFinal= false;
 	  	int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+	  	int accessModifier= Modifier.PRIVATE;
+        
+		enablementHelper(4, 13, 4, 14, newName, declareStatic, declareFinal, initializeIn, accessModifier,
+					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
+	}
+
+	public void testEnablement9() throws Exception{
+        boolean expectedCanEnableInitInConstructors	= false;
+        boolean expectedCanEnableInitInMethod			= true;
+        boolean expectedCanEnableInitInField			= true;
+        boolean expectedCanEnableSettingStatic			= true;
+        boolean expectedCanEnableSettingFinal			= false;
+        
+        String newName= "i";
+		boolean declareStatic = true;
+	  	boolean declareFinal= false;
+	  	int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
 	  	int accessModifier= Modifier.PRIVATE;
         
 		enablementHelper(4, 13, 4, 14, newName, declareStatic, declareFinal, initializeIn, accessModifier,
