@@ -37,6 +37,8 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
@@ -110,20 +112,41 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		boolean hasUnused= false;		
 		pm.setTaskName(NLSSearchMessages.getString("NLSSearchResultRequestor.searching")); //$NON-NLS-1$
 		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
-		FileEntry key= new FileEntry(fPropertiesFile, message);
+		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		
 		for (Enumeration enum= fProperties.propertyNames(); enum.hasMoreElements();) {
 			String propertyName= (String) enum.nextElement();
 			if (!fUsedPropertyNames.contains(propertyName)) {
-				int start= findPropertyNameStartPosition(propertyName);
-				fResult.addMatch(new Match(key, Math.max(start, 0), propertyName.length()));
+				addMatch(groupElement, propertyName);
 				hasUnused= true;
 			}
 			pm.worked(1);
 		}
 		if (hasUnused)
-			fResult.setUnusedGroup(key);
+			fResult.setUnusedGroup(groupElement);
 		pm.done();
+	}
+
+	private void addMatch(FileEntry groupElement, String propertyName) {
+		/* 
+		 * TODO (bug 63794): Should read in .properties file with our own reader and not
+		 * with Properties.load(InputStream) . Then, we can remember start position and
+		 * original version (not interpreting escape characters) for each property.
+		 * 
+		 * The current workaround is to escape the key again before searching in the
+		 * .properties file. However, this can fail if the key is escaped in a different
+		 * manner than what PropertyFileDocumentModel.unwindEscapeChars(.) produces.
+		 */
+		String escapedPropertyName= PropertyFileDocumentModel.unwindEscapeChars(propertyName);
+		int start= findPropertyNameStartPosition(escapedPropertyName);
+		int length;
+		if (start == -1) { // not found -> report at beginning
+			start= 0;
+			length= 0;
+		} else {
+			length= escapedPropertyName.length();
+		}
+		fResult.addMatch(new Match(groupElement, start, length));
 	}
 
 	/**
@@ -234,15 +257,18 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				boolean hasNoValue= (charPos >= line.length());
 				if (i > -1 && !hasNoValue)
 					terminatorChar= line.charAt(charPos);
-				if (line.trim().startsWith(propertyName) && (hasNoValue || Character.isWhitespace(terminatorChar) || terminatorChar == '=')) {
+				if (line.trim().startsWith(propertyName) &&
+						(hasNoValue || Character.isWhitespace(terminatorChar) || terminatorChar == '=')) {
 					start += line.indexOf(propertyName);
-					eols= -1;
+					eols= -17; // found key
 				} else {
 					start += line.length() + eols;
 					buf.setLength(0);
 					eols= lineReader.readLine(buf);
 				}
 			}
+			if (eols != -17)
+				start= -1; //key not found in file. See bug 63794. This can happen if the key contains escaped characters.
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);			
 			return -1;
@@ -285,14 +311,13 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			return;
 		
 		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.duplicateKeys", fPropertiesFile.getName()); //$NON-NLS-1$
-		FileEntry key= new FileEntry(fPropertiesFile, message);
+		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		Iterator iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {
 			String propertyName= (String) iter.next();
-			int start= findPropertyNameStartPosition(propertyName);
-			fResult.addMatch(new Match(key, Math.max(start, 0), propertyName.length()));
+			addMatch(groupElement, propertyName);
 		}
-		fResult.setDuplicatesGroup(key);
+		fResult.setDuplicatesGroup(groupElement);
 	}
 
 }
