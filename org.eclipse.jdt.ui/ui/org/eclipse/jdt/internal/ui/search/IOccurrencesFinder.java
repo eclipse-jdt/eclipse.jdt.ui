@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;

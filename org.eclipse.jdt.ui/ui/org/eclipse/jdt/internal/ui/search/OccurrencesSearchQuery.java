@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.Match;
 
 
 public class OccurrencesSearchQuery implements ISearchQuery {
@@ -45,7 +44,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	 */
 	public IStatus run(IProgressMonitor monitor) {
 		fFinder.perform();
-		Match[] matches= fFinder.getOccurrenceMatches(fElement, fDocument);
+		org.eclipse.search.ui.text.Match[] matches= Match.convert(fFinder.getOccurrenceMatches(fElement, fDocument));
 		fResult.addMatches(matches);
 		//Don't leak AST:
 		fFinder= null;
@@ -53,7 +52,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		monitor.done();
 		return Status.OK_STATUS;
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */

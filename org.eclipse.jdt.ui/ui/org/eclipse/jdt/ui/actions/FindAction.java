@@ -281,10 +281,22 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (query != null) {
 			NewSearchUI.activateSearchResultView();
 			if (query.canRunInBackground()) {
-				NewSearchUI.runQueryInBackground(query);
+				/*
+				 * This indirection with Object as parameter is needed to prevent the loading
+				 * of the Search plug-in: the VM verifies the method call and hence loads the
+				 * types used in the method signature, eventually triggering the loading of
+				 * a plug-in (in this case ISearchQuery results in Search plug-in being loaded).
+				 */
+				SearchUtil.runQueryInBackground(query);
 			} else {
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
-				IStatus status= NewSearchUI.runQueryInForeground(progressService, query);
+				/*
+				 * This indirection with Object as parameter is needed to prevent the loading
+				 * of the Search plug-in: the VM verifies the method call and hence loads the
+				 * types used in the method signature, eventually triggering the loading of
+				 * a plug-in (in this case it would be ISearchQuery).
+				 */
+				IStatus status= SearchUtil.runQueryInForeground(progressService, query);
 				if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
 					ProblemDialog.open(getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message"), status); //$NON-NLS-1$ //$NON-NLS-2$
 				}
