@@ -15,6 +15,7 @@ com.oti.zrh.eclipse.tools/*
 com.oti.zrh.eclipse.doc.tools-feature/*
 com.oti.zrh.eclipse.tools-updateSite/*
 Eclipse*JDT*Builds/*
+org.eclipse.jdt.launching/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jdt.ui.tests.refactoring/resources/*
 platform-search-home/*
