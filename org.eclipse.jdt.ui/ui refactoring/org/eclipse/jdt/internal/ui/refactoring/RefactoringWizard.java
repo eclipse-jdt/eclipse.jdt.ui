@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
@@ -47,7 +47,7 @@ public class RefactoringWizard extends Wizard {
 	 */
 	public void init(Refactoring refactoring) {
 		fRefactoring= refactoring;
-		initializeDefaultPageImageDescriptor();
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	}
 
 	//---- Hooks to overide ---------------------------------------------------------------
@@ -386,18 +386,4 @@ public class RefactoringWizard extends Wizard {
 		Assert.isTrue(page instanceof RefactoringWizardPage);
 		super.addPage(page);
 	}
-	
-	/* (non-Javadoc)
-	 * Method implemented in Wizard.
-	 */
-	protected void initializeDefaultPageImageDescriptor() {
-		try {
-			URL installURL= Platform.getPlugin(PlatformUI.PLUGIN_ID).getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/basic/wizban/new_wiz.gif");
-			ImageDescriptor desc= ImageDescriptor.createFromURL(url);
-			setDefaultPageImageDescriptor(desc);
-		} catch (MalformedURLException e) {
-			// Should not happen.  Ignore.
-		}
-	}		 	
 }
