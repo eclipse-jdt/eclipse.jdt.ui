@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -197,7 +198,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++)
-			if (types[i].getElementName().equals(name))
+			if (JavaModelUtil.getTypeQualifiedName(types[i]).equals(name))
 				return types[i];
 		return null;
 	}
