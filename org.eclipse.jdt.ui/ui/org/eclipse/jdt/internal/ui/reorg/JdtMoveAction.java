@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -45,8 +46,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class JdtMoveAction extends ReorgDestinationAction {
 
 	private boolean fShowPreview= false;
-	
-	public JdtMoveAction(String name, StructuredSelectionProvider provider) {
+
+	public JdtMoveAction(String name, ISelectionProvider provider) {
 		super(name, provider);
 		setDescription(ReorgMessages.getString("moveAction.description")); //$NON-NLS-1$
 	}
@@ -109,7 +110,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	private static int askIfOverwrite(String elementName){
 		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
 		String title= ReorgMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
-		String question= "Element '" + elementName + "' already exists. Would you like to overwrite?";
+		String question= ReorgMessages.getFormattedString("JdtMoveAction.overwrite", elementName);//$NON-NLS-1$
 		
 		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
 															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
@@ -204,6 +205,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			super(parent, labelProvider, contentProvider);
 			fRefactoring= refactoring;
 			fShowPreview= false;//from outter instance
+			setDoubleClickSelects(false);
 		}
 		
 		protected Control createDialogArea(Composite parent) {
