@@ -143,8 +143,8 @@ public class ParameterGuesser {
 				thisType= fEnclosingTypeName;
 			}
 			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray(), new char[] {'.'}, getFieldDescriptor(Flags.AccPublic | Flags.AccFinal)); //$NON-NLS-1$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
 			
 			return fVariables;
 		}
@@ -456,6 +456,13 @@ public class ParameterGuesser {
 		private int score(Variable v) {
 			int variableScore= 10 - v.variableType; // since these are increasing with distance
 			int subStringScore= getLongestCommonSubstring(v.name, fParamName).length();
+			// substringscores under 60% are not considered
+			// this prevents marginal matches like a - ba and false - isBool that will
+			// destroy the sort order
+			int shorter= Math.min(v.name.length(), fParamName.length());
+			if (subStringScore < 0.6 * shorter)
+				subStringScore= 0;
+				
 			int positionScore= v.positionScore; // since ???
 			int matchedScore= v.alreadyMatched ? 0 : 1;
 			
