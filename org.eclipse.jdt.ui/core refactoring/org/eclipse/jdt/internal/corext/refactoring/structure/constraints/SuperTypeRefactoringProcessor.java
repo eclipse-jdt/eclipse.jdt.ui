@@ -101,6 +101,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/** The type environment */
 	protected final TypeEnvironment fEnvironment= new TypeEnvironment();
 
+	/** Should type occurrences on instanceof's also be rewritten? */
+	protected boolean fInstanceOf= false;
+
 	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
 	protected Map fObsoleteCasts= null;
 
@@ -264,6 +267,15 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns whether type occurrences in instanceof's should be rewritten.
+	 * 
+	 * @return <code>true</code> if they are rewritten, <code>false</code> otherwise
+	 */
+	public final boolean isInstanceOf() {
+		return fInstanceOf;
 	}
 
 	/**
@@ -580,6 +592,15 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	}
 
 	/**
+	 * Determines whether type occurrences in instanceof's should be rewritten.
+	 * 
+	 * @param rewrite <code>true</code> to rewrite them, <code>false</code> otherwise
+	 */
+	public final void setInstanceOf(final boolean rewrite) {
+		fInstanceOf= rewrite;
+	}
+
+	/**
 	 * Solves the supertype constraints to replace subtype by a supertype.
 	 * 
 	 * @param subUnit the compilation unit of the subtype
@@ -595,7 +616,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		boolean covariance= true;
 		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(fEnvironment, fEnvironment.create(subType), fEnvironment.create(superType));
 		model.setUseCovariance(true);
-		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model);
+		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		fSuperType= model.getSuperType();
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$

@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -119,6 +120,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/** The current method declarations being processed (element type: <code>MethodDeclaration</code>) */
 	private final Stack fCurrentMethods= new Stack();
 
+	/** Should instanceof expressions be rewritten? */
+	private final boolean fInstanceOf;
+
 	/** The type constraint model to solve */
 	private final SuperTypeConstraintsModel fModel;
 
@@ -126,11 +130,13 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * Creates a new super type constraints creator.
 	 * 
 	 * @param model the model to create the type constraints for
+	 * @param instanceofs <code>true</code> to rewrite instanceof expressions, <code>false</code> otherwise
 	 */
-	public SuperTypeConstraintsCreator(final SuperTypeConstraintsModel model) {
+	public SuperTypeConstraintsCreator(final SuperTypeConstraintsModel model, final boolean instanceofs) {
 		Assert.isNotNull(model);
 
 		fModel= model;
+		fInstanceOf= instanceofs;
 	}
 
 	/*
@@ -664,7 +670,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 */
 	public final void endVisit(final Type node) {
 		final ASTNode parent= node.getParent();
-		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof TypeLiteral))
+		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof TypeLiteral) && (!(parent instanceof InstanceofExpression) || fInstanceOf))
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createTypeVariable(node));
 	}
 
