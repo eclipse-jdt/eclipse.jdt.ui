@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.filters;
 
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -24,6 +24,6 @@ public class NonJavaProjectsFilter extends ViewerFilter {
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		return (element instanceof IJavaProject);
+		return (!(element instanceof IProject)); 
 	}
 }
