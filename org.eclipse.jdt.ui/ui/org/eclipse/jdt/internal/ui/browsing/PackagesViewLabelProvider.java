@@ -81,10 +81,10 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		for (int i= 0; i < fragments.length; i++) {
 			IPackageFragment fragment= fragments[i];
 			if(!isEmpty(fragment)) {
-				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_COMPOUND_PACKAGE, cp);
+				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp);
 			}
 		}
-		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_COMPOUND_EMPTY_PACKAGE, cp); 
+		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp); 
 	}
 	
 	
@@ -166,8 +166,9 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		
 		public ImageDescriptor getCPImageDescriptor(LogicalPackage element, boolean isEmpty) {
 			if(isEmpty)
-				return JavaPluginImages.DESC_OBJS_COMPOUND_EMPTY_PACKAGE;
-			else return JavaPluginImages.DESC_OBJS_COMPOUND_PACKAGE;		
+				return JavaPluginImages.DESC_OBJS_EMPTY_LOGICAL_PACKAGE;
+			else
+				return JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE;		
 		}
 	}
 }

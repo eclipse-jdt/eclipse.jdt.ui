@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -151,7 +152,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	// Filters
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
-	private IWorkbenchPart fPreviousSelectionProvider;
+	protected IWorkbenchPart fPreviousSelectionProvider;
 	protected Object fPreviousSelectedElement;
 			
 	/*
@@ -559,9 +560,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (input instanceof IJavaElement && newInput instanceof IJavaElement)
 			return getTypeComparator().compare(newInput, input)  > 0;
 
-// XXX: why?				
-//		if((newInput instanceof List) && (part instanceof PackagesView))
-//			return true;
+		if((newInput instanceof List) && (part instanceof PackagesView))
+			return true;
 					
 		else
 			return false;

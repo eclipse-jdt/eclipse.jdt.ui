@@ -118,6 +118,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater()),
+			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, fPart.getViewer()),
 			new LayoutActionGroup(part)});
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
@@ -138,7 +139,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fCollapseAllAction= new CollapseAllAction(fPart);
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView");  //$NON-NLS-1$
-		fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, fPart.getViewer());
 		
 		provider.addSelectionChangedListener(this);
 		update(selection);
@@ -150,11 +150,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			fMemberFilterActionGroup= null;
 		}
 		
-		if (fCustomFiltersActionGroup != null) {
-			fCustomFiltersActionGroup.dispose();
-			fCustomFiltersActionGroup= null;
-		}
-		
+	
 		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
 		provider.removeSelectionChangedListener(this);
 		super.dispose();
@@ -203,8 +199,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		super.fillActionBars(actionBars);
 		setGlobalActionHandlers(actionBars);
 		fillToolBar(actionBars.getToolBarManager());
-		fillViewMenu(actionBars.getMenuManager());
-		fCustomFiltersActionGroup.fillActionBars(actionBars);
+		fillViewMenu(actionBars.getMenuManager());		
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {

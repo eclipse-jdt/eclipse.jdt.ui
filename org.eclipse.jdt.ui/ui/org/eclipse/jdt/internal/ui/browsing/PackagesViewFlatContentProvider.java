@@ -129,16 +129,15 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			} else if (kind == IJavaElementDelta.CHANGED) {
 				//just refresh 
 				Object toBeRefreshed= element;
-				if (element instanceof IPackageFragment) {
-					IPackageFragment pkgFragment= (IPackageFragment)element;
-					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-					//deal with packages that have been filtered and are now visible
-					if (logicalPkg != null)
-						toBeRefreshed= findElementToRefresh(logicalPkg);
-					else
-						toBeRefreshed= findElementToRefresh(pkgFragment);
-					
-				}
+
+				IPackageFragment pkgFragment= (IPackageFragment) element;
+				LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
+				//deal with packages that have been filtered and are now visible
+				if (logicalPkg != null)
+					toBeRefreshed= findElementToRefresh(logicalPkg);
+				else
+					toBeRefreshed= findElementToRefresh(pkgFragment);
+
 				postRefresh(toBeRefreshed);
 			}
 			//in this view there will be no children of PackageFragment to refresh
@@ -261,7 +260,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		
 		IPackageFragment fragment= (IPackageFragment)fMapToPackageFragments.get(key);
 		if(fragment != null){
-			//must create a new CompoundElement
+			//must create a new LogicalPackage
 			if(!fragment.equals(frag)){
 				lp= new LogicalPackage(fragment);
 				lp.add(frag);

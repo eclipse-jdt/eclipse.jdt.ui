@@ -475,7 +475,6 @@ public class PackagesView extends JavaBrowsingPart{
 
 		setUpViewer(fWrappedViewer);
 
-		// FIXME: does not work
 		createSelectAllAction();
 
 		// add the selection information from old viewer
@@ -502,6 +501,7 @@ public class PackagesView extends JavaBrowsingPart{
 			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, null);
 			fSelectAllAction= null;
 		}
+		actionBars.updateActionBars();
 	}
 	
 	/*
@@ -574,7 +574,6 @@ public class PackagesView extends JavaBrowsingPart{
 		IJavaElement newInput= findInputForJavaElement(je);
 		if (elementToSelect == null && !isValidInput(newInput))
 			setInput(null);
-		// XXX: to use testFindItem needs to be reworked
 		else if (elementToSelect == null || getViewer().testFindItem(elementToSelect) == null) {
 
 			//optimization, if you are in the same project but expansion hasn't happened

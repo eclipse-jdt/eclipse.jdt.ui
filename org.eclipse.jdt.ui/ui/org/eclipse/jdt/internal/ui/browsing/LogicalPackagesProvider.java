@@ -150,10 +150,9 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	}
 
 	protected boolean isInCompoundState() {
-		// XXX: for now we don't off a preference might become a view menu entry
-		//		return AppearancePreferencePage.compoundPackagesInPackagesView();
+		// XXX: for now we don't offer a preference might become a view menu entry
+		//		return AppearancePreferencePage.logicalPackagesInPackagesView();
 		return true;
-
 	}
 	
 	public void dispose(){

@@ -11,16 +11,15 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 
 /**
@@ -47,9 +46,15 @@ class LayoutActionGroup extends MultiActionGroup {
 		// Create layout sub menu
 		IMenuManager layoutSubMenu= new MenuManager("Layout"); //$NON-NLS-1$
 		String layoutGroupName= PackagesMessages.getString("LayoutActionGroup.label"); //$NON-NLS-1$
-		GroupMarker marker= new GroupMarker(layoutGroupName);
+//		GroupMarker marker= new GroupMarker(layoutGroupName);
+		Separator marker= new Separator(layoutGroupName);
+
+		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+
+
 		viewMenu.add(marker);
 		viewMenu.appendToGroup(layoutGroupName,layoutSubMenu);
+		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
 		addActions(layoutSubMenu);
 	}
 
