@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
@@ -79,24 +81,28 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
 			pm.worked(1);
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-			if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
-				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
+			IMethod relatedMethod= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName());
+			if (relatedMethod != null){
+				Context context= JavaSourceContext.create(relatedMethod);
+				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined"), context); //$NON-NLS-1$
+			}	
 			return result;
 		} finally {
 			pm.done();
 		}
 	}
 		
-	private boolean relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
+	private IMethod relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			Set types= getRelatedTypes(new SubProgressMonitor(pm, 1));
 			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
 				IMethod m= Checks.findMethod(method, (IType)iter.next());
-				if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName))
-					return true;
+				IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName);
+				if (hierarchyMethod != null)
+					return hierarchyMethod;
 			}
-			return false;
+			return null;
 		} finally {
 			pm.done();
 		}	

@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
@@ -52,8 +54,11 @@ class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 				return result;
 			
 			pm.subTask(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.analyzing_hierachy")); //$NON-NLS-1$
-			if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameStaticMethodRefactoring.hierachy_declares", getNewName())); //$NON-NLS-1$
+			IMethod hierarchyMethod= hierarchyDeclaresMethodName(pm, getMethod(), getNewName());
+			if (hierarchyMethod != null){
+				Context context= JavaSourceContext.create(hierarchyMethod);
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameStaticMethodRefactoring.hierachy_declares", getNewName()), context); //$NON-NLS-1$
+			}	
 			return result;
 		} finally{
 			pm.done();

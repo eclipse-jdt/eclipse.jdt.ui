@@ -403,7 +403,10 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 
 	//-------
-	private boolean classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
+	/**
+	 * @return the found method or <code>null</code>
+	 */
+	private IMethod classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
 		IType type= method.getDeclaringType();
 		List subtypes= Arrays.asList(hier.getAllSubtypes(type));
 		
@@ -415,26 +418,37 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			IMethod[] methods= clazz.getMethods();
 			boolean isSubclass= subtypes.contains(clazz);
 			for (int j= 0; j < methods.length; j++) {
-				if (null == Checks.findMethod(newName, parameterCount, false, new IMethod[] {methods[j]}))
+				IMethod foundMethod= Checks.findMethod(newName, parameterCount, false, new IMethod[] {methods[j]});
+				if (foundMethod == null)
 					continue;
 				if (isSubclass || type.equals(clazz))
-					return true;
+					return foundMethod;
 				if ((! isMethodPrivate) && (! JdtFlags.isPrivate(methods[j])))
-					return true;
+					return foundMethod;
 			}
 		}
-		return false;
+		return null;
 	}
-	
-	final boolean hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
+
+	/**
+	 * @return the found method or <code>null</code>
+	 */	
+	final IMethod hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
-		if (null != Checks.findMethod(newName, method.getParameterTypes().length, false, type)) {
-			return true;
-		}
-		IType[] implementingClasses= hier.getImplementingClasses(type);
-		return classesDeclareMethodName(hier, Arrays.asList(hier.getAllClasses()), method, newName) 
-			|| classesDeclareMethodName(hier, Arrays.asList(implementingClasses), method, newName);
+		IMethod foundMethod= Checks.findMethod(newName, method.getParameterTypes().length, false, type);
+		if (foundMethod != null) 
+			return foundMethod;
+
+		IMethod foundInHierarchyClasses= classesDeclareMethodName(hier, Arrays.asList(hier.getAllClasses()), method, newName);
+		if (foundInHierarchyClasses != null)
+			return foundInHierarchyClasses;
+		
+		IType[] implementingClasses= hier.getImplementingClasses(type);	
+		IMethod foundInImplementingClasses= classesDeclareMethodName(hier, Arrays.asList(implementingClasses), method, newName);
+		if (foundInImplementingClasses != null)
+			return foundInImplementingClasses;
+		return null;	
 	}
 				
 	//-------- changes -----
