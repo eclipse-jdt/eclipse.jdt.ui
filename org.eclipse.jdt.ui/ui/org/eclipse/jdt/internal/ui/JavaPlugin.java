@@ -51,6 +51,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -61,13 +62,12 @@ import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
-
-import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -315,6 +315,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 		TemplatePreferencePage.initDefaults(store);		
 		CodeGenerationPreferencePage.initDefaults(store);
+		JavadocPreferencePage.initDefaults(store);
 		
 		WorkInProgressPreferencePage.initDefaults(store);
 		JavaBrowsingPreferencePage.initDefaults(store);

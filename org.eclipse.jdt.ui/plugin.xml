@@ -719,6 +719,31 @@ JavaStructureDiffViewerCreator
 </extension>
 
 <!-- =========================================================================== -->
+<!-- Javadoc Export                                                       -->
+<!-- =========================================================================== -->
+
+<extension point="org.eclipse.ui.exportWizards">
+	<!-- Change to necessary NLS -->
+	<wizard
+	   id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
+	   name="Javadoc" 
+	   class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
+	   icon="icons/full/ctool16/insp_sbook.gif">
+	   <description>Javadoc Generation Wizard</description>
+	   <selection class="org.eclipse.core.resources.IProject"/>
+	</wizard>
+</extension>
+
+<extension
+	point="org.eclipse.ui.preferencePages">
+	<page name="Javadoc"
+		id="org.eclipse.jdt.ui.preferences.JavadocPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
+</extension>
+
+<!-- =========================================================================== -->
 <!-- NLS tool 																	 -->
 <!-- =========================================================================== -->
 
