@@ -152,7 +152,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E <Vector1> {\n");
+		buf.append("public class E<Vector1> {\n");
 		buf.append("    Vector1 vec;\n");
 		buf.append("}\n");
 		String expected5= buf.toString();
@@ -228,7 +228,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E <Vect1or> {\n");
+		buf.append("public class E<Vect1or> {\n");
 		buf.append("    void foo(Vect1or[] vec) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -306,7 +306,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E <Vect1or> {\n");
+		buf.append("public class E<Vect1or> {\n");
 		buf.append("    Vect1or[] foo() {\n");
 		buf.append("        return null;\n");		
 		buf.append("    }\n");
@@ -496,7 +496,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");		
-		buf.append("public class E <ArrayListExtra> {\n");
+		buf.append("public class E<ArrayListExtra> {\n");
 		buf.append("    void foo() {\n");
 		buf.append("        Serializable[] v= new ArrayListExtra[10];\n");
 		buf.append("    }\n");
@@ -832,7 +832,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E <floot> {\n");
+		buf.append("public class E<floot> {\n");
 		buf.append("    floot vec= 1.0;\n");
 		buf.append("}\n");
 		String expected7= buf.toString();

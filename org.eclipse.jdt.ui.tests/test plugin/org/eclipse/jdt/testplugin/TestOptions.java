@@ -581,7 +581,7 @@ class TestFormatterOptions {
 		this.compact_else_if = true;
 		this.keep_guardian_clause_on_one_line = false;
 		this.keep_else_statement_on_same_line = false;
-		this.keep_empty_array_initializer_on_one_line = false;
+		this.keep_empty_array_initializer_on_one_line = true;
 		this.keep_simple_if_on_one_line = false;
 		this.keep_then_statement_on_same_line = false;
 		this.number_of_empty_lines_to_preserve = 1;
