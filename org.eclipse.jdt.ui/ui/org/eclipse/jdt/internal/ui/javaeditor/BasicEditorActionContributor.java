@@ -91,6 +91,9 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		IActionBars actionBars= getActionBars();
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_LEFT, getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
+
+		actionBars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
+		actionBars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		
 		// character encoding
 		fEncodingActionGroup.retarget(textEditor);

@@ -923,12 +923,14 @@
 
 		<action id="openTypeInHierarchy"
 			definitionId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+			helpContextId="org.eclipse.jdt.ui.open_type_in_hierarchy_action"
 			menubarPath="navigate/open.ext2"
 			label="%OpenTypeInHierarchyAction.label"
 			tooltip="%OpenTypeInHierarchyAction.tooltip"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
 			definitionId="org.eclipse.jdt.ui.navigate.open.type"
+			helpContextId="org.eclipse.jdt.ui.open_type_action"
 			menubarPath="navigate/open.ext2"
 			toolbarPath="org.eclipse.search.searchActionSet/Search"			
 			label="%OpenTypeAction.label"
