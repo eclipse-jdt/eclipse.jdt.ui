@@ -16,6 +16,7 @@ import java.util.*;
 import org.eclipse.jface.text.*;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.*;
@@ -23,10 +24,13 @@ import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.core.JavaModel;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.internal.DocumentManager;
+import org.eclipse.compare.internal.IResourceProvider;
 import org.eclipse.compare.structuremergeviewer.*;
 
 
@@ -128,6 +132,18 @@ public class JavaStructureCreator implements IStructureCreator {
 			}
 		}
 		
+		Map compilerOptions= null;
+		if (input instanceof IResourceProvider) {
+			IResource resource= ((IResourceProvider) input).getResource();
+			if (resource != null) {
+				JavaModelManager javaModelManager= JavaModelManager.getJavaModelManager();
+				JavaModel javaModel= javaModelManager.getJavaModel();
+				IJavaProject javaProject= javaModel.getJavaProject(resource);
+				if (javaProject != null)
+					compilerOptions= javaProject.getOptions(true);
+			}
+		}
+		
 		if (doc != null) {
 			boolean isEditable= false;
 			if (input instanceof IEditableContent)
@@ -148,6 +164,8 @@ public class JavaStructureCreator implements IStructureCreator {
 			}
 						
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			if (compilerOptions != null)
+				parser.setCompilerOptions(compilerOptions);
 			parser.setSource(buffer);
 			parser.setFocalPosition(0);
 			CompilationUnit cu= (CompilationUnit) parser.createAST(null);
