@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -134,12 +135,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		checkArgName();
 	}
 	
-	public static boolean isAvailable(IField field) throws JavaModelException {
-		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
-	}
-	
 	public static SelfEncapsulateFieldRefactoring create(IField field) throws JavaModelException {
-		if (Checks.checkAvailability(field).hasFatalError() || !isAvailable(field))
+		if (Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
 			return null;
 		return new SelfEncapsulateFieldRefactoring(field);
 	}

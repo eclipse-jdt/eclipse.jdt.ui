@@ -13,19 +13,24 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -33,13 +38,9 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 public class NLSRefactoring extends Refactoring {
 
@@ -50,7 +51,7 @@ public class NLSRefactoring extends Refactoring {
 	public static final String KEY= "${key}"; //$NON-NLS-1$
 	public static final String DEFAULT_SUBST_PATTERN= "getString(" + KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	
-	private static final String DEFAULT_PROPERTY_FILENAME= "messages"; //$NON-NLS-1$
+	public static final String DEFAULT_PROPERTY_FILENAME= "messages"; //$NON-NLS-1$
 
 	//private IPath fPropertyFilePath;
 
@@ -82,23 +83,13 @@ public class NLSRefactoring extends Refactoring {
 		setResourceBundleName(nlsHint.getResourceBundleName());
 		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
 		
-		fSubstitutionPattern= getDefaultSubstitutionPattern();
+		fSubstitutionPattern= DEFAULT_SUBST_PATTERN;
 	}
 
 	public static NLSRefactoring create(ICompilationUnit cu) {
-		if (!isAvailable(cu))
+		if (cu == null || !cu.exists())
 			return null;
 		return new NLSRefactoring(cu);
-	}
-
-	public static boolean isAvailable(ICompilationUnit cu) {
-		if (cu == null)
-			return false;
-
-		if (!cu.exists())
-			return false;
-
-		return true;
 	}
 
 	/**
@@ -120,10 +111,6 @@ public class NLSRefactoring extends Refactoring {
 	 */
 	public String getSubstitutionPattern() {
 		return fSubstitutionPattern;
-	}
-
-	public static String getDefaultSubstitutionPattern() {
-		return DEFAULT_SUBST_PATTERN;
 	}
 
 	public ICompilationUnit getCu() {
@@ -394,8 +381,6 @@ public class NLSRefactoring extends Refactoring {
 		return res;
 	}
 
-
-
 	public NLSSubstitution[] getSubstitutions() {
 		return fSubstitutions;
 	}
@@ -409,12 +394,6 @@ public class NLSRefactoring extends Refactoring {
 		NLSSubstitution.setPrefix(prefix);
 	}
 
-
-	public static String getDefaultPropertiesFilename() {
-		return DEFAULT_PROPERTY_FILENAME + PROPERTY_FILE_EXT;
-	}
-	
-	
 	public void setAccessorClassName(String name) {
 		Assert.isNotNull(name);
 		fAccessorClassName= name;

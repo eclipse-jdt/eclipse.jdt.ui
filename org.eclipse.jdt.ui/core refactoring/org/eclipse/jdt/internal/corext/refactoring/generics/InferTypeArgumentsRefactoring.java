@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -82,12 +83,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		fElements= elements;
 	}
 	
-	public static boolean isAvailable(IJavaElement[] elements) {
-		return elements.length > 0;
-	}
-
 	public static InferTypeArgumentsRefactoring create(IJavaElement[] elements) {
-		if (isAvailable(elements)) {
+		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
 			return new InferTypeArgumentsRefactoring(elements);
 		}
 		return null;

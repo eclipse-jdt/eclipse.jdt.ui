@@ -19,8 +19,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -52,12 +57,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
-
 
 public class InlineTempRefactoring extends Refactoring {
 
@@ -79,11 +78,6 @@ public class InlineTempRefactoring extends Refactoring {
 		fCu= cu;
 	}
 	
-	public static boolean isAvailable(ILocalVariable variable) throws JavaModelException {
-		// work around for https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-		return Checks.isAvailable(variable);
-	}
-	
 	public static InlineTempRefactoring create(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		InlineTempRefactoring ref= new InlineTempRefactoring(unit, selectionStart, selectionLength);
 		if (ref.checkIfTempSelected().hasFatalError())
@@ -92,7 +86,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkIfTempSelected(){
-		initializeAST();
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 
@@ -107,23 +101,11 @@ public class InlineTempRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 	
-	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
-	}
-	
 	/*
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("InlineTempRefactoring.name"); //$NON-NLS-1$
-	}
-	
-	public String getTempName(){
-		return fTempDeclaration.getName().getIdentifier();
-	}
-	
-	public int getReferencesCount() {
-		return getReferenceOffsets().length;
 	}
 	
 	/*
@@ -180,7 +162,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 		
 		if (fTempDeclaration.getInitializer() == null){
-			String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.not_initialized", getTempName());//$NON-NLS-1$
+			String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.not_initialized", fTempDeclaration.getName().getIdentifier());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 				
@@ -196,7 +178,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int length= assignmentFinder.getFirstAssignment().getLength();
 		ISourceRange range= new SourceRange(start, length);
 		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);	
-		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", getTempName());//$NON-NLS-1$
+		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", fTempDeclaration.getName().getIdentifier());//$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
@@ -233,7 +215,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int[] offsets= getReferenceOffsets();
 		pm.beginTask("", offsets.length); //$NON-NLS-1$
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name"); //$NON-NLS-1$
-		int length= getTempName().length();
+		int length= fTempDeclaration.getName().getIdentifier().length();
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i];
             String sourceToInline= getInitializerSource(needsBrackets(offset));
@@ -256,7 +238,7 @@ public class InlineTempRefactoring extends Refactoring {
     }
 
 	private SimpleName getReferenceAtOffset(int offset) {
-    	SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, getTempName().length()), true);
+    	SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, fTempDeclaration.getName().getIdentifier().length()), true);
     	fCompilationUnitNode.accept(analyzer);
     	ASTNode reference= analyzer.getFirstSelectedNode();
     	if(!isReference(reference))
@@ -308,14 +290,17 @@ public class InlineTempRefactoring extends Refactoring {
 		int end= start + length;
 		return fCu.getSource().substring(start, end);
 	}
-	
-	private int[] getReferenceOffsets() {
+
+	public int[] getReferenceOffsets() {
 		if (fReferenceOffsets == null) {
 			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclaration, false);
 			analyzer.perform();
 			fReferenceOffsets= analyzer.getReferenceOffsets();
 		}
 		return fReferenceOffsets;
-	}	
-	
+	}
+
+	public VariableDeclaration getTempDeclaration() {
+		return fTempDeclaration;
+	}
 }

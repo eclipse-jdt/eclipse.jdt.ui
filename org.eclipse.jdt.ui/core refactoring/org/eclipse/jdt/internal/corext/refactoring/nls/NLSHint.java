@@ -48,7 +48,7 @@ public class NLSHint {
 
 		fAccessorName= NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
 		fAccessorPackage= cuPackage;
-		fResourceBundleName= NLSRefactoring.getDefaultPropertiesFilename();
+		fResourceBundleName= NLSRefactoring.DEFAULT_PROPERTY_FILENAME + NLSRefactoring.PROPERTY_FILE_EXT;
 		fResourceBundlePackage= cuPackage;
 		
 		IJavaProject project= cu.getJavaProject();

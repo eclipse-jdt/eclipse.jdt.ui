@@ -130,10 +130,6 @@ public class InlineMethodRefactoring extends Refactoring {
 		fDeleteSource= true;
 	}
 	
-	public static boolean isAvailable(IMethod method) throws JavaModelException {
-		return Checks.isAvailable(method);		
-	}
-	
 	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length) {
 		ASTNode node= getTargetNode(unit, offset, length);
 		if (node == null)
@@ -231,7 +227,7 @@ public class InlineMethodRefactoring extends Refactoring {
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
 							added= true;
-							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"));
+							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline")); //$NON-NLS-1$
 							change.addTextEditGroup(group);
 							result.merge(inliner.perform(group)); //$NON-NLS-1$
 						} else {
@@ -251,7 +247,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					root.addChild(inliner.getModifications());
 					ImportRewrite rewrite= inliner.getImportEdit();
 					if (!rewrite.isEmpty()) {
-						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument());
+						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument(), null);
 						if (edit instanceof MultiTextEdit ? ((MultiTextEdit)edit).getChildrenSize() > 0 : true) {
 							root.addChild(edit);
 							change.addTextEditGroup(

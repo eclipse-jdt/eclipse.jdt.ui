@@ -245,10 +245,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			return typeBinding.getElementType().getQualifiedName();
 	}
 
-	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
-		return Checks.isExtractableExpression(selectedNodes, coveringNode) || (selectedNodes.length == 1 && selectedNodes[0] instanceof ExpressionStatement);
-	}
-
 	private static boolean isLeftValue(ASTNode node) {
 		ASTNode parent= node.getParent();
 		if (parent instanceof Assignment) {
@@ -605,7 +601,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (rewrite.isEmpty())
 			return null;
 		else
-			return rewrite.createEdit(buffer.getDocument());
+			return rewrite.createEdit(buffer.getDocument(), null);
 	}
 
 	private TextEdit[] createReplaceExpressionWithTempEdits() throws JavaModelException {

@@ -29,7 +29,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -109,7 +108,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	private boolean fInitializerUsesLocalTypes;
 	private boolean fTempTypeUsesClassTypeVariables;
 	
-	
 	private PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -125,11 +123,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
         fCodeGenerationSettings= codeGenerationSettings;
-	}
-	
-	public static boolean isAvailable(ILocalVariable variable) throws JavaModelException {
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-		return Checks.isAvailable(variable);
 	}
 	
 	public static PromoteTempToFieldRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){

@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -197,20 +196,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
-	}
-	
-	public static boolean isAvailable(ASTNode[] selectedNodes) {
-		if (selectedNodes == null || selectedNodes.length == 0)
-			return false;
-		if (selectedNodes.length == 1) {
-			return selectedNodes[0] instanceof Statement || Checks.isExtractableExpression(selectedNodes[0]);
-		} else {
-			for (int i= 0; i < selectedNodes.length; i++) {
-				if (!(selectedNodes[i] instanceof Statement))
-					return false;
-			}
-		}
-		return true;
 	}
 	
 	public static ExtractMethodRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) throws CoreException {
@@ -447,7 +432,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			replaceDuplicates(result);
 		
 			if (!fImportRewriter.isEmpty()) {
-				TextEdit edit= fImportRewriter.createEdit(fDocument);
+				TextEdit edit= fImportRewriter.createEdit(fDocument, null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(
 					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$

@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,8 +27,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -84,10 +88,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -210,12 +210,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 	private int fConstructorVisibility= Modifier.PRIVATE;
 
-	public static boolean isAvailable(IMethod method) throws JavaModelException {
-		return Checks.isAvailable(method) && method.isConstructor();
-	}
-
-	public static IntroduceFactoryRefactoring create(ICompilationUnit cu,
-													 int selectionStart, int selectionLength) {
+	public static IntroduceFactoryRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		return new IntroduceFactoryRefactoring(cu, selectionStart, selectionLength);
 	}
 
@@ -884,7 +879,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			if (someChange) {
 				root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCUHandle.getJavaProject().getOptions(true)));
-				root.addChild(fImportRewriter.createEdit(buffer.getDocument()));
+				root.addChild(fImportRewriter.createEdit(buffer.getDocument(), null));
 			}
 		} finally {
 			RefactoringFileBuffers.release(unitHandle);

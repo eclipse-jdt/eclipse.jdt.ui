@@ -37,13 +37,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -54,7 +50,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -99,7 +94,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -226,34 +220,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private IBinding fSelectionBinding;
 	private ITypeBinding fSelectionTypeBinding;
 	private ConstraintCollector fCollector;
-	
-	public static boolean isAvailable(IJavaElement element) throws JavaModelException {
-		if (element == null || ! element.exists())
-			return false;
-		String returnType= null;
-		if (element instanceof IMethod) {
-			returnType= ((IMethod)element).getReturnType();
-		} else if (element instanceof IField) {
-			final IField field= (IField) element;
-			if (JdtFlags.isEnum(field))
-				return false;
-			returnType= field.getTypeSignature();
-		} else if (element instanceof ILocalVariable) {
-			// be optimistic
-			return true;
-		} else if (element instanceof IType) {
-			final IType type= (IType) element;
-			if (JdtFlags.isEnum(type))
-				return false;
-			// be optimistic.
-			return true;
-		}
-		if (returnType == null || PrimitiveType.toCode(Signature.toString(returnType)) != null)
-			return false;
-		
-		return true;
-	}
-	
+
 	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
 	}
@@ -1185,7 +1152,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private String updateImports(ICompilationUnit icu, ITextFileBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
 		ImportRewrite rewrite= new ImportRewrite(icu);
 		String typeName= rewrite.addImport(fSelectedType.getQualifiedName());
-		rootEdit.addChild(rewrite.createEdit(buffer.getDocument()));
+		rootEdit.addChild(rewrite.createEdit(buffer.getDocument(), null));
 		return typeName;
 	}
 

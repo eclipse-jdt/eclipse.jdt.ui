@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -151,33 +152,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		//fExceptionInfos is created in checkInitialConditions
 		String initialReturnTypeName= Signature.toString(Signature.getReturnType(fMethod.getSignature()));
 		fReturnTypeInfo= new ReturnTypeInfo(initialReturnTypeName);
-		fMethodName= getInitialMethodName();
-		fVisibility= getInitialMethodVisibility();
+		fMethodName= fMethod.getElementName();
+		fVisibility= JdtFlags.getVisibilityCode(fMethod);
 		fOldVarargIndex= -1;
 	}
 	
 	public static ChangeSignatureRefactoring create(IMethod method) throws JavaModelException{
-		if (! isAvailable(method))
+		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
 			return null;
 		return new ChangeSignatureRefactoring(method);
-	}
-	
-	public static boolean isAvailable(IMethod method) throws JavaModelException {
-		if (method == null)
-			return false;
-		if (! Checks.isAvailable(method))
-			return false;
-		if (Flags.isAnnotation(method.getDeclaringType().getFlags()))
-			return false;
-		return true;
-	}	
-	
-	private String getInitialMethodName() {
-		return fMethod.getElementName();
-	}
-
-	private int getInitialMethodVisibility() throws JavaModelException{
-		return JdtFlags.getVisibilityCode(fMethod);
 	}
 	
 	private static List createParameterInfoList(IMethod method) {
@@ -375,7 +358,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private boolean isMethodNameSameAsInitial() {
-		return fMethodName.equals(getInitialMethodName());
+		return fMethodName.equals(fMethod.getElementName());
 	}
 	
 	private boolean areExceptionsSameAsInitial() {
@@ -795,7 +778,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return null;
 	    if (fRippleMethods.length == 1)
 	    	return null;
-	    Assert.isTrue(getInitialMethodVisibility() != Modifier.PRIVATE);
+	    Assert.isTrue(JdtFlags.getVisibilityCode(fMethod) != Modifier.PRIVATE);
 	    if (fVisibility == Modifier.PRIVATE)
 	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.non-virtual")); //$NON-NLS-1$
 		return null;

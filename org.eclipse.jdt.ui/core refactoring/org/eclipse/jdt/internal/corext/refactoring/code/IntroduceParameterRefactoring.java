@@ -23,6 +23,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.text.TextSelection;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -43,8 +50,6 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import org.eclipse.jface.text.TextSelection;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -64,11 +69,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class IntroduceParameterRefactoring extends Refactoring {
 	
@@ -94,10 +94,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 	}
 	
-	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
-		return Checks.isExtractableExpression(selectedNodes, coveringNode);
-	}
-
 	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength);
 	}
@@ -171,8 +167,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			fChangeSignatureRefactoring.getParameterInfos().add(fParameter);
 			
 			fChangeSignatureRefactoring.setBodyUpdater(new BodyUpdater() {
-				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus updaterResult) {
-					replaceSelectedExpression(cuRewrite);
+				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite rewrite, RefactoringStatus updaterResult) {
+					replaceSelectedExpression(rewrite);
 				}
 			});
 			

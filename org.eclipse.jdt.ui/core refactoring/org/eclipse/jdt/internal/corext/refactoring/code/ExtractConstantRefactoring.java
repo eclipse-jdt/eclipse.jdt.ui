@@ -137,10 +137,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fCu= cu;
 	}
 	
-	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
-		return Checks.isExtractableExpression(selectedNodes, coveringNode);
-	}
-
 	public static ExtractConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		return new ExtractConstantRefactoring(cu, selectionStart, selectionLength);
 	}
