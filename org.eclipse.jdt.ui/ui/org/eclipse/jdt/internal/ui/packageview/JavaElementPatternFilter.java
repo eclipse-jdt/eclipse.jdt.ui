@@ -5,7 +5,7 @@
  * The JavaElementPatternFilter is the filter used to determine whether 
  * a JavaElement is shown.
  */
-class JavaElementPatternFilter extends ViewerFilter {
+public class JavaElementPatternFilter extends ViewerFilter {
 	private String[] fPatterns;
 	private StringMatcher[] fMatchers;
 	
