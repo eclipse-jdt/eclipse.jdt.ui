@@ -376,7 +376,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-//		GridData gd= new GridData(GridData.FILL_BOTH);
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		editorComposite.setLayoutData(gd);		
 
