@@ -69,7 +69,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null;
+		return new char[] { '.', '(' };
 	}
 
 	/**

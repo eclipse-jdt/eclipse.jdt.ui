@@ -185,7 +185,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			int found= s.indexOf(',', start);
 			if (found == -1)
 				break;
-			start += (found + 1);
+			start= found + 1;
 			++ occurrences;
 		}
 		
