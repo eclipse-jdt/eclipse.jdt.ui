@@ -44,7 +44,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	}
 
 	public void dispose() {
-		fHierarchyView= null;
+		// action is reused, can be called several times.
 		if (fMenu != null) {
 			fMenu.dispose();
 			fMenu= null;
