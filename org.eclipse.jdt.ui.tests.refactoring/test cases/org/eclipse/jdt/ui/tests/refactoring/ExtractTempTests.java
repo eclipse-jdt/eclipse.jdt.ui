@@ -345,8 +345,8 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test51() throws Exception{
-		printTestDisabledMessage("test for bug#23281");
-//		helper1(5, 15, 5, 18, true, false, "temp");
+//		printTestDisabledMessage("test for bug#23281");
+		helper1(5, 15, 5, 18, true, false, "temp");
 	}
 	
 	// -- testing failing preconditions
