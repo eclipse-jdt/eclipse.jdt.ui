@@ -298,7 +298,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			if (curr != null) {
 				ImportOrderEntry entry= ImportOrderEntry.fromSerialized(curr);
 				if (!JavaConventions.validatePackageName(entry.name).matches(IStatus.ERROR)) {
-					res.add(curr);
+					res.add(entry);
 				} else {
 					return null;
 				}
