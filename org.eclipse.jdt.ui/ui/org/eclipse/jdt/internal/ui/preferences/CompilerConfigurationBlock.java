@@ -87,7 +87,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_EMPTY_STATEMENT= JavaCore.COMPILER_PB_EMPTY_STATEMENT;
 	private static final String PREF_PB_UNNECESSARY_ELSE= JavaCore.COMPILER_PB_UNNECESSARY_ELSE;
 	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
-	
+	private static final String PREF_PB_FORBIDDEN_REFERENCE= JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE;
+
 	private static final String PREF_JAVADOC_SUPPORT= JavaCore.COMPILER_DOC_COMMENT_SUPPORT;
 
 	private static final String PREF_PB_INVALID_JAVADOC= JavaCore.COMPILER_PB_INVALID_JAVADOC;
@@ -228,7 +229,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 				
-				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND
+				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_PB_FORBIDDEN_REFERENCE
 			};
 		return keys;
 	}
@@ -413,9 +414,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_when_overriding.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, indent);
-		
+				
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_forbidden_reference.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		
 		gd= new GridData();
