@@ -114,6 +114,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PRINT_MARGIN_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, CompilationUnitEditor.PRINT_MARGIN_COLUMN),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PRINT_MARGIN),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
@@ -210,6 +212,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, true);
 		store.setDefault(CompilationUnitEditor.PRINT_MARGIN_COLUMN, 80);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
+
+		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
 		
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, false);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
@@ -545,7 +549,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Control fPrintMarginColumn;
 	private Button fProblemIndicationButton;
 	private Control fProblemIndicationColor;
-	
+	private Control fFindScopeColor;
 	
 	private Control createBehaviorPage(Composite parent) {
 
@@ -626,6 +630,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+
+		label= "F&ind Scope:";
+		fFindScopeColor= addColorButton(behaviorComposite, label, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, 0);
 		
 		return behaviorComposite;
 	}
