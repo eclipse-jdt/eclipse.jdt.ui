@@ -23,7 +23,6 @@ import java.util.Vector;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -60,7 +59,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -77,11 +75,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.Delegation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.MethodEditSession;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -147,31 +146,39 @@ class InstanceMethodMover {
 			Assert.isTrue(inlineDelegator || !removeDelegator);
 			Assert.isTrue(Arrays.asList(method.getPossibleNewReceivers()).contains(this));
 
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InstanceMethodMover.move_method")); //$NON-NLS-1$
-			composite.add(addMovedMethodToMyClass(method, newMethodName, originalReceiverParameterName));
-			composite.add(replaceOriginalMethodBodyWithDelegation(method, newMethodName));
-			return composite;
+			TextChangeManager manager= new TextChangeManager();
+			addMovedMethodToMyClass(manager, method, newMethodName, originalReceiverParameterName);
+			replaceOriginalMethodBodyWithDelegation(manager, method, newMethodName);
+
+			return getChange(manager);
 		}
 		
-		private CompilationUnitChange replaceOriginalMethodBodyWithDelegation(Method originalMethod, String newMethodName) throws CoreException {
+		private static IChange getChange(TextChangeManager manager) {
+			TextChange[] changes= manager.getAllChanges();
+			if (changes.length == 1) {
+				return changes[0];
+			} else {
+				return new CompositeChange(RefactoringCoreMessages.getString("InstanceMethodMover.move_method"), changes); //$NON-NLS-1$
+			}
+		}
+
+		private void replaceOriginalMethodBodyWithDelegation(TextChangeManager manager, Method originalMethod, String newMethodName) throws CoreException {
 			Method.MethodEditSession methodEditSession= originalMethod.createEditSession();	
 			methodEditSession.replaceBodyWithDelegation(
 				specifyDelegationToNewMethod(originalMethod, newMethodName));
-
-			CompilationUnitChange cuChange= new CompilationUnitChange(RefactoringCoreMessages.getString("InstanceMethodMover.transform_to_delegate"), originalMethod.getDeclaringCU()); //$NON-NLS-1$
+			TextChange cuChange= manager.get(originalMethod.getDeclaringCU());
 			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits()); //$NON-NLS-1$
-			return cuChange;	
 		}
 		
 		abstract Method.Delegation specifyDelegationToNewMethod(Method originalMethod, String newMethodName);
 		
-		private CompilationUnitChange addMovedMethodToMyClass(Method originalMethod, String newMethodName, String originalReceiverParameterName) throws CoreException {
+		private void addMovedMethodToMyClass(TextChangeManager manager, Method originalMethod, String newMethodName, String originalReceiverParameterName) throws CoreException {
 			List allTypesUsedWithoutQualification= new ArrayList();
 			TextBufferPortion newMethodText= getNewMethodDeclarationText(originalMethod, newMethodName, originalReceiverParameterName, allTypesUsedWithoutQualification);
-			return addNewMethodToMyClass(newMethodText.getUnindentedContentIgnoreFirstLine(), allTypesUsedWithoutQualification);
+			addNewMethodToMyClass(manager, newMethodText.getUnindentedContentIgnoreFirstLine(), allTypesUsedWithoutQualification);
 		}
 		
-		private CompilationUnitChange addNewMethodToMyClass(String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
+		private void addNewMethodToMyClass(TextChangeManager manager, String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
 			TypeDeclaration myClassDeclaration= getReceiverClassDeclaration();
 			ASTRewrite rewrite= new ASTRewrite(myClassDeclaration);
 			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.METHOD_DECLARATION);
@@ -180,16 +187,15 @@ class InstanceMethodMover {
 
 			TextBuffer buffer= TextBuffer.create(getReceiverClassCU().getBuffer().getContents());
 			MultiTextEdit edit= new MultiTextEdit();
-			rewrite.rewriteNode(buffer, edit, null);
+			rewrite.rewriteNode(buffer, edit);
 			rewrite.removeModifications();
-
-			CompilationUnitChange cuChange= new CompilationUnitChange(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), getReceiverClassCU()); //$NON-NLS-1$
+			
+			TextChange cuChange= manager.get(getReceiverClassCU());
 			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit); //$NON-NLS-1$
 			cuChange.addTextEdit(
 				RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), //$NON-NLS-1$
 				createImportEdit(allTypesUsedWithoutQualification, getReceiverClassCU())
 			);
-			return cuChange;		
 		}
 
 		private TextEdit createImportEdit(List types, ICompilationUnit cu) throws JavaModelException {
@@ -287,10 +293,6 @@ class InstanceMethodMover {
 			if( ! isReceiverModelClassAvailable())
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.to_local_localunsupported"), null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL); //$NON-NLS-1$
 
-			// TODO: handle moving to within same cu
-			if(isDeclaredInMyCU(method))
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.moving_to_same_cu_unsupported"), null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_SAME_CU); //$NON-NLS-1$
-			
 			RefactoringStatus result= new RefactoringStatus();
 			checkParameterNames(result, method, originalReceiverParameterName);
 			if (result.hasFatalError())
@@ -862,7 +864,7 @@ class InstanceMethodMover {
 			
 			private MultiTextEdit getEdits(TextBuffer buffer) {
 				MultiTextEdit rootEdit= new MultiTextEdit();
-				fRewrite.rewriteNode(buffer, rootEdit, null);
+				fRewrite.rewriteNode(buffer, rootEdit);
 				return rootEdit;			
 			}
 			

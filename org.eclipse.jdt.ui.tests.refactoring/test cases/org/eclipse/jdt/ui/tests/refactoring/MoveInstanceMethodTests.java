@@ -291,6 +291,19 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] {"p1.TR", "p1.TC"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
 	}	
 	
+	//move to type in same cu
+	public void test15() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=40120
+		helper1(new String[] {"p.A"}, "p.A", 13, 18, 13, 18, PARAMETER, "s", false, false);
+	}	
+
+	//move to inner type in same cu
+	public void test16() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=40120
+		helper1(new String[] {"p.B"}, "p.B", 11, 17, 11, 22, PARAMETER, "s", false, false);
+	}
+	
+
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
 		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);	
