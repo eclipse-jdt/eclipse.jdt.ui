@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Property page used to set the project's Javadoc location for sources
@@ -71,16 +72,20 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	protected Control createContents(Composite parent) {
 		
 		IJavaElement elem= getJavaElement();
+		
 		URL initialLocation= null;
-		try {
-			initialLocation= JavaUI.getJavadocBaseLocation(elem);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}		
+		if (elem != null) {
+			try {
+				initialLocation= JavaUI.getJavadocBaseLocation(elem);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
 		
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
+		control.setVisible(elem != null);
 
 		Dialog.applyDialogFont(control);
 		return control;
@@ -94,14 +99,11 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			IResource resource= (IResource) adaptable.getAdapter(IResource.class);
 			//special case when the .jar is a file
 			try {
-				if (resource instanceof IFile) {
+				if (resource instanceof IFile && ArchiveFileFilter.isArchivePath(resource.getFullPath())) {
 					IProject proj= resource.getProject();
 					if (proj.hasNature(JavaCore.NATURE_ID)) {
 						IJavaProject jproject= JavaCore.create(proj);
-						IPackageFragmentRoot root= jproject.findPackageFragmentRoot(resource.getFullPath());
-						if (root != null && root.isArchive()) {
-							elem= root;
-						}
+						elem= jproject.getPackageFragmentRoot(resource); // create a handle
 					}
 				}
 			} catch (CoreException e) {
@@ -127,7 +129,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		IJavaElement elem= getJavaElement();
 		if (elem instanceof IJavaProject) {
 			JavaUI.setProjectJavadocLocation((IJavaProject) elem, javadocLocation);
-		} else {
+		} else if (elem instanceof IPackageFragmentRoot) {
 			JavaUI.setLibraryJavadocLocation(elem.getPath(), javadocLocation);
 		}
 		return true;
