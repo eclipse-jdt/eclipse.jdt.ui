@@ -469,13 +469,19 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			public void run(final IProgressMonitor pm) {
 				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
 				String name= JavadocExportMessages.getString("JavadocWizard.savetask.name"); //$NON-NLS-1$
-				List dirtyFilesList= Arrays.asList(dirtyFiles);
-				for (int i= 0; i < editorsToSave.length; i++) {
-					if (editorsToSave[i].getEditorInput() instanceof IFileEditorInput) {
-						IFile dirtyFile= ((IFileEditorInput) editorsToSave[i].getEditorInput()).getFile();
-						if (dirtyFilesList.contains((dirtyFile)))
-							editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
+				pm.beginTask(name, editorsToSave.length);
+				try {
+					List dirtyFilesList= Arrays.asList(dirtyFiles);
+					for (int i= 0; i < editorsToSave.length; i++) {
+						if (editorsToSave[i].getEditorInput() instanceof IFileEditorInput) {
+							IFile dirtyFile= ((IFileEditorInput) editorsToSave[i].getEditorInput()).getFile();
+							if (dirtyFilesList.contains((dirtyFile)))
+								editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
+						}
+						pm.worked(1);
 					}
+				} finally {
+					pm.done();
 				}
 			}
 		};
