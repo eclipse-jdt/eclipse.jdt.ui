@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -78,7 +77,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
