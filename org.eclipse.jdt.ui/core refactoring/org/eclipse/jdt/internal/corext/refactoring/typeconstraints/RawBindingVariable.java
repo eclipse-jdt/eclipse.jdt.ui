@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class RawBindingVariable extends ConstraintVariable{
 
-	protected RawBindingVariable(ITypeBinding binding) {
+	public RawBindingVariable(ITypeBinding binding) {
 		super(binding);
 	}
 }
