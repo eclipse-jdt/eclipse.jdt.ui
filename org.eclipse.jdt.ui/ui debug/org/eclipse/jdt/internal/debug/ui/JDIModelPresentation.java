@@ -49,6 +49,16 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String TERMINATED_USR= LABEL + "terminated_usr";
 	private static final String STEPPING_SYS= LABEL + "stepping_sys";
 	private static final String STEPPING_USR= LABEL + "stepping_usr";
+	private static final String EXCEPTION_SYS= LABEL + "exception_sys";
+	private static final String EXCEPTION_USR= LABEL + "exception_usr";
+	private static final String BREAKPOINT_SYS= LABEL + "breakpoint_sys";
+	private static final String BREAKPOINT_USR= LABEL + "breakpoint_usr";
+	private static final String ACCESS_SYS= LABEL + "access_sys";
+	private static final String ACCESS_USR= LABEL + "access_usr";
+	private static final String MODIFICATION_SYS= LABEL + "modification_sys";
+	private static final String MODIFICATION_USR= LABEL + "modification_usr";	
+	private static final String RUN_TO_LINE_SYS= LABEL + "run_to_line_sys";
+	private static final String RUN_TO_LINE_USR= LABEL + "run_to_line_usr";
 	private static final String SUSPENDED_SYS= LABEL + "suspended_sys";
 	private static final String SUSPENDED_USR= LABEL + "suspended_usr";
 
@@ -56,8 +66,15 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String TERMINATED= "terminated";
 	private static final String NOT_RESPONDING= PREFIX + "not_responding";
 	private static final String LINE= "line";
+	private static final String HITCOUNT= "hitCount";
 	
 	private static final String NO_RETURN_VALUE= PREFIX + "no_return_value";
+
+	protected final static String EXCEPTION= PREFIX + "exception.";
+	protected final static String FORMAT= EXCEPTION + "format";
+	protected final static String CAUGHT= EXCEPTION + "caught";
+	protected final static String UNCAUGHT= EXCEPTION + "uncaught";
+	protected final static String BOTH= EXCEPTION + "both";
 
 	protected static final String fgStringName= "java.lang.String";
 
@@ -80,7 +97,13 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			} else if (item instanceof IStackFrame) {
 				return getStackFrameText((IStackFrame) item);
 			} else if (item instanceof IMarker) {
-				return getMarkerText((IMarker) item);
+				IBreakpoint breakpoint = getBreakpoint((IMarker)item);
+				if (breakpoint != null) {
+					return getBreakpointText(breakpoint);
+				}
+				return null;
+			} else if (item instanceof IBreakpoint) {
+				return getBreakpointText((IBreakpoint)item);
 			} else {
 				String label= null;
 				if (item instanceof IJavaThread) {
@@ -98,15 +121,19 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				}
 				return label;
 			}
-		} catch (DebugException e) {
+		} catch (CoreException e) {
 			return getResourceString(NOT_RESPONDING);
 		}
 	}
 
+	protected IBreakpoint getBreakpoint(IMarker marker) {
+		return DebugPlugin.getDefault().getBreakpointManager().getBreakpoint(marker);
+		}
+	
 	/**
 	 * Build the text for an IJavaThread.
 	 */
-	protected String getThreadText(IJavaThread thread, boolean qualified) throws DebugException {
+	protected String getThreadText(IJavaThread thread, boolean qualified) throws CoreException {
 		if (thread.isTerminated()) {
 			if (thread.isSystemThread()) {
 				return getFormattedString(TERMINATED_SYS, thread.getName());
@@ -128,9 +155,56 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				return getFormattedString(RUNNING_USR, thread.getName());
 			}
 		}
-		IJavaBreakpoint breakpoint= thread.getBreakpoint();
-		if (breakpoint != null && breakpoint.getMarker().exists()) {			
-			return breakpoint.getThreadText(thread.getName(), qualified, thread.isSystemThread());
+		IJavaBreakpoint breakpoint= (IJavaBreakpoint)thread.getBreakpoint();
+		if (breakpoint != null) {
+			String typeName= getMarkerTypeName(breakpoint, qualified);
+			if (breakpoint instanceof IJavaExceptionBreakpoint) {
+				if (thread.isSystemThread()) {
+					return getFormattedString(EXCEPTION_SYS, new String[] {thread.getName(), typeName});
+				} else {
+					return getFormattedString(EXCEPTION_USR, new String[] {thread.getName(), typeName});
+				}
+			}
+			if (breakpoint instanceof IJavaWatchpoint) {
+				IJavaWatchpoint wp = (IJavaWatchpoint)breakpoint;
+				IField field = wp.getField();
+				String fieldName = "";
+				if (field != null) {
+					fieldName = field.getElementName();
+				}
+				if (wp.isAccess()) {
+					if (thread.isSystemThread()) {
+						return getFormattedString(ACCESS_SYS, new String[] {thread.getName(), fieldName, typeName});
+					} else {
+						return getFormattedString(ACCESS_USR, new String[] {thread.getName(), fieldName, typeName});
+					}
+				} else {
+					// modification
+					if (thread.isSystemThread()) {
+						return getFormattedString(MODIFICATION_SYS, new String[] {thread.getName(), fieldName, typeName});
+					} else {
+						return getFormattedString(MODIFICATION_USR, new String[] {thread.getName(), fieldName, typeName});
+					}
+				}
+			}
+			if (breakpoint instanceof IJavaLineBreakpoint) {
+				int lineNumber= ((IJavaLineBreakpoint)breakpoint).getLineNumber();
+				if (lineNumber > -1) {
+					if (thread.isSystemThread()) {
+						if (breakpoint instanceof IJavaRunToLineBreakpoint) {
+							return getFormattedString(RUN_TO_LINE_SYS, new String[] {thread.getName(), String.valueOf(lineNumber), typeName});
+						} else {
+							return getFormattedString(BREAKPOINT_SYS, new String[] {thread.getName(), String.valueOf(lineNumber), typeName});
+						}
+					} else {
+						if (breakpoint instanceof IJavaRunToLineBreakpoint) {
+							return getFormattedString(RUN_TO_LINE_USR, new String[] {thread.getName(), String.valueOf(lineNumber), typeName});
+						} else {
+							return getFormattedString(BREAKPOINT_USR, new String[] {thread.getName(), String.valueOf(lineNumber), typeName});
+						}
+					}
+				}
+			}
 		}
 
 		// Otherwise, it's just suspended
@@ -361,23 +435,39 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return c;
 	}
 
+	protected String getMarkerTypeName(IJavaBreakpoint breakpoint, boolean qualified) throws CoreException {
+		String typeName= "";
+		IType type = breakpoint.getType();
+		if (type != null) {
+			typeName= type.getFullyQualifiedName();
+			if (!qualified) {
+				int index= typeName.lastIndexOf('.');
+				if (index != -1) {
+					typeName= typeName.substring(index + 1);
+				}
+			}
+		}
+		return typeName;
+	}
+
 	/**
 	 * Maps a Java element to an appropriate image.
 	 */
 	public Image getImage(Object item) {
-		if (item instanceof IJavaVariable) {
-			return getVariableImage((IAdaptable) item);
-		}
-		if (item instanceof IMarker) {
-			IBreakpointManager manager= getBreakpointManager();
-			IBreakpoint breakpoint= manager.getBreakpoint((IMarker)item);
-			if (breakpoint instanceof IJavaBreakpoint) {
-				try {
-					return getBreakpointImage((IJavaBreakpoint)breakpoint);
-				} catch (CoreException e) {
-					DebugUIUtils.logError(e);
+		try {
+			if (item instanceof IJavaVariable) {
+				return getVariableImage((IAdaptable) item);
+			}
+			if (item instanceof IMarker) {
+				IBreakpoint bp = getBreakpoint((IMarker)item);
+				if (bp != null && bp instanceof IJavaBreakpoint) {
+					return getBreakpointImage((IJavaBreakpoint)bp);
 				}
 			}
+			if (item instanceof IJavaBreakpoint) {
+				return getBreakpointImage((IJavaBreakpoint)item);
+			}
+		} catch (CoreException e) {
 		}
 		return null;
 	}
@@ -388,21 +478,21 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		} if (breakpoint instanceof IJavaRunToLineBreakpoint) {
 			return null;
 		} else {
-			return getLineBreakpointImage(breakpoint);
+			return getJavaBreakpointImage(breakpoint);
 		}
 	}
 
-	protected Image getExceptionBreakpointImage(IJavaExceptionBreakpoint breakpoint) throws CoreException {
-		if (!breakpoint.isEnabled()) {
+	protected Image getExceptionBreakpointImage(IJavaExceptionBreakpoint exception) throws CoreException {
+		if (!exception.isEnabled()) {
 			return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_DISABLED);
-		} else if (breakpoint.isChecked()) {
+		} else if (exception.isChecked()) {
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 		} else {
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ERROR);
 		}
 	}
 
-	protected Image getLineBreakpointImage(IJavaBreakpoint breakpoint) throws CoreException {
+	protected Image getJavaBreakpointImage(IJavaBreakpoint breakpoint) throws CoreException {
 		if (!breakpoint.isEnabled()) {
 			return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_DISABLED);
 		}
@@ -433,19 +523,18 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @see IDebugModelPresentation
 	 */
 	public IEditorInput getEditorInput(Object item) {
-		if (item instanceof IMarker) {
-			IMarker marker= (IMarker) item;
-			IBreakpoint breakpoint= getBreakpointManager().getBreakpoint(marker);
-			if (breakpoint instanceof IJavaBreakpoint) {
-				item= ((IJavaBreakpoint)breakpoint).getType();
-			}
-		}
-		if (item instanceof IType) {
-			promptForSource((IType)item);
-		}
 		try {
+			if (item instanceof IMarker) {
+				item = getBreakpoint((IMarker)item);
+			}
+			if (item instanceof IJavaBreakpoint) {
+				item= ((IJavaBreakpoint)item).getType();
+			}
+			if (item instanceof IType) {
+				promptForSource((IType)item);
+			}
 			return EditorUtility.getEditorInput(item);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			return null;
 		}
 	}
@@ -607,19 +696,91 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return buff.toString();
 	}
 
-	protected String getMarkerText(IMarker marker) {
-		IBreakpoint breakpoint= (IBreakpoint)getBreakpointManager().getBreakpoint(marker);
-		if (breakpoint instanceof IJavaLineBreakpoint) {
-			IMember member= ((IJavaLineBreakpoint)breakpoint).getMethod();
-			if (member == null) {
-				member= ((IJavaLineBreakpoint)breakpoint).getMember();
-			}
-			return ((IJavaLineBreakpoint)breakpoint).getMarkerText(isShowQualifiedNames(), fJavaLabelProvider.getText(member));
+	protected String getBreakpointText(IBreakpoint breakpoint) throws CoreException {
+
+		if (breakpoint instanceof IJavaExceptionBreakpoint) {
+			return getExceptionBreakpointText((IJavaExceptionBreakpoint)breakpoint);
 		}
-		else if (breakpoint instanceof IJavaExceptionBreakpoint) {			
-			return ((IJavaExceptionBreakpoint)breakpoint).getMarkerText(isShowQualifiedNames());
+		if (breakpoint instanceof IJavaLineBreakpoint) {
+			return getLineBreakpointText((IJavaLineBreakpoint)breakpoint);
+		}
+
+		return "";
+	}
+
+	protected String getExceptionBreakpointText(IJavaExceptionBreakpoint breakpoint) throws CoreException {
+
+		String name = "";
+		IType type = breakpoint.getType();
+		if (type != null) {
+			boolean showQualified= isShowQualifiedNames();
+			if (showQualified) {
+				name= type.getFullyQualifiedName();
+			} else {
+				name= type.getElementName();
+			}
+		}
+
+		String state= null;
+		boolean c= breakpoint.isCaught();
+		boolean u= breakpoint.isUncaught();
+		if (c && u) {
+			state= BOTH;
+		} else if (c) {
+			state= CAUGHT;
+		} else if (u) {
+			state= UNCAUGHT;
+		}
+		String label= null;
+		if (state == null) {
+			label= name;
+		} else {
+			String format= DebugUIUtils.getResourceString(FORMAT);
+			state= DebugUIUtils.getResourceString(state);
+			label= MessageFormat.format(format, new Object[] {state, name});
+		}
+		return label;
+
+	}
+
+	protected String getLineBreakpointText(IJavaLineBreakpoint breakpoint) throws CoreException {
+
+		boolean showQualified= isShowQualifiedNames();
+		IType type= breakpoint.getType();
+		//method entry breakpoints
+		IMember member= breakpoint.getMember();
+		if (type != null) {
+			StringBuffer label= new StringBuffer();
+			if (showQualified) {
+				label.append(type.getFullyQualifiedName());
+			} else {
+				label.append(type.getElementName());
+			}
+			int lineNumber= breakpoint.getLineNumber();
+			if (lineNumber > 0) {
+				label.append(" [");
+				label.append(DebugUIUtils.getResourceString(PREFIX + LINE));
+				label.append(' ');
+				label.append(lineNumber);
+				label.append(']');
+
+			}
+			int hitCount= breakpoint.getHitCount();
+			if (hitCount > 0) {
+				label.append(" [");
+				label.append(DebugUIUtils.getResourceString(PREFIX + HITCOUNT));
+				label.append(' ');
+				label.append(hitCount);
+				label.append(']');
+			}
+			if (member != null) {
+				label.append(" - ");
+				label.append(fJavaLabelProvider.getText(member));
+			}
+			return label.toString();
 		}
 		return "";
+
 	}
 
 	protected String getStackFrameText(IStackFrame stackFrame) throws DebugException {
@@ -722,12 +883,4 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			}
 		}
 	}
-	
-	/**
-	 * Returns the breakpoint manager
-	 */
-	private IBreakpointManager getBreakpointManager() {
-		return DebugPlugin.getDefault().getBreakpointManager();
-	}
-		
 }

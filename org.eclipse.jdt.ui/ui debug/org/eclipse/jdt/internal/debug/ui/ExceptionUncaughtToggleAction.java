@@ -22,7 +22,7 @@ public class ExceptionUncaughtToggleAction extends ExceptionAction {
 	/**
 	 * @see ExceptionException
 	 */
-	protected boolean getToggleState(IJavaExceptionBreakpoint exception) {
+	protected boolean getToggleState(IJavaExceptionBreakpoint exception) throws CoreException {
 		return exception.isUncaught();
 	}
 

@@ -1,7 +1,9 @@
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.*;
-import org.eclipse.jdt.core.*;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.*;
@@ -60,7 +62,12 @@ public class AddWatchpointAction extends JavaUIAction implements IUpdate {
 				for (int i=0; i<breakpoints.length; i++) {
 					IBreakpoint breakpoint= breakpoints[i];
 					if (breakpoint instanceof IJavaWatchpoint) {
-						IField breakpointField= ((IJavaWatchpoint) breakpoint).getField();
+						IField breakpointField= null;
+						try {
+							breakpointField = ((IJavaWatchpoint) breakpoint).getField();
+						} catch (CoreException e) {
+							return false;
+						}
 						if (breakpointField != null && equalFields(breakpointField, field)) {
 							return false;
 						}

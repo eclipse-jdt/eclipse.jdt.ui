@@ -8,7 +8,7 @@ public class ModificationWatchpointToggleAction extends WatchpointAction {
 	/**
 	 * @see WatchpointAction#getToggleState(IMarker)
 	 */
-	protected boolean getToggleState(IJavaWatchpoint watchpoint) {
+	protected boolean getToggleState(IJavaWatchpoint watchpoint) throws CoreException {
 		return watchpoint.isModification();
 	}
 

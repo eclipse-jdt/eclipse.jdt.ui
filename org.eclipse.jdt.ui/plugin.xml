@@ -828,10 +828,12 @@
 	<persistent value="false"/>
 </extension>	
 
-<extension
-	id="snippetSupportLineBreakpoint"
-	point="org.eclipse.debug.core.breakpoints">
-	markerType="org.eclipse.jdt.debug.snippetSupportLineBreakpointMarker">
+<extension point="org.eclipse.debug.core.breakpoints">
+	<breakpoint
+		id="snippetSupportLineBreakpoint"
+		markerType="org.eclipse.jdt.debug.snippetSupportLineBreakpointMarker"
+		class="org.eclipse.jdt.internal.debug.core.SnippetSupportLineBreakpoint">
+	</breakpoint>
 </extension>	
 
 <!-- =========================================================================== -->

@@ -4,9 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.debug.core.IJavaMethodEntryBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
@@ -88,7 +88,12 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 		for (int i= 0; i < breakpoints.length; i++) {
 			IBreakpoint breakpoint= breakpoints[i];
 			if (breakpoint instanceof IJavaMethodEntryBreakpoint) {
-				IMethod container= ((IJavaMethodEntryBreakpoint) breakpoint).getMethod();
+				IMethod container = null;
+				try {
+					container= ((IJavaMethodEntryBreakpoint) breakpoint).getMethod();
+				} catch (CoreException e) {
+					return null;
+				}
 				if (method.equals(container))
 					return breakpoint;
 			}

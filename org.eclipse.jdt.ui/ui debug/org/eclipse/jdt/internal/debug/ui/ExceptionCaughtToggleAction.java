@@ -15,7 +15,7 @@ public class ExceptionCaughtToggleAction extends ExceptionAction {
 	/**
 	 * @see ExceptionAction
 	 */
-	protected boolean getToggleState(IJavaExceptionBreakpoint exception) {
+	protected boolean getToggleState(IJavaExceptionBreakpoint exception) throws CoreException {
 		return exception.isCaught();
 	}
 

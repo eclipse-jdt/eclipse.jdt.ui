@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;

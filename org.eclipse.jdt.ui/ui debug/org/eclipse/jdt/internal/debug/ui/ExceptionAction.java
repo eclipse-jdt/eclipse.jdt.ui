@@ -10,6 +10,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.BreakpointsView;
 import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -42,10 +43,8 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 		Iterator enum= selection.iterator();
 		while (enum.hasNext()) {
 			try {
-				IBreakpoint breakpoint= getBreakpoint((IMarker)enum.next());
-				if (breakpoint instanceof IJavaExceptionBreakpoint) {
-					doAction((IJavaExceptionBreakpoint) breakpoint);
-				}
+				IJavaExceptionBreakpoint breakpoint= (IJavaExceptionBreakpoint)enum.next();
+				doAction(breakpoint);
 			} catch (CoreException e) {
 				DebugUIUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(),"exception_action.error.", e.getStatus());
 			}
@@ -69,9 +68,12 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 			boolean enabled= fCurrentSelection.size() == 1 && isEnabledFor(fCurrentSelection.getFirstElement());
 			action.setEnabled(enabled);
 			if (enabled) {
-				IBreakpoint breakpoint= getBreakpoint((IMarker)fCurrentSelection.getFirstElement());
+				IBreakpoint breakpoint= (IBreakpoint)fCurrentSelection.getFirstElement();
 				if (breakpoint instanceof IJavaExceptionBreakpoint) {
-					action.setChecked(getToggleState((IJavaExceptionBreakpoint) breakpoint));
+					try {
+						action.setChecked(getToggleState((IJavaExceptionBreakpoint) breakpoint));
+					} catch (CoreException e) {
+					}
 				}
 			}
 		}
@@ -85,7 +87,7 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	/**
 	 * Returns whether this action is currently toggled on
 	 */
-	protected abstract boolean getToggleState(IJavaExceptionBreakpoint exception);
+	protected abstract boolean getToggleState(IJavaExceptionBreakpoint exception) throws CoreException;
 
 	/**
 	 * @see IViewActionDelegate
@@ -101,11 +103,7 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	}
 
 	public boolean isEnabledFor(Object element) {
-		if (element instanceof IMarker) {
-			IBreakpoint breakpoint= getBreakpoint((IMarker) element);
-			return breakpoint instanceof IJavaExceptionBreakpoint;
-		}
-		return false;
+		return element instanceof IJavaExceptionBreakpoint;
 	}
 	
 	/** 

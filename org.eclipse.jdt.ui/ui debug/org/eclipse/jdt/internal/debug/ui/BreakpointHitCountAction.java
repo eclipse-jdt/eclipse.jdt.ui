@@ -7,10 +7,11 @@ package org.eclipse.jdt.internal.debug.ui;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.*;
-import org.eclipse.jdt.debug.core.*;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
+import org.eclipse.jdt.debug.core.IJavaBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -81,14 +82,11 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 		}
 
 		while (enum.hasNext()) {
-			IBreakpoint breakpoint= getBreakpointManager().getBreakpoint((IMarker)enum.next());
-			if (!(breakpoint instanceof IJavaLineBreakpoint)) {
-				continue;
-			}
-			int newHitCount= hitCountDialog((IJavaLineBreakpoint)breakpoint);
+			IJavaBreakpoint breakpoint= (IJavaBreakpoint)enum.next();
+			int newHitCount= hitCountDialog(breakpoint);
 			if (newHitCount != -1) {				
 				try {
-					((IJavaLineBreakpoint)breakpoint).setHitCount(newHitCount);
+					breakpoint.setHitCount(newHitCount);
 					breakpoint.setEnabled(true);
 				} catch (CoreException ce) {
 					DebugUIUtils.logError(ce);
@@ -104,7 +102,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 		run(null);
 	}
 
-	protected int hitCountDialog(IJavaLineBreakpoint breakpoint) {
+	protected int hitCountDialog(IJavaBreakpoint breakpoint) {
 		String title= DebugUIUtils.getResourceString(DIALOG_TITLE);
 		String message= DebugUIUtils.getResourceString(DIALOG_MESSAGE);
 		IInputValidator validator= new IInputValidator() {
@@ -124,7 +122,11 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			}
 		};
 
-		int currentHitCount= breakpoint.getHitCount();
+		int currentHitCount= 0;
+		try {
+			currentHitCount = breakpoint.getHitCount();
+		} catch (CoreException e) {
+		}
 		String initialValue;
 		if (currentHitCount > 0) {
 			initialValue= Integer.toString(currentHitCount);
@@ -162,11 +164,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 	}
 
 	public boolean isEnabledFor(Object element) {
-		try {
-			return element instanceof IMarker && ((IMarker)element).isSubtypeOf(IJavaDebugConstants.JAVA_LINE_BREAKPOINT);
-		} catch (CoreException ce) {
-			return false;
-		}
+		return element instanceof IJavaBreakpoint;
 	}
 
 }
