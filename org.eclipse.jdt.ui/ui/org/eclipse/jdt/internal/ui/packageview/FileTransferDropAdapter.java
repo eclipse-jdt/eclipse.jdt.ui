@@ -5,46 +5,7 @@ package org.eclipse.jdt.internal.ui.packageview;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.ui.dialogs.IOverwriteQuery;
-import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
-import org.eclipse.ui.wizards.datatransfer.ImportOperation;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.Utilities;
+import java.io.File;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.dnd.DND;import org.eclipse.swt.dnd.DropTargetEvent;import org.eclipse.swt.dnd.FileTransfer;import org.eclipse.swt.dnd.Transfer;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.Dialog;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.AbstractTreeViewer;import org.eclipse.core.resources.IContainer;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.ui.dialogs.IOverwriteQuery;import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;import org.eclipse.ui.wizards.datatransfer.ImportOperation;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.Utilities;
 
 /**
  * Adapter to handle file drop from other applications like Windows Explorer.
@@ -58,31 +19,28 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 		super(viewer, SWT.NONE);
 	}
 
-	//---- IOverwriteQuery interface --------------------------------------------------
+	//---- IOverwriteQuery ------------------------------------------------------------
 
 	public String queryOverwrite(String file) {
-		String msg= JavaPlugin.getFormattedString(PREFIX + "override.message", file);
-		String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 		String[] returnCodes= {YES, NO, ALL, CANCEL};
-		MessageDialog dialog= new MessageDialog(JavaPlugin.getActiveWorkbenchShell(),
-			JavaPlugin.getResourceString(PREFIX + "override.title"),
-			null, msg, MessageDialog.QUESTION, options, 0);
-		// Open and return the appropriate code. Open the dialog in the display thread since the
-		// query callback can come from the model context thread.
-		int returnVal= openDialog(dialog);
+		int returnVal= openDialog(getViewer().getControl(), file);
 		return returnVal < 0 ? CANCEL : returnCodes[returnVal];
-	}
+	}	
 	
-	private int openDialog(final Dialog dialog) {
+	private int openDialog(final Control control, final String file) {
 		final int[] result= { Dialog.CANCEL };
-		getViewer().getControl().getDisplay().syncExec(new Runnable() {
+		control.getDisplay().syncExec(new Runnable() {
 			public void run() {
+				String title= JavaPlugin.getResourceString(PREFIX + "override.title");
+				String msg= JavaPlugin.getFormattedString(PREFIX + "override.message", file);
+				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
+				MessageDialog dialog= new MessageDialog(control.getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 				result[0]= dialog.open();
 			}
 		});
 		return result[0];
-	}		 
-	
+	}
+		
 	//---- TransferDropTargetListener interface ---------------------------------------
 	
 	public Transfer getTransfer() {
