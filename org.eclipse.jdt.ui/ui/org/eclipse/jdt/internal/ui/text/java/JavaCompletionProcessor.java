@@ -185,13 +185,18 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		if (fNumberOfComputedResults == 0)
-			return JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
-			return fExperimentalCollector.getErrorMessage();
-		} else {
-			return fCollector.getErrorMessage();
+		
+		if (fNumberOfComputedResults == 0) {
+			String errorMsg= fCollector.getErrorMessage();
+			if (errorMsg == null || errorMsg.trim().length() == 0)
+				errorMsg= JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
+			return errorMsg;
 		}
+		
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
+			return fExperimentalCollector.getErrorMessage();
+			
+		return fCollector.getErrorMessage();
 	}
 
 	/**
