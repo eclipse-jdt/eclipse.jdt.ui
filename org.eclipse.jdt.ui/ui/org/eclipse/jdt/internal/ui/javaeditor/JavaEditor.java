@@ -2308,68 +2308,58 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			
+			boolean newBooleanValue= Boolean.valueOf(event.getNewValue().toString()).booleanValue();
+			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
-				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue())
+				if (newBooleanValue)
 					selectionChanged();
 				return;
 			}
 			
 			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean) {
-					boolean markOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
-					if (markOccurrenceAnnotations != fMarkOccurrenceAnnotations) {
-						fMarkOccurrenceAnnotations= markOccurrenceAnnotations;
-						if (!fMarkOccurrenceAnnotations)
-							uninstallOccurrencesFinder();
-						else
-							installOccurrencesFinder();
-					}
+				if (newBooleanValue != fMarkOccurrenceAnnotations) {
+					fMarkOccurrenceAnnotations= newBooleanValue;
+					if (!fMarkOccurrenceAnnotations)
+						uninstallOccurrencesFinder();
+					else
+						installOccurrencesFinder();
 				}
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkTypeOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkTypeOccurrences= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkMethodOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkMethodOccurrences= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkConstantOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkConstantOccurrences= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkFieldOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkFieldOccurrences= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkLocalVariableypeOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkLocalVariableypeOccurrences= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkExceptions= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkExceptions= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkMethodExitPoints= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkMethodExitPoints= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_IMPLEMENTORS.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fMarkImplementors= ((Boolean)event.getNewValue()).booleanValue();
+				fMarkImplementors= newBooleanValue;
 				return;
 			}
 			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
-				if (event.getNewValue() instanceof Boolean)
-					fStickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
+				fStickyOccurrenceAnnotations= newBooleanValue;
 				return;
 			}
 			if (SemanticHighlightings.affectsEnablement(getPreferenceStore(), event)) {
