@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -16,13 +15,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -57,6 +52,11 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
+		fNewName= "";//the only thing we can set
+	}
+	
+	public Object getNewElement(){
+		return null; //?????
 	}
 	
 	/* non java-doc

@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
@@ -27,6 +28,7 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	public RenameResourceRefactoring(IResource resource){
 		Assert.isNotNull(resource); 
 		fResource= resource;
+		fNewName= resource.getName();
 	}
 	
 	/* non java-doc
@@ -34,6 +36,10 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	 */
 	public String getName() {
 		return "Rename resource " +  getCurrentName() + " to:" + fNewName;
+	}
+	
+	public Object getNewElement(){
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(fNewName));
 	}
 	
 	/* non java-doc

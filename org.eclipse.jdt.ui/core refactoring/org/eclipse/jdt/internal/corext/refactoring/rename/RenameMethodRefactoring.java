@@ -29,11 +29,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -49,6 +44,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
@@ -61,6 +61,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	RenameMethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
 		fMethod= method;
+		fNewName= method.getElementName();
 		fUpdateReferences= true;
 	}
 		
@@ -79,6 +80,10 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		 	return new RenameMethodInInterfaceRefactoring(method);	
 	}	
 	
+	public Object getNewElement(){
+		return fMethod.getDeclaringType().getMethod(fNewName, fMethod.getParameterTypes());
+	}
+	
 	/* non java-doc
 	 * @see Refactoring#checkPreconditions(IProgressMonitor)
 	 */
@@ -89,7 +94,6 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		result.merge(super.checkPreconditions(pm));
 		return result;
 	}
-
 
 	/* non java-doc
 	 * @see IRenameRefactoring#setNewName

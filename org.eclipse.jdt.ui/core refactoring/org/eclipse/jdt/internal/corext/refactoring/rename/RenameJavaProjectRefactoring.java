@@ -1,22 +1,18 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
@@ -32,6 +28,12 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	public RenameJavaProjectRefactoring(IJavaProject project){
 		Assert.isNotNull(project); 
 		fProject= project;
+		fNewName= project.getElementName();
+	}
+	
+	public Object getNewElement() throws JavaModelException{
+		IPath newPath= fProject.getCorrespondingResource().getFullPath().removeLastSegments(1).append(getNewName());
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
 	}
 	
 	/* non java-doc

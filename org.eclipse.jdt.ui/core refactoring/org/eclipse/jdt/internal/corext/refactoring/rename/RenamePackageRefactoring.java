@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -23,8 +22,6 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -41,6 +38,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 
 public class RenamePackageRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
@@ -58,6 +57,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	public RenamePackageRefactoring(IPackageFragment pack){
 		Assert.isNotNull(pack);
 		fPackage= pack;
+		fNewName= pack.getElementName();
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
@@ -70,6 +70,15 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	public String getName(){
 		return RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.name",  //$NON-NLS-1$
 						new String[]{fPackage.getElementName(), fNewName});
+	}
+	
+	public Object getNewElement(){
+		IJavaElement parent= fPackage.getParent();
+		if (!(parent instanceof IPackageFragmentRoot))
+			return fPackage;//??
+			
+		IPackageFragmentRoot root= (IPackageFragmentRoot)parent;
+		return root.getPackageFragment(fNewName);
 	}
 	
 	/*

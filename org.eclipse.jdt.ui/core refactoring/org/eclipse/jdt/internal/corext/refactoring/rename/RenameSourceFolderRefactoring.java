@@ -3,6 +3,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -20,7 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderCha
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 
-public class RenameSourceFolderRefactoring	extends Refactoring implements IRenameRefactoring {
+public class RenameSourceFolderRefactoring extends Refactoring implements IRenameRefactoring {
 
 	private IPackageFragmentRoot fSourceFolder;
 	private String fNewName;
@@ -28,6 +29,7 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public RenameSourceFolderRefactoring(IPackageFragmentRoot sourceFolder){
 		Assert.isNotNull(sourceFolder); 
 		fSourceFolder= sourceFolder;
+		fNewName= fSourceFolder.getElementName();
 	}
 	
 	/* non java-doc
@@ -35,6 +37,15 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	 */
 	public String getName() {
 		return "Rename Source Folder:" + fSourceFolder + " to:" + fNewName;
+	}
+	
+	public Object getNewElement() throws JavaModelException{
+		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (roots[i].getElementName().equals(fNewName))
+				return roots[i];	
+		}
+		return null;
 	}
 	
 	/* non java-doc

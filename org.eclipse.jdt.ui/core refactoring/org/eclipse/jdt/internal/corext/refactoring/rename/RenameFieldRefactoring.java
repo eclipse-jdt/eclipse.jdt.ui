@@ -21,10 +21,6 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -41,6 +37,10 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
@@ -57,10 +57,15 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	public RenameFieldRefactoring(IField field){
 		Assert.isTrue(field.exists());
 		fField= field;
+		fNewName= fField.getElementName();
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
+	}
+	
+	public Object getNewElement(){
+		return fField.getDeclaringType().getField(fNewName);
 	}
 	
 	/*
