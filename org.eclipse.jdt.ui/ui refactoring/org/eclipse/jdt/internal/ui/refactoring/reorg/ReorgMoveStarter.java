@@ -12,21 +12,19 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -49,7 +47,7 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(destination.getJavaProject()));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
 		if (processor == null)
 			return null;
 		if (! processor.setDestination(destination).isOK())
@@ -61,10 +59,7 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		IJavaProject project= null;
-		if (javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
 		if (processor == null)
 			return null;
 		if (! processor.setDestination(destination).isOK())

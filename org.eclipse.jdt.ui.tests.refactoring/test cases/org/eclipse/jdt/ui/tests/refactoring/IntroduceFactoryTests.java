@@ -22,16 +22,17 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
@@ -183,8 +184,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	private void doSingleUnitTest(boolean protectConstructor, ICompilationUnit cu, String outputFileName) throws Exception, JavaModelException, IOException {
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
 		ref.setProtectConstructor(protectConstructor);
 
@@ -259,8 +259,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	{
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), true, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
@@ -297,8 +296,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	private void doMultiUnitTest(ICompilationUnit[] CUs, String testPath, String[] outputFileBaseNames, String factoryClassName) throws Exception, JavaModelException, IOException {
 		ISourceRange selection= findSelectionInSource(CUs[0].getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength(), 
-												   JavaPreferencesSettings.getCodeGenerationSettings(CUs[0].getJavaProject()));
+		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength());
 
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
@@ -480,8 +478,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private void failHelper(boolean staticFactory, int expectedStatus) throws Exception {
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), false, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus	result= performRefactoring(ref);
 
 		assertNotNull("precondition was supposed to fail", result);
@@ -491,8 +488,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private void failBugHelper(String baseFileName, boolean staticFactory, int expectedStatus) throws Exception {
 		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-				JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus	result= performRefactoring(ref);
 
 		assertNotNull("precondition was supposed to fail", result);

@@ -16,12 +16,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.reorg.MockReorgQueries;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
@@ -36,8 +33,7 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		JavaMoveProcessor processor= JavaMoveProcessor.create(
 			new IResource[0], 
-			new IJavaElement[] {cunit},
-			JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
+			new IJavaElement[] {cunit});
 		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null); 
 		processor.setDestination(destination);
 		processor.setReorgQueries(new MockReorgQueries());

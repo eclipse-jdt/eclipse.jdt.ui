@@ -12,21 +12,19 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
@@ -44,7 +42,7 @@ public class ReorgCopyStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(destination.getJavaProject()));
+		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements);
 		if (copyRefactoring == null)
 			return null;
 		if (! copyRefactoring.setDestination(destination).isOK())
@@ -56,10 +54,7 @@ public class ReorgCopyStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		IJavaProject project= null;
-		if (javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements);
 		if (copyRefactoring == null)
 			return null;
 		if (! copyRefactoring.setDestination(destination).isOK())

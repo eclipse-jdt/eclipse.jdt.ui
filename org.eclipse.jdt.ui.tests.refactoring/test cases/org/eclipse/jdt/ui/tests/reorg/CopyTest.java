@@ -15,12 +15,14 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
@@ -33,17 +35,17 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
@@ -69,22 +71,14 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
-			project= javaElements[0].getJavaProject();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-		assertTrue("copy should be disabled", ! CopyRefactoring.isAvailable(resources, javaElements, settings));
-		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements, settings);
+		assertTrue("copy should be disabled", ! CopyRefactoring.isAvailable(resources, javaElements));
+		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements);
 		assertTrue(refactoring2 == null);
 	}
 
 	private CopyRefactoring verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
-			project= javaElements[0].getJavaProject();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-		assertTrue("copy should be enabled", CopyRefactoring.isAvailable(resources, javaElements, settings));
-		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements, settings);
+		assertTrue("copy should be enabled", CopyRefactoring.isAvailable(resources, javaElements));
+		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements);
 		assertNotNull(refactoring2);
 		if (newNameQueries != null)
 			refactoring2.setNewNameQueries(newNameQueries);

@@ -19,6 +19,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -27,12 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 	private static final boolean BUG_80839= true;
@@ -77,9 +75,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(
-			unit, selection[0], selection[1],
-			JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject()));
+		ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);
 		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());

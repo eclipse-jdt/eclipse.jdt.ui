@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
@@ -65,7 +65,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean updateInstanceOf) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		UseSupertypeWherePossibleRefactoring ref= UseSupertypeWherePossibleRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		UseSupertypeWherePossibleRefactoring ref= UseSupertypeWherePossibleRefactoring.create(clas);
 		ref.setUseSupertypeInInstanceOf(updateInstanceOf);
 			
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];

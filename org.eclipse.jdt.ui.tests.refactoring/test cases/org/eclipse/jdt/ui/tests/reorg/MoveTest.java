@@ -36,18 +36,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
@@ -83,22 +79,14 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
-			project= javaElements[0].getJavaProject();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-		assertTrue("move should be disabled", ! JavaMoveProcessor.isAvailable(resources, javaElements, settings));
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, settings);
+		assertTrue("move should be disabled", ! JavaMoveProcessor.isAvailable(resources, javaElements));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
 		assertTrue(processor == null);
 	}
 	
 	private JavaMoveProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
-			project= javaElements[0].getJavaProject();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-		assertTrue("move should be enabled", JavaMoveProcessor.isAvailable(resources, javaElements, settings));
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, settings);
+		assertTrue("move should be enabled", JavaMoveProcessor.isAvailable(resources, javaElements));
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
 		if (reorgQueries != null)
 			processor.setReorgQueries(reorgQueries);
 		assertNotNull(processor);

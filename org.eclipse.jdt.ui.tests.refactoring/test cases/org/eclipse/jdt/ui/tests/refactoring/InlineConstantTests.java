@@ -18,14 +18,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
@@ -94,7 +91,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 		
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
+		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
@@ -132,9 +129,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 			
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), 
-										
-		JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
+		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength());
 		if (ref == null)
 			return;
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());	
