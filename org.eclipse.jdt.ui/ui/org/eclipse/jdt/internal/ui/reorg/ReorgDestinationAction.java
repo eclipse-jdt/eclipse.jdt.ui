@@ -369,7 +369,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		dialog.setInitialSelection(selection);
 	}
 	
-	private ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
+ 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
 		return new ElementTreeSelectionDialog(parent, labelProvider, cp);
 	}
 	
