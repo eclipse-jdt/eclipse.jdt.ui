@@ -32,6 +32,9 @@
 		<copy todir="${dest}/templates">
 			<fileset dir="templates" />
 		</copy>
+		<copy todir= "${dest}/META-INF">
+			<fileset dir="META-INF"/>
+		</copy>		
 		<zip zipfile="${dest}/jdtsrc.zip">
 		    <fileset dir="core refactoring" />
 		    <fileset dir="ui refactoring" />
