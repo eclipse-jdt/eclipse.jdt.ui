@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -62,6 +63,8 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IWorkbenchAdapter.class) 
 			return this;
+		if ((adapter == IResource.class) && (fContainer instanceof IAdaptable))
+			return ((IAdaptable)fContainer).getAdapter(IResource.class);
 		return null;
 	}
 
