@@ -143,7 +143,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					for (int i= 0; i != parameterCount; i++) {
 						int positionOffset= baseOffset + positionOffsets[i];
 						String type= TYPE + i;
-						if (fChoices[i].length == 0) {
+						if (fChoices[i].length < 2) {
 							manager.addPosition(positionOffset, positionLengths[i], type);
 						} else {
 							manager.addPosition(positionOffset, positionLengths[i], type, fChoices[i]);
