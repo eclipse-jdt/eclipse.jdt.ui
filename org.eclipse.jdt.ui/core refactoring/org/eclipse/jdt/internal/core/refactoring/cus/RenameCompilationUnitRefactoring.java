@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitChange;import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageChange;import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
@@ -20,6 +20,8 @@ import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
+import org.eclipse.jdt.internal.core.refactoring.cus.*;
+
 
 public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 
@@ -137,7 +139,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			return fRenameTypeRefactoring.checkInput(pm);
 		else{
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(Checks.checkCompilationUnitNewName(getCu(), fNewName));
+			result.merge(Checks.checkCompilationUnitNewName(getCu(), removeFileNameExtension(fNewName)));
 			return result;
 		}
 	}
@@ -152,7 +154,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			return fRenameTypeRefactoring.createChange(pm);
 	
 		CompositeChange composite= new CompositeChange();
-		composite.addChange(new RenameResourceChange(getResource(getCu()), removeFileNameExtension(fNewName)));
+		composite.addChange(new RenameCompilationUnitChange(getCu(), fNewName));
 		return composite;	
 	}
 }
