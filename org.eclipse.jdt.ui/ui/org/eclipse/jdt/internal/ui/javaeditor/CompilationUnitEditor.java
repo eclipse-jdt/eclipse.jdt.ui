@@ -99,6 +99,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistoryAction;
@@ -541,6 +542,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
+
+		action= GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);				
+		setAction(GoToNextPreviousMemberAction.NEXT_MEMBER, action);
+
+		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
+		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 		
 		fSelectionHistory= new SelectionHistory(this);
 

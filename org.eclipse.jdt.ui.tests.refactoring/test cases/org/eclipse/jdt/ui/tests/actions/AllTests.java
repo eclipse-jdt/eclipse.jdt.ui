@@ -16,7 +16,8 @@ public class AllTests {
 		suite.addTest(StructureSelectionActionTests.suite());
 		suite.addTest(CopyResourcesToClipboardActionTest.suite());
 		suite.addTest(PasteResourcesFromClipboardActionTest.suite());
-	    return suite;
+		suite.addTest(GoToNextPreviousMemberActionTests.suite());
+		return suite;
 	}
 
 }

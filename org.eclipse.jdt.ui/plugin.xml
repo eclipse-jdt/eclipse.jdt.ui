@@ -1408,6 +1408,8 @@ JavaStructureDiffViewerCreator
 <!-- =========================================================================== -->
 <extension point="org.eclipse.ui.actionDefinitions">
 	<!-- edit -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.next" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
@@ -1481,7 +1483,9 @@ JavaStructureDiffViewerCreator
 		scopeId="org.eclipse.ui.globalScope"
 		configurationId="org.eclipse.ui.emacsAcceleratorConfiguration">
 
-		<!-- edit -->
+		<!-- edit --> 
+		<accelerator key="Ctrl+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
+		<accelerator key="Ctrl+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
 		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
 		<accelerator key="Alt+Shift+ARROW_RIGHT" id="org.eclipse.jdt.ui.edit.text.java.select.next" />
 		<accelerator key="Alt+Shift+ARROW_LEFT" id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
@@ -1555,6 +1559,8 @@ JavaStructureDiffViewerCreator
 		configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
 
 		<!-- edit -->
+		<accelerator key="Ctrl+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
+		<accelerator key="Ctrl+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
 		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
 		<accelerator key="Alt+Shift+ARROW_RIGHT" id="org.eclipse.jdt.ui.edit.text.java.select.next" />
 		<accelerator key="Alt+Shift+ARROW_LEFT" id="org.eclipse.jdt.ui.edit.text.java.select.previous" />

@@ -38,6 +38,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
@@ -126,6 +127,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	private RetargetTextEditorAction fStructureSelectNextAction;
 	private RetargetTextEditorAction fStructureSelectPreviousAction;
 	private RetargetTextEditorAction fStructureSelectHistoryAction;	
+	private RetargetTextEditorAction fGotoNextMemberAction;	
+	private RetargetTextEditorAction fGotoPreviousMemberAction;	
 	
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
@@ -165,7 +168,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fStructureSelectNextAction= new RetargetTextEditorAction(b, "StructureSelectNext."); //$NON-NLS-1$
 		fStructureSelectPreviousAction= new RetargetTextEditorAction(b, "StructureSelectPrevious."); //$NON-NLS-1$
 		fStructureSelectHistoryAction= new RetargetTextEditorAction(b, "StructureSelectHistory."); //$NON-NLS-1$
-		
+		fGotoNextMemberAction= new RetargetTextEditorAction(b, "GotoNextMember."); //$NON-NLS-1$
+		fGotoPreviousMemberAction= new RetargetTextEditorAction(b, "GotoPreviousMember."); //$NON-NLS-1$
 		
 		// actions that are "contributed" to editors, they are consider belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
@@ -201,6 +205,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoPreviousMemberAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoNextMemberAction);
 		}
 	}
 	
@@ -233,6 +239,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fStructureSelectNextAction.setAction(getAction(textEditor, StructureSelectionAction.NEXT));
 		fStructureSelectPreviousAction.setAction(getAction(textEditor, StructureSelectionAction.PREVIOUS));
 		fStructureSelectHistoryAction.setAction(getAction(textEditor, StructureSelectionAction.HISTORY));		
+		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
+		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		IActionBars bars= getActionBars();		
 		

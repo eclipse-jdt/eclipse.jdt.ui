@@ -24,6 +24,22 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinitionIds {
 
 	// edit
+
+	/**
+	 * Action definition ID of the edit -> go to next member action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.next.member"</code>).
+	 *
+	 * @since 2.1
+	 */
+	public static final String GOTO_NEXT_MEMBER= "org.eclipse.jdt.ui.edit.text.java.goto.next.member"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the edit -> go to previous member action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.previous.member"</code>).
+	 *
+	 * @since 2.1
+	 */
+	public static final String GOTO_PREVIOUS_MEMBER= "org.eclipse.jdt.ui.edit.text.java.goto.previous.member"; //$NON-NLS-1$
 	
 	/**
 	 * Action definition ID of the edit -> select enclosing action
