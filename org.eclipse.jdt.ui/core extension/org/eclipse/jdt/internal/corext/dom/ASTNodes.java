@@ -291,6 +291,12 @@ public class ASTNodes {
 			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
 	}
 	
+	public static boolean isLabel(SimpleName name) {
+		int parentType= name.getParent().getNodeType();
+		return parentType == ASTNode.LABELED_STATEMENT || 
+			parentType == ASTNode.BREAK_STATEMENT || parentType != ASTNode.CONTINUE_STATEMENT;
+	}
+	
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {

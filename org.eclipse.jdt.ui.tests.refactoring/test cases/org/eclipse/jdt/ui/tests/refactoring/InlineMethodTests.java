@@ -12,6 +12,8 @@
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *       o bug inline method: compile error (array related) [refactoring] 
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
+ * 	     o bug "Inline refactoring showed bogus error" (see bugzilla
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -136,6 +138,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 
 	public void testSuper() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testLabeledStatement() throws Exception {
 		performSimpleTest();
 	}	
 

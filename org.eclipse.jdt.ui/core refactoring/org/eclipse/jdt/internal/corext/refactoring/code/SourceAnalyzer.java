@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
+ * 	     o bug "Inline refactoring showed bogus error" (see bugzilla
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -96,10 +99,13 @@ class SourceAnalyzer  {
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding == null && !status.hasFatalError()) {
-				status.addFatalError(
-					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
-					JavaStatusContext.create(fCUnit, fDeclaration));
-				return false;
+				// fixes bug #42753
+				if (!ASTNodes.isLabel(node)) {
+					status.addFatalError(
+						RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
+						JavaStatusContext.create(fCUnit, fDeclaration));
+					return false;
+				}
 			}
 			return true;
 		}
