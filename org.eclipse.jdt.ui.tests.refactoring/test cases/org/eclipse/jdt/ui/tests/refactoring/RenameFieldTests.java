@@ -15,6 +15,6 @@ public class RenameFieldTests {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		suite.addTest(RenamePrivateFieldTests.suite());
-		return new MySetup(suite);
+		return suite;
 	}
 }

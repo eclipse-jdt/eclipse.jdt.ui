@@ -16,6 +16,6 @@ public class RenameMethodTests {
 		suite.addTest(RenameMethodInInterfaceTests.suite());
 		suite.addTest(RenamePrivateMethodTests.suite());	
 		suite.addTest(RenameStaticMethodTests.suite());
-		return new MySetup(suite);
+		return suite;
 	}
 }
