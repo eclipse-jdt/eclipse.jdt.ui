@@ -88,7 +88,7 @@ public class IndentAction extends TextEditorAction {
 	 */
 	public void run() {
 		// update has been called by the framework
-		if (!isEnabled() || !validateEdit())
+		if (!isEnabled() || !validateEditorInputState())
 			return;
 		
 		ITextSelection selection= getSelection();

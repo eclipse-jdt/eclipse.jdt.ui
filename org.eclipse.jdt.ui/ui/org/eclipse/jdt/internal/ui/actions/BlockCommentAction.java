@@ -181,7 +181,7 @@ public abstract class BlockCommentAction extends TextEditorAction {
 		if (!isValidSelection(selection))
 			return;
 		
-		if (!validateEdit())
+		if (!validateEditorInputState())
 			return;
 		
 		IDocumentProvider docProvider= editor.getDocumentProvider();
