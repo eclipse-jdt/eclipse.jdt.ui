@@ -140,6 +140,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
 	}
 	
+	public void testFieldReference() throws Exception {
+		performArgumentTest();
+	}	
+	
 	public void testLocalReferenceUnused() throws Exception {
 		performArgumentTest();
 	}	
@@ -157,6 +161,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 	
 	public void testLocalReferenceLoop() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferencePrefix() throws Exception {
 		performArgumentTest();
 	}	
 	

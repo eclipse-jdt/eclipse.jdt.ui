@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -78,6 +81,56 @@ public class CallInliner {
 	private FlowContext fFlowContext;
 	private FlowInfo fFlowInfo;
 	private CodeScopeBuilder.Scope fInvocationScope;
+	
+	private class InlineEvaluator extends HierarchicalASTVisitor {
+		private ParameterData fFormalArgument;
+		private boolean fResult;
+		public InlineEvaluator(ParameterData argument) {
+			fFormalArgument= argument;
+		}
+		public boolean getResult() {
+			return fResult;
+		}
+		private boolean setResult(boolean result) {
+			fResult= result;
+			return false;
+		}
+		public boolean visit(Expression node) {
+			int accessMode= fFormalArgument.getSimplifiedAccessMode();
+			if (accessMode == FlowInfo.WRITE)
+				return setResult(false);
+			if (accessMode == FlowInfo.UNUSED)
+				return setResult(true);
+			if (ASTNodes.isLiteral(node))
+				return setResult(true);
+			return setResult(fFormalArgument.getNumberOfAccesses() <= 1);
+		}
+		public boolean visit(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			if (binding instanceof IVariableBinding) {
+				if (fFormalArgument.getSimplifiedAccessMode() == FlowInfo.READ)
+					return setResult(true);
+				// from now on we only have write accesses.
+				IVariableBinding vb= (IVariableBinding)binding;
+				if (vb.isField())
+					return setResult(false);
+				return setResult(fFlowInfo.hasAccessMode(fFlowContext, vb, FlowInfo.UNUSED | FlowInfo.WRITE));
+			}
+			return setResult(false);
+		}
+		public boolean visit(FieldAccess node) {
+			return visit(node.getName());
+		}
+		public boolean visit(SuperFieldAccess node) {
+			return visit(node.getName());
+		}
+		public boolean visit(ThisExpression node) {
+			int accessMode= fFormalArgument.getSimplifiedAccessMode();
+			if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
+				return setResult(true);
+			return setResult(false);
+		}
+	}
 
 	public CallInliner(ICompilationUnit unit, SourceProvider provider, CodeGenerationSettings settings) throws CoreException {
 		super();
@@ -303,6 +356,11 @@ public class CallInliner {
 	}
 
 	private boolean canInline(Expression actualParameter, ParameterData formalParameter) {
+		InlineEvaluator evaluator= new InlineEvaluator(formalParameter);
+		actualParameter.accept(evaluator);
+		return evaluator.getResult();
+		
+		/*
 		switch (canInline(actualParameter)){
 			case 0:
 				return false;
@@ -316,6 +374,7 @@ public class CallInliner {
 		if (formalParameter.isWrite())
 			return false;
 		return !formalParameter.needsEvaluation();
+		*/
 	}
 	
 	/*

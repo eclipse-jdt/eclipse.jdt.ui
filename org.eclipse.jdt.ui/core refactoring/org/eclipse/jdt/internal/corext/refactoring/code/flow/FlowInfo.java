@@ -363,6 +363,8 @@ public abstract class FlowInfo {
 			handleComputeArguments(others);
 		} else if (context.computeReturnValues()) {
 			handleComputeReturnValues(others);
+		} else if (context.computeMerge()) {
+			handleMergeValues(others);
 		}
 	}
 
@@ -394,6 +396,14 @@ public abstract class FlowInfo {
 			} else if (accessMode == WRITE_POTENTIAL && otherMode == WRITE) {
 				fAccessModes[i]= WRITE;
 			}
+		}
+	}
+	
+	private void handleMergeValues(int[] others) {
+		for (int i= 0; i < fAccessModes.length; i++) {
+			fAccessModes[i]= ACCESS_MODE_CONDITIONAL_TABLE
+				[getIndex(fAccessModes[i])]
+				[getIndex(others[i])];
 		}
 	}
 	

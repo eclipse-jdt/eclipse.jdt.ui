@@ -67,11 +67,23 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	}
 	
 	public boolean isReadOnly() {
-		return (fAccessMode & (FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN)) != 0;
+		return (fAccessMode & (FlowInfo.READ | FlowInfo.READ_POTENTIAL)) != 0;
 	}
 	
 	public boolean isWrite() {
 		return (fAccessMode & (FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN)) != 0;
+	}
+	
+	public int getSimplifiedAccessMode() {
+		if (isWrite())
+			return FlowInfo.WRITE;
+		if (isReadOnly())
+			return FlowInfo.READ;
+		return FlowInfo.UNUSED;
+	}
+	
+	public int getNumberOfAccesses() {
+		return fReferences.size();
 	}
 	
 	public boolean needsEvaluation() {

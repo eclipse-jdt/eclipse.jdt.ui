@@ -617,11 +617,16 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(PostfixExpression node) {
-		endVisitPrePostfixExpression(node, node.getOperand());
+		endVisitIncDecOperation(node, node.getOperand());
 	}
 	
 	public void endVisit(PrefixExpression node) {
-		endVisitPrePostfixExpression(node, node.getOperand());
+		PrefixExpression.Operator op= node.getOperator();
+		if (PrefixExpression.Operator.INCREMENT.equals(op) || PrefixExpression.Operator.DECREMENT.equals(op)) {
+			endVisitIncDecOperation(node, node.getOperand());
+		} else {
+			assignFlowInfo(node, node.getOperand());
+		}
 	}
 	
 	public void endVisit(PrimitiveType node) {
@@ -815,7 +820,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeExceptions(binding, fFlowContext);
 	}
 	
-	private void endVisitPrePostfixExpression(Expression node, Expression operand) {
+	private void endVisitIncDecOperation(Expression node, Expression operand) {
 		if (skipNode(node))
 			return;
 		FlowInfo info= getFlowInfo(operand);

@@ -283,7 +283,7 @@ class SourceAnalyzer  {
 		int numberOfLocals= LocalVariableIndex.perform(fDeclaration);
 		FlowContext context= new FlowContext(0, numberOfLocals + 1);
 		context.setConsiderAccessMode(true);
-		context.setComputeMode(FlowContext.ARGUMENTS);
+		context.setComputeMode(FlowContext.MERGE);
 		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(context);
 		FlowInfo info= flowAnalyzer.perform(getStatements());
 		

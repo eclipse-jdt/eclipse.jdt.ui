@@ -27,6 +27,7 @@ public class FlowContext {
 	private static class Enum {
 	}
 	
+	public static final Enum MERGE=			new Enum();
 	public static final Enum ARGUMENTS= 	new Enum();
 	public static final Enum RETURN_VALUES= new Enum();
 	
@@ -72,6 +73,10 @@ public class FlowContext {
 	
 	boolean isLoopReentranceMode() {
 		return fLoopReentranceMode;
+	}
+	
+	boolean computeMerge() {
+		return fComputeMode == MERGE;
 	}
 	
 	boolean computeArguments() {
