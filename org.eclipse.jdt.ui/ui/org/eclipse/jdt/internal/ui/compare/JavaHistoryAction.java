@@ -31,7 +31,7 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 		fBundle= ResourceBundle.getBundle(bundleName);
 		fTitle= getResourceString("title", "title");
 		fLabel= getResourceString("actionLabel", "actionLabel");
-		fLabelWithArg= getResourceString("actionLabelWithArg", "actionLabelWithArg {0}");
+		fLabelWithArg= getResourceString("actionLabelWithArg", fLabel);
 				
 		fSelectionProvider= sp;
 		
