@@ -117,7 +117,9 @@ public class EditorTestHelper {
 	}
 	
 	public static void runEventQueue(Shell shell) {
-		while (shell.getDisplay().readAndDispatch());
+		while (shell.getDisplay().readAndDispatch()) {
+			// do nothing
+		}
 	}
 	
 	public static void runEventQueue(long minTime) {
@@ -187,7 +189,6 @@ public class EditorTestHelper {
 			runEventQueue(intervalTime);
 			calm= allJobsQuiet();
 		}
-//		System.out.println("--------------------------------------------------");
 		return calm;
 	}
 
@@ -205,25 +206,27 @@ public class EditorTestHelper {
 		for (int i= 0; i < jobs.length; i++) {
 			Job job= jobs[i];
 			int state= job.getState();
-//			System.out.println(job.getName() + ": " + getStateName(state));
-			if (state == Job.RUNNING || state == Job.WAITING) {
-//				System.out.println();
+			if (state == Job.RUNNING || state == Job.WAITING)
 				return false;
-			}
 		}
-//		System.out.println();
 		return true;
 	}
 
-//	private static String getStateName(int state) {
-//		switch (state) {
-//			case Job.RUNNING: return "RUNNING";
-//			case Job.WAITING: return "WAITING";
-//			case Job.SLEEPING: return "SLEEPING";
-//			case Job.NONE: return "NONE";
-//			default: return "unknown " + state;
-//		}
-//	}
+	public static boolean isViewShown(String viewId) {
+		return getActivePage().findViewReference(viewId) != null;
+	}
+	
+	public static boolean showView(String viewId, boolean show) throws PartInitException {
+		IWorkbenchPage activePage= getActivePage();
+		IViewReference view= activePage.findViewReference(viewId);
+		boolean shown= view != null;
+		if (shown != show)
+			if (show)
+				activePage.showView(viewId);
+			else
+				activePage.hideView(view);
+		return shown;
+	}
 
 	public static boolean showView(String viewId) throws PartInitException {
 		IWorkbenchPage activePage= getActivePage();
@@ -258,6 +261,8 @@ public class EditorTestHelper {
 		
 		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		AbstractReconciler reconciler= getReconciler(sourceViewer);
+		if (reconciler == null)
+			return true;
 		Accessor backgroundThreadAccessor= getBackgroundThreadAccessor(reconciler);
 		Accessor javaReconcilerAccessor= null;
 		if (reconciler instanceof JavaReconciler)
