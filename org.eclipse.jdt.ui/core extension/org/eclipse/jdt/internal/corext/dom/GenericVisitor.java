@@ -100,6 +100,9 @@ public class GenericVisitor extends ASTVisitor {
 	public boolean visit(InfixExpression node) {
 		return visitNode(node);
 	}
+	public boolean visit(InstanceofExpression node) {
+		return visitNode(node);
+	}
 	public boolean visit(Initializer node) {
 		return visitNode(node);
 	}
@@ -282,6 +285,9 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	public void endVisit(InfixExpression node) {
+		endVisitNode(node);
+	}
+	public void endVisit(InstanceofExpression node) {
 		endVisitNode(node);
 	}
 	public void endVisit(Initializer node) {

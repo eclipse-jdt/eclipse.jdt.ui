@@ -500,6 +500,12 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		process(info, node.extendedOperands());
 	}
 	
+	public void endVisit(InstanceofExpression node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getLeftOperand(), node.getRightOperand());
+	}
+	
 	public void endVisit(Initializer node) {
 		if (skipNode(node))
 			return;
