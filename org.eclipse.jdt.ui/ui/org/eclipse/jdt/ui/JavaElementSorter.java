@@ -24,10 +24,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Sorter for Java elements. Ordered by element category, then by element name. 
@@ -168,19 +168,28 @@ public class JavaElementSorter extends ViewerSorter {
 			return compareWithLabelProvider(viewer, e1, e2);
 		}
 		
-		if (cat1 == METHODS || cat1 == STATIC_METHODS || cat1 == CONSTRUCTORS) {
-			IMethod m1= (IMethod) e1;
-			IMethod m2= (IMethod) e2;
-			int nParamDiff= m1.getParameterTypes().length - m2.getParameterTypes().length;
-			if (nParamDiff != 0) {
-				return nParamDiff;
-			}
+		String name1= ((IJavaElement) e1).getElementName();
+		String name2= ((IJavaElement) e2).getElementName();
+		
+		// java element are sorted by name
+		int cmp= getCollator().compare(name1, name2);
+		if (cmp != 0) {
+			return cmp;
 		}
 		
-		// java element are sorted by name (and parameter types)
-		String name1= JavaElementLabels.getTextLabel(e1, JavaElementLabels.M_PARAMETER_TYPES);
-		String name2= JavaElementLabels.getTextLabel(e2, JavaElementLabels.M_PARAMETER_TYPES);
-		return getCollator().compare(name1, name2);	
+		if (cat1 == METHODS || cat1 == STATIC_METHODS || cat1 == CONSTRUCTORS) {
+			String[] params1= ((IMethod) e1).getParameterTypes();
+			String[] params2= ((IMethod) e2).getParameterTypes();
+			int len= Math.min(params1.length, params2.length);
+			for (int i = 0; i < len; i++) {
+				cmp= getCollator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
+				if (cmp != 0) {
+					return cmp;
+				}
+			}
+			return params1.length - params2.length;
+		}
+		return 0;
 	}
 	
 	private int compareWithLabelProvider(Viewer viewer, Object e1, Object e2) {
