@@ -188,8 +188,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 				try {
 					resource= je.getUnderlyingResource();
 				} catch (JavaModelException ex) {
-					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$
-					return count;
+					continue;
 				}
 			}
 			else
