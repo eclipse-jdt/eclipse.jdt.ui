@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -279,8 +281,14 @@ public class ListDialogField extends DialogField {
 						
 			fTable= createTableViewer(parent);
 
-			
 			fTableControl= (Table)fTable.getControl();
+			fTableControl.addKeyListener(new KeyAdapter() {
+				public void keyPressed(KeyEvent e) {
+					handleKeyPressed(e);
+				}
+			});
+			
+			
 			TableLayout tableLayout= new TableLayout();
 			fTableControl.setLayout(tableLayout);			
 			
@@ -298,7 +306,8 @@ public class ListDialogField extends DialogField {
 			}
 			fTable.setContentProvider(fListViewerAdapter);
 			fTable.setLabelProvider(fLabelProvider);
-			fTable.addSelectionChangedListener(fListViewerAdapter);			
+			fTable.addSelectionChangedListener(fListViewerAdapter);
+
 			
 			fTable.setInput(fParentElement);
 			
@@ -325,7 +334,11 @@ public class ListDialogField extends DialogField {
 	 * Subclasses may override to specify a different style.
 	 */
 	protected int getListStyle(){
-		return SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
+		int style=  SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL ;
+		if (fTableColumns != null) {
+			style |= SWT.FULL_SELECTION;
+		}
+		return style;		
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
@@ -416,6 +429,18 @@ public class ListDialogField extends DialogField {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Handles key events in the table viewer. Specifically
+	 * when the delete key is pressed.
+	 */
+	protected void handleKeyPressed(KeyEvent event) {
+		if (event.character == SWT.DEL && event.stateMask == 0) {
+			if (fRemoveButtonIndex != -1 && isButtonEnabled(fTable.getSelection(), fRemoveButtonIndex)) {
+				managedButtonPressed(fRemoveButtonIndex);
+			}
+		} 
 	}	
 	
 	// ------ enable / disable management
@@ -444,8 +469,7 @@ public class ListDialogField extends DialogField {
 			for (int i= 0; i < fButtonControls.length; i++) {
 				Button button= fButtonControls[i];
 				if (isOkToUse(button)) {
-					boolean extraState= getManagedButtonState(sel, i);
-					button.setEnabled(isEnabled() && extraState && fButtonsEnabled[i]);
+					button.setEnabled(isButtonEnabled(sel, i));
 				}				
 			}
 		}
@@ -491,6 +515,12 @@ public class ListDialogField extends DialogField {
 			updateButtonState();
 		}
 	}
+	
+	private boolean isButtonEnabled(ISelection sel, int index) {
+		boolean extraState= getManagedButtonState(sel, index);
+		return isEnabled() && extraState && fButtonsEnabled[index];
+	}		
+	
 
 	// ------ model access
 	
