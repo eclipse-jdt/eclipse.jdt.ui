@@ -34,6 +34,8 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -65,8 +67,8 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 	private IInformationPresenter fHierarchyPresenter;
 
 	/**
-     * This viewer's foreground color.
-     * @since 3.0
+	 * This viewer's foreground color.
+	 * @since 3.0
 	 */
 	private Color fForegroundColor;
 	/** 
@@ -74,6 +76,16 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 	 * @since 3.0
 	 */
 	private Color fBackgroundColor;
+	/**
+	 * This viewer's selection foreground color.
+	 * @since 3.0
+	 */
+	private Color fSelectionForegroundColor;
+	/** 
+	 * The viewer's selection background color.
+	 * @since 3.0
+	 */
+	private Color fSelectionBackgroundColor;
 	/**
 	 * The preference store.
 	 * 
@@ -188,6 +200,28 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 				fBackgroundColor.dispose();
 			
 			fBackgroundColor= color;
+			
+			// ----------- selection foreground color --------------------
+			color= fPreferenceStore.getBoolean(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
+				? null
+				: createColor(fPreferenceStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+			styledText.setSelectionForeground(color);
+				
+			if (fSelectionForegroundColor != null)
+				fSelectionForegroundColor.dispose();
+			
+			fSelectionForegroundColor= color;
+			
+			// ---------- selection background color ----------------------
+			color= fPreferenceStore.getBoolean(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
+				? null
+				: createColor(fPreferenceStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+			styledText.setSelectionBackground(color);
+				
+			if (fSelectionBackgroundColor != null)
+				fSelectionBackgroundColor.dispose();
+				
+			fSelectionBackgroundColor= color;
 		}
     }
 
@@ -273,7 +307,11 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 		if (PreferenceConstants.EDITOR_FOREGROUND_COLOR.equals(property)
 				|| PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR.equals(property)
 				|| PreferenceConstants.EDITOR_BACKGROUND_COLOR.equals(property)
-				|| PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR.equals(property))
+				|| PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR.equals(property)
+				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR.equals(property)
+				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR.equals(property)
+				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR.equals(property)
+				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR.equals(property))
 		{
 			initializeViewerColors();
 		}		
