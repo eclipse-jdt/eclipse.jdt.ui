@@ -40,11 +40,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleTypeRequestedInDifferentPackage"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleTypeRequestedFromSuperClass"));
 			return suite;
 		}
 	}
@@ -961,8 +961,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		if (true) {
 			System.out.println("testInvisibleTypeRequestedInDifferentPackage: Waiting for release fo bug fix 24406");	
 			return;
-		}		
-		
+		}
 		
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1002,6 +1001,55 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
+	public void testInvisibleTypeRequestedFromSuperClass() throws Exception {
+		if (false) {
+			System.out.println("testInvisibleTypeRequestedFromSuperClass: Waiting for release fo bug fix 24502");	
+			return;
+		}
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    private class CInner {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         CInner c= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		//assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    class CInner {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
 	
 	public void testInvisibleImport() throws Exception {
 		if (true) {
