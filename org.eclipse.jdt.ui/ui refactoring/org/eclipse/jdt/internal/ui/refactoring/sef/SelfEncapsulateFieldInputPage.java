@@ -102,17 +102,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		createAccessModifier(result, layouter);
 		
-		final Button checkBox= new Button(result, SWT.CHECK);
-		checkBox.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.encapsulate_in_declaring_class")); //$NON-NLS-1$
-		checkBox.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fRefactoring.setEncapsulateDeclaringClass(checkBox.getSelection());
-			}
-		});
-		checkBox.setSelection(fRefactoring.getEncapsulateDeclaringClass());
-		layouter.perform(checkBox);
-
-		
+		createFieldAccessBlock(result);
+			
 		processValidation();
 		
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
@@ -152,6 +143,38 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layouter.perform(label, group, 1);	
 	}
 	
+	public void createFieldAccessBlock(Composite result) {
+		int indent= convertWidthInCharsToPixels(2);
+		Composite block= new Composite(result, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0; layout.marginHeight= 0;
+		block.setLayout(layout);
+		Label label= new Label(block, SWT.LEFT);
+		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
+		Button radio= new Button(block, SWT.RADIO);
+		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.use_setter_getter")); //$NON-NLS-1$
+		radio.setSelection(true);
+		radio.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fRefactoring.setEncapsulateDeclaringClass(true);
+			}
+		});
+		GridData data= new GridData();
+		data.horizontalIndent= indent;
+		radio.setLayoutData(data);
+		
+		radio= new Button(block, SWT.RADIO);
+		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.keep_references")); //$NON-NLS-1$
+		radio.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fRefactoring.setEncapsulateDeclaringClass(false);
+			}
+		});
+		data= new GridData();
+		data.horizontalIndent= indent;
+		radio.setLayoutData(data);
+	}
+
 	private Object[] createData(int visibility) {
 		String pub= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.public"); //$NON-NLS-1$
 		String pro= RefactoringMessages.getString("SelfEncapsulateFieldInputPage.protected"); //$NON-NLS-1$
