@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -34,7 +36,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -94,12 +98,13 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
+		String[] paramNames= getArgumentNames(binding);
 		for (int i= 0; i < params.length; i++) {
 			ITypeBinding curr= params[i];
 			addImport(curr);		
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			var.setType(ASTResolving.getTypeFromTypeBinding(ast, curr));
-			var.setName(ast.newSimpleName("arg" + i));
+			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}		
 		
@@ -142,6 +147,26 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		
 		return decl;
 	}
+	
+	private String[] getArgumentNames(IMethodBinding binding) {
+		int nParams= binding.getParameterTypes().length;
+		if (nParams > 0) {
+			try {
+				IMethod method= Binding2JavaModel.find(binding, getCompilationUnit().getJavaProject());
+				if (method != null) {
+					return method.getParameterNames();
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}			
+		String[] names= new String[nParams];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= "arg" + i;
+		}
+		return names;
+	}
+	
 	
 		
 	private void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, ArrayList visited, ArrayList allMethods, ArrayList toImplement) {
