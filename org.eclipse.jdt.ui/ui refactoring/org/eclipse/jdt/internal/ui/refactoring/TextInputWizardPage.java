@@ -23,7 +23,9 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	private Text fTextField;	
 	
 	public static final String PAGE_NAME= "TextInputPage";//$NON-NLS-1$
-	private String fOriginalMessage; 
+	
+	private String fOriginalMessage;
+	private int fOriginalMessageType;
 	
 	/**
 	 * Creates a new text input page.
@@ -31,7 +33,12 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 *  user input page. Otherwise <code>false</code>.
 	 */
 	public TextInputWizardPage(String message, boolean isLastUserPage) {
-		this(message, isLastUserPage, ""); //$NON-NLS-1$
+		this(message, NONE, isLastUserPage);
+		
+	}
+	
+	public TextInputWizardPage(String message, int messageType, boolean isLastUserPage) {
+		this(message, messageType, isLastUserPage, ""); //$NON-NLS-1$
 	}
 	
 	/**
@@ -41,11 +48,16 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 * @param initialSetting the initialSetting.
 	 */
 	public TextInputWizardPage(String message, boolean isLastUserPage, String initialValue) {
+		this(message, NONE, isLastUserPage, initialValue);
+	}
+	
+	public TextInputWizardPage(String message, int messageType, boolean isLastUserPage, String initialValue) {
 		super(PAGE_NAME, isLastUserPage);
 		Assert.isNotNull(initialValue);
-		setMessage(message);
+		setMessage(message, messageType);
 		fInitialValue= initialValue;
 		fOriginalMessage= message;
+		fOriginalMessageType= messageType;
 	}
 	
 	/**
@@ -160,7 +172,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	}
 	
 	private void restoreMessage(){
-		setMessage(fOriginalMessage);
+		setMessage(fOriginalMessage, fOriginalMessageType);
 	}
 	
 	/* (non-Javadoc)
