@@ -11,7 +11,13 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -28,28 +34,82 @@ public class ResourceTestHelper {
 	}
 
 	public static void copy(String src, String dest) throws CoreException {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		IFile file= root.getFile(new Path(src));
+		IFile file= getRoot().getFile(new Path(src));
 		file.copy(new Path(dest), true, null);
 	}
 
 	public static void delete(String file) throws CoreException {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		root.getFile(new Path(file)).delete(true, null);
+		getRoot().getFile(new Path(file)).delete(true, null);
 	}
 
 	public static IFile findFile(String path) {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		return root.getFile(new Path(path));
+		return getRoot().getFile(new Path(path));
 	}
 
 	public static IFile[] findFiles(String prefix, String suffix, int i, int n) {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IWorkspaceRoot root= getRoot();
 		List files= new ArrayList(n - i);
 		for (int j= i; j < i + n; j++) {
 			String path= root.getLocation().toString() + "/" + prefix + j + suffix;
 			files.add(findFile(path));
 		}
 		return (IFile[]) files.toArray(new IFile[files.size()]);
+	}
+
+	public static StringBuffer read(String src) throws IOException, CoreException {
+		return FileTool.read(new InputStreamReader(getRoot().getFile(new Path(src)).getContents()));
+	}
+
+	public static void write(String dest, final String content) throws IOException, CoreException {
+		InputStream stream= new InputStream() {
+			private Reader fReader= new StringReader(content);
+			public int read() throws IOException {
+				return fReader.read();
+			}
+		};
+		getRoot().getFile(new Path(dest)).create(stream, true, null);
+	}
+	
+
+	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destName) throws IOException, CoreException {
+		
+		StringBuffer s= read(src);
+		
+		List positions= identifierPositions(s, srcName);
+		
+		for (int j= 0; j < n; j++) {
+			StringBuffer c= new StringBuffer(s.toString());
+			replacePositions(c, srcName.length(), destName + j, positions);
+			write(destPrefix + j + destSuffix, c.toString());
+		}
+	}
+
+	private static void replacePositions(StringBuffer c, int origLength, String string, List positions) {
+		int offset= 0;
+		for (Iterator iter= positions.iterator(); iter.hasNext();) {
+			int position= ((Integer) iter.next()).intValue();
+			c.replace(offset + position, offset + position + origLength, string);
+			offset += string.length() - origLength;
+		}
+	}
+
+	private static List identifierPositions(StringBuffer buffer, String identifier) {
+		List positions= new ArrayList();
+		int i= -1;
+		while (true) {
+			i= buffer.indexOf(identifier, i + 1);
+			if (i == -1)
+				break;
+			if (i > 0 && Character.isJavaIdentifierPart(buffer.charAt(i - 1)))
+				continue;
+			if (i < buffer.length() - 1 && Character.isJavaIdentifierPart(buffer.charAt(i + identifier.length())))
+				continue;
+			positions.add(new Integer(i));
+		}
+		return positions;
+	}
+
+	private static IWorkspaceRoot getRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 }

@@ -13,7 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -183,11 +182,13 @@ public class FileTool {
 		}
 	}
 
-	public static StringBuffer read(String fileName) throws FileNotFoundException, IOException {
+	public static StringBuffer read(String fileName) throws IOException {
+		return read(new FileReader(fileName));
+	}
+
+	public static StringBuffer read(Reader reader) throws IOException {
 		StringBuffer s= new StringBuffer();
-		Reader reader= null;
 		try {
-			reader= new FileReader(fileName);
 			char[] buffer= new char[8196];
 			int chars= reader.read(buffer);
 			while (chars != -1) {
@@ -196,23 +197,20 @@ public class FileTool {
 			}
 		} finally {
 			try {
-				if (reader != null)
-					reader.close();
+				reader.close();
 			} catch (IOException e) {
 			}
 		}
 		return s;
 	}
 
-	public static void write(String fileName, StringBuffer c) throws IOException {
-		Writer writer= null;
+	public static void write(String fileName, StringBuffer content) throws IOException {
+		Writer writer= new FileWriter(fileName);
 		try {
-			writer= new FileWriter(fileName);
-			writer.write(c.toString());
+			writer.write(content.toString());
 		} finally {
 			try {
-				if (writer != null)
-					writer.close();
+				writer.close();
 			} catch (IOException e) {
 			}
 		}
