@@ -2342,8 +2342,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
+		ISelectionProvider selectionProvider= getSelectionProvider();
+		if (selectionProvider == null)
+			return;
 		
-		ISelection selection= getSelectionProvider().getSelection();
+		ISelection selection= selectionProvider.getSelection();
 		if (selection instanceof TextSelection) {
 			TextSelection textSelection= (TextSelection) selection;
 			// PR 39995: [navigation] Forward history cleared after going back in navigation history:
