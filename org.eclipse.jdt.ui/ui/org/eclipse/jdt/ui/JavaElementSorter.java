@@ -243,8 +243,8 @@ public class JavaElementSorter extends ViewerSorter {
 			}
 		}
 		
-		String name1= ((IJavaElement) e1).getElementName();
-		String name2= ((IJavaElement) e2).getElementName();
+		String name1= getElementName(e1);
+		String name2= getElementName(e2);
 		
 		if (e1 instanceof IType) { // handle anonymous types
 			if (name1.length() == 0) {
@@ -360,5 +360,15 @@ public class JavaElementSorter extends ViewerSorter {
 			return ((ClassPathContainer)element).getJavaProject();
 		}
 		return null;
+	}
+	
+	private String getElementName(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getElementName();
+		} else if (element instanceof ClassPathContainer) {
+			return ((ClassPathContainer)element).getLabel(element);
+		} else {
+			return element.toString();
+		}
 	}
 }
