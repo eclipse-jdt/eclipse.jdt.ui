@@ -166,23 +166,6 @@ public class Checks {
 	public static boolean isTopLevel(IType type){
 		return type.getDeclaringType() == null;
 	}
-	
-	/**
-	 * Analyzes resources for availability: i.e. existence and being not read-only
-	 * @param List groupedResults list of lists of <code>SearchResults</code> (grouped by resource 
-	 * - as returned by <code>RefactoringSearchEngine#search</code>)
-	 */
-	public static RefactoringStatus checkAffectedResourcesAvailability(SearchResultGroup[] groupedResults) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < groupedResults.length; i++){
-			IResource resource= groupedResults[i].getResource();
-			if (!resource.isAccessible())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
-			if (resource.isReadOnly())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath()), FileContext.create(resource, null)); //$NON-NLS-1$
-		}
-		return result;
-	}	
 
 	public static boolean isAlreadyNamed(IJavaElement element, String name){
 		return name.equals(element.getElementName());
