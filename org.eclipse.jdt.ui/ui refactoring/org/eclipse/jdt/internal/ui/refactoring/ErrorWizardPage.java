@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -147,26 +147,34 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	 * Method declared in IWizardPage.
 	 */
 	public void createControl(Composite parent) {
-		fTableViewer= getTableViewer(parent);
+		// Additional composite is needed to limit the size of the table to
+		// 60 characters.
+		Composite content= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1; layout.marginWidth= 0; layout.marginHeight= 0;
+		content.setLayout(layout);
+		
+		fTableViewer= getTableViewer(content);
 
-		Table tableControl= (Table)fTableViewer.getControl();
-
-		// Add a table column.
-		TableLayout tableLayout= new TableLayout();
-		tableLayout.addColumnData(new ColumnWeightData(100));
+		Table tableControl= fTableViewer.getTable();
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.widthHint= convertWidthInCharsToPixels(60);
+		tableControl.setLayoutData(gd);
+		// Add a column so that we can pack it in setVisible.
 		TableColumn tc= new TableColumn(tableControl, SWT.NONE);
 		tc.setResizable(false);
-		tableControl.setLayout(tableLayout);		
 		
-		setControl(tableControl);
+		setControl(content);
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on IDialog.
 	 */
 	public void setVisible(boolean visible) {
-		if (visible && fTableViewer.getInput() != fStatus)
+		if (visible && fTableViewer.getInput() != fStatus) {
 			fTableViewer.setInput(fStatus);
+			fTableViewer.getTable().getColumn(0).pack();
+		}
 		super.setVisible(visible);
 	}
 	

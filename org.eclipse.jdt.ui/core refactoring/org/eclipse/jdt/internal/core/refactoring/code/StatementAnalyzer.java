@@ -117,7 +117,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
-				fMessage= "Can not create new method. Only statements from the body of a top level method can be extracted.";
+				fMessage= "Can not extract new method form selection. Only statements from the body of a top level method can be extracted.";
 			if (fMessage != null)
 				status.addFatalError(fMessage);
 		}
@@ -348,10 +348,10 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		if (target != null) {
 			if (isSelected(target)) {
 				if (fMode != SELECTED)
-					fStatus.addError("Selection contains a " + name + " target but not all corresponding " + name + " statements are selected.");
+					fStatus.addFatalError("Selection contains a " + name + " target but not all corresponding " + name + " statements are selected.");
 			} else {
 				if (fMode == SELECTED)
-					fStatus.addError("Selection contains a " + name + " statement but the corresponding " + name + " target isn't selected.");
+					fStatus.addFatalError("Selection contains a " + name + " statement but the corresponding " + name + " target isn't selected.");
 			}
 		} else {
 			fStatus.addFatalError("Can not find break target");
