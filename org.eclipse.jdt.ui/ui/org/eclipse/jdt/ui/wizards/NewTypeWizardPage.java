@@ -1214,7 +1214,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ISourceRange range;
 		if (isInnerClass) {
 			synchronized(cu) {
-				cu.reconcile();
+				cu.reconcile(null);
 			}
 			range= createdType.getSourceRange();
 		} else {
