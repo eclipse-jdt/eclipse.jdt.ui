@@ -34,6 +34,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -178,8 +179,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		// register actions that have a dynamic editor. 
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
 	}
 
 	/*
