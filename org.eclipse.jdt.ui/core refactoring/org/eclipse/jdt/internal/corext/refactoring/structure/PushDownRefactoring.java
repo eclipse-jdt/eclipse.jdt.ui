@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -85,7 +86,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class PushDownRefactoring extends Refactoring {
 	
-	public static class MemberActionInfo{
+	public static class MemberActionInfo implements IMemberActionInfo{
 
 		private final IMember fMember;
 		private int fAction;
@@ -206,6 +207,10 @@ public class PushDownRefactoring extends Refactoring {
 				result[i]= infos[i].getMember();
 			}
 			return result;
+		}
+
+		public boolean isNoAction() {
+			return getAction() == NO_ACTION;
 		}
 
 	}
