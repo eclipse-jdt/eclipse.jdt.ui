@@ -257,7 +257,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			if (cu.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
-			if (mustCancelRenamingType())
+			if (cancelTypeRenameDueToParseErrors())
 				fWillRenameType= false;
 			
 			if (fWillRenameType)
@@ -275,10 +275,16 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		if (mustCancelRenamingType()){
+		if (cancelTypeRenameDueToParseErrors()){
 			Assert.isTrue(! fWillRenameType);
 			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", fCu.getElementName())); //$NON-NLS-1$
-		}	
+		}
+		
+		if (fRenameTypeRefactoring != null){
+			IType type= fRenameTypeRefactoring.getType();
+			if (! type.exists())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.type_does_not_exist", type.getElementName())); //$NON-NLS-1$
+		}
 		 
 		// we purposely do not check activation of the renameTypeRefactoring here. 
 		return new RefactoringStatus();
@@ -338,7 +344,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		}
 	}
 	
-	private boolean mustCancelRenamingType() throws JavaModelException {
+	private boolean cancelTypeRenameDueToParseErrors() throws JavaModelException {
 		return (fRenameTypeRefactoring != null) && (! fCu.isStructureKnown());
 	}
 	
