@@ -15,11 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
@@ -28,12 +24,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 /**
  * This class adapts a Call Hierarchy view site.
@@ -46,8 +37,6 @@ class CallHierarchyViewSiteAdapter implements IViewSite {
     private ISelectionProvider fProvider;
     private IWorkbenchSite fSite;
     
-    private ISelectionChangedListener fListener;
-
     public CallHierarchyViewSiteAdapter(IWorkbenchSite site){
         fSite= site;
         setSelectionProvider(site.getSelectionProvider());
@@ -71,41 +60,9 @@ class CallHierarchyViewSiteAdapter implements IViewSite {
     
     public void setSelectionProvider(final ISelectionProvider provider) {
         Assert.isNotNull(provider);
-        fProvider= 
-            new ISelectionProvider() {
-                public void addSelectionChangedListener(final ISelectionChangedListener listener) {
-                    fListener=
-                        new ISelectionChangedListener() {
-                            public void selectionChanged(SelectionChangedEvent event) {
-                                listener.selectionChanged(new SelectionChangedEvent(fProvider, convertSelection(event.getSelection())));
-                            }
-                        };
-                    provider.addSelectionChangedListener(fListener);
-                }
-                public ISelection getSelection() {
-                    return convertSelection(provider.getSelection());
-                }
-                public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-                    provider.removeSelectionChangedListener(fListener);
-                }
-                public void setSelection(ISelection selection) {
-                }
-            };
+        fProvider= new SelectionProviderAdapter(provider);
     }
 
-    private ISelection convertSelection(ISelection selection) {
-        Object element= SelectionUtil.getSingleElement(selection);
-        if (element instanceof MethodWrapper) {
-            MethodWrapper methodWrapper= (MethodWrapper) element;
-            if (methodWrapper != null) {
-                    IJavaElement je= methodWrapper.getMember();
-                    if (je != null)
-                        return new StructuredSelection(je);
-            }
-        }
-        return StructuredSelection.EMPTY;       
-    }
-    
     // --------- only empty stubs below ---------
         
     /*

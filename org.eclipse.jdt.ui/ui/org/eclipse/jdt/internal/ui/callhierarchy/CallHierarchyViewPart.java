@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -39,6 +42,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -73,7 +77,13 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -278,8 +288,35 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         showOrHideCallDetailsView();
     }
 
+    private void initDragAndDrop() {
+        Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
+        int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
+
+        addDragAdapters(fCallHierarchyViewer, ops, transfers);
+        addDropAdapters(fCallHierarchyViewer, ops | DND.DROP_DEFAULT, transfers);
+        addDropAdapters(fLocationViewer, ops | DND.DROP_DEFAULT, transfers);
+
+        //dnd on empty hierarchy
+        DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops | DND.DROP_DEFAULT);
+        dropTarget.setTransfer(transfers);
+        dropTarget.addDropListener(new CallHierarchyTransferDropAdapter(this, fCallHierarchyViewer));
+    }
+    
+    private void addDropAdapters(StructuredViewer viewer, int ops, Transfer[] transfers){
+        TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
+            new CallHierarchyTransferDropAdapter(this, viewer)
+        };
+        viewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+    }
+
+    private void addDragAdapters(StructuredViewer viewer, int ops, Transfer[] transfers) {
+        TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
+            new SelectionTransferDragAdapter(new SelectionProviderAdapter(viewer))
+        };
+        viewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(viewer, dragListeners));
+    }   
+            
     public void createPartControl(Composite parent) {
-        //        setTitle("Call Hierarchy");
         fPagebook = new PageBook(parent, SWT.NONE);
 
         // Page 1: Viewers
@@ -316,6 +353,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         if (fMemento != null) {
             restoreState(fMemento);
         }
+        
+        initDragAndDrop();      
     }
 
     /**
