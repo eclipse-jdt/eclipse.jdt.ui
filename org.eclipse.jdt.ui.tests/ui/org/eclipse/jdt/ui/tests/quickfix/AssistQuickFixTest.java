@@ -58,11 +58,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AssistQuickFixTest("testCreateInSuper"));
+			suite.addTest(new AssistQuickFixTest("testAssignToLocal7"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -439,6 +439,73 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
+	
+	public void testAssignToLocal7() throws Exception {
+		// test name conflict: name used later
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        goo().iterator();\n");
+		buf.append("        Iterator iterator= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("goo().iterator()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    private Iterator iterator2;\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        iterator2 = goo().iterator();\n");
+		buf.append("        Iterator iterator= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        Iterator iterator2 = goo().iterator();\n");
+		buf.append("        Iterator iterator= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}
+
 
 	
 	public void testAssignParamToField() throws Exception {

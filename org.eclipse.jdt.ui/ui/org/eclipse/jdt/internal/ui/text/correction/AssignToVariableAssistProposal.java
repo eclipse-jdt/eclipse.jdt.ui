@@ -272,10 +272,15 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	
 	private String[] getUsedVariableNames() {
 		CompilationUnit root= (CompilationUnit) fNodeToAssign.getRoot();
-		IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsInScope(fNodeToAssign.getStartPosition(), ScopeAnalyzer.VARIABLES);
-		String[] names= new String[bindings.length];
-		for (int i= 0; i < names.length; i++) {
-			names[i]= bindings[i].getName();
+		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(fNodeToAssign.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(fNodeToAssign.getStartPosition() + fNodeToAssign.getLength(), ScopeAnalyzer.VARIABLES);
+		
+		String[] names= new String[varsBefore.length + varsAfter.length];
+		for (int i= 0; i < varsBefore.length; i++) {
+			names[i]= varsBefore[i].getName();
+		}
+		for (int i= varsBefore.length; i < names.length; i++) {
+			names[i]= varsAfter[i].getName();
 		}
 		return names;
 	}
