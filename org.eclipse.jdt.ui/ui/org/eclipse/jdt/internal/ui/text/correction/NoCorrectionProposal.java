@@ -11,33 +11,20 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 
 
-public class NoCorrectionProposal implements ICompletionProposal {
+public class NoCorrectionProposal extends ChangeCorrectionProposal {
 
 	private ProblemPosition fProblemPosition;
 
 	public NoCorrectionProposal(ProblemPosition problemPosition) {
+		super("No correction available", new NullChange(), 0);
 		fProblemPosition= problemPosition;
 	}
 
-	/*
-	 * @see ICompletionProposal#apply(IDocument)
-	 */
-	public void apply(IDocument document) {
-		// do nothing
-	}
-	
 
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
@@ -91,32 +78,5 @@ public class NoCorrectionProposal implements ICompletionProposal {
 		return buf.toString();
 	}
 
-	/*
-	 * @see ICompletionProposal#getContextInformation()
-	 */
-	public IContextInformation getContextInformation() {
-		return null;
-	}
-
-	/*
-	 * @see ICompletionProposal#getDisplayString()
-	 */
-	public String getDisplayString() {
-		return "No correction available"; //$NON-NLS-1$
-	}
-
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVA_MODEL);
-	}
-
-	/*
-	 * @see ICompletionProposal#getSelection(IDocument)
-	 */
-	public Point getSelection(IDocument document) {
-		return null;
-	}
 
 }

@@ -233,10 +233,12 @@ public class StubUtility {
 			String simpleName= Signature.getSimpleName(Signature.toString(retTypeSig));
 			buf.append(" * @return "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
 		}
-		for (int i= 0; i < excTypeSigs.length; i++) {
-			String simpleName= Signature.getSimpleName(Signature.toString(excTypeSigs[i]));
-			buf.append(" * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
-		}		
+		if (excTypeSigs != null) {
+			for (int i= 0; i < excTypeSigs.length; i++) {
+				String simpleName= Signature.getSimpleName(Signature.toString(excTypeSigs[i]));
+				buf.append(" * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
+			}
+		}
 		buf.append(" */\n"); //$NON-NLS-1$
 	}
 	

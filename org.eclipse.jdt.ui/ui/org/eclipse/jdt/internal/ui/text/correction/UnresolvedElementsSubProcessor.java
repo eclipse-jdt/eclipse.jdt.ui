@@ -169,7 +169,7 @@ public class UnresolvedElementsSubProcessor {
 			if (cu.equals(changedCU)) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
 			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, typeName } ); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, type.getElementName() } ); //$NON-NLS-1$
 			}
 			proposals.add(new NewMethodCompletionProposal(type, problemPos, label, methodName, arguments, 1));
 		}
@@ -180,7 +180,7 @@ public class UnresolvedElementsSubProcessor {
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken();
+			res[i]= tok.nextToken().trim();
 		}
 		return res;
 	}	
