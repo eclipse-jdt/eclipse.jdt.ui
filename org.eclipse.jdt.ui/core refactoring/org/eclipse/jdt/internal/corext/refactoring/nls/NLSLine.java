@@ -45,6 +45,10 @@ public class NLSLine {
 		return fElements.size();
 	}
 	
+	/* non javaDoc
+	 * only for debugging
+	 * @see Object#toString()
+	 */
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		result.append("Line: " + fLineNumber + "\n"); //$NON-NLS-2$ //$NON-NLS-1$
