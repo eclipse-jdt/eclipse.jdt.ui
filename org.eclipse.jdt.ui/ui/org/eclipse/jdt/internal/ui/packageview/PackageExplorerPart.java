@@ -1259,10 +1259,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * @deprecated To be removed
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
-		if (decorator == null)
-			fViewer.setLabelProvider(fJavaElementLabelProvider);
-		else
-			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
+		// no-op this is no longer supported
 	}
 	
 	/*
