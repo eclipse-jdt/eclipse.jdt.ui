@@ -22,24 +22,33 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
@@ -63,7 +72,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private final ICompilationUnit fCu;
     
     private int fVisibility; /*see Modifier*/
-    private boolean fDeclareStatic;
     private boolean fDeclareFinal;
     private String fClassName;
     
@@ -101,18 +109,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	fClassName= className;
     }
     
-    public boolean canEnableSettingStatic(){
-    	return true; //XXX TBD
-    }
-    
-    public boolean getDeclareStatic(){
-    	return fDeclareStatic;
-    }
-    
-    public void setDeclareStatic(boolean declareStatic){
-    	fDeclareStatic= declareStatic;
-    }
-
     public boolean canEnableSettingFinal(){
     	return true;
     }
@@ -189,7 +185,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	fVisibility= Modifier.PRIVATE;
     	fClassName= "";
     	fDeclareFinal= true;
-    	fDeclareStatic= false;//XXX TBD
     }
 
 	public RefactoringStatus validateInput(){
@@ -249,7 +244,18 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 //    	newClassCreation.setExpression(expression);//XXX ???
 		newClassCreation.setName(getAST().newSimpleName(fClassName));
 		copyArguments(rewrite, newClassCreation);
+        addArgumentsForLocalsUsedInInnerClass(rewrite, newClassCreation);
         return newClassCreation;
+    }
+
+    private void addArgumentsForLocalsUsedInInnerClass(ASTRewrite rewrite, ClassInstanceCreation newClassCreation) {
+        IVariableBinding[] usedLocals= getUsedLocalVariables();
+        for (int i= 0; i < usedLocals.length; i++) {
+            IVariableBinding local= usedLocals[i];
+            Expression expression= getAST().newSimpleName(local.getName());
+            rewrite.markAsInserted(expression);
+            newClassCreation.arguments().add(expression);
+        }
     }
     
     private void copyArguments(ASTRewrite rewrite, ClassInstanceCreation newClassCreation) {
@@ -295,17 +301,58 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	newType.setName(getAST().newSimpleName(fClassName));
     	setSuperType(newType);
         copyBodyDeclarationsToNestedClass(rewrite, newType);
-        if (isNewConstructorNeeded())
-	        createNewConstructor(rewrite, newType);
+        createFieldsForAccessedLocals(rewrite, newType);
+	    createNewConstructorIfNeeded(rewrite, newType);
         return newType;
     }
     
-    private boolean isNewConstructorNeeded() {
-    	//XXX very rough approximation
-    	return ! getClassInstanceCreation().arguments().isEmpty();
+    private void createFieldsForAccessedLocals(ASTRewrite rewrite, TypeDeclaration newType) {
+        IVariableBinding[] usedLocals= getUsedLocalVariables();
+		for (int i= 0; i < usedLocals.length; i++) {
+            IVariableBinding local= usedLocals[i];
+            VariableDeclarationFragment fragment= getAST().newVariableDeclarationFragment();
+            fragment.setExtraDimensions(0);
+            fragment.setInitializer(null);
+            fragment.setName(getAST().newSimpleName(local.getName()));
+            FieldDeclaration field= getAST().newFieldDeclaration(fragment);
+            field.setType(Bindings.createType(local.getType(), getAST(), false));
+            field.setModifiers(Modifier.PRIVATE | Modifier.FINAL);
+            newType.bodyDeclarations().add(findIndexOfLastField(newType.bodyDeclarations()) + 1, field);
+            rewrite.markAsInserted(field);
+        }    
     }
     
-    private void createNewConstructor(ASTRewrite rewrite, TypeDeclaration newType) throws JavaModelException {
+    private IVariableBinding[] getUsedLocalVariables(){
+    	final Set result= new HashSet(0);
+    	fAnonymousInnerClassNode.accept(new ASTVisitor(){
+    		public boolean visit(SimpleName node) {
+    			IBinding binding= node.resolveBinding();
+    			if (isLocalBinding(binding))
+	    			result.add(binding);	
+    			return true;
+            }
+            private boolean isLocalBinding(IBinding binding){
+    			if (!(binding instanceof IVariableBinding))
+    				return false;
+    			if (! Modifier.isFinal(binding.getModifiers()))
+    				return false;
+   				ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
+   				if (declaringNode == null)
+    				return false;
+    			if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
+    				return false;
+    			return true;	
+            }
+    	});
+    	return (IVariableBinding[]) result.toArray(new IVariableBinding[result.size()]);
+    }
+    
+    private void createNewConstructorIfNeeded(ASTRewrite rewrite, TypeDeclaration newType) throws JavaModelException {
+	    IVariableBinding[] usedLocals= getUsedLocalVariables();
+    
+    	if (getClassInstanceCreation().arguments().isEmpty() && usedLocals.length == 0)
+    		return;
+    	
     	MethodDeclaration newConstructor= getAST().newMethodDeclaration();
     	newConstructor.setConstructor(true);
     	newConstructor.setExtraDimensions(0);
@@ -313,24 +360,43 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	newConstructor.setModifiers(fVisibility);
     	newConstructor.setName(getAST().newSimpleName(fClassName));
     	addParametersToNewConstructor(newConstructor, rewrite);
-    	
+	    int paramCount= newConstructor.parameters().size();
+
+        addParametersForLocalsUsedInInnerClass(rewrite, usedLocals, newConstructor);
+
         Block constructorBody= getAST().newBlock();
         SuperConstructorInvocation superConstructorInvocation= getAST().newSuperConstructorInvocation();
-        for (Iterator iter= newConstructor.parameters().iterator(); iter.hasNext();) {
-            SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
+        for (int i= 0; i < paramCount; i++) {
+            SingleVariableDeclaration param= (SingleVariableDeclaration) newConstructor.parameters().get(i);
             superConstructorInvocation.arguments().add(getAST().newSimpleName(param.getName().getIdentifier()));
         }
-        
         constructorBody.statements().add(superConstructorInvocation);
+        for (int i= 0; i < usedLocals.length; i++) {
+            IVariableBinding local= usedLocals[i];
+            String assignmentCode= ToolFactory.createCodeFormatter().format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator());
+            Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
+            ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
+	        constructorBody.statements().add(assignmentStatement);
+        }
     	newConstructor.setBody(constructorBody);
     	
 		addExceptionsToNewConstructor(newConstructor, rewrite);
     	rewrite.markAsInserted(newConstructor);
-    	newType.bodyDeclarations().add(0, newConstructor);
+    	int index= 1 + usedLocals.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations());
+        newType.bodyDeclarations().add(index, newConstructor);
+    }
+
+    private void addParametersForLocalsUsedInInnerClass(ASTRewrite rewrite, IVariableBinding[] usedLocals, MethodDeclaration newConstructor) {
+        for (int i= 0; i < usedLocals.length; i++) {
+            IVariableBinding local= usedLocals[i];
+            SingleVariableDeclaration param= createNewParamDeclarationNode(local.getName(), local.getType());
+            rewrite.markAsInserted(param);
+            newConstructor.parameters().add(param);
+        }
     }
     
     private IMethodBinding getSuperConstructorBinding(){
-    	//workaround 
+    	//workaround for missing jcore functionality - finding a superconstructor for an anonymous class creation
     	IMethodBinding anonConstr= getClassInstanceCreation().resolveConstructorBinding();
     	ITypeBinding superClass= anonConstr.getDeclaringClass().getSuperclass();
     	IMethodBinding[] superMethods= superClass.getDeclaredMethods();
@@ -376,15 +442,20 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		return;
     	String[] parameterNames= method.getParameterNames();
     	for (int i= 0; i < parameterNames.length; i++) {
-            SingleVariableDeclaration param= getAST().newSingleVariableDeclaration();
-            param.setExtraDimensions(0);
-            param.setInitializer(null);
-            param.setModifiers(Modifier.NONE);
-            param.setName(getAST().newSimpleName(parameterNames[i]));
-            param.setType(Bindings.createType(paramTypes[i], getAST(), false));
+            SingleVariableDeclaration param= createNewParamDeclarationNode(parameterNames[i], paramTypes[i]);
             rewrite.markAsInserted(param);
             newConstructor.parameters().add(param);
         }
+    }
+
+    private SingleVariableDeclaration createNewParamDeclarationNode(String paramName, ITypeBinding paramType) {
+        SingleVariableDeclaration param= getAST().newSingleVariableDeclaration();
+        param.setExtraDimensions(0);
+        param.setInitializer(null);
+        param.setModifiers(Modifier.NONE);
+        param.setName(getAST().newSimpleName(paramName));
+        param.setType(Bindings.createType(paramType, getAST(), false));
+        return param;
     }
 
     private void copyBodyDeclarationsToNestedClass(ASTRewrite rewrite, TypeDeclaration newType) {
@@ -431,8 +502,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         int flags= fVisibility;
         if (fDeclareFinal)
         	flags |= Modifier.FINAL;
-        if (fDeclareStatic)	
-        	flags |= Modifier.STATIC;
         return flags;	
     }
 
@@ -447,4 +516,21 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	private TypeDeclaration getTypeDeclaration(){
 		return (TypeDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, TypeDeclaration.class);
 	}
+
+    private String getLineSeparator() {
+		try {
+			return StubUtility.getLineDelimiterUsed(fCu);
+		} catch (JavaModelException e) {
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+    }    
+
+    private static int findIndexOfLastField(List bodyDeclarations) {
+    	for (int i= bodyDeclarations.size() - 1; i >= 0; i--) {
+    		BodyDeclaration each= (BodyDeclaration)bodyDeclarations.get(i);
+    		if (each instanceof FieldDeclaration)
+    			return i;
+        }
+        return -1;
+    }
 }
