@@ -40,8 +40,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.JavaModelUtility;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /*
  * non java-doc
  * not API
@@ -278,15 +277,12 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		return methods;
 	}
 	
-	/* not java-doc
+	/* XXX
 	 * possible performance improvement
 	 * needs rework
 	 */
 	private boolean classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
-
-		HackFinder.fixMeSoon(null);
-
-		IType type= method.getDeclaringType();
+		IType type= method.getDeclaringType();
 		IType[] subtypesArr= hier.getAllSubtypes(type);
 		int parameterCount= method.getParameterTypes().length;
 		

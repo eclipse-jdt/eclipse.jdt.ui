@@ -16,7 +16,6 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.search.matching.MatchLocator;
 import org.eclipse.jdt.internal.core.search.matching.SearchPattern;
-import org.eclipse.jdt.internal.core.util.HackFinder;
 
 class RefactoringMatchLocator extends MatchLocator{
 	
@@ -39,7 +38,7 @@ class RefactoringMatchLocator extends MatchLocator{
 	 */
 	public void reportQualifiedReference(int sourceStart, int sourceEnd, char[][] qualifiedName, IJavaElement element, int accuracy) throws CoreException {
 		
-		HackFinder.fixMeSoon("code copied from org.eclipse.jdt.internal.core.search.matching.MatchLocator;");
+		//XXX: code copied from org.eclipse.jdt.internal.core.search.matching.MatchLocator
 		
 	// compute source positions of the qualified reference 
 	Scanner scanner = getScanner();

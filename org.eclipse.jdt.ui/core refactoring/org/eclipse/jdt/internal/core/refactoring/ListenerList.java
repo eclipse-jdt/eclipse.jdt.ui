@@ -4,15 +4,13 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
 /**
  * Local copy of org.eclipse.jface.ListenerList
  */
 public class ListenerList {
 	
 	static {
-		HackFinder.fixMeLater("1GCQD0A: ITPVCM:WIN2000 - ListenerList should be part of a core project");
+		//XXX: 1GCQD0A: ITPVCM:WIN2000 - ListenerList should be part of a core project
 	}
 		
 	/**

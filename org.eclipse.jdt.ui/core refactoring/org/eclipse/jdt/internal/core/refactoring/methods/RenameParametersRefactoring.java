@@ -22,8 +22,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 

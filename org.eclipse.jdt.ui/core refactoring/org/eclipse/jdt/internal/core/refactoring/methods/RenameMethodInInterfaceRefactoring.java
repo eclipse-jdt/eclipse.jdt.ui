@@ -23,8 +23,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
@@ -132,15 +131,14 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 		return (found != null && !Flags.isPrivate(found.getFlags()) && !Flags.isStatic(found.getFlags()));
 	}
 	
-	/**
+	/*
+	 * XXX
 	 * almost duplicated logic from doGetMethodToRename
 	 * need serious rework
 	 * see into private/static method issues
 	 * needs a better name
 	 */ 
 	private HashSet getRelatedTypes(HashSet typesVisited, ITypeHierarchy hier, IType type, IMethod method, IProgressMonitor pm) throws JavaModelException {
-		
-		HackFinder.fixMeSoon("see  comment");
 		
 		HashSet typeSet= new HashSet();
 		typesVisited.add(type);
@@ -192,7 +190,7 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	 */
 	private HashSet doGetMethodsToRename(HashSet typesVisited, ITypeHierarchy hier, IType type, IMethod method, IProgressMonitor pm) throws JavaModelException {
 		
-		HackFinder.fixMeSoon("needs serious rethinking and rework");
+		//XXX: needs serious rethinking and rework
 		
 		HashSet typeSet= new HashSet();
 		typesVisited.add(type);

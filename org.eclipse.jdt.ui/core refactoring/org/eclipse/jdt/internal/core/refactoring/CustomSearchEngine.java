@@ -22,12 +22,11 @@ import org.eclipse.jdt.internal.core.search.PatternSearchJob;
 import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
 import org.eclipse.jdt.internal.core.search.matching.MatchLocator;
 import org.eclipse.jdt.internal.core.search.matching.SearchPattern;
-import org.eclipse.jdt.internal.core.util.HackFinder;
 
 class CustomSearchEngine extends SearchEngine {
 
 	public void search(IWorkspace workspace, ISearchPattern searchPattern, IJavaSearchScope scope, IJavaSearchResultCollector resultCollector) throws JavaModelException {
-		HackFinder.fixMeSoon("code copied from org.eclipse.jdt.core.search.SearchEngine;");
+		//XXX: code copied from org.eclipse.jdt.core.search.SearchEngine
 
 	/* search is starting */
 	resultCollector.aboutToStart();

@@ -16,8 +16,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /*
  * non java-doc
  * not API

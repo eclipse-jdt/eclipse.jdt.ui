@@ -31,8 +31,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultCollector;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
@@ -124,8 +123,8 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		pm.beginTask("", 2);
 		if (Flags.isPrivate(getMethod().getFlags()))
 			return false;
-		HackFinder.fixMeSoon("use the commented code once this is fixed: 1GCZZS1: ITPJCORE:WINNT - inconsistent search for method declarations");	
-		//and delete findMethod
+		//XXX: use the commented code once this is fixed: 1GCZZS1: ITPJCORE:WINNT - inconsistent search for method declarations
+		//XXX: and delete findMethod
 		
 //		IType declaringType= getMethod().getDeclaringType();	
 //		ITypeHierarchy superTypes= declaringType.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));

@@ -25,8 +25,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 

@@ -27,8 +27,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * Checks whether the source range denoted by <code>start</code> and <code>end</code>
  * selects a set of statements.
@@ -569,7 +568,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		HackFinder.fixMeSoon("1GEG3MS: ITPJCORE:WIN2000 - AbstractVariableDeclaration - declarationSourceStart and declarationSourceEnd set to incorrect values");
+		//XXX: 1GEG3MS: ITPJCORE:WIN2000 - AbstractVariableDeclaration - declarationSourceStart and declarationSourceEnd set to incorrect values
 		// return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
 		// 	localDeclaration, scope);
 		return visitNode(localDeclaration, scope);

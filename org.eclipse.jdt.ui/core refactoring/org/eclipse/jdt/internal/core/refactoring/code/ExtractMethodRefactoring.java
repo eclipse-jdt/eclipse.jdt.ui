@@ -29,8 +29,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * Extracts a method in a compilation unit based on a text selection range.
  * [ToDo:

@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
-import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
  * <p>
@@ -475,10 +474,10 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
 		/*
+		 * XXX
 		 * Most of these should not be created because they are simple type references.
 		 * otherwise they're displayed in the compare viewer as no-ops
 		 */
-		HackFinder.fixMeSoon("see comment");
 		
 		SimpleReplaceTextChange change= new SimpleReplaceTextChange("update type reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) {
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {

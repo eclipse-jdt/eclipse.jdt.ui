@@ -13,8 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 

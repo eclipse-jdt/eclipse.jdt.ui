@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
-import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /*
  * non java-doc

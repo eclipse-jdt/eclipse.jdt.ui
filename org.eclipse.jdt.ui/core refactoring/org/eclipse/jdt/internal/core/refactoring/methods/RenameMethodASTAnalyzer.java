@@ -31,8 +31,7 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
-import org.eclipse.jdt.internal.core.util.HackFinder;
-
+
 /*
  * non java-doc
  * not API
@@ -68,7 +67,7 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 	private boolean nameDefinedInTypes(MethodBinding[] methods) {
 		if (methods != null) {
 			for (int i= 0; i < methods.length; i++) {
-				HackFinder.fixMeSoon("should perform real visibility analysis");
+				//XXX should perform real visibility analysis
 				if (methods[i].isPrivate())
 					continue;
 				int methodParamCount= methods[i].parameters == null ? 0 : methods[i].parameters.length;
@@ -81,7 +80,7 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 
 	private boolean nameDefinedInTypes(TypeBinding binding) {
-		HackFinder.fixMeSoon("other types of bindings?");
+		// XXX: other types of bindings?
 		if (binding instanceof SourceTypeBinding) {
 			SourceTypeBinding sourceBinding= (SourceTypeBinding) binding;
 			if (nameDefinedInTypes(sourceBinding.methods()))
@@ -90,7 +89,7 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 				return true;
 		} else
 			if (binding instanceof BinaryTypeBinding) {
-				HackFinder.fixMeSoon("is BinaryTypeBinding ok?");
+				// XXX: is BinaryTypeBinding ok?
 				BinaryTypeBinding binaryBinding= (BinaryTypeBinding) binding;
 				if (nameDefinedInTypes(binaryBinding.methods()))
 					return true;
@@ -111,7 +110,7 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 				return true;
 			}
 		}
-		HackFinder.fixMeSoon("should check access modifiers");
+		//XXX: should check access modifiers 
 		if (typeDeclaration.superclass != null && nameDefinedInTypes(typeDeclaration.superclass.binding))
 			return true;
 		return false;
