@@ -130,7 +130,7 @@ public class HistoryListAction extends Action {
 			} else {
 				fResult= (IJavaElement) selected.get(0);
 			}
-			fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size());			
+			fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);			
 			fHistoryStatus= status;
 			updateStatus(status);	
 		}
