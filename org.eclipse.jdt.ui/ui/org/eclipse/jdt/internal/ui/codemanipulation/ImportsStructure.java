@@ -316,7 +316,7 @@ public class ImportsStructure implements IImportsStructure {
 
 			String replaceString= getReplaceString(buffer, textPosition);
 			if (replaceString != null) {
-				buffer.replace(textPosition.getOffset(), textPosition.getLength(), replaceString);
+				buffer.replace(textPosition, replaceString);
 			}		
 			if (save) {
 				TextBuffer.commitChanges(buffer, true, null);

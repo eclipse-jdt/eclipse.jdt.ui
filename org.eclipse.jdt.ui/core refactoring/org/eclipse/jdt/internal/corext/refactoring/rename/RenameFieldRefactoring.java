@@ -428,7 +428,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		public void connect(TextBuffer buffer) throws CoreException {
 			TextPosition oldPos= getTextPosition();
 			int offset= oldPos.getOffset() + oldPos.getLength() - fOldName.length();
-			setPosition(new TextPosition(offset, fOldName.length()));
+			setTextPosition(new TextPosition(offset, fOldName.length()));
 		}
 	}
 }

@@ -73,7 +73,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 		String text= fVisibility;
 		if (length == 0)
 			text+= " ";
-		setPosition(new TextPosition(offset, length));
+		setTextPosition(new TextPosition(offset, length));
 		setText(text);
 		super.connect(buffer);
 	}	

@@ -8,13 +8,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.internal.utils.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.Assert;
 
 /**
  * A <code>TextBufferEditor</code> manages a set of <code>TextEdit</code>s and applies
@@ -98,7 +100,9 @@ public class TextBufferEditor {
 	public boolean canPerformEdits() {
 		if (fBuffer == null)
 			return false;
-		return fBuffer.validatePositions();
+		if (fEdits.size() == 0)
+			return true;
+		return fBuffer.validatePositions(fEdits);
 	}
 	
 	/**
@@ -138,7 +142,7 @@ public class TextBufferEditor {
 			pm.beginTask("", size + 10);
 			for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
 				TextEdit edit= (TextEdit) iter.next();
-				fBuffer.setCurrentPositions(edit.getTextPositions());
+				fBuffer.setCurrentTextEdit(edit);
 				undo.add(edit.perform(fBuffer));
 				pm.worked(1);
 			}

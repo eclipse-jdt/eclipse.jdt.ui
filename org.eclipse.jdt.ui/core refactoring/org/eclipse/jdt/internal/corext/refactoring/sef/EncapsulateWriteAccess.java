@@ -37,14 +37,13 @@ final class EncapsulateWriteAccess extends TextEdit {
 			return new TextPosition[] { fWriteAccess, fClosingBracket };
 		}
 		public TextEdit perform(TextBuffer buffer) throws CoreException {
-			buffer.replace(fClosingBracket.getOffset(), fClosingBracket.getLength(), "");
-			int offset= fWriteAccess.getOffset();
-			int length= fWriteAccess.getLength();
-			String old= buffer.getContent(offset, length);
-			buffer.replace(offset, length, fSetter);
+			buffer.replace(fClosingBracket, "");
+			String old= buffer.getContent(fWriteAccess.getOffset(), fWriteAccess.getLength());
+			buffer.replace(fWriteAccess, fSetter);
 			return new EncapsulateWriteAccess(old, fWriteAccess, fClosingBracket);
 		}	
 	}
+	
 	public EncapsulateWriteAccess(String setter, Reference lhs, Expression expression) {
 		this(setter + "(", lhs.sourceStart, expression.sourceStart - lhs.sourceStart, expression.sourceEnd + 1);
 	}
@@ -83,12 +82,10 @@ final class EncapsulateWriteAccess extends TextEdit {
 	 * @see TextEdit#doPerform
 	 */
 	public TextEdit perform(TextBuffer buffer) throws CoreException {
-		int offset= fWriteAccess.getOffset();
-		int length= fWriteAccess.getLength();
-		String old= buffer.getContent(offset, length);
-		buffer.replace(offset, length, fSetter);
-		buffer.replace(fClosingBracket.getOffset(), 0, ")");
+		String old= buffer.getContent(fWriteAccess.getOffset(), fWriteAccess.getLength());
+		buffer.replace(fWriteAccess, fSetter);
+		buffer.replace(fClosingBracket, ")");
 		return new UndoEncapsulateWriteAccess(old, fWriteAccess, fClosingBracket);
-	}	
+	}		
 }
 

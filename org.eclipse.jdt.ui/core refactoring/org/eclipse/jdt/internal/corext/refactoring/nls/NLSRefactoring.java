@@ -870,7 +870,7 @@ public class NLSRefactoring extends Refactoring {
 			int lineEndOffset= getLineEndOffset(buffer, pos.getOffset());
 			if (lineEndOffset != -1)
 				offset= lineEndOffset;
-			setPosition(new TextPosition(offset, pos.getLength()));	
+			setTextPosition(new TextPosition(offset, pos.getLength()));	
 		}
 		
 		private int getLineEndOffset(TextBuffer buffer, int offset){

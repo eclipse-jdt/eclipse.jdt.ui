@@ -80,6 +80,6 @@ public abstract class TextEdit {
 	 */
 	public Object getModifiedLanguageElement() {
 		return null;
-	}
+	}	
 }
 

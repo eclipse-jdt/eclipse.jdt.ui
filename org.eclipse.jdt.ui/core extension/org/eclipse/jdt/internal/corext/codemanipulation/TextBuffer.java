@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -90,19 +92,6 @@ public class TextBuffer {
 		}
 	}
 	
-	/**
-	 * Validates if the positions added to this text buffer a valid position ranges. 
-	 */
-	public boolean validatePositions() {
-		try {
-			Position[] positions= fDocument.getPositions(PositionUpdater.CATEGORY);
-			return fUpdater.canUpdate(positions, getLength());
-		} catch (BadPositionCategoryException e) {
-			Assert.isTrue(false, "Should never happen");
-		}
-		return false;
-	}
-
 	/**
 	 * Returns the number of characters in this text buffer.
 	 *
@@ -302,24 +291,26 @@ public class TextBuffer {
 	}
 	
 	/**
-	 * Subsitutes the given text for the specified text range. Returns <code>true</code>
-	 * if replacing was possible. Otherwise <code>false</code> is returned.
+	 * Subsitutes the given text for the specified text position
 	 *
-	 * @param offset the document offset
-	 * @param length the length of the specified range
+	 * @param position the text position denoting offset and length of the text to be
+	 * 	replaced
 	 * @param text the substitution text
-     * @exception  CoreException  if the text range [offset, length] 
-     *  is invalid.	 
+     * @exception  CoreException  if the text position [offset, length] is invalid.	 
 	 */
-	public void replace(int offset, int length, String text) throws CoreException {
+	public void replace(TextPosition position, String text) throws CoreException {
 		try {
-			fDocument.replace(offset, length, text);
+			fUpdater.setActiveTextPosition(position);
+			fDocument.replace(position.offset, position.length, text);
+			fUpdater.setActiveTextPosition(null);
 		} catch (BadLocationException e) {
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, 
 				"Replace failed due to wrong positions", e);
 			throw new CoreException(s);
 		}	
 	}
+
+	//---- Special methods used by the <code>TextBufferEditor</code>
 	
 	/**
 	 * Releases this text buffer.
@@ -337,8 +328,16 @@ public class TextBuffer {
 		}
 	}
 	
-	void setCurrentPositions(TextPosition[] positions) {
-		fUpdater.setCurrentPositions(positions);
+	/**
+	 * Validates if the positions added to this text buffer a valid position ranges. 
+	 */
+	/* package */ boolean validatePositions(List edits) {
+		PositionChecker checker= new PositionChecker(edits, getLength());
+		return checker.perform();
+	}
+
+	/* package */ void setCurrentTextEdit(TextEdit currentEdit) {
+		fUpdater.setActiveTextEdit(currentEdit);
 	}
 	
 	//---- Utility methods
@@ -358,19 +357,19 @@ public class TextBuffer {
 		int size= line.length();
 		for (int i= 0; i < size; i++) {
 			switch (line.charAt(i)) {
-			case '\t':
-				indent++;
-				blanks= 0;
-				continue;
-			case ' ':
-				blanks++;
-				if (blanks == tabWidth) {
+				case '\t':
 					indent++;
 					blanks= 0;
-				}
-				continue;
-			default:
-				break;
+					continue;
+				case ' ':
+					blanks++;
+					if (blanks == tabWidth) {
+						indent++;
+						blanks= 0;
+					}
+					continue;
+				default:
+					break;
 			}
 			break;
 		}

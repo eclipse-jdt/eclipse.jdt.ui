@@ -73,7 +73,7 @@ public abstract class SimpleTextEdit extends TextEdit {
 	 * 
 	 * @param length the text edit's position.
 	 */	
-	protected void setPosition(TextPosition position) {
+	protected void setTextPosition(TextPosition position) {
 		fPosition= position;
 		Assert.isNotNull(fPosition);
 	}
@@ -100,10 +100,8 @@ public abstract class SimpleTextEdit extends TextEdit {
 	 * @see TextEdit#doPerform
 	 */
 	public final TextEdit perform(TextBuffer buffer) throws CoreException {
-		int offset= fPosition.getOffset();
-		int length= fPosition.getLength();
-		String current= buffer.getContent(offset, length);
-		buffer.replace(offset, length, fText);
+		String current= buffer.getContent(fPosition.getOffset(), fPosition.getLength());
+		buffer.replace(fPosition, fText);
 		return new SimpleTextEditImpl(fPosition, current);
 	}	
 }

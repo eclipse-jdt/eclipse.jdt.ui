@@ -4,163 +4,201 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import java.util.List;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.Position;
 
-import org.eclipse.core.internal.runtime.Assert;
+import org.eclipse.jdt.internal.core.Assert;
 
 /* package */ final class PositionUpdater implements IPositionUpdater {
 
-	private static class OffsetComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			Position pos1= (Position)o1;
-			Position pos2= (Position)o2;
-			int p1= pos1.offset;
-			int p2= pos2.offset;
-			if (p1 < p2)
-				return -1;
-			if (p1 > p2)
-				return 1;
-			// same offset
-			int l1= pos1.length;
-			int l2= pos2.length;
-			if (l1 <  l2)
-				return 1;
-			if (l1 > l2)
-				return -1;
-			return 0;	
-		}
-	}
-
 	private DefaultPositionUpdater fDefaultUpdater;
 	private int fOffset, fLength, fEnd, fNewLength, fDelta;
-	private Position fPosition;
-	private TextPosition[] fCurrentPositions;
+	private TextEdit fActiveTextEdit;
+	private TextPosition fActiveTextPosition;
+	private int fMoveStep;
 	
-	public static final String CATEGORY= PositionUpdater.class.getClass().getName();
+	/* package */ static final String CATEGORY= PositionUpdater.class.getName();
 	
-	public PositionUpdater() {
+	/* package */ PositionUpdater() {
 		fDefaultUpdater= new DefaultPositionUpdater(CATEGORY);
 	}
+	
+	/* package */ void setActiveTextPosition(TextPosition position) {
+		fActiveTextPosition= position;
+	}
+	
+	/* package */ void setActiveTextEdit(TextEdit currentTextEdit) {
+		fActiveTextEdit= currentTextEdit;
+	}
+	
+	//---- Position updating -----------------------------------------------------------------------
 	
 	public void update(DocumentEvent event) {
 		if (!isTextBufferEditorMode())
 			fDefaultUpdater.update(event);
 			
 		try {
-			Position[] positions= event.getDocument().getPositions(CATEGORY);
+			Position[] temp= event.getDocument().getPositions(CATEGORY);
+			if (temp.length == 0)
+				return;
+			TextPosition[] positions= new TextPosition[temp.length];
+			System.arraycopy(temp, 0, positions, 0, temp.length);
 			fOffset= event.getOffset();
 			fLength= event.getLength();
 			fEnd= fOffset + fLength - 1;
 			fNewLength= (event.getText() == null ? 0 : event.getText().length());
 			fDelta= fNewLength - fLength;
+			boolean isMoveDelete= isMoveDelete();
+			boolean isMoveInsert= isMoveInsert();
 			for (int i= 0; i < positions.length; i++) {
-				fPosition= positions[i];
-				if (!isAffected())
+				TextPosition position= positions[i];
+				if (!isAffected(position, isMoveInsert) || position.isDeleted())
 					continue;
-				processPosition();
-				correctValues();
+				if (isMoveDelete) {
+					handleMoveDelete(position);
+				} else if (isMoveInsert) {
+					handleMoveInsert(position);
+				} else {
+					handleDefault(position);
+				}
+				correctValues(position);
 			}
-			
+			if (isMoveDelete) {
+				fMoveStep++;
+			} else if (isMoveInsert) {
+				fMoveStep= 0;
+			}	
 		} catch (BadPositionCategoryException e) {
+			// Should not happen.
 		}
 	}
 	
-	private boolean isTextBufferEditorMode() {
-		return fCurrentPositions != null;
-	}
-	
-	private void processPosition() {
-		int positionOffset= fPosition.offset;
-		int positionLength= fPosition.length;
+	private void handleMoveDelete(TextPosition position) {
+		int positionOffset= position.offset;
+		int positionLength= position.length;
 		int positionEnd= positionOffset + positionLength - 1;
+
+		// Do we have an insertion point
+		if (positionLength == 0) {
+			if(	positionOffset == fOffset && position.getAnchor() == TextPosition.ANCHOR_RIGHT ||
+				 	positionOffset == fEnd + 1 && position.getAnchor() == TextPosition.ANCHOR_LEFT) {
+				position.disable();
+				position.setOffset(positionOffset - fOffset);
+			} else {
+				handleDefault(position);
+			}
+		// It is an position covered by the range to be moved
+		} else if (fOffset <= positionOffset && positionEnd <= fEnd && !isMoveSourcePosition(position)) {
+			position.disable();
+			position.setOffset(positionOffset - fOffset);
+		} else {
+			handleDefault(position);
+		}
+	}
+
+	private void handleMoveInsert(TextPosition position) {
+		if (!position.isEnabled()) {
+			position.enable();
+			position.setOffset(position.getOffset() + fOffset);
+		} else {
+			handleDefault(position);
+		}
+	}
+
+	private void handleDefault(TextPosition position) {
+		Assert.isTrue(position.isEnabled());
+		int positionOffset= position.offset;
+		int positionLength= position.length;
+		int positionEnd= positionOffset + positionLength;
 		
 		if (positionOffset == fOffset) {
-			boolean isCurrentPosition= isCurrentPosition(fPosition);
+			boolean isCurrentPosition= isActivePosition(position);
 			if (positionLength == 0) {		// The position is an insertion point
 				if (isCurrentPosition) {
 					// We have an insertion point and the position is one of the currently perform text edit.
-					fPosition.length= fDelta;
+					position.length= fDelta;
 				} 
 				// Keep the insertion point at the current location.
 			} else {
 				if (isCurrentPosition) {
 					// No insertion point but current position. Extend length
-					fPosition.length+= fDelta;
+					position.length+= fDelta;
+				} else if (fLength == 0) {
+					// This one is actual an insertion. So more offset to the right
+					position.offset+= fDelta;
 				} else {
-					// No insertion point and not current position. Shift the offset to the right.
-					fPosition.offset+= fDelta;
+					position.length+= fDelta;	// Overlapping move position found.
 				}
 			}
 		} else if (positionOffset > fEnd) {
-			fPosition.offset+= fDelta;
-		} else if (positionOffset < fOffset && (isTextInsertion() ? fOffset <= positionEnd : fEnd <= positionEnd)) {
-			fPosition.length+= fDelta;
+			position.offset+= fDelta;
 		} else {
-			Assert.isTrue(false, "Should never happen");
+			Assert.isTrue(false, "Overlapping text position found: " + position.toString());
 		}
 	}
 	
-	private boolean isAffected() {
-		return fPosition.offset >= fOffset;
+	private boolean isTextBufferEditorMode() {
+		return fActiveTextEdit != null;
+	}
+	
+	private boolean isAffected(TextPosition position, boolean isMoveInsert) {
+		return (position.offset >= fOffset) || (isMoveInsert && position.isDisabled());
 	}
 	
 	private boolean isTextInsertion() {
 		return fLength == 0;
 	}
 	
-	private void correctValues() {
-		if (fPosition.offset < 0)
-			fPosition.offset= 0;
-		if (fPosition.length < 0)
-			fPosition.length= 0;
-	}
-
-	public boolean canUpdate(Position[] positions, int bufferLength) {	
-		Arrays.sort(positions, new OffsetComparator());
-		outer: for (int i= 0; i < positions.length;) {
-			Position position= positions[i];
-			int offset= position.offset;
-			int length= position.length;
-			int end= offset + length - 1;
-			if (end >= bufferLength)
-				return false;
-			boolean isInsertion= length == 0;
-			int x= i + 1;
-			for (; x < positions.length; x++) {
-				Position t= positions[x];
-				int tOffset= t.offset;
-				int tLength= t.length;
-				int tEnd= tOffset + tLength - 1;
-				if (offset == tOffset && tLength == 0) // Same insertion points are ok.
-					continue;
-				if ((offset == tOffset && tEnd <= end) || (offset < tOffset && tOffset <= end))
-					return false;
-				if (tOffset > end)
-					break;
-			}
-			i= x;
-		}
-		return true;
-	}
-
-	public void setCurrentPositions(TextPosition[] currentPositions) {
-		fCurrentPositions= currentPositions;
+	private boolean isMoveDelete() {
+		return fActiveTextEdit instanceof MoveTextEdit && fMoveStep == 0;
 	}
 	
-	private boolean isCurrentPosition(Position position) {
-		if (fCurrentPositions == null)
-			return false;
-		for (int i= 0; i < fCurrentPositions.length; i++) {
-			if (fCurrentPositions[i] == position)
-				return true;
-		}
-		return false;
-	}	
+	private boolean isMoveInsert() {
+		return fActiveTextEdit instanceof MoveTextEdit && fMoveStep == 1;
+	}
+	
+	private boolean isMoveSourcePosition(TextPosition position) {
+		return ((MoveTextEdit)fActiveTextEdit).getTextPositions()[0] == position;
+	}
+	
+	private void correctValues(TextPosition position) {
+		if (!position.isEnabled() || position.isDeleted())
+			return;
+		if (position.offset < 0)
+			position.offset= 0;
+		if (position.length < 0)
+			position.length= 0;
+	}
+	private boolean isActivePosition(TextPosition position) {
+		return fActiveTextPosition == position;
+	}
+	
+//	private boolean covers(TextPosition position) {
+//		if (length == 0) {
+//			if (position.length == 0)
+//				return offset == position.offset;
+//			else
+//				return false;
+//		} else if (position.length == 0) {
+//			int pOffset= position.offset;
+//			int exclusiveEnd= offset + length;
+//			int inclusiveEnd= exclusiveEnd - 1;
+//			if (fAnchor == ANCHOR_RIGHT)
+//				return offset <= pOffset && pOffset <= inclusiveEnd;
+//			else if (fAnchor == ANCHOR_LEFT)
+//				return offset < pOffset && pOffset <= exclusiveEnd;
+//			else
+//				return offset < pOffset && pOffset <= inclusiveEnd;
+//		} else {
+//			return offset <= position.offset && position.offset + position.length <= offset + length;
+//		}
+//	}		
 }

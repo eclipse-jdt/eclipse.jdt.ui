@@ -193,7 +193,7 @@ public class MemberEdit extends SimpleTextEdit {
 		
 		Assert.isTrue(offset >= 0); // we better should have a valid insertion point
 
-		setPosition(new TextPosition(offset, length));
+		setTextPosition(new TextPosition(offset, length));
 		setText(sb.toString());
 		
 		super.connect(buffer);

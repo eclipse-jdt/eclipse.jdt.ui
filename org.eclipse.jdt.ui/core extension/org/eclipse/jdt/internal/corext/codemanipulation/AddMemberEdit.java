@@ -72,7 +72,7 @@ public class AddMemberEdit extends SimpleTextEdit {
 			sb.append(lineDelimiter);
 		}
 		String text= sb.toString();
-		setPosition(new TextPosition(offset, 0));
+		setTextPosition(new TextPosition(offset, 0));
 		setText(text);
 		super.connect(buffer);
 	}

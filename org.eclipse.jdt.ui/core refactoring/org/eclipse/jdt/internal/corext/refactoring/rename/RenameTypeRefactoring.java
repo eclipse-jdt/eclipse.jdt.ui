@@ -744,7 +744,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			int offset= pos.getOffset() + pos.getLength() - fOldName.length();
 			int length= fOldName.length();
 			TextPosition newPos= new TextPosition(offset, length);
-			setPosition(newPos);
+			setTextPosition(newPos);
 		}
 	}
 }

@@ -467,7 +467,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				length= oldNameIndex + oldMethodName.length();
 				setText(oldText.substring(0, theDotIndex) + ending);
 			}			
-			setPosition(new TextPosition(offset, length));
+			setTextPosition(new TextPosition(offset, length));
 		}
 	}
 }	
