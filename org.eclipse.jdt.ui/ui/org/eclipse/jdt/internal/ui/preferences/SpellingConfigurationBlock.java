@@ -269,14 +269,10 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	protected Control createContents(final Composite parent) {
 
 		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(); layout.numColumns= 1;
-		composite.setLayout(layout);
+		composite.setLayout(new GridLayout());
 
 		List allControls= new ArrayList();
 		final PixelConverter converter= new PixelConverter(parent);
-
-		layout= new GridLayout();
-		layout.numColumns= 3;
 
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
 
@@ -308,9 +304,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		final Group engine= new Group(composite, SWT.NONE);
 		engine.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
-		layout= new GridLayout();
-		layout.numColumns= 4;
-		engine.setLayout(layout);
+		engine.setLayout(new GridLayout(4, false));
 		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(engine);
 
@@ -326,6 +320,9 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
+		GridData gd= (GridData) fDictionaryPath.getLayoutData();
+		gd.grabExcessHorizontalSpace= true;
+		gd.widthHint= converter.convertWidthInCharsToPixels(40);
 		allControls.add(fDictionaryPath);
 		allControls.add(fLabels.get(fDictionaryPath));
 
@@ -342,23 +339,18 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		SWTUtil.setButtonDimensionHint(button);
 		allControls.add(button);
 		
-		layout= new GridLayout();
-		layout.numColumns= 3;
-
 		Group advanced= new Group(composite, SWT.NONE);
 		advanced.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.advanced")); //$NON-NLS-1$
-		layout= new GridLayout();
-		layout.numColumns= 3;
-		advanced.setLayout(layout);		
+		advanced.setLayout(new GridLayout(3, false));
 		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(advanced);
 		
 		label= PreferencesMessages.getString("SpellingPreferencePage.proposals.threshold"); //$NON-NLS-1$
 		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
 		text.setTextLimit(3);
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		data.widthHint= converter.convertWidthInCharsToPixels(4);
-		text.setLayoutData(data);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.widthHint= converter.convertWidthInCharsToPixels(4);
+		text.setLayoutData(gd);
 		allControls.add(text);
 		allControls.add(fLabels.get(text));
 		
