@@ -7,12 +7,15 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -49,15 +52,22 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
 	public void run(IStructuredSelection selection) {
 		IResource[] resources= getSelectedResources(selection);
-		getClipboard().setContents(
-			new Object[] { 
-					resources, 
-					getFileLocations(resources), 
-					getFileNamesText(resources)}, 
-			new Transfer[] { 
-					ResourceTransfer.getInstance(), 
-					FileTransfer.getInstance(), 
-					TextTransfer.getInstance()});
+		try{
+			getClipboard().setContents(
+				new Object[] { 
+						resources, 
+						getFileLocations(resources), 
+						getFileNamesText(resources)}, 
+				new Transfer[] { 
+						ResourceTransfer.getInstance(), 
+						FileTransfer.getInstance(), 
+						TextTransfer.getInstance()});
+		} catch (SWTError e){
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
+				throw e;
+			if (MessageDialog.openQuestion(getShell(), "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
+				run(selection);
+		}				
 	}
 	
 	public static boolean canOperateOn(IStructuredSelection selection){
