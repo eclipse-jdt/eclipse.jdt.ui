@@ -323,7 +323,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		labelControl.setLayoutData(gd);
 		
 		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.widthHint= convertWidthInCharsToPixels(40);
+		gd.widthHint= convertWidthInCharsToPixels(30);
 		
 		Text text= new Text(parent, SWT.SINGLE | SWT.BORDER);
 		text.setText(getPreferenceStore().getString(key));

@@ -103,6 +103,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
 	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
 	private static final String PREF_BUILD_CLEAN_OUTPUT_FOLDER= JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER;
+	private static final String PREF_ENABLE_EXCLUSION_PATTERNS= JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS;
+	private static final String PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS= JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS;
+
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_PB_INCOMPATIBLE_JDK_LEVEL= JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL;
@@ -119,7 +122,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= "org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation"; //$NON-NLS-1$
 	private static final String PREF_15_PB_FINAL_PARAM_BOUND= "org.eclipse.jdt.core.compiler.problem.finalParameterBound"; //$NON-NLS-1$
-	
 	
 	
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
@@ -208,7 +210,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				
 				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
-				PREF_PB_INCOMPATIBLE_JDK_LEVEL, 
+				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS
 			};
 		if (JavaModelUtil.isJDTCore_1_5()) {
 			String[] newKeys= new String[] {
@@ -572,6 +574,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createBuildPathTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
+		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
 		
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
@@ -618,6 +621,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.enable_exclusion_patterns.label"); //$NON-NLS-1$
+		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
+		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
 		
 		description= new Label(othersComposite, SWT.WRAP);
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
