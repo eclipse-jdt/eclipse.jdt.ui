@@ -58,7 +58,6 @@ public interface IJavaHelpContextIds {
 	public static final String CLASS_FILE_EDITOR= PREFIX + "class_file_editor_context"; //$NON-NLS-1$
 	
 	// view parts
-	public static final String PACKAGE_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
 	public static final String PROJECTS_VIEW= PREFIX + "projects_view_context"; //$NON-NLS-1$
 	public static final String PACKAGES_VIEW= PREFIX + "packages_view_context"; //$NON-NLS-1$

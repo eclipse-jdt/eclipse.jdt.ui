@@ -350,7 +350,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fMemento= null;
 
 		// Set help for the view 
-		WorkbenchHelp.setHelp(fViewer.getControl(), IJavaHelpContextIds.MEMBERS_VIEW);
+		WorkbenchHelp.setHelp(fViewer.getControl(), IJavaHelpContextIds.PACKAGES_VIEW);
 		
 		fillActionBars();
 
