@@ -30,7 +30,23 @@ import org.eclipse.jdt.internal.core.util.Util;
  */
 public final class SignatureUtil {
 	
+	/**
+	 * The signature of the null type. This type does not really exist in the
+	 * type system. It represents the bound of type variables that have no lower
+	 * bound, for example the parameter type to the <code>add</code> method of
+	 * an instance of <code>java.util.List&lt;? extends Number&gt;</code>.
+	 * <p>
+	 * The only possible value that has that type is <code>null</code>.
+	 * </p>
+	 * <p>
+	 * The representation of the null type is the signature of a type variable
+	 * named <code>NULL</code> ({@value}), which will only work if no such
+	 * variable gets declared in the same context.
+	 */
 	private static final String NULL_TYPE_SIGNATURE= "TNULL;"; //$NON-NLS-1$
+	/**
+	 * The signature of <code>java.lang.Object</code> ({@value}).
+	 */
 	private static final String OBJECT_SIGNATURE= "Ljava.lang.Object;"; //$NON-NLS-1$
 
 	private SignatureUtil() {
@@ -68,6 +84,28 @@ public final class SignatureUtil {
 		
 		if (signature.startsWith(String.valueOf(Signature.C_EXTENDS))) //$NON-NLS-1$
 			return signature.substring(1);
+		
+		return signature;
+	}
+
+	/**
+	 * Returns the lower bound of a type signature. Returns the null type
+	 * signature if <code>signature</code> is a wildcard or upper bound (<code>(? extends T)</code>);
+	 * returns the signature of the type <code>T</code> of a lower bound (<code>(? super T)</code>)
+	 * or <code>signature</code> itself if it is not a bound signature.
+	 * 
+	 * @param signature the signature
+	 * @return the lower bound signature of <code>signature</code>
+	 */
+	public static String getLowerBound(String signature) {
+		if (signature.equals(String.valueOf(Signature.C_STAR))) //$NON-NLS-1$
+			return NULL_TYPE_SIGNATURE;
+		
+		if (signature.startsWith(String.valueOf(Signature.C_SUPER))) //$NON-NLS-1$
+			return signature.substring(1);
+		
+		if (signature.startsWith(String.valueOf(Signature.C_EXTENDS))) //$NON-NLS-1$
+			return NULL_TYPE_SIGNATURE;
 		
 		return signature;
 	}
@@ -134,9 +172,12 @@ public final class SignatureUtil {
 	}
 	
 	/**
-	 * Takes a method signature <code>[&lt; typeVariableName : formalTypeDecl &gt;] ( paramTypeSig1* ) retTypeSig</code> and
-	 * returns it with any type signature that is a bounded type converted using
-	 * <code>getUpperBound</code>.
+	 * Takes a method signature
+	 * <code>[&lt; typeVariableName : formalTypeDecl &gt;] ( paramTypeSig1* ) retTypeSig</code>
+	 * and returns it with any parameter signatures filtered through
+	 * <code>getUpperBound</code> and the return type filtered through
+	 * <code>getLowerBound</code>. Any preceding formal type variable
+	 * declarations are removed.
 	 * <p>
 	 * TODO this is a temporary workaround for
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600
@@ -211,7 +252,7 @@ public final class SignatureUtil {
 					if (isReturnType)
 						res.append(OBJECT_SIGNATURE); // return type is at least Object
 					else
-						res.append(NULL_TYPE_SIGNATURE); // no lower bound! return void type for now //$NON-NLS-1$
+						res.append(NULL_TYPE_SIGNATURE); // no lower bound!
 					break;
 				case Signature.C_SUPER:
 					int end= Util.scanTypeSignature(signature, pos + 1);
@@ -226,7 +267,7 @@ public final class SignatureUtil {
 					if (isReturnType)
 						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end, methodTypeDecls));
 					else
-						res.append(NULL_TYPE_SIGNATURE);
+						res.append(NULL_TYPE_SIGNATURE); // no lower bound
 					pos= end + 1;
 					break;
 				case Signature.C_PARAM_END:
@@ -246,10 +287,18 @@ public final class SignatureUtil {
 		return res.toString().toCharArray();
 	}
 
+	/*
+	 * Replace a type variable by its bound if the variable is declared in the
+	 * method declaration and contains a single bound. Return the type signature
+	 * of the bound, or the type itself if not a type variable or the variable
+	 * is not declared in the method or the bound has multiple bounds.
+	 */
 	private static String replaceTypeVariableBySingleBound(char[] signature, int pos, int end, Map methodTypeDecls) {
 		String typeSig= String.valueOf(signature, pos, end - pos + 1);
-		// don't do early resolvation for now
-		if (false && Signature.getTypeSignatureKind(typeSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
+		// don't do early resolution for now
+		if (true)
+			return typeSig;
+		if (Signature.getTypeSignatureKind(typeSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
 			String typeVar= Signature.getSignatureSimpleName(typeSig);
 			if (methodTypeDecls.containsKey(typeVar)) {
 				List types= (List) methodTypeDecls.get(typeVar);
