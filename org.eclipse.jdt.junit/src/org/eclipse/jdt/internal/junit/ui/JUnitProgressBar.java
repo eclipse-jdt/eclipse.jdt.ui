@@ -37,7 +37,9 @@ public class JUnitProgressBar extends Canvas {
 	private int fColorBarWidth= 0;
 	private Color fOKColor;
 	private Color fFailureColor;
+	private Color fStoppedColor;
 	private boolean fError;
+	private boolean fStopped= false;
 	
 	public JUnitProgressBar(Composite parent) {
 		super(parent, SWT.NONE);
@@ -57,11 +59,13 @@ public class JUnitProgressBar extends Canvas {
 			public void widgetDisposed(DisposeEvent e) {
 				fFailureColor.dispose();
 				fOKColor.dispose();
+				fStoppedColor.dispose();
 			}
 		});
 		Display display= parent.getDisplay();
-		fFailureColor= new Color(display, 159,63,63);
-		fOKColor= new Color(display, 95,191,95);
+		fFailureColor= new Color(display, 159, 63, 63);
+		fOKColor= new Color(display, 95, 191, 95);
+		fStoppedColor= new Color(display, 120, 120, 120);
 	}
 
 	public void setMaximum(int max) {
@@ -70,6 +74,7 @@ public class JUnitProgressBar extends Canvas {
 		
 	public void reset() {
 		fError= false;
+		fStopped= false;
 		fCurrentTickCount= 0;
 		fColorBarWidth= 0;
 		fMaxTickCount= 0;
@@ -88,10 +93,17 @@ public class JUnitProgressBar extends Canvas {
 	private void setStatusColor(GC gc) {
 		if (fError)
 			gc.setBackground(fFailureColor);
+		else if (fStopped)
+			gc.setBackground(fStoppedColor);
 		else
 			gc.setBackground(fOKColor);
 	}
 
+	public void stopped() {
+		fStopped= true;
+		redraw();
+	}
+	
 	private int scale(int value) {
 		if (fMaxTickCount > 0) {
 			Rectangle r= getClientArea();
