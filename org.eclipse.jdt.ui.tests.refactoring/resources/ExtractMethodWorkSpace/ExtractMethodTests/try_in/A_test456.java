@@ -7,7 +7,7 @@ public class A_test456 {
 	public void foo() {
 		Exception e= new IOException("Message");
 		try {
-			/*]*/throw e;/*[*/
+			/*[*/throw e;/*]*/
 		} catch (Exception x) {
 		}
 	}

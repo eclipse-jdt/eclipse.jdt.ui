@@ -2,12 +2,12 @@ package semicolon_out;
 
 public class A_test409 {
 	public void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() {
-		synchronized (this) {
+		/*[*/synchronized (this) {
 			foo();
-		}
+		}/*]*/
 	}
 }

@@ -7,6 +7,6 @@ public class A_test606 {
 		foo();
 		do {
 			foo();
-		} while (/*]*/i <= 10/*[*/);
+		} while (/*[*/i <= 10/*]*/);
 	}	
 }

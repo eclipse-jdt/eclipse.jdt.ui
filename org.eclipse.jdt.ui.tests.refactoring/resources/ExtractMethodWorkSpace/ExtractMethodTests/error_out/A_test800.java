@@ -5,9 +5,9 @@ public class A_test800 {
 		foo()
 	}
 	public void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 	protected void extracted() {
-		foo();
+		/*[*/foo();/*]*/
 	}
 }

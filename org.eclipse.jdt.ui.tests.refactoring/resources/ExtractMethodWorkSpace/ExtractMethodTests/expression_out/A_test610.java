@@ -2,10 +2,10 @@ package expression_out;
 
 public class A_test610 {
 	public void foo() {
-		int i= /*]*/extracted()/*[*/;
+		int i= extracted();
 	}
 
 	protected int extracted() {
-		return 0;
+		return /*[*/0/*]*/;
 	}
 }

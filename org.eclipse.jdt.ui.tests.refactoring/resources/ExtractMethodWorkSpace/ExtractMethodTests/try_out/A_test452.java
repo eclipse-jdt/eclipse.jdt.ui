@@ -5,13 +5,13 @@ import java.io.IOException;
 public class A_test452 {
 	public void foo() {
 		try {
-			/*]*/extracted();/*[*/
+			extracted();
 		} catch (IOException e) {
 		}
 	}
 
 	protected void extracted() throws IOException {
-		g();
+		/*[*/g();/*]*/
 	}
 
 	public void g() throws IOException {

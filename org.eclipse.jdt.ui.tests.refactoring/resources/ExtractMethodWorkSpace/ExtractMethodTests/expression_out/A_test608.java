@@ -14,13 +14,13 @@ public class A_test608 {
 	public void foo(Selection selection) {
 		Scanner scanner= new Scanner();
 		
-		if (/*]*/extracted(selection, scanner)/*[*/) {
+		if (extracted(selection, scanner)) {
 			g();
 		}
 	}
 
 	protected boolean extracted(Selection selection, Scanner scanner) {
-		return scanner.x < selection.start && selection.start < scanner.y;
+		return /*[*/scanner.x < selection.start && selection.start < scanner.y/*]*/;
 	}
 
 	public void g() {

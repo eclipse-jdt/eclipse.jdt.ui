@@ -8,9 +8,9 @@ public class A_test2004 {
 		int i= 0;
 		while (field < 2) {
 			field++;
-			/*]*/
-			System.out.println("i, field == " + i++ +", " + field);
 			/*[*/
+			System.out.println("i, field == " + i++ +", " + field);
+			/*]*/
 		}
 	}
 }

@@ -6,12 +6,12 @@ public class A_test563 {
 		int x= 0;
 		do {
 			int y= x;
-			/*]*/extracted();/*[*/
+			extracted();
 		} while ((x= 20) < 10);
 	}
 	protected void extracted() {
 		int x;
-		x= 20;
+		/*[*/x= 20;/*]*/
 	}
 }
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 public class A_test452 {
 	public void foo() {
 		try {
-			/*]*/g();/*[*/
+			/*[*/g();/*]*/
 		} catch (IOException e) {
 		}
 	}

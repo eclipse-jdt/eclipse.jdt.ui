@@ -5,10 +5,10 @@ public class A_test904 {
 		int i= 0;
 		float y= 0;
 		
-		/*]*/extracted(y, i);/*[*/
+		extracted(y, i);
 	}
 
 	protected void extracted(float zz, int xx) {
-		System.out.println(xx + zz);
+		/*[*/System.out.println(xx + zz);/*]*/
 	}
 }

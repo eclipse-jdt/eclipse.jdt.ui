@@ -5,11 +5,11 @@ public class A_test458 {
 		try{
 			new A_test458();
 		} catch (Throwable t){
-			/*]*/extracted(t);/*[*/
+			extracted(t);
 		}
 	}
 
 	protected void extracted(Throwable t) throws Throwable {
-		throw t;
+		/*[*/throw t;/*]*/
 	}
 }

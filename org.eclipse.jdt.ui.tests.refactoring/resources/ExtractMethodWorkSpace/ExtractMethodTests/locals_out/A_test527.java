@@ -5,17 +5,17 @@ public class A_test527 {
 	
 	protected void foo() {
 		int i= 0;
-		/*]*/i = extracted(i);/*[*/
+		i = extracted(i);
 		read(i);
 	}
 
 	protected int extracted(int i) {
-		try {
+		/*[*/try {
 			if (flag)
 				throwException();
 			i= 10;
 		} catch (Exception e) {
-		}
+		}/*]*/
 		return i;
 	}
 

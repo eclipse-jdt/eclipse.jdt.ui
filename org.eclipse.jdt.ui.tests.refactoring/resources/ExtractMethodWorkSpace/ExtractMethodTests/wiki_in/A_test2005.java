@@ -9,9 +9,9 @@ public class A_test2005 {
 
 	public static void main(String args[]) {
 		try {
-			/*]*/
-			fun();
 			/*[*/
+			fun();
+			/*]*/
 		} catch (Exception e) {
 		}
 	}

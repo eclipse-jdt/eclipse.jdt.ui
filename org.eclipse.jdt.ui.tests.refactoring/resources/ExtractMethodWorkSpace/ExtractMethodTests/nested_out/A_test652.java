@@ -8,10 +8,10 @@ public class A_test652 {
 			}
 		};
 		
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() {
-		foo();
+		/*[*/foo();/*]*/
 	}
 }

@@ -6,7 +6,7 @@ public class A_test524 {
 	protected void foo() {
 		int i= 0;
 		try {
-			/*]*/i = extracted();/*[*/
+			i = extracted();
 		} catch (Exception e) {
 		}
 		read(i);
@@ -14,9 +14,9 @@ public class A_test524 {
 
 	protected int extracted() throws Exception {
 		int i;
-		if (flag)
+		/*[*/if (flag)
 			throw new Exception();
-		i= 10;
+		i= 10;/*]*/
 		return i;
 	}
 

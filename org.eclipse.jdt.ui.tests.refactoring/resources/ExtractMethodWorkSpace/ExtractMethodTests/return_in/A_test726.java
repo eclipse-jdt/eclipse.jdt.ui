@@ -8,7 +8,7 @@ public class A_test726 {
 		int j= 0;
 		for(int i= 0; i < 10; i++) {
 			if (flag) {
-				/*]*/j= 10;/*[*/
+				/*[*/j= 10;/*]*/
 			} else {
 				read(j);
 			}

@@ -8,7 +8,7 @@ public class A_test528 {
 
 	static class B extends A_test528 {
 		public void bar() throws IOException {
-			/*]*/super.foo();/*[*/
+			/*[*/super.foo();/*]*/
 		}
 	}
 }

@@ -6,7 +6,7 @@ public class A_test455 {
 
 	public void foo() {
 		try {
-			/*]*/throw createException();/*[*/
+			/*[*/throw createException();/*]*/
 		} catch (Exception e) {
 		}
 	}

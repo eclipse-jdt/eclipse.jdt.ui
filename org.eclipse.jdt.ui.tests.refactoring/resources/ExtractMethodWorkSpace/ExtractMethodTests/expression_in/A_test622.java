@@ -5,7 +5,7 @@ public class A_test622 {
 	}
 	static class Inner extends A_test622 {
 		public Inner() {
-			super(/*]*/5 + 6/*[*/);
+			super(/*[*/5 + 6/*]*/);
 		}
 	}
 }

@@ -5,6 +5,6 @@ public class A_test904 {
 		int i= 0;
 		float y= 0;
 		
-		/*]*/System.out.println(i + y);/*[*/
+		/*[*/System.out.println(i + y);/*]*/
 	}
 }

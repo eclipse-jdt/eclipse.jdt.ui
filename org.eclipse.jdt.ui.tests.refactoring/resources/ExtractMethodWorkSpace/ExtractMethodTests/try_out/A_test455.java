@@ -6,13 +6,13 @@ public class A_test455 {
 
 	public void foo() {
 		try {
-			/*]*/extracted();/*[*/
+			extracted();
 		} catch (Exception e) {
 		}
 	}
 
 	protected void extracted() throws IOException {
-		throw createException();
+		/*[*/throw createException();/*]*/
 	}
 
 	public IOException createException() {

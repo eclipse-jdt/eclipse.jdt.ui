@@ -4,11 +4,11 @@ public class A_test651 {
 	public void foo() {
 		Runnable run= new Runnable() {
 			public void run() {
-				/*]*/extracted();/*[*/
+				extracted();
 			}
 
 			protected void extracted() {
-				foo();
+				/*[*/foo();/*]*/
 			}
 		};
 	}

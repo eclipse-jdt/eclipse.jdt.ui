@@ -6,6 +6,6 @@ public class A_test615 {
 	public void foo() {
 		Inner inner= null;
 		boolean b;
-		b= /*]*/inner instanceof Inner/*[*/;
+		b= /*[*/inner instanceof Inner/*]*/;
 	}
 }

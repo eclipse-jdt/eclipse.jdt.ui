@@ -4,6 +4,6 @@ public class A_test518 {
 	public void foo() {
 		int i;
 		
-		/*]*/i= 10;/*[*/
+		/*[*/i= 10;/*]*/
 	}
 }

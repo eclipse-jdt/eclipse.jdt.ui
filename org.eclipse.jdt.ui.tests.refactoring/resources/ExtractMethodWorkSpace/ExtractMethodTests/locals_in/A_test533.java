@@ -6,7 +6,7 @@ public class A_test533 {
 	}
 	
 	public void foo() {
-		/*]*/Inner inner= new Inner();/*[*/
+		/*[*/Inner inner= new Inner();/*]*/
 
 		Inner inner2= inner;		
 	}

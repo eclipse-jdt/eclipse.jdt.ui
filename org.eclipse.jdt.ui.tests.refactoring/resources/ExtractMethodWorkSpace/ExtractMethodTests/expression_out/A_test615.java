@@ -6,9 +6,9 @@ public class A_test615 {
 	public void foo() {
 		Inner inner= null;
 		boolean b;
-		b= /*]*/extracted(inner)/*[*/;
+		b= extracted(inner);
 	}
 	protected boolean extracted(Inner inner) {
-		return inner instanceof Inner;
+		return /*[*/inner instanceof Inner/*]*/;
 	}
 }

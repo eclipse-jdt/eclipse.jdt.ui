@@ -5,12 +5,12 @@ public class A_test509 {
 		int x= 0;
 		int y= 0;
 
-		/*]*/extracted(x);/*[*/		
+		extracted(x);		
 	}
 
 	protected void extracted(int x) {
 		int y;
-		y= x;
-		x= 0;
+		/*[*/y= x;
+		x= 0;/*]*/
 	}	
 }

@@ -5,11 +5,11 @@ public class A_test622 {
 	}
 	static class Inner extends A_test622 {
 		public Inner() {
-			super(/*]*/extracted()/*[*/);
+			super(extracted());
 		}
 
 		protected static int extracted() {
-			return 5 + 6;
+			return /*[*/5 + 6/*]*/;
 		}
 	}
 }

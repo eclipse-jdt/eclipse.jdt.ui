@@ -4,11 +4,11 @@ public class A_test720 {
 	private boolean flag;
 	public boolean foo() {
 		if (flag) {
-			/*]*/try {
+			/*[*/try {
 				foo();
 			} catch(Exception e) {
 			}
-			return false;/*[*/
+			return false;/*]*/
 		}
 		return true;
 	}

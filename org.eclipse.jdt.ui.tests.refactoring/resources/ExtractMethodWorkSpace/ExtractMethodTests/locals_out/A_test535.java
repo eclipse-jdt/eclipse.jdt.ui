@@ -9,12 +9,12 @@ public class A_test535 {
 		List allElements= new ArrayList();
 		Iterator iter= allElements.iterator();		
 
-		/*]*/extracted(allElements, iter);/*[*/
+		extracted(allElements, iter);
 	}
 
 	protected void extracted(List allElements, Iterator iter) {
-		while (iter.hasNext()) {
+		/*[*/while (iter.hasNext()) {
 			allElements.add(iter.next());
-		}
+		}/*]*/
 	}
 }

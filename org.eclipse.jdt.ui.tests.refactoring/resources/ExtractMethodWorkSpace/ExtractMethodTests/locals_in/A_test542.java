@@ -5,6 +5,6 @@ public class A_test542 {
 		int i= 0;
 		int[] array= new int[10];
 		
-		/*]*/array[i++]= 10;/*[*/
+		/*[*/array[i++]= 10;/*]*/
 	}
 }

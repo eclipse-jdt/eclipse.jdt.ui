@@ -8,10 +8,10 @@ public class A_test531 {
 	public void foo() {
 		Inner inner= new Inner();
 		
-		/*]*/extracted(inner);/*[*/
+		extracted(inner);
 	}
 
 	protected void extracted(Inner inner) {
-		inner.x= 10;
+		/*[*/inner.x= 10;/*]*/
 	}
 }

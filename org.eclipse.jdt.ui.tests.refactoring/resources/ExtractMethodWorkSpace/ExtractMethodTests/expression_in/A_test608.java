@@ -14,7 +14,7 @@ public class A_test608 {
 	public void foo(Selection selection) {
 		Scanner scanner= new Scanner();
 		
-		if (/*]*/scanner.x < selection.start && selection.start < scanner.y/*[*/) {
+		if (/*[*/scanner.x < selection.start && selection.start < scanner.y/*]*/) {
 			g();
 		}
 	}

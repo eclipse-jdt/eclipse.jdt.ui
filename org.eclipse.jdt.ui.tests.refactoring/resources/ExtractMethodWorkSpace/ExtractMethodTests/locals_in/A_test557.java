@@ -5,7 +5,7 @@ public class A_test557 {
 	public void foo() {
 		int x= 0;
 		for (int y= x; true;) {
-			/*]*/x= 20;/*[*/
+			/*[*/x= 20;/*]*/
 		}
 	}
 }

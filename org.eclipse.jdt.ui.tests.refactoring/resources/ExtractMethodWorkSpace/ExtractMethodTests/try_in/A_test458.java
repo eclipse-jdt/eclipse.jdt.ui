@@ -5,7 +5,7 @@ public class A_test458 {
 		try{
 			new A_test458();
 		} catch (Throwable t){
-			/*]*/throw t;/*[*/
+			/*[*/throw t;/*]*/
 		}
 	}
 }

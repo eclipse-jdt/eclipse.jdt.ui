@@ -7,13 +7,13 @@ public class A_test459 {
 		}
 	}
 	public void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 	protected void extracted() {
-		Protectable p= new Protectable() {
+		/*[*/Protectable p= new Protectable() {
 			public void protect() throws Exception {
 				setUp();
 			}
-		};
+		};/*]*/
 	}
 }

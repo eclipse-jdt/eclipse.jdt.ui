@@ -8,7 +8,7 @@ public class A_test530 {
 	public void foo() {
 		Inner inner= null;
 		
-		/*]*/inner= new Inner();/*[*/
+		/*[*/inner= new Inner();/*]*/
 		
 		inner.x= 10;
 	}

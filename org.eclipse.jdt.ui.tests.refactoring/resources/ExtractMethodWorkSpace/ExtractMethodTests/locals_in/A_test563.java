@@ -6,7 +6,7 @@ public class A_test563 {
 		int x= 0;
 		do {
 			int y= x;
-			/*]*/x= 20;/*[*/
+			/*[*/x= 20;/*]*/
 		} while ((x= 20) < 10);
 	}
 }

@@ -6,9 +6,9 @@ public class A_test524 {
 	protected void foo() {
 		int i= 0;
 		try {
-			/*]*/if (flag)
+			/*[*/if (flag)
 				throw new Exception();
-			i= 10;/*[*/
+			i= 10;/*]*/
 		} catch (Exception e) {
 		}
 		read(i);

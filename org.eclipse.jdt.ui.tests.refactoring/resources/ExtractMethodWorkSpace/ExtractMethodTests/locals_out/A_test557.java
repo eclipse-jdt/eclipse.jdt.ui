@@ -5,12 +5,12 @@ public class A_test557 {
 	public void foo() {
 		int x= 0;
 		for (int y= x; true;) {
-			/*]*/extracted();/*[*/
+			extracted();
 		}
 	}
 	protected void extracted() {
 		int x;
-		x= 20;
+		/*[*/x= 20;/*]*/
 	}
 }
 

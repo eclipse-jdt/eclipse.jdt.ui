@@ -5,14 +5,14 @@ public class A_test715 {
 		public boolean run();
 	}
 	public void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 	protected void extracted() {
-		bar (this, new I() {
+		/*[*/bar (this, new I() {
 			public boolean run() {
 				return true;
 			}
-		});
+		});/*]*/
 	}
 	public void bar(A_test715 a, I i) {
 	}

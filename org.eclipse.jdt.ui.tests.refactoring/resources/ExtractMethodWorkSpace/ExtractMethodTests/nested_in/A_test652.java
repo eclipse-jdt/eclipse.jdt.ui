@@ -8,6 +8,6 @@ public class A_test652 {
 			}
 		};
 		
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 }

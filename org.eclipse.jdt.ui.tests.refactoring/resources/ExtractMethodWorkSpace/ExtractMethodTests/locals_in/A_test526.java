@@ -10,7 +10,7 @@ public class A_test526 {
 	
 	protected void foo() {
 		int i= 10;
-		/*]*/try {
+		/*[*/try {
 			try {
 				if (flag)
 					throw new Exception1();
@@ -20,7 +20,7 @@ public class A_test526 {
 			}
 			i= 10;
 		} catch (Exception2 e) {
-		}/*[*/
+		}/*]*/
 		read(i);
 	}
 

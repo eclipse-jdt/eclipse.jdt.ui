@@ -5,6 +5,6 @@ public class A_test800 {
 		foo()
 	}
 	public void foo() {
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 }

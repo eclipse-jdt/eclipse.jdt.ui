@@ -5,12 +5,12 @@ public class A_test527 {
 	
 	protected void foo() {
 		int i= 0;
-		/*]*/try {
+		/*[*/try {
 			if (flag)
 				throwException();
 			i= 10;
 		} catch (Exception e) {
-		}/*[*/
+		}/*]*/
 		read(i);
 	}
 

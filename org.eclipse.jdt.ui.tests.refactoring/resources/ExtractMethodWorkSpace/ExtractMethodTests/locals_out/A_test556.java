@@ -6,13 +6,13 @@ public class A_test556 {
 		int x= 0;
 		while (true) {
 			for (int y= 0; true; y= x) {
-				/*]*/x = extracted();/*[*/
+				x = extracted();
 			}
 		}
 	}
 	protected int extracted() {
 		int x;
-		x= 20;
+		/*[*/x= 20;/*]*/
 		return x;
 	}
 }

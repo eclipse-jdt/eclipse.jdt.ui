@@ -5,6 +5,6 @@ public class A_test365 {
 	}
 	
 	protected void foo() {
-		/*]*/bar();/*[*/
+		/*[*/bar();/*]*/
 	}
 }

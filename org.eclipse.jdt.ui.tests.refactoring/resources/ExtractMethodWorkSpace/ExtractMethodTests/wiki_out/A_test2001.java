@@ -6,14 +6,14 @@ public class A_test2001 {
 
 	void fun() {
 		int i;
-		/*]*/
 		extracted();
-		/*[*/
 	}
 
 	protected void extracted() {
 		int i;
+		/*[*/
 		i= 0;
 		System.out.println("i, field == " + i++ +", " + field);
+		/*]*/
 	}
 }

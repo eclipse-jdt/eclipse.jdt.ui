@@ -5,7 +5,7 @@ public class A_test725 {
 	protected void foo() {
 		int i= 0;
 		if (flag) {
-			/*]*/extracted();/*[*/
+			extracted();
 			i= 20;
 		} else {
 			read(i);
@@ -14,7 +14,7 @@ public class A_test725 {
 	}
 	protected void extracted() {
 		int i;
-		i= 10;
+		/*[*/i= 10;/*]*/
 	}
 	private void read(int i) {
 	}

@@ -5,7 +5,7 @@ public class A_test509 {
 		int x= 0;
 		int y= 0;
 
-		/*]*/y= x;
-		x= 0;/*[*/		
+		/*[*/y= x;
+		x= 0;/*]*/		
 	}	
 }

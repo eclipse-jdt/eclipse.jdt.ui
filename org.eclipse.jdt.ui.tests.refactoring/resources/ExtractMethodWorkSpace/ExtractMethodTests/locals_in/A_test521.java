@@ -5,8 +5,8 @@ public class A_test521 {
 	
 	public void foo() {
 		int i= 5;
-		/*]*/if (flag)
-			i= 10;/*[*/
+		/*[*/if (flag)
+			i= 10;/*]*/
 		i--;
 	}
 }

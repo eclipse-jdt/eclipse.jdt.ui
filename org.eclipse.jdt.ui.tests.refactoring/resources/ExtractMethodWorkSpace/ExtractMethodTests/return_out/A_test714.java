@@ -2,12 +2,12 @@ package return_out;
 
 public class A_test714 {
 	public boolean foo() {
-		/*]*/return extracted();/*[*/
+		return extracted();
 	}
 
 	protected boolean extracted() {
-		boolean b= false;
+		/*[*/boolean b= false;
 		foo();
-		return (b == true);
+		return (b == true);/*]*/
 	}
 }

@@ -4,6 +4,6 @@ public class A_test611 {
 	class Inner {
 	}
 	public void foo() {
-		Inner inner= /*]*/new Inner()/*]*/;
+		Inner inner= /*[*/new Inner()/*]*/;
 	}
 }

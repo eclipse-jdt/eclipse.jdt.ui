@@ -4,7 +4,7 @@ public class A_test602 {
 
 	public void foo() {
 		int i= 10;
-		if (/*]*/i < 10 || i < 20/*[*/)
+		if (/*[*/i < 10 || i < 20/*]*/)
 			foo();
 	}	
 }

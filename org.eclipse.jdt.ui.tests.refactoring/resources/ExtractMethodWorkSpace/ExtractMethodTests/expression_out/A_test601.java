@@ -4,11 +4,11 @@ public class A_test601 {
 
 	public void foo() {
 		int i= 10;
-		if (/*]*/extracted(i)/*[*/)
+		if (extracted(i))
 			foo();
 	}
 
 	protected boolean extracted(int i) {
-		return i < 10 && i < 20;
+		return /*[*/i < 10 && i < 20/*]*/;
 	}	
 }

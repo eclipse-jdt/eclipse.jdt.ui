@@ -5,7 +5,7 @@ public class A_test561 {
 	public void foo() {
 		int x= 0;
 		do {
-			/*]*/x= 20;/*[*/
+			/*[*/x= 20;/*]*/
 		} while (x < 10);
 	}
 }

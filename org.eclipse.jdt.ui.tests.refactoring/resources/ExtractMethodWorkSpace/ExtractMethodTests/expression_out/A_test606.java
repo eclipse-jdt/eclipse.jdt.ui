@@ -7,10 +7,10 @@ public class A_test606 {
 		foo();
 		do {
 			foo();
-		} while (/*]*/extracted(i)/*[*/);
+		} while (extracted(i));
 	}
 
 	protected boolean extracted(int i) {
-		return i <= 10;
+		return /*[*/i <= 10/*]*/;
 	}	
 }

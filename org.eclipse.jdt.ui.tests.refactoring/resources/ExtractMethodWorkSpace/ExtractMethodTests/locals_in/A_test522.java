@@ -5,11 +5,11 @@ public class A_test522 {
 	
 	public void foo() {
 		int i= 20;
-		/*]*/target: {
+		/*[*/target: {
 			if (flag)
 				break target;
 			i= 10;
-		}/*[*/
+		}/*]*/
 		i--;
 	}	
 }

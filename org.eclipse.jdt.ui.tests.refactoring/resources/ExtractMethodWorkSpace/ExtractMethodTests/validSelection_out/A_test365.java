@@ -5,10 +5,10 @@ public class A_test365 {
 	}
 	
 	protected void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() {
-		bar();
+		/*[*/bar();/*]*/
 	}
 }

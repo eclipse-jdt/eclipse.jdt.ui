@@ -6,10 +6,10 @@ public class A_test539 {
 		int[] array= new int[10];
 		int[] index= new int[1];
 		
-		/*]*/extracted(i, array, index);/*[*/
+		extracted(i, array, index);
 	}
 
 	protected void extracted(int i, int[] array, int[] index) {
-		array[index[i]]= 10;
+		/*[*/array[index[i]]= 10;/*]*/
 	}
 }

@@ -6,11 +6,11 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class A_test460 {
 	public void foo() throws InvocationTargetException {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() throws InvocationTargetException {
-		InputStreamReader in= null;
+		/*[*/InputStreamReader in= null;
 		try {
 			bar();
 		} catch (IOException e) {
@@ -22,7 +22,7 @@ public abstract class A_test460 {
 				} catch (IOException e) {
 				}
 			}
-		}
+		}/*]*/
 	}
 
 	public abstract void bar() throws IOException;

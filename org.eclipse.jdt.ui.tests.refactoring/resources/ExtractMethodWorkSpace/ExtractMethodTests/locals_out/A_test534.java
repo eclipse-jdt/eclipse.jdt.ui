@@ -8,12 +8,12 @@ public class A_test534 {
 	public void foo() {
 		Inner inner= new Inner();
 		
-		/*]*/extracted(inner);/*[*/
+		extracted(inner);
 		
 		int y= inner.x;
 	}
 
 	protected void extracted(Inner inner) {
-		inner.x= 10;
+		/*[*/inner.x= 10;/*]*/
 	}
 }

@@ -2,11 +2,11 @@ package validSelection_out;
 
 public class A_test361 {
 	void f(){
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() {
-		class AA extends A_test361 {
-		};
+		/*[*/class AA extends A_test361 {
+		};/*]*/
 	}
 }

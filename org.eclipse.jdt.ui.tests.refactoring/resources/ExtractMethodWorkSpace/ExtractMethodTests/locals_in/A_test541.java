@@ -8,7 +8,7 @@ public class A_test541 {
 		int[] array= new int[10];
 		Inner inner= new Inner();
 		
-		/*]*/array[inner.x]= 10;
-		inner.x= 20;/*[*/
+		/*[*/array[inner.x]= 10;
+		inner.x= 20;/*]*/
 	}
 }

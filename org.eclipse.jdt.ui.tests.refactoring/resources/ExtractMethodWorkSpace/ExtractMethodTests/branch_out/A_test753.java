@@ -4,14 +4,14 @@ public class A_test753 {
 	public volatile boolean flag;
 
 	public void foo() {
-		/*]*/extracted();/*[*/
+		extracted();
 	}
 
 	protected void extracted() {
-		while (flag) {
+		/*[*/while (flag) {
 			if (flag)
 				break;
-		}
+		}/*]*/
 	}
 }
 

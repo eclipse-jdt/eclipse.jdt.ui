@@ -3,11 +3,11 @@ package nested_out;
 public class A_test650 {
 	public class Inner {
 		public void foo() {
-			/*]*/extracted();/*[*/
+			extracted();
 		}
 
 		protected void extracted() {
-			foo();
+			/*[*/foo();/*]*/
 		}
 	}
 }

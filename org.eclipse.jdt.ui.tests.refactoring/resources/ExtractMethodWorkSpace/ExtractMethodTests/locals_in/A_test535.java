@@ -9,8 +9,8 @@ public class A_test535 {
 		List allElements= new ArrayList();
 		Iterator iter= allElements.iterator();		
 
-		/*]*/while (iter.hasNext()) {
+		/*[*/while (iter.hasNext()) {
 			allElements.add(iter.next());
-		}/*[*/
+		}/*]*/
 	}
 }

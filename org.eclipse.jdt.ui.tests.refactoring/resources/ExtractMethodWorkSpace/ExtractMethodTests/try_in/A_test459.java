@@ -7,10 +7,10 @@ public class A_test459 {
 		}
 	}
 	public void foo() {
-		/*]*/Protectable p= new Protectable() {
+		/*[*/Protectable p= new Protectable() {
 			public void protect() throws Exception {
 				setUp();
 			}
-		};/*[*/
+		};/*]*/
 	}
 }

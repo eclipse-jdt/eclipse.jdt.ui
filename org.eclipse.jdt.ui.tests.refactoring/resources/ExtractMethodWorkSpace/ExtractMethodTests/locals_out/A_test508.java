@@ -5,7 +5,7 @@ public class A_test508 {
 		int x= 0;
 		int y= 0;
 		
-		/*]*/x = extracted();/*[*/
+		x = extracted();
 		
 		y= x;
 	}
@@ -13,8 +13,8 @@ public class A_test508 {
 	protected int extracted() {
 		int x;
 		int y;
-		x= 10;
-		y= 20;
+		/*[*/x= 10;
+		y= 20;/*]*/
 		return x;
 	}	
 }

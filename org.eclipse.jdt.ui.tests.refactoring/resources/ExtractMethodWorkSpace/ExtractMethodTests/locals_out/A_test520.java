@@ -4,12 +4,12 @@ public class A_test520 {
 	public void foo() {
 		int i= 0;
 
-		/*]*/extracted(i);/*[*/
+		extracted(i);
 		
 		i= 20;		
 	}
 
 	protected void extracted(int i) {
-		int y= i;
+		/*[*/int y= i;/*]*/
 	}
 }

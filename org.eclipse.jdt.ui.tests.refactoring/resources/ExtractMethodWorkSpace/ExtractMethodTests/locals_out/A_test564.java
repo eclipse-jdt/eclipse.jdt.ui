@@ -4,7 +4,7 @@ public class A_test564 {
 	void foo(final int out){
 		int i;
 		if (out > 5){
-			/*]*/i = extracted();/*[*/
+			i = extracted();
 		} else {
 			i= 2;
 		}
@@ -13,7 +13,7 @@ public class A_test564 {
 
 	protected int extracted() {
 		int i;
-		i= 1;
+		/*[*/i= 1;/*]*/
 		return i;
 	}
 }
