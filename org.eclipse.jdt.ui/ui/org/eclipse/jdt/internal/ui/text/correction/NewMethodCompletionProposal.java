@@ -122,7 +122,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		
 		for (int i= 0; i < paramTypes.length; i++) {
 			ITypeBinding binding= evaluateParameterType((Expression) arguments.get(i), importEdit);
-			paramTypes[i]= (binding != null) ? binding.getName() : "Object";
+			paramTypes[i]= (binding != null) ? binding.getName() : "Object"; //$NON-NLS-1$
 		}
 		
 		String[] paramNames= getParameterNames(paramTypes, arguments);

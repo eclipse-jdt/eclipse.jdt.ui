@@ -31,7 +31,7 @@ public class VariableBlock {
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
-			String name= entries[i];			CPVariableElement elem;			IPath entryPath= JavaCore.getClasspathVariable(name);			if (entryPath != null) {				elem= new CPVariableElement(name, entryPath, reserved.contains(name));				elements.add(elem);				if (name.equals(initSelection)) {					initSelectedElement= elem;				}			} else {								JavaPlugin.logErrorMessage("VariableBlock: Classpath variable with null value: " + name);			}		}		
+			String name= entries[i];			CPVariableElement elem;			IPath entryPath= JavaCore.getClasspathVariable(name);			if (entryPath != null) {				elem= new CPVariableElement(name, entryPath, reserved.contains(name));				elements.add(elem);				if (name.equals(initSelection)) {					initSelectedElement= elem;				}			} else {								JavaPlugin.logErrorMessage("VariableBlock: Classpath variable with null value: " + name); //$NON-NLS-1$			}		}		
 		fVariablesList.setElements(elements);
 		
 		if (initSelectedElement != null) {

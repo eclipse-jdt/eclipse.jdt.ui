@@ -23,12 +23,12 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 		if ((element instanceof IJavaProject)
 			|| (element instanceof IPackageFragmentRoot)) {
 
-			String doc = "";
+			String doc = ""; //$NON-NLS-1$
 			try {
 				URL url = JavaDocLocations.getJavadocBaseLocation((IJavaElement) element);
 				if (url != null) {
 					doc = url.toExternalForm();
-					return text + " - " + doc;
+					return text + " - " + doc; //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

@@ -118,7 +118,7 @@ public class JavadocOptionsManager {
 	public final static String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
 	public final static String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
 	public final static String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
-	public final static String TITLE= "doctitle"; //$NON-NLS-1$	public final String HREF="href";
+	public final static String TITLE= "doctitle"; //$NON-NLS-1$	public final String HREF="href"; //$NON-NLS-1$
 
 	public final String NAME= "name"; //$NON-NLS-1$
 	public final String PATH= "path"; //$NON-NLS-1$
@@ -238,7 +238,7 @@ public class JavadocOptionsManager {
 	private void loadLinksFromDialogSettings(IDialogSettings settings) {
 
 		if (settings != null) {
-			IDialogSettings links = settings.getSection("projects");
+			IDialogSettings links = settings.getSection("projects"); //$NON-NLS-1$
 			if (links != null) {
 				IDialogSettings[] projs = links.getSections();
 				for (int i = 0; i < projs.length; i++) {
@@ -250,7 +250,7 @@ public class JavadocOptionsManager {
 						if (!fLinks.containsKey(javaProject)) {
 							String hrefs = iDialogSettings.get(HREF);
 							if (hrefs == null) {
-								hrefs= "";
+								hrefs= ""; //$NON-NLS-1$
 							}
 							String destdir= iDialogSettings.get(DESTINATION);
 							if (destdir == null || destdir.length() == 0) {
@@ -278,7 +278,7 @@ public class JavadocOptionsManager {
 				ProjectData data= new ProjectData(javaProject);
 				data.setDestination(getDefaultDestination(javaProject));
 				data.setAntpath(getDefaultAntPath(javaProject));
-				data.setlinks("");
+				data.setlinks(""); //$NON-NLS-1$
 				fLinks.put(javaProject, data);
 			}
 		}
@@ -457,7 +457,7 @@ public class JavadocOptionsManager {
 		ProjectData data= (ProjectData)fLinks.get(project);
 		if(data != null)
 			return data.getAntPath();
-		else return "";
+		else return ""; //$NON-NLS-1$
 	}
 
 	public boolean fromStandard() {
@@ -468,7 +468,7 @@ public class JavadocOptionsManager {
 		ProjectData data= (ProjectData)fLinks.get(project);
 		if(data != null)
 			return data.getDestination();
-		else return "";
+		else return ""; //$NON-NLS-1$
 	}
 
 	public String getDocletPath() {
@@ -511,7 +511,7 @@ public class JavadocOptionsManager {
 		ProjectData data= (ProjectData)fLinks.get(project);
 		if(data != null)
 			return data.getlinks();
-		else return "";
+		else return ""; //$NON-NLS-1$
 	}
 	
 	public Map getLinkMap() {
@@ -613,10 +613,10 @@ public class JavadocOptionsManager {
 							if (!fAdditionalParams.equals("")) { //$NON-NLS-1$					ExecutionArguments tokens = new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$					String[] argsArray = tokens.getProgramArgumentsArray();					for (int i = 0; i < argsArray.length; i++) {						args.add(argsArray[i]);					}				}
 				
 			String hrefs = (String) data.getlinks();
-			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";");
+			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
 			while (tokenizer.hasMoreElements()) {
 				String href = (String) tokenizer.nextElement();
-				args.add("-link");
+				args.add("-link"); //$NON-NLS-1$
 				args.add(href);
 			}
 		}//end standard options
@@ -695,7 +695,7 @@ public class JavadocOptionsManager {
 			settings.put(STYLESHEETFILE, fStylesheet);
 		if(!fTitle.equals("")) //$NON-NLS-1$			settings.put(TITLE, fTitle);		
 		
-		IDialogSettings links = new DialogSettings("projects");
+		IDialogSettings links = new DialogSettings("projects"); //$NON-NLS-1$
 		
 		Set keys = fLinks.keySet();
 		List contains = new ArrayList();
@@ -706,9 +706,9 @@ public class JavadocOptionsManager {
 			if (javaProject != null) {
 				IDialogSettings proj = new DialogSettings(javaProject.getElementName());
 				if (!keys.contains(javaProject)) {
-					proj.put(HREF, "");
-					proj.put(DESTINATION, "");
-					proj.put(ANTPATH, "");
+					proj.put(HREF, ""); //$NON-NLS-1$
+					proj.put(DESTINATION, ""); //$NON-NLS-1$
+					proj.put(ANTPATH, ""); //$NON-NLS-1$
 				} else {
 					ProjectData data = (ProjectData) fLinks.get(javaProject);
 					proj.put(HREF, data.getlinks());
@@ -954,19 +954,19 @@ public class JavadocOptionsManager {
 		
 		public void setlinks(String hrefs) {
 			if(hrefs==null)
-				dataHrefs="";
+				dataHrefs=""; //$NON-NLS-1$
 			else dataHrefs= hrefs;	
 		}
 		
 		public void setDestination(String destination) {
 			if(destination==null)
-				dataDestdir="";
+				dataDestdir=""; //$NON-NLS-1$
 			else dataDestdir= destination;
 		}
 		
 		public void setAntpath(String antpath) {
 			if(antpath==null)
-				dataAntPath= "";
+				dataAntPath= ""; //$NON-NLS-1$
 			else dataAntPath= antpath;	
 		}
 		

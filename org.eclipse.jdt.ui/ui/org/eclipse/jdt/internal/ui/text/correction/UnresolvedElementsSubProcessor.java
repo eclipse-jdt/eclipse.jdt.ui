@@ -119,10 +119,14 @@ public class UnresolvedElementsSubProcessor {
 			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
 				boolean isClass= (kind & SimilarElementsRequestor.CLASSES) != 0;
-				String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" };
-				
-				String name= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createtype.description", typeName); //$NON-NLS-1$
-				proposals.add(new NewCUCompletionProposal(name, addedCU, isClass, superTypes, 0));
+				String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" }; //$NON-NLS-1$
+				String label;
+				if (isClass) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclass.description", typeName); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
+				}
+				proposals.add(new NewCUCompletionProposal(label, addedCU, isClass, superTypes, 0));
 			}
 		}
 	}

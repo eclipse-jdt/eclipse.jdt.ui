@@ -111,7 +111,7 @@ public class CreateCompilationUnitChange extends Change {
 			int k= 0;
 			if (isClass) {
 				String superClass= superTypes[0];
-				if (!superClass.equals("java.lang.Object")) {
+				if (!superClass.equals("java.lang.Object")) { //$NON-NLS-1$
 					buf.append(" extends "); //$NON-NLS-1$
 					buf.append(Signature.getSimpleName(superClass));
 				}

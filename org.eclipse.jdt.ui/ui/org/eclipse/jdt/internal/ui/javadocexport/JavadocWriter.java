@@ -141,7 +141,7 @@ public class JavadocWriter {
 			
 		if (fProject != null) { //it should never equal null
 			String hrefs = store.getLinks(fProject);
-			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";");
+			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
 			while (tokenizer.hasMoreElements()) {
 				String href = (String) tokenizer.nextElement();
 				Element links = document.createElement("link"); //$NON-NLS-1$

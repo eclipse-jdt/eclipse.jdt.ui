@@ -378,7 +378,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
-		IDialogSettings settings= getDialogSettings().getSection("javadoc");
+		IDialogSettings settings= getDialogSettings().getSection("javadoc"); //$NON-NLS-1$
 		fStore= new JavadocOptionsManager(fXmlJavadocFile, settings, structuredSelection);
 	}
 	
