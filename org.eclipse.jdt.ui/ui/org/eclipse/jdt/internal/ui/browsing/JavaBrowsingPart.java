@@ -73,6 +73,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -118,6 +119,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -579,7 +581,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
-		if (!fProcessSelectionEvents || part == this || part instanceof ISearchResultView || !(selection instanceof IStructuredSelection))
+		if (!fProcessSelectionEvents || part == this || !(selection instanceof IStructuredSelection))
 			return;
 		
 		// Set selection
@@ -879,16 +881,30 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	abstract protected IJavaElement findElementToSelect(IJavaElement je);
 	
 
-	protected Object getSingleElementFromSelection(ISelection selection) {
+	protected final Object getSingleElementFromSelection(ISelection selection) {
 		if (!(selection instanceof StructuredSelection) || selection.isEmpty())
 			return null;
 		
 		Iterator iter= ((StructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
-			if (firstElement instanceof IAdaptable)
-				return (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);
-			else
+			if (firstElement instanceof ISearchResultViewEntry) {
+				IJavaElement je= SearchUtil.getJavaElement((ISearchResultViewEntry)firstElement);
+				if (je != null)
+					return je;
+				firstElement= ((ISearchResultViewEntry)firstElement).getResource();
+			}
+			if (firstElement instanceof IAdaptable) {
+				IJavaElement je= (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);
+				if (je == null && firstElement instanceof IFile) { 
+					IContainer parent= ((IFile)firstElement).getParent();
+					if (parent != null)
+						return (IJavaElement)parent.getAdapter(IJavaElement.class);
+					else return null;
+				} else 
+					return je;
+				
+			} else
 				return firstElement;
 		}
 		Object currentInput= (IJavaElement)getViewer().getInput();
@@ -962,14 +978,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				}
 			}
 			if (ei instanceof IFileEditorInput) {
-				IFile file= ((IFileEditorInput)ei).getFile();
-				IJavaElement je= (IJavaElement)file.getAdapter(IJavaElement.class);
-				if (je == null) {
-					setSelection(null, false);
-					return;
-				}
+				IContainer container= ((IFileEditorInput)ei).getFile().getParent();
+				IJavaElement je= null;
+				if (container != null)
+					je= (IJavaElement)container.getAdapter(IJavaElement.class);
 				adjustInputAndSetSelection(je);
-	
 			} else if (ei instanceof IClassFileEditorInput) {
 				IClassFile cf= ((IClassFileEditorInput)ei).getClassFile();
 				adjustInputAndSetSelection(cf);
