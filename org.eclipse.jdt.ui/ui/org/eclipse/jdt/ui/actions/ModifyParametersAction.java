@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -152,7 +153,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	
 	private boolean shouldAcceptElement(IMethod method) {
 		try{
-			fRefactoring= new ChangeSignatureRefactoring(method);
+			fRefactoring= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 			return fRefactoring.checkPreactivation().isOK();
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
