@@ -971,7 +971,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		final IEditorInput newInput= new FileEditorInput(file);
 		
 		ISchedulingRule scheduleRule= file.getParent();
-		if (scheduleRule == null)
+		
+//      Cannot yet release: this operation calls a nested operation
+//		which wants to lock the whole workspace.
+//		if (scheduleRule == null)
 			scheduleRule= workspaceRoot;
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation(scheduleRule) {
