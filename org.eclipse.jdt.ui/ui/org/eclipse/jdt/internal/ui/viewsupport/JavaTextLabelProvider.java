@@ -146,9 +146,11 @@ public class JavaTextLabelProvider {
 		if (showVariable() && root.isArchive()) {
 			try {
 				IClasspathEntry rawEntry= JavaModelUtility.getRawClasspathEntry(root);
-				if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					buf.append(rawEntry.getPath().makeRelative());
-					buf.append(" - ");
+				if (rawEntry != null) {
+					if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+						buf.append(rawEntry.getPath().makeRelative());
+						buf.append(" - ");
+					}
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
