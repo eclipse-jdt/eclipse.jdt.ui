@@ -45,6 +45,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		fgTestSetup= new ExtractMethodTestSetup(new TestSuite(ExtractMethodTests.class));
 		return fgTestSetup;
 	}
+	
+	public static Test setUpTest(Test test) {
+		fgTestSetup= new ExtractMethodTestSetup(test);
+		return fgTestSetup;
+	}
 
 	protected String getResourceLocation() {
 		return "ExtractMethodWorkSpace/ExtractMethodTests/";
