@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -90,7 +89,7 @@ public final class SuperTypeConstraintsSolver {
 	 * @param level the compliance level
 	 */
 	private void computeNonCovariantConstraints(final Collection constraints, final int level) {
-		if (level != AST.JLS3) {
+		if (level != 3) {
 			ITypeConstraint2 constraint= null;
 			for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
 				constraint= (ITypeConstraint2) iterator.next();
@@ -233,7 +232,7 @@ public final class SuperTypeConstraintsSolver {
 		ITypeConstraint2 constraint= null;
 		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
 			constraint= (ITypeConstraint2) iterator.next();
-			if ((level == AST.JLS3 || !(constraint instanceof CovariantTypeConstraint)) && !(constraint instanceof ConditionalTypeConstraint)) {
+			if ((level == 3 || !(constraint instanceof CovariantTypeConstraint)) && !(constraint instanceof ConditionalTypeConstraint)) {
 				final ConstraintVariable2 leftVariable= constraint.getLeft();
 				final ITypeSet leftEstimate= leftVariable.getTypeEstimate();
 				final TypeEquivalenceSet set= leftVariable.getTypeEquivalenceSet();
@@ -261,10 +260,15 @@ public final class SuperTypeConstraintsSolver {
 
 		computeTypeEstimates(variables);
 		fProcessable.addAll(variables);
+		Collection usage= null;
 		ConstraintVariable2 variable= null;
 		while (!fProcessable.isEmpty()) {
 			variable= (ConstraintVariable2) fProcessable.removeFirst();
-			processConstraints(SuperTypeConstraintsModel.getVariableUsage(variable));
+			usage= SuperTypeConstraintsModel.getVariableUsage(variable);
+			if (!usage.isEmpty())
+				processConstraints(usage);
+			else
+				variable.setData(DATA_TYPE_ESTIMATE, fModel.getSuperType());
 		}
 		computeTypeOccurrences(variables);
 		computeObsoleteCasts(fModel.getCastVariables());
