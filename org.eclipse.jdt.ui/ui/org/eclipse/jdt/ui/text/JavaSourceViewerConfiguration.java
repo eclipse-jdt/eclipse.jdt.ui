@@ -560,7 +560,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(60, 10, true, true);		
+		presenter.setSizeConstraints(60, 10, true, true);
 		return presenter;
 	}
 
