@@ -113,12 +113,10 @@ public class TypeMismatchSubProcessor {
 		
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
 		
-		if (currBinding == null || "void".equals(currBinding.getName())) { //$NON-NLS-1$
-			return;
-		}
+		boolean nullOrVoid= currBinding == null || "void".equals(currBinding.getName()); //$NON-NLS-1$
 		
 		// change method return statement to actual type
-		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
+		if (!nullOrVoid && parentNodeType == ASTNode.RETURN_STATEMENT) {
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 			if (decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
@@ -151,7 +149,7 @@ public class TypeMismatchSubProcessor {
 			}
 		}
 
-		if (receiverNode != null) {
+		if (!nullOrVoid && receiverNode != null) {
 			currBinding= Bindings.normalizeTypeBinding(currBinding);
 			if (currBinding == null) {
 				currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
