@@ -13,14 +13,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -31,14 +32,13 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IOverrideMethodQuery;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class OverrideMethodQuery implements IOverrideMethodQuery {
 	
-	private static class OverrideTreeSelectionDialog extends CheckedTreeSelectionDialog{
+	private static class OverrideTreeSelectionDialog extends CheckedTreeSelectionDialog {
 
 		private OverrideMethodContentProvider fContentProvider;
 
@@ -50,16 +50,17 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		/*
 		 * @see CheckedTreeSelectionDialog#createTreeViewer(Composite)
 		 */
-		protected Tree createTreeViewer(Composite composite) {
+		protected CheckboxTreeViewer createTreeViewer(Composite composite) {
 			Composite inner= new Composite(composite, SWT.NONE);
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			layout.numColumns= 1;
 			inner.setLayout(layout);
+			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 			
-			Tree tree= super.createTreeViewer(inner);
-			tree.setLayoutData(new GridData(GridData.FILL_BOTH));
+			CheckboxTreeViewer treeViewer= super.createTreeViewer(inner);
+			
 			
 			Button flatListButton= new Button(inner, SWT.CHECK);
 			flatListButton.setText(ActionMessages.getString("OverrideMethodQuery.groupMethodsByTypes")); //$NON-NLS-1$
@@ -76,7 +77,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 				}
 			});
 			flatListButton.setSelection(fContentProvider.isShowTypes());
-			return tree;		
+			return treeViewer;		
 		}
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
