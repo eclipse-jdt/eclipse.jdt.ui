@@ -75,7 +75,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private FrameUpAction fUpAction;
 
  	
-	private static final String SELECT_FILTERS_LABEL = "Select &Filters...";
+	private static final String SELECT_FILTERS_LABEL = "&Filters...";
  	private FilterSelectionAction fFilterAction;
 	private static final String SHOW_LIBRARIES_LABEL = "Show Referenced &Libraries";
  	private ShowLibrariesAction fShowLibrariesAction;
