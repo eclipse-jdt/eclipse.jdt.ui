@@ -71,10 +71,12 @@ public class CallHierarchyTestHelper {
     public void createSimpleClasses() throws CoreException, JavaModelException {
         createPackages();
 
+        
         ICompilationUnit cu1= fPack1.getCompilationUnit("A.java");
+
         fType1=
             cu1.createType(
-                "public class A {public A() { }\n public void method1() { }\n public void method2() { method1(); }\n public void recursiveMethod1() { recursiveMethod2(); }\n public void recursiveMethod2() { recursiveMethod1(); }\n}\n",
+                "public class A {\n" +                "public A() {\n" +                "}\n " +                "public void method1() {\n" +                "}\n " +                "public void method2() {\n" +                "  method1();\n" +                "}\n " +                "public void recursiveMethod1() {\n" +                "  recursiveMethod2();\n " +                "}\n " +                "public void recursiveMethod2() {\n" +                "  recursiveMethod1();\n " +                "}\n" +                "}\n",
                 null,
                 true,
                 null);
@@ -82,7 +84,7 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu2= fPack2.getCompilationUnit("B.java");
         fType2=
             cu2.createType(
-                "public class B extends pack1.A {public void method3() { method1(); method2(); }\n public void method4() { method3(); }\n}\n",
+                "public class B extends pack1.A {\npublic void method3() { method1(); method2(); }\n public void method4() { method3(); }\n}\n",
                 null,
                 true,
                 null);
@@ -165,7 +167,7 @@ public class CallHierarchyTestHelper {
      * instance fields fPack1 and fPack2.
      */
     public void createPackages() throws CoreException, JavaModelException {
-        IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJavaProject1);
+        JavaProjectHelper.addRTJar(fJavaProject1);
 
         IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
         fPack1= root1.createPackageFragment("pack1", true, null);

@@ -349,7 +349,31 @@ public class CallHierarchyTest extends TestCase {
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
     }
-    
+
+    public void testLineNumberCallers() throws Exception {
+        helper.createSimpleClasses();
+        
+        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(helper.getMethod1());
+        MethodWrapper[] calls= wrapper.getCalls(new NullProgressMonitor());
+        assertEquals("Wrong line number", 9, calls[0].getMethodCall().getFirstCallLocation().getLineNumber());
+
+        wrapper= CallHierarchy.getDefault().getCallerRoot(helper.getRecursiveMethod2());
+        calls= wrapper.getCalls(new NullProgressMonitor());
+        assertEquals("Wrong line number", 12, calls[0].getMethodCall().getFirstCallLocation().getLineNumber());
+    }
+        
+    public void testLineNumberCallees() throws Exception {
+        helper.createSimpleClasses();
+        
+        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(helper.getMethod2());
+        MethodWrapper[] calls= wrapper.getCalls(new NullProgressMonitor());
+        assertEquals("Wrong line number", 9, calls[0].getMethodCall().getFirstCallLocation().getLineNumber());
+        
+        wrapper= CallHierarchy.getDefault().getCalleeRoot(helper.getRecursiveMethod1());
+        calls= wrapper.getCalls(new NullProgressMonitor());
+        assertEquals("Wrong line number", 12, calls[0].getMethodCall().getFirstCallLocation().getLineNumber());
+    }
+
     private void assertRecursive(MethodWrapper[] callResults, boolean shouldBeRecursive) {
         for (int i= 0; i < callResults.length; i++) {
             assertEquals(
