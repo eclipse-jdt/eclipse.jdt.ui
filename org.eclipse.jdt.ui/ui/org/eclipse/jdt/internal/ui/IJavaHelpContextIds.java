@@ -156,6 +156,8 @@ public interface IJavaHelpContextIds {
 	public static final String FORMAT_ACTION=							PREFIX + "format_action"; 	 //$NON-NLS-1$	
 	public static final String COMMENT_ACTION=							PREFIX + "comment_action"; 	 //$NON-NLS-1$	
 	public static final String UNCOMMENT_ACTION=							PREFIX + "uncomment_action"; 	 //$NON-NLS-1$	
+	public static final String ADD_BLOCK_COMMENT_ACTION=				PREFIX + "add_block_comment_action"; 	//$NON-NLS-1$
+	public static final String REMOVE_BLOCK_COMMENT_ACTION=				PREFIX + "remove_block_comment_action";	//$NON-NLS-1$
 	public static final String QUICK_FIX_ACTION= 						PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$	
 	public static final String CONTENT_ASSIST_ACTION= 						PREFIX + "content_assist_action"; 	 //$NON-NLS-1$	
 	public static final String PARAMETER_HINTS_ACTION= 						PREFIX + "parameter_hints_action"; 	 //$NON-NLS-1$	
