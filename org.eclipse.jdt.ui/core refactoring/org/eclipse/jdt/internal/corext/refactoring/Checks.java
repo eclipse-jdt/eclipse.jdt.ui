@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -36,7 +37,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.*;
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -81,6 +82,17 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkFieldName(String name) {
 		return checkName(name, JavaConventions.validateFieldName(name));
+	}
+
+	/**
+	 * Checks if the given name is a valid Java identifier.
+	 *
+	 * @param the java identifier.
+	 * @return a refactoring status containing the error message if the
+	 *  name is not a valid java identifier.
+	 */
+	public static RefactoringStatus checkIdentifier(String name) {
+		return checkName(name, JavaConventions.validateIdentifier(name));
 	}
 	
 	/**
@@ -568,5 +580,43 @@ public class Checks {
 				return cus[i].getType(name);
 		}
 		return null;
-	}	
+	}
+
+	public static RefactoringStatus checkTempName(String newName) {
+		RefactoringStatus result= Checks.checkIdentifier(newName);
+		if (result.hasFatalError())
+			return result;
+		if (! Checks.startsWithLowerCase(newName))
+			result.addWarning(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
+		return result;		
+	}
+	
+	public static RefactoringStatus checkConstantName(String newName) {
+		RefactoringStatus result= Checks.checkFieldName(newName);
+		if(result.hasFatalError())
+			return result;
+		for(int i= 0; i < newName.length(); i++) {
+			char c= newName.charAt(i);
+			if(Character.isLetter(c) && !Character.isUpperCase(c)) {
+				result.addWarning(RefactoringCoreMessages.getString("ExtractConstantRefactoring.convention")); //$NON-NLS-1$	
+				break;
+			}	
+		}
+		return result;
+	}
+	
+	public static boolean isException(IType iType, IProgressMonitor pm) throws JavaModelException {
+		try{
+			if (iType.isInterface())
+				return false;
+			IType[] superTypes= iType.newSupertypeHierarchy(pm).getAllSupertypes(iType);
+			for (int i= 0; i < superTypes.length; i++) {
+				if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName()))
+					return true;
+			}
+			return false;
+		} finally{
+			pm.done();
+		}	
+	}
 }
