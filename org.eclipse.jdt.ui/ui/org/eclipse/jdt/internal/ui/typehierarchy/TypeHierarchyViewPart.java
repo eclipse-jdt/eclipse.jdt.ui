@@ -438,10 +438,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void updateInput(IJavaElement inputElement) {
 		IJavaElement prevInput= fInputElement;
 		
+		// Make sure the UI got repainted before we execute a long running
+		// operation. This can be removed if we refresh the hierarchy in a 
+		// separate thread.
+		// Work-araound for http://dev.eclipse.org/bugs/show_bug.cgi?id=30881
+		processOutstandingEvents();
 		fInputElement= inputElement;
 		if (fInputElement == null) {	
 			clearInput();
-		} else {			
+		} else {
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, new BusyIndicatorRunnableContext());
 			} catch (JavaModelException e) {
@@ -450,7 +455,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				return;
 			}
 				
-			fPagebook.showPage(fTypeMethodsSplitter);
 			if (inputElement.getElementType() != IJavaElement.TYPE) {
 				setView(VIEW_ID_TYPE);
 			}
@@ -466,8 +470,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			updateToolbarButtons();
 			updateTitle();
 			enableMemberFilter(false);
+			fPagebook.showPage(fTypeMethodsSplitter);
 		}
 	}
+	
+	private void processOutstandingEvents() {
+		Display display= getDisplay();	
+		if (display != null && display == Display.getCurrent()) {
+			while(!display.isDisposed()) {
+				if (!display.readAndDispatch())
+					return;
+			}
+		}			
+	}	
 	
 	private void clearInput() {
 		fInputElement= null;
