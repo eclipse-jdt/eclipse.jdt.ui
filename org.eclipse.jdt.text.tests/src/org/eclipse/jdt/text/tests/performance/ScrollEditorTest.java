@@ -47,8 +47,10 @@ public class ScrollEditorTest extends TestCase {
 		
 		for (int i= 0; i < nOfRuns; i++) {
 			fPerformanceMeter.start();
-			for (int j= 0; j < m; j++)
+			for (int j= 0; j < m; j++) {
+				// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 				SWTEventHelper.pressKeyCode(display, SWT.PAGE_DOWN);
+			}
 			fPerformanceMeter.stop();
 			assertTrue(text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
 			SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
