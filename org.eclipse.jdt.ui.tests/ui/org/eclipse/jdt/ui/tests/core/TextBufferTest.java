@@ -43,24 +43,16 @@ public class TextBufferTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
-			TestSuite result= new TestSuite(THIS);
-			if (false) {	// For hot code replace when debugging test cases
-				result.addTestSuite(THIS);
-				result.addTestSuite(THIS);
-				result.addTestSuite(THIS);
-				result.addTestSuite(THIS);
-				result.addTestSuite(THIS);
-				result.addTestSuite(THIS);
-			}
-			return result;
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new TextBufferTest("testSwap1"));
-			suite.addTest(new TextBufferTest("testSwap2"));
-			suite.addTest(new TextBufferTest("testSwapInSwap"));
-			return suite;
-		}	
+		TestSuite result= new TestSuite(THIS);
+		if (false) {	// For hot code replace when debugging test cases
+			result.addTestSuite(THIS);
+			result.addTestSuite(THIS);
+			result.addTestSuite(THIS);
+			result.addTestSuite(THIS);
+			result.addTestSuite(THIS);
+			result.addTestSuite(THIS);
+		}
+		return result;
 	}
 	
 	protected void setUp() throws Exception {
@@ -593,43 +585,6 @@ public class TextBufferTest extends TestCase {
 		doUndoRedo(undo, result);		
 	}
 	
-	private void doUndoRedo(UndoMemento undo, String redoResult) throws Exception {
-		fEditor.add(undo);
-		UndoMemento redo= fEditor.performEdits(null);
-		assertBufferContent();
-		fEditor.add(redo);
-		undo= fEditor.performEdits(null);
-		assertEquals("Buffer content redo", redoResult, fBuffer.getContent());
-		fEditor.add(undo);
-		fEditor.performEdits(null);
-		assertBufferContent();
-	}
-	
-	private void assertEquals(TextRange r, int offset, int length) {
-		assertEquals("Offset", offset, r.getOffset());
-		assertEquals("Length", length, r.getLength());	
-	}
-	
-	private void assertBufferContent() {
-		assertEquals("Buffer content restored", "0123456789", fBuffer.getContent());
-	}
-	
-	private void assertTrue(IStatus status) {
-		assertTrue(status.isOK());
-	}	
-	
-	private void assertTrue(String message, IStatus status) {
-		assertTrue(message, status.isOK());
-	}	
-	
-	private void assertFalse(IStatus status) {
-		assertTrue(!status.isOK());
-	}	
-	
-	private void assertFalse(String message, IStatus status) {
-		assertTrue(message, !status.isOK());
-	}
-	
 	public void testSwap1() throws Exception {
 		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
 		TextBufferEditor editor= new TextBufferEditor(buffer);		
@@ -694,10 +649,6 @@ public class TextBufferTest extends TestCase {
 	}	
 	
 	public void testSwap2InSwap1() throws Exception {
-		// disabled
-		if (true)
-			return;
-		
 		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
 		TextBufferEditor editor= new TextBufferEditor(buffer);		
 		
@@ -743,6 +694,43 @@ public class TextBufferTest extends TestCase {
 		String result= "3, foo(2, 1)";
 		assertEquals("Buffer content", result, buffer.getContent());
 	}	
-		
+	
+	private void doUndoRedo(UndoMemento undo, String redoResult) throws Exception {
+		fEditor.add(undo);
+		UndoMemento redo= fEditor.performEdits(null);
+		assertBufferContent();
+		fEditor.add(redo);
+		undo= fEditor.performEdits(null);
+		assertEquals("Buffer content redo", redoResult, fBuffer.getContent());
+		fEditor.add(undo);
+		fEditor.performEdits(null);
+		assertBufferContent();
+	}
+	
+	private void assertEquals(TextRange r, int offset, int length) {
+		assertEquals("Offset", offset, r.getOffset());
+		assertEquals("Length", length, r.getLength());	
+	}
+	
+	private void assertBufferContent() {
+		assertEquals("Buffer content restored", "0123456789", fBuffer.getContent());
+	}
+	
+	private void assertTrue(IStatus status) {
+		assertTrue(status.isOK());
+	}	
+	
+	private void assertTrue(String message, IStatus status) {
+		assertTrue(message, status.isOK());
+	}	
+	
+	private void assertFalse(IStatus status) {
+		assertTrue(!status.isOK());
+	}	
+	
+	private void assertFalse(String message, IStatus status) {
+		assertTrue(message, !status.isOK());
+	}
+			
 }
 

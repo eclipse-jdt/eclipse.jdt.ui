@@ -155,11 +155,16 @@ public final class TextRange {
 	 * @see Object#toString()
 	 */
 	public String toString() {
+		if (isDeleted())
+			return "[deleted]";
+		if (isUndefined())
+			return "[undefined]";
 		StringBuffer buffer= new StringBuffer();
-		buffer.append("Offset: ");
+		buffer.append("[");
 		buffer.append(fOffset);
-		buffer.append(" Length: ");
+		buffer.append(",");
 		buffer.append(fLength);
+		buffer.append("]");
 		return buffer.toString();
 	}
 

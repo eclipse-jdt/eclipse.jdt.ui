@@ -97,6 +97,13 @@ public class SimpleTextEdit extends TextEdit {
 		buffer.replace(fRange, fText);
 	}
 	
+	/* non Java-doc
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return super.toString() + " <<" + fText;
+	}
+	
 	protected TextEdit copy0(TextEditCopier copier) {
 		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0");
 		return new SimpleTextEdit(getTextRange().copy(), getText());

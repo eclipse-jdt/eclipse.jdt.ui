@@ -279,6 +279,18 @@ public abstract class TextEdit {
 		return null;
 	}
 	
+	/* non Java-doc
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		String name= getClass().getName();
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			name= name.substring(index + 1);
+		}
+		return "{" + name + "} " + getTextRange().toString();
+	}
+	
 	public static TextRange getTextRange(List edits) {
 		int size= 0;
 		if (edits == null || (size= edits.size()) == 0)
@@ -471,6 +483,7 @@ public abstract class TextEdit {
 			try {
 				updater.setActiveNode(this);
 				perform(buffer);
+				// System.out.println(toString());
 			} finally {
 				updater.setActiveNode(null);
 			}

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.DocumentEvent;
@@ -62,11 +63,25 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 	public void perform(TextBuffer buffer) throws CoreException {
 		TextRange range= getTextRange();
 		fContent= buffer.getContent(range.getOffset(), range.getLength());
-		fTarget.perform(buffer);
+		TextRange targetRange= fTarget.getTextRange();
+		if (++fCounter == 2 && !targetRange.isDeleted()) {
+			try {
+				buffer.replace(targetRange, fContent);
+			} finally {
+				clearContent();
+			}
+		}
 	}
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {
-		predecessorExecuted(fTarget.getSuccessorIterator(), delta);
+		boolean doIt= true;
+		for (Iterator iter= executedEdits.iterator(); iter.hasNext() && doIt;) {
+			TextEdit edit= (TextEdit)iter.next();
+			if (edit == fTarget)
+				doIt= false;
+			if (doIt)
+				edit.adjustOffset(delta);
+		}
 		fTarget.adjustLength(delta);
 		fTarget.updateParents(delta);
 	}
