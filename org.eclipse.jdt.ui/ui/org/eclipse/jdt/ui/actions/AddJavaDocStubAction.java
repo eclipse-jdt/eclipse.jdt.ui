@@ -12,17 +12,18 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -135,8 +136,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			ICompilationUnit cu= null;
 			for (int i= 0; i < nElements; i++) {
 				Object curr= elements.get(i);
-				if (curr instanceof IMethod) {
-					IMethod member= (IMethod)curr; // limit to methods
+				if (curr instanceof IMethod || curr instanceof IType) {
+					IMember member= (IMember)curr; // limit to methods & types
 					
 					if (i == 0) {
 						cu= member.getCompilationUnit();
@@ -154,5 +155,5 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			return res;
 		}
 		return null;
-	}	
+	}
 }

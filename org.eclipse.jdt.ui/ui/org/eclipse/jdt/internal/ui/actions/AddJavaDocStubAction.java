@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -117,8 +118,8 @@ public class AddJavaDocStubAction extends Action {
 				ICompilationUnit cu= null;
 				for (int i= 0; i < nElements; i++) {
 					Object curr= elements.get(i);
-					if (curr instanceof IMethod) {
-						IMethod member= (IMethod)curr; // limit to methods
+					if (curr instanceof IMethod || curr instanceof IType) {
+						IMember member= (IMember)curr; // limit to methods & types
 						
 						if (i == 0) {
 							cu= member.getCompilationUnit();

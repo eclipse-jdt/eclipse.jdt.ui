@@ -24,10 +24,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -48,10 +52,25 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	}
 
 
-	private String createTypeComment(IType type) throws JavaModelException {
-		// not yet supported
-		return null;
-	}
+	private String createTypeComment(IType type) throws CoreException {
+		Template[] templates= Templates.getInstance().getTemplates();
+		String comment= null;
+		for (int i= 0; i < templates.length; i++) {
+			if ("typecomment".equals(templates[i].getName())) {
+				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit());
+				break;
+			}
+		}
+		if (comment == null || comment.length() == 0) {
+			StringBuffer buf= new StringBuffer();
+			buf.append("/**\n");
+			buf.append(" * This comment is specified in template 'typecomment'.\n");
+			buf.append(" * (Workbench>Preferences>Java>Templates)\n");
+			buf.append(" */\n");
+			return buf.toString();
+		}		
+		return comment;
+	}		
 	
 	private String createMethodComment(IMethod meth) throws JavaModelException {
 		IType declaringType= meth.getDeclaringType();
