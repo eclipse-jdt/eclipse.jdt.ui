@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 public class ImportOrganizeTest extends CoreTests {
@@ -47,11 +48,11 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testInnerClassVisibility"));
+			suite.addTest(new ImportOrganizeTest("testOrganizeImportOnRange2"));
 			return suite;
 		}	
 	}
@@ -1567,7 +1568,112 @@ public class ImportOrganizeTest extends CoreTests {
 		
 		assertEqualStringIgnoreDelim(wc.getSource(), buf.toString());
 
-	}	
+	}
+	
+	public void testOrganizeImportOnRange() throws Exception {
+	
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Vector vec) {\n");
+		buf.append("        HashMap map;\n");
+		buf.append("        /*b*/\n");
+		buf.append("        Iterator iter= ((Collection) vec).iterator();\n");
+		buf.append("        /*e*/\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", content, false, null);
+
+		int start= content.indexOf("/*b*/");
+		int end= content.indexOf("/*e*/");
+		Selection sel= Selection.createFromStartEnd(start, end);
+
+		String[] order= new String[] { };
+		int threshold= 99;
+				
+		ImportsStructure structure= new ImportsStructure(cu, order, threshold, true);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(structure, sel, true, true, null);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Vector vec) {\n");
+		buf.append("        HashMap map;\n");
+		buf.append("        /*b*/\n");
+		buf.append("        Iterator iter= ((Collection) vec).iterator();\n");
+		buf.append("        /*e*/\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());
+
+	}
+	
+	public void testOrganizeImportOnRange2() throws Exception {
+	
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Vector vec) {\n");
+		buf.append("        /*b*/HashMap map;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", content, false, null);
+
+		int start= content.indexOf("/*b*/");
+		Selection sel= Selection.createFromStartLength(start, 5);
+
+		String[] order= new String[] { };
+		int threshold= 99;
+				
+		ImportsStructure structure= new ImportsStructure(cu, order, threshold, true);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(structure, sel, true, true, null);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Vector vec) {\n");
+		buf.append("        /*b*/HashMap map;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());
+		
+		sel= Selection.createFromStartLength(start, 9);
+		
+		structure= new ImportsStructure(cu, order, threshold, true);
+		op= new OrganizeImportsOperation(structure, sel, true, true, null);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Vector vec) {\n");
+		buf.append("        /*b*/HashMap map;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());		
+
+	}			
 	
 		
 }

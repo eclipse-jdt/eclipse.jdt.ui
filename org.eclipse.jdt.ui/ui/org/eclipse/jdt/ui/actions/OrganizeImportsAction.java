@@ -320,18 +320,25 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					cu= JavaModelUtil.toWorkingCopy(cu);
 				
 					monitor.subTask(cuLocation);
-					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, query);
-					runInSync(op, cuLocation, status, monitor);
+
+					try {
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, query);
+						runInSync(op, cuLocation, status, monitor);
+
+						IProblem parseError= op.getParseError();
+						if (parseError != null) {
+							String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
+							status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+						} 	
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
+						status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+					}
 
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-				
-					IProblem parseError= op.getParseError();
-					if (parseError != null) {
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
-						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-					} 					
 				}
 			}
 		} finally {
@@ -369,7 +376,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		};
 		getShell().getDisplay().syncExec(runnable);
-		}
+	}
 				
 
 	/**

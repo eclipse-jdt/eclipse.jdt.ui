@@ -35,7 +35,9 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -43,7 +45,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
-
 
 	public static interface IChooseImportQuery {
 		/**
@@ -57,20 +58,29 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	
-	private static class TypeRefASTVisitor extends ASTVisitor {
+	private static class TypeRefASTVisitor extends GenericVisitor {
 
+		private Selection fRange;
 		private Collection fResult;
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 
-		public TypeRefASTVisitor(Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
+		public TypeRefASTVisitor(Selection rangeLimit, Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
 			fResult= result;
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
+			fRange= rangeLimit;
 		}
 		
+		private boolean isAffected(ASTNode node) {
+			return fRange == null || !fRange.liesOutside(node);
+		}
+		
+		
 		private void addReference(SimpleName name) {
-			fResult.add(name);
+			if (isAffected(name)) {
+				fResult.add(name);
+			}
 		}			
 		
 		private void typeRefFound(Name node) {
@@ -100,6 +110,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			for (int i= 0; i < nElements; i++) {
 				((ASTNode) elements.get(i)).accept(this);
 			}
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		protected boolean visitNode(ASTNode node) {
+			return isAffected(node);
 		}
 		
 		/*
@@ -190,6 +207,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(SuperConstructorInvocation)
 		 */		
 		public boolean visit(SuperConstructorInvocation node) {
+			if (!isAffected(node)) {
+				return false;
+			}
+			
 			evalQualifyingExpression(node.getExpression());
 			visitChildren(node.arguments());
 			return false;	
@@ -215,6 +236,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(TypeDeclaration)
 		 */
 		public boolean visit(TypeDeclaration node) {
+			if (!isAffected(node)) {
+				return false;
+			}
+			
 			typeRefFound(node.getSuperclass());
 
 			Iterator iter= node.superInterfaces().iterator();
@@ -229,6 +254,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(MethodDeclaration)
 		 */
 		public boolean visit(MethodDeclaration node) {
+			if (!isAffected(node)) {
+				return false;
+			}			
+			
 			if (!node.isConstructor()) {
 				node.getReturnType().accept(this);
 			}
@@ -349,7 +378,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					return null;
 				} else if (nFound == 1) {
 					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
-					fImpStructure.addImport(typeRef.getTypeContainerName(), typeRef.getTypeName());
+					fImpStructure.addImport(typeRef.getFullyQualifiedName());
 					return null;
 				} else {
 					String containerToImport= null;
@@ -362,7 +391,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						String containerName= typeRef.getTypeContainerName();
 						if (fOldSingleImports.contains(fullName)) {
 							// was single-imported
-							fImpStructure.addImport(containerName, typeRef.getTypeName());
+							fImpStructure.addImport(fullName);
 							return null;
 						} else if (fOldDemandImports.contains(containerName)) {
 							if (containerToImport == null) {
@@ -402,11 +431,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}	
 
 
-	private ICompilationUnit fCompilationUnit;	
+	private Selection fRange;
+	private ImportsStructure fImportsStructure;	
 	private boolean fDoSave;
 	
-	private String[] fOrderPreference;
-	private int fImportThreshold;
 	private boolean fIgnoreLowerCaseNames;
 	
 	private IChooseImportQuery fChooseImportQuery;
@@ -415,36 +443,39 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	private IProblem fParsingError;
 	private CompilationUnit fASTRoot;
-	
-	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) {
+
+	public OrganizeImportsOperation(ImportsStructure impStructure, Selection range, boolean ignoreLowerCaseNames, boolean save, IChooseImportQuery chooseImportQuery) {
 		super();
-		fCompilationUnit= cu;
+		fImportsStructure= impStructure;
+		fRange= range;
 		fDoSave= save;
-		
-		fImportThreshold= importThreshold;
-		fOrderPreference= importOrder;
 		fIgnoreLowerCaseNames= ignoreLowerCaseNames;
 		fChooseImportQuery= chooseImportQuery;
 
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
-	
-		fASTRoot= AST.parseCompilationUnit(fCompilationUnit, doResolve);
+		fASTRoot= AST.parseCompilationUnit(impStructure.getCompilationUnit(), true);
 	}
-
+	
+	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
+		this(new ImportsStructure(cu, importOrder, importThreshold, false), null, ignoreLowerCaseNames, save, chooseImportQuery);
+	}
+	
 	/**
 	 * Runs the operation.
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
+
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
-			}			
+			}
+			ICompilationUnit cu= fImportsStructure.getCompilationUnit();
 			fNumberOfImportsAdded= 0;
 			
-			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", fCompilationUnit.getElementName()), 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 2); //$NON-NLS-1$
 
 			ArrayList oldSingleImports= new ArrayList();
 			ArrayList oldDemandImports= new ArrayList();
@@ -458,13 +489,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						
 			oldDemandImports.add(""); //$NON-NLS-1$
 			oldDemandImports.add("java.lang"); //$NON-NLS-1$
-			oldDemandImports.add(fCompilationUnit.getParent().getElementName());			
+			oldDemandImports.add(cu.getParent().getElementName());			
 			
 			monitor.worked(1);
-
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold, false);
-			
-			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, impStructure, fIgnoreLowerCaseNames);
+		
+			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, fImportsStructure, fIgnoreLowerCaseNames);
 			ArrayList openChoices= new ArrayList();
 			ArrayList sourceRanges= new ArrayList();
 			while (references.hasNext()) {
@@ -478,7 +507,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			processor= null;
 			
-			if (openChoices.size() > 0) {
+			if (openChoices.size() > 0 && fChooseImportQuery != null) {
 				TypeInfo[][] choices= (TypeInfo[][]) openChoices.toArray(new TypeInfo[openChoices.size()][]);
 				ISourceRange[] ranges= (ISourceRange[]) sourceRanges.toArray(new ISourceRange[sourceRanges.size()]);
 				TypeInfo[] chosen= fChooseImportQuery.chooseImports(choices, ranges);
@@ -488,29 +517,34 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeInfo typeInfo= chosen[i];
-					impStructure.addImport(typeInfo.getTypeContainerName(), typeInfo.getTypeName());
+					fImportsStructure.addImport(typeInfo.getFullyQualifiedName());
 				}				
 			}
-			impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
+			fImportsStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 			
-			fNumberOfImportsAdded= impStructure.getNumberOfImportsCreated() - nOldImports;
+			fNumberOfImportsAdded= fImportsStructure.getNumberOfImportsCreated() - nOldImports;
 		} finally {
 			monitor.done();
 		}
 	}
+	
+	private boolean isAffected(IProblem problem) {
+		return fRange == null || (fRange.getOffset() <= problem.getSourceEnd() && fRange.getExclusiveEnd() > problem.getSourceStart());
+	}
+
 	
 	// find type references in a compilation unit
 	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) throws JavaModelException {
 		IProblem[] problems= fASTRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
-			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
+			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0 && isAffected(curr)) {
 				fParsingError= problems[i];
 				return null;
 			}
 		}
 		ArrayList result= new ArrayList();
-		TypeRefASTVisitor visitor = new TypeRefASTVisitor(result, oldSingleImports, oldDemandImports);
+		TypeRefASTVisitor visitor = new TypeRefASTVisitor(fRange, result, oldSingleImports, oldDemandImports);
 		fASTRoot.accept(visitor);
 
 		return result.iterator();
