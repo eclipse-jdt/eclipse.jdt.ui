@@ -50,18 +50,6 @@
                 visible="false" 
                 relationship="stack"/> 
         </perspectiveExtension> 
-        <perspectiveExtension 
-			targetID="org.eclipse.jdt.ui.JavaPerspective">
-			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
-		</perspectiveExtension>
-		<perspectiveExtension 
-			targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
-			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
-		</perspectiveExtension>
-		<perspectiveExtension 
-			targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
-		</perspectiveExtension>
     </extension> 
 
 	<extension
