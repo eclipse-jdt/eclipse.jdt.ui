@@ -586,10 +586,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}			
 		}
 
-		public void applyTextPresentation(TextPresentation textPresentation, IRegion region) {
+		public void applyTextPresentation(TextPresentation textPresentation) {
 			if (fActiveRegion == null)
 				return;
-
+			IRegion region= textPresentation.getExtent();
 			if (fActiveRegion.getOffset() + fActiveRegion.getLength() >= region.getOffset() && region.getOffset() + region.getLength() > fActiveRegion.getOffset())
 				textPresentation.mergeStyleRange(new StyleRange(fActiveRegion.getOffset(), fActiveRegion.getLength(), fColor, null));
 		}
