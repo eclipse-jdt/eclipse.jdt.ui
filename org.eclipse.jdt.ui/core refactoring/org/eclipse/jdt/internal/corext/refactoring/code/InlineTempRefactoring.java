@@ -90,7 +90,7 @@ public class InlineTempRefactoring extends Refactoring {
 			pm.beginTask("Checking preconditions", 1);
 			fAST= new AST(fCu);
 			
-			if (fAST.hasProblems()){
+			if (fAST.isMalformed()){
 				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
 				if (compileErrors.hasFatalError())
 					return compileErrors;

@@ -144,7 +144,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
 				
-		if (fAST.hasProblems()){
+		if (fAST.isMalformed()){
 			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
 			if (compileErrors.hasFatalError())
 				return compileErrors;
