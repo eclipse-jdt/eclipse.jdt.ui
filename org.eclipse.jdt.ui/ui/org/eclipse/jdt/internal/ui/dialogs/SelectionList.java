@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TwoArrayQuickSort;
 
@@ -59,7 +58,7 @@ public class SelectionList extends Composite {
 		fIgnoreCase= ignoreCase;
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0; layout.marginWidth= 0;
-		JdtHackFinder.fixme("1G9V58A: ITPUI:WIN2000 - Dialog.convert* methods should be static");
+		//XXX: 1G9V58A: ITPUI:WIN2000 - Dialog.convert* methods should be static
 		setLayout(layout);
 		createText();
 		createList(style);

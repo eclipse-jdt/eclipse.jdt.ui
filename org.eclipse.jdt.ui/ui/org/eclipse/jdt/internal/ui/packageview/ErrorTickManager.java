@@ -4,8 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IMarkerDelta;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IResourceChangeEvent;import org.eclipse.core.resources.IResourceChangeListener;import org.eclipse.core.resources.IResourceDelta;import org.eclipse.core.resources.IResourceDeltaVisitor;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement; import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject; import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
-
+import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IMarkerDelta;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IResourceChangeEvent;import org.eclipse.core.resources.IResourceChangeListener;import org.eclipse.core.resources.IResourceDelta;import org.eclipse.core.resources.IResourceDeltaVisitor;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement; import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject; import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ErrorTickManager implements IResourceChangeListener {
 
 	protected static final int SEVERITY_WARNING= 0;
@@ -100,7 +99,7 @@ public class ErrorTickManager implements IResourceChangeListener {
 			if (delta != null)
 				delta.accept(new ProjectErrorVisitor());
 		} catch (CoreException e) {
-			JdtHackFinder.fixme("error handling");
+			//XXX: error handling
 		}
 		endChange();
 	}

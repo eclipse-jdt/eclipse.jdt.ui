@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.Ja
 import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 /**
   * Action for renaming file and folder resource elements in the resource explorer.

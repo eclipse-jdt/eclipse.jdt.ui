@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.ui.reorg.ICopySupport;
 import org.eclipse.jdt.internal.ui.reorg.IMoveSupport;
 import org.eclipse.jdt.internal.ui.reorg.MoveAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgSupportFactory;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter implements TransferDropTargetListener {
 
@@ -135,7 +134,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 		};
 		action.run();
 		// Remove the action from the selection provider.
-		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus");
+		//XXX: Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus
 		action.getSelectionProvider().removeSelectionChangedListener(action);
 	}
 	
@@ -172,7 +171,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 		};
 		action.run();
 		// Remove the action from the selection provider.
-		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus");
+		//XXX: Workaround for 1GAUFEK: ITPUI:WIN2000 - Leaking context menus
 		action.getSelectionProvider().removeSelectionChangedListener(action);
 	}
 }

@@ -26,7 +26,6 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 

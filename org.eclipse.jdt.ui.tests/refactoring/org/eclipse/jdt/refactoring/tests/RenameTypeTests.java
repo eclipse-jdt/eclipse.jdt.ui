@@ -69,7 +69,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	private void helper2(String oldName, String newName) throws Exception{
-		helper2_0(oldName, newName, "A");
+		helper2_0(oldName, newName, newName);
 	}
 	
 	private void helper2_0(String oldName, String newName, String newCUName) throws Exception{
@@ -90,7 +90,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IRefactoring ref= createRefactoring(getScope(), classA, newName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
-		assert(newcu.exists());
+		assert("cu does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
 	}
 		

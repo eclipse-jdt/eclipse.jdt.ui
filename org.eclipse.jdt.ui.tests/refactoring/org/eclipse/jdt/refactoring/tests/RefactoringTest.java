@@ -25,12 +25,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
 import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
@@ -91,15 +90,19 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
-
-		RefactoringStatus status= ref.checkPreconditions(fgNullProgressMonitor);
+		RefactoringStatus status= new RefactoringStatus();
+		if (ref instanceof IPreactivatedRefactoring)
+			status.merge(((IPreactivatedRefactoring)ref).checkPreactivation());
+		if (status.hasFatalError())	
+			return status;
+		status.merge(ref.checkPreconditions(fgNullProgressMonitor));
 		if (!status.isOK())
 			return status;
 
 		IChange change= ref.createChange(fgNullProgressMonitor);
 		change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
 
-		JdtHackFinder.fixme("this should be done by someone else");
+		//XXX: this should be done by someone else
 		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
 
 		return null;

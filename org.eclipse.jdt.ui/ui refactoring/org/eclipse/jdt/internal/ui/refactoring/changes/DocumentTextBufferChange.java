@@ -19,7 +19,6 @@ import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 
 import org.eclipse.jdt.internal.ui.util.IDocumentManager;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	

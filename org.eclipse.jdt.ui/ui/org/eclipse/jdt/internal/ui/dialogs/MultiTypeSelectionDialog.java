@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
 
@@ -79,7 +78,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 						String title= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"title");
 						String message= JavaPlugin.getResourceString(NO_MAPPING_PREFIX+"message");
 						MessageDialog.openError(getShell(), title, message);
-						JdtHackFinder.fixme("java model");
+						//XXX: java model
 					} else {
 						result.add(type);
 					}

@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 import org.eclipse.jdt.internal.ui.util.PortingFinder;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
@@ -273,9 +272,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
-		JdtHackFinder.fixme("1G9TFEH: ITPUI:WIN2000 - SelectionDialog.createMessageArea should return the Label not void");
-		// Label messageLabel= createMessageArea(composite);
-		createMessageArea(composite);
+		Label messageLabel= createMessageArea(composite);
 		
 		Control treeWidget= createTreeViewer(composite);
 
@@ -285,8 +282,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		treeWidget.setLayoutData(gd);
 		
 		if (fIsEmpty) {
-			JdtHackFinder.fixme("1G9TFEH: ITPUI:WIN2000 - SelectionDialog.createMessageArea should return the Label not void");
-			// messageLabel.setEnabled(false);
+			messageLabel.setEnabled(false);
 			treeWidget.setEnabled(false);
 		}
 		

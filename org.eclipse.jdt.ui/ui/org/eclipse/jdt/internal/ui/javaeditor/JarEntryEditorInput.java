@@ -15,8 +15,6 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
-
 
 /**
  * An EditorInput for a JarEntryFile.

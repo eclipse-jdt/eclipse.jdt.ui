@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.dialogs.InputDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jface.dialogs.InputDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /** 
  * Action for deleting elements in a delete target.
@@ -101,7 +101,7 @@ public class DeleteAction extends ReorgAction {
 	}
 
 	protected boolean canExecute(IStructuredSelection selection) {
-		// XXX Could be done nicer<g>. DB & MA
+		//XXX: Could be done nicer<g>. DB & MA
 		if (selection.isEmpty())
 			return false;
 		Iterator elements= selection.iterator();

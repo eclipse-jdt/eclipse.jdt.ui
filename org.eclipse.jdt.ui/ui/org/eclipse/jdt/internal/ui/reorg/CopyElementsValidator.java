@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class CopyElementsValidator implements ISelectionValidator {
 	private List fElementsToCopy;
@@ -27,7 +26,7 @@ public class CopyElementsValidator implements ISelectionValidator {
 			info.setOK();
 		} else {
 			info.setError("");
-			// XXX Could give more detailed error message
+			//XXX: Could give more detailed error message
 		}
 	}
 	
