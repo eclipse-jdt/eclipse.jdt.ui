@@ -29,7 +29,7 @@
 		    <fileset dir="core refactoring" />
 		    <fileset dir="ui refactoring" />
 		    <fileset dir="ui" />
-		    <fileset dir="core codemanipulation" />
+		    <fileset dir="core extension" />
   		</zip>		
 	</target>
 </project>
