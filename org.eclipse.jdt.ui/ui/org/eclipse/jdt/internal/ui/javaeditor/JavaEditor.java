@@ -3489,7 +3489,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	protected boolean isShowingOverrideIndicators() {
-		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(OverrideIndicatorManager.ANNOTATION_TYPE);
+		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(OverrideIndicatorManager.ANNOTATION_TYPE);
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(preference.getHighlightPreferenceKey())
 			|| store.getBoolean(preference.getVerticalRulerPreferenceKey())
@@ -3507,7 +3507,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected boolean affectsOverrideIndicatorAnnotations(PropertyChangeEvent event) {
 		String key= event.getProperty();
-		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(OverrideIndicatorManager.ANNOTATION_TYPE);
+		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(OverrideIndicatorManager.ANNOTATION_TYPE);
 		if (key == null || preference == null)
 			return false;
 		
