@@ -47,7 +47,7 @@ public class NameProposer {
 	}
 	
 	public String proposeSetterSignature(IField field) throws JavaModelException {
-		return proposeGetterName(field) + "(" + Signature.toString(field.getTypeSignature()) + ")"; 
+		return proposeSetterName(field) + "(" + Signature.toString(field.getTypeSignature()) + ")"; 
 	}
 	
 	public String proposeGetterName(IField field) throws JavaModelException {
