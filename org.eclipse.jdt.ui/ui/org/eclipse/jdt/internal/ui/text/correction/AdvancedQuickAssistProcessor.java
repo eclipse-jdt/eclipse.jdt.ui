@@ -67,7 +67,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getPickOutStringProposals(context, coveringNode, null)
 					|| getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, null)
 					|| getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, null)
-					|| getReplaceConditionalWithIfElseAssignProposals(context, coveringNode, null);
+					|| getReplaceConditionalWithIfElseProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -99,7 +99,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, resultingCollections);
-				getReplaceConditionalWithIfElseAssignProposals(context, coveringNode, resultingCollections);
+				getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -1630,7 +1630,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statement;
 	}
 	
-	private static boolean getReplaceConditionalWithIfElseAssignProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
+	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
 		// check that parent statement is assignment
 		while (!(covering instanceof ConditionalExpression) && covering instanceof Expression) {
 			covering= covering.getParent();
@@ -1677,12 +1677,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.replace(covering.getParent().getParent(), ifStatement, null);
 			
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
-			//
-			ReturnStatement thenReturn= createReturnExpression(rewrite, conditional.getThenExpression());
-			ifStatement.setThenStatement(thenReturn);
-			//
-			ReturnStatement elseReturn= createReturnExpression(rewrite, conditional.getElseExpression());
-			ifStatement.setElseStatement(elseReturn);
+			ifStatement.setThenStatement(createReturnExpression(rewrite, conditional.getThenExpression()));
+			ifStatement.setElseStatement(createReturnExpression(rewrite, conditional.getElseExpression()));
 			//
 			// replace return conditional expression with if/then/else/return
 			rewrite.replace(conditional.getParent(), ifStatement, null);
@@ -1692,14 +1688,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ifStatement.setThenStatement(createAssignmentStatement(rewrite, assignee, conditional.getThenExpression()));
 			ifStatement.setElseStatement(createAssignmentStatement(rewrite, assignee, conditional.getElseExpression()));
 			
-			rewrite.set(frag, VariableDeclarationFragment.INITIALIZER_PROPERTY, null, null); // remove initializer
+			rewrite.set(frag, VariableDeclarationFragment.INITIALIZER_PROPERTY, null, null); // clear initializer
 			
 			ASTNode statement= frag.getParent();
 			rewrite.getListRewrite(statement.getParent(), Block.STATEMENTS_PROPERTY).insertAfter(ifStatement, statement, null);
 		}
 
 		// add correction proposal
-		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIfAssign"); //$NON-NLS-1$
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIf"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
