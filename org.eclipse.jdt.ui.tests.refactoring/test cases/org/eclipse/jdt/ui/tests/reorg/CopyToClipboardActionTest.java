@@ -45,6 +45,8 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
+import org.eclipse.jdt.internal.ui.reorg.TypedSource;
+import org.eclipse.jdt.internal.ui.reorg.TypedSourceTransfer;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.JavaElementTransfer;
@@ -181,13 +183,25 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		IResource[] clipboardResources= getClipboardResources();
 		String clipboardText= getClipboardText();
 		IJavaElement[] clipboardJavaElements= getClipboardJavaElements();
+		TypedSource[] clipboardTypedSources= getClipboardTypedSource();
 
 		checkNames(resourcesCopied, javaElementsCopied, clipboardText);
 		checkFiles(resourcesCopied, javaElementsCopied, mainTypesCopied, clipboardFiles);
+		checkTypedSources(javaElementsCopied, clipboardTypedSources);
 		checkElements(resourcesExpected, clipboardResources);
 		checkElements(javaElementsExpected, clipboardJavaElements);
 	}
 	
+	private void checkTypedSources(IJavaElement[] javaElementsCopied, TypedSource[] clipboardTypedSources) throws JavaModelException {
+		TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsCopied);
+		assertEquals("different number", typedSources.length, clipboardTypedSources.length);		
+		TypedSource.sortByType(typedSources);
+		TypedSource.sortByType(clipboardTypedSources);
+		for (int i= 0; i < typedSources.length; i++) {
+			assertEquals("different typed sources", typedSources[i], clipboardTypedSources[i]);
+		}
+	}
+
 	private IResource[] computeResourcesExpectedInClipboard(IResource[] resourcesCopied, IType[] mainTypesCopied) throws JavaModelException {
 		return ReorgUtils2.union(resourcesCopied, ReorgUtils2.getResources(ReorgUtils2.getCompilationUnits(mainTypesCopied)));
 	}
@@ -308,6 +322,11 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	private IResource[] getClipboardResources() {
 		IResource[] resources= (IResource[])fClipboard.getContents(ResourceTransfer.getInstance());
 		return resources == null ? new IResource[0]: resources; 
+	}
+
+	private TypedSource[] getClipboardTypedSource() {
+		TypedSource[] typedSources= (TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance());
+		return typedSources == null ? new TypedSource[0]: typedSources; 
 	}
 
 	private String getClipboardText() {
