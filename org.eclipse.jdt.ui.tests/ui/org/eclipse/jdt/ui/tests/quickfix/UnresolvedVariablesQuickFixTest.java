@@ -42,7 +42,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -314,9 +314,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
-				buf.append("    private int var1;\n");
-				buf.append("\n");
 				buf.append("    public int var2;\n");
+				buf.append("\n");				
+				buf.append("    private int var1;\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 			} else if (curr instanceof CUCorrectionProposal) {
