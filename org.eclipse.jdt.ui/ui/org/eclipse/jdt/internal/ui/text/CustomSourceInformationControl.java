@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,6 +43,8 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 
 	/** The partition type to be used as the starting partition type by the paritition scanner. */
 	private String fPartition;
+	/** The horizontal scroll index. */
+	private int fHorizontalScrollPixel;
 	
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
@@ -127,11 +130,13 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 	 */
 	public void setInformation(String content) {
-		super.setInformation(content);
+		String spaces= getSpacesForHorizontalScrolling();
+		
+		super.setInformation(content + spaces);
 		IDocument doc= getViewer().getDocument();
 		if (doc == null)
 			return;
-			
+		
 		String start= null;
 		if (IJavaPartitions.JAVA_DOC.equals(fPartition)) {
 			start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
@@ -146,5 +151,36 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 			} catch (BadLocationException e) {
 			}
 		}
+		
+		getViewer().getTextWidget().setHorizontalPixel(fHorizontalScrollPixel);
+	}
+
+	/**
+	 * Returns a run of spaces the length of which is at least
+	 * <code>fHorizontalScrollPixel</code>.
+	 * 
+	 * @return the spaces to add to the document content to ensure that it can
+	 *         be scrolled at least <code>fHorizontalScrollPixel</code>
+	 */
+	private String getSpacesForHorizontalScrolling() {
+		StyledText widget= getViewer().getTextWidget();
+		GC gc= new GC(widget);
+		StringBuffer spaces= new StringBuffer();
+		Point spaceSize= gc.stringExtent(" "); //$NON-NLS-1$
+		gc.dispose();
+		int n= fHorizontalScrollPixel / spaceSize.x + 1; 
+		for (int i= 0; i < n; i++)
+			spaces.append(' ');
+		return spaces.toString();
+	}
+	
+	/**
+	 * Sets the horizontal scroll index in pixels.
+	 *  
+	 * @param scrollIndex the new horizontal scroll index
+	 */
+	public void setHorizontalScrollPixel(int scrollIndex) {
+		scrollIndex= Math.max(0, scrollIndex);
+		fHorizontalScrollPixel= scrollIndex;
 	}
 }

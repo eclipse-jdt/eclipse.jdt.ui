@@ -36,7 +36,9 @@ public class JavaChangeHover extends LineChangeHover  {
 	CustomSourceInformationControl fInformationControl;
 	/** The document partitioning to be used by this hover. */
 	private String fPartitioning;
-	
+	/** The last created information control. */
+	private int fLastScrollIndex= 0;
+
 	/**
 	 * Creates a new change hover for the given document partitioning.
 	 * 
@@ -60,6 +62,7 @@ public class JavaChangeHover extends LineChangeHover  {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				fInformationControl= new CustomSourceInformationControl(parent, fPartition);
+				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}
 		};
@@ -75,8 +78,11 @@ public class JavaChangeHover extends LineChangeHover  {
 		} else {
 			fPartition= IDocument.DEFAULT_CONTENT_TYPE;
 		}
-		if (fInformationControl != null)
-			fInformationControl.setStartingPartitionType(fPartition); 
+		fLastScrollIndex= viewer.getTextWidget().getHorizontalPixel();
+		if (fInformationControl != null) {
+			fInformationControl.setStartingPartitionType(fPartition);
+			fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
+		}
 		return lineRange;
 	}
 

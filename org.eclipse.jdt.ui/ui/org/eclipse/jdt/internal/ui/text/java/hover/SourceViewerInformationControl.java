@@ -189,7 +189,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * 
 	 * @param parent the parent shell
 	 * @param style the additional styles for the styled text widget
-	 * @param presenter the presenter to be used
 	 */	
 	public SourceViewerInformationControl(Shell parent,int style) {
 		this(parent, SWT.NO_TRIM, style);
@@ -202,7 +201,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * 
 	 * @param parent the parent shell
 	 * @param style the additional styles for the styled text widget
-	 * @param presenter the presenter to be used
 	 * @param statusFieldText the text to be used in the optional status field
 	 *                         or <code>null</code> if the status field should be hidden
 	 * @since 3.0
