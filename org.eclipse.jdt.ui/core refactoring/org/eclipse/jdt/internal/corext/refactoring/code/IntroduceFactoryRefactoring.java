@@ -101,7 +101,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private CompilationUnit fCU;
 
 	/**
-	 * Compilation unit in which the factory method/class/interface will be
+	 * Handle for compilation unit in which the factory method/class/interface will be
 	 * generated.
 	 */
 	private ICompilationUnit fFactoryUnit;
@@ -369,7 +369,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			// Can't find an IMethod for this method, so build a string pattern instead
 			StringBuffer	buf= new StringBuffer();
 
-			buf.append(methodBinding.getName())
+			buf.append(methodBinding.getDeclaringClass().getQualifiedName())
 			   .append("(");//$NON-NLS-1$
 			for(int i=0; i < fArgTypes.length; i++) {
 				if (i != 0)

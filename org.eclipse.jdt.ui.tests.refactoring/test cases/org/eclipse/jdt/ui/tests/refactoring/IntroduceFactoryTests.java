@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * @author rfuhrer@watson.ibm.com
  */
 public class IntroduceFactoryTests extends RefactoringTest {
+	
 	private static final Class clazz= IntroduceFactoryTests.class;
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
@@ -112,10 +113,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param input true iff the requested file is an input file
 	 * @see getSimpleTestFileName(boolean input)
 	 */
-	private String getBugTestFileName(String fileName, boolean input) {
+	private String getBugTestFileName(IPackageFragment pack, String fileName, boolean input) {
 		String testName= getName();
 		String testNumber= testName.substring("test".length());//$NON-NLS-1$
-		String path= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
+		String path= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/" +
+									(pack == getPackageP() ? "" : pack.getElementName() + "/");
 
 		return path + fileName + (input ? "" : "_out") + ".java";//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -135,7 +137,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 													String baseName, boolean input)
 		throws Exception
 	{
-		String	fileName= getBugTestFileName(baseName, input);
+		String	fileName= getBugTestFileName(pack, baseName, input);
 		String	cuName= baseName + (input ? "" : "_out") + ".java";
 
 		return createCU(pack, cuName, getFileContents(fileName));
@@ -228,7 +230,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	{
 		ICompilationUnit	cu= createCUForBugTestCase(getPackageP(), baseFileName, true);
 
-		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(baseFileName, false));
+		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(getPackageP(), baseFileName, false));
 	}
 
 	/**
@@ -342,11 +344,15 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	void multiUnitBugHelper(boolean staticFactoryMethod, String[] inputFileBaseNames)
 		throws Exception
 	{
-		IPackageFragment	pkg= getPackageP();
-		ICompilationUnit	CUs[]= new ICompilationUnit[inputFileBaseNames.length];
+		ICompilationUnit CUs[]= new ICompilationUnit[inputFileBaseNames.length];
 
-		for (int i = 0; i < inputFileBaseNames.length; i++)
-			CUs[i] = createCUForBugTestCase(pkg, inputFileBaseNames[i], true);
+		for (int i = 0; i < inputFileBaseNames.length; i++) {
+			int pkgEnd= inputFileBaseNames[i].lastIndexOf('/')+1;
+			boolean explicitPkg= (pkgEnd > 0);
+			IPackageFragment pkg= explicitPkg ? getRoot().createPackageFragment(inputFileBaseNames[i].substring(0, pkgEnd-1), true, new NullProgressMonitor()) : getPackageP();
+
+			CUs[i] = createCUForBugTestCase(pkg, inputFileBaseNames[i].substring(pkgEnd), true);
+		}
 
 		String	testName= getName();
 		String	testNumber= testName.substring("test".length());
@@ -500,5 +506,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	public void test46374() throws Exception {
 		singleUnitBugHelper("QualifiedName", false);
+	}
+
+	public void test46608() throws Exception {
+		multiUnitBugHelper(true, new String[] { "p1/TT", "p2/TT" });
 	}
 }
