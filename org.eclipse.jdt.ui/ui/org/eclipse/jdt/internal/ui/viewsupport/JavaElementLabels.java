@@ -1,5 +1,10 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.ui.model.IWorkbenchAdapter;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -16,7 +21,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 public class JavaElementLabels {
@@ -248,7 +252,18 @@ public class JavaElementLabels {
 		return (flags & flag) != 0;
 	}
 	
-	
+	public static String getTextLabel(Object obj, int flags) {
+		if (obj instanceof IJavaElement) {
+			return getElementLabel((IJavaElement) obj, flags);
+		} else if (obj instanceof IAdaptable) {
+			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
+			if (wbadapter != null) {
+				return wbadapter.getLabel(obj);
+			}
+		}
+		return "";
+	}
+				
 	/**
 	 * Returns the label for a Java element. Flags as defined above.
 	 */

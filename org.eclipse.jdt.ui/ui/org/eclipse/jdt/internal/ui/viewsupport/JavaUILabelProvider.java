@@ -10,14 +10,9 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
-import org.eclipse.jdt.core.IJavaElement;
-
 public class JavaUILabelProvider extends LabelProvider {
 	
 	private JavaElementImageProvider fImageLabelProvider;
-	private WorkbenchLabelProvider fWorkbenchLabelProvider;	
 	private StorageLabelProvider fStorageLabelProvider;
 
 	private int fImageFlags;
@@ -32,7 +27,6 @@ public class JavaUILabelProvider extends LabelProvider {
 
 	public JavaUILabelProvider(int textFlags, int imageFlags, JavaElementImageProvider imageLabelProvider) {
 		fImageLabelProvider= imageLabelProvider;
-		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
@@ -80,12 +74,7 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-
-		if (element instanceof IJavaElement) {
-			return JavaElementLabels.getElementLabel((IJavaElement) element, fTextFlags);
-		}
-	
-		String text= fWorkbenchLabelProvider.getText(element);
+		String text= JavaElementLabels.getTextLabel(element, fTextFlags);
 		if (text.length() > 0) {
 			return text;
 		}
@@ -101,7 +90,6 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
-		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}

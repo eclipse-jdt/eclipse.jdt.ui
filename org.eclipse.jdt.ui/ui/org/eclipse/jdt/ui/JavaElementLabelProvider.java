@@ -10,10 +10,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
@@ -123,7 +119,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
 	private JavaElementImageProvider fImageLabelProvider;
-	private WorkbenchLabelProvider fWorkbenchLabelProvider;	
 	private StorageLabelProvider fStorageLabelProvider;
 
 	private int fFlags;
@@ -147,7 +142,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public JavaElementLabelProvider(int flags) {
 		fImageLabelProvider= new JavaElementImageProvider();
-		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
 		fStorageLabelProvider= new StorageLabelProvider();
 		fFlags= flags;
 		updateImageProviderFlags();
@@ -244,12 +238,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-
-		if (element instanceof IJavaElement) {
-			return JavaElementLabels.getElementLabel((IJavaElement) element, fTextFlags);
-		}
-	
-		String text= fWorkbenchLabelProvider.getText(element);
+		String text= JavaElementLabels.getTextLabel(element, fTextFlags);
 		if (text.length() > 0) {
 			return text;
 		}
@@ -265,7 +254,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
-		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}

@@ -1,11 +1,8 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import java.text.Collator;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.Viewer;
@@ -156,28 +153,13 @@ public class JavaElementSorter extends ViewerSorter {
 			}
 		}
 		
-		Collator collator= getCollator();
-		String name1;
-		String name2;
-		switch (cat1) {
-			case OTHERS:
-				return 0;
-			case RESOURCES:
-			case RESOURCEFOLDERS:
-				name1= ((IResource) e1).getName();
-				name2= ((IResource) e2).getName();
-				break;
-			case STORAGE:
-				name1= ((IStorage) e1).getName();
-				name2= ((IStorage) e2).getName();
-				break;
-			default:
-				name1= JavaElementLabels.getElementLabel((IJavaElement) e1, JavaElementLabels.M_PARAMETER_TYPES);
-				name2= JavaElementLabels.getElementLabel((IJavaElement) e2, JavaElementLabels.M_PARAMETER_TYPES);
-				break;
+		if (cat1 == STORAGE) {
+			return getCollator().compare(((IStorage) e1).getName(),  ((IStorage) e2).getName());
 		}
 		
-		return collator.compare(name1, name2);
+		String name1= JavaElementLabels.getTextLabel(e1, JavaElementLabels.M_PARAMETER_TYPES);
+		String name2= JavaElementLabels.getTextLabel(e2, JavaElementLabels.M_PARAMETER_TYPES);
+		return getCollator().compare(name1, name2);	
 	}
 		
 	
