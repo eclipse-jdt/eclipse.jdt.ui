@@ -339,7 +339,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			getViewSite().getPage().removePartListener(fPartListener);
 			fViewer= null;
 		}
-		fStandardActionGroups.dispose();
+		if (fStandardActionGroups != null)
+			fStandardActionGroups.dispose();
 		super.dispose();
 	}
 	

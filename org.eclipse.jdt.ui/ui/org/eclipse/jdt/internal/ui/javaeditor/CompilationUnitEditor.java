@@ -1104,7 +1104,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fPaintManager= null;
 		}
 		
-		fStandardActionGroups.dispose();
+		if (fStandardActionGroups != null)
+			fStandardActionGroups.dispose();
 		super.dispose();
 	}
 	

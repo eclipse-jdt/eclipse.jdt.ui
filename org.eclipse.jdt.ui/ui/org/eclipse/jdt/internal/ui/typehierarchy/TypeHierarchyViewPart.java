@@ -439,7 +439,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fMethodsViewer != null) {
 			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fMethodsViewer);
 		}
-		fStandardActionGroups.dispose();
+		if (fStandardActionGroups != null)
+			fStandardActionGroups.dispose();
 		super.dispose();
 	}
 			
