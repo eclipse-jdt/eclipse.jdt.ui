@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -266,7 +267,9 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		boolean exportClassFiles= fJarPackage.areClassFilesExported();
 		fExportWarningsCheckbox.setEnabled(exportClassFiles);
 		fExportErrorsCheckbox.setEnabled(exportClassFiles);
-		fBuildIfNeededCheckbox.setEnabled(exportClassFiles);
+		
+		boolean isAutobuilding= ResourcesPlugin.getWorkspace().isAutoBuilding();
+		fBuildIfNeededCheckbox.setEnabled(exportClassFiles && !isAutobuilding);
 		
 		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());		
 	}
