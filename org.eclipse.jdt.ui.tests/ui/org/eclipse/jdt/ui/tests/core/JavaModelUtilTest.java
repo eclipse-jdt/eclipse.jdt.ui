@@ -329,7 +329,7 @@ public class JavaModelUtilTest extends TestCase {
 			sig[i]= Signature.createTypeSignature(name, false);
 			assertNotNull(methName + "-ts1" + i, sig[i]);
 		}
-		IMethod meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, methName, sig, isConstructor);
+		IMethod meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam1", meth.getParameterTypes().length == paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));
@@ -339,7 +339,7 @@ public class JavaModelUtilTest extends TestCase {
 			sig[i]= Signature.createTypeSignature(paramTypeNames[i], true);
 			assertNotNull(methName + "-ts2" + i, sig[i]);
 		}		
-		meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, methName, sig, isConstructor);
+		meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));

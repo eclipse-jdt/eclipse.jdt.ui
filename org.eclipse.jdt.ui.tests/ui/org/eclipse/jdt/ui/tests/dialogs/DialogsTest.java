@@ -56,7 +56,7 @@ public class DialogsTest extends TestCase {
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite(AddUnimplementedMethodsTest.class.getName());
+		TestSuite suite= new TestSuite(DialogsTest.class.getName());
 //		suite.addTest(new DialogsTest("testElementListSelectionDialog2"));
 		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
 		suite.addTest(new DialogsTest("testMultiElementSelectionDialog"));

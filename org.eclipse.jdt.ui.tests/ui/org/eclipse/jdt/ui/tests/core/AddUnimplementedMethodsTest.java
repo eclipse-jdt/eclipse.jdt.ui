@@ -101,7 +101,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
 	
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -119,7 +119,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test2.java");
 		IType testClass= cu.createType("public class Test2 extends C implements B {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -136,7 +136,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test3.java");
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -154,7 +154,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test4.java");
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
