@@ -4,12 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
@@ -17,9 +17,11 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
@@ -29,17 +31,17 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final int SHOW_PATH= 3;
 
 	private JavaElementLabelProvider fLabelProvider;
-	private JavaTextLabelProvider fTextLabelProvider;
+	private int fTextFlags= 0;
 	
-	// LRU Cache
+	// Cache
 	private IMarker fLastMarker;
 	private IJavaElement fLastJavaElement;
+	private StringBuffer fBufffer= new StringBuffer(50);
 	
 	public static final JavaSearchResultLabelProvider INSTANCE= new JavaSearchResultLabelProvider();
 
 	public JavaSearchResultLabelProvider() {
-		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_QUALIFIED);
 	}	
 
 	public String getText(Object o) {
@@ -61,10 +63,11 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
 
-		if (isAccurate) 
-			return fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
-		else
-			return "?: " + fTextLabelProvider.getTextLabel((IJavaElement)javaElement); //$NON-NLS-1$
+		fBufffer.setLength(0);
+		if (!isAccurate) 
+			fBufffer.append("?: "); //$NON-NLS-1$
+		JavaElementLabels.getElementLabel(javaElement, fTextFlags, fBufffer);
+		return fBufffer.toString();
 	}
 
 	public Image getImage(Object o) {
@@ -75,24 +78,17 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	}
 
 	public void setOrder(int orderFlag) {
-		if (orderFlag == SHOW_ELEMENT_CONTAINER) {
-			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_CONTAINER);
-			fTextLabelProvider.turnOff(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
-			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_ROOT);
-		}
-		else if (orderFlag == SHOW_CONTAINER_ELEMENT) {
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
-			fTextLabelProvider.turnOn(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_ROOT);			
-		}
+		if (orderFlag == SHOW_ELEMENT_CONTAINER)
+			fTextFlags = JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED 
+							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
+			
+		else if (orderFlag == SHOW_CONTAINER_ELEMENT)
+			fTextFlags= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED 
+				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 		else if (orderFlag == SHOW_PATH) {
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
-			fTextLabelProvider.turnOn(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
-			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_ROOT);
-			fTextLabelProvider.turnOff(JavaTextLabelProvider.SHOW_ROOT_POSTFIX);
+			fTextFlags= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED 
+				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
+			fTextFlags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
 	}
 

@@ -187,6 +187,13 @@ public class JavaElementLabels {
 	 * Option only applies to getElementLabel
 	 */
 	public final static int APPEND_ROOT_PATH= 1 << 27;
+
+	/**
+	 * Add root path to all elements except Package Fragment Roots and Java projects.
+	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
+	 * Option only applies to getElementLabel
+	 */
+	public final static int PREPEND_ROOT_PATH= 1 << 28;
 	
 	/**
 	 * Qualify all elements
@@ -231,8 +238,25 @@ public class JavaElementLabels {
 	 */
 	public static String getElementLabel(IJavaElement element, int flags) {
 		StringBuffer buf= new StringBuffer();
-		boolean addRootPath= getFlag(flags, APPEND_ROOT_PATH);
-		switch (element.getElementType()) {
+		getElementLabel(element, flags, buf);
+		return buf.toString();
+	}
+
+	/**
+	 * Returns the label for a Java element. Flags as defined above.
+	 */
+	public static void getElementLabel(IJavaElement element, int flags, StringBuffer buf) {
+		int type= element.getElementType();
+		IPackageFragmentRoot root= null;
+
+		if (type != IJavaElement.JAVA_MODEL && type != IJavaElement.JAVA_PROJECT && type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			root= JavaModelUtil.getPackageFragmentRoot(element);
+		if (root != null && getFlag(flags, PREPEND_ROOT_PATH)) {
+			getPackageFragmentRootLabel(root, ROOT_QUALIFIED, buf);
+			buf.append(CONCAT_STRING);
+		}		
+		
+		switch (type) {
 			case IJavaElement.METHOD:
 				getMethodLabel((IMethod) element, flags, buf);
 				break;
@@ -256,7 +280,6 @@ public class JavaElementLabels {
 				break;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT: 
 				getPackageFragmentRootLabel((IPackageFragmentRoot) element, flags, buf);
-				addRootPath= false;
 				break;
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
@@ -265,21 +288,16 @@ public class JavaElementLabels {
 				break;
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.JAVA_MODEL:
-				addRootPath= false;
 				buf.append(element.getElementName());
 				break;
 			default:
 				buf.append(element.getElementName());
 		}
-		if (addRootPath) {
-			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
-			if (root != null) {
-				buf.append(CONCAT_STRING);
-				getPackageFragmentRootLabel(root, ROOT_QUALIFIED, buf);
-			}
+
+		if (root != null && getFlag(flags, APPEND_ROOT_PATH)) {
+			buf.append(CONCAT_STRING);
+			getPackageFragmentRootLabel(root, ROOT_QUALIFIED, buf);
 		}
-	
-		return buf.toString();
 	}
 
 	/**

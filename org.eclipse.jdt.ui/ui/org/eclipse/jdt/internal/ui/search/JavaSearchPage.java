@@ -641,9 +641,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}	
 
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
-		ILabelProvider labelProvider= new JavaElementLabelProvider(
-			  JavaElementLabelProvider.SHOW_DEFAULT 
-			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
+		ILabelProvider labelProvider= new JavaElementLabelProvider(flags);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$

@@ -135,9 +135,9 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReferencesPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.ALL_OCCURRENCES:
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.READ_REFERENCES:
+			case IJavaSearchConstants.READ_ACCESSES:
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReadReferencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.WRITE_REFERENCES:
+			case IJavaSearchConstants.WRITE_ACCESSES:
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralWriteReferencesPostfix", args); //$NON-NLS-1$
 			default:
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$;

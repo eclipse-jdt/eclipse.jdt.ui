@@ -164,9 +164,8 @@ public abstract class JavaElementAction extends Action {
 		return manager.getWorkingCopy(input);
 	}
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
-		ILabelProvider labelProvider= new JavaElementLabelProvider(
-			  JavaElementLabelProvider.SHOW_DEFAULT 
-			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
+		ILabelProvider labelProvider= new JavaElementLabelProvider(flags);
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
