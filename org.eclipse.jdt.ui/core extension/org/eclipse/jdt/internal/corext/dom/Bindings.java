@@ -270,7 +270,7 @@ public class Bindings {
 	 * Finds the field specified by <code>fieldName</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
 	 * exists. If the field is defined in more than one super type only the first match is 
-	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the field in
 	 * @param fieldName The name of the field to find
 	 */
@@ -326,7 +326,7 @@ public class Bindings {
 	 * Finds the method that is defines the given method.
 	 * @param method The method to find
 	 */
-	public static IMethodBinding findDefiningMethod(IMethodBinding method) {
+	public static IMethodBinding findMethodDefininition(IMethodBinding method) {
 		ITypeBinding type= method.getDeclaringClass();
 		String methodName= method.getName();
 		ITypeBinding[] parameters= method.getParameterTypes();
@@ -345,10 +345,29 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the declarartion of a method specified by <code>methodName</code> and </code>parameters</code> in
+	 * Finds the method that is defines the given method.
+	 * @param method The method to find
+	 */
+	public static IMethodBinding findMethodImplementation(IMethodBinding method) {
+		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
+		
+		String methodName= method.getName();
+		ITypeBinding[] parameters= method.getParameterTypes();
+		while (superClass != null) {
+			IMethodBinding res= findMethodInType(superClass, methodName, parameters);
+			if (res != null) {
+				return res;
+			}
+			superClass= superClass.getSuperclass();
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds the declaration of a method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
-	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
@@ -381,7 +400,7 @@ public class Bindings {
 	 * Method to visit a type hierarchy defined by a given type.
 	 * 
 	 * @param type the type which hierarchy is to be visited
-	 * @param visitor the vistor
+	 * @param visitor the visitor
 	 */
 	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
 		boolean result= visitSuperclasses(type, visitor);
@@ -395,7 +414,7 @@ public class Bindings {
 	 * Method to visit a interface hierarchy defined by a given type.
 	 * 
 	 * @param type the type which interface hierarchy is to be visited
-	 * @param visitor the vistor
+	 * @param visitor the visitor
 	 */
 	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
 		ITypeBinding[] interfaces= type.getInterfaces();
@@ -411,7 +430,7 @@ public class Bindings {
 	 * Method to visit a super class hierarchy defined by a given type.
 	 * 
 	 * @param type the type which super class hierarchy is to be visited
-	 * @param visitor the vistor
+	 * @param visitor the visitor
 	 */
 	public static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
 		while ((type= type.getSuperclass()) != null) {
@@ -486,7 +505,7 @@ public class Bindings {
 	}
 	
 	/**
-	 * Returns <code>true</code> if the given type is a supertype of a candidate.
+	 * Returns <code>true</code> if the given type is a super type of a candidate.
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
 	 */
 	public static boolean isSuperType(ITypeBinding type, ITypeBinding candidate) {
@@ -519,7 +538,7 @@ public class Bindings {
 
 	/**
 	 * Finds the compilation unit where the type of the given <code>ITypeBinding</code> is defined,
-	 * using the classpath defined by the given Java project. Returns <code>null</code>
+	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if no compilation unit is found (e.g. type binding is from a binary type)
 	 */
 	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
@@ -542,7 +561,7 @@ public class Bindings {
 
 	/**
 	 * Finds a field for the given <code>IVariableBinding</code>
-	 * using the classpath defined by the given Java project. Returns <code>null</code>
+	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if the field could not be found.
 	 */
 	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
@@ -561,7 +580,7 @@ public class Bindings {
 
 	/**
 	 * Finds a type for the given <code>ITypeBinding</code>
-	 * using the classpath defined by the given Java project. Returns <code>null</code>
+	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if the type could not be found.
 	 */
 	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
@@ -717,7 +736,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's parent type declararation
+	 * Returns the type binding of the node's parent type declaration
 	 * @param node
 	 * @return CompilationUnit
 	 */
