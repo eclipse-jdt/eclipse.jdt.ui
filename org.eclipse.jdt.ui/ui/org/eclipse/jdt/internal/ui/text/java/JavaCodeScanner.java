@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -191,14 +192,34 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 	
+	/**
+	 * An annotation rule matches the '@' symbol, any following whitespace and
+	 * a following java identifier or the <code>interface</code> keyword.
+	 * 
+	 * It does not match if there is a comment between the '@' symbol and
+	 * the identifier. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=82452
+	 * 
+	 * @since 3.1
+	 */
 	private static class AnnotationRule implements IRule, IVersionDependent {
+		/**
+		 * A resettable scanner supports marking a position in a scanner and
+		 * unreading back to the marked position. 
+		 */
 		private static class ResettableScanner implements ICharacterScanner {
 			private final ICharacterScanner fDelegate;
 			private int fReadCount;
 
+			/**
+			 * Creates a new resettable scanner that will forward calls
+			 * to <code>scanner</code>, but store a marked position.
+			 *  
+			 * @param scanner the delegate scanner
+			 */
 			public ResettableScanner(final ICharacterScanner scanner) {
+				Assert.isNotNull(scanner);
 				fDelegate= scanner;
-				fReadCount= 0;
+				mark();
 			}
 			
 			/*
@@ -260,6 +281,18 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		private final String fVersion;
 		private boolean fIsVersionMatch;
 		
+		/**
+		 * Creates a new rule.
+		 * 
+		 * @param interfaceToken the token to return if
+		 *        <code>'@\s*interface'</code> is matched
+		 * @param annotationToken the token to return if <code>'@\s*\w+'</code>
+		 *        is matched, but not <code>'@\s*interface'</code>
+		 * @param version the lowest <code>JavaCore.COMPILER_SOURCE</code>
+		 *        version that this rule is enabled
+		 * @param currentVersion the current
+		 *        <code>JavaCore.COMPILER_SOURCE</code> version
+		 */
 		public AnnotationRule(IToken interfaceToken, Token annotationToken, String version, String currentVersion) {
 			fInterfaceToken= interfaceToken;
 			fAnnotationToken= annotationToken;
@@ -267,6 +300,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			setCurrentVersion(currentVersion);
 		}
 
+		/*
+		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
+		 */
 		public IToken evaluate(ICharacterScanner scanner) {
 			if (!fIsVersionMatch)
 				return Token.UNDEFINED;
@@ -284,7 +320,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			StringBuffer buffer= new StringBuffer();
 			
 			int ch= scanner.read();
-			while (ch != ICharacterScanner.EOF && fWordDetector.isWordPart((char) ch)) {
+			while (fWordDetector.isWordPart((char) ch)) {
 				buffer.append((char) ch);
 				ch= scanner.read();
 			}
@@ -312,6 +348,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			return true;
 		}
 
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+		 */
 		public void setCurrentVersion(String version) {
 			fIsVersionMatch= fVersion.compareTo(version) <= 0; //$NON-NLS-1$
 		}

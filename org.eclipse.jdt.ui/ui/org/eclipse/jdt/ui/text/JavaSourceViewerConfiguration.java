@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.JavadocDoubleClickStrategy;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
@@ -458,8 +459,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer, String)
 	 */
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (IJavaPartitions.JAVA_DOC.equals(contentType) ||
-				IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
+		if (IJavaPartitions.JAVA_DOC.equals(contentType))
+			return new JavadocDoubleClickStrategy();
+		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
 				IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
 			return new DefaultTextDoubleClickStrategy();
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType) ||
@@ -467,7 +469,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
-			fJavaDoubleClickSelector.setVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
+			fJavaDoubleClickSelector.setCurrentVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
 		}
 		return fJavaDoubleClickSelector;
 	}
@@ -845,7 +847,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			fJavaDocScanner.adaptToPreferenceChange(event);
 		if (fJavaDoubleClickSelector != null && JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
 			if (event.getNewValue() instanceof String)
-				fJavaDoubleClickSelector.setVersion((String) event.getNewValue());
+				fJavaDoubleClickSelector.setCurrentVersion((String) event.getNewValue());
 	}
 	
 	/*

@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * Helper class for match pairs of characters.
  */
-public class JavaPairMatcher implements ICharacterPairMatcher {
+public class JavaPairMatcher implements ICharacterPairMatcher, IVersionDependent {
 	
 	protected char[] fPairs;
 	protected IDocument fDocument;
@@ -271,15 +271,10 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 						|| identifier.startsWith("private")); //$NON-NLS-1$
 	}
 	
-	/**
-	 * Sets the source version to one of the <code>JavaCore.VERSION_</code>
-	 * identifiers. Versions greater than {@link JavaCore#VERSION_1_4} have
-	 * angular bracket highlighting.
-	 * 
-	 * @param version the new version
-	 * @since 3.1
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
 	 */
-	public void setVersion(String version) {
+	public void setCurrentVersion(String version) {
 		if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
 			fHighlightAngularBrackets= true;
 		else

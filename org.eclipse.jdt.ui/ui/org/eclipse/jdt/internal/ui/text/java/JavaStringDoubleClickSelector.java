@@ -47,10 +47,12 @@ public class JavaStringDoubleClickSelector extends JavaDoubleClickSelector {
 		IDocument document= textViewer.getDocument();
 		
 		IRegion region= match(document, offset);
-		if (region != null && region.getLength() >= 2)
+		if (region != null && region.getLength() >= 2) {
 			textViewer.setSelectedRange(region.getOffset() + 1, region.getLength() - 2);
-		else
-			selectWord(textViewer, document, offset);
+		} else {
+			region= selectWord(document, offset);
+			textViewer.setSelectedRange(region.getOffset(), region.getLength());
+		}
 	}
 
 	private IRegion match(IDocument document, int offset) {
