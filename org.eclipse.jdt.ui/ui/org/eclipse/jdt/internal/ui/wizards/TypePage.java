@@ -404,7 +404,7 @@ public abstract class TypePage extends ContainerPage {
 	// -------- update message ----------------		
 
 	/**
-	 * Called whenever a content of a field has changed
+	 * Called whenever a content of a field has changed.
 	 * @see ContainerPage#handleFieldChanged
 	 */			
 	protected void handleFieldChanged(String fieldName) {
@@ -457,7 +457,7 @@ public abstract class TypePage extends ContainerPage {
 	
 	
 	/**
-	 * Returns the package fragment corresponding to the current input
+	 * Returns the package fragment corresponding to the current input.
 	 * Can be null if the input could not be resolved.
 	 */
 	public IPackageFragment getPackageFragment() {
@@ -472,7 +472,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Sets the package fragment
+	 * Sets the package fragment.
 	 * This will update model and the text of the control.
 	 * @param canBeModified Selects if the package fragment can be changed by the user
 	 */
@@ -485,7 +485,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Returns the encloding type corresponding to the current input
+	 * Returns the encloding type corresponding to the current input.
 	 * Can be null if enclosing type is not selected or the input could not
 	 * be resolved.
 	 */
@@ -497,8 +497,8 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Sets the package fragment
-	 * This will update model and the text of the control
+	 * Sets the package fragment.
+	 * This will update model and the text of the control.
 	 * @param canBeModified Selects if the enclosing type can be changed by the user
 	 */	
 	public void setEnclosingType(IType type, boolean canBeModified) {
@@ -982,28 +982,23 @@ public abstract class TypePage extends ContainerPage {
 		
 	// ---- creation ----------------
 
-	protected IPackageFragment createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException {		
-		IPackageFragmentRoot root= createContainer(monitor);
-		IPackageFragment pack= getPackageFragment();
-		if (pack == null) {
-			pack= root.getPackageFragment("");
-		}
-
-		if (!pack.exists()) {
-			String packName= pack.getElementName();
-			pack= root.createPackageFragment(packName, true, monitor);
-		}
-		return pack;
-	}
-
-
 	/**
 	 * Creates a type using the current field values
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		monitor.beginTask(getResourceString(OPERATION_DESC), 10);
 		
-		IPackageFragment pack= createPackage(monitor);
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		IPackageFragment pack= getPackageFragment();
+		if (pack == null) {
+			pack= root.getPackageFragment("");
+		}
+		
+		if (!pack.exists()) {
+			String packName= pack.getElementName();
+			pack= root.createPackageFragment(packName, true, null);
+		}		
+		
 		monitor.worked(1);
 		
 		String clName= fTypeNameDialogField.getText();
@@ -1071,7 +1066,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Returns the created type. Only valid after createType has been invoke
+	 * Returns the created type. Only valid after createType has been invoked
 	 */			
 	public IType getCreatedType() {
 		return fCreatedType;

@@ -213,7 +213,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	}
 	
 	protected void createPackage(IProgressMonitor monitor) throws JavaModelException, CoreException, InterruptedException {
-		IPackageFragmentRoot root= createContainer(monitor);
+		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 	}	

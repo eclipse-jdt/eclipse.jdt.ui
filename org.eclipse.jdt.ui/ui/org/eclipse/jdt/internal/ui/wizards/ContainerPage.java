@@ -68,7 +68,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * </dl>
  */
 public abstract class ContainerPage extends NewElementWizardPage {
-		
+	
+	/**
+	 * container field id
+	 */
 	protected static final String CONTAINER= "ContainerPage.container";
 		
 	private static final String CONTAINER_DIALOG= "ContainerPage.ChooseSourceContainerDialog";
@@ -88,11 +91,11 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 */
 	protected IStatus fContainerStatus;
 
-
-	// the text field
 	private StringButtonDialogField fContainerDialogField;
 	
-	// package fragment root corresponding to the inout type (can be null)
+	/*
+	 * package fragment root corresponding to the inout type (can be null)
+	 */
 	private IPackageFragmentRoot fCurrRoot;
 	
 	private IWorkspaceRoot fWorkspaceRoot;
@@ -111,15 +114,20 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		fCurrRoot= null;
 	}
 			
-	// -------- Initialization ---------
-	
+	/**
+	 * Initializes the field provided by the container page with a give
+	 * java element as selection.
+	 * @param elem The initial selection of this page or null if no
+	 *             selection was available
+	 */
 	protected void initContainerPage(IJavaElement elem) {
 		IPackageFragmentRoot initRoot= null;
 		if (elem != null) {
 			initRoot= JavaModelUtility.getPackageFragmentRoot(elem);
-			if (initRoot == null) {
+			if (initRoot == null || initRoot.isArchive()) {
 				IJavaProject jproject= elem.getJavaProject();
 				try {
+					initRoot= null;
 					IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
 					for (int i= 0; i < roots.length; i++) {
 						if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
@@ -138,8 +146,11 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		setPackageFragmentRoot(initRoot, true);
 	}	
 
-	// -------- UI creation --------
-	
+	/**
+	 * Creates the controls for the container field
+	 * @param parent The parent composite
+	 * @param nColumns The number of columns to span
+	 */
 	protected void createContainerControls(Composite parent, int nColumns) {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
 	}
@@ -174,8 +185,8 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	// ----------- validation ----------
 			
 	/**
-	 * Called after the container field has changed
-	 * Updates the model and returns the status
+	 * Called after the container field has changed.
+	 * Updates the model and returns the status.
 	 * Model is only valid if returned status is OK
 	 */
 	protected IStatus containerChanged() {
@@ -241,11 +252,12 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	// -------- update message ----------------
 	
 	/**
-	 * Framework method: Called when a field on the page changed
-	 * Every sub type is responsible to class this method when a own field is changed.
+	 * Called when a field on a page changed. Every sub type is responsible to
+	 * call this method when a field on its page has changed.
 	 * Subtypes override (extend) the method to add verification when own field has a
 	 * dependency to an other field. (for example the class name input must be verified
 	 * again, when the package field changes (check for duplicated class names))
+	 * @param fieldName The name of the field that has changed (field id)
 	 */
 	protected void handleFieldChanged(String fieldName) {
 	}	
@@ -254,7 +266,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	// ---- get ----------------
 	
 	/**
-	 * Returns the packagefragmentroot corresponding to the current input
+	 * Returns the PackageFragmentRoot corresponding to the current input.
 	 * Can be null
 	 */ 
 	protected IWorkspaceRoot getWorkspaceRoot() {
@@ -262,20 +274,24 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	}	
 	
 	/**
-	 * Returns the packagefragmentroot corresponding to the current input
+	 * Returns the PackageFragmentRoot corresponding to the current input.
 	 * Can be null
 	 */ 
 	protected IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;
 	}
-	
+
+	/**
+	 * Returns the text of the container field
+	 */ 	
 	protected String getContainerText() {
 		return fContainerDialogField.getText();
 	}
 	
 	
 	/**
-	 * Sets the current packagefragmentroot
+	 * Sets the current PackageFragmentRoot (model and text field)
+	 * @param canBeModified Selects if the container field can be changed by the user
 	 */ 
 	protected void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
 		fCurrRoot= root;
@@ -283,15 +299,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		fContainerDialogField.setText(str);
 		fContainerDialogField.setEnabled(canBeModified);
 	}	
-	
-	/**
-	 * Creates the container when not existing
-	 */
-	protected IPackageFragmentRoot createContainer(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		// the resource already exists
-		return getPackageFragmentRoot();
-	}
-	
+		
 	// ------------- choose source container dialog
 	
 	private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {

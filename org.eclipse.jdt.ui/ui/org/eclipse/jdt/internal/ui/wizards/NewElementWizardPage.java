@@ -87,7 +87,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 	
 
 	/**
-	 * Updates the status line and the ok button debending on the status
+	 * Updates the status line and the ok button depending on the status
 	 */
 	protected void updateStatus(IStatus status) {
 		fCurrStatus= status;
