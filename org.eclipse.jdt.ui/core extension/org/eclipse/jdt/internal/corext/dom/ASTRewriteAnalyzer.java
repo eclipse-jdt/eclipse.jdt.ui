@@ -335,6 +335,24 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
+	private void rewriteExtraDimensions(int oldDim, int newDim, int pos, String description) {
+		if (oldDim < newDim) {
+			for (int i= oldDim; i < newDim; i++) {
+				doTextInsert(pos, "[]", description);
+			}
+		} else if (newDim < oldDim) {
+			try {
+				IScanner scanner= getScanner(pos);
+				for (int i= newDim; i < oldDim; i++) {
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRBRACKET);
+				}
+				doTextRemove(pos, scanner.getCurrentTokenEndPosition() + 1 - pos, description);
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}	
+	
 	private int getNextExistingStartPos(List list, int listStartIndex, int defaultOffset) {
 		for (int i= listStartIndex; i < list.size(); i++) {
 			ASTNode elem= (ASTNode) list.get(i);
@@ -768,6 +786,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	
 		int pos= rewriteRequiredNode(methodDecl.getName());
+		if (isModified(methodDecl)) {
+			String description= getDescription(methodDecl);
+			MethodDeclaration modifedNode= (MethodDeclaration) getModifiedNode(methodDecl);
+			rewriteExtraDimensions(methodDecl.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
+		}		
+		
 		try {
 			pos= methodDecl.getStartPosition(); // workaround for bug 22161
 			
@@ -908,18 +932,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					nOldBrackets--;
 				}
 			}
-			if (nOldBrackets < nNewBrackets) {
-				for (int i= nOldBrackets; i < nNewBrackets; i++) {
-					doTextInsert(offset, "[]", description);
-				}
-			} else if (nOldBrackets > nNewBrackets) {
-				IScanner scanner= getScanner(offset);
-				for (int i= nNewBrackets; i < nOldBrackets; i++) {
-					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRBRACKET);
-				}
-				doTextRemove(offset, scanner.getCurrentTokenEndPosition() + 1 - offset, description);
-			}
-			
+			rewriteExtraDimensions(nOldBrackets, nNewBrackets, offset, description);
+		
 			ArrayInitializer initializer= node.getInitializer();
 			if (initializer != null) {
 				int pos= node.getStartPosition() + node.getLength(); // insert pos
@@ -1473,8 +1487,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			SingleVariableDeclaration modifedNode= (SingleVariableDeclaration) getModifiedNode(node);
 			rewriteModifiers(node.getStartPosition(), node.getModifiers(), modifedNode.getModifiers(), getDescription(node));
 		}
+		
 		rewriteRequiredNode(node.getType());
 		int pos= rewriteRequiredNode(node.getName());
+		if (isModified(node)) {
+			String description= getDescription(node);
+			SingleVariableDeclaration modifedNode= (SingleVariableDeclaration) getModifiedNode(node);
+			rewriteExtraDimensions(node.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
+		}			
 		
 		Expression initializer= node.getInitializer();
 		if (initializer != null) {
@@ -1683,24 +1703,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (isModified(node)) {
 			String description= getDescription(node);
 			VariableDeclarationFragment modifedNode= (VariableDeclarationFragment) getModifiedNode(node);
-			int oldDim= node.getExtraDimensions();
-			int newDim= modifedNode.getExtraDimensions();
-			if (oldDim < newDim) {
-				for (int i= oldDim; i < newDim; i++) {
-					doTextInsert(pos, "[]", description);
-				}
-			} else if (newDim < oldDim) {
-				try {
-					IScanner scanner= getScanner(pos);
-					for (int i= newDim; i < oldDim; i++) {
-						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRBRACKET);
-					}
-					doTextRemove(pos, scanner.getCurrentTokenEndPosition() + 1 - pos, description);
-				} catch (InvalidInputException e) {
-					JavaPlugin.log(e);
-				}
-			}
-		}
+			rewriteExtraDimensions(node.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
+		}			
 		Expression initializer= node.getInitializer();
 		if (initializer != null) {
 			if (isRemoved(initializer)) {

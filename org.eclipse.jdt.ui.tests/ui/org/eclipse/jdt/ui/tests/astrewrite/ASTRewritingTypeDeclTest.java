@@ -652,7 +652,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, int[] k/*, int[] x[]*/) {\n");
+		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -691,7 +691,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(float[][] count, int[] k/*, int[] x[]*/) {\n");
+		buf.append("    public void foo(float[][] count, int[] k, int[] x[]) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
