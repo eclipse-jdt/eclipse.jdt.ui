@@ -58,7 +58,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private SelectWorkingSetAction fSelectWorkingSetAction;
 	private EditWorkingSetAction fEditWorkingSetAction;
 	
-	private IPropertyChangeListener fPropertyChangeListener;
 	private IPropertyChangeListener fTitleUpdater;
 	
 	private int fLRUMenuCount;
@@ -75,7 +74,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
-		fPropertyChangeListener= addWorkingSetChangeSupport();
+		addWorkingSetChangeSupport();
 	}
 
 	/**

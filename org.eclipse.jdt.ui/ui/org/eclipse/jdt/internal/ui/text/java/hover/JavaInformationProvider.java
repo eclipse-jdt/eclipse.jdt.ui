@@ -63,7 +63,7 @@ public class JavaInformationProvider implements IInformationProvider {
 		public void partBroughtToTop(IWorkbenchPart part) {
 			update();
 		}	
-	};
+	}
 	
 	protected IEditorPart fEditor;
 	protected IPartListener fPartListener;

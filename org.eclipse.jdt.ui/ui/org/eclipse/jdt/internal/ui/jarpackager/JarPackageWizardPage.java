@@ -42,10 +42,11 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.WizardExportResourcesPage;
@@ -63,13 +64,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
-
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
@@ -410,7 +408,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		dialog.getShell().setText(JarPackagerMessages.getString("JarPackageWizardPage.saveAsDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarPackageWizardPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
-		if (dialog.open() == SaveAsDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IPath path= dialog.getResult();
 			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());
@@ -582,7 +580,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		String currentMessage= getMessage();
 		if (!(new File(fDestinationNamesCombo.getText()).isAbsolute())) {
 			if (currentMessage == null)
-				setMessage(JarPackagerMessages.getString("JarPackageWizardPage.info.relativeExportDestination"), WizardPage.INFORMATION); //$NON-NLS-1$
+				setMessage(JarPackagerMessages.getString("JarPackageWizardPage.info.relativeExportDestination"), IMessageProvider.INFORMATION); //$NON-NLS-1$
 		} else {
 			if (currentMessage != null)
 				setMessage(null);

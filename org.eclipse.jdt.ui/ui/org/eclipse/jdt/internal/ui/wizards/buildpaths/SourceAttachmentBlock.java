@@ -41,8 +41,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -463,7 +463,7 @@ public class SourceAttachmentBlock {
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
-		if (dialog.open() == JARFileSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			File result= (File) dialog.getResult()[0];
 			IPath returnPath= new Path(result.getPath()).makeAbsolute();
 			return modifyPath(returnPath, currVariable);
@@ -546,7 +546,7 @@ public class SourceAttachmentBlock {
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IResource res= (IResource) dialog.getFirstResult();
 			return res.getFullPath();
 		}

@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
@@ -469,7 +470,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			dialog.setInitialSelection(res);
 		}
 
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (IFolder) dialog.getFirstResult();
 		}			
 		return null;		
@@ -490,7 +491,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewSourceFolderWizardPage.ChooseProjectDialog.description")); //$NON-NLS-1$
 		dialog.setElements(projects);
 		dialog.setInitialSelections(new Object[] { fCurrJProject });
-		if (dialog.open() == ElementListSelectionDialog.OK) {			
+		if (dialog.open() == Window.OK) {			
 			return (IJavaProject) dialog.getFirstResult();
 		}			
 		return null;		

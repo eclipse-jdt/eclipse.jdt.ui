@@ -44,11 +44,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -70,15 +71,12 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
-
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
@@ -424,7 +422,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.getShell().setText(JarPackagerMessages.getString("JarManifestWizardPage.saveAsDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getManifestLocation()));
-		if (dialog.open() == SaveAsDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fJarPackage.setManifestLocation(dialog.getResult());
 			fNewManifestFileText.setText(dialog.getResult().toString());
 		}
@@ -434,7 +432,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.title"), JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		if (fJarPackage.isManifestAccessible())
 			dialog.setInitialSelections(new IResource[] {fJarPackage.getManifestFile()});
-		if (dialog.open() ==  ElementTreeSelectionDialog.OK) {
+		if (dialog.open() ==  Window.OK) {
 			Object[] resources= dialog.getResult();
 			if (resources.length != 1)
 				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.onlyOneManifestMustBeSelected")); //$NON-NLS-1$
@@ -481,7 +479,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		if (fJarPackage.getManifestMainClass() != null)
 			dialog.setInitialSelections(new Object[] {fJarPackage.getManifestMainClass()});
 
-		if (dialog.open() == SelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fJarPackage.setManifestMainClass((IType)dialog.getResult()[0]);
 			fMainClassText.setText(JarPackagerUtil.getMainClassName(fJarPackage));
 		} else if (!fJarPackage.isMainClassValid(getContainer())) {
@@ -496,7 +494,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToSeal());
-		if (dialog.open() == SelectionDialog.OK)
+		if (dialog.open() == Window.OK)
 			fJarPackage.setPackagesToSeal(getPackagesFromDialog(dialog));
 		updateSealingInfo();
 	}
@@ -506,7 +504,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToUnseal());
-		if (dialog.open() == SelectionDialog.OK)
+		if (dialog.open() == Window.OK)
 			fJarPackage.setPackagesToUnseal(getPackagesFromDialog(dialog));
 		updateSealingInfo();
 	}
@@ -607,7 +605,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 					// nothing reported in the wizard
 				}
 				if (manifest != null && manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION) == null)
-					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), DialogPage.WARNING); //$NON-NLS-1$
+					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), IMessageProvider.WARNING); //$NON-NLS-1$
 			} else {
 				if (fJarPackage.getManifestLocation().toString().length() == 0)
 					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
@@ -933,7 +931,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * @throws ClassCastException if results are not IPackageFragments
 	 */
 	protected IPackageFragment[] getPackagesFromDialog(SelectionDialog dialog) {
-		if (dialog.getReturnCode() == SelectionDialog.OK && dialog.getResult().length > 0)
+		if (dialog.getReturnCode() == Window.OK && dialog.getResult().length > 0)
 			return (IPackageFragment[])Arrays.asList(dialog.getResult()).toArray(new IPackageFragment[dialog.getResult().length]);
 		else
 			return new IPackageFragment[0];

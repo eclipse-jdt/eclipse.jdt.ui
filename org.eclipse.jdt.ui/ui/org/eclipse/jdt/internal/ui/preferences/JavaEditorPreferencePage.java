@@ -1115,9 +1115,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		if (fBrowserLikeLinksCheckBox.getSelection() && (stateMask == -1 || (stateMask & SWT.SHIFT) != 0)) {
 			if (stateMask == -1)
-				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
+				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
 			else
-				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getString("JavaEditorPreferencePage.navigation.shiftIsDisabled")); //$NON-NLS-1$
+				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("JavaEditorPreferencePage.navigation.shiftIsDisabled")); //$NON-NLS-1$
 			setValid(false);
 			StatusUtil.applyToStatusLine(this, fBrowserLikeLinksKeyModifierStatus);
 		} else {

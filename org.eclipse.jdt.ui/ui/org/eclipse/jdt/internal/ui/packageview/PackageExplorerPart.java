@@ -33,6 +33,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -1123,7 +1124,7 @@ public class PackageExplorerPart extends ViewPart
 
 	public void collapseAll() {
 		fViewer.getControl().setRedraw(false);		
-		fViewer.collapseToLevel(getViewPartInput(), TreeViewer.ALL_LEVELS);
+		fViewer.collapseToLevel(getViewPartInput(), AbstractTreeViewer.ALL_LEVELS);
 		fViewer.getControl().setRedraw(true);
 	}
 	

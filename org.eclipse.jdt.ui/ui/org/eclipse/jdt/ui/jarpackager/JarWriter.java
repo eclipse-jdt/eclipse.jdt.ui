@@ -19,6 +19,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -168,10 +169,10 @@ public class JarWriter {
 	protected void write(IPath path, byte[] contents, long lastModified) throws IOException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 		if (fJarPackage.isCompressed())
-			newEntry.setMethod(JarEntry.DEFLATED);
+			newEntry.setMethod(ZipEntry.DEFLATED);
 			// Entry is filled automatically.
 		else {
-			newEntry.setMethod(JarEntry.STORED);
+			newEntry.setMethod(ZipEntry.STORED);
 			newEntry.setSize(contents.length);
 			CRC32 checksumCalculator= new CRC32();
 			checksumCalculator.update(contents);

@@ -91,7 +91,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			public _FileSynchronizer(IFileEditorInput fileEditorInput) {
 				super(fileEditorInput);
 			}
-		};
+		}
 		
 		/**
 		 * Bundle of all required informations to allow working copy management. 
@@ -108,7 +108,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			public void setModificationStamp(long timeStamp) {
 				fModificationStamp= timeStamp;
 			}
-		};
+		}
 		
 		/**
 		 * Annotation representating an <code>IProblem</code>.
@@ -268,7 +268,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			public ICompilationUnit getCompilationUnit() {
 				return fCompilationUnit;
 			}
-		};
+		}
 		
 		/**
 		 * Internal structure for mapping positions to some value. 
@@ -281,7 +281,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			static class Entry {
 				Position fPosition;
 				Object fValue;
-			};
+			}
 			
 			private List fList= new ArrayList(2);
 			private int fAnchor= 0;
@@ -348,7 +348,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			public void clear() {
 				fList.clear();
 			}
-		};
+		}
 		
 		/**
 		 * Annotation model dealing with java marker annotations and temporary problems.
@@ -639,7 +639,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				}
 				super.removeAnnotation(annotation, fireModelChanged);
 			}
-		};
+		}
 		
 		
 		protected static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
@@ -680,7 +680,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			public void removeListener(IAnnotationModelListener listener) {
 				fListenerList.remove(listener);
 			}			
-		};
+		}
 			
 		
 		/**
@@ -736,7 +736,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			synchronized public void set(String text) {
 				super.set(text);
 			}
-		};
+		}
 		
 		
 		

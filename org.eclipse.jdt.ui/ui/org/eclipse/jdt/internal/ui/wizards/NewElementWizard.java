@@ -23,7 +23,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.INewWizard;
@@ -113,7 +115,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 			String title= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.message"); //$NON-NLS-1$
-			OptionalMessageDialog.open(key, getShell(), title, OptionalMessageDialog.getDefaultImage(), message, OptionalMessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
+			OptionalMessageDialog.open(key, getShell(), title, Window.getDefaultImage(), message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
 		}
 	}
 

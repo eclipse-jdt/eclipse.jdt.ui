@@ -751,8 +751,8 @@ public class JarPackageData {
 	 * 
 	 * @param a boolean telling if a build should be performed
 	 */
-	public void setBuildIfNeeded(boolean fBuildIfNeeded) {
-		this.fBuildIfNeeded= fBuildIfNeeded;
+	public void setBuildIfNeeded(boolean buildIfNeeded) {
+		fBuildIfNeeded= buildIfNeeded;
 	}
 	// ----------- Utility methods -----------
 	

@@ -97,7 +97,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		public void setContextInformationPosition(int position) {
 			fPosition= position;	
 		}
-	};
+	}
 	
 	
 	private final static String VISIBILITY= JavaCore.CODEASSIST_VISIBILITY_CHECK;
@@ -154,7 +154,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		Object value= options.get(VISIBILITY);
 		if (value instanceof String) {
 			String newValue= restrict ? ENABLED : DISABLED;
-			if ( !newValue.equals((String) value)) {
+			if ( !newValue.equals(value)) {
 				options.put(VISIBILITY, newValue);
 				JavaCore.setOptions(options);
 			}

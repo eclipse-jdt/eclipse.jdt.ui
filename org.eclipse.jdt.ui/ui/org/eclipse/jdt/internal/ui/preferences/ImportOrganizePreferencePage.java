@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -260,7 +261,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		if (index == 0) { // add new
 			List existing= fOrderListField.getElements();
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
-			if (dialog.open() == ImportOrganizeInputDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				fOrderListField.addElement(dialog.getResult());
 			}
 		} else if (index == 1) { // edit
@@ -275,7 +276,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
 			dialog.setInitialString(editedEntry);
-			if (dialog.open() == ImportOrganizeInputDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				fOrderListField.replaceElement(editedEntry, dialog.getResult());
 			}
 		} else if (index == 8) { // load

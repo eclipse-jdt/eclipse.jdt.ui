@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,6 +42,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
@@ -118,7 +118,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	interface ITextConverter {
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
-	};
+	}
 	
 	class AdaptedSourceViewer extends JavaSourceViewer  {
 				
@@ -254,7 +254,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy();
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
 		}
-	};
+	}
 	
 	static class TabConverter implements ITextConverter {
 		
@@ -330,7 +330,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 			}
 		}
-	};
+	}
 	
 	private class ExitPolicy implements LinkedPositionUI.ExitPolicy {
 		
@@ -391,14 +391,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 			return false;
 		}
-	};
+	}
 	
 	private static class BracketLevel {
 		int fOffset;
 		int fLength;
 		LinkedPositionManager fManager;
 		LinkedPositionUI fEditor;
-	};
+	}
 	
 	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
 		
@@ -574,7 +574,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			} catch (BadLocationException e) {
 			}
 		}
-	};
+	}
 	
 	/** Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
@@ -894,7 +894,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
 			
-		if (dialog.open() == Dialog.CANCEL) {
+		if (dialog.open() == Window.CANCEL) {
 			if (progressMonitor != null)
 				progressMonitor.setCanceled(true);
 			return;

@@ -138,10 +138,10 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 				}								
 			} catch (NumberFormatException e) {
 				String message= PreferencesMessages.getString("NewJavaProjectPreferencePage.error.decode"); //$NON-NLS-1$
-				JavaPlugin.log(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, e));
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			} catch (NoSuchElementException e) {
 				String message= PreferencesMessages.getString("NewJavaProjectPreferencePage.error.decode"); //$NON-NLS-1$
-				JavaPlugin.log(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, e));
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			}
 		}
 		return (IClasspathEntry[]) res.toArray(new IClasspathEntry[res.size()]);	

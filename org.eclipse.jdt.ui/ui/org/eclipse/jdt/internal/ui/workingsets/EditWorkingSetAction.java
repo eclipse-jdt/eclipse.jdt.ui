@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkingSet;
@@ -66,7 +67,7 @@ public class EditWorkingSetAction extends Action {
 		}
 		WizardDialog dialog= new WizardDialog(fShell, wizard);
 	 	dialog.create();		
-		if (dialog.open() == WizardDialog.OK)
+		if (dialog.open() == Window.OK)
 			fActionGroup.setWorkingSet(wizard.getSelection(), true);
 	}
 }

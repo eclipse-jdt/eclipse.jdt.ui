@@ -49,7 +49,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		public boolean isWordPart(char c) {
 			return (c == '*' || c == '/');
 		}
-	};
+	}
 	
 	
 	/**
@@ -81,7 +81,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		public IToken getSuccessToken() {
 			return fSuccessToken;
 		}
-	};
+	}
 
 	
 	

@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -258,7 +259,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					public void widgetSelected(SelectionEvent event) {				
 						try {
 							SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), entry, containerPath, jproject, true);
-							if (dialog.open() == SourceAttachmentDialog.OK)
+							if (dialog.open() == Window.OK)
 								verifyInput(getEditorInput());
 	
 						} catch (CoreException e) {
@@ -375,7 +376,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				}
 				styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 			}	
-		};
+		}
 		
 		/**
 		 *  Updater that takes care of minimizing changes of the editor input.
@@ -442,7 +443,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					}
 				}
 			}
-		};	
+		}	
 
 	
 	

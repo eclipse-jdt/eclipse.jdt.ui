@@ -25,6 +25,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -159,7 +161,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		dialog.setMessage(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.description")); //$NON-NLS-1$
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
-		if (dialog.open() == JARFileSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			File result= (File) dialog.getResult()[0];
 			IPath returnPath= new Path(result.getPath()).makeAbsolute();
 			return modifyPath(returnPath, currVariable);

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -254,7 +255,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		dialog.getShell().setText(JarPackagerMessages.getString("JarOptionsPage.saveAsDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarOptionsPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
-		if (dialog.open() == SaveAsDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IPath path= dialog.getResult();
 			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());

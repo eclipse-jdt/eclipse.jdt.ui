@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
@@ -232,7 +233,7 @@ public class VariableBlock {
 		List existingEntries= fVariablesList.getElements();
 
 		VariableCreationDialog dialog= new VariableCreationDialog(getShell(), entry, existingEntries);
-		if (dialog.open() != VariableCreationDialog.OK) {
+		if (dialog.open() != Window.OK) {
 			return;
 		}
 		CPVariableElement newEntry= dialog.getClasspathElement();

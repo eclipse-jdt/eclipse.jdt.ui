@@ -110,7 +110,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			public void setContents(char[] contents) {}
 		
 			public void setContents(String contents) {}
-		};
+		}
 		
 	
 	/** NULL implementing <code>IBuffer</code> */
@@ -132,7 +132,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			fContents= contents;
 			Display.getDefault().syncExec(this);
 		}
-	};
+	}
 	
 	/**
 	 * Executes a document replace call in the ui thread.
@@ -157,7 +157,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			fText= text;
 			Display.getDefault().syncExec(this);
 		}
-	};
+	}
 	
 	private IOpenable fOwner;
 	private IDocument fDocument;
@@ -370,7 +370,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#getOwner()
 	 */
 	public IOpenable getOwner() {
-		return (IOpenable) fOwner;
+		return fOwner;
 	}
 	
 	/*

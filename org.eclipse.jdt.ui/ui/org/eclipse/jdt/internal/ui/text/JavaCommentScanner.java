@@ -43,7 +43,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		public boolean isWordPart(char c) {
 			return Character.isLetter(c);
 		}
-	};
+	}
 
 	private class TaskTagRule extends WordRule {
 

@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -461,7 +462,7 @@ public class JavadocConfigurationBlock {
 			}
 			
 			dialog.setInput(zipFile);
-			if (dialog.open() == ElementTreeSelectionDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				Object element= dialog.getFirstResult();
 				if (element instanceof ZipTreeNode)  {
 					return ((ZipTreeNode) element).toString();

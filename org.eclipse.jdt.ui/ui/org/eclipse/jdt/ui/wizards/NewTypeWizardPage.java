@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
@@ -1242,7 +1243,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			dialog.setInitialSelections(new Object[] { pack });
 		}
 
-		if (dialog.open() == ElementListSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (IPackageFragment) dialog.getFirstResult();
 		}
 		return null;
@@ -1261,7 +1262,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
 		
-		if (dialog.open() == TypeSelectionDialog.OK) {	
+		if (dialog.open() == Window.OK) {	
 			return (IType) dialog.getFirstResult();
 		}
 		return null;
@@ -1281,7 +1282,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.message")); //$NON-NLS-1$
 		dialog.setFilter(getSuperClass());
 
-		if (dialog.open() == TypeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();
 		}
 		return null;

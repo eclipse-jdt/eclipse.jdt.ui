@@ -152,14 +152,14 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 		public IStatus validate(Object[] selection) {
 			int nSelected= selection.length;
 			if (nSelected == 0 || (nSelected > 1 && !fMultiSelect)) {
-				return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
+				return new StatusInfo(IStatus.ERROR, "");  //$NON-NLS-1$
 			}
 			for (int i= 0; i < selection.length; i++) {
 				Object curr= selection[i];
 				if (curr instanceof File) {
 					File file= (File) curr;
 					if (!fAcceptFolders && !file.isFile()) {
-						return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
+						return new StatusInfo(IStatus.ERROR, "");  //$NON-NLS-1$
 					}
 				}
 			}

@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -174,7 +175,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		List existing= fExclusionPatternList.getElements();
 		String entry= (String) selElements.get(0);
 		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), entry, existing, fCurrElement);
-		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fExclusionPatternList.replaceElement(entry, dialog.getExclusionPattern());
 		}
 	}
@@ -182,7 +183,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 	private void addEntry() {
 		List existing= fExclusionPatternList.getElements();
 		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), null, existing, fCurrElement);
-		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fExclusionPatternList.addElement(dialog.getExclusionPattern());
 		}
 	}	
@@ -263,7 +264,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		dialog.setInitialSelection(initialElement);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] objects= dialog.getResult();
 			int existingSegments= fCurrSourceFolder.getFullPath().segmentCount();
 			

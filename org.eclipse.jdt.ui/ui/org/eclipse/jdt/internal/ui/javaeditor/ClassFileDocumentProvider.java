@@ -148,7 +148,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		
 			return false;
 		}
-	};
+	}
 	
 	/**
 	 * Correcting the visibility of <code>FileSynchronizer</code>.
@@ -157,7 +157,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		public _FileSynchronizer(IFileEditorInput fileEditorInput) {
 			super(fileEditorInput);
 		}
-	};
+	}
 	
 	/**
 	 * Bundle of all required informations. 
@@ -174,7 +174,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			super(document, model, null);
 			fClassFileSynchronizer= classFileSynchronizer;
 		}
-	};
+	}
 	
 	/** Input change listeners. */
 	private List fInputListeners= new ArrayList();
@@ -262,13 +262,13 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			if (external != null) {
 				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null);
 				info.fModificationStamp= computeModificationStamp(external.getFile());
-				((StorageInfo)info).fEncoding= getPersistedEncoding(element);
+				info.fEncoding= getPersistedEncoding(element);
 				return info;
 			} else if (input instanceof InternalClassFileEditorInput) {
 				ClassFileSynchronizer s= new ClassFileSynchronizer(input);
 				s.install();
 				ClassFileInfo info= new ClassFileInfo(d, m, s);
-				((StorageInfo)info).fEncoding= getPersistedEncoding(element);
+				info.fEncoding= getPersistedEncoding(element);
 				return info;
 			}
 		}

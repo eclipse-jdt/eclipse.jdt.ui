@@ -99,7 +99,9 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 				}
 			});
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), "Error", "Unexpected error occurred. See log for details.");
+			String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
+			String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}
 	

@@ -191,7 +191,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					
 					return null;
 				}
-			};
+			}
          
 			static class NoClassElement extends WorkbenchAdapter implements IAdaptable {
 				/*
@@ -332,7 +332,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						fListener= null;
 					}
 				}
-			};
+			}
 			
 			
 			class JavaOutlineViewer extends TreeViewer {
@@ -584,10 +584,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 										if (last != null && deletions.contains(last)) {
 											// reuse item
 											deletions.removeElement(last);
-											reuseTreeItem(last, (Object) e);
+											reuseTreeItem(last, e);
 										} else {
 											// nothing to reuse
-											createTreeItem(w, (Object) e, j);
+											createTreeItem(w, e, j);
 										}
 										continue go2;
 									}
@@ -675,7 +675,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}				
 				
 
-			};
+			}
 				
 			class LexicalSortingAction extends Action {
 				
@@ -707,7 +707,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (store)
 						JavaPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", on); //$NON-NLS-1$
 				}
-			};
+			}
 
 		class ClassOnlyAction extends Action {
 
@@ -739,7 +739,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore(); 
 				preferenceStore.setValue("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
 			}
-		};
+		}
 
 		/**
 		 * This action toggles whether this Java Outline page links

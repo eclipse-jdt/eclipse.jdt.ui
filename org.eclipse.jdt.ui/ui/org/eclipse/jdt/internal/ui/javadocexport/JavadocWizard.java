@@ -34,6 +34,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -46,12 +47,14 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -178,7 +181,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		if (fJSWPage.generateAnt()) {
 			//@Improve: make a better message
-			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), MessageDialog.getDefaultImage(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
+			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), Window.getDefaultImage(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
 			fStore.createXML();
 		}
 
@@ -204,7 +207,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			IJavaProject iJavaProject= projects[j];
 			String message= JavadocExportMessages.getFormattedString("JavadocWizard.updatejavadoclocation.message", new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); //$NON-NLS-1$
 			String[] buttonlabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL };
-			MessageDialog dialog= new MessageDialog(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), MessageDialog.getImage(MessageDialog.DLG_IMG_QUESTION), message, 4, buttonlabels, 1);//$NON-NLS-1$
+			MessageDialog dialog= new MessageDialog(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), Dialog.getImage(Dialog.DLG_IMG_QUESTION), message, 4, buttonlabels, 1);//$NON-NLS-1$
 
 			switch (dialog.open()) {
 				case YES :
@@ -442,7 +445,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private void refresh(IPath path) {
 		if (fRoot.findContainersForLocation(path).length > 0) {
 			try {
-				fRoot.refreshLocal(IWorkspaceRoot.DEPTH_INFINITE, null);
+				fRoot.refreshLocal(IResource.DEPTH_INFINITE, null);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

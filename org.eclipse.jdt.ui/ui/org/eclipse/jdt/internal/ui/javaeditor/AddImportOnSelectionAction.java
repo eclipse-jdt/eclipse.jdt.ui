@@ -27,6 +27,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -245,7 +246,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		
 		if (containerName.length() != 0) {
 			for (int i= 0; i < nResults; i++) {
-				TypeInfo curr= (TypeInfo) results[i];
+				TypeInfo curr= results[i];
 				if (containerName.equals(curr.getTypeContainerName())) {
 					return curr;
 				}
@@ -255,7 +256,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(results);
-		if (dialog.open() == ElementListSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (TypeInfo) dialog.getFirstResult();
 		}
 		return null;

@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -197,7 +198,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 	private void chooseVariablePressed() {
 		String variable= getVariable();
 		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), variable);
-		if (dialog.open() == ChooseVariableDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IPath newPath= new Path(dialog.getSelectedVariable()).append(getPathExtension());
 			setText(newPath.toString());
 		}

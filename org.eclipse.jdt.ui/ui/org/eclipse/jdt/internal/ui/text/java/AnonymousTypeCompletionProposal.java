@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -129,7 +131,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			OverrideMethodDialog selectionDialog= new OverrideMethodDialog(shell, null, fDeclaringType, true);			
 			int selectionResult= selectionDialog.open();
-			if (selectionResult == OverrideMethodDialog.OK) {
+			if (selectionResult == Window.OK) {
 				Object[] checkedElements= selectionDialog.getResult();
 				if (checkedElements != null) {
 					ArrayList result= new ArrayList(checkedElements.length);

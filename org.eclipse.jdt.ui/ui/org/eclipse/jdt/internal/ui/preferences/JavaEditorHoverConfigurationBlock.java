@@ -331,7 +331,7 @@ class JavaEditorHoverConfigurationBlock {
 		fHoverConfigs[i].fModifierString= modifiers;
 		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
 		if (fHoverConfigs[i].fIsEnabled && fHoverConfigs[i].fStateMask == -1)
-			fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
+			fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
 		else
 			fStatus= new StatusInfo();
 		updateStatus();
@@ -373,9 +373,9 @@ class JavaEditorHoverConfigurationBlock {
 				String label= getContributedHovers()[i].getLabel();
 				Integer stateMask= new Integer(fHoverConfigs[i].fStateMask);
 				if (fHoverConfigs[i].fStateMask == -1)
-					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValidForHover", new String[] {fHoverConfigs[i].fModifierString, label})); //$NON-NLS-1$
+					fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValidForHover", new String[] {fHoverConfigs[i].fModifierString, label})); //$NON-NLS-1$
 				else if (stateMasks.containsKey(stateMask))
-					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.duplicateModifier", new String[] {label, (String)stateMasks.get(stateMask)})); //$NON-NLS-1$
+					fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.duplicateModifier", new String[] {label, (String)stateMasks.get(stateMask)})); //$NON-NLS-1$
 				else
 					stateMasks.put(stateMask, label);
 			}

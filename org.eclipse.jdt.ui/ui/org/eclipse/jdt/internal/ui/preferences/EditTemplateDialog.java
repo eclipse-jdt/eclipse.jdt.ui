@@ -501,7 +501,7 @@ public class EditTemplateDialog extends StatusDialog {
 				break;
 
 			// CTRL-Z
-			case (int) 'z' - (int) 'a' + 1:
+			case 'z' - 'a' + 1:
 				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
 				break;				
 		}
@@ -521,7 +521,7 @@ public class EditTemplateDialog extends StatusDialog {
 				break;
 
 			// CTRL-Z
-			case (int) 'z' - (int) 'a' + 1:
+			case 'z' - 'a' + 1:
 				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
 				event.doit= false;
 				break;				

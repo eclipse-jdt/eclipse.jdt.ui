@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
@@ -34,6 +35,7 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -95,7 +97,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		super(parent);
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
-		updateStatus(new StatusInfo(StatusInfo.ERROR, "")); //$NON-NLS-1$
+		updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 
 		String[] buttonLabels= new String[] { 
 			/* IDX_EXTEND */ NewWizardMessages.getString("NewVariableEntryDialog.vars.extend"), //$NON-NLS-1$
@@ -232,7 +234,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);
-		if (dialog.open() == JARFileSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] selected= dialog.getResult();
 			IPath[] paths= new IPath[selected.length];
 			for (int i= 0; i < selected.length; i++) {
@@ -276,7 +278,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 			public void run() {
 				dialog.create();
 				dialog.setMessage(targetNode.getLabelText());
-				result[0]= (dialog.open() == PreferenceDialog.OK);
+				result[0]= (dialog.open() == Window.OK);
 			}
 		});
 		return result[0];

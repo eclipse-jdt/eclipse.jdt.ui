@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
@@ -434,7 +435,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(initElement);
 		
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();
 			if (element instanceof IJavaProject) {
 				IJavaProject jproject= (IJavaProject)element;

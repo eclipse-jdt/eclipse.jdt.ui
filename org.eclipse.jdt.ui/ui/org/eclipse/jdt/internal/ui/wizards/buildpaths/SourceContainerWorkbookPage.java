@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -330,7 +331,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (key.equals(CPListElement.OUTPUT)) {
 			CPListElement selElement=  elem.getParent();
 			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement);
-			if (dialog.open() == OutputLocationDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
@@ -338,7 +339,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		} else if (key.equals(CPListElement.EXCLUSION)) {
 			CPListElement selElement= elem.getParent();
 			ExclusionPatternDialog dialog= new ExclusionPatternDialog(getShell(), selElement);
-			if (dialog.open() == OutputLocationDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
@@ -472,7 +473,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		IProject proj= fCurrJProject.getProject();
 		NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
-		if (dialog.open() == NewContainerDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IResource folder= dialog.getSourceFolder();
 			return newCPSourceElement(folder);
 		}
@@ -571,7 +572,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		} else {
 			dialog.setInitialSelection(existing.getResource());
 		}		
-		if (dialog.open() == FolderSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();	
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {

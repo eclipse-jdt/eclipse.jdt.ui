@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -142,7 +143,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 			dialog.setInitialSelections(new Object[] { initialSelection });
 		}
 		
-		if (dialog.open() == ElementListSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
 			fNameDialogField.setText(res.getElementName());
 		}

@@ -50,6 +50,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
@@ -765,7 +766,7 @@ public class BuildPathsBlock {
 		dialog.setInitialSelection(initSelection);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		
-		if (dialog.open() == FolderSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (IContainer)dialog.getFirstResult();
 		}
 		return null;

@@ -537,7 +537,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 */
 	boolean isJavaFile(IResource file) {
 		return file != null
-			&& file.getType() == IFile.FILE
+			&& file.getType() == IResource.FILE
 			&& file.getFileExtension() != null
 			&& file.getFileExtension().equalsIgnoreCase("java"); //$NON-NLS-1$
 	}
@@ -550,7 +550,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 */
 	boolean isClassFile(IResource file) {
 		return file != null
-			&& file.getType() == IFile.FILE
+			&& file.getType() == IResource.FILE
 			&& file.getFileExtension() != null
 			&& file.getFileExtension().equalsIgnoreCase("class"); //$NON-NLS-1$
 	}

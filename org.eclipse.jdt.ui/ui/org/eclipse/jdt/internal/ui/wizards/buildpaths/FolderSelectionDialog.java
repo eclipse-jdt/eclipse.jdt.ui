@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
@@ -87,7 +88,7 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 	
 	protected void newFolderButtonPressed() {
 		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
-		if (dialog.open() == NewFolderDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			TreeViewer treeViewer= getTreeViewer();
 			treeViewer.refresh(fSelectedContainer);
 			Object createdFolder= dialog.getResult()[0];

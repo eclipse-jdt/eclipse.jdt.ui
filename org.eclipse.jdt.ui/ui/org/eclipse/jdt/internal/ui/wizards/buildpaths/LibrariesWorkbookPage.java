@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
@@ -345,7 +346,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				applyChanges= true;
 			}
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry(), containerPath, fCurrJProject, applyChanges);
-			if (dialog.open() == SourceAttachmentDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
 				fLibrariesList.refresh();
 				fClassPathList.refresh(); // images
@@ -353,7 +354,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
 			JavadocPropertyDialog dialog= new JavadocPropertyDialog(getShell(), selElement);
-			if (dialog.open() == JavadocPropertyDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.JAVADOC, dialog.getJavaDocLocation());
 				fLibrariesList.refresh();
 			}
@@ -450,7 +451,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers(existing), existing);
 		IPath projpath= currProject.getFullPath();
 		dialog.setMessage(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.NewClassFolderDialog.description", projpath.toString())); //$NON-NLS-1$
-		if (dialog.open() == NewContainerDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IFolder folder= dialog.getFolder();
 			return new CPListElement[] { newCPLibraryElement(folder) };
 		}
@@ -486,7 +487,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			dialog.setInitialSelection(existing.getResource());
 		}
 		
-		if (dialog.open() == FolderSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -522,7 +523,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			dialog.setInitialSelection(existing.getResource());
 		}
 
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
@@ -626,7 +627,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (existing == null) {
 			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell());
 			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title")); //$NON-NLS-1$
-			if (dialog.open() == NewVariableEntryDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				List existingElements= fLibrariesList.getElements();
 				
 				IPath[] paths= dialog.getResult();
@@ -652,7 +653,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 			EditVariableEntryDialog dialog= new EditVariableEntryDialog(getShell(), existing.getPath(), existingPaths);
 			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title")); //$NON-NLS-1$
-			if (dialog.open() == EditVariableEntryDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, dialog.getPath(), null);
 				return new CPListElement[] { elem };
 			}
@@ -680,7 +681,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(40), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
-		if (dialog.open() == WizardDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IClasspathEntry created= wizard.getNewEntry();
 			if (created != null) {			
 				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), null);

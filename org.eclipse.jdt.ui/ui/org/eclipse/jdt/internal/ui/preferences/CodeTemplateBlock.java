@@ -41,6 +41,8 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
@@ -343,7 +345,7 @@ public class CodeTemplateBlock {
 	private void edit(Template template) {
 		Template newTemplate= new Template(template);
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, new String[0]);
-		if (dialog.open() == EditTemplateDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			// changed
 			template.setDescription(newTemplate.getDescription());
 			template.setPattern(newTemplate.getPattern());

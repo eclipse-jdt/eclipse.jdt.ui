@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IMessageProvider;
 
 /**
  * A utility class to work with IStatus.
@@ -58,15 +59,15 @@ public class StatusUtil {
 		String message= status.getMessage();
 		switch (status.getSeverity()) {
 			case IStatus.OK:
-				page.setMessage(message, DialogPage.NONE);
+				page.setMessage(message, IMessageProvider.NONE);
 				page.setErrorMessage(null);
 				break;
 			case IStatus.WARNING:
-				page.setMessage(message, DialogPage.WARNING);
+				page.setMessage(message, IMessageProvider.WARNING);
 				page.setErrorMessage(null);
 				break;				
 			case IStatus.INFO:
-				page.setMessage(message, DialogPage.INFORMATION);
+				page.setMessage(message, IMessageProvider.INFORMATION);
 				page.setErrorMessage(null);
 				break;			
 			default:

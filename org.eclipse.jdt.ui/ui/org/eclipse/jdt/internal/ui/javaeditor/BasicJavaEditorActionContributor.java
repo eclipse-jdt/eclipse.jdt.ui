@@ -115,7 +115,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 					setChecked(false);
 				}
 			}
-		};
+		}
 		
 		
 	private List fRetargetToolbarActions= new ArrayList();

@@ -63,7 +63,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			this.buffer= buffer;
 			this.delta= delta;
 		}
-	};
+	}
 
 	/** The text viewer. */
 	private final ITextViewer fTextViewer;

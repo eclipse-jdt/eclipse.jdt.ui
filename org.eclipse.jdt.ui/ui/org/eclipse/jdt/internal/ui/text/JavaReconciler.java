@@ -68,7 +68,7 @@ public class JavaReconciler extends MonoReconciler {
 		 */
 		public void partOpened(IWorkbenchPart part) {
 		}
-	};
+	}
 	
 	
 	/** The reconciler's editor */
