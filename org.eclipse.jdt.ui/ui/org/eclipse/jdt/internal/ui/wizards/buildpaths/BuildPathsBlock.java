@@ -704,7 +704,7 @@ public class BuildPathsBlock {
 	}
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {
-		if (resource.isDerived() && "class".equals(resource.getFileExtension())) { //$NON-NLS-1$
+		if (resource.isDerived()) { //$NON-NLS-1$
 			return true;
 		}		
 		if (resource instanceof IContainer) {
@@ -720,7 +720,7 @@ public class BuildPathsBlock {
 	
 
 	public static void removeOldClassfiles(IResource resource) throws CoreException {
-		if (resource.isDerived() && "class".equals(resource.getFileExtension())) { //$NON-NLS-1$
+		if (resource.isDerived()) {
 			resource.delete(false, null);
 		}
 		if (resource instanceof IContainer) {
