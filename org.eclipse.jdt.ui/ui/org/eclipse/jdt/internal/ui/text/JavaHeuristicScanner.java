@@ -363,6 +363,8 @@ public class JavaHeuristicScanner implements Symbols {
 					return TokenFOR;
 				if ("try".equals(s)) //$NON-NLS-1$
 					return TokenTRY;
+				if ("new".equals(s)) //$NON-NLS-1$
+					return TokenNEW;
 				break;
 			case 4:
 				if ("case".equals(s)) //$NON-NLS-1$

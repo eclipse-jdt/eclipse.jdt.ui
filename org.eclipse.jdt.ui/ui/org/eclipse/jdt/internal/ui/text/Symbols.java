@@ -45,5 +45,6 @@ public interface Symbols {
 	int TokenSYNCHRONIZED= 1022;
 	int TokenGOTO= 1023;
 	int TokenDEFAULT= 1024;
+	int TokenNEW= 1025;
 	int TokenIDENT= 2000;
 }

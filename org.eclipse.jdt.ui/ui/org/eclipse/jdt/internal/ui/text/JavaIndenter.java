@@ -284,6 +284,7 @@ public class JavaIndenter {
 		boolean indentBlockLess= true; // whether to indent after an if / while / for without block (set false by semicolons and braces)
 		boolean takeNextExit= true; // whether the next possible exit should be taken (instead of looking for the base; see blockless stuff)
 		boolean found= false; // whether we have found anything at all. If we have, we'll trace back to it once we have a hoist point
+		boolean hasBrace= false;
 		
 		if (matchBrace) {
 			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
@@ -382,6 +383,8 @@ public class JavaIndenter {
 							fAlign= first;
 					}
 					
+					hasBrace= true;
+					
 					if (found)
 						return fScanner.findNonWhitespaceForward(searchPos, position);
 						
@@ -427,7 +430,8 @@ public class JavaIndenter {
 				// use double indentation inside conditions and calls
 				// handle method definitions separately
 				case Symbols.TokenLPAREN:
-					fIndent += 2;
+					if (!hasBrace)
+						fIndent += 2;
 					searchPos= fPreviousPos;
 					if (looksLikeMethodDecl()) {
 						if (found)
