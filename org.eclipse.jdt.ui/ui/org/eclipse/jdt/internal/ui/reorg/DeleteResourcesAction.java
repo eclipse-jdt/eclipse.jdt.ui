@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class DeleteResourcesAction extends SelectionDispatchAction {
 
@@ -184,7 +185,8 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	}
 	
 	private static boolean isLinkedResource(Object element) {
-		return (element instanceof IResource) && ((IResource)element).isLinked();
+		IResource resource= ResourceUtil.getResource(element);
+		return (resource != null && resource.isLinked());
 	}
 	
 	private static String getName(Object element){
