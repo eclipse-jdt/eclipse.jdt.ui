@@ -27,6 +27,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension4;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -54,7 +55,8 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
 		 */
 		public void accept(SpellingProblem problem) {
-			if (fRequester != null) {
+			IProblemRequestor requestor= fRequestor;
+			if (requestor != null) {
 				try {
 					int line= fDocument.getLineOfOffset(problem.getOffset()) + 1;
 					String word= fDocument.get(problem.getOffset(), problem.getLength());
@@ -64,8 +66,12 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 						dictionaryMatch= ((JavaSpellingProblem)problem).isDictionaryMatch();
 						sentenceStart= ((JavaSpellingProblem) problem).isSentenceStart();
 					}
-					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, fEditor.getEditorInput().getName());
-					fRequester.acceptProblem(iProblem);
+					// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=81514
+					IEditorInput editorInput= fEditor.getEditorInput();
+					if (editorInput != null) {
+						CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, editorInput.getName());
+						requestor.acceptProblem(iProblem);
+					}
 				} catch (BadLocationException x) {
 					// drop this SpellingProblem
 				}
@@ -76,16 +82,16 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginReporting()
 		 */
 		public void beginReporting() {
-			if (fRequester != null)
-				fRequester.beginReporting();
+			if (fRequestor != null)
+				fRequestor.beginReporting();
 		}
 
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endReporting()
 		 */
 		public void endReporting() {
-			if (fRequester != null)
-				fRequester.endReporting();
+			if (fRequestor != null)
+				fRequestor.endReporting();
 		}
 	}
 
@@ -102,7 +108,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	private IProgressMonitor fProgressMonitor;
 	
 	/** The problem requester. */
-	private IProblemRequestor fRequester;
+	private IProblemRequestor fRequestor;
 	
 	/** The spelling problem collector. */
 	private ISpellingProblemCollector fCollector= new SpellingProblemCollector();
@@ -135,7 +141,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion region) {
-		if (fRequester != null) {
+		if (fRequestor != null) {
 			try {
 				SpellingContext context= new SpellingContext();
 				context.setContentType(getContentType());
@@ -183,6 +189,6 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 */
 	private void updateProblemRequester() {
 		IAnnotationModel model= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
-		fRequester= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
+		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
 	}
 }
