@@ -13,9 +13,9 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	private boolean fShowInTypeHierarchy;
 
 	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)
+		IJavaSearchScope scope, int style)
 	{
-		super(parent, context, scope, style, ignoreCase, matchEmtpyString);
+		super(parent, context, scope, style);
 
 		fShowInTypeHierarchy= getDialogSetting().getBoolean(SHOW_IN_TYPE_HIERARCHY);
 	}

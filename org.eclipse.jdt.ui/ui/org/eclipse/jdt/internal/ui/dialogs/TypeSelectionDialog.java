@@ -21,11 +21,10 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 * Constructor.
 	 */
 	public TypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)
+		IJavaSearchScope scope, int style)
 	{
 		super(parent, new TypeInfoLabelProvider(0),
-			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX),
-			ignoreCase, matchEmtpyString);
+			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX));
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);

@@ -43,8 +43,7 @@ public class FocusOnTypeAction extends Action {
 	public void run() {
 		Shell parent= fViewPart.getSite().getWorkbenchWindow().getShell();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
-			true, true);				
+			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
 	
 		dialog.setTitle(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.message")); //$NON-NLS-1$

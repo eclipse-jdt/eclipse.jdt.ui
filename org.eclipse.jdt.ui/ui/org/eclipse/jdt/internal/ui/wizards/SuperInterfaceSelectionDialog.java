@@ -32,7 +32,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	private List fOldContent;
 	
 	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IProject p) {
-		super(parent, context, createSearchScope(p), IJavaElementSearchConstants.CONSIDER_INTERFACES, true, true);
+		super(parent, context, createSearchScope(p), IJavaElementSearchConstants.CONSIDER_INTERFACES);
 		fList= list;
 		//to restore the content of the dialog field if the dialog is canceled
 		fOldContent= fList.getElements(); 

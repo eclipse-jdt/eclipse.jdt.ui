@@ -36,10 +36,10 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	 * Constructor.
 	 */
 	public MainTypeSelectionDialog(Shell shell, IRunnableContext context,
-		IJavaSearchScope scope, int style, boolean ignoreCase)
+		IJavaSearchScope scope, int style)
 	{
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
-			new PackageRenderer(), ignoreCase, true);
+			new PackageRenderer());
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);

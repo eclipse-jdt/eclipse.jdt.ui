@@ -45,9 +45,9 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
-			true, false);				
-	
+			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
+		
+		dialog.setMatchEmptyString(false);	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {

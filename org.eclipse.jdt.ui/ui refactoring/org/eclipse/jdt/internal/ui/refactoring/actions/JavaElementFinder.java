@@ -53,7 +53,7 @@ class JavaElementFinder {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
 		dialog.setTitle("Select"); 
 		dialog.setMessage("Select the correct element from the list");
 		dialog.setElements(openChoices);

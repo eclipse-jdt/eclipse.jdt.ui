@@ -246,7 +246,7 @@ public final class JavaUI {
 		if (multipleSelection) {
 			dialog= new MultiTypeSelectionDialog(parent, context, scope, style);
 		} else {
-			dialog= new TypeSelectionDialog(parent, context, scope, style, true, true);
+			dialog= new TypeSelectionDialog(parent, context, scope, style);
 		}
 		return dialog;
 	}
@@ -279,7 +279,7 @@ public final class JavaUI {
 		if (multipleSelection) {
 			dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style);
 		} else {
-			dialog= new MainTypeSelectionDialog(parent, context, scope, style, true);
+			dialog= new MainTypeSelectionDialog(parent, context, scope, style);
 		}
 		return dialog;
 	}

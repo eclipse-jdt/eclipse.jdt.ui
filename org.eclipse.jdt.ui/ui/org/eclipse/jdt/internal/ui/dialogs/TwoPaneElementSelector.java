@@ -35,8 +35,8 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private ILabelProvider fElementRenderer;
 	private ILabelProvider fQualifierRenderer;
 	private Object[] fElements;
-	private final boolean fIgnoreCase;
-	private boolean fMatchEmtpyString;
+	private boolean fIgnoreCase= true;
+	private boolean fMatchEmtpyString= true;
 
 	private String fUpperListLabel;
 	private String fLowerListLabel;
@@ -49,25 +49,28 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private String[] fRenderedStrings;
 	private int[] fElementMap;
 	private Integer[] fQualifierMap;
-	
-	private final TwoArrayQuickSorter fSorter;
-	
+		
 	/**
 	 *
 	 */
 	public TwoPaneElementSelector(Shell parent, ILabelProvider elementRenderer, 
-			ILabelProvider qualifierRenderer, boolean ignoreCase, boolean matchEmtpyString)
+		ILabelProvider qualifierRenderer)
 	{
 		super(parent);
 		
 		setMessage(""); //$NON-NLS-1$
 		
 		fElementRenderer= elementRenderer;
-		fQualifierRenderer= qualifierRenderer;
-		fIgnoreCase= ignoreCase;
-		fSorter= new TwoArrayQuickSorter(ignoreCase);
-		fMatchEmtpyString= matchEmtpyString;
+		fQualifierRenderer= qualifierRenderer;	
 	}			
+
+	public void setIgnoreCase(boolean ignoreCase) {
+		fIgnoreCase= ignoreCase;
+	}
+
+	public void setMatchEmptyString(boolean matchEmptyString) {
+		fMatchEmtpyString= matchEmptyString;
+	}
 
 	public void setUpperListLabel(String label) {
 		fUpperListLabel= label;
@@ -244,7 +247,10 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		for (int i= 0; i < size; i++) {
 			strings[i]= fElementRenderer.getText(p[i]);
 		}
-		fSorter.sort(strings, p);
+		
+		TwoArrayQuickSorter sorter = new TwoArrayQuickSorter(fIgnoreCase);
+		sorter.sort(strings, p);
+		
 		return strings;
 	}
 	
@@ -396,7 +402,9 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			qualifiers[i-from]= fQualifierRenderer.getText(fElements[i]);
 			fQualifierMap[i-from]= new Integer(i);
 		}
-		fSorter.sort(qualifiers, fQualifierMap);
+
+		TwoArrayQuickSorter sorter = new TwoArrayQuickSorter(fIgnoreCase);		
+		sorter.sort(qualifiers, fQualifierMap);
 		
 		for (int i= 0; i < to - from; i++) {
 			TableItem item= new TableItem(fLowerList, i);

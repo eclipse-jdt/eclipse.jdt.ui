@@ -1012,7 +1012,7 @@ public abstract class TypePage extends ContainerPage {
 		scope.setIncludesBinaries(false);
 		scope.setIncludesClasspaths(false);	
 			
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES, true, true);
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {	
@@ -1033,7 +1033,7 @@ public abstract class TypePage extends ContainerPage {
 		scope.setIncludesClasspaths(true);	
 
 		IProject project= root.getJavaProject().getProject();
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, true, true);
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.SuperClassDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
 
