@@ -394,7 +394,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 						case RESULT_DISPLAY:
 							Runnable r = new Runnable() {
 								public void run() {
-									displayResult(value);
+									displayResult(value, result.getThread());
 								}
 							};
 							getSite().getShell().getDisplay().asyncExec(r);
@@ -458,7 +458,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		showError(status);
 	}
 	
-	public void displayResult(IJavaValue result) {
+	public void displayResult(IJavaValue result, IJavaThread thread) {
 		StringBuffer resultString= new StringBuffer();
 		try {
 			String sig= result.getSignature();
@@ -470,7 +470,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 				} else {
 					resultString.append(" "); //$NON-NLS-1$
 				}   
-				resultString.append(result.evaluateToString());
+				resultString.append(result.evaluateToString(thread));
 			}
 		} catch(DebugException e) {
 			ErrorDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.error.toString"), null, e.getStatus()); //$NON-NLS-1$

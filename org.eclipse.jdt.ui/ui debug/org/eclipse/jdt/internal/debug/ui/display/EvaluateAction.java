@@ -5,45 +5,26 @@
 package org.eclipse.jdt.internal.debug.ui.display;
 
 
-import com.sun.jdi.InvocationException;
-import com.sun.jdi.ObjectReference;
 import java.text.MessageFormat;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.ISourceLocator;
-import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.IThread;
+import org.eclipse.core.runtime.*;
+import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.*;
 import org.eclipse.debug.ui.IDebugUIConstants;
-
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.debug.core.*;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.*;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
-import org.eclipse.jdt.debug.core.IJavaStackFrame;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import com.sun.jdi.InvocationException;
+import com.sun.jdi.ObjectReference;
 
 
 /**
@@ -79,9 +60,9 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	protected IStackFrame getContextFromDebugTarget(IDebugTarget dt) {
 		if (!dt.isTerminated()) {
 			try {
-				IDebugElement[] threads= dt.getChildren();
+				IThread[] threads= dt.getThreads();
 				for (int i= 0; i < threads.length; i++) {
-					IThread thread= (IThread)threads[i];
+					IThread thread= threads[i];
 					if (thread.isSuspended()) {
 						return thread.getTopStackFrame();
 					}
@@ -195,7 +176,11 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	protected IJavaElement getJavaElement(IStackFrame stackFrame) {
 		
 		// Get the corresponding element.
-		ISourceLocator locator= stackFrame.getSourceLocator();
+		ILaunch launch = stackFrame.getLaunch();
+		if (launch == null) {
+			return null;
+		}
+		ISourceLocator locator= launch.getSourceLocator();
 		if (locator == null)
 			return null;
 		

@@ -78,9 +78,9 @@ public class RunToLineAction extends Action implements IUpdate {
 				return;
 			} 
 			target.breakpointAdded(breakpoint);
-			IDebugElement[] threads= target.getChildren(); 
+			IThread[] threads= target.getThreads(); 
 			for (int i= 0; i < threads.length; i++) {
-				IThread thread= (IThread) threads[i];
+				IThread thread= threads[i];
 				if (thread.canResume()) {
 					try {
 						thread.resume();
@@ -105,10 +105,10 @@ public class RunToLineAction extends Action implements IUpdate {
 		if (target == null) {
 			return null;
 		}
-		IDebugElement[] threads= target.getChildren();
+		IThread[] threads= target.getThreads();
 		boolean threadSuspended= false;
 		for (int i= 0; i < threads.length; i++) {
-			IThread thread= (IThread) threads[i];
+			IThread thread= threads[i];
 			if (thread.canResume()) {
 				threadSuspended=true;
 				break;
@@ -201,9 +201,9 @@ public class RunToLineAction extends Action implements IUpdate {
 	 */
 	protected JDIDebugTarget getContextFromDebugTarget(JDIDebugTarget dt) throws DebugException {
 		if (!dt.isTerminated()) {
-			IDebugElement[] threads= dt.getChildren();
+			IThread[] threads= dt.getThreads();
 			for (int i= 0; i < threads.length; i++) {
-				IThread thread= (IThread) threads[i];
+				IThread thread= threads[i];
 				if (thread.isSuspended()) {
 					return dt;
 				}

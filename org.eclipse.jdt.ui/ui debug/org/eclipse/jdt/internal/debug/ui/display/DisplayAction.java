@@ -8,16 +8,11 @@ package org.eclipse.jdt.internal.debug.ui.display;
 
 import java.text.MessageFormat;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.debug.core.DebugException;
-
-import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
-import org.eclipse.jdt.debug.core.IJavaValue;
-
+import org.eclipse.jdt.debug.core.*;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPart;
 
 
 /**
@@ -48,13 +43,13 @@ public class DisplayAction extends EvaluateAction {
 					if (result.hasProblems())
 						reportProblems(result);
 					if (value != null)
-						insertResult(value);
+						insertResult(value, result.getThread());
 				}
 			});
 		}
 	}
 	
-	protected void insertResult(IJavaValue result) {
+	protected void insertResult(IJavaValue result, IJavaThread thread) {
 		
 		String resultString= " "; //$NON-NLS-1$
 		try {
@@ -64,7 +59,7 @@ public class DisplayAction extends EvaluateAction {
 			} else {
 				if (sig != null)
 					resultString= MessageFormat.format(DisplayMessages.getString("Display.type_name_pattern"), new Object[] { result.getReferenceTypeName() }); //$NON-NLS-1$
-				resultString= MessageFormat.format(DisplayMessages.getString("Display.result_pattern"), new Object[] { resultString, result.evaluateToString() }); //$NON-NLS-1$
+				resultString= MessageFormat.format(DisplayMessages.getString("Display.result_pattern"), new Object[] { resultString, result.evaluateToString(thread) }); //$NON-NLS-1$
 			}
 		} catch(DebugException x) {
 			reportError(x);
