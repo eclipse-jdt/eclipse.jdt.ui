@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -18,12 +21,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -83,92 +88,192 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		return null;
 	}
+	
+	private boolean isAssigned(Statement statement, SimpleName name) {
+		if (statement instanceof ExpressionStatement) {
+			ExpressionStatement exstat= (ExpressionStatement) statement;
+			if (exstat.getExpression() instanceof Assignment) {
+				Assignment assignment= (Assignment) exstat.getExpression();
+				return assignment.getLeftHandSide() == name;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isForStatementInit(Statement statement, SimpleName name) {
+		if (statement instanceof ForStatement) {
+			ForStatement forStatement= (ForStatement) statement;
+			List list = forStatement.initializers();
+			if (list.size() == 1 && list.get(0) instanceof Assignment) {
+				Assignment assignment= (Assignment) list.get(0);
+				return assignment.getLeftHandSide() == name;
+			}
+		}		
+		return false;
+	}
+	
 
 	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
 		
-		SimpleName node= fOriginalNode;
-
-		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
-		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
-			ASTRewrite rewrite= new ASTRewrite(decl);
-					
-			ASTNode parent= node.getParent();
-			if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
-				Assignment assignment= (Assignment) parent;
-				if (node.equals(assignment.getLeftHandSide())) {
-					int parentParentKind= parent.getParent().getNodeType();
-					if (parentParentKind == ASTNode.EXPRESSION_STATEMENT) {
-						
-						// x = 1; -> int x = 1;
-						VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-						VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
-						newDecl.setType(evaluateVariableType(ast));
-						
-						Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
-						newDeclFrag.setInitializer(placeholder);
-						newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-						rewrite.markAsReplaced(assignment.getParent(), newDecl);
-						
-						markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-						markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
-						
-						markAsSelection(rewrite, newDecl); // end position
-
-						return rewrite;
-					} else if (parentParentKind == ASTNode.FOR_STATEMENT) {
-						//	for (x = 1;;) ->for (int x = 1;;)
-						
-						ForStatement forStatement= (ForStatement) parent.getParent();
-						if (forStatement.initializers().size() == 1 && assignment.equals(forStatement.initializers().get(0))) {
-							VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
-							VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
-							frag.setName(ast.newSimpleName(node.getIdentifier()));
-							Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
-							frag.setInitializer(placeholder);
-							expression.setType(evaluateVariableType(ast));
-							
-							rewrite.markAsReplaced(assignment, expression);
-							
-							markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
-							markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
-							
-							markAsSelection(rewrite, expression); // end position
-							
-							return rewrite;
-						}			
-					}			
-				}
-			}
-			//	foo(x) -> int x= 0; foo(x)
+		Block body;
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(fOriginalNode);
+		if (decl instanceof MethodDeclaration) {
+			body= (((MethodDeclaration) decl).getBody());
+		} else if (decl instanceof Initializer) {
+			body= (((Initializer) decl).getBody());
+		} else {
+			return null;
+		}
+		ASTRewrite rewrite= new ASTRewrite(decl);
+		
+		SimpleName[] names= getAllReferences(cu, body);
+		ASTNode dominant= getDominantNode(names);
+		
+		Statement dominantStatement= ASTResolving.findParentStatement(dominant);
+		SimpleName node= names[0];
+		
+		if (isAssigned(dominantStatement, node)) {
+			// x = 1; -> int x = 1;
+			Assignment assignment= (Assignment) node.getParent();
 			
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
-
-			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 			newDecl.setType(evaluateVariableType(ast));
-			newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
-
+			
+			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
+			newDeclFrag.setInitializer(placeholder);
+			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
+			rewrite.markAsReplaced(dominantStatement, newDecl);
+			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-			markAsLinked(rewrite, node, true, KEY_NAME); 
-			markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
+			markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
+			
+			markAsSelection(rewrite, newDecl); // end position
 
-			Statement statement= ASTResolving.findParentStatement(node);
-			if (statement != null) {
-				List list= ASTNodes.getContainingList(statement);
-				while (list == null && statement.getParent() instanceof Statement) { // parent must be if, for or while
-					statement= (Statement) statement.getParent();
-					list= ASTNodes.getContainingList(statement);
-				}
-				if (list != null) {
-					list.add(list.indexOf(statement), newDecl);
-					rewrite.markAsInserted(newDecl);
-					return rewrite;					
+			return rewrite;
+		} else if (isForStatementInit(dominantStatement, node)) {
+			//	for (x = 1;;) ->for (int x = 1;;)
+			
+			Assignment assignment= (Assignment) node.getParent();
+			
+			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+			VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
+			frag.setName(ast.newSimpleName(node.getIdentifier()));
+			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
+			frag.setInitializer(placeholder);
+			expression.setType(evaluateVariableType(ast));
+			
+			rewrite.markAsReplaced(assignment, expression);
+			
+			markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
+			markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
+			
+			markAsSelection(rewrite, expression); // end position
+			
+			return rewrite;
+		}
+		//	foo(x) -> int x= 0; foo(x)
+		
+		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+
+		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
+		newDecl.setType(evaluateVariableType(ast));
+		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
+
+		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+		markAsLinked(rewrite, node, true, KEY_NAME); 
+		markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
+		
+		Statement statement= dominantStatement;
+		List list= ASTNodes.getContainingList(statement);
+		while (list == null && statement.getParent() instanceof Statement) { // parent must be if, for or while
+			statement= (Statement) statement.getParent();
+			list= ASTNodes.getContainingList(statement);
+		}
+		if (list != null) {
+			list.add(list.indexOf(statement), newDecl);
+			rewrite.markAsInserted(newDecl);
+			return rewrite;					
+		}
+		return rewrite;
+	}
+	
+	private SimpleName[] getAllReferences(CompilationUnit cu, Block body) {
+		IProblem[] problems= cu.getProblems();
+		
+		ArrayList res= new ArrayList();
+		
+		int bodyStart= body.getStartPosition();
+		int bodyEnd= bodyStart + body.getLength();
+		
+		String name= fOriginalNode.getIdentifier();
+
+		for (int i= 0; i < problems.length; i++) {
+			IProblem curr= problems[i];
+			int probStart= curr.getSourceStart();
+			int probEnd= curr.getSourceEnd() + 1;
+			
+			if (curr.getID() == IProblem.UndefinedName &&  probStart > bodyStart && probEnd < bodyEnd) {
+				if (name.equals(curr.getArguments()[0])) {
+					ASTNode node= NodeFinder.perform(body, probStart, probEnd - probStart);
+					if (node instanceof SimpleName) {
+						res.add(node);
+					}
 				}
 			}
 		}
-		return null;
+		if (res.isEmpty()) {
+			res.add(fOriginalNode); // bug 48617 should fix that
+		}
+		
+		
+		SimpleName[] names= (SimpleName[]) res.toArray(new SimpleName[res.size()]);
+		if (res.size() > 0) {
+			Arrays.sort(names, new Comparator() {
+				public int compare(Object o1, Object o2) {
+					return ((SimpleName) o1).getStartPosition() - ((SimpleName) o2).getStartPosition();
+				}
+	
+				public boolean equals(Object obj) {
+					return false;
+				}
+			});
+		}
+		return names;
 	}
+	
+	
+	private ASTNode getDominantNode(SimpleName[] names) {
+		ASTNode dominator= names[0]; //ASTResolving.findParentStatement(names[0]);
+		for (int i= 1; i < names.length; i++) {
+			ASTNode curr= names[i];// ASTResolving.findParentStatement(names[i]);
+			if (curr != dominator) {
+				ASTNode parent= getCommonParent(curr, dominator);
+				
+				if (curr.getStartPosition() < dominator.getStartPosition()) {
+					dominator= curr;
+				}
+				while (dominator.getParent() != parent) {
+					dominator= dominator.getParent();
+				}
+			}
+		}
+		int parentKind= dominator.getParent().getNodeType();
+		if (parentKind != ASTNode.BLOCK && parentKind != ASTNode.FOR_STATEMENT) {
+			return dominator.getParent();
+		}
+		return dominator;
+	}
+	
+	private ASTNode getCommonParent(ASTNode node1, ASTNode node2) {
+		ASTNode parent= node1.getParent();
+		while (parent != null && !ASTNodes.isParent(node2, parent)) {
+			parent= parent.getParent();
+		}
+		return parent;
+	}	
 
 	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
