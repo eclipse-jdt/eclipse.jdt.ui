@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -92,6 +94,25 @@ public class SearchUsagesInFileAction extends Action {
 		public boolean visit(VariableDeclarationFragment node) {
 			if (node.getInitializer() != null)
 				match(node.getName(), fWriteUsages);
+			return super.visit(node);
+		}
+
+		public boolean visit(PrefixExpression node) {
+			PrefixExpression.Operator operator= node.getOperator();	
+			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
+				Expression operand= node.getOperand();
+				Name name= getName(operand);
+				if (name != null) 
+					match(name, fWriteUsages);				
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(PostfixExpression node) {
+			Expression operand= node.getOperand();
+			Name name= getName(operand);
+			if (name != null) 
+				match(name, fWriteUsages);
 			return super.visit(node);
 		}
 
