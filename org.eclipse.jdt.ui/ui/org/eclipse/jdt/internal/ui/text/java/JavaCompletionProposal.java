@@ -266,15 +266,21 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		
 		if (offset < fReplacementOffset)
 			return false;
+			
+		/* 
+		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
+		String word= fReplacementString;
+		 */ 
+		String word= fDisplayString;
 		
-		int replacementLength= fReplacementString == null ? 0 : fReplacementString.length();
-		if (offset >  fReplacementOffset + replacementLength)
+		int wordLength= word == null ? 0 : word.length();
+		if (offset >  fReplacementOffset + wordLength)
 			return false;
 		
 		try {
 			int length= offset - fReplacementOffset;
 			String start= document.get(fReplacementOffset, length);
-			return fReplacementString.substring(0, length).equalsIgnoreCase(start);
+			return word.substring(0, length).equalsIgnoreCase(start);
 		} catch (BadLocationException x) {
 		}		
 		
@@ -296,5 +302,4 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
 	}
-
 }
