@@ -2,9 +2,11 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -16,12 +18,15 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -29,6 +34,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	
@@ -36,7 +43,6 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		super("&Delete", provider);
 	}
 
-	//void perform(ISourceReference[] elements) throws CoreException {
 	protected void perform() throws CoreException {
 		if (!confirmDelete())
 			return;
@@ -163,6 +169,65 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	protected boolean confirmDelete() {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		return MessageDialog.openQuestion(parent, title, label);
+	}
+	
+	//overridden to add getters/setters
+	protected ISourceReference[] getElementsToProcess() {
+		ISourceReference[] elements= super.getElementsToProcess();
+		IField[] fields= getFields(elements);
+		if (fields.length == 0)
+			return elements;
+		IMethod[] gettersSetters= getGettersSettersForFields(fields);		
+		if (gettersSetters.length == 0)
+			return elements;
+		Set getterSetterSet= new HashSet(Arrays.asList(gettersSetters));
+		getterSetterSet.removeAll(Arrays.asList(elements));
+		if (getterSetterSet.isEmpty())
+			return elements;
+		if (! confirmGetterSetterDelete())
+			return elements;
+		
+		Set newElementSet= new HashSet(Arrays.asList(elements));
+		newElementSet.addAll(getterSetterSet);
+		return (ISourceReference[]) newElementSet.toArray(new ISourceReference[newElementSet.size()]);
+	}
+
+	private static IField[] getFields(ISourceReference[] elements){
+		List fields= new ArrayList();
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i] instanceof IField)
+				fields.add(elements[i]);
+		}
+		return (IField[]) fields.toArray(new IField[fields.size()]);
+	}
+	
+	private static IMethod[] getGettersSettersForFields(IField[] fields) {
+		try {
+			String[] namePrefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
+			String[] nameSuffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
+			
+			List gettersSetters= new ArrayList();
+			for (int i= 0; i < fields.length; i++) {
+				IMethod getter= GetterSetterUtil.getGetter(fields[i], namePrefixes, nameSuffixes);
+				if (getter != null && getter.exists())
+					gettersSetters.add(getter);
+				IMethod setter= GetterSetterUtil.getSetter(fields[i], namePrefixes, nameSuffixes);
+				if (setter != null && setter.exists())
+					gettersSetters.add(setter);			
+			}
+			return  (IMethod[]) gettersSetters.toArray(new IMethod[gettersSetters.size()]);
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), "Delete elements", "Unexpected exception. Please see log for details.");
+			return new IMethod[0];
+		}
+	}
+	
+	//made protected for ui-less testing
+	protected boolean confirmGetterSetterDelete() {
+		String title= "Confirm Delete of Getters/Setters";
+		String label= "Delete also getters/setters for the selected fields?";
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		return MessageDialog.openQuestion(parent, title, label);
 	}

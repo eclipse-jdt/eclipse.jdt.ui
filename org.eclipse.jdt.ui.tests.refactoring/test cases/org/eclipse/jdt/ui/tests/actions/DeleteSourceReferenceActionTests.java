@@ -181,5 +181,12 @@ public class DeleteSourceReferenceActionTests extends RefactoringTest{
 		SourceReferenceTestUtil.delete(elems);
 		check();
 	}
+
+	public void test15() throws Exception{
+		Object elem0= fCuA.getType("A").getField("field");
+		Object[] elems= new Object[]{elem0};
+		SourceReferenceTestUtil.delete(elems);
+		check();
+	}
 	
 }

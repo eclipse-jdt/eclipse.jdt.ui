@@ -25,6 +25,9 @@ class SourceReferenceTestUtil {
 			protected boolean confirmDelete() {
 				return true;
 			}
+			protected boolean confirmGetterSetterDelete(){
+				return true;
+			}
 		};
 		return deleteAction;
 	}
