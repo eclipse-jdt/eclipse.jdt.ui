@@ -238,7 +238,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				StringBuffer indent= indenter.computeIndentation(p, true);
 				if (indent != null) {
 					c.text= indent.append(c.text).toString();
-					c.length= indent.length();
+					c.length += c.offset - lineOffset;
 					c.offset= lineOffset;
 				}
 			}
