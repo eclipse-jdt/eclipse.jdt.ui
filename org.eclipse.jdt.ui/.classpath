@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="ui refactoring"/>
 	<classpathentry kind="src" path="core refactoring"/>
 	<classpathentry kind="src" path="core extension"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
