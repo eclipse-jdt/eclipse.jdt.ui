@@ -10,18 +10,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -127,18 +124,6 @@ public class JavaModelUtil {
 	}
 	
 
-	/** 
-	 * Finds a type by package and type name.
-	 * @param jproject the java project to search in
-	 * @param pack The package name
-	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
-	 * @return the type found, or null if not existing
-	 * @deprecated Use IJavaProject.findType(String, String) instead
-	 */	
-	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
-		return jproject.findType(pack, typeQualifiedName);
-	}
-	
 	/**
 	 * Finds a type container by container name.
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
@@ -195,17 +180,6 @@ public class JavaModelUtil {
 		return null;
 	}
 	
-	
-	/**
-	 * Gets the primary type of a compilation unit (type with the same name as the
-	 * compilation unit), or <code>null</code> if not existing.
-	 * @deprecated Use cu.findPrimaryType();
-	 */
-	public static IType findPrimaryType(ICompilationUnit cu) {
-		return cu.findPrimaryType();
-	}
-	
-
 	
 	/** 
 	 * Returns the element of the given compilation unit which is "equal" to the
@@ -267,29 +241,6 @@ public class JavaModelUtil {
 	
 	
 	/**
-	 * Gets the path of the underlying resource without throwing
-	 * a JavaModelException if the resource does not exist.
-	 * Returns <code>null</code> for libararies and elemens in libraries.
-	* @deprecated Use elem.getPath();
-	 */
-	public static IPath getUnderlyingPath(IJavaElement elem) {
-		IPackageFragmentRoot root= getPackageFragmentRoot(elem);
-		if (root != null && !root.isArchive()) {
-			return elem.getPath();
-		}
-		return null;
-	}	
-		
-	/**
-	 * Returns the raw class path entry corresponding to a package fragment root
-	 * or null if there isn't a corresponding entry.
-	 * @deprecated Use root.getRawClasspathEntry();
-	 */
-	public static IClasspathEntry getRawClasspathEntry(IPackageFragmentRoot root) throws JavaModelException {
-		return root.getRawClasspathEntry();
-	}
-
-	/**
 	 * Concatenates two names. Uses a dot for separation.
 	 * Both strings can be empty or <code>null</code>.
 	 */
@@ -345,15 +296,6 @@ public class JavaModelUtil {
 	}
 		
 	/**
-	 * Returns true if the element is on the build path of the given project
-	 * @deprecated Use jproject.isOnClasspath(element);
-	 */	
-	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
-		return jproject.isOnClasspath(element);
-	}
-	
-	
-	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given
 	 * element is already a package fragment root, the element itself is returned.
 	 */
@@ -361,16 +303,6 @@ public class JavaModelUtil {
 		return (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 	}
 
-	/**
-	 * Returns the first openable parent. If the given element is openable, the element
-	 * itself is returned.
-	 * @deprecated Use element.getOpenable();
-	 */
-	public static IOpenable getOpenable(IJavaElement element) {
-		return element.getOpenable();
-	}		
-	
-	
 	/**
 	 * Returns the parent of the supplied java element that conforms to the given 
 	 * parent type or <code>null</code>, if such a parent doesn't exit.
@@ -383,17 +315,6 @@ public class JavaModelUtil {
 		return null;
 	}
 	
-	/**
-	 * Returns the first java element that conforms to the given type walking the
-	 * java element's parent relationship. If the given element alrady conforms to
-	 * the given kind, the element is returned.
-	 * Returns <code>null</code> if no such element exits.
-	 * @deprecated Use element.getAncestor(kind);
-	 */
-	public static IJavaElement findElementOfKind(IJavaElement element, int kind) {
-		return element.getAncestor(kind);
-	}
-
 	/**
 	 * Finds a method in a type.
 	 * This searches for a method with the same name and signature. Parameter types are only
