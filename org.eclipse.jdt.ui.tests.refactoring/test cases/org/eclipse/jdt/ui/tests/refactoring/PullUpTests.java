@@ -68,6 +68,7 @@ public class PullUpTests extends RefactoringTest {
 			String actual= cu.getSource();
 			assertEquals("incorrect modification", expected, actual);
 		} finally{
+			performDummySearch();
 			cu.delete(false, null);
 		}	
 	}
@@ -87,6 +88,7 @@ public class PullUpTests extends RefactoringTest {
 			String actual= cu.getSource();
 			assertEquals("incorrect modification", expected, actual);
 		} finally{
+			performDummySearch();
 			cu.delete(false, null);
 		}	
 	}
@@ -101,6 +103,7 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
 		} finally{
+			performDummySearch();
 			cu.delete(false, null);
 		}		
 	}
@@ -129,6 +132,7 @@ public class PullUpTests extends RefactoringTest {
 			//assertEquals("incorrect lengths", expected.length(), actual.length());
 			assertEquals("incorrect modification", expected, actual);
 		} finally{
+			performDummySearch();
 			cu.delete(false, null);
 		}	
 	}
@@ -147,6 +151,7 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
 		} finally{
+			performDummySearch();
 			cu.delete(false, null);
 		}		
 	}
@@ -166,6 +171,7 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
 		} finally{
+			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}				
@@ -208,6 +214,7 @@ public class PullUpTests extends RefactoringTest {
 			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
 			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
 		} finally{
+			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}					
@@ -232,6 +239,7 @@ public class PullUpTests extends RefactoringTest {
 			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
 			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
 		} finally{
+			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}		
@@ -282,6 +290,7 @@ public class PullUpTests extends RefactoringTest {
 			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
 			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
 		} finally{
+			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}							

@@ -69,7 +69,7 @@ public abstract class RefactoringTest extends TestCase {
 		Refactoring.getUndoManager().flush();
 	}
 
-	private void performDummySearch() throws Exception{
+	protected void performDummySearch() throws Exception{
 		new SearchEngine().searchAllTypeNames(
 		 	ResourcesPlugin.getWorkspace(),
 			null,
@@ -85,6 +85,7 @@ public abstract class RefactoringTest extends TestCase {
 	
 	protected void tearDown() throws Exception {
 		performDummySearch();
+		
 		if (fPackageP.exists()){	
 			IJavaElement[] kids= fPackageP.getChildren();
 			for (int i= 0; i < kids.length; i++){

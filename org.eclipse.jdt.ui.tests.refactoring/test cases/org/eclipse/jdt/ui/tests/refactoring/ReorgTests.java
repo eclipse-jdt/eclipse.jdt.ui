@@ -87,9 +87,13 @@ public class ReorgTests extends RefactoringTest {
 	public void testActivation1() throws Exception{
 		List elements= new ArrayList();
 		ICompilationUnit cu= getCu("A.java", getPackageP(), "A.java");
-		elements.add(cu);
-		checkActivation(elements, true);		
-		cu.delete(false, null);
+		try{
+			elements.add(cu);
+			checkActivation(elements, true);	
+		} finally{
+			performDummySearch();
+			cu.delete(false, null);
+		}	
 	}
 	
 	public void testActivation2() throws Exception{
@@ -98,6 +102,7 @@ public class ReorgTests extends RefactoringTest {
 		elements.add(cu);
 		elements.add(getPackageP());
 		checkActivation(elements, false);
+		performDummySearch();
 		cu.delete(false, null);
 	}
 
@@ -108,6 +113,7 @@ public class ReorgTests extends RefactoringTest {
 		elements.add(cu);
 		elements.add(p1);
 		checkActivation(elements, false);
+		performDummySearch();
 		cu.delete(false, null);		
 		p1.delete(false, null);
 	}
@@ -120,6 +126,7 @@ public class ReorgTests extends RefactoringTest {
 		elements.add(cu);
 		elements.add(cu2);
 		checkActivation(elements, true);
+		performDummySearch();
 		cu2.delete(false, null);
 		cu.delete(false, null);
 	}
@@ -154,6 +161,7 @@ public class ReorgTests extends RefactoringTest {
 		IFile file= createFile("launcher.gif");
 		elements.add(file);
 		checkActivation(elements, true);
+		performDummySearch();
 		file.delete(false, null);
 	}
 	
@@ -162,6 +170,7 @@ public class ReorgTests extends RefactoringTest {
 		IFolder folder= createFolder("newF");
 		elements.add(folder);
 		checkActivation(elements, true);
+		performDummySearch();
 		folder.delete(false, null);
 	}	
 	
@@ -172,6 +181,7 @@ public class ReorgTests extends RefactoringTest {
 		elements.add(folder);
 		elements.add(cu);
 		checkActivation(elements, false);
+		performDummySearch();
 		cu.delete(false, null);
 		folder.delete(false, null);
 	}	
@@ -181,6 +191,7 @@ public class ReorgTests extends RefactoringTest {
 		IPackageFragment p1= getRoot().createPackageFragment("p1", false, null);
 		elements.add(p1);
 		checkActivation(elements, true);
+		performDummySearch();
 		p1.delete(false, null);
 	}		
 	
@@ -219,6 +230,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("moveRef6", true, moveRef.isValidDestination(folder));
 		
 		} finally{
+			performDummySearch();
 			folder.delete(false, null);
 			p1.delete(false, null);
 			cu.delete(false, null);
@@ -262,6 +274,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("moveRef6", true, moveRef.isValidDestination(folder));
 
 		}finally{		
+			performDummySearch();
 			folder.delete(false, null);	
 			p1.delete(false, null);
 			cu.delete(false, null);
@@ -308,6 +321,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("moveRef6", true, moveRef.isValidDestination(folder));
 			assertEquals("moveRef7", false, moveRef.isValidDestination(file));
 		} finally{		
+			performDummySearch();
 			file.delete(false, null);
 			folder.delete(false, null);	
 			p1.delete(false, null);
@@ -349,6 +363,7 @@ public class ReorgTests extends RefactoringTest {
 			assertTrue("copied folder should be read-only", copiedFolder.isReadOnly());
 		
 		}finally{
+			performDummySearch();
 			JavaProjectHelper.delete(p2);
 			folder.delete(false, null);
 			copiedFolder.delete(false, null);
@@ -386,6 +401,7 @@ public class ReorgTests extends RefactoringTest {
 			assertTrue("copied folder should be read-only", copiedFolder.isReadOnly());
 		
 		}finally{
+			performDummySearch();
 			if (p2 != null)
 				JavaProjectHelper.delete(p2);
 			srcFolder.getCorrespondingResource().delete(false, null);
@@ -423,6 +439,7 @@ public class ReorgTests extends RefactoringTest {
 			assertTrue("copied package should be read-only (2)", copiedPackage.getCorrespondingResource().isReadOnly());
 		
 		}finally{
+			performDummySearch();
 			srcFolder2.getCorrespondingResource().delete(false, null);
 			pack.delete(false, null);
 		}

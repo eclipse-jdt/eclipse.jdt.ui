@@ -51,8 +51,8 @@ public class SurroundWithTestSetup extends TestSetup {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJavaProject);
 		super.tearDown();
+		JavaProjectHelper.delete(fJavaProject);
 	}
 	
 	public IPackageFragment getTryCatchPackage() {

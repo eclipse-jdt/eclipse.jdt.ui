@@ -40,7 +40,8 @@ public class MultiMoveTests extends RefactoringTest {
 		return createCU(pack, cuName, getFileContents(getRefactoringPath() + cuPath));
 	}
 	
-	private static void delete(IPackageFragment pack) {
+	private void delete(IPackageFragment pack) throws Exception {
+		performDummySearch();
 		try {
 			if (pack.exists())
 				pack.delete(true, null);

@@ -72,6 +72,7 @@ public class MoveMembersTests extends RefactoringTest {
 			assertEquals("incorrect modification of  B", expected, actual);
 		
 		} finally{
+			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}	
@@ -105,6 +106,7 @@ public class MoveMembersTests extends RefactoringTest {
 			assertEquals("precondition was supposed to fail", errorLevel, result.getSeverity());
 		
 		} finally{
+			performDummySearch();			
 			cuA.delete(false, null);
 			cuB.delete(false, null);
 		}	
@@ -156,6 +158,7 @@ public class MoveMembersTests extends RefactoringTest {
 			packageForB= getRoot().createPackageFragment("r", false, null);
 			fieldMethodHelper_passingTest(new String[]{"f"}, new String[0], new String[0][0], getPackageP(), packageForB);
 		} finally{
+			performDummySearch();
 			if (packageForB != null)
 				packageForB.delete(true, null);
 		}	
@@ -329,6 +332,7 @@ public class MoveMembersTests extends RefactoringTest {
 										 RefactoringStatus.WARNING, "r.B", 
 										 getPackageP(), packageForB);
 		} finally{
+			performDummySearch();
 			if (packageForB != null)
 				packageForB.delete(true, null);
 		}	

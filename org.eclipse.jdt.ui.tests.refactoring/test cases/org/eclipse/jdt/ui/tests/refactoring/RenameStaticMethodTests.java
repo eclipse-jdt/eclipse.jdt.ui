@@ -44,6 +44,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);
 		} finally{
+			performDummySearch();
 			classA.getCompilationUnit().delete(true, null);
 		}	
 	}
@@ -76,6 +77,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 			assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		} finally{
+			performDummySearch();
 			cu.delete(true, null);
 		}
 	}

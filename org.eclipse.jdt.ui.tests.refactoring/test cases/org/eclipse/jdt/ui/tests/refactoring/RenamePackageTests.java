@@ -44,23 +44,27 @@ public class RenamePackageTests extends RefactoringTest {
 	 * the 0th one is the one to rename
 	 */
 	private void helper1(String packageNames[], String[][] packageFiles, String newPackageName) throws Exception{
-		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
-		for (int i= 0; i < packageFiles.length; i++){
-			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
-			for (int j= 0; j < packageFiles[i].length; j++){
-				createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
-				//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
-			}	
-		}
-		IPackageFragment thisPackage= packages[0];
-		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
-		if (fIsVerbose)
-			DebugUtils.dump("" + result);
+		try{
+			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+			for (int i= 0; i < packageFiles.length; i++){
+				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+				for (int j= 0; j < packageFiles[i].length; j++){
+					createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
+					//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
+				}	
+			}
+			IPackageFragment thisPackage= packages[0];
+			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			RefactoringStatus result= performRefactoring(ref);
+			assertNotNull("precondition was supposed to fail", result);
+			if (fIsVerbose)
+				DebugUtils.dump("" + result);
+		} finally{		
+			performDummySearch();
 		
-		for (int i= 0; i < packageNames.length; i++){
-			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+			for (int i= 0; i < packageNames.length; i++){
+				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+			}	
 		}	
 	}
 	
@@ -68,20 +72,24 @@ public class RenamePackageTests extends RefactoringTest {
 	 * the 0th one is the one to rename
 	 */
 	private void helper1(String[] packageNames, String newPackageName) throws Exception{
-		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
-		for (int i= 0; i < packageNames.length; i++){
-			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
-		}
-		IPackageFragment thisPackage= packages[0];
-		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
-		if (fIsVerbose)
-			DebugUtils.dump("" + result);
+		try{
+			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+			for (int i= 0; i < packageNames.length; i++){
+				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+			}
+			IPackageFragment thisPackage= packages[0];
+			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			RefactoringStatus result= performRefactoring(ref);
+			assertNotNull("precondition was supposed to fail", result);
+			if (fIsVerbose)
+				DebugUtils.dump("" + result);
+		} finally{		
+			performDummySearch();	
 			
-		for (int i= 0; i < packageNames.length; i++){
-			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
-		}		
+			for (int i= 0; i < packageNames.length; i++){
+				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+			}		
+		}	
 	}
 	
 	private void helper1() throws Exception{
@@ -89,50 +97,52 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName, boolean updateReferences) throws Exception{
-		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
-		ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
-		for (int i= 0; i < packageNames.length; i++){
-			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
-			for (int j= 0; j < packageFileNames[i].length; j++){
-				cus[i][j]= createCUfromTestFile(packages[i], packageFileNames[i][j], packageNames[i].replace('.', '/') + "/");
+		try{
+			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+			ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
+			for (int i= 0; i < packageNames.length; i++){
+				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+				for (int j= 0; j < packageFileNames[i].length; j++){
+					cus[i][j]= createCUfromTestFile(packages[i], packageFileNames[i][j], packageNames[i].replace('.', '/') + "/");
+				}
 			}
-		}
-		IPackageFragment thisPackage= packages[0];
-		RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		ref.setUpdateReferences(updateReferences);
-		RefactoringStatus result= performRefactoring(ref);
-		assertEquals("preconditions were supposed to pass", null, result);
-		
-		//---
-		
-		assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
-		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
-		assertTrue("new package does not exist", newPackage.exists());
-		
-		for (int i= 0; i < packageFileNames.length; i++){
-			String packageName= (i == 0) 
-							? newPackageName.replace('.', '/') + "/"
-							: packageNames[i].replace('.', '/') + "/";
-			for (int j= 0; j < packageFileNames[i].length; j++){
-				String s1= getFileContents(getOutputTestFileName(packageFileNames[i][j], packageName));
-				ICompilationUnit cu= 
-					(i == 0) 
-						? newPackage.getCompilationUnit(packageFileNames[i][j] + ".java")
-						: cus[i][j];
-				//DebugUtils.dump("cu:" + cu.getElementName());		
-				String s2= cu.getSource();
-				
-				//DebugUtils.dump("expected:" + s1);
-				//DebugUtils.dump("was:" + s2);
-				assertEquals("invalid update in file " + cu.getElementName(), s1,	s2);
+			IPackageFragment thisPackage= packages[0];
+			RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			ref.setUpdateReferences(updateReferences);
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("preconditions were supposed to pass", null, result);
+			
+			//---
+			
+			assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+			IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
+			assertTrue("new package does not exist", newPackage.exists());
+			
+			for (int i= 0; i < packageFileNames.length; i++){
+				String packageName= (i == 0) 
+								? newPackageName.replace('.', '/') + "/"
+								: packageNames[i].replace('.', '/') + "/";
+				for (int j= 0; j < packageFileNames[i].length; j++){
+					String s1= getFileContents(getOutputTestFileName(packageFileNames[i][j], packageName));
+					ICompilationUnit cu= 
+						(i == 0) 
+							? newPackage.getCompilationUnit(packageFileNames[i][j] + ".java")
+							: cus[i][j];
+					//DebugUtils.dump("cu:" + cu.getElementName());		
+					String s2= cu.getSource();
+					
+					//DebugUtils.dump("expected:" + s1);
+					//DebugUtils.dump("was:" + s2);
+					assertEquals("invalid update in file " + cu.getElementName(), s1,	s2);
+				}
 			}
-		}
-		
-		getRoot().getPackageFragment(newPackageName).delete(true, null);
-		for (int i= 1; i < packageNames.length; i++){
-			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+		} finally{
+			performDummySearch();
+			getRoot().getPackageFragment(newPackageName).delete(true, null);
+			for (int i= 1; i < packageNames.length; i++){
+				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+			}	
 		}	
-		
 	}
 	
 	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{

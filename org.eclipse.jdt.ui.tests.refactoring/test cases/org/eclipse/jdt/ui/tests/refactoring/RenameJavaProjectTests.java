@@ -74,6 +74,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			}
 			
 		}	finally{
+			performDummySearch();
+			
 			JavaProjectHelper.removeSourceContainer(referencing1, "src");
 			JavaProjectHelper.removeSourceContainer(referencing2, "src");
 			
