@@ -4,68 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;import java.util.List;
-import java.util.Set;
-
-import java.io.File;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
-
-import org.eclipse.ui.dialogs.FileSelectionDialog;
-import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.ui.dialogs.ResourceSelectionDialog;
-import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.TwoPaneElementSelector;
-import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.ui.dialogs.ResourceSelectionDialog;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.SelectionDialog;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  *	Page 3 of the JAR Package wizard
@@ -161,12 +100,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		createSealingGroup(composite);
 
 //		createSpacer(composite);
-
-//		fMainClassHeaderLabel= createLabel(composite, "Which class is the application's entry point?", false);
-
 		new Label(composite, SWT.NONE); // vertical spacer
 
-//		fMainClassHeaderLabel= createLabel(composite, "Other options:", false);
 		fMainClassHeaderLabel= createLabel(composite, "Which class is the application's entry point?", false);
 		createMainClassGroup(composite);
 
@@ -590,6 +525,9 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 			// Sealing
 			settings.put(STORE_SEAL_JAR, fJarPackage.isJarSealed());
+			/*
+			 * The following values are not stored in the dialog store
+			 */
 //			settings.put(STORE_SEALED_PACKAGES, fJarPackage.getPackageNamesToSeal());
 //			settings.put(STORE_UNSEALED_PACKAGES, fJarPackage.getPackageNamesToUnseal());
 			
@@ -658,6 +596,9 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	
 			// Sealing
 			fJarPackage.setSealJar(settings.getBoolean(STORE_SEAL_JAR));
+			/*
+			 * The following values are not stored for the dialog
+			 */
 //			fJarPackage.setPackageNamesToSeal(settings.getArray(STORE_SEALED_PACKAGES));
 //			fJarPackage.setPackageNamesToUnseal(settings.getArray(STORE_UNSEALED_PACKAGES));
 
@@ -690,6 +631,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// Sealing
 		fJarPackage.setSealJar(fSealJarRadioButton.getSelection());
+			
+
 		// Packages are updated when dialog is closed
 		
 		// Main-Class

@@ -4,8 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.File;import java.util.HashSet;import java.util.Iterator;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.dialogs.WizardExportResourcesPage;
+import java.io.File;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.WizardExportResourcesPage;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -122,12 +121,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fOverwriteCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fOverwriteCheckbox.setText("Overwrite existing files without warning");
 		fOverwriteCheckbox.addListener(SWT.Selection, this);
-/*
-		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fSaveDescriptionCheckbox.setText("Save the description of this JAR in the workspace");
-		fSaveDescriptionCheckbox.addListener(SWT.Selection, this);
-		createDescriptionFileGroup(parent);
-	*/
 	}
 	/**
 	 *	Answer the contents of the destination specification widget. If this
@@ -193,10 +186,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			// options
 			settings.put(STORE_COMPRESS, fJarPackage.isCompressed());
 			settings.put(STORE_OVERWRITE, fJarPackage.allowOverwrite());
-/*
-			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
-			settings.put(STORE_DESCRIPTION_LOCATION, fJarPackage.getDescriptionLocation().toString());
-			*/
 		}
 		// Allow subclasses to save values
 		internalSaveWidgetValues();
@@ -236,11 +225,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		// options
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
-
-		/*
-		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
-		fDescriptionFileText.setText(fJarPackage.getDescriptionLocation().toString());
-		*/
 	}
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
@@ -262,11 +246,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			// options
 			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
 			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
-
-			/*
-			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
-			fJarPackage.setDescriptionLocation(getPathFromString(settings.get(STORE_DESCRIPTION_LOCATION)));
-			*/
 		}
 	}
 	/**
@@ -454,13 +433,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * Updates the enablements of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
-		/*
-		boolean saveDescription= fSaveDescriptionCheckbox.getSelection();
-		fDescriptionFileGroup.setEnabled(saveDescription);
-		fDescriptionFileBrowseButton.setEnabled(saveDescription);
-		fDescriptionFileText.setEnabled(saveDescription);
-		fDescriptionFileLabel.setEnabled(saveDescription);
-		*/
 	}
 	/*
 	 * Overrides method from IJarPackageWizardPage

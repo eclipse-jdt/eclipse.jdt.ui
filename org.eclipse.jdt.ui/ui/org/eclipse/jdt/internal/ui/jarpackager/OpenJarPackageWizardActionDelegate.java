@@ -4,9 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.io.IOException;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.wizard.WizardDialog;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * This action delegate opens the JAR Package Wizard and initializes
@@ -22,7 +28,16 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 	 */
 	public void run(IAction action) {
 		Shell parent= getShell();
-		JarPackage jarPackage= readJarPackage(getDescriptionFile(getSelection()));
+		JarPackage jarPackage= null;
+		try {
+			jarPackage= readJarPackage(getDescriptionFile(getSelection()));			
+		} catch (IOException ex) {
+			ExceptionHandler.handle(ex, parent, "Open JAR Packager Error", "Reading JAR package description from file failed");
+			return;
+		} catch (CoreException ex) {
+			ExceptionHandler.handle(ex, parent, "Open JAR Packager Error", "Reading JAR package description from file failed");
+			return;
+		}
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

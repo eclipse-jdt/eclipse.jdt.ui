@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.lang.ClassNotFoundException;
 import java.lang.reflect.InvocationTargetException;
-import java.io.IOException;
+import java.util.Iterator;import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -66,37 +66,44 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 		else
 			fSelection= StructuredSelection.EMPTY;
 	}
-
+	/**
+	 * Returns the description file for the first description file in
+	 * the selection. Use this method if this action is only active if
+	 * one single file is selected.
+	 */
 	protected IFile getDescriptionFile(IStructuredSelection selection) {
 		return (IFile)selection.getFirstElement();
 	}
 	/**
+	 * Returns a description file for each description file in
+	 * the selection. Use this method if this action allows multiple
+	 * selection.
+	 */
+	protected IFile[] getDescriptionFiles(IStructuredSelection selection) {
+		IFile[] files= new IFile[selection.size()];
+		Iterator iter= selection.iterator();
+		int i= 0;
+		while (iter.hasNext())
+			files[i++]= (IFile)iter.next();
+		return files;
+	}
+	/**
 	 * Reads the JAR package spec from file.
 	 */
-	protected JarPackage readJarPackage(IFile description) {
+	protected JarPackage readJarPackage(IFile description) throws CoreException, IOException {
 		Assert.isLegal(description.isAccessible());
 		Assert.isNotNull(description.getFileExtension());
 		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));
-		JarPackageReader objectInput= null;
+		JarPackageReader reader= null;
+		JarPackage jarPackage= null;
 		try {
-			objectInput= new JarPackageReader(description.getContents());
-			return (JarPackage)objectInput.readObject();
-		} catch (CoreException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
+			reader= new JarPackageReader(description.getContents());
+			jarPackage= reader.readXML();
 		} finally {
-			try {
-				if (objectInput != null)
-					objectInput.close();
-			}
-			catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			if (reader != null)
+				reader.close();
+			return jarPackage;
 		}
-		return null;
 	}
 
 	protected IWorkbench getWorkbench() {

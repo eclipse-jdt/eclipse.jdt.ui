@@ -1,49 +1,15 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.operation.ModalContext;
-import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayInputStream;import java.io.ByteArrayOutputStream;import java.io.IOException;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import java.util.jar.Manifest;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.operation.ModalContext;import org.eclipse.jface.util.Assert;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
  */
 public class JarFileExportOperation implements IRunnableWithProgress {
 
 	private JarWriter fJarWriter;
-	private JarPackage fJarPackage;
+	private JarPackage fJarPackage;	private IFile[] fDescriptionFiles;
 	private Shell fParentShell;
 	private List fErrors= new ArrayList(1); //IStatus
 	private Map fJavaNameToClassFilesMap;
-	private IFolder fClassFilesMapFolder;
-
+	private IFolder fClassFilesMapFolder;
 	/**
 	 * Creates an instance of this class.
 	 *
@@ -51,11 +17,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	parent	the parent for the dialog,
 	 * 			or <code>null</code> if no dialog should be presented
 	 */
-	public JarFileExportOperation(JarPackage jarPackage, Shell parent) {
-		fJarPackage= jarPackage;
-		fParentShell= parent;
-	}
-	/**
+	public JarFileExportOperation(JarPackage jarPackage, Shell parent) {		fJarPackage= jarPackage;		fParentShell= parent;	}	/**	 * Creates an instance of this class.	 *	 * @param	descriptions	an array with JAR package descriptions	 * @param	parent			the parent for the dialog,	 * 			or <code>null</code> if no dialog should be presented	 */	public JarFileExportOperation(IFile[] descriptions, Shell parent) {		fDescriptionFiles= descriptions;		fParentShell= parent;	}	/**
 	 * Adds a new warning to the list with the passed information.	 * Normally the export operation continues after a warning.
 	 * @param	message		the message
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
@@ -287,11 +249,10 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	progressMonitor	the progress monitor that displays the progress
 	 * @see		#getStatus()
 	 */
-	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
-		int totalWork= countSelectedElements();
+	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		if (fJarPackage != null)			singleRun(progressMonitor);		else {			int jarCount= fDescriptionFiles.length;			for (int i= 0; i < jarCount; i++) {				fJarPackage= readJarPackage(fDescriptionFiles[i]);				singleRun(progressMonitor);			}		}	}	public void singleRun(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		int totalWork= countSelectedElements();
 		progressMonitor.beginTask("Exporting:", totalWork);
 		try {			if (!preconditionsOK())				throw new InvocationTargetException(null, "JAR creation failed. Details follow");			fJarWriter= new JarWriter(fJarPackage, fParentShell);
-			exportSelectedElements(progressMonitor);		} catch (IOException ex) {
+			exportSelectedElements(progressMonitor);			if (getStatus().getSeverity() != IStatus.ERROR) {				progressMonitor.subTask("Saving files...");				saveFiles();			}		} catch (IOException ex) {
 			addError("Unable to create JAR file: " +  ex.getMessage(), ex);
 			throw new InvocationTargetException(ex, "Unable to create JAR file: " + ex.getMessage());
 		} catch (CoreException ex) {
@@ -308,4 +269,4 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			progressMonitor.done();
 		}
 	}
-		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError("No export type chosen", null);			return false;		}		if (fJarPackage.getSelectedElements() == null || fJarPackage.getSelectedElements().size() == 0) {			addError("No resources selected", null);			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError("Invalid JAR location", null);			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError("Manifest does not exist", null);			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError("Main class is not valid", null);			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedElements();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError("File is unsaved: " + dirtyFile.getFullPath(), null);					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}}
+		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError("No export type chosen", null);			return false;		}		if (fJarPackage.getSelectedElements() == null || fJarPackage.getSelectedElements().size() == 0) {			addError("No resources selected", null);			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError("Invalid JAR location", null);			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError("Manifest does not exist", null);			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError("Main class is not valid", null);			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedElements();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError("File is unsaved: " + dirtyFile.getFullPath(), null);					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}	protected void saveFiles() {		// Save the manifest		if (fJarPackage.isManifestSaved()) {			try {				saveManifest();			} catch (CoreException ex) {				addError("Saving manifest in workspace failed", ex);			} catch (IOException ex) {				addError("Saving manifest in workspace failed", ex);			}		}				// Save the description		if (fJarPackage.isDescriptionSaved()) {			try {				saveDescription();			} catch (CoreException ex) {				addError("Saving description in workspace failed", ex);			} catch (IOException ex) {				addError("Saving description in workspace failed", ex);			}		}	}	protected void saveDescription() throws CoreException, IOException {		// Adjust JAR package attributes		if (fJarPackage.isManifestReused())			fJarPackage.setGenerateManifest(false);		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();		JarPackageWriter objectStream= new JarPackageWriter(objectStreamOutput);		ByteArrayInputStream fileInput= null;		try {			objectStream.writeXML(fJarPackage);			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());			if (fJarPackage.getDescriptionFile().isAccessible() && fJarPackage.allowOverwrite())				fJarPackage.getDescriptionFile().setContents(fileInput, true, true, null);			else {				org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Should ask again");				fJarPackage.getDescriptionFile().create(fileInput, true, null);				}		}		finally {			if (fileInput != null)				fileInput.close();			if (objectStream != null)				objectStream.close();		}	}	protected void saveManifest() throws CoreException, IOException {		ByteArrayOutputStream manifestOutput= new ByteArrayOutputStream();		ByteArrayInputStream fileInput= null;		try {			Manifest manifest= ManifestFactory.getInstance().create(fJarPackage);			manifest.write(manifestOutput);			fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());			if (fJarPackage.getManifestFile().isAccessible() && fJarPackage.allowOverwrite())				fJarPackage.getManifestFile().setContents(fileInput, true, true, null);			else {				org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Should ask again");				fJarPackage.getManifestFile().create(fileInput, true, null);			}		}		finally {			if (manifestOutput != null)				manifestOutput.close();			if (fileInput != null)				fileInput.close();		}	}	/**	 * Reads the JAR package spec from file.	 */	protected JarPackage readJarPackage(IFile description) {		Assert.isLegal(description.isAccessible());		Assert.isNotNull(description.getFileExtension());		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));		JarPackage jarPackage= null;		JarPackageReader reader= null;		try {			reader= new JarPackageReader(description.getContents());			// Do not save - only generate JAR			jarPackage= reader.readXML();			jarPackage.setSaveManifest(false);			jarPackage.setSaveDescription(false);		} catch (CoreException ex) {				addError("Error reading JAR package from description", ex);		} catch (IOException ex) {				addError("Error reading JAR package from description", ex);		} finally {			try {				if (reader != null)					reader.close();			}			catch (IOException ex) {				addError("Error reading JAR package from description", ex);			}		}		return jarPackage;	}}

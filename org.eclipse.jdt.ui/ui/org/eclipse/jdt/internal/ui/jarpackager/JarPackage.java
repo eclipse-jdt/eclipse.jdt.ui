@@ -41,7 +41,7 @@ public class JarPackage implements java.io.Serializable {
 	public static final String DESCRIPTION_EXTENSION= "jardesc";
 
 	private String	fManifestVersion;
-	private boolean fIsUsedToInitialize;
+	private transient boolean fIsUsedToInitialize;
 
 	/*
 	 * What to export - internal locations
@@ -49,15 +49,15 @@ public class JarPackage implements java.io.Serializable {
 	 */	
 	private boolean fExportClassFiles;				// export generated class files and resources
 	private boolean	fExportJavaFiles;				// export java files and resources
-transient 	private List	fSelectedElements;		// internal locations
+	private List	fSelectedElements;		// internal locations
 
-transient 	private IPath	fJarLocation;			// external location
+	private IPath	fJarLocation;			// external location
 
 	private boolean fOverwrite;
 	private boolean fCompress;
 	
 	private boolean	fSaveDescription;
-transient 	private IPath	fDescriptionLocation; // internal location
+	private IPath	fDescriptionLocation; // internal location
 	/*
 	 * A normal JAR has a manifest (fUsesManifest is true)
 	 * The manifest can be contributed in two ways
@@ -71,7 +71,7 @@ transient 	private IPath	fDescriptionLocation; // internal location
 	private boolean fSaveManifest;
 	private boolean fReuseManifest;	
 	private boolean fGenerateManifest;
-transient private IPath fManifestLocation; // internal location
+	private IPath fManifestLocation; // internal location
 	/*
 	 * Sealing: a JAR can be
 	 * - sealed (fSealJar is true) and a list of 
@@ -82,10 +82,10 @@ transient private IPath fManifestLocation; // internal location
 	 *		while the list of unsealed packages is ignored
 	 */
 	private boolean fSealJar;
-transient 	private IPackageFragment[] fPackagesToSeal;
-transient 	private IPackageFragment[] fPackagesToUnseal;
+	private IPackageFragment[] fPackagesToSeal;
+	private IPackageFragment[] fPackagesToUnseal;
 
-transient 	private IType fMainClass;
+ 	private IType fMainClass;
 	
 	private String fDownloadExtensionsPath;	
 	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
@@ -342,7 +342,7 @@ transient 	private IType fMainClass;
 	 * Gets the selected elements
 	 * @return a List with the selected elements
 	 */
-	public List getSelectedElements() {
+	public List getSelectedElements() {		if (fSelectedElements == null)			setSelectedElements(new ArrayList());
 		return fSelectedElements;
 	}
 	/**
@@ -386,7 +386,7 @@ transient 	private IType fMainClass;
 	 * Subclasses may override to provide their own reader.
 	 * 
 	 * @param	inputStream the underlying stream
-	 * @return	a JarPackage specification reader
+	 * @return	a JarPackage specification reader	 * @deprecated	As of 0.114, create the  reader outside this class - will be removed
 	 */
 	protected JarPackageReader getReader(InputStream inputStream) {
 		return new JarPackageReader(inputStream);
@@ -396,8 +396,7 @@ transient 	private IType fMainClass;
 	 * Subclasses may override to provide their own writer.
 	 * 
 	 * @param	outputStream the underlying stream
-	 * @return	a JarPackage specification writer
-	 */
+	 * @return	a JarPackage specification writer	 * @deprecated	As of 0.114, create the  reader outside this class - will be removed	 */
 	protected JarPackageWriter getWriter(OutputStream outputStream) {
 		return new JarPackageWriter(outputStream);
 	}
@@ -468,7 +467,7 @@ transient 	private IType fMainClass;
 	 */
 	public String toString() {
 		ByteArrayOutputStream out= new ByteArrayOutputStream();
-		JarPackageWriter writer= getWriter(out);
+		JarPackageWriter writer= new JarPackageWriter(out);
 		try {
 			writer.writeString(this);
 		}

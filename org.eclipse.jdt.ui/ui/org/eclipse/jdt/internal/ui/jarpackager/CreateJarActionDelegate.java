@@ -28,8 +28,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	 */
 	public void run(IAction action) {
 		Shell shell= getShell();
-		JarPackage jarPackage= readJarPackage(getDescriptionFile(getSelection()));
-		JarFileExportOperation op= new JarFileExportOperation(jarPackage, shell);
+		JarFileExportOperation op= new JarFileExportOperation(getDescriptionFiles(getSelection()), shell);
 		try {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(true, true, op);

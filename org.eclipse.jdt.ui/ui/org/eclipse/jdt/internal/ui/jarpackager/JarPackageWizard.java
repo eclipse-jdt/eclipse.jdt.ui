@@ -4,52 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.jar.Manifest;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.ui.IExportWizard;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.lang.reflect.InvocationTargetException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.ui.IExportWizard;import org.eclipse.ui.IWorkbench;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Standard workbench wizard for exporting resources from the workspace
@@ -133,6 +88,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		// ignore the selection argument since the main export wizard changed it
 		fSelection= getValidSelection();
 		fJarPackage= new JarPackage();
+		fJarPackage.setIsUsedToInitialize(false);
 		setWindowTitle("JAR Packager");
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
@@ -147,7 +103,9 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		Assert.isNotNull(workbench);
 		Assert.isNotNull(jarPackage);		
 		fWorkbench= workbench;
-		fJarPackage= new JarPackage();
+		fJarPackage= jarPackage;
+		fJarPackage.setIsUsedToInitialize(true);
+		fSelection= new StructuredSelection(fJarPackage.getSelectedElements());
 		setWindowTitle("JAR Packager");
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
@@ -174,29 +132,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			if (page instanceof IJarPackageWizardPage)
 				((IJarPackageWizardPage)page).saveWidgetValues();
 		}
-		
-		// Save the manifest
-		if (fJarPackage.isManifestSaved()) {
-			try {
-				saveManifest();
-			} catch (CoreException ex) {
-				ExceptionHandler.handle(ex, getShell(), "JAR Package Wizard Error", "Saving manifest in workspace failed");
-			} catch (IOException ex) {
-				ExceptionHandler.showStackTraceDialog(ex, getShell(), "Saving manifest in workspace failed");
-			}
-		}
-		
-		// Save the description
-		if (fJarPackage.isDescriptionSaved()) {
-			try {
-				saveDescription();
-			} catch (CoreException ex) {
-				ExceptionHandler.handle(ex, getShell(), "JAR Package Wizard Error", "Saving description in workspace failed");
-			} catch (IOException ex) {
-				ExceptionHandler.showStackTraceDialog(ex, getShell(), "Saving description in workspace failed");
-			}
-		}
-
 		return true;
 	}
 	/**
@@ -216,70 +151,10 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {
 			ErrorDialog.openError(getShell(), "JAR Export Problems", null, status);
-			return false;
+			return !(status.getSeverity() == IStatus.ERROR);
 		}
 		return true;
 	}
-
-	protected boolean isDescriptionSelected(IStructuredSelection selection) {
-		if (selection == null || selection.size() != 1 || !(selection.getFirstElement() instanceof IFile))
-			return false;
-		IFile file= (IFile)selection.getFirstElement();
-		String extension= file.getFileExtension();
-		if (file.isAccessible() && extension != null && extension.equals(JarPackage.DESCRIPTION_EXTENSION))
-			return true;
-		return false;
-	}
-
-	protected void saveManifest() throws CoreException, IOException {
-		ByteArrayOutputStream manifestOutput= new ByteArrayOutputStream();
-		ByteArrayInputStream fileInput= null;
-		try {
-			Manifest manifest= ManifestFactory.getInstance().create(fJarPackage);
-			manifest.write(manifestOutput);
-			fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());
-			if (fJarPackage.getManifestFile().isAccessible() && fJarPackage.allowOverwrite())
-				fJarPackage.getManifestFile().setContents(fileInput, true, true, null);
-			else {
-				org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Should ask again");
-				fJarPackage.getManifestFile().create(fileInput, true, null);
-			}
-		}
-		finally {
-			if (manifestOutput != null)
-				manifestOutput.close();
-			if (fileInput != null)
-				fileInput.close();
-		}
-	}
-
-	protected void saveDescription() throws CoreException, IOException {
-		// Adjust JAR package attributes
-		if (fJarPackage.isManifestReused())
-			fJarPackage.setGenerateManifest(false);
-		fJarPackage.setIsUsedToInitialize(false);
-		
-		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();
-		JarPackageWriter objectStream= fJarPackage.getWriter(objectStreamOutput);;
-		ByteArrayInputStream fileInput= null;
-		try {
-			objectStream.writeObject(fJarPackage);
-			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());
-			if (fJarPackage.getDescriptionFile().isAccessible() && fJarPackage.allowOverwrite())
-				fJarPackage.getDescriptionFile().setContents(fileInput, true, true, null);
-			else {
-				org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Should ask again");
-				fJarPackage.getDescriptionFile().create(fileInput, true, null);	
-			}
-		}
-		finally {
-			if (fileInput != null)
-				fileInput.close();
-			if (objectStream != null)
-				objectStream.close();
-		}
-	}
-
 	/**
 	 * Gets the current workspace page selection and converts it to a valid
 	 * selection for this wizard:
