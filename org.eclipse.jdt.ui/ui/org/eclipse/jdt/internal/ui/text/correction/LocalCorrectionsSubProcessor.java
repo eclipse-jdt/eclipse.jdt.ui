@@ -181,6 +181,9 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(selectedNode.getStartPosition(), selectedNode.getLength()));
+		if (uncaughtExceptions.length == 0) {
+			return;
+		}
 		
 		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
 		if (surroundingTry != null) {

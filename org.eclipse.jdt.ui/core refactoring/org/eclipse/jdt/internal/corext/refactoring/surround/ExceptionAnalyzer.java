@@ -12,14 +12,15 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
@@ -73,13 +74,13 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(ASTNodes.getMethodBinding(node.getName()), node.getAST());
+		return handleExceptions(node.resolveMethodBinding(), node.getAST());
 	}
 	
 	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(ASTNodes.getMethodBinding(node.getName()), node.getAST());
+		return handleExceptions(node.resolveMethodBinding(), node.getAST());
 	}
 	
 	public boolean visit(ClassInstanceCreation node) {
@@ -88,6 +89,18 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
 	}
 	
+	public boolean visit(ConstructorInvocation node) {
+		if (!isSelected(node))
+			return false;
+		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
+	}
+	
+	public boolean visit(SuperConstructorInvocation node) {
+		if (!isSelected(node))
+			return false;
+		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
+	}	
+
 	private boolean handleExceptions(IMethodBinding binding, AST ast) {
 		if (binding == null)
 			return true;
