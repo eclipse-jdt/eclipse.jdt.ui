@@ -15,12 +15,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClassFile;
@@ -278,8 +275,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	private boolean performNewSearch() {
-		org.eclipse.search.ui.NewSearchUI.activateSearchResultView();
-
 		SearchPatternData data= getPatternData();
 
 		// Setup search scope
@@ -331,6 +326,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		} 
 		
 		textSearchJob= new JavaSearchQuery(querySpec);
+		org.eclipse.search.ui.NewSearchUI.activateSearchResultView();
+
 		NewSearchUI.runQuery(textSearchJob);	
 		return true;
 	}
@@ -943,18 +940,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
 	}
 	
-	private void collectConcernedProjects(Set projects, ISelection selection) {
-		if (!(selection instanceof IStructuredSelection))
-			return;
-		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
-		Iterator elements= structuredSelection.iterator();
-		while (elements.hasNext()) {
-			IProject project= getProject(elements.next());
-			if (project != null)
-				projects.add(project);
-		}
-	}	
-
 	/**
 	 * Stores it current configuration in the dialog store.
 	 */
@@ -962,46 +947,4 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		IDialogSettings s= getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
 	}
-	
-
-
-	private void collectConcernedProjects(Set projects, IWorkingSet[] workingSets) {
-		for (int i= 0; i < workingSets.length; i++)
-			collectConcernedProjects(projects, workingSets[i]);
-	}
-	private void collectConcernedProjects(Set projects, IWorkingSet workingSet) {
-		IAdaptable[] adaptables= workingSet.getElements();
-		for (int i= 0; i < adaptables.length; i++) {
-			IProject project= getProject(adaptables[i]);
-			if (project != null)
-				projects.add(project);
-		}
-	}
-
-	private void collectConcernedProjects(Set projects, IWorkspace workspace) {
-		IProject[] allProjects= workspace.getRoot().getProjects();
-		for (int i= 0; i < allProjects.length; i++) {
-			if (allProjects[i].isAccessible())
-				projects.add(allProjects[i]);
-		}
-	}
-
-	private IProject getProject(Object element) {
-		if (element instanceof ISearchResultViewEntry)
-			element= ((ISearchResultViewEntry)element).getGroupByKey();
-		if (element instanceof IAdaptable) {
-			IAdaptable adaptable= (IAdaptable)element;
-			IProject project= (IProject) adaptable.getAdapter(IProject.class);
-			if (project != null)
-				return project;
-			IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-			if (resource != null)
-				project= resource.getProject();
-			if (project != null)
-				return project;
-		}
-		return null;
-	}
-	
-
 }

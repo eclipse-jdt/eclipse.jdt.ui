@@ -164,7 +164,6 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	}
 
 	private boolean performNewSearch() {
-		NewSearchUI.activateSearchResultView();
 		SearchPatternData data= getPatternData();
 		if (data.wrapperClass == null || data.propertyFile == null)
 			return false;
@@ -205,6 +204,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		}
 		
 		NLSSearchQuery query= new NLSSearchQuery(data.wrapperClass, data.propertyFile, scope, scopeDescription);
+		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQuery(query);
 		return true;
 	}
