@@ -111,6 +111,12 @@ public final class DebugUtils {
 		System.out.println("exists" + res.exists()); //$NON-NLS-1$
 	}
 
+	public static void dump(Object o){
+		if (o == null)
+			dump(o);		
+		else
+			dump(o.toString());	
+	}
 	public static void dump(String msg){
 		System.out.println("DUMP:" + msg); //$NON-NLS-1$
 	}
