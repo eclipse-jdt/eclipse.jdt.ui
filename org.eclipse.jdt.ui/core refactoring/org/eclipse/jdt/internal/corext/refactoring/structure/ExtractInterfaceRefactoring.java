@@ -18,22 +18,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -63,8 +68,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -87,10 +90,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
@@ -213,17 +214,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			
 		return Checks.checkIfCuBroken(fInputType);
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
-	 */
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);//$NON-NLS-1$
 		try {
-			RefactoringStatus result= new RefactoringStatus();		
-			result.merge(checkNewInterfaceName(fNewInterfaceName));
-			if (result.hasFatalError())
-				return result;
+			RefactoringStatus result= new RefactoringStatus();
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 			if (result.hasFatalError())
 				return result;
@@ -231,7 +226,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return result;
 		} finally {
 			pm.done();
-		}	
+		}
 	}
 
 	private RefactoringStatus checkInterfaceTypeName() throws JavaModelException {
