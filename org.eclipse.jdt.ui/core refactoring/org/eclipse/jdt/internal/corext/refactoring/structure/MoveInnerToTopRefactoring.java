@@ -149,7 +149,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException{
-		return Checks.isAvailable(type) && ! Checks.isTopLevel(type);
+		return Checks.isAvailable(type) && ! Checks.isTopLevel(type) && !type.isLocal();
 	}
 	
 	public boolean isInstanceFieldMarkedFinal(){

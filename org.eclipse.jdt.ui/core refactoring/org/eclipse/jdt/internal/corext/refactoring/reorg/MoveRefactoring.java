@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -27,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdatingRefactoring{
 
@@ -36,6 +38,13 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	private boolean fWasCanceled;
 
 	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
+		if (javaElements != null) {
+			for (int i= 0; i < javaElements.length; i++) {
+				IJavaElement element= javaElements[i];
+				if (element.getElementType() == IJavaElement.TYPE && ((IType)element).isLocal())
+					return false;
+			}
+		}
 		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings));
 	}
 
