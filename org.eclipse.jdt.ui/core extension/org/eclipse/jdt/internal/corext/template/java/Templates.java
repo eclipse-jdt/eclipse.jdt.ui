@@ -21,7 +21,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * <code>Templates</code> gives access to the available templates.
- * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()} instead
+ * 
+ * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.templates.persistence.TemplateStore}
  */
 public class Templates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
@@ -34,6 +35,8 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Returns an instance of templates.
+	 * 
+	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()}
 	 */
 	public static Templates getInstance() {
 		if (fgTemplates == null)
