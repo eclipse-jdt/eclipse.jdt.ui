@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.CheckedInputStream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -36,8 +37,12 @@ import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  *	Combines a CheckboxTreeViewer and CheckboxListViewer.
@@ -474,8 +479,13 @@ public class JavadocCheckboxTreeAndListGroup implements ICheckStateListener, ISe
 	 *@param treeElement java.lang.Object
 	 */
 	protected void populateListViewer(final Object treeElement) {
-		if (treeElement == fCurrentTreeSelection)
-			return;
+		//@hack
+		//This is a problem because the very first time an item is
+		//click in the treeViewer which just happens to be the currentselection
+		//left over from the initial setup of the tree, nothing is displayed in
+		//the ListViewer.
+		//if (treeElement == fCurrentTreeSelection)
+		//	return;
 		fCurrentTreeSelection= treeElement;
 		fListViewer.setInput(treeElement);
 		List listItemsToCheck= (List) fCheckedStateStore.get(treeElement);
@@ -495,6 +505,56 @@ public class JavadocCheckboxTreeAndListGroup implements ICheckStateListener, ISe
 	public void removeCheckStateListener(ICheckStateListener listener) {
 		fListeners.remove(listener);
 	}
+	//@hack
+	//--
+	public void refresh() {
+	
+		fListViewer.refresh();
+
+		//Must rebuild the CheckedStateStore
+		//Will I assume contain all White checked elements
+		try {
+			fCheckedStateStore.clear();
+			Object[] elements= fTreeViewer.getCheckedElements();
+				
+			for (int i = 0; i < elements.length; i++) {
+				if(elements[i] instanceof IPackageFragment) {
+					IPackageFragment frag= (IPackageFragment)elements[i];
+					ICompilationUnit[] units= frag.getCompilationUnits();
+					List checked= new ArrayList();
+					for (int j = 0; j < units.length; j++) {
+						ICompilationUnit iCompilationUnit = units[j];
+						IType[] types= iCompilationUnit.getTypes();
+						for (int k = 0; k < types.length; k++) {
+							IType iType = types[k];
+							if(fListViewer.getChecked(iType))
+								checked.add(iType);	
+						}
+					}
+					fCheckedStateStore.put(frag, checked);
+					updateHierarchy(frag);
+				} else if(elements[i] instanceof IJavaProject) {
+					IJavaProject project= (IJavaProject)elements[i];
+					//wast
+					IPackageFragment[] frags= project.getPackageFragments();
+					List list= new ArrayList();
+					for (int j = 0; j < frags.length; j++) {
+						IPackageFragment iPackageFragment = frags[j];
+						list.add(iPackageFragment);
+					} 
+					fCheckedStateStore.put(project, list); 	
+				} else 
+				//In the spirit of futur improvments
+					fCheckedStateStore.put(elements[i], new ArrayList());	
+			}
+		} catch(JavaModelException e) {
+				
+		}
+			
+	}
+	//--
+	
+	
 	/**
 	 *	Handles the selection of an item in the tree viewer
 	 *
@@ -780,4 +840,7 @@ public class JavadocCheckboxTreeAndListGroup implements ICheckStateListener, ISe
 		return fTreeViewer;
 	}
 
+	public CheckboxTableViewer getTableViewer() {
+		return fListViewer;
+	}
 }

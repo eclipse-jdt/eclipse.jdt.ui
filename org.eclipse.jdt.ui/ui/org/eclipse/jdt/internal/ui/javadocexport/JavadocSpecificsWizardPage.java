@@ -6,25 +6,16 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.launching.ExecutionArguments;
-import org.eclipse.jface.dialogs.ControlEnableState;
-import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogSettings;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -34,10 +25,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-/**
- * @version 	1.0
- * @author
- */
+import org.eclipse.jface.dialogs.ControlEnableState;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	protected FlaggedButton fDeprecatedList;
@@ -50,7 +44,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	protected FlaggedButton fSeperatedIndexCheck;
 	protected Button fStyleSheetBrowseButton;
 	protected Button fStyleSheetButton;
-	private Button checkbrowser;
+	protected Button fAntBrowseButton;
+	private Button fCheckbrowser;
 	protected Text fStyleSheetText;
 	protected Text fExtraOptionsText;
 	protected Text fOverViewText;
@@ -63,10 +58,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private Composite fUpperComposite;
 	private Composite fLowerComposite;
 	private Composite fComposite;
+	private Label fSeparator;
 
-	private Point Pu;
-	private Point Pl;
-	
 	private StatusInfo fStyleSheetStatus;
 	private StatusInfo fOverviewStatus;
 	private StatusInfo fAntStatus;
@@ -75,38 +68,27 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private ControlEnableState fControlEnableState;
 
-	private IDialogSettings fDialogSettings;
+	private JavadocOptionsManager fStore;
 	private String fDialogSectionName;
 	private JavadocTreeWizardPage fPredecessor;
-	
 
 	/**
 	 * Constructor for JavadocWizardPage.
 	 * @param pageName
 	 */
-	protected JavadocSpecificsWizardPage(String pageName, IDialogSettings settings, JavadocTreeWizardPage pred) {
+	protected JavadocSpecificsWizardPage(String pageName, JavadocOptionsManager store, JavadocTreeWizardPage pred) {
 		super(pageName);
 		setDescription("Configure Javadoc arguments.");
 
-		fDialogSettings= settings;
-		fDialogSectionName= pageName;
-
+		fStore= store;
 		fButtonsList= new ArrayList();
-
 		fPredecessor= pred;
 
 		fStyleSheetStatus= new StatusInfo();
 		fOverviewStatus= new StatusInfo();
 		fAntStatus= new StatusInfo();
-
 	}
-	
-	protected JavadocSpecificsWizardPage(String pageName, JavadocTreeWizardPage pred) {
-		this(pageName, null, pred);
-	}
-	
 
-	
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
@@ -116,27 +98,30 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fComposite= new Composite(parent, SWT.NONE);
 		fComposite.setLayoutData(createGridData(GridData.FILL_BOTH, 0, 0));
 		fComposite.setLayout(createGridLayout(1));
+	
 
 		fUpperComposite= new Composite(fComposite, SWT.NONE);
 		fUpperComposite.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fUpperComposite.setLayout(createGridLayout(4));
 		
+		GridLayout layout= createGridLayout(4);
+		layout.marginHeight= 0;
+		fUpperComposite.setLayout(layout);
+
 		fLowerComposite= new Composite(fComposite, SWT.NONE);
 		fLowerComposite.setLayoutData(createGridData(GridData.FILL_BOTH, 1, 0));
-		fLowerComposite.setLayout(createGridLayout(4));
 		
-		Pu= fUpperComposite.getLocation();
-		Pl= fLowerComposite.getLocation();
-		
+		layout= createGridLayout(3);
+		layout.marginHeight= 0;
+		fLowerComposite.setLayout(layout);
+
 		createBasicOptionsGroup(fUpperComposite);
 		createTagOptionsGroup(fUpperComposite);
 		createStyleSheetGroup(fUpperComposite);
-		//fUpperComposite.setVisible();
 
-		Label separator= new Label(fUpperComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
-		separator.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
+		//fSeparator= new Label(fUpperComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
+		//fSeparator.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
+		//fSeparator.setVisible(false);
 
-		
 		createExtraOptionsGroup(fLowerComposite);
 
 		setControl(fComposite);
@@ -149,12 +134,12 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
 		fBasicOptionsGroup.setText("Basic Options");
 
-		fHierarchyCheck= new FlaggedButton(fBasicOptionsGroup, "Ge&nerate hierarchy tree", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.NOTREE, false);
-		fNavigatorCheck= new FlaggedButton(fBasicOptionsGroup, "Genera&te navigator bar", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.NONAVBAR, false);
+		fHierarchyCheck= new FlaggedButton(fBasicOptionsGroup, "Ge&nerate hierarchy tree", new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false);
+		fNavigatorCheck= new FlaggedButton(fBasicOptionsGroup, "Genera&te navigator bar", new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false);
 
-		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, "Generate inde&x", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.NOINDEX, false);
+		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, "Generate inde&x", new GridData(GridData.FILL_HORIZONTAL), fStore.NOINDEX, false);
 
-		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, "Sepa&rate index per letter", createGridData(GridData.GRAB_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), JavadocWizard.SPLITINDEX, true);
+		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, "Sepa&rate index per letter", createGridData(GridData.GRAB_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.SPLITINDEX, true);
 		fSeperatedIndexCheck.getButton().setEnabled(fIndexCheck.getButton().getSelection());
 
 		fIndexCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fSeperatedIndexCheck.getButton()}) {
@@ -170,10 +155,10 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
 		fTagsGroup.setText("Document these tags");
 
-		fAuthorCheck= new FlaggedButton(fTagsGroup, "@&author", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.AUTHOR, true);
-		fVersionCheck= new FlaggedButton(fTagsGroup, "@v&ersion", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.VERSION, true);
-		fDeprecatedCheck= new FlaggedButton(fTagsGroup, "@&deprecated", new GridData(GridData.FILL_HORIZONTAL), JavadocWizard.NODEPRECATED, false);
-		fDeprecatedList= new FlaggedButton(fTagsGroup, "depre&cated list", createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), JavadocWizard.NODEPRECATEDLIST, false);
+		fAuthorCheck= new FlaggedButton(fTagsGroup, "@&author", new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true);
+		fVersionCheck= new FlaggedButton(fTagsGroup, "@v&ersion", new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true);
+		fDeprecatedCheck= new FlaggedButton(fTagsGroup, "@&deprecated", new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false);
+		fDeprecatedList= new FlaggedButton(fTagsGroup, "depre&cated list", createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.NODEPRECATEDLIST, false);
 		fDeprecatedList.getButton().setEnabled(fDeprecatedCheck.getButton().getSelection());
 
 		fDeprecatedCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fDeprecatedList.getButton()}) {
@@ -186,29 +171,23 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		Composite c= new Composite(composite, SWT.NONE);
 		c.setLayout(createGridLayout(3));
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
-		((GridLayout)c.getLayout()).marginWidth= 0;
+		((GridLayout) c.getLayout()).marginWidth= 0;
 
 		fStyleSheetButton= createButton(c, SWT.CHECK, "St&yle sheet:", createGridData(1));
 		fStyleSheetText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fStyleSheetBrowseButton =createButton(c,SWT.PUSH,"Bro&wse...",
-					createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, "Bro&wse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fStyleSheetBrowseButton);
-		
-		if (fDialogSettings != null) {
-			String str = fDialogSettings.get(JavadocWizard.STYLESHEET);
-			if (str == null) {
-				fStyleSheetText.setEnabled(false);
-				fStyleSheetBrowseButton.setEnabled(false);
-			} else {
-				fStyleSheetButton.setSelection(true);
-				fStyleSheetText.setText(str);
-			}
-		} else {
+
+		String str= fStore.getStyleSheet();
+		if (str.equals("")) {
+			//default
 			fStyleSheetText.setEnabled(false);
 			fStyleSheetBrowseButton.setEnabled(false);
+		} else {
+			fStyleSheetButton.setSelection(true);
+			fStyleSheetText.setText(str);
 		}
-			
-				
+
 		//Listeners
 		fStyleSheetButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fStyleSheetText, fStyleSheetBrowseButton }) {
 			public void validate() {
@@ -227,52 +206,44 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				handleFileBrowseButtonPressed(fStyleSheetText, new String[] { "*.css" }, "Select stylesheet");
 			}
 		});
+
 	}
 
 	private void createExtraOptionsGroup(Composite composite) {
-		Label jdocLocationLabel=
-			createLabel(composite, SWT.NONE, "Extra &Javadoc options (path names with white spaces must be enclosed in quotes):", createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0));
-		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP, null, createGridData(GridData.FILL_BOTH, 4, 0));
-		fExtraOptionsText.setSize(convertWidthInCharsToPixels(60),
-				convertHeightInCharsToPixels(10));
-	
-		Composite c= new Composite(composite, SWT.NONE);
-		c.setLayout(createGridLayout(3));
-		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
-		((GridLayout)c.getLayout()).marginWidth= 0;
 
-		fOverViewButton= createButton(c, SWT.CHECK, "O&verview:", createGridData(1));
-		fOverViewText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fOverViewBrowseButton= createButton(c, SWT.PUSH, "Br&owse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fOverViewButton= createButton(composite, SWT.CHECK, "O&verview:", createGridData(1));
+		fOverViewText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fOverViewBrowseButton= createButton(composite, SWT.PUSH, "Br&owse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fOverViewBrowseButton);
-		
-		if (fDialogSettings != null) {
 
-			String str= fDialogSettings.get(JavadocWizard.EXTRAOPTIONS);
-			if(str != null)
-				fExtraOptionsText.setText(str);
-
-			str = fDialogSettings.get(JavadocWizard.OVERVIEW);
-			if (str == null) {
-				fOverViewText.setEnabled(false);
-				fOverViewBrowseButton.setEnabled(false);
-			} else {
-				fOverViewButton.setSelection(true);
-				fOverViewText.setText(str);
-			}
-		} else {
+		String str= fStore.getOverview();
+		if (str.equals("")) {
+			//default
 			fOverViewText.setEnabled(false);
 			fOverViewBrowseButton.setEnabled(false);
+		} else {
+			fOverViewButton.setSelection(true);
+			fOverViewText.setText(str);
 		}
 
-//		Button checkbrowser= createButton(composite, SWT.CHECK, "O&pen generated index file in browser", createGridData(4));
-//		checkbrowser.setEnabled(false);
-		
-		fAntButton= createButton(c, SWT.CHECK, "Generate &Ant script:", createGridData(1));
-		fAntText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fAntText.setText("javadoc.xml");
+		Label jdocLocationLabel= createLabel(composite, SWT.NONE, "Extra &Javadoc options (path names with white spaces must be enclosed in quotes):", createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0));
+		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
+		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
+
+		str= fStore.getAdditionalParams();
+		fExtraOptionsText.setText(str);
+
+		//		Button checkbrowser= createButton(composite, SWT.CHECK, "O&pen generated index file in browser", createGridData(4));
+		//		checkbrowser.setEnabled(false);
+
+		fAntButton= createButton(composite, SWT.CHECK, "&Ant script:", createGridData(1));
+		fAntText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fAntText.setText(fStore.getAntpath());
 		fAntText.setEnabled(false);
-	
+		fAntBrowseButton= createButton(composite, SWT.PUSH, "Br&owse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
+		fAntBrowseButton.setEnabled(false);
+
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
 			public void validate() {
@@ -291,16 +262,34 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				handleFileBrowseButtonPressed(fOverViewText, new String[] { "*.html" }, "Select overview page");
 			}
 		});
-		
-		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] {fAntText}) {
+
+		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
 			public void validate() {
 				doValidation();
 			}
 		});
-		
+
 		fAntText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation();
+			}
+		});
+
+		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				//@hack
+				String temp= fAntText.getText();
+				IPath path= new Path(temp);
+				String file= path.lastSegment();
+				path= path.removeLastSegments(1);
+				fAntText.setText(path.toOSString());
+
+				temp= handleFolderBrowseButtonPressed(fAntText, "Destination Selection", "&Select destination folder for ant script:");
+
+				path= new Path(temp);
+				path= path.addTrailingSeparator().append(file);
+				fAntText.setText(path.toOSString());
+
 			}
 		});
 	} //end method createExtraOptionsGroup
@@ -309,31 +298,32 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fStyleSheetStatus= new StatusInfo();
 		fOverviewStatus= new StatusInfo();
+		fAntStatus= new StatusInfo();
 		if (fStyleSheetButton.getSelection()) {
 			Path stylePath= new Path(fStyleSheetText.getText());
 			File file= new File(fStyleSheetText.getText());
-
 			if (!stylePath.toFile().exists() || !stylePath.getFileExtension().equalsIgnoreCase("css")) {
 				fStyleSheetStatus.setError("Not a valid stylesheet.");
 			}
 		}
 		if (fOverViewButton.getSelection()) {
 			Path overviewPath= new Path(fOverViewText.getText());
-
 			if (!overviewPath.toFile().exists() || !overviewPath.getFileExtension().equalsIgnoreCase("html")) {
 				fOverviewStatus.setError("Not a valid html document.");
 			}
 		}
-		if(fAntButton.getSelection()) {
-			
-			Path path= new Path(fAntText.getText());
-			
-			//@Improve
-			if(false) {
-				fAntStatus.setError("Not a valid file name.");	
-			}
+		if (fAntButton.getSelection()) {
+			IPath antPath= new Path(fAntText.getText());
+			String ext= antPath.getFileExtension();
+			IPath antSeg= antPath.removeLastSegments(1);
+			//@test
+			//System.out.println(antPath.toOSString());
+			if ((!antSeg.isValidPath(antSeg.toOSString())) || (ext == null) || !(ext.equalsIgnoreCase("xml")))
+				fAntStatus.setError("Not a valid Ant file name.");
+			else if (antPath.toFile().exists())
+				fAntStatus.setWarning("The generated ant file will overwrite the existing ant file.");
 		}
-			
+
 		updateStatus(findMostSevereStatus());
 
 	}
@@ -341,116 +331,42 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	/*
 	 * @see JavadocWizardPage#onFinish()
 	 */
-	public void collectArguments(ArrayList cFlags, Map map) {
 
-		//This is done because user may never go to the second page
-		if (fPredecessor.fCustomButton.getSelection()) {
-			fControlEnableState = ControlEnableState.disable(fUpperComposite);
-		}
+	protected void finish() {
 
-		if (fUpperComposite.getVisible()) {
-			for (int i = 0; i < fButtonsList.size(); i++) {
-				FlaggedButton button = (FlaggedButton) fButtonsList.get(i);
-				if (button.getButton().getEnabled()) {
-					if (!(button.getButton().getSelection() ^ button.show())) {
-						cFlags.add(makeflag(button.getFlag()));
-						map.put(button.getFlag(), "true");
-					} else {
-						map.put(button.getFlag(), "false");
-					}
-				} else {
-					map.put(button.getFlag(), "false");
-				}
-
-			}
-			if (fStyleSheetButton.getSelection() && fUpperComposite.getVisible()) {
-				cFlags.add(makeflag(JavadocWizard.STYLESHEET));
-				cFlags.add(fStyleSheetText.getText());
-				map.put(JavadocWizard.STYLESHEET, fStyleSheetText.getText());
-			}
-		}
-		String userArgs = fExtraOptionsText.getText();
-		if (userArgs.length() > 0) {
-			ExecutionArguments args = new ExecutionArguments("", userArgs);
-			String[] argsArray = args.getProgramArgumentsArray();
-			for (int i = 0; i < argsArray.length; i++) {
-				cFlags.add(argsArray[i]);
-			}
-			map.put(JavadocWizard.EXTRAOPTIONS, userArgs);
-		}
-		if (fOverViewButton.getSelection()) {
-			cFlags.add(makeflag(JavadocWizard.OVERVIEW));
-			cFlags.add(fOverViewText.getText());
-			map.put(JavadocWizard.OVERVIEW, fOverViewText.getText());
-		}
-		
-		if(fAntButton.getSelection()) {
-			map.put(JavadocWizard.ANT, fAntText.getText());	
-		}
-	}
-	
-	private String makeflag(String flag) {
-		return "-"+flag;
-	}
-
-	//The dialogSettings are not perserved if the wizard has been
-	//launched from an Ant Script
-	public void finish() {
-	}
-
-	protected IDialogSettings preserveDialogSettings() {
-		if (fDialogSettings == null) {
-			fDialogSettings= new DialogSettings(fDialogSectionName);
-		}
 		Object[] buttons= fButtonsList.toArray();
 		for (int i= 0; i < buttons.length; i++) {
 			FlaggedButton button= (FlaggedButton) buttons[i];
-			fDialogSettings.put(button.getFlag(), !(button.getButton().getSelection() ^ button.show()));
+			if (button.getButton().getEnabled())
+				fStore.setBoolean(button.getFlag(), !(button.getButton().getSelection() ^ button.show()));
+			else
+				fStore.setBoolean(button.getFlag(), false == button.show());
 		}
-		
+
 		String str= fExtraOptionsText.getText();
-		if(str.length() > 0)
-			fDialogSettings.put(JavadocWizard.EXTRAOPTIONS, str);
-		if(fOverViewText.getEnabled())
-			fDialogSettings.put(JavadocWizard.OVERVIEW, fOverViewText.getText());
-		if(fStyleSheetText.getEnabled())
-			fDialogSettings.put(JavadocWizard.STYLESHEET, fStyleSheetText.getText());	
-		
-		return fDialogSettings;
+		if (str.length() > 0)
+			fStore.setAdditionalParams(str);
+		if (fOverViewText.getEnabled())
+			fStore.setOverview(fOverViewText.getText());
+		if (fStyleSheetText.getEnabled())
+			fStore.setStyleSheet(fStyleSheetText.getText());
+		if (fAntText.getEnabled())
+			fStore.setAntpath(fAntText.getText());
 	}
 
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		
-		
-				
 		if (visible) {
-			
-			Point pu= fUpperComposite.getLocation();
-			Point pl= fLowerComposite.getLocation();
-			
-			if (fPredecessor.fCustomButton.getSelection()) {
-	//@hack
-	//--		
-				if(pu.y < pl.y) {	
-					fUpperComposite.setLocation(pl);
-					fLowerComposite.setLocation(pu);
-				
-					fUpperComposite.setVisible(false);
-					fComposite.redraw();
-				}	
-		
-			} else {
-				
-				if(pu.y > pl.y) {
-					fUpperComposite.setLocation(pl);
-					fLowerComposite.setLocation(pu);
-	
-					fUpperComposite.setVisible(true);
-					fComposite.redraw();
-				}
+
+			if (fPredecessor.getCustom()) {
+				fControlEnableState= ControlEnableState.disable(fUpperComposite);
+				//fSeparator.setVisible(true);
+
 			}
-		//--
+		} else {
+			if (fPredecessor.getCustom())
+				fControlEnableState.restore();
+			//fSeparator.setVisible(false);
 		}
 	}
 
@@ -459,7 +375,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	}
 
 	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMostSevere(new IStatus[] {fAntStatus, fOverviewStatus, fStyleSheetStatus });
+		return StatusUtil.getMostSevere(new IStatus[] { fAntStatus, fOverviewStatus, fStyleSheetStatus });
 	}
 
 	public boolean generateAnt() {
@@ -492,12 +408,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		}
 
 		private void setButtonSettings() {
-			if (fDialogSettings == null) {
-				//default all options checked
-				fButton.setSelection(true);
-			} else {
-				fButton.setSelection(!(fDialogSettings.getBoolean(fFlag)^fShowFlag));
-			}
+
+			fButton.setSelection(!(fStore.getBoolean(fFlag) ^ fShowFlag));
 		}
 
 	} //end class FlaggesButton

@@ -5,48 +5,17 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.EnableSelectionAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -60,6 +29,31 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.EnableSelectionAdapter;
+import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 /**
  * @version 	1.0
  * @author
@@ -72,6 +66,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private JavadocCheckboxTreeAndListGroup fInputGroup;
 
 	protected IWorkspaceRoot fRoot;
+	private IJavaProject fProject;
 	protected String fWorkspace;
 
 	private final String DOCUMENT_DIRECTORY= "doc";
@@ -94,10 +89,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
 
-	private IDialogSettings fDialogSettings;
 	private String fDialogSectionName;
 	protected String fVisibilitySelection;
 	protected boolean docletselected;
+	
+	private JavadocOptionsManager fStore;
 
 	protected StatusInfo fDestinationStatus;
 	protected StatusInfo fDocletStatus;
@@ -107,23 +103,16 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * Constructor for JavadocTreeWizardPage.
 	 * @param pageName
 	 */
-	protected JavadocTreeWizardPage(String pageName, IDialogSettings settings) {
+	protected JavadocTreeWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
 		setDescription("Select types for Javadoc generation.");
 
-		fDialogSettings= settings;
-
-		fRoot= ResourcesPlugin.getWorkspace().getRoot();
-		fWorkspace= fRoot.getLocation().toOSString();
+		fStore= store;
 
 		// Status variables
 		fDestinationStatus= new StatusInfo();
 		fDocletStatus= new StatusInfo();
 		fTreeStatus= new StatusInfo();
-	}
-	
-	protected JavadocTreeWizardPage(String pageName) {
-		this(pageName, null);
 	}
 
 	/*
@@ -160,7 +149,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fInputGroup=
 			new JavadocCheckboxTreeAndListGroup(
 				c,
-				fRoot,
+				fStore.getRoot(),
 				treeContentProvider,
 				new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT),
 				listContentProvider,
@@ -177,32 +166,24 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		//fFilter= new JavadocTreeViewerFilter();
 		//fInputGroup.getTableViewer().addFilter(fFilter);
 
-		Object project= getCurrentProject();
-		if (project == null) {
-			Object[] roots= treeContentProvider.getElements(fRoot);
+//		IJavaProject fProject= getCurrentProject();
+		IJavaProject fProject= fStore.getProject();
+		if (fProject == null) {
+			Object[] roots= treeContentProvider.getElements(fStore.getRoot());
 			if (roots.length > 0) {
-				project= roots[0];
+				fProject= (IJavaProject)roots[0];
 			}
 		}
-		
 		try {
-			Object[] packages= null;
-			if(fDialogSettings!=null) {
-				 packages= fDialogSettings.getArray(JavadocWizard.PACKAGENAMES);
-			}
-			if ((fDialogSettings==null) || (packages == null))
-				setTreeChecked(getValidSelection().toArray(), (IJavaProject) project);
-			else
-				setTreeChecked(packages, (IJavaProject) project);
-		} catch (JavaModelException e) {
-			JavaPlugin.logErrorMessage("JavaModelException, unable to set tree values");
+			setTreeChecked(fStore.getPackagenames().toArray(), fProject);
+		} catch(JavaModelException e) {
+			JavaPlugin.logErrorMessage(e.getMessage());
 		}
-		
-		fInputGroup.aboutToOpen();
-		if (project != null) {
-			fInputGroup.getTreeViewer().expandToLevel(project, 4);
+		if (fProject != null) {
+			fInputGroup.getTreeViewer().expandToLevel(fProject, 4);
 		}
-		
+//		fInputGroup.aboutToOpen();
+//		fInputGroup.refresh();
 	}
 
 	private void createVisibilitySet(Composite composite) {
@@ -223,7 +204,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fPrivateVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection = JavadocWizard.PRIVATE;
+					fVisibilitySelection = fStore.PRIVATE;
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -232,7 +213,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fPackageVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection = JavadocWizard.PACKAGE;
+					fVisibilitySelection = fStore.PACKAGE;
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -241,7 +222,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fProtectedVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection = JavadocWizard.PROTECTED;
+					fVisibilitySelection = fStore.PROTECTED;
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -250,7 +231,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fPublicVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection = JavadocWizard.PUBLIC;
+					fVisibilitySelection = fStore.PUBLIC;
 					//fFilter.setVisibility(fVisibilitySelection);
 					//fInputGroup.refresh();
 				}
@@ -263,24 +244,17 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	protected void setVisibilitySettings() {
 
-		if (fDialogSettings == null) {
-			//default setting
-			fPrivateVisibility.setSelection(true);
-			fVisibilitySelection = JavadocWizard.PRIVATE;
-		} else {
-			fVisibilitySelection = fDialogSettings.get(JavadocWizard.VISIBILITY);
-			if(fVisibilitySelection==null)
-				fVisibilitySelection= JavadocWizard.PRIVATE;
+		
+			fVisibilitySelection = fStore.getAccess();
 			fPrivateVisibility.setSelection(
-				fVisibilitySelection.equals(JavadocWizard.PRIVATE));
+				fVisibilitySelection.equals(fStore.PRIVATE));
 			fProtectedVisibility.setSelection(
-				fVisibilitySelection.equals(JavadocWizard.PROTECTED));
+				fVisibilitySelection.equals(fStore.PROTECTED));
 			fPackageVisibility.setSelection(
-				fVisibilitySelection.equals(JavadocWizard.PACKAGE));
+				fVisibilitySelection.equals(fStore.PACKAGE));
 			fPublicVisibility.setSelection(
-				fVisibilitySelection.equals(JavadocWizard.PUBLIC));
-		}
-		//fFilter.setVisibility(fVisibilitySelection);
+				fVisibilitySelection.equals(fStore.PUBLIC));
+			//fFilter.setVisibility(fVisibilitySelection);
 
 	}
 	
@@ -348,11 +322,16 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 		fDestinationBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				handleFolderBrowseButtonPressed(fDestinationText, "Destination Selection", "&Select the Javadoc destination folder:");
+				String text= handleFolderBrowseButtonPressed(fDestinationText, "Destination Selection", "&Select the Javadoc destination folder:");
+				fDestinationText.setText(text);
 			}
 		});
 		
 		setOptionSetSettings();
+	}
+	
+	public boolean getCustom(){
+		return fCustomButton.getSelection();
 	}
 
 	private String getDestinationText() {
@@ -375,35 +354,22 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	private void setOptionSetSettings() {
 
-		if (fDialogSettings == null) {
-			setOptionsSetDefaults(null);
-		} else {
-			//This should work for both DialogSettings and ANT
-			IDialogSettings section= fDialogSettings.getSection(JavadocWizard.DOCLET);
-			if (section!=null) {
+			if(!fStore.fromStandard()) {
 				fCustomButton.setSelection(true);
-				//@hack
-				fDocletText.setText(section.get("path"));
-				fDocletTypeText.setText(section.get("name"));
+				fDocletText.setText(fStore.getDocletPath());
+				fDocletTypeText.setText(fStore.getDocletName());
 				fDestinationText.setEnabled(false);
 				fDestinationBrowserButton.setEnabled(false);
 				fDestinationLabel.setEnabled(false);
-			} else 
-				setOptionsSetDefaults(fDialogSettings.get(JavadocWizard.STANDARD));
-		}
+			} else {
+				fStandardButton.setSelection(true);
+				fDestinationText.setText(fStore.getDestination());
+				fDocletText.setEnabled(false);
+				fDocletLabel.setEnabled(false);
+				fDocletTypeText.setEnabled(false);
+				fDocletTypeLabel.setEnabled(false);
+			}
 
-	}
-
-	private void setOptionsSetDefaults(String dest) {
-		//default setting
-		fStandardButton.setSelection(true);
-		if(dest==null)
-			fDestinationText.setText(getDestinationText());
-		else fDestinationText.setText(dest);
-		fDocletText.setEnabled(false);
-		fDocletLabel.setEnabled(false);
-		fDocletTypeText.setEnabled(false);
-		fDocletTypeLabel.setEnabled(false);
 	}
 
 	protected void setTreeChecked(Object[] packagenames, IJavaProject project) throws JavaModelException{
@@ -412,85 +378,17 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			return;
 			
 		for (int i = 0; i < packagenames.length; i++) {
-			if(packagenames[i] instanceof String) {
-			
-			//@hack
-			//--
-				IPackageFragment[] packs= project.getPackageFragments();				
-				for (int j = 0; j < packs.length; j++) {
-					IPackageFragment iPackageFragment = packs[j];
-					if(iPackageFragment.getElementName().equals(packagenames[i]))
-						fInputGroup.initialCheckTreeItem(iPackageFragment);
-					else {
-						ICompilationUnit[] units= iPackageFragment.getCompilationUnits();
-						for (int k = 0; k < units.length; k++) {
-							ICompilationUnit iCompilationUnit = units[k];
-							IType[] types= iCompilationUnit.getTypes();
-							for (int index = 0; index < types.length; index++) {
-								IType iType = types[index];
-								if(iType.getFullyQualifiedName().equals(packagenames[i]))
-									fInputGroup.initialCheckListItem(iType);
-							}			
-						}
-					}
-				}
-				
-			//---
-			} else if(packagenames[i] instanceof IJavaElement) {
+			if(packagenames[i] instanceof IJavaElement) {
 					IJavaElement element = (IJavaElement)packagenames[i];
 					if (element instanceof IType) {
 						fInputGroup.initialCheckListItem(element);
 					} else
-						fInputGroup.initialCheckTreeItem(element);
-				
-			}
-			
+						fInputGroup.initialCheckTreeItem(element);	
+			}		
 		}
 	}
 
-	public void collectArguments(ArrayList cFlags, Map map) {
-
-		if (fStandardButton.getSelection()) {
-			cFlags.add("-d");
-			cFlags.add(fDestinationText.getText());
-			map.put(JavadocWizard.STANDARD, fDestinationText.getText());
-
-		} else if (fCustomButton.getSelection()) {
-			
-			cFlags.add(makeflag(JavadocWizard.DOCLET));
-			cFlags.add(fDocletTypeText.getText());
-			map.put(JavadocWizard.DOCLET, fDocletTypeText.getText());
-
-			String docletPath= fDocletText.getText();
-			if (docletPath.length() > 0) {
-				cFlags.add(makeflag(JavadocWizard.DOCLETPATH));
-				cFlags.add(docletPath);
-				map.put(JavadocWizard.DOCLETPATH, fDocletText.getText());
-
-			}
-			JavadocWizard.WRITECUSTOM= true;
-		}
-
-		IJavaProject jproject= getCurrentProject();
-		JavadocWizard.currentProject= jproject; //@hack
-		map.put(JavadocWizard.PROJECT, jproject.getElementName());
-
-		String str= getSourcePath(jproject, cFlags);
-		map.put(JavadocWizard.SOURCEPATH, str);		
-		
-		str= getClassPath(jproject, cFlags);
-		map.put(JavadocWizard.CLASSPATH, str);
-		
-		cFlags.add(makeflag(fVisibilitySelection));
-		map.put(JavadocWizard.VISIBILITY, fVisibilitySelection);
-	}
-	
-	private String makeflag(String flag) {
-		return "-"+flag;
-	}
-
-	private String getSourcePath(IJavaProject project, ArrayList flags) {
-		flags.add(makeflag(JavadocWizard.SOURCEPATH));
+	private String getSourcePath(IJavaProject project) {
 		StringBuffer buf= new StringBuffer();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
@@ -508,13 +406,12 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
+		//@test
 		//System.out.println("source path " + buf.toString());
-		flags.add(buf.toString());
 		return buf.toString();
 	}
 
-	private String getClassPath(IJavaProject javaProject, ArrayList flags) {
-		flags.add(makeflag(JavadocWizard.CLASSPATH));
+	private String getClassPath(IJavaProject javaProject) {
 		StringBuffer buf= new StringBuffer();
 
 		try {
@@ -535,23 +432,17 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} 
+		//@test
 		//System.out.println("class path " + buf.toString());
-		flags.add(buf.toString());
 		return buf.toString();
 	}
 
-	public String getFileListArgument(Map map) {
-		return createDocletFile(map);
-	}
-
+	
 	//Returns the path were the doclet file will be created
-	private String createDocletFile(Map map) {
-		PrintWriter out= null;
-		try {
-			fTempFile= File.createTempFile("jdoc", ".txt");
-			out= new PrintWriter(new FileWriter(fTempFile));
+	private List getPackagenames() {
+				
 			Iterator checkedElements= fInputGroup.getAllCheckedListItems();
-			StringBuffer buf= new StringBuffer();
+			List list= new ArrayList();
 
 			while (checkedElements.hasNext()) {
 				Object element= checkedElements.next();
@@ -560,10 +451,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					IPackageFragment pack= type.getPackageFragment();
 					if (fInputGroup.getTreeViewer().getGrayed(pack) || pack.isDefaultPackage()) {
 						String qn=JavaModelUtil.getFullyQualifiedName(type);
-						out.println(qn);
-						if(!(buf.length() == 0))
-							buf.append(',');
-						buf.append(qn);
+						list.add(qn);
 					}
 				}
 			}
@@ -575,54 +463,35 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (!fInputGroup.getTreeViewer().getGrayed(pack) && !pack.isDefaultPackage()) {
 						
 						String en= pack.getElementName();
-						out.println(en);
-						if(!(buf.length() == 0))
-							buf.append(',');
-						buf.append(en);
+						list.add(en);
 					}
 				}
 			}
 			
-			map.put(JavadocWizard.PACKAGENAMES, buf.toString());
-			//} catch (FileNotFoundException FNFe) {
-			//	JavaPlugin.logErrorMessage("Notify: Core Error file " + path.toString() + " not found");
-		} catch (java.io.IOException IOe) {
-			JavaPlugin.logErrorMessage("Notify: Java IOException, Unable to Write");
-		} finally {
-			if (out != null) {
-				out.close();
-			}
-		}
-		
-		return fTempFile.getPath();
+			return list;
 	}
 
-	//The dialogSettings are not preserved if the wizard
-	//was launched from an Ant Script
-	public void finish() {
-		fTempFile.delete();
-	}
 
-	protected IDialogSettings preserveDialogSettings() {
-
-		if (fDialogSettings == null)
-			fDialogSettings= new DialogSettings(JavadocWizard.TreePageDesc);
-
+	protected void finish() {
 		//I have made the assumption that preserve settings will not be
 		//called on an ANT file, which is evident...
+		
 		if (fCustomButton.getSelection()) {
-			IDialogSettings doclet= new DialogSettings(JavadocWizard.DOCLET);
-			//@hack
-			doclet.put("name", fDocletTypeText.getText());
-			doclet.put("path", fDocletText.getText());
-			fDialogSettings.addSection(doclet);
+			fStore.setDocletName(fDocletTypeText.getText());
+			fStore.setDocletPath(fDocletText.getText());
+			fStore.setFromStandard(false);
 		}
-		if(fStandardButton.getSelection())
-			fDialogSettings.put(JavadocWizard.STANDARD, fDestinationText.getText());
-		fDialogSettings.put(JavadocWizard.VISIBILITY, fVisibilitySelection);
-
-		return fDialogSettings;
-
+		if(fStandardButton.getSelection()){
+			fStore.setDestination(fDestinationText.getText());
+			fStore.setFromStandard(true);
+		}
+			
+		IJavaProject project= getCurrentProject();
+		fStore.setProject(project);	
+		fStore.setSourcepath(getSourcePath(project));
+		fStore.setClasspath(getClassPath(project));	
+		fStore.setAccess(fVisibilitySelection);
+		fStore.setPackagenames(getPackagenames());
 	}
 
 	private void doValidation() {
@@ -693,6 +562,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 */
 	private IJavaProject getCurrentProject() {
 		Object[] items= fInputGroup.getAllCheckedTreeItems().toArray();
+			
 		IJavaProject project= null;
 		for (int i= 0; i < items.length; i++) {
 			if (items[i] instanceof JavaProject) {
@@ -715,123 +585,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return true;
 	}
 
-	// copied from JarPackageWizard
-	protected IStructuredSelection getValidSelection() {
-		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
-
-		if (currentSelection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-			List selectedElements= new ArrayList(structuredSelection.size());
-			Iterator iter= structuredSelection.iterator();
-
-			IJavaProject currentProject= null;
-			while (iter.hasNext()) {
-				Object selectedElement= iter.next();
-				IJavaElement elem= getSelectableJavaElement(selectedElement);
-				if (elem != null) {
-					IJavaProject jproj= elem.getJavaProject();
-					if (currentProject == null || currentProject.equals(jproj)) {
-						selectedElements.add(elem);
-						currentProject= jproj;
-					}
-				}
-			}
-			if (!selectedElements.isEmpty()) {
-				return new StructuredSelection(selectedElements);
-			}
-		}
-
-		try {
-			IJavaProject[] jproject= JavaCore.create(fRoot).getJavaProjects();
-			if (jproject.length > 0) {
-				IJavaProject currentProject= jproject[0];
-				return new StructuredSelection(currentProject);
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-		return StructuredSelection.EMPTY;
-
-	}
-
-	private IJavaElement getSelectableJavaElement(Object obj) {
-		IJavaElement je= null;
-		try {
-			if (obj instanceof IAdaptable) {
-				je= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
-			}
-
-			if (je == null) {
-				return null;
-			}
-
-			switch (je.getElementType()) {
-				case IJavaElement.JAVA_MODEL :
-				case IJavaElement.JAVA_PROJECT :
-				case IJavaElement.CLASS_FILE :
-					break;
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-					if (containsCompilationUnits((IPackageFragmentRoot) je)) {
-						return je;
-					}
-					break;
-				case IJavaElement.PACKAGE_FRAGMENT :
-					if (containsCompilationUnits((IPackageFragment) je)) {
-						return je;
-					}
-					break;
-				default :
-					ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(je, IJavaElement.COMPILATION_UNIT);
-					if (cu != null) {
-						if (cu.isWorkingCopy()) {
-							cu= (ICompilationUnit) cu.getOriginalElement();
-						}
-						IType primaryType= JavaModelUtil.findPrimaryType(cu);
-						if (primaryType != null) {
-							return primaryType;
-						}
-					}
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-		IJavaProject project= je.getJavaProject();
-		if (project != null) {
-			try {
-				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					if (containsCompilationUnits(roots[i])) {
-						return project;
-					}
-				}
-			} catch(JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
-		return null;
-	}
-	
-	private boolean containsCompilationUnits(IPackageFragmentRoot root) throws JavaModelException {
-		if (root.getKind() != IPackageFragmentRoot.K_SOURCE) {
-			return false;
-		}
-		
-		IJavaElement[] elements= root.getChildren();
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) elements[i];
-				if (containsCompilationUnits(fragment)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	private boolean containsCompilationUnits(IPackageFragment pack) throws JavaModelException {
-		return pack.getCompilationUnits().length > 0;
-	}
-
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
@@ -847,7 +600,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			doValidation();
-		}
+		} 
 	}
 
 	public IPath getDestination() {
