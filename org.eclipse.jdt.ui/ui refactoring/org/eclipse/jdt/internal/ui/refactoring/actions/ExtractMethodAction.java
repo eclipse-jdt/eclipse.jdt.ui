@@ -28,23 +28,11 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	 * Creates a new extract method action when used as an action delegate.
 	 */
 	public ExtractMethodAction() {
-		super(RefactoringMessages.getString("ExtractMethodAction.extract_method"),  //$NON-NLS-1$
-				  "Extract Method", "This action in unavailable on the current text selection. Select an expression or a set of statements."); 
+		super(RefactoringMessages.getString("ExtractMethodAction.extract_method"));  //$NON-NLS-1$
 	}
 	
-	/**
-	 * Creates a new extract method action for the given text editor. The text
-	 * editor's selection marks the set of statements to be extracted into a new
-	 * method.
-	 * @param editor the text editor.
-	 */
-	public ExtractMethodAction(JavaEditor editor) {
-		this();
-		setEditor(editor);
-	}
-
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createRefactoring
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new ExtractMethodRefactoring(
@@ -55,11 +43,17 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 			JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
-	 */
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
 	}
 
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
+	protected String getMessageDialogTitle() {
+		return "Extract Method";
+	}
 }

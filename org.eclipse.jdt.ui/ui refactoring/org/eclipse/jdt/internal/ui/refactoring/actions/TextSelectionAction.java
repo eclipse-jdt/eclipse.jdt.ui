@@ -6,43 +6,30 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 abstract public class TextSelectionAction extends Action implements IUpdate, IWorkbenchWindowActionDelegate {
 	
-	private JavaEditor fEditor;
-	private IAction fAction;
+	private AbstractTextEditor fEditor;
+	private Class fEditorClass;
 	private IWorkbenchWindow fWorkbenchWindow;
 
-	private String fOperationNotAvailableDialogMessage;
-	private String fOperationNotAvailableDialogTitle;
-	
 	/**
 	 * Creates a new action when used as an action delegate.
 	 */
-	public TextSelectionAction(String name) {
-		this(name, "Refactoring", "Cannot perform this action on the current text selection.");
-	}
-	
-	/**
-	 * Creates a new action when used as an action delegate.
-	 */
-	protected TextSelectionAction(String name, String operationNonAvailableDialogTitle, String operationNonAvailableDialogMessage) {
+	protected TextSelectionAction(String name) {
 		super(name);
-		Assert.isNotNull(operationNonAvailableDialogTitle);
-		Assert.isNotNull(operationNonAvailableDialogMessage);
-		fOperationNotAvailableDialogTitle= operationNonAvailableDialogTitle;
-		fOperationNotAvailableDialogMessage= operationNonAvailableDialogMessage;
+		fEditorClass= CompilationUnitEditor.class;
 	}
 	
 	/* (non-JavaDoc)
@@ -52,15 +39,28 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 		setEnabled(canOperateOnCurrentSelection());
 	}
 	
-	//-- accessors ---
+	//---- Accessors ------------------------------------------------------------------------------------------
+
+	protected final void setEditor(AbstractTextEditor editor) {
+		Assert.isNotNull(editor);
+		if (fEditorClass.isInstance(editor))
+			fEditor= editor;
+		else
+			fEditor= null;
+	}	
 	
-	protected final JavaEditor getEditor() {
-		return fEditor;
+	protected final AbstractTextEditor getEditor() {
+		if (fEditor != null)
+			return fEditor;
+		IWorkbenchPart part= fWorkbenchWindow.getPartService().getActivePart();
+		if (part instanceof AbstractTextEditor && fEditorClass.isInstance(part))
+			return (AbstractTextEditor)part;
+		return null;
 	}
 
-	protected final void setEditor(JavaEditor editor) {
-		//Assert.isNotNull(editor);
-		this.fEditor= editor;
+	protected final void setEditorClass(Class clazz) {
+		Assert.isNotNull(clazz);
+		fEditorClass= clazz;
 	}
 	
 	protected final ICompilationUnit getCompilationUnit() {
@@ -71,49 +71,29 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 		return (ITextSelection)getEditor().getSelectionProvider().getSelection();
 	}
 	
-	protected final String getOperationNotAvailableDialogTitle() {
-		return fOperationNotAvailableDialogTitle;
-	}	
-	
 	//---- IWorkbenchWindowActionDelegate stuff ----------------------------------------------------
 	
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void run(IAction action) {
-		if (fAction == null)
-			fAction= action;
-		IWorkbenchPart part= fWorkbenchWindow.getPartService().getActivePart();
-		if (part instanceof JavaEditor) {
-			setEditor((JavaEditor)part);
-			if (!canOperateOnCurrentSelection()) {
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
-					fOperationNotAvailableDialogTitle,
-					fOperationNotAvailableDialogMessage);
-				return;
-			}
-		} else {
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
-				getText(),
-				"Active part is not a Java Editor.");
-			fAction.setEnabled(false);
-			return;
-		}
 		run();
 	}
-	
 	
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection s) {
+		boolean enabled= false;
+		if (getEditor() != null)
+			enabled= canOperateOnCurrentSelection(s);
+		action.setEnabled(enabled);
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void dispose() {
-		fAction= null;
 		fWorkbenchWindow= null;
 	}
 	
@@ -122,41 +102,20 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	 */
 	public void init(IWorkbenchWindow window) {
 		fWorkbenchWindow= window;
-		window.getPartService().addPartListener(new IPartListener() {
-			public void partActivated(IWorkbenchPart part) {
-				boolean enabled= false;
-				setEditor(null);
-				if (part instanceof JavaEditor) {
-					setEditor((JavaEditor)part);
-					enabled= true;
-				}
-				if (fAction != null)
-					fAction.setEnabled(enabled);
-			}
-			public void partBroughtToTop(IWorkbenchPart part) {
-			}
-			public void partClosed(IWorkbenchPart part) {
-				if (part == getEditor() && fAction != null)
-					fAction.setEnabled(false);
-			}
-			public void partDeactivated(IWorkbenchPart part) {
-			}
-			public void partOpened(IWorkbenchPart part) {
-			}
-		});
 	}	
 		
 	protected boolean canOperateOnCurrentSelection() {
 		if (getEditor() == null)
 			return false;
-		ISelection selection= getEditor().getSelectionProvider().getSelection();
+			
+		return canOperateOnCurrentSelection(getEditor().getSelectionProvider().getSelection());
+	}
+	
+	protected boolean canOperateOnCurrentSelection(ISelection selection) {
 		if (!(selection instanceof ITextSelection))
 			return false;
 		
-		if (getCompilationUnit() == null)
-			return false;		
-		
 		return (((ITextSelection)selection).getLength() > 0);
-	}	
+	}
 }
 

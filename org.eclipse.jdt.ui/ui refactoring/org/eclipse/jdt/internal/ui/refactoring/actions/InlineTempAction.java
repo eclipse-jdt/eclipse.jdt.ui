@@ -13,29 +13,31 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 
 	public InlineTempAction() {
-		super("Inline Local Variable", "Inline Local Variable", "This action is unavailable on the current text selection. Select a local variable declaration or reference.");
+		super("Inline Local Variable");
 	}
 	
-	public InlineTempAction(JavaEditor editor) {
-		this();
-		setEditor(editor);
-	}
-
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createRefactoring(ICompilationUnit, ITextSelection)
-	 */
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new InlineTempRefactoring(cunit, selection.getOffset(), selection.getLength());
 	}
 
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
-	 */
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= "Inline Local Variable";
 		return new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
 	}
+	
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
+	protected String getMessageDialogTitle() {
+		return "Inline Local Variable";
+	}	
 }
 

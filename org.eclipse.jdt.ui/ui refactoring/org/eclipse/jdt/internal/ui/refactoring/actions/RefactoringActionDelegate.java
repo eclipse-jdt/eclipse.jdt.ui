@@ -6,21 +6,24 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 
 public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow fWorkbenchWindow;
-	private IAction fAction;
 	private RefactoringAction[] fPossibleTargets;
-	private RefactoringAction fTargetAction;
 	
 	private String fOperationNotAvailableDialogMessage;
 	private String fOperationNotAvailableDialogTitle;
@@ -40,15 +43,28 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 		fPossibleTargets= possibleTargets;
 	}
 	
+	protected boolean handleTextSelection(ITextSelection selection) {
+		if (fWorkbenchWindow.getPartService().getActivePart() instanceof CompilationUnitEditor)
+			return ((ITextSelection)selection).getLength() > 0;
+		return false;
+	}
+	
+	protected boolean handleStructuredSelection(IStructuredSelection selection) {
+		// XXX Workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=7823
+		if (!((IStructuredSelection)selection).isEmpty())
+			return findAction() != null;
+		return false;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void run(IAction action) {
-		fTargetAction= findAction();
-		if (fTargetAction != null) {
-			fTargetAction.run();
+		RefactoringAction targetAction= findAction();
+		if (targetAction != null) {
+			targetAction.run();
 		} else {
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
+			MessageDialog.openInformation(fWorkbenchWindow.getShell(), 
 				fOperationNotAvailableDialogTitle,
 				fOperationNotAvailableDialogMessage);
 		}
@@ -58,12 +74,20 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	 * Method declared in IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection s) {
+		boolean enabled= false;
+		if (s instanceof ITextSelection) {
+			enabled= handleTextSelection((ITextSelection)s);
+		} else if (s instanceof IStructuredSelection) {
+			enabled= handleStructuredSelection((IStructuredSelection)s);
+		}
+		action.setEnabled(enabled);
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void dispose() {
+		fWorkbenchWindow= null;
 	}
 	
 	/* (non-Javadoc)
@@ -73,7 +97,7 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 		fWorkbenchWindow= window;
 	}
 	
-	private RefactoringAction findAction() {
+	protected RefactoringAction findAction() {
 		if (fPossibleTargets == null)
 			return null;
 		for (int i= 0; i < fPossibleTargets.length; i++) {

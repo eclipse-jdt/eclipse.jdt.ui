@@ -18,29 +18,31 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
 	public RenameTempAction() {
-		super("Rename Local Variable", "Rename Local Variable", "This action is unavailable on the current text selection. Select a local variable declaration or reference.");
+		super("Rename Local Variable");
 	}
 	
-	public RenameTempAction(JavaEditor editor) {
-		this();
-		setEditor(editor);
-	}
-
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createRefactoring
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new RenameTempRefactoring(cunit, selection.getOffset(), selection.getLength());
 	}
 	
-	/*
-	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
 	 */
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		String message= "Choose a new name for the local variable.";
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getText(), message, wizardPageHelp, errorPageHelp);
+	}
+	
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
+	protected String getMessageDialogTitle() {
+		return "Rename Local Variable";
 	}
 }
 

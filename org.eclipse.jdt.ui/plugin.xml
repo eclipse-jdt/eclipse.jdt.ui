@@ -575,32 +575,35 @@
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
 		
 		<!-- selectionGroup  -->
-		<action id="StructureSelectPreviousAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
-			label="%Refactoring.structureSelection.previous.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction"/>
-		<action id="StructureSelectAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
-			label="%Refactoring.structureSelection.up.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction"/>
 		<action id="StructureSelectNextAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
 			label="%Refactoring.structureSelection.next.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction"/>
+		<action id="StructureSelectAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
+			label="%Refactoring.structureSelection.up.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction"/>
+		<action id="StructureSelectPreviousAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/selectionGroup"
+			label="%Refactoring.structureSelection.previous.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction"/>
 		
 		<!-- reorg group  -->		
 		<action id="MoveAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.moveAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate"/>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
+		</action>
 		<action id="RenameParametersAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameParametersActionDelegate"/>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameParametersActionDelegate">
+		</action>
 		<action id="ReorderParametersAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.reorderParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ReorderParametersActionDelegate"/>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ReorderParametersActionDelegate">
+		</action>
 		<action id="RenameAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameAction.label"
@@ -614,7 +617,8 @@
 		<action id="ExtractMethodAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractMethodAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction"/>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction">
+		</action>
 		<action id="SelfEncapsulateFieldAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.selfEncapsulateFieldAction.label"
@@ -630,9 +634,7 @@
 		<action id="ExtractTempAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction"/>		
-			
-		
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction"/>
      </actionSet>
 </extension>
 

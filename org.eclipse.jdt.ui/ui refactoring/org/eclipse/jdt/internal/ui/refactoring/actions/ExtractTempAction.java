@@ -16,14 +16,12 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 
 	public ExtractTempAction() {
-		super("Extract Local Variable", "Extract Local Variable", "This action is unavailable on the current text selection. Select an expression.");
+		super("Extract Local Variable");
 	}
 	
-	public ExtractTempAction(JavaEditor editor) {
-		this();
-		setEditor(editor);
-	}
-
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new ExtractTempRefactoring(cunit, selection.getOffset(), selection.getLength(), 
 																 JavaPreferencesSettings.getCodeGenerationSettings(),
@@ -31,6 +29,9 @@ public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 																 CodeFormatterPreferencePage.isCompactingAssignment());
 	}
 
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
@@ -38,4 +39,10 @@ public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
 	}
 
+	/* (non-Javadoc)
+	 * Method declated in TextSelectionBasedRefactoringAction
+	 */	
+	protected String getMessageDialogTitle() {
+		return "Extract Local Variable";
+	}
 }

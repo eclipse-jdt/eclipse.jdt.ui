@@ -13,6 +13,7 @@ import org.eclipse.jdt.internal.ui.actions.*;
 public class RenameActionDelegate extends RefactoringActionDelegate {
 
 	public RenameActionDelegate() {
+		super("Rename", "Operation unavailable on the current selection. Select a field, method or type.");
 	}
 	
 	/* (non-Javadoc)

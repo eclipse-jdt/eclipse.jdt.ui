@@ -33,27 +33,6 @@ public class StructureSelectionAction extends TextSelectionAction {
 		this("Structure Select");
 	}
 	
-	/* non java-doc
-	 * Method declared in TextSelectionAction
-	 * 
-	 */
-	protected boolean canOperateOnCurrentSelection() {
-		if (super.canOperateOnCurrentSelection())
-			return true;
-		
-		if (getEditor() == null)
-			return false;
-		ISelection selection= getEditor().getSelectionProvider().getSelection();
-		if (!(selection instanceof ITextSelection))
-			return false;
-		
-		if (getCompilationUnit() == null)
-			return false;		
-		
-		Assert.isTrue(((ITextSelection)selection).getLength() >= 0);	
-		return true;				
-	}
-	
 	/* (non-JavaDoc)
 	 * Method declared in IAction.
 	 */
@@ -76,6 +55,13 @@ public class StructureSelectionAction extends TextSelectionAction {
 	 		JavaPlugin.log(e); //dialog would be too heavy here
 	 		return new SourceRange(oldSourceRange.getOffset(), oldSourceRange.getLength());
 	 	}
+	}
+	
+	protected boolean canOperateOnCurrentSelection(ISelection selection) {
+		if (super.canOperateOnCurrentSelection(selection))
+			return true;
+		
+		return selection instanceof ITextSelection;
 	}
 	
 	/**

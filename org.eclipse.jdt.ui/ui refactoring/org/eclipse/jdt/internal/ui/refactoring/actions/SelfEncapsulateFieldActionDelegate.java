@@ -13,6 +13,7 @@ import org.eclipse.jdt.internal.ui.actions.*;
 public class SelfEncapsulateFieldActionDelegate extends RefactoringActionDelegate {
 
 	public SelfEncapsulateFieldActionDelegate() {
+		super("Self Encapsulate Field", "Operation unavailable on the current selection. Select a field.");
 	}
 
 	/* (non-Javadoc)

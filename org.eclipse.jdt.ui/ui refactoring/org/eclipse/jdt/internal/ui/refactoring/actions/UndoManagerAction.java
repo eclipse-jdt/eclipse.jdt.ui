@@ -5,28 +5,97 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.Action;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManagerListener;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 
 	private RefactoringStatus fPreflightStatus;
+	private IAction fAction;
+	private IWorkbenchWindow fWorkbenchWindow;
+	private UndoManagerAdapter fUndoManagerListener;
 
 	public UndoManagerAction() {
 	}
 	
-	public abstract IRunnableWithProgress createOperation(ChangeContext context);
+	protected abstract IRunnableWithProgress createOperation(ChangeContext context);
+	
+	protected abstract UndoManagerAdapter createUndoManagerListener();
 	
 	protected abstract String getName();
 	
-	/* package */ void internalRun() {
+	protected IWorkbenchWindow getWorkbenchWindow() {
+		return fWorkbenchWindow;
+	}
+	
+	protected IAction getAction() {
+		return fAction;
+	}
+	
+	protected boolean isHooked() {
+		return fAction != null;
+	}
+	
+	protected void hookListener(IAction action) {
+		if (isHooked())
+			return;
+		fAction= action;
+		fUndoManagerListener= createUndoManagerListener();
+		Refactoring.getUndoManager().addListener(fUndoManagerListener);
+	}		
+	/* (non-Javadoc)
+	 * Method declared in IActionDelegate
+	 */
+	public void dispose() {
+		if (fUndoManagerListener != null)
+			Refactoring.getUndoManager().removeListener(fUndoManagerListener);
+		fWorkbenchWindow= null;
+		fAction= null;
+		fUndoManagerListener= null;
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared in IActionDelegate
+	 */
+	public void init(IWorkbenchWindow window) {
+		fWorkbenchWindow= window;
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared in IActionDelegate
+	 */
+	public void run(IAction action) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler(), getUnsavedFiles());
@@ -56,7 +125,7 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 			error.open();
 		}
 	}
-
+	
 	/* package */ void setPreflightStatus(RefactoringStatus status) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		fPreflightStatus= status;
@@ -93,17 +162,5 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 			}
 		}
 		return (IFile[])result.toArray(new IFile[result.size()]);
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared in IActionDelegate
-	 */
-	public void selectionChanged(IAction action, ISelection s) {
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared in IActionDelegate
-	 */
-	public void init(IWorkbenchWindow window) {
 	}	
 }

@@ -87,6 +87,8 @@ public final class JavaUI {
 	
 	/**
 	 * The id of the Java Element Creation action set.
+	 * 
+	 * @since 2.0
 	 */
 	public static final String ID_ELEMENT_CREATION_ACTION_SET= "org.eclipse.jdt.ui.JavaElementCreationActionSet"; //$NON-NLS-1$
 	

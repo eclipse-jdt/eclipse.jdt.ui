@@ -15,8 +15,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class TextSelectionBasedRefactoringAction extends TextSelectionAction{
 
-	protected TextSelectionBasedRefactoringAction(String name, String operationNonAvailableDialogTitle, String operationNonAvailableDialogMessage) {
-		super(name, operationNonAvailableDialogTitle, operationNonAvailableDialogMessage);
+	protected TextSelectionBasedRefactoringAction(String name) {
+		super(name);
 	}
 	
 	/* (non-JavaDoc)
@@ -25,13 +25,16 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 	public void run() {
 	try{
 			Refactoring refactoring= createRefactoring(getCompilationUnit(), getTextSelection());
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getOperationNotAvailableDialogTitle(), false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getMessageDialogTitle(), false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, getText(), "Unexpected exception occurred. See log for details.");
 		}	
 	}
 	
 	protected abstract Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection);
+	
 	protected abstract RefactoringWizard createWizard(Refactoring refactoring);
+	
+	protected abstract String getMessageDialogTitle();
 }
 

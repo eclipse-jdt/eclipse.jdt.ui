@@ -9,6 +9,8 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -16,6 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -33,7 +36,7 @@ public class SurroundWithTryCatchAction extends TextSelectionAction {
 	}
 	
 	public SurroundWithTryCatchAction(JavaEditor editor) {
-		super("Surround with try/catch", TITLE, "This action in unavailable on the current text selection. Select a set of statements."); 
+		super("Surround with try/catch"); 
 		setEditor(editor);
 	}
 	
@@ -47,10 +50,11 @@ public class SurroundWithTryCatchAction extends TextSelectionAction {
 			if (status.hasFatalError()) {
 				RefactoringErrorDialog.open(TITLE, status);
 				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
-				if (entry.getContext() instanceof JavaSourceContext && getEditor() != null) {
+				AbstractTextEditor editor= getEditor();
+				if (entry.getContext() instanceof JavaSourceContext && editor != null) {
 					JavaSourceContext context= (JavaSourceContext)entry.getContext();
 					ISourceRange range= context.getSourceRange();
-					getEditor().setHighlightRange(range.getOffset(), range.getLength(), true);
+					editor.setHighlightRange(range.getOffset(), range.getLength(), true);
 				}
 				return;
 			}
