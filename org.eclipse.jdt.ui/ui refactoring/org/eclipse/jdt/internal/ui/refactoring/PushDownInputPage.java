@@ -177,7 +177,8 @@ class PushDownInputPage extends UserInputWizardPage {
 
 	private Button fEditButton;
 	private PullPushCheckboxTableViewer fTableViewer;
-
+	private Label fStatusLine;
+	
 	public PushDownInputPage() {
 		super(PAGE_NAME, true);
 	}
@@ -192,11 +193,20 @@ class PushDownInputPage extends UserInputWizardPage {
 
 		createMemberTableLabel(composite);
 		createMemberTableComposite(composite);
+		createStatusLine(composite);
 		
 		setControl(composite);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PUSH_DOWN_WIZARD_PAGE);
 	}
 
+	private void createStatusLine(Composite composite) {
+		fStatusLine= new Label(composite, SWT.NONE);
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		updateStatusLine();
+		fStatusLine.setLayoutData(gd);
+	}
+	
 	private void createMemberTableLabel(Composite parent) {
 		Label label= new Label(parent, SWT.NONE) ;
 		label.setText(RefactoringMessages.getString("PushDownInputPage.Specify_actions")); //$NON-NLS-1$
@@ -395,6 +405,16 @@ class PushDownInputPage extends UserInputWizardPage {
 		}
 		checkPageCompletionStatus();
 		updateButtonEnablementState(getTableSelection());
+		updateStatusLine();
+	}
+
+	private void updateStatusLine(){
+		if (fStatusLine == null)
+			return;
+		int selected= fTableViewer.getCheckedElements().length;
+		String[] keys= {String.valueOf(selected)};
+		String msg= RefactoringMessages.getFormattedString("PushDownInputPage.status_line", keys); //$NON-NLS-1$
+		fStatusLine.setText(msg);
 	}
 
 	private void checkPageCompletionStatus() {

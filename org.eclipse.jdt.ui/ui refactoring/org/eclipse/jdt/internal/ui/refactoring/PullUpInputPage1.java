@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PullUpInputPage1 extends UserInputWizardPage {
 	
@@ -261,8 +260,9 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	private Combo fSuperclassCombo;
 	private IType[] fSuperclasses;
 	private Button fEditButton;
-
 	private Button fCreateStubsButton;
+	private Label fStatusLine;
+
 	public PullUpInputPage1() {
 		super(PAGE_NAME, false);
 		setMessage(RefactoringMessages.getString("PullUpInputPage1.page_message")); //$NON-NLS-1$
@@ -280,9 +280,18 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		createSpacer(composite);
 		createMemberTableLabel(composite);
 		createMemberTableComposite(composite);
+		createStatusLine(composite);
 				
 		setControl(composite);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
+	}
+	
+	private void createStatusLine(Composite composite) {
+		fStatusLine= new Label(composite, SWT.NONE);
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		updateStatusLine();
+		fStatusLine.setLayoutData(gd);
 	}
 	
 	private void createStubCheckbox(Composite parent) {
@@ -438,6 +447,16 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		}
 		checkPageCompletionStatus();
 		updateButtonEnablementState(fTableViewer.getSelection());
+		updateStatusLine();
+	}
+
+	private void updateStatusLine(){
+		if (fStatusLine == null)
+			return;
+		int selected= fTableViewer.getCheckedElements().length;
+		String[] keys= {String.valueOf(selected)};
+		String msg= RefactoringMessages.getFormattedString("PullUpInputPage1.status_line", keys); //$NON-NLS-1$
+		fStatusLine.setText(msg);
 	}
 
 	private static int countEditableInfos(MemberActionInfo[] infos) {
