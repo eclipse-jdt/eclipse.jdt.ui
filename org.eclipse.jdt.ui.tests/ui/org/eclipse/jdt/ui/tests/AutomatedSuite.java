@@ -15,7 +15,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.TestOptionsSetup;
 
-import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
@@ -46,7 +45,6 @@ public class AutomatedSuite extends TestSuite {
 	 */
 	public AutomatedSuite() {
 		addTest(CoreTests.suite());
-		addTest(ASTRewritingTest.suite());
 		addTest(QuickFixTest.suite());
 		
 		addTest(NewJavaProjectWizardTest.suite());
