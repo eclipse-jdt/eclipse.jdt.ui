@@ -905,8 +905,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private void createAll(MemberActionInfo[] members, TypeDeclaration typeDeclaration, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		for (int i= 0; i < members.length; i++) {
-			MemberActionInfo info= members[i];
-			create(info, typeDeclaration, declaringCuNode, rewrite);
+			create(members[i], typeDeclaration, declaringCuNode, rewrite);
 		}
 	}
 	
