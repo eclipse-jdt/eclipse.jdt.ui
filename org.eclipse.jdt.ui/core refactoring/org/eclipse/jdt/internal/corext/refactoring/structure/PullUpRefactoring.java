@@ -107,7 +107,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	public IMember[] getElementsToPullUp() throws JavaModelException {
+	public IMember[] getElementsToPullUp() {
 		return fElementsToPullUp;
 	}
 	
