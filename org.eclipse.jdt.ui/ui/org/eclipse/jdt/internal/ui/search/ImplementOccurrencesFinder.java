@@ -52,14 +52,9 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		public boolean visit(MethodDeclaration node) {
 			IMethodBinding binding= node.resolveBinding();
 			if (binding != null) {
-				IMethodBinding definingMethod= Bindings.findMethodDefininition(binding, true);
-				if (definingMethod != null) {
-					
-					ITypeBinding definingType= definingMethod.getDeclaringClass();
-					
-					if (Bindings.isSuperType(definingType, fSelectedType))
-						fResult.add(node.getName());
-				}
+				IMethodBinding method= Bindings.findMethodInHierarchy(fSelectedType, binding.getName(), binding.getParameterTypes());
+				if (method != null)
+					fResult.add(node.getName());
 			}
 			return super.visit(node);
 		}
