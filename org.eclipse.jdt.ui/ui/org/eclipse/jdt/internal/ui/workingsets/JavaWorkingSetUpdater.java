@@ -17,9 +17,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetUpdater;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -27,9 +31,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetUpdater;
 
 
 public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChangedListener {
@@ -199,9 +200,13 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			IAdaptable element= (IAdaptable)iter.next();
 			boolean remove= false;
 			if (element instanceof IJavaElement) {
-				remove= !((IJavaElement)element).exists();
+				IJavaElement jElement= (IJavaElement)element;
+				IProject project= jElement.getJavaProject().getProject();
+				remove= !jElement.exists() && (project != null ? project.isOpen() : true);
 			} else if (element instanceof IResource) {
-				remove= !((IResource)element).exists();
+				IResource resource= (IResource)element;
+				IProject project= resource.getProject();
+				remove= !resource.exists() && (project != null ? project.isOpen() : true);
 			}
 			if (remove) {
 				iter.remove();

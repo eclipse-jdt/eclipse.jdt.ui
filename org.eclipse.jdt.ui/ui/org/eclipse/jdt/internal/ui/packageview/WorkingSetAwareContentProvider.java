@@ -15,10 +15,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -26,6 +25,11 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
@@ -72,13 +76,45 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			Assert.isTrue(fWorkingSetModel == element);
 			return fWorkingSetModel.getActiveWorkingSets();
 		} else if (element instanceof IWorkingSet) {
-			children= fWorkingSetModel.getChildren((IWorkingSet)element);
+			children= filterClosedElements(fWorkingSetModel.getChildren((IWorkingSet)element));
 		} else {
 			children= super.getChildren(element);
 		}
 		return children;
 	}
 	
+	private Object[] filterClosedElements(Object[] children) {
+		List result= new ArrayList(children.length);
+		for (int i= 0; i < children.length; i++) {
+			Object element= children[i];
+			boolean add= false;
+			if (element instanceof IProject) {
+				add= true;
+			} else if (element instanceof IResource) {
+				IProject project= ((IResource)element).getProject();
+				add= project == null || project.isOpen();
+			} else if (element instanceof IJavaProject) {
+				add= true;
+			} else if (element instanceof IJavaElement) {
+				IProject project= getProject((IJavaElement)element);
+				add= project == null || project.isOpen();
+			}
+			if (add) {
+				result.add(element);
+			}
+		}
+		return result.toArray();
+	}
+	
+	private IProject getProject(IJavaElement element) {
+		if (element == null)
+			return null;
+		IJavaProject project= element.getJavaProject();
+		if (project == null)
+			return null;
+		return project.getProject();
+	}
+ 
 	/**
 	 * {@inheritDoc}
 	 */
