@@ -257,28 +257,33 @@ class JavaCompareUtilities {
 	}
 	
 	/**
-	 * Breaks the given string into lines and strips off the line terminator.
+	 * Breaks the given string into lines.
 	 */
 	static String[] readLines(InputStream is) {
 		
 		try {
-			StringBuffer sb= null;
+			StringBuffer sb= new StringBuffer();
 			List list= new ArrayList();
 			while (true) {
 				int c= is.read();
 				if (c == -1)
 					break;
-				if (c == '\n' || c == '\r') {
-					if (sb != null)
-						list.add(sb.toString());
-					sb= null;
-				} else {
-					if (sb == null)
-						sb= new StringBuffer();
+				sb.append((char)c);
+				if (c == '\r') {	// single CR or a CR followed by LF
+					c= is.read();
+					if (c == -1)
+						break;
 					sb.append((char)c);
+					if (c == '\n') {
+						list.add(sb.toString());
+						sb= new StringBuffer();
+					}
+				} else if (c == '\n') {	// a single LF
+					list.add(sb.toString());
+					sb= new StringBuffer();
 				}
 			}
-			if (sb != null)
+			if (sb.length() > 0)
 				list.add(sb.toString());
 			return (String[]) list.toArray(new String[list.size()]);
 

@@ -137,7 +137,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 			
 			// build the TextEdit that inserts the text into the buffer
-			TextEdit edit= null;
+			MemberEdit edit= null;
 			if (input != null)
 				edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines,
 										CodeFormatterPreferencePage.getTabSize());
@@ -147,6 +147,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				MessageDialog.openError(shell, errorTitle, errorMessage);
 				return;
 			}
+			edit.setAddLineSeparators(false);
 			
 			IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
 
@@ -192,7 +193,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	/**
 	 * Creates a TextEdit for inserting the given lines into the container. 
 	 */
-	private TextEdit createEdit(String[] lines, IParent container) {
+	private MemberEdit createEdit(String[] lines, IParent container) {
 		
 		// find a child where to insert before
 		IJavaElement[] children= null;

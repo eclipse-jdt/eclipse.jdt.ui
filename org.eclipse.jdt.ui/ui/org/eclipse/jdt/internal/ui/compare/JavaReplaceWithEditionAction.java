@@ -116,8 +116,9 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					return;
 				}
 				
-				TextEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
+				MemberEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
 										CodeFormatterPreferencePage.getTabSize());
+				edit.setAddLineSeparators(false);
 										
 				IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
 				
