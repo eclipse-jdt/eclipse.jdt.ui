@@ -57,7 +57,7 @@ public class QualifiedNameFinder {
 			// do nothing;
 		}
 
-		public void accept(IResourceProxy proxy, String line, int start, int length, int lineNumber) throws CoreException {
+		public void accept(IResourceProxy proxy, int start, int length) throws CoreException {
 			if (proxy.getType() != IResource.FILE)
 				return;
 			// Make sure we don't change Compilation Units
