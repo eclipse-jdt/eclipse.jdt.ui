@@ -743,7 +743,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			TextEdit edit= new MultiTextEdit();
 			TextBuffer textBuffer= TextBuffer.create(fUnit.getBuffer().getContents());
-			rewrite.rewriteNode(textBuffer, edit, null);
+			rewrite.rewriteNode(textBuffer, edit);
 			
 			rewrite.removeModifications();
 			
@@ -1119,7 +1119,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 		TextEdit edit= new MultiTextEdit();
 		TextBuffer textBuffer= TextBuffer.create(getDeclaringCompilationUnit().getBuffer().getContents());
-		rewrite.rewriteNode(textBuffer, edit, null);
+		rewrite.rewriteNode(textBuffer, edit);
 		
 		rewrite.removeModifications();
 		
