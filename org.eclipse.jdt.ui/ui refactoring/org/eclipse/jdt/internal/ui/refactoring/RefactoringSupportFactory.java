@@ -288,8 +288,12 @@ public class RefactoringSupportFactory {
 		
 		if (!(element instanceof IJavaElement))
 			return null;
+		
+		IJavaElement jElement= (IJavaElement)element;
+		if (! jElement.exists())
+			return null;
 			
-		switch (((IJavaElement)element).getElementType()){
+		switch (jElement.getElementType()){
 			
 			case IJavaElement.PACKAGE_FRAGMENT:
 					return createPackageRename();
