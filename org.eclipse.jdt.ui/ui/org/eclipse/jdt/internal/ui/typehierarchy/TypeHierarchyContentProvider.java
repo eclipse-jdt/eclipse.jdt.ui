@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Base class for content providers for type hierarchy viewers.
@@ -109,7 +108,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 */	
-	protected abstract IType[] getTypesInHierarchy(IType type);
+	protected abstract void getTypesInHierarchy(IType type, List res);
 	
 	/**
 	 * Hook to overwrite. Return null if parent is ambiguous.
@@ -127,16 +126,20 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 */	
 	public Object[] getChildren(Object element) {
 		if (element instanceof IType) {
-			IType type= (IType)element;
-			IType[] childrenTypes= getTypesInHierarchy(type);
+			try {
+				IType type= (IType)element;
+	
+				List children= new ArrayList();
+				if (fMemberFilter != null) {
+					addFilteredMemberChildren(type, children);
+				}
+	
+				addTypeChildren(type, children);
 				
-			List children= new ArrayList();
-			if (fMemberFilter != null) {
-				addFilteredMembers(type, children);
+				return children.toArray();
+			} catch (JavaModelException e) {
+				// ignore
 			}
-			addFilteredTypes(childrenTypes, children);
-			
-			return children.toArray();
 		}
 		return NO_ELEMENTS;
 	}
@@ -147,7 +150,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public boolean hasChildren(Object element) {
 		if (element instanceof IType) {
 			try {
-				return hasFilteredChildren((IType) element);
+				IType type= (IType) element;
+				return hasTypeChildren(type) || (fMemberFilter != null && hasMemberFilterChildren(type));
 			} catch (JavaModelException e) {
 				return false;
 			}			
@@ -155,66 +159,74 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return false;
 	}	
 	
-	private void addFilteredMembers(IType parent, List children) {
-		try {		
-			IMethod[] methods= parent.getMethods();
-			for (int i= 0; i < fMemberFilter.length; i++) {
-				IMember member= fMemberFilter[i];
-				if (parent.equals(member.getDeclaringType())) {
-					if (!children.contains(member)) {
-						children.add(member);
-					}
-				} else if (member instanceof IMethod) {
-					IMethod curr= (IMethod)member;
-					IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
-					if (meth != null && !children.contains(meth)) {
-						children.add(meth);
-					}
+	private void addFilteredMemberChildren(IType parent, List children) throws JavaModelException {
+		IMethod[] methods= parent.getMethods();
+		for (int i= 0; i < fMemberFilter.length; i++) {
+			IMember member= fMemberFilter[i];
+			if (parent.equals(member.getDeclaringType())) {
+				if (!children.contains(member)) {
+					children.add(member);
 				}
-			}		
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-	}
-		
-	private void addFilteredTypes(IType[] types, List children) {
-		try {
-			for (int i= 0; i < types.length; i++) {
-				if (hasFilteredChildren(types[i])) {
-					children.add(types[i]);
+			} else if (member instanceof IMethod) {
+				IMethod curr= (IMethod)member;
+				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
+				if (meth != null && !children.contains(meth)) {
+					children.add(meth);
 				}
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		}		
+	}
+		
+	private void addTypeChildren(IType type, List children) throws JavaModelException {
+		ArrayList types= new ArrayList();
+		getTypesInHierarchy(type, types);
+		int len= types.size();
+		for (int i= 0; i < len; i++) {
+			IType curr= (IType) types.get(i);
+			if (isInTree(curr)) {
+				children.add(curr);
+			}
 		}
 	}
 	
 
-	private boolean hasFilteredChildren(IType type) throws JavaModelException {
-		
+	private boolean isInTree(IType type) throws JavaModelException {
 		if (isInWorkingSet(type)) {
 			if (fMemberFilter != null) {
-				IMethod[] methods= type.getMethods();
-				for (int i= 0; i < fMemberFilter.length; i++) {
-					IMember member= fMemberFilter[i];
-					if (type.equals(member.getDeclaringType())) {
-						return true;
-					} else if (member instanceof IMethod) {
-						IMethod curr= (IMethod)member;
-						IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
-						if (meth != null) {
-							return true;
-						}
-					}
-				}
+				return hasMemberFilterChildren(type);
 			} else {
 				return true;
 			}
 		}
 		
-		IType[] childrenTypes= getTypesInHierarchy(type);
-		for (int i= 0; i < childrenTypes.length; i++) {
-			if (hasFilteredChildren(childrenTypes[i])) {
+		return hasTypeChildren(type);
+	}
+	
+	private boolean hasMemberFilterChildren(IType type) throws JavaModelException {
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < fMemberFilter.length; i++) {
+			IMember member= fMemberFilter[i];
+			if (type.equals(member.getDeclaringType())) {
+				return true;
+			} else if (member instanceof IMethod) {
+				IMethod curr= (IMethod)member;
+				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
+				if (meth != null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	private boolean hasTypeChildren(IType type) throws JavaModelException {
+		ArrayList types= new ArrayList();
+		getTypesInHierarchy(type, types);
+		int len= types.size();
+		for (int i= 0; i < len; i++) {
+			IType curr= (IType) types.get(i);
+			if (isInTree(curr)) {
 				return true;
 			}
 		}
@@ -247,6 +259,14 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			return member.getDeclaringType();
 		}
 		return null;
+	}
+	
+	protected final boolean isAnonymous(IType type) {
+		return type.getElementName().length() == 0;
+	}
+	
+	protected final boolean isObject(IType type) {
+		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.List;
+
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.ui.IWorkbenchPart;
@@ -59,12 +61,14 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 			super(lifeCycle);
 		}
 		
-		protected final IType[] getTypesInHierarchy(IType type) {
+		protected final void getTypesInHierarchy(IType type, List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
-				return hierarchy.getSupertypes(type);
+				IType[] types= hierarchy.getSupertypes(type);
+				for (int i= 0; i < types.length; i++) {
+					res.add(types[i]);
+				}
 			}
-			return new IType[0];
 		}
 		
 		protected IType getParentType(IType type) {

@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:
@@ -27,7 +29,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * Used by the TypeHierarchyViewPart which has to provide a TypeHierarchyLifeCycle
  * on construction (shared type hierarchy)
  */
-public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
+public class TraditionalHierarchyViewer extends TypeHierarchyViewer {	
 	
 	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lifeCycle, part);
@@ -104,15 +106,25 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			if (hierarchy != null) {
 				IType input= hierarchy.getType();
 				if (input == null) {
-					// opened on a region
-					return hierarchy.getRootClasses();	
+					ArrayList res=  new ArrayList();
+					IType[] classes= hierarchy.getRootClasses();
+					for  (int i= 0; i < classes.length; i++) {
+						res.add(classes[i]);
+					}
+					IType[] interfaces= hierarchy.getRootInterfaces();
+					for (int i= 0; i < interfaces.length; i++) {
+						if (isRootOfInterfaceOrAnonym(hierarchy, interfaces[i])) {
+							res.add(interfaces[i]);
+						}
+					}
+					return res.toArray();
 				} else {
 					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
 						return new Object[] { input };
 					} else {
 						IType[] roots= hierarchy.getRootClasses();
 						for (int i= 0; i < roots.length; i++) {
-							if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) { //$NON-NLS-1$
+							if (isObject(roots[i])) {
 								return new Object[] { roots[i] };
 							}
 						} 
@@ -122,16 +134,57 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return NO_ELEMENTS;
 		}
+			
+		private boolean isRootOfInterfaceOrAnonym(ITypeHierarchy hierarchy, IType type) {
+			IType[] subTypes= hierarchy.getSubtypes(type);
+			for (int i= 0; i < subTypes.length; i++) {
+				IType curr= subTypes[i];
+				if (isAnonymous(curr)) {
+					return true;
+				}
+				if (Flags.isInterface(hierarchy.getCachedFlags(curr))) {
+					if (isInScope(curr) || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		private boolean isInScope(IType type) {
+			IJavaElement input= fTypeHierarchy.getInputElement();
+			
+			IJavaElement parent= type.getAncestor(input.getElementType());
+			if (input.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+				if (parent == null || parent.getElementName().equals(input.getElementName())) {
+					return true;
+				}
+			} else if (input.equals(parent)) {
+				return true;
+			}
+			return false;
+		}
 	
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */	
-		protected final IType[] getTypesInHierarchy(IType type) {
+		protected final void getTypesInHierarchy(IType type, List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
-				return hierarchy.getSubtypes(type);
+				IType[] types= hierarchy.getSubtypes(type);
+				if (isObject(type)) {
+					for (int i= 0; i < types.length; i++) {
+						IType curr= types[i];
+						if (!isAnonymous(curr)) {
+							res.add(curr);
+						}
+					}
+				} else {
+					for (int i= 0; i < types.length; i++) {
+						res.add(types[i]);
+					}
+				}
 			}
-			return new IType[0];
 		}
 
 		protected IType getParentType(IType type) {

@@ -710,7 +710,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			
 	/**
 	 * Returns the inner component in a workbench part.
-	 * @see IWorkbenchPart#createPartControl
+	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite container) {
 						
