@@ -4,19 +4,28 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.viewers.IStructuredSelection;
 public class RenameAction extends ReorgAction {
 	
 	private IRefactoringRenameSupport fRefactoringSupport;
+	
+	public RenameAction(ISelectionProvider provider) {
+		super(ReorgMessages.getString("renameAction.label"), provider); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("renameAction.description")); //$NON-NLS-1$
+	}
 	
 	public RenameAction(StructuredSelectionProvider provider) {
 		super(ReorgMessages.getString("renameAction.label"), provider); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("renameAction.description")); //$NON-NLS-1$
 	}
+	
 
 	/**
 	 *The user has invoked this action

@@ -1,13 +1,8 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -29,6 +24,10 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 class SourceReferenceAction extends RefactoringAction {
 
 	protected SourceReferenceAction(String name, StructuredSelectionProvider provider) {
+		super(name, provider);
+	}
+	
+	protected SourceReferenceAction(String name, ISelectionProvider provider) {
 		super(name, provider);
 	}
 

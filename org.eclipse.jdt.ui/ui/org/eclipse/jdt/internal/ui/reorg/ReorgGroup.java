@@ -35,15 +35,14 @@ public class ReorgGroup extends ContextMenuGroup {
 			return;
 			
 		fActions= new RefactoringAction[] {	
-			new RenameAction(provider),
-			new CutSourceReferencesToClipboardAction(provider),
+			new RenameAction(p),
+			new CutSourceReferencesToClipboardAction(p),
 			new CopyAction(provider),
-			new CopySourceReferencesToClipboardAction(provider),
+			new CopySourceReferencesToClipboardAction(p),
 			new MoveAction(provider),
-			new PasteSourceReferencesAction(provider),
+			new PasteSourceReferencesAction(p),
 			//new DuplicateSourceReferenceAction(provider, p),
-			new DeleteAction(provider),
-			new DeleteSourceReferencesAction(provider)	
+			new DeleteAction(p)
 		};		
 	}	
 }

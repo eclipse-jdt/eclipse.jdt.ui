@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -38,7 +38,7 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 	 * Constructor for PasteSourceReferencesAction.
 	 * @param provider
 	 */
-	public PasteSourceReferencesAction(StructuredSelectionProvider provider) {
+	public PasteSourceReferencesAction(ISelectionProvider provider) {
 		super("&Paste", provider);
 	}
 

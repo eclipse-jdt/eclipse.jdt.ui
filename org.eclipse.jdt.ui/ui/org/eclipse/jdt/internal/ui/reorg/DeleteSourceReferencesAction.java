@@ -10,6 +10,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
+
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -17,12 +19,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class DeleteSourceReferencesAction extends SourceReferenceAction{
 	
-	public DeleteSourceReferencesAction(StructuredSelectionProvider provider) {
+	public DeleteSourceReferencesAction(ISelectionProvider provider) {
 		super("&Delete", provider);
 	}
 	
