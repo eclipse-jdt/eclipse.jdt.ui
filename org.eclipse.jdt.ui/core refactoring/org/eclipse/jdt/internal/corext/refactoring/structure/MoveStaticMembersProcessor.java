@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
@@ -49,12 +49,12 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -92,6 +92,7 @@ import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class MoveStaticMembersProcessor extends MoveProcessor {
 	
+	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
 	private IMember[] fMembersToMove;
 	private IType fDestinationType;
 	private String fDestinationTypeName;
@@ -850,21 +851,20 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
-						fSource.getOldRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
+						fSource.getASTRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
 				} else if (declaration instanceof TypeDeclaration) {
 					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
-						fSource.getOldRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
+						fSource.getASTRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
 					}
 				}
 			}
-			TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_declaration")); //$NON-NLS-1$
-			fSource.getOldRewrite().markAsTracked(declaration, group);
-			declaration.setProperty("group", group); //$NON-NLS-1$
+			ITrackedNodePosition trackedPosition= fSource.getASTRewrite().track(declaration);
+			declaration.setProperty(TRACKED_POSITION_PROPERTY, trackedPosition);
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
-			status.merge(analyzer.getStatus()); 
+			status.merge(analyzer.getStatus());
 		}
 		// Adjust imports
 		if (targetNeedsSourceImport && (fTarget != fSource))
@@ -877,8 +877,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		String[] updatedMemberSources= new String[members.length];
 		TextBuffer buffer= TextBuffer.create(fSource.getCu().getSource());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
-		MultiTextEdit edit= new MultiTextEdit();
-		fSource.getOldRewrite().rewriteNode(buffer, edit);
+		TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), null);
 		editor.add(edit);
 		editor.performEdits(new NullProgressMonitor());
 		for (int i= 0; i < members.length; i++) {
@@ -889,25 +888,25 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	}
 	
 	private String getUpdatedMember(TextBuffer buffer, BodyDeclaration declaration) {
-		TextEditGroup groupDescription= (TextEditGroup) declaration.getProperty("group"); //$NON-NLS-1$
-		IRegion textRange= groupDescription.getRegion();
-		String newSource= buffer.getContent(textRange.getOffset(), textRange.getLength());
+		ITrackedNodePosition trackedPosition= (ITrackedNodePosition) declaration.getProperty(TRACKED_POSITION_PROPERTY);
+		String newSource= buffer.getContent(trackedPosition.getStartPosition(), trackedPosition.getLength());
 		return Strings.trimIndentation(newSource, fPreferences.tabWidth, false);
 	}
 
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		TypeDeclaration destination= getDestinationDeclaration();
-		List container= destination.bodyDeclarations();
-			
+		ListRewrite containerRewrite= fTarget.getASTRewrite().getListRewrite(destination, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		
 		TextEditGroup delete= fSource.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.deleteMembers")); //$NON-NLS-1$
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			fSource.getOldRewrite().remove(declaration, delete);
-			ASTNode node= fTarget.getOldRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
-			fTarget.getOldRewrite().markAsInserted(node, add);
-			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
+			fSource.getASTRewrite().remove(declaration, delete);
+			ASTNode node= fTarget.getASTRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
+			List container= containerRewrite.getRewrittenList();
+			int insertionIndex= ASTNodes.getInsertionIndex((BodyDeclaration) node, container);
+			containerRewrite.insertAt(node, insertionIndex, add);
 		}
 		return result;
 	}
