@@ -440,22 +440,27 @@ public class FilteredList extends Composite {
 	}
 
 	private class TableUpdater implements IncrementalRunnable {
+		private final static int BATCH_SIZE= 20;
 		private final Display fDisplay;
 		private final Table fTable;
 		private final int fCount;
+		private final int fSteps;
 		private int fIndex;
 		
 		public TableUpdater(Table table, int count) {
 			fTable= table;
 			fDisplay= table.getDisplay();
 			fCount= count;
+			fSteps= (count % BATCH_SIZE == 0)
+				? count / BATCH_SIZE
+				: count / BATCH_SIZE + 1;
 		}
 		
 		/*
 		 * @see IncrementalRunnable#getCount()
 		 */
 		public int getCount() {
-			return fCount + 1;	
+			return fSteps + 1;
 		}
 		
 		/*
@@ -464,7 +469,7 @@ public class FilteredList extends Composite {
 		public void cancel() {
 			fIndex= 0;
 		}
-		
+	
 		/*
 		 * @see Runnable#run()
 		 */
@@ -478,21 +483,32 @@ public class FilteredList extends Composite {
 					
 			 		final int itemCount= fTable.getItemCount();
 					
-					if (index < fCount) {
-						final TableItem item= (index < itemCount)
-							? fTable.getItem(index)
-							: new TableItem(fTable, SWT.NONE);
-	
-						final Label label= fLabels[fFilteredIndices[fFoldedIndices[index]]];
-	
-						item.setText(label.string);
-						item.setImage(label.image);		
+					if (index < fSteps) {
+						final int modulo= fCount % BATCH_SIZE;
+						final int count= (index == fCount / BATCH_SIZE) && (modulo != 0)
+								? modulo
+								: BATCH_SIZE;
 
-						// select first item
-						if (index == 0) {
-							fTable.setSelection(0);				 		
-							fTable.notifyListeners(SWT.Selection, new Event());
+						fTable.setRedraw(false);
+						for (int i= 0; i != count; i++) {						
+							int realIndex= index * BATCH_SIZE + i;
+
+							final TableItem item= (realIndex < itemCount)
+								? fTable.getItem(realIndex)
+								: new TableItem(fTable, SWT.NONE);
+		
+							final Label label= fLabels[fFilteredIndices[fFoldedIndices[realIndex]]];
+		
+							item.setText(label.string);
+							item.setImage(label.image);		
+	
+							// select first item
+							if (index == 0) {
+								fTable.setSelection(0);				 		
+								fTable.notifyListeners(SWT.Selection, new Event());
+							}
 						}
+						fTable.setRedraw(true);
 
 					// finish
 					} else {
