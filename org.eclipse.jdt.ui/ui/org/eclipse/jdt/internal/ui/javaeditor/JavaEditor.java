@@ -2612,6 +2612,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/*
+	 * @see org.eclipse.ui.part.WorkbenchPart#getOrientation()
+	 * @since 3.1
+	 */
+	public int getOrientation() {
+		return SWT.LEFT_TO_RIGHT;	//Java editors are always left to right by default
+	}
+	
+	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
