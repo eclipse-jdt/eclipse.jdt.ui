@@ -116,7 +116,7 @@ public class JavaFormatter implements ITemplateEditor {
 		int[] offsets= variablesToOffsets(variables);
 		
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		string= formatter.format(string, indentationLevel, offsets, "\n"); //$NON-NLS-1$
+		string= formatter.format(string, indentationLevel, offsets, fLineDelimiter);
 		
 		offsetsToVariables(offsets, variables);
 
@@ -180,7 +180,6 @@ public class JavaFormatter implements ITemplateEditor {
 		TextBufferEditor editor= new TextBufferEditor(textBuffer);
 		addEdits(editor, positions);
 		addEdits(editor, edits);
-//		editor.add(edit);
 		editor.performEdits(null);
 		
 		return textBuffer.getContent();
