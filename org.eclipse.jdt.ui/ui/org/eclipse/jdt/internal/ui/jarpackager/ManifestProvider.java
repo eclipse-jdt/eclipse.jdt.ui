@@ -1,13 +1,12 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.IOException;
+/* * (c) Copyright IBM Corp. 2000, 2002. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;
-
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.ui.jarpackager.IManifestProvider;import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 /**
  * A manifest provider creates manifest files.
  */
-public class ManifestProvider {
+public class ManifestProvider implements IManifestProvider {
 
 	// Constants
 	private static final String SEALED_VALUE= "true"; //$NON-NLS-1$
@@ -18,7 +17,7 @@ public class ManifestProvider {
 	 * 
 	 * @param	jarPackage	the JAR package specification
 	 */	
-	public Manifest create(JarPackage jarPackage) throws IOException, CoreException {
+	public Manifest create(JarPackageData jarPackage) throws IOException, CoreException {
 		Assert.isNotNull(jarPackage);
 		if (jarPackage.isManifestGenerated())
 			return createGeneratedManifest(jarPackage);
@@ -35,22 +34,21 @@ public class ManifestProvider {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);
 		return manifest;
 	}
-	/**	 * Hook for subclasses to add additional manifest entries.	 * 	 * @param	manifest	the manifest to which the entries should be added	 * @param	jarPackage	the JAR package specification	 */	protected void putAdditionalEntries(Manifest manifest, JarPackage jarPackage) {	}
-	private Manifest createGeneratedManifest(JarPackage jarPackage) {
+	/**	 * Hook for subclasses to add additional manifest entries.	 * 	 * @param	manifest	the manifest to which the entries should be added	 * @param	jarPackage	the JAR package specification	 */	protected void putAdditionalEntries(Manifest manifest, JarPackageData jarPackage) {	}
+	private Manifest createGeneratedManifest(JarPackageData jarPackage) {
 		Manifest manifest= new Manifest();
 		putVersion(manifest, jarPackage);
 		putSealing(manifest, jarPackage);
 		putMainClass(manifest, jarPackage);
-		putDownloadExtension(manifest, jarPackage);
 		putAdditionalEntries(manifest, jarPackage);
 		return manifest;
 	}
 
-	private void putVersion(Manifest manifest, JarPackage jarPackage) {
+	private void putVersion(Manifest manifest, JarPackageData jarPackage) {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, jarPackage.getManifestVersion());
 	}
 		
-	private void putSealing(Manifest manifest, JarPackage jarPackage) {
+	private void putSealing(Manifest manifest, JarPackageData jarPackage) {
 		if (jarPackage.isJarSealed()) {
 			manifest.getMainAttributes().put(Attributes.Name.SEALED, SEALED_VALUE);
 			IPackageFragment[] packages= jarPackage.getPackagesToUnseal();
@@ -73,22 +71,17 @@ public class ManifestProvider {
 		}
 	}
 	
-	private void putMainClass(Manifest manifest, JarPackage jarPackage) {
-		if (jarPackage.getMainClass() != null && jarPackage.getMainClass().getFullyQualifiedName().length() > 0)
-			manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, jarPackage.getMainClass().getFullyQualifiedName());
+	private void putMainClass(Manifest manifest, JarPackageData jarPackage) {
+		if (jarPackage.getManifestMainClass() != null && jarPackage.getManifestMainClass().getFullyQualifiedName().length() > 0)
+			manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, jarPackage.getManifestMainClass().getFullyQualifiedName());
 	}
 	
-	private void putDownloadExtension(Manifest manifest, JarPackage jarPackage) {
-		if (jarPackage.getDownloadExtensionsPath() != null && jarPackage.getDownloadExtensionsPath().length() > 0)
-			manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, jarPackage.getDownloadExtensionsPath());
-	}
-
 	private String getInManifestFormat(IPackageFragment packageFragment) {
 		String name= packageFragment.getElementName();
 		return name.replace('.', '/') + '/';
 	}
 
-	private Manifest createSuppliedManifest(JarPackage jarPackage) throws IOException, CoreException {		IFile manifestFile= jarPackage.getManifestFile();		if (manifestFile.isLocal(IResource.DEPTH_ZERO))			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());		Manifest manifest;		// No need to use buffer here because Manifest(...) does		InputStream stream= jarPackage.getManifestFile().getContents(false);		try {			manifest= new Manifest(stream);		} finally {			if (stream != null)				stream.close();		}
+	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {		IFile manifestFile= jarPackage.getManifestFile();		if (manifestFile.isLocal(IResource.DEPTH_ZERO))			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());		Manifest manifest;		// No need to use buffer here because Manifest(...) does		InputStream stream= jarPackage.getManifestFile().getContents(false);		try {			manifest= new Manifest(stream);		} finally {			if (stream != null)				stream.close();		}
 		return manifest;
 	}
 }
