@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -363,11 +364,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			IBinding vb= simpleName.resolveBinding();
 			if (vb == null)
 				continue;
-			String text;
-			if (isStatic(vb))
-				text= getTypeOfEnclosingInstanceField() + '.';
-			else
-				text= createReadAccessForEnclosingInstance() + '.';
+			String text= createAccessToEnclosingInstanceFieldText(simpleName, vb);
 			int offset= simpleName.getStartPosition();
 			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_field_access"), SimpleTextEdit.createInsert(offset, text));  //$NON-NLS-1$
 		}
@@ -386,11 +383,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			IVariableBinding vb= resolveFieldBinding(fieldAccess);
 			if (vb == null)
 				continue;
-			String text;
-			if (isStatic(vb))
-				text= getTypeOfEnclosingInstanceField() + '.';
-			else
-				text= createReadAccessForEnclosingInstance() + '.';
+			String text= createAccessToEnclosingInstanceFieldText(fieldAccess, vb);
 			int offset= fieldAccess.getStartPosition();
 			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_field_access"), SimpleTextEdit.createReplace(offset, length, text)); //$NON-NLS-1$
 		}
@@ -409,14 +402,47 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			IMethodBinding mb= resolveMethodBinding(methodInvocation);
 			if (mb == null)
 				continue;
-			String text;
-			if (isStatic(mb))
-				text= getTypeOfEnclosingInstanceField() + '.';
-			else
-				text= createReadAccessForEnclosingInstance() + '.';
+			String text= createAccessToEnclosingInstanceFieldText(methodInvocation, mb);
 			int offset= methodInvocation.getStartPosition();
 			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_method_invocation"), SimpleTextEdit.createReplace(offset, length, text)); //$NON-NLS-1$
 		}
+	}
+
+	private String createAccessToEnclosingInstanceFieldText(ASTNode node, IBinding binding) throws JavaModelException {
+		if (isStatic(binding))
+			return getTypeOfEnclosingInstanceField() + '.';
+		else if (isInTypeNestedInInputType(node))
+			return createQualifiedReadAccessForEnclosingInstance() + '.';
+		else	
+			return createReadAccessForEnclosingInstance() + '.';
+	}
+
+	private boolean isInTypeNestedInInputType(ASTNode node) throws JavaModelException{
+		return (isInAnonymousTypeInsideInputType(node) ||
+				isInLocalTypeInsideInputType(node) ||
+				isInNonStaticMemberTypeInsideInputType(node));
+	}
+	
+
+	private boolean isInLocalTypeInsideInputType(ASTNode node) throws JavaModelException {
+		TypeDeclaration inputType= getTypeDeclarationNode();
+		TypeDeclarationStatement localType= (TypeDeclarationStatement)ASTNodes.getParent(node, TypeDeclarationStatement.class);
+		return localType != null && ASTNodes.isParent(localType, inputType);
+	}
+
+	private boolean isInNonStaticMemberTypeInsideInputType(ASTNode node) throws JavaModelException {
+		TypeDeclaration inputType= getTypeDeclarationNode();
+		TypeDeclaration nested= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
+		return nested != null && 
+				! inputType.equals(nested) && 
+				! Modifier.isStatic(nested.getFlags()) &&
+				ASTNodes.isParent(nested, inputType);
+	}
+
+	private boolean isInAnonymousTypeInsideInputType(ASTNode node) throws JavaModelException {
+		TypeDeclaration inputType= getTypeDeclarationNode();
+		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
+		return anon != null && ASTNodes.isParent(anon, inputType);
 	}
 
 	private TypeDeclaration getTypeDeclarationNode() throws JavaModelException {
@@ -947,6 +973,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return false;
 		return Bindings.getFullyQualifiedName(binding).equals(JavaElementUtil.createSignature(type));
 	}	
+
+	private String createQualifiedReadAccessForEnclosingInstance() {
+		return fType.getElementName() + '.' + createReadAccessForEnclosingInstance();
+	}
 
 	private String createReadAccessForEnclosingInstance() {
 		return THIS_KEYWORD + '.' + fEnclosingInstanceFieldName;
