@@ -196,7 +196,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 		 */
 		public String getDisplayString() {
-			if (fTypeProposal == null || fTypeProposal.isPrimitive()) {
+			if (fTypeProposal == null || fTypeProposal.getPackage() == null) {
 				return fProposal;
 			}
 			StringBuffer buf= new StringBuffer();
