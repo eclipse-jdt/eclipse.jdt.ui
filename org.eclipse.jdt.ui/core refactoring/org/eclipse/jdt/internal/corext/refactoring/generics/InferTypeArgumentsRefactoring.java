@@ -340,7 +340,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					for (int i= 0; i < typeArguments.length; i++)
 						newType.typeArguments().add(typeArguments[i]);
 					
-					rewrite.getASTRewrite().replace(originalType, newType, null);
+					rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription("Add type arguments"));
 				} //TODO: other node types?
 			}
 			
@@ -370,7 +370,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			nodeToReplace= castExpression;
 		
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
-		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, null);
+		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription("Remove cast"));
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
 	}
 
