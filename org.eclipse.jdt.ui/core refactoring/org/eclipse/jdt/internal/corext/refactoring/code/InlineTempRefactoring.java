@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -117,6 +118,9 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp")); //$NON-NLS-1$
+
+		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
+			return RefactoringStatus.createFatalErrorStatus("Cannot inline fields");
 
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
