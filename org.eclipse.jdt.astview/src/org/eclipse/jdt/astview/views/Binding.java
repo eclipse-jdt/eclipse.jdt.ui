@@ -81,6 +81,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), false)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", variableBinding.getDeclaringClass(), false)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING METHOD", variableBinding.getDeclaringMethod(), false)); //$NON-NLS-1$
+					res.add(new Binding(this, "VARIABLE DECLARATION", variableBinding.getVariableDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated())); //$NON-NLS-1$
 					Object constVal= variableBinding.getConstantValue();
