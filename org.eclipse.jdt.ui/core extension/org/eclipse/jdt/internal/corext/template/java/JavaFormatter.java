@@ -29,6 +29,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -152,7 +153,7 @@ public class JavaFormatter implements ITemplateEditor {
 
 		int[] offsets= variablesToOffsets(variables);
 		
-		string= CodeFormatterUtil.format(CodeFormatterUtil.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, null);
+		string= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, null);
 				
 		offsetsToVariables(offsets, variables);
 

@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -53,12 +52,6 @@ public class CodeFormatterUtil {
 	public static boolean OLD_FUNC= true;
 	public static boolean DEBUG= false;
 	
-	public static final int K_UNKNOWN= CodeFormatter.K_UNKNOWN;
-	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
-	public static final int K_STATEMENTS = CodeFormatter.K_STATEMENTS;
-	public static final int K_CLASS_BODY_DECLARATIONS = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
-	public static final int K_COMPILATION_UNIT = CodeFormatter.K_COMPILATION_UNIT;
-		 
 	private static final String POS_CATEGORY= "myCategory"; //$NON-NLS-1$
 	
 	
@@ -69,7 +62,7 @@ public class CodeFormatterUtil {
 		if (OLD_FORMATTER) {
 			return old_formatter("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
 		} else {
-			String str= format(K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
+			String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
 			return str.substring(0, str.indexOf('x'));
 		}
 	} 
@@ -97,13 +90,13 @@ public class CodeFormatterUtil {
 	/**
 	 * Old API. Consider to use format2 (TextEdit)
 	 */	
-	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+	public static String format(int kind, String string, int offset, int length, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FUNC) {
-			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
+			return old_formatter(string.substring(offset, offset + length), indentationLevel, positions, lineSeparator, options);
 		}
-		TextEdit edit= format2(kind, string, start, end - start, indentationLevel, lineSeparator, options);
-		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
-
+		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
+		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
+		return formatted.substring(offset, formatted.length() - (string.length() - (offset + length)));
 	}
 	
 	/**
@@ -185,7 +178,8 @@ public class CodeFormatterUtil {
 		if (OLD_FORMATTER) {
 			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
 		} else {
-			return new DefaultCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
+			return null;
+			//return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
 		}	
 	}
 	
@@ -198,57 +192,78 @@ public class CodeFormatterUtil {
 	 * @throws IllegalArgumentException If the offset and length are not inside the string, a
 	 *  IllegalArgumentException is thrown.
 	 */
-	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {				
+	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {
 		int code;
 		String prefix= ""; //$NON-NLS-1$
 		String suffix= ""; //$NON-NLS-1$
-		if (node instanceof CompilationUnit) {
-			code= CodeFormatterUtil.K_COMPILATION_UNIT;
-		} else if (node instanceof BodyDeclaration) {
-			code= CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS;
-		} else if (node instanceof SwitchCase) {
-			prefix = "switch(1) {"; //$NON-NLS-1$
-			suffix = "}"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;
-		} else if (node instanceof Statement) {
-			code= CodeFormatterUtil.K_STATEMENTS;
-		} else if (node instanceof VariableDeclarationExpression) {
-			code = CodeFormatterUtil.K_STATEMENTS;
-			suffix = ";"; //$NON-NLS-1$
+		if (node instanceof Statement) {
+			code= CodeFormatter.K_STATEMENTS;
+			if (node.getNodeType() == ASTNode.SWITCH_CASE) {
+				prefix= "switch(1) {"; //$NON-NLS-1$
+				suffix= "}"; //$NON-NLS-1$
+				code= CodeFormatter.K_STATEMENTS;
+			}
 		} else if (node instanceof Expression) {
-			code= CodeFormatterUtil.K_EXPRESSION;
-		} else if (node instanceof Type) {
-			suffix= " x;"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;
-		} else if (node instanceof SingleVariableDeclaration) {
-			suffix= ";"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;			
-		} else if (node instanceof VariableDeclarationFragment) {
-			prefix= "A "; //$NON-NLS-1$
-			suffix= ";"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;
-		} else if (node instanceof PackageDeclaration || node instanceof ImportDeclaration) {
-			suffix= "\nclass A {}"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_COMPILATION_UNIT;
-		} else if (node instanceof Javadoc) {
-			suffix= "void foo();"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS;
-		} else if (node instanceof CatchClause) {
-			prefix= "try {}"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;
-		} else if (node instanceof AnonymousClassDeclaration) {
-			prefix= "new A()"; //$NON-NLS-1$
-			code= CodeFormatterUtil.K_STATEMENTS;
-			suffix= ";"; //$NON-NLS-1$
+			code= CodeFormatter.K_EXPRESSION;
+			if (node instanceof Type) {
+				suffix= " x;"; //$NON-NLS-1$
+			}
 		} else {
-			Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
-			return null;
+			switch (node.getNodeType()) {
+				case ASTNode.METHOD_DECLARATION:
+				case ASTNode.TYPE_DECLARATION:
+				case ASTNode.FIELD_DECLARATION:
+				case ASTNode.INITIALIZER:
+					code= CodeFormatter.K_CLASS_BODY_DECLARATIONS;
+					break;
+				case ASTNode.ARRAY_TYPE:
+				case ASTNode.PRIMITIVE_TYPE:
+				case ASTNode.SIMPLE_TYPE:
+					suffix= " x;"; //$NON-NLS-1$
+					code= CodeFormatter.K_EXPRESSION;
+					break;
+				case ASTNode.COMPILATION_UNIT:
+					code= CodeFormatter.K_COMPILATION_UNIT;
+					break;
+				case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					suffix= ";"; //$NON-NLS-1$
+					code= CodeFormatter.K_STATEMENTS;
+					break;
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+					prefix= "A "; //$NON-NLS-1$
+					suffix= ";"; //$NON-NLS-1$
+					code= CodeFormatter.K_STATEMENTS;
+					break;			
+				case ASTNode.PACKAGE_DECLARATION:
+				case ASTNode.IMPORT_DECLARATION:
+					suffix= "\nclass A {}"; //$NON-NLS-1$
+					code= CodeFormatter.K_COMPILATION_UNIT;
+					break;
+				case ASTNode.JAVADOC:
+					suffix= "void foo();"; //$NON-NLS-1$
+					code= CodeFormatter.K_CLASS_BODY_DECLARATIONS;
+					break;
+				case ASTNode.CATCH_CLAUSE:
+					prefix= "try {}"; //$NON-NLS-1$
+					code= CodeFormatter.K_STATEMENTS;
+					break;
+				case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+					prefix= "new A()"; //$NON-NLS-1$
+					suffix= ";"; //$NON-NLS-1$
+					code= CodeFormatter.K_STATEMENTS;
+					break;
+				default:
+					Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
+					return null;
+			}
 		}
+		
 		String concatStr= prefix + str + suffix;
 		TextEdit edit= format2(code, concatStr, prefix.length(), str.length(), indentationLevel, lineSeparator, options);
 		if (prefix.length() > 0) {
 			edit= shifEdit(edit, prefix.length());
-		}
+		}		
 		return edit;
 	}	
 		

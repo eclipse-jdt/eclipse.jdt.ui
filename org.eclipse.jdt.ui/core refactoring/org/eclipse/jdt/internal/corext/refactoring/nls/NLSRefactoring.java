@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -798,7 +799,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	//--bundle class source creation
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
-		return CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, null);
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, null);
 	}
 
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {

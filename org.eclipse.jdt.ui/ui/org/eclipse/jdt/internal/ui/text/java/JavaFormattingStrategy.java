@@ -24,10 +24,10 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
@@ -75,7 +75,6 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		final Map preferences= getPreferences();
 		final IDocument document= getViewer().getDocument();
-		final ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(preferences);
 
 		int indent= 0;
 		if (indentation != null) {
@@ -90,10 +89,9 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		}
 
 		try {
-
+			//TODO rewrite using the edit API (CodeFormatterUtil.format2)
+			final String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences);
 			final String raw= document.get(partition.getOffset(), partition.getLength());
-			final String formatted= formatter.format(raw, indent, positions, TextUtilities.getDefaultLineDelimiter(document));
-
 			if (formatted != null && !formatted.equals(raw))
 				document.replace(partition.getOffset(), partition.getLength(), formatted);
 

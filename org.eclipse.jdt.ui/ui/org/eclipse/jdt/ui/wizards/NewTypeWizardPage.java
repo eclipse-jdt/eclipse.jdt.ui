@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -1408,7 +1409,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			
 			IBuffer buf= cu.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter, null); 
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter, null); 
 			buf.replace(range.getOffset(), range.getLength(), formattedContent);
 			if (!isInnerClass) {
 				String fileComment= getFileComment(cu);

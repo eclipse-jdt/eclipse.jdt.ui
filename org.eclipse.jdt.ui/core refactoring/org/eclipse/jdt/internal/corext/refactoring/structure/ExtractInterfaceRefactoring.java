@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -449,7 +450,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String formatCuSource(String source) {
-		return CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, source, 0, null, getLineSeperator(), null);
+  return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, source, 0, null, getLineSeperator(), null);
 	}
 	
 	private String getCuNameForNewInterface() {

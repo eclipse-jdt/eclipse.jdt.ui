@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -677,7 +678,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
 		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
-		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
+  String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
 		String tail= addTrailingLineDelimiter ? getLineDelimiter(): ""; //$NON-NLS-1$
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource)

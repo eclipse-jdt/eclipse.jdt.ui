@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -412,7 +413,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
             String unformattedAssigmentCode= "this." + local.getName() + "=" + local.getName();
-			String assignmentCode= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), null);
+            String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), null);
             Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
 	        constructorBody.statements().add(assignmentStatement);

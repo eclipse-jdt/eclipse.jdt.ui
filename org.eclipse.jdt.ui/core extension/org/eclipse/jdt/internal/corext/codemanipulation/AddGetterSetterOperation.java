@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -223,7 +224,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
@@ -304,7 +305,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();			
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+   String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}			

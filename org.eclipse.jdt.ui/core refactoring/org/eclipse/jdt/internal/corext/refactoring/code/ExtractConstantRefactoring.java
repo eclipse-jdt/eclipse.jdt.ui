@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -708,7 +709,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int[] position= { dummyDeclaration.length() - dummyInitializer.length() - semicolon.length()};
-		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
+		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource).toString();
 	}

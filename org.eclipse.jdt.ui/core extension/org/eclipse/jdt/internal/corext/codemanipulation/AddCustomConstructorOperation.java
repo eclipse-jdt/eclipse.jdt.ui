@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -173,7 +174,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fConstructorCreated= fType.createMethod(formattedContent, fInsertPosition, true, null);
 
 			monitor.worked(1);		

@@ -20,6 +20,7 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -190,7 +191,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			String str= fPrefix + nodeString;
 			Position pos= new Position(fStart, fPrefix.length() + 1 - fStart);
 
-			TextEdit res= CodeFormatterUtil.format2(CodeFormatterUtil.K_STATEMENTS, str, indent, lineDelim, null);
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos });
 			}
@@ -219,7 +220,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			Position pos1= new Position(fStart, nodeStart + 1 - fStart);
 			Position pos2= new Position(nodeEnd, 2);
 
-			TextEdit res= CodeFormatterUtil.format2(CodeFormatterUtil.K_STATEMENTS, str, indent, lineDelim, null);
+   TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos1, pos2 });
 			}
@@ -234,10 +235,10 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix SPACE= new ConstPrefix(" "); //$NON-NLS-1$
 	public final static Prefix ASSERT_COMMENT= new ConstPrefix(" : "); //$NON-NLS-1$
 	
-	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+ public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+ public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatter.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
+ public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+ public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefixSuffix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", 8); //$NON-NLS-1$ //$NON-NLS-2$

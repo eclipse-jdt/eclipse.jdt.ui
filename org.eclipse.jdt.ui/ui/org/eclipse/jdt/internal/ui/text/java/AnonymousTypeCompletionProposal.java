@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -106,7 +107,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 		
-		String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, buf.toString(), indent, null, lineDelim, null);	
+		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), indent, null, lineDelim, null); 
 		int start= replacement.indexOf('(') + 1;
 		int end= replacement.lastIndexOf('}') + 1;
 	

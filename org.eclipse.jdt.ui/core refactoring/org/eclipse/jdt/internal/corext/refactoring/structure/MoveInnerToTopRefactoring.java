@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -1135,7 +1136,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String formatConstructorSource(String src, int indentationLevel){
-		return CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, src, indentationLevel, null, getLineSeperator(), null);
+  return CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, src, indentationLevel, null, getLineSeperator(), null);
 	}
 
 	private static String getFullyQualifiedImportName(ITypeBinding type) {

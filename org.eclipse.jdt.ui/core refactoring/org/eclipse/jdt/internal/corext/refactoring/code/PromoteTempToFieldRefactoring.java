@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -498,7 +499,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	}
     }
     private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws CoreException {
-		String constructorSource = CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(typeDeclaration), 0, null, getLineSeperator(), null);
+  String constructorSource = CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(typeDeclaration), 0, null, getLineSeperator(), null);
 		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createPlaceholder(constructorSource, ASTRewrite.METHOD_DECLARATION);
         rewrite.markAsInserted(newConstructor);
         int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);

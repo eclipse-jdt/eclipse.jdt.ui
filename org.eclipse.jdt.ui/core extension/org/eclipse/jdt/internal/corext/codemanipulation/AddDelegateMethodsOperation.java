@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -133,7 +134,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 					sibling = existingMethods[0];
 				}
 	
-				String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;
+				String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;
 				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
 				fCreatedMethods.add(created);
 					
