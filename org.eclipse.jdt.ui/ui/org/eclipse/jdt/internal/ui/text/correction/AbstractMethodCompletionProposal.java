@@ -30,6 +30,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -41,7 +43,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	public AbstractMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
-		Assert.isTrue(binding != null && !binding.isParameterizedType() && !binding.isRawType());
+		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
 		
 		fNode= invocationNode;
 		fSenderBinding= binding;

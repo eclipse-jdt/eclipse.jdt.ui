@@ -2713,7 +2713,50 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 	
 	
-	
+	public void testParameterMismatchMoreArgumentsInGeneric() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public void foo(X<T> x) {\n");
+		buf.append("        x.xoo(x.toString(), x, 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<T> {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The int value\n");
+		buf.append("     */\n");
+		buf.append("    public void xoo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public void foo(X<T> x) {\n");
+		buf.append("        x.xoo(x.toString());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+	}
+
 	
 	public void testSuperConstructorMoreArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -3007,6 +3050,75 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
 	}
+	
+	public void testParameterMismatchSwapInGenericType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A<T> {\n");
+		buf.append("    public void b(int i, T[] t) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public enum E {\n");
+		buf.append("    CONST1, CONST2;\n");
+		buf.append("    public void foo(A<String> a) {\n");
+		buf.append("        a.b(new String[1], 1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A<T> {\n");
+		buf.append("    public void b(T[] t, int i) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A<T> {\n");
+		buf.append("    public void b(int i, T[] t) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void b(String[] strings, int i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public enum E {\n");
+		buf.append("    CONST1, CONST2;\n");
+		buf.append("    public void foo(A<String> a) {\n");
+		buf.append("        a.b(1, new String[1]);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+	}
+
 	
 	public void testParameterMismatchSwap2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -34,7 +35,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 	public TypeChangeCompletionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
 		
-		Assert.isTrue(binding != null && binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE);
+		Assert.isTrue(binding != null && binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE && Bindings.isDeclarationBinding(binding));
 		
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;

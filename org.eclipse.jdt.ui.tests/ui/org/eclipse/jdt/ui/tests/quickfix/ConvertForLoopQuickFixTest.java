@@ -17,6 +17,8 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -24,7 +26,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -34,7 +36,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ConvertForLoopProposal;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ConvertForLoopQuickFixTest extends QuickFixTest {
@@ -985,7 +986,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 	}
-	private List fecthConvertingProposal(StringBuffer buf, ICompilationUnit cu) {
+	private List fecthConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);

@@ -42,7 +42,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 	public ImplementInterfaceProposal(ICompilationUnit targetCU, ITypeBinding binding, CompilationUnit astRoot, ITypeBinding newInterface, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
 		
-		Assert.isTrue(binding != null && !binding.isParameterizedType() && !binding.isRawType());
+		Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
 		
 		fBinding= binding;
 		fAstRoot= astRoot;

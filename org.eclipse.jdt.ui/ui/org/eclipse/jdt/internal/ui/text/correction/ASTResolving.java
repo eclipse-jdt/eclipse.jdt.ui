@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -655,5 +656,102 @@ public class ASTResolving {
 		}
 		return null;
 	}	
+	
+	private static void collectAvailableTypeVariables(IBinding binding, Set result) {
+		if (binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding var= (IVariableBinding) binding;
+			binding= var.getDeclaringMethod();
+			if (binding == null) {
+				binding= var.getDeclaringClass();
+			}
+		}
+		if (binding instanceof IMethodBinding) {
+			IMethodBinding meth= (IMethodBinding) binding;
+			ITypeBinding[] typeParameters= meth.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				result.add(typeParameters[i]);
+			}
+			binding= meth.getDeclaringClass();
+		}
+		
+		while (binding instanceof ITypeBinding) {
+			ITypeBinding type= (ITypeBinding) binding;
+			ITypeBinding[] typeParameters= type.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				result.add(typeParameters[i]);
+			}
+			binding= type.getDeclaringClass();
+		}
+		
+	}
+	
+	public static boolean isUseableTypeInContext(ITypeBinding[] binding, IBinding context, boolean noWildcards) {
+		for (int i= 0; i < binding.length; i++) {
+			if (!isUseableTypeInContext(binding[i], context, noWildcards)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 
+	public static boolean isUseableTypeInContext(ITypeBinding binding, IBinding context, boolean noWildcards) {
+		if (binding.isArray()) {
+			binding= binding.getElementType();
+		}
+		if (binding.isRawType() || binding.isPrimitive()) {
+			return true;
+		}
+		HashSet set= new HashSet();
+		collectAvailableTypeVariables(context, set);
+		return isUseableTypeInContext(binding, set, noWildcards);
+	}
+	
+	private static boolean isUseableTypeInContext(ITypeBinding type, Set availableVariables, boolean noWildcards) {
+		if (type.isArray()) {
+			type= type.getElementType();
+		}
+		if (type.isRawType() || type.isPrimitive()) {
+			return true;
+		}
+		if (type.isTypeVariable()) {
+			if (!availableVariables.contains(type)) {
+				return false;
+			}
+			ITypeBinding[] typeBounds= type.getTypeBounds();
+			for (int i= 0; i < typeBounds.length; i++) {
+				if (!isUseableTypeInContext(typeBounds[i], availableVariables, noWildcards)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (type.isGenericType()) {
+			ITypeBinding[] typeParameters= type.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				if (!isUseableTypeInContext(typeParameters[i], availableVariables, noWildcards)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (type.isParameterizedType()) {
+			ITypeBinding[] typeArguments= type.getTypeArguments();
+			for (int i= 0; i < typeArguments.length; i++) {
+				if (!isUseableTypeInContext(typeArguments[i], availableVariables, noWildcards)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (type.isWildcardType()) {
+			if (noWildcards) {
+				return false;
+			}
+			return isUseableTypeInContext(type.getBound(), availableVariables, noWildcards);
+		}
+		return true;
+	}
+	
+	
 }

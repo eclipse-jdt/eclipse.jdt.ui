@@ -729,22 +729,24 @@ public class UnresolvedElementsSubProcessor {
 			if (targetCU != null) {			
 				String label;
 				Image image;
-				String sig= getMethodSignature(methodName, arguments);
+				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
+				String sig= getMethodSignature(methodName, parameterTypes);
 				
-				if (cu.equals(targetCU)) {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", sig); //$NON-NLS-1$
-					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
-				} else {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { sig, targetCU.getElementName() } ); //$NON-NLS-1$
-					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+				if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
+					if (cu.equals(targetCU)) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", sig); //$NON-NLS-1$
+						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+					} else {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { sig, targetCU.getElementName() } ); //$NON-NLS-1$
+						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+					}
+					proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
 				}
-				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
-				
 				if (senderDeclBinding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, null) == null) { // no covering method
 					ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 					if (anonymDecl != null) {
 						senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
-						if (!senderDeclBinding.isAnonymous()) {
+						if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
 							String[] args= new String[] { sig, getTypeSignature(senderDeclBinding) };
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", args); //$NON-NLS-1$
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
@@ -1053,6 +1055,9 @@ public class UnresolvedElementsSubProcessor {
 				if (newType == null) {
 					newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
+				if (!ASTResolving.isUseableTypeInContext(newType, methodDecl, false)) {
+					return;
+				}
 				changeDesc[idx]= new InsertDescription(newType, name);
 				changeTypes[i]= newType;
 			}
@@ -1107,7 +1112,7 @@ public class UnresolvedElementsSubProcessor {
 		return getMethodSignature(buf.toString(), binding.getParameterTypes());
 	}
 	
-	private static String getMethodSignature(String name, List args) {
+	private static ITypeBinding[] getParameterTypes(List args) {
 		ITypeBinding[] params= new ITypeBinding[args.size()];
 		for (int i= 0; i < args.size(); i++) {
 			Expression expr= (Expression) args.get(i);
@@ -1117,9 +1122,8 @@ public class UnresolvedElementsSubProcessor {
 			}
 			params[i]= curr;
 		}
-		return getMethodSignature(name, params);
-	}
-	
+		return params;
+	}	
 	
 	private static String getMethodSignature(String name, ITypeBinding[] params) {
 		StringBuffer buf= new StringBuffer();
@@ -1135,6 +1139,9 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	private static String getTypeSignature(ITypeBinding type) {
+		if (type.isRawType()) {
+			return type.getName();
+		}
 		if (type.isParameterizedType() || type.isGenericType()) {
 			StringBuffer buf= new StringBuffer(Bindings.getRawName(type));
 			buf.append('<');
@@ -1149,8 +1156,6 @@ public class UnresolvedElementsSubProcessor {
 			return buf.toString();
 		} else if (type.isWildcardType()) {
 			return "?"; //$NON-NLS-1$
-		} else if (type.isRawType()) {
-			
 		}
 		return type.getName();
 	}
@@ -1394,7 +1399,7 @@ public class UnresolvedElementsSubProcessor {
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 			if (targetCU != null) {
-				String[] args= new String[] { getMethodSignature( getTypeSignature(targetDecl), arguments) };
+				String[] args= new String[] { getMethodSignature( getTypeSignature(targetDecl), getParameterTypes(arguments)) };
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", args); //$NON-NLS-1$
 				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetDecl, 5, image));

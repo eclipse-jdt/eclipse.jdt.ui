@@ -1127,11 +1127,11 @@ public class Bindings {
 	
 
 	/**
-	 * Get generic field. See bug 83100
+	 * Get field declaration. See bug 83100
 	 */
-	public static IBinding getGenericField(IVariableBinding field) {
+	public static IBinding getFieldDeclaration(IVariableBinding field) {
 		ITypeBinding declaringClass= field.getDeclaringClass();
-		if (!declaringClass.isParameterizedType() && !declaringClass.isRawType()) {
+		if (declaringClass.getGenericType() == declaringClass) { // test if type is already declaration
 			return field;
 		}
 		IVariableBinding[] genericFields= declaringClass.getGenericType().getDeclaredFields();
@@ -1143,5 +1143,22 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Tests if the given node is a declaration, not a instance of a generic type, method or field.
+	 * Declarations can be found in AST with CompilationUnit.findDeclaringNode
+	 */
+	public static boolean isDeclarationBinding(IBinding binding) {
+		switch (binding.getKind()) {
+			case IBinding.TYPE:
+				return ((ITypeBinding) binding).getGenericType() == binding;
+			case IBinding.VARIABLE:
+				IVariableBinding var= (IVariableBinding) binding;
+				return !var.isField() || isDeclarationBinding(var.getDeclaringClass());
+			case IBinding.METHOD:
+				return ((IMethodBinding) binding).getGenericMethod() == binding;
+		}
+		return true;
+	}
+
 }

@@ -17,10 +17,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -35,23 +31,26 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectPackageDeclarationProposal;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ReorgQuickFixTest extends QuickFixTest {
 	
@@ -95,6 +94,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
+
 
 	
 	public void testUnusedImports() throws Exception {
@@ -648,9 +648,9 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
+		ArrayList proposals= collectCorrections(context, problem);
 		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -666,7 +666,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
 	}
-	
+
 	public void testTodoTasks2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -681,9 +681,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -715,9 +713,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -750,9 +746,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -785,9 +779,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -821,9 +813,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -855,9 +845,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem } , proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1038,5 +1026,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			JavaProjectHelper.delete(otherProject);
 		}
 	}
+	
+	
 
 }

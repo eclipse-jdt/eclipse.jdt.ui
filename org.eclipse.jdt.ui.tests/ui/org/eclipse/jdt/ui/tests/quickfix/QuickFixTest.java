@@ -19,18 +19,15 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.StringAsserts;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IProblemRequestor;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -39,14 +36,18 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
+import org.eclipse.jdt.testplugin.StringAsserts;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
   */
@@ -164,16 +165,16 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) throws CoreException {
 		return collectCorrections(cu, astRoot, 1, null);
 	}
 	
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length != nProblems) {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
@@ -189,7 +190,7 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, problems[0], context);
 	}
 	
-	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws JavaModelException {
+	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
 		
 		final ArrayList problemsList= new ArrayList();
 		IProblemRequestor requestor= new IProblemRequestor() {
@@ -225,7 +226,7 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, problems[0], null);
 	}
 	
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr, IInvocationContext context) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr, IInvocationContext context) throws CoreException {
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
 		if (context == null) {
@@ -233,9 +234,7 @@ public class QuickFixTest extends TestCase {
 		}
 		
 		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), true);
-		ArrayList proposals= new ArrayList();
-		
-		JavaCorrectionProcessor.collectCorrections(context,  new ProblemLocation[] { problem }, proposals);
+		ArrayList proposals= collectCorrections(context, problem);
 		if (!proposals.isEmpty()) {
 			assertCorrectContext(context, problem);
 		}
@@ -243,9 +242,32 @@ public class QuickFixTest extends TestCase {
 		return proposals;
 	}
 	
-	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) {
+	protected static ArrayList collectCorrections(IInvocationContext context, IProblemLocation problem) throws CoreException {
 		ArrayList proposals= new ArrayList();
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem }, proposals);
+		assertStatusOk(status);
+		return proposals;
+	}
+	
+	public static void assertStatusOk(IStatus status) throws CoreException {
+		if (!status.isOK()) {
+			if (status.getException() == null) {  // find a status with an exception
+				IStatus[] children= status.getChildren();
+				for (int i= 0; i < children.length; i++) {
+					IStatus child= children[i];
+					if (child.getException() != null) {
+						throw new CoreException(child);
+					}
+				}
+			}
+		}
+	}
+	
+	
+	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) throws CoreException {
+		ArrayList proposals= new ArrayList();
+		IStatus status= JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertStatusOk(status);
 		
 		if (!proposals.isEmpty()) {
 			assertTrue("should be marked as 'has assist'", JavaCorrectionProcessor.hasAssists(context));
@@ -271,7 +293,7 @@ public class QuickFixTest extends TestCase {
 		return false;
 	}
 	
-	protected static final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
+	protected static final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
 		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
