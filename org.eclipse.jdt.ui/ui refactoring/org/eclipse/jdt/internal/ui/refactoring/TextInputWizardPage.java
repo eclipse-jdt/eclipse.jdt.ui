@@ -107,6 +107,22 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	 */
 	protected DialogField[] createDialogFields() {
 		return new DialogField[] { createStringDialogField(), getEditorList() };
-	}	
+	}
+	
+	/**
+	 * Sets the stringInput
+	 * @param stringInput The stringInput to set
+	 */
+	protected void setStringInput(StringDialogField stringInput) {
+		fStringInput= stringInput;
+	}
+	/**
+	 * Gets the stringInput
+	 * @return Returns a StringDialogField
+	 */
+	protected StringDialogField getStringInput() {
+		return fStringInput;
+	}
+
 }
 

@@ -22,14 +22,12 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage( new TextInputWizardPage(true) {
+		addPage( new MoveCompilationUnitWizardPage(true){
 			protected RefactoringStatus validatePage() {
 				return validateUserInput(getNewName());
-			}
-			protected String getLabelText(){
-				return RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.wizardpage.labelmessage");
 			}	
-		});
+		}
+		);
 	}
 	
 	private IPackageFragmentRoot getPackageFragmentRoot(ICompilationUnit cu){
