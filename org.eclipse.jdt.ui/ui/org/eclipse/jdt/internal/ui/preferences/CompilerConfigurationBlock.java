@@ -109,6 +109,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_UNDOCUMENTED_EMPTY_BLOCK= JavaCore.COMPILER_PB_UNDOCUMENTED_EMPTY_BLOCK;
 	private static final String PREF_PB_FINALLY_BLOCK_NOT_COMPLETING= JavaCore.COMPILER_PB_FINALLY_BLOCK_NOT_COMPLETING;
 	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION;
+	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING;
 	private static final String PREF_PB_UNQUALIFIED_FIELD_ACCESS= JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS;
 	
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
@@ -156,6 +157,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fComplianceStatus= new StatusInfo();
 		fMaxNumberProblemsStatus= new StatusInfo();
 		fResourceFilterStatus= new StatusInfo();
+		
+		// compatibilty code for the merge of the two option PB_SIGNAL_PARAMETER: 
+		if (ENABLED.equals(fWorkingValues.get(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
+			fWorkingValues.put(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
+		}
+		
 	}
 	
 	private final String[] KEYS= new String[] {
@@ -173,6 +180,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
 		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
+		PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING,
 
 		PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
 		PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
@@ -396,9 +404,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_overriding.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, enabledDisabled, indent);
 		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_abstract.label"); //$NON-NLS-1$
-		addCheckBox(composite, label, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, enabledDisabled, indent);		
-
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
@@ -424,6 +429,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_throwing_exception.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_throwing_exception_when_overriding.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, enabledDisabled, indent);
+
 		return composite;
 	}
 	
@@ -726,8 +734,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 					PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
-					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey)) {				
+					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
+					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey)) {				
 				updateEnableStates();
+			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
+				// merging the two options
+				fWorkingValues.put(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
 			} else {
 				return;
 			}
@@ -745,12 +757,14 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private void updateEnableStates() {
 		boolean enableUnusedParams= !checkValue(PREF_PB_UNUSED_PARAMETER, IGNORE);
 		getCheckBox(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING).setEnabled(enableUnusedParams);
-		getCheckBox(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT).setEnabled(enableUnusedParams);
 		
 		boolean enableDeprecation= !checkValue(PREF_PB_DEPRECATION, IGNORE);
 		getCheckBox(PREF_PB_DEPRECATION_IN_DEPRECATED_CODE).setEnabled(enableDeprecation);
 		getCheckBox(PREF_PB_DEPRECATION_WHEN_OVERRIDING).setEnabled(enableDeprecation);
 		
+		boolean enableThrownExceptions= !checkValue(PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, IGNORE);
+		getCheckBox(PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING).setEnabled(enableThrownExceptions);
+
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
 
