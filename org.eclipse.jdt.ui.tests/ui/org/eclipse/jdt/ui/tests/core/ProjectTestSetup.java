@@ -42,7 +42,8 @@ public class ProjectTestSetup extends TestSetup {
 	
 		
 	private IJavaProject fJProject;
-//	private long fTimeCreated;
+
+	private boolean fAutobuilding;
 	
 	public ProjectTestSetup(Test test) {
 		super(test);
@@ -53,12 +54,13 @@ public class ProjectTestSetup extends TestSetup {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-//		fTimeCreated= System.currentTimeMillis();
 		
 		IJavaProject project= getProject();
 		if (project.exists()) { // allow nesting of ProjectTestSetup's
 			return;
 		}
+		
+		fAutobuilding = JavaProjectHelper.setAutoBuilding(false);
 		
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);	
@@ -67,10 +69,8 @@ public class ProjectTestSetup extends TestSetup {
 	protected void tearDown() throws Exception {
 		if (fJProject != null) {
 			JavaProjectHelper.delete(fJProject);
+			JavaProjectHelper.setAutoBuilding(fAutobuilding);
 		}
-		
-//		long taken= System.currentTimeMillis() -fTimeCreated;
-//		System.out.println(getTest().toString() + ": " + taken);
 	}
 
 }
