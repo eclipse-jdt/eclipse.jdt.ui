@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.ContainerCheckedTreeViewer;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -20,6 +21,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -117,6 +119,15 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 				updateSelectedMethodsLabel();
 			}	
 		});
+		fMethodsTree.addFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (element instanceof IMethod) {
+					IMethod method = (IMethod) element;
+					return !method.getElementName().equals("<clinit>");
+				}
+				return true;
+			}
+		});
 
 		Composite buttonContainer= new Composite(container, SWT.NONE);
 		gd= new GridData(GridData.FILL_VERTICAL);
@@ -184,6 +195,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 				types.add(currType);
 				types.addAll(Arrays.asList(superTypes));
 			} catch(JavaModelException e) {
+				JUnitPlugin.log(e);
 			}
 			fMethodsTree.setContentProvider(new MethodsTreeContentProvider(types.toArray()));
 			if (types == null)
@@ -244,7 +256,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 							}
 						}
 					} catch (JavaModelException e) {
-						System.err.println("MethodsTreeContentProvider: "+e); //$NON-NLS-1$
+						JUnitPlugin.log(e);
 					}
 				}
 			}

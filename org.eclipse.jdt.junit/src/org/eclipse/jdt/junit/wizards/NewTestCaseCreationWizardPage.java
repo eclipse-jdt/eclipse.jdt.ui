@@ -152,7 +152,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 						fDefaultClassToTest= enclosingType.getFullyQualifiedName();
 					}
 				} catch (JavaModelException e) {
-					e.printStackTrace();
+					JUnitPlugin.log(e);
 				}
 			}
 		}
@@ -318,7 +318,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				type= (IType) resultArray[0];
 			}
 		} catch (JavaModelException e) {
-			// ???
+			JUnitPlugin.log(e);
 		}
 		return type;
 	}
@@ -528,11 +528,21 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 						// (new Character(Signature.C_ARRAY)).toString() --> Character.toString(Signature.C_ARRAY)
 						if (param.startsWith( (new Character(Signature.C_ARRAY)).toString() ))
 							start= 1;
-							methodName.append(param.substring(
-								((param.startsWith( (new Character(Signature.C_UNRESOLVED)).toString() ,start))?start+1:start) ,
-								((param.endsWith( (new Character(Signature.C_NAME_END)).toString() ))?end-1:end))
-								);
-							
+						
+						if (param.endsWith((new Character(Signature.C_NAME_END)).toString() ))
+							end--;
+						
+						if (param.startsWith((new Character(Signature.C_UNRESOLVED)).toString() ,start))
+							start++;
+						else if (param.startsWith((new Character(Signature.C_RESOLVED)).toString() ,start)) {
+							start++;
+							String paramName= param.substring(start, end);
+							/* if parameter is qualified name, extract simple name */
+							if (paramName.indexOf('.') != -1) {
+								start += paramName.lastIndexOf('.')+1;
+							}
+						}
+						methodName.append(param.substring(start, end));
 						if (param.startsWith( (new Character(Signature.C_ARRAY)).toString() ))
 							methodName.append("Array"); //$NON-NLS-1$
 					}
@@ -613,32 +623,32 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
 		String superClassName= getSuperClass();
 		if (superClassName != null && !superClassName.equals("") && getPackageFragmentRoot() != null) { //$NON-NLS-1$
-		try {
-			IType type= NewTestCaseCreationWizardPage.resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
-			JUnitStatus status = new JUnitStatus();				
-			if (type == null) {
-				status.setError(Messages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
-				fSuperClassStatus= status;
-			} else {
-				if (type.isInterface()) {
-					status.setError(Messages.getString("NewTestClassWizPage.error.superclass.is_interface")); //$NON-NLS-1$
-					fSuperClassStatus= status;
-				}
-				if (!TestSearchEngine.isTestImplementor(type)) {
-					status.setError(Messages.getFormattedString("NewTestClassWizPage.error.superclass.not_implementing_test_interface", JUnitPlugin.TEST_INTERFACE_NAME)); //$NON-NLS-1$
+			try {
+				IType type= NewTestCaseCreationWizardPage.resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
+				JUnitStatus status = new JUnitStatus();				
+				if (type == null) {
+					status.setError(Messages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
 					fSuperClassStatus= status;
 				} else {
-					IMethod setupMethod= type.getMethod(SETUP, new String[] {});
-					IMethod teardownMethod= type.getMethod(TEARDOWN, new String[] {});
-					if (setupMethod.exists())
-						fMethodStubsButtons.setEnabled(2, !Flags.isFinal(setupMethod.getFlags()));
-					if (teardownMethod.exists())
-						fMethodStubsButtons.setEnabled(3, !Flags.isFinal(teardownMethod.getFlags()));
+					if (type.isInterface()) {
+						status.setError(Messages.getString("NewTestClassWizPage.error.superclass.is_interface")); //$NON-NLS-1$
+						fSuperClassStatus= status;
+					}
+					if (!TestSearchEngine.isTestImplementor(type)) {
+						status.setError(Messages.getFormattedString("NewTestClassWizPage.error.superclass.not_implementing_test_interface", JUnitPlugin.TEST_INTERFACE_NAME)); //$NON-NLS-1$
+						fSuperClassStatus= status;
+					} else {
+						IMethod setupMethod= type.getMethod(SETUP, new String[] {});
+						IMethod teardownMethod= type.getMethod(TEARDOWN, new String[] {});
+						if (setupMethod.exists())
+							fMethodStubsButtons.setEnabled(2, !Flags.isFinal(setupMethod.getFlags()));
+						if (teardownMethod.exists())
+							fMethodStubsButtons.setEnabled(3, !Flags.isFinal(teardownMethod.getFlags()));
+					}
 				}
+			} catch (JavaModelException e) {
+				JUnitPlugin.log(e);
 			}
-		} catch (JavaModelException e) {
-			System.err.println(this.getClass()+": checkSuperClass(): "+e); //$NON-NLS-1$
-		}
 		}
 	}
 	

@@ -112,7 +112,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 						try {
 							progressDialog.run(false, false, getRunnable());
 						} catch (Exception e) {
-							e.printStackTrace();
+							JUnitPlugin.log(e);
 						}
 					}
 				} else {
@@ -122,7 +122,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				cannotUpdateSuiteError();
 			}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				JUnitPlugin.log(e);
 			}
 		} else {
 			noSuiteError();
@@ -167,7 +167,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 					source.replace(start, end, getUpdatableString());
 					buf.replace(range.getOffset(), range.getLength(), source.toString());
 					monitor.worked(1);
-					fTestSuite.reconcile();
+					fTestSuite.reconcile(null);
 					originalContent= buf.getText(0, buf.getLength());
 					monitor.worked(1);
 					String formattedContent=
@@ -182,7 +182,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				}
 			}
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			JUnitPlugin.log(e);
 		}
 	}
 

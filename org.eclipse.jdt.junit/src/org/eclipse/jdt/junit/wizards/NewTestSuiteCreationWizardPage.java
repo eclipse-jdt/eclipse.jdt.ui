@@ -6,7 +6,6 @@ package org.eclipse.jdt.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,7 +23,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.junit.util.*;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.JUnitStatus;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -264,7 +265,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 					return typesArrayList.toArray();
 				}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				JUnitPlugin.log(e);
 			}
 			return new Object[0];
 		}
@@ -362,7 +363,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 							end += endMarker.length();
 							source.replace(start, end, getUpdatableString());
 							buf.replace(range.getOffset(), range.getLength(), source.toString());
-							cu.reconcile();
+							cu.reconcile(null);
 							originalContent= buf.getText(0, buf.getLength());
 							monitor.worked(1);
 							String formattedContent=
@@ -394,7 +395,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			monitor.done();
 			fUpdatedExistingClassButton= true;
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			JUnitPlugin.log(e);
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -66,7 +67,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 					try {
 						progressDialog.run(false, false, getRunnableSave(cu_ep));
 					} catch (Exception e) {
-						e.printStackTrace();
+						JUnitPlugin.log(e);
 					}
 				}
 			}
@@ -89,7 +90,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 					return false;
 				}
 				} catch (JavaModelException e) {
-					e.printStackTrace();
+					JUnitPlugin.log(e);
 					return false;
 				}
 			}
@@ -117,7 +118,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 			selectAndReveal(resource);
 			openResource(resource);
 		} catch (JavaModelException e) {
-			System.err.println(getClass().getName() + ": " + e); //$NON-NLS-1$
+			JUnitPlugin.log(e);
 		}
 	}
 
