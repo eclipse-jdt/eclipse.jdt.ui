@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -41,7 +40,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 /**
  * A tuple used to keep source of an element and its type.
  * @see IJavaElement
- * @see ISourceReference
+ * @see org.eclipse.jdt.core.ISourceReference
  */
 public class TypedSource {
 	
