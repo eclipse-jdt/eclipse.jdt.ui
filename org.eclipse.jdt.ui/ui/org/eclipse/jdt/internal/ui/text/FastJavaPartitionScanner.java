@@ -58,7 +58,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	private int fPrefixLength;
 	
 	//emulate JavaPartitionScanner
-	private static final boolean fgEmulate= false;
+	private static final boolean fgEmulate= true;
 	private int fJavaOffset;
 	private int fJavaLength;
 	
