@@ -787,7 +787,7 @@ class UseSupertypeWherePossibleUtil {
 				IMethod method= Binding2JavaModel.find((IMethodBinding)bin, fInputClass.getJavaProject());
 				if (method == null)
 					return true;
-				IType paramType= JavaModelUtil.getMethodParameterType(method, argumentIndex);
+				IType paramType= getMethodParameterType(method, argumentIndex);
 				if ( fSuperTypeToUse != null && 
 				     ! fSuperTypeSet.contains(paramType) && 
 					 ! fSuperTypeToUse.equals(paramType) && 
@@ -817,6 +817,17 @@ class UseSupertypeWherePossibleUtil {
 			}
 		}
 		return false;
+	}
+
+	//maybe generally useful
+	public static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
+		Assert.isTrue(parameterIndex >=0);
+		if (method.getNumberOfParameters() < parameterIndex)
+			return null;
+		String fqn= JavaModelUtil.getResolvedTypeName(method.getParameterTypes()[parameterIndex], method.getDeclaringType());
+		if (fqn == null)
+			return null;
+		return JavaModelUtil.findType(method.getJavaProject(), fqn);	
 	}
 	
 	private boolean isVariableBindingOk(IVariableBinding vb) throws JavaModelException{
