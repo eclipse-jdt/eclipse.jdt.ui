@@ -125,7 +125,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameParameters.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameParametersWizard("Rename Method Parameters");
+				return new RenameParametersWizard();
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
