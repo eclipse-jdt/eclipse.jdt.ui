@@ -2370,6 +2370,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
+		if (getSelectionProvider() == null)
+			return;
+
 		ISelection selection= getSelectionProvider().getSelection();
 		if (selection instanceof TextSelection) {
 			TextSelection textSelection= (TextSelection) selection;
