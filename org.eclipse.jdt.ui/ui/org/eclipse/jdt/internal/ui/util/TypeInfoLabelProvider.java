@@ -4,12 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.viewers.LabelProvider;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
 
 public class TypeInfoLabelProvider extends LabelProvider {
 	
@@ -35,7 +33,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 	private String getPackageName(TypeInfo typeRef) {
 		String packName= typeRef.getPackageName();
 		if (packName.length() == 0)
-			return JavaUIMessages.getString("TypeRefLabelProvider.default_package"); //$NON-NLS-1$
+			return JavaUIMessages.getString("TypeInfoLabelProvider.default_package"); //$NON-NLS-1$
 		else
 			return packName;
 	}
@@ -58,12 +56,12 @@ public class TypeInfoLabelProvider extends LabelProvider {
 				buf.append(typeRef.getTypeQualifiedName());
 
 			if (isSet(SHOW_PACKAGE_POSTFIX)) {
-				buf.append(" - "); //$NON-NLS-1$
+				buf.append(JavaUIMessages.getString("TypeInfoLabelProvider.dash")); //$NON-NLS-1$
 				buf.append(getPackageName(typeRef));
 			}
 		}
 		if (isSet(SHOW_ROOT_POSTFIX)) {
-			buf.append(" - "); //$NON-NLS-1$
+			buf.append(JavaUIMessages.getString("TypeInfoLabelProvider.dash"));//$NON-NLS-1$
 			buf.append(typeRef.getPackageFragmentRootPath().toString());
 		}
 		return buf.toString();				
