@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.examples;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -18,6 +19,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.launcher.MainMethodFinder;
@@ -52,17 +54,21 @@ public class TestMainMethodFinderAction implements IWorkbenchWindowActionDelegat
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		ProgressMonitorDialog progressDialog= new ProgressMonitorDialog(shell);
-		MainMethodFinder finder = new MainMethodFinder();
-		List res= finder.findTargets(progressDialog, (IStructuredSelection) sel);
-		
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
-		dialog.setIgnoreCase(false);
-		dialog.setTitle("Title"); //$NON-NLS-1$
-		dialog.setMessage("Title"); //$NON-NLS-1$
-		dialog.setEmptyListMessage("Title"); //$NON-NLS-1$
-		dialog.setElements(res.toArray());
-		
-		dialog.open();
+		try {
+			IType[] res= MainMethodFinder.findTargets(progressDialog, ((IStructuredSelection) sel).toArray());
+			
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+			dialog.setIgnoreCase(false);
+			dialog.setTitle("Title"); //$NON-NLS-1$
+			dialog.setMessage("Title"); //$NON-NLS-1$
+			dialog.setEmptyListMessage("Title"); //$NON-NLS-1$
+			dialog.setElements(res);
+			
+			dialog.open();
+		} catch (InterruptedException e) {
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

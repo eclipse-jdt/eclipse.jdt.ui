@@ -24,9 +24,9 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
-import org.eclipse.jdt.internal.ui.wizards.NewPackageRootCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
-import org.eclipse.jdt.internal.ui.wizards.NewSnippetCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard;
 
 
 public class WizardsTest extends TestCase {
@@ -65,7 +65,7 @@ public class WizardsTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
 		JavaProjectHelper.addRTJar(jproject);
 	
-		NewPackageRootCreationWizard wizard = new NewPackageRootCreationWizard();
+		NewSourceFolderCreationWizard wizard = new NewSourceFolderCreationWizard();
 		wizard.init(getWorkbench(), new StructuredSelection(jproject));
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
@@ -127,7 +127,7 @@ public class WizardsTest extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(jproject, "src1");
 		JavaProjectHelper.addRTJar(jproject);
 	
-		NewSnippetCreationWizard wizard = new NewSnippetCreationWizard();
+		NewSnippetFileCreationWizard wizard = new NewSnippetFileCreationWizard();
 		wizard.init(getWorkbench(), new StructuredSelection(root));
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);

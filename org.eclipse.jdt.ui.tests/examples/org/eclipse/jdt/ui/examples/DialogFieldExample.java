@@ -52,9 +52,19 @@ public class DialogFieldExample {
 		stringbutton.setLabelText("StringButton: ");
 		stringbutton.setButtonLabel("Click");
 		
-		String[] addButtons= new String[] { "Add1", "Add2" };
-		ListDialogField list= new ListDialogField(adapter, addButtons, new LabelProvider(), ListDialogField.UPDOWN);
-		list.setRemoveButtonLabel("Remove");
+		String[] addButtons= new String[] { 
+			/* 0 */ "Add1",
+			/* 1 */ "Add2",
+			/* 2 */ null,
+			/* 3 */ "Up",
+			/* 4 */ "Down",					
+			/* 5 */ null,
+			/* 6 */ "Remove"
+		};
+		ListDialogField list= new ListDialogField(adapter, addButtons, new LabelProvider());
+		list.setUpButtonIndex(3);
+		list.setDownButtonIndex(4);
+		list.setRemoveButtonIndex(6);
 		list.setLabelText("List: ");
 		
 		list.addElement("firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");

@@ -42,9 +42,20 @@ public class CheckBoxExample {
 		Adapter adapter= new Adapter();
 
 		
-		String[] addButtons= new String[] { "Add1", "Check 0", "Print"};
-		CheckedListDialogField list= new CheckedListDialogField(adapter, addButtons, new LabelProvider(), 0);
-		list.setRemoveButtonLabel("Remove");
+		String[] addButtons= new String[] { 
+			/* 0 */ "Add1", 
+			/* 1 */ "Check 0", 
+			/* 2 */ "Print", 
+			/* 3 */ null, 
+			/* 4 */ "Check All", 
+			/* 5 */ "Uncheck All", 
+			/* 6 */ null, 
+			/* 7 */ "Remove"
+		};
+		CheckedListDialogField list= new CheckedListDialogField(adapter, addButtons, new LabelProvider());
+		list.setCheckAllButtonIndex(4);
+		list.setUncheckAllButtonIndex(5);
+		list.setRemoveButtonIndex(7);
 		list.setLabelText("List: ");
 				
 		LayoutUtil.doDefaultLayout(fShell, new DialogField[] { list }, false);

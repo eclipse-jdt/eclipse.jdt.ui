@@ -58,9 +58,14 @@ public class TabExample {
 		item= new TabItem(folder, SWT.NONE);
 		item.setText("Tab0");
 		
-		String[] addButtons= new String[] { "Add1", "Add2" };
-		ListDialogField list= new ListDialogField(new Adapter(), addButtons, new LabelProvider(), 0);
-		list.setRemoveButtonLabel("Remove");
+		String[] addButtons= new String[] { 
+			/* 0 */ "Add1",
+			/* 1 */ "Add2",			
+			/* 2 */ null,
+			/* 3 */ "Remove"
+		};
+		ListDialogField list= new ListDialogField(new Adapter(), addButtons, new LabelProvider());
+		list.setRemoveButtonIndex(3);
 		list.setLabelText("List: ");
 
 		Composite c1= new Composite(folder, SWT.NONE);
