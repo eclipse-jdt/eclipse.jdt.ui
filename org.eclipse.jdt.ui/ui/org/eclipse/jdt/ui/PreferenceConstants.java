@@ -579,6 +579,7 @@ public class PreferenceConstants {
 	 * <code>javaEditorTextHovers</code>.
 	 *
 	 * @since 2.1
+	 * @deprecated as of 3.0, this hover is no longer available
 	 */
 	public static String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
 

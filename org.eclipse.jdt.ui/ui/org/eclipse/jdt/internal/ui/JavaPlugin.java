@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumen
 import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptorComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -371,7 +370,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
 		if (fJavaEditorTextHoverDescriptors == null) {
 			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
-			Arrays.sort(fJavaEditorTextHoverDescriptors, new JavaEditorTextHoverDescriptorComparator());
+			Arrays.sort(fJavaEditorTextHoverDescriptors, new JavaEditorTextHoverDescriptorComparator(fJavaEditorTextHoverDescriptors));
 		}
 		
 		return fJavaEditorTextHoverDescriptors;
