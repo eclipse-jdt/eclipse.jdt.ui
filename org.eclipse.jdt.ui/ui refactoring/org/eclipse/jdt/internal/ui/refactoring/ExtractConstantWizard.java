@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
 import org.eclipse.ui.PlatformUI;
@@ -83,6 +84,9 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		private final boolean fInitialValid;
 		private final int fOriginalMessageType;
 		private final String fOriginalMessage;
+		
+		private Button fQualifyReferences;
+		private static final String QUALIFY_REFERENCES= "qualifyReferences"; //$NON-NLS-1$
 	
 		public ExtractConstantInputPage(String description, int messageType, String initialValue) {
 			super(description, true, initialValue);
@@ -172,12 +176,12 @@ public class ExtractConstantWizard extends RefactoringWizard {
 
 		private void addQualifyReferencesCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.getString("ExtractConstantInputPage.qualify_constant_references_with_class_name"); //$NON-NLS-1$
-			boolean defaultValue= getExtractConstantRefactoring().qualifyReferencesWithDeclaringClassName();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
-			getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			boolean defaultValue= getBooleanSetting(QUALIFY_REFERENCES, getExtractConstantRefactoring().qualifyReferencesWithDeclaringClassName());
+			fQualifyReferences= createCheckbox(result,  title, defaultValue, layouter);
+			getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
+			fQualifyReferences.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(checkBox.getSelection());
+					getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
 				}
 			});	
 		}
@@ -254,5 +258,32 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		protected void restoreMessage() {
 			setMessage(fOriginalMessage, fOriginalMessageType);
 		}
+		
+		private boolean getBooleanSetting(String key, boolean defaultValue) {
+			String update= getRefactoringSettings().get(key);
+			if (update != null)
+				return Boolean.valueOf(update).booleanValue();
+			else
+				return defaultValue;
+		}
+		
+		private void saveBooleanSetting(String key, Button checkBox) {
+			if (checkBox != null)
+				getRefactoringSettings().put(key, checkBox.getSelection());
+		}
+		
+		private boolean saveSettings() {
+			if (getContainer() instanceof Dialog)
+				return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+			return true;
+		}
+		
+		public void dispose() {
+			if (saveSettings()) {
+				saveBooleanSetting(QUALIFY_REFERENCES, fQualifyReferences);
+			}
+			super.dispose();
+		}
+
 	}	
 }
