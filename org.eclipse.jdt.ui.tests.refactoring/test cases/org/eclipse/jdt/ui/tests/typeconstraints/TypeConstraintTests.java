@@ -14,23 +14,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExtractInterfaceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
 
 public class TypeConstraintTests extends RefactoringTest {
@@ -239,12 +234,4 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(A:f(A, Object)) =^= p.A", "[a1] =^= Object", "[a0] =^= A"};
 		testConstraints(strings);
 	}	
-	
-	public void testUpdatableExtractInterfaceRanges0() throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP());
-		IType theInterface= cu.getType("Bag");
-		IType theClass= cu.getType("A");
-		CompilationUnitRange[] ranges= ExtractInterfaceUtil.getUpdatableRanges(theClass, theInterface, new NullProgressMonitor());		
-		assertEquals(10, ranges.length);
-	}
 }
