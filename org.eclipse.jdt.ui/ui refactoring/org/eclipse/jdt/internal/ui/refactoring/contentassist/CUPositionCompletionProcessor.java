@@ -92,7 +92,8 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		fOriginalCu= cu;
 		fBeforeString= beforeString;
 		fAfterString= afterString;
-		fCompletionRequestor.setJavaProject(cu.getJavaProject());
+		if (cu != null)
+			fCompletionRequestor.setJavaProject(cu.getJavaProject());
 	}
 
 	/**

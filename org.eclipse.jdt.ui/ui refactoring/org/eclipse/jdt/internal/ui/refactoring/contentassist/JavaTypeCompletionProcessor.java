@@ -52,7 +52,10 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	public void setPackageFragment(IPackageFragment packageFragment) {
 		//TODO: Some callers have a better completion context and should include imports
 		// and nested classes of their declaring CU in WC's source.
-		setCompletionContext(packageFragment.getCompilationUnit(DUMMY_CU_NAME), CU_START, CU_END);
+		if (packageFragment == null)
+			setCompletionContext(null, null, null);
+		else
+			setCompletionContext(packageFragment.getCompilationUnit(DUMMY_CU_NAME), CU_START, CU_END);
 	}
 	
 	public void setExtendsCompletionContext(IPackageFragment packageFragment) {
