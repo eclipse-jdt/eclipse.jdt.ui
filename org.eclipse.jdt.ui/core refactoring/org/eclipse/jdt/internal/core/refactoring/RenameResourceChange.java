@@ -29,6 +29,9 @@ public class RenameResourceChange extends Change {
 	private IPath fResourcePath;
 	private String fNewName;
 	
+	/**
+	 * @param newName does not include an extension
+	 */
 	public RenameResourceChange(IResource resource, String newName){
 		this(resource.getFullPath(), newName);
 	}
