@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import junit.framework.Assert;
 
 import org.eclipse.swt.widgets.Display;
@@ -18,6 +21,12 @@ import org.eclipse.swt.widgets.Display;
  * Runs the event loop of the given display until {@link #condition()} becomes
  * <code>true</code> or no events have occurred for the supplied timeout.
  * Between running the event loop, {@link Display#sleep()} is called.
+ * <p>
+ * There is a caveat: the given timeouts must be long enough that the calling
+ * thread can enter <code>Display.sleep()</code> before the timeout elapses,
+ * otherwise, the waiter may time out before <code>sleep</code> is called and
+ * the sleeping thread may never be waken up.
+ * </p>
  * 
  * @since 3.1
  */
@@ -53,7 +62,7 @@ public abstract class DisplayHelper {
 		
 		// if driving the event loop once makes the condition hold, succeed
 		// without spawning a thread.
-		runEventQueue(display);
+		driveEventQueue(display);
 		if (condition())
 			return true;
 		
@@ -68,7 +77,7 @@ public abstract class DisplayHelper {
 		try {
 			do {
 				if (display.sleep())
-					runEventQueue(display);
+					driveEventQueue(display);
 				condition= condition();
 			} while (!condition && !timeoutState.hasTimedOut());
 		} finally {
@@ -98,23 +107,63 @@ public abstract class DisplayHelper {
 	}
 	
 	/**
-	 * The condition which causes {@link #waitForCondition(Display, int)} to
-	 * wait for the entire timeout.
+	 * Call {@link Display#sleep()} and run the event loop once if
+	 * <code>sleep</code> returns before the timeout elapses. Returns
+	 * <code>true</code> if any events were processed, <code>false</code> if
+	 * not.
+	 * <p>
+	 * If <code>timeout &lt; 0</code>, nothing happens and false is returned.
+	 * If <code>timeout == 0</code>, the event loop is driven exactly once,
+	 * but <code>Display.sleep()</code> is never invoked.
+	 * </p>
 	 * 
-	 * @return <code>true</code> if the condition is reached,
-	 *         <code>false</code> if the event loop should be driven some more
+	 * @param display the display to run the event loop of
+	 * @param timeout the timeout in milliseconds
+	 * @return <code>true</code> if any event was taken off the event queue,
+	 *         <code>false</code> if not
 	 */
-	public abstract boolean condition();
+	public static boolean runEventLoop(Display display, long timeout) {
+		if (timeout < 0)
+			return false;
+		
+		if (timeout == 0)
+			return driveEventQueue(display);
+		
+		// repeatedly sleep until condition becomes true or timeout elapses
+		DisplayWaiter waiter= new DisplayWaiter(display);
+		DisplayWaiter.Timeout timeoutState= waiter.start(timeout);
+		boolean events= false;
+		if (display.sleep() && !timeoutState.hasTimedOut()) {
+			driveEventQueue(display);
+			events= true;
+		}
+		waiter.stop();
+		return events;
+	}
+	
+	/**
+	 * The condition which has to be met in order for
+	 * {@link #waitForCondition(Display, int)} to return before the timeout
+	 * elapses.
+	 * 
+	 * @return <code>true</code> if the condition is met, <code>false</code>
+	 *         if the event loop should be driven some more
+	 */
+	protected abstract boolean condition();
 
 	/**
 	 * Runs the event loop on the given display.
 	 * 
 	 * @param display the display
+	 * @return if <code>display.readAndDispatch</code> returned
+	 *         <code>true</code> at least once
 	 */
-	private void runEventQueue(Display display) {
+	private static boolean driveEventQueue(Display display) {
+		boolean events= false;
 		while (display.readAndDispatch()) {
-			// do nothing
+			events= true;
 		}
+		return events;
 	}
 
 }
@@ -214,16 +263,31 @@ final class DisplayWaiter {
 			switch (fState) {
 				case STOPPED:
 					startThread();
-					fNextTimeout= System.currentTimeMillis() + delay;
+					setNextTimeout(delay);
 					break;
 				case IDLE:
 					unhold();
-					fNextTimeout= System.currentTimeMillis() + delay;
+					setNextTimeout(delay);
 					break;
 			}
 			
 			return fCurrentTimeoutState;
 		}
+	}
+
+	/**
+	 * Sets the next timeout to <em>current time</em> plus <code>delay</code>.
+	 * 
+	 * @param delay the delay until the next timeout occurs in milliseconds from
+	 *        now
+	 */
+	private void setNextTimeout(long delay) {
+		long currentTimeMillis= System.currentTimeMillis();
+		long next= currentTimeMillis + delay;
+		if (next > currentTimeMillis)
+			fNextTimeout= next;
+		else
+			fNextTimeout= Long.MAX_VALUE;
 	}
 	
 	/**
@@ -244,7 +308,7 @@ final class DisplayWaiter {
 					unhold();
 					break;
 			}
-			fNextTimeout= System.currentTimeMillis() + delay;
+			setNextTimeout(delay);
 
 			return fCurrentTimeoutState;
 		}
@@ -308,11 +372,13 @@ final class DisplayWaiter {
 				} catch (InterruptedException e) {
 					// ignore and end the thread - we never interrupt ourselves,
 					// so it must be an external entity that interrupted us
+					Logger.global.log(Level.FINE, "", e);
 				} catch (ThreadChangedException e) {
 					// the thread was stopped and restarted before we got out
 					// of a wait - we're no longer used
 					// we might have been notified instead of the current thread,
 					// so wake it up
+					Logger.global.log(Level.FINE, "", e);
 					synchronized (fMutex) {
 						fMutex.notifyAll();
 					}
@@ -328,17 +394,17 @@ final class DisplayWaiter {
 			private void run2() throws InterruptedException, ThreadChangedException {
 				synchronized (fMutex) {
 					checkThread();
-					tryHold(); // potential state change
+					tryHold(); // wait / potential state change
 					assertStates(STOPPED | RUNNING);
 					
 					while (isState(RUNNING)) {
-						waitForTimeout(); // potential state change
+						waitForTimeout(); // wait / potential state change
 						
 						if (isState(RUNNING))
 							timedOut(); // state change
 						assertStates(STOPPED | IDLE);
 						
-						tryHold(); // potential state change
+						tryHold(); // wait / potential state change
 						assertStates(STOPPED | RUNNING);
 					}
 					assertStates(STOPPED);
@@ -365,7 +431,7 @@ final class DisplayWaiter {
 			private void waitForTimeout() throws InterruptedException, ThreadChangedException {
 				long delta;
 				while (isState(RUNNING) && (delta = fNextTimeout - System.currentTimeMillis()) > 0) {
-					fMutex.wait(delta);
+					fMutex.wait(Math.max(delta, 50)); // wait at least 50ms in order to avoid timing out before the display is going to sleep
 					checkThread();
 				}
 			}
@@ -376,6 +442,7 @@ final class DisplayWaiter {
 			 * <code>STOPPED</code>.
 			 */
 			private void timedOut() {
+				Logger.global.finer("timed out");
 				fCurrentTimeoutState.setTimedOut(true);
 				fDisplay.wake(); // wake up call!
 				if (fKeepRunningOnTimeout)
@@ -418,9 +485,11 @@ final class DisplayWaiter {
 	 */
 	private boolean tryTransition(int possibleStates, int nextState) {
 		if (isState(possibleStates)) {
+			Logger.global.finer("DisplayWaiter.tryTransition(): " + fState + " > " + nextState);
 			fState= nextState;
 			return true;
 		}
+		Logger.global.finest("DisplayWaiter.tryTransition(): failed " + fState + " > " + nextState);
 		return false;
 	}
 	
@@ -432,6 +501,7 @@ final class DisplayWaiter {
 	 * @param nextState the state to transition to
 	 */
 	private void checkedTransition(int possibleStates, int nextState) {
+		Logger.global.finer("DisplayWaiter.checkedTransition(): " + fState + " > " + nextState);
 		assertStates(possibleStates);
 		fState= nextState;
 	}

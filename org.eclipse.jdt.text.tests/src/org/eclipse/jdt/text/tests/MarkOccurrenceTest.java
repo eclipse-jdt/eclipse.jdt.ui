@@ -51,6 +51,7 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.text.tests.performance.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -160,18 +161,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(8, fOccurrences);
+		assertOccurrences(8);
 		assertOccurrencesInWidget();
 	}
 	
@@ -201,18 +191,7 @@ public class MarkOccurrenceTest extends TestCase {
 		fMatch= new Region(fMatch.getOffset(), 4);
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(1, fOccurrences);
+		assertOccurrences(1);
 		assertOccurrencesInWidget();
 		
 		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", false);
@@ -229,18 +208,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(2, fOccurrences);
+		assertOccurrences(2);
 		assertOccurrencesInWidget();
 	}
 	public void testMarkFieldOccurrences() {
@@ -253,18 +221,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(9, fOccurrences);
+		assertOccurrences(9);
 		assertOccurrencesInWidget();
 	}
 	
@@ -278,18 +235,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(4, fOccurrences);
+		assertOccurrences(4);
 		assertOccurrencesInWidget();
 	}
 	
@@ -304,18 +250,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(6, fOccurrences);
+		assertOccurrences(6);
 		assertOccurrencesInWidget();
 	}
 	
@@ -329,18 +264,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(2, fOccurrences);
+		assertOccurrences(2);
 		assertOccurrencesInWidget();
 	}
 	
@@ -355,18 +279,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(3, fOccurrences);
+		assertOccurrences(3);
 		assertOccurrencesInWidget();
 	}
 	public void testMarkImplementOccurrences2() {
@@ -383,18 +296,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences > 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(0, fOccurrences);
+		assertOccurrences(0);
 		assertOccurrencesInWidget();
 	}
 	
@@ -408,18 +310,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences == 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(2, fOccurrences);
+		assertOccurrences(2);
 		assertOccurrencesInWidget();
 	}
 	
@@ -435,18 +326,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		long timeOut= System.currentTimeMillis() + 60000;
-		while (fOccurrences > 0) {
-			EditorTestHelper.runEventQueue(fEditor);
-			synchronized (this) {
-				try {
-					wait(200);
-				} catch (InterruptedException e1) {
-				}
-			}
-			assertTrue(System.currentTimeMillis() < timeOut);
-		}
-		assertEquals(0, fOccurrences);
+		assertOccurrences(0);
 		assertOccurrencesInWidget();
 	}
 	
@@ -485,6 +365,16 @@ public class MarkOccurrenceTest extends TestCase {
 			return PreferenceConverter.getColor(store, annotationPref.getColorPreferenceKey());
 		
 		return null;
+	}
+	
+
+	private void assertOccurrences(final int expected) {
+		DisplayHelper helper= new DisplayHelper() {
+			protected boolean condition() {
+				return fOccurrences == expected;
+			}
+		};
+		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 60000));
 	}
 	
 }
