@@ -833,7 +833,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void updateDeclarationNode(ASTNode methodOccurrence) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
 
-		changeReturnType(methodDeclaration);
+		if (! methodDeclaration.isConstructor())
+			changeReturnType(methodDeclaration);
 		changeParameterTypes(methodDeclaration);
 				
 		if (needsVisibilityUpdate(methodDeclaration))
