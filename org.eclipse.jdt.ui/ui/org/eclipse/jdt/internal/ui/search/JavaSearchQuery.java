@@ -182,6 +182,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			desc= ((PatternQuerySpecification)fPatternData).getPattern();
 		}
 
+		desc= quote(desc);
 		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
 		String[] args= new String[] {desc, fPatternData.getScopeDescription()}; //$NON-NLS-1$
 		switch (fPatternData.getLimitTo()) {
@@ -201,6 +202,13 @@ public class JavaSearchQuery implements ISearchQuery {
 				return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
 		}
 	}
+	
+	public static String quote(String searchString) {
+		searchString= searchString.replaceAll("\\{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
+		return searchString.replaceAll("\\}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+	}
+
 
 	String getPluralLabelPattern() {
 		String desc= null;
@@ -218,6 +226,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			desc= ((PatternQuerySpecification)fPatternData).getPattern();
 		}
 
+		desc= quote(desc);
 		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
 		String[] args= new String[] {desc, "{0}", fPatternData.getScopeDescription()}; //$NON-NLS-1$
 		switch (fPatternData.getLimitTo()) {
