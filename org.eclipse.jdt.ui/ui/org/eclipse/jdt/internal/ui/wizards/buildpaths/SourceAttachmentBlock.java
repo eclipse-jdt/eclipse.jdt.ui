@@ -60,8 +60,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * UI to set the source attachment archive and root.
@@ -234,17 +234,16 @@ public class SourceAttachmentBlock {
 		
 		Composite composite= new Composite(parent, SWT.NONE);	
 		
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
 		int widthHint= converter.convertWidthInCharsToPixels(fIsVariableEntry ? 50 : 60);
 		
 		
-		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 4;
 		
 		Label message= new Label(composite, SWT.LEFT);
@@ -253,7 +252,7 @@ public class SourceAttachmentBlock {
 				
 		if (fIsVariableEntry) {
 			DialogField.createEmptySpace(composite, 1);
-			gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.widthHint= widthHint;
 			gd.horizontalSpan= 2;
 			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
@@ -263,7 +262,7 @@ public class SourceAttachmentBlock {
 		}
 		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
-		gd= (MGridData)fFileNameField.getTextControl(null).getLayoutData();
+		gd= (GridData)fFileNameField.getTextControl(null).getLayoutData();
 		gd.widthHint= widthHint;
 		
 		if (!fIsVariableEntry) {
@@ -275,13 +274,13 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 1);	
 			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
 			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
-			fFullPathResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+			fFullPathResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 			DialogField.createEmptySpace(composite, 2);			
 		}
 		
 		// prefix description
 		DialogField.createEmptySpace(composite, 1);
-		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.widthHint= widthHint;
 		gd.horizontalSpan= 2;
 		Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
@@ -291,7 +290,7 @@ public class SourceAttachmentBlock {
 		
 		// root path field	
 		fPrefixField.doFillIntoGrid(composite, 4);
-		gd= (MGridData)fPrefixField.getTextControl(null).getLayoutData();
+		gd= (GridData)fPrefixField.getTextControl(null).getLayoutData();
 		gd.widthHint= widthHint;
 		
 		if (fIsVariableEntry) {
@@ -299,7 +298,7 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 1);	
 			fPrefixResolvedLabel= new CLabel(composite, SWT.LEFT);
 			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
-			fPrefixResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+			fPrefixResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 			DialogField.createEmptySpace(composite, 2);
 		}
 		
@@ -307,7 +306,7 @@ public class SourceAttachmentBlock {
 		
 //		if (!fIsVariableEntry) {
 			DialogField.createEmptySpace(composite, 1);
-			gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.widthHint= widthHint;
 			gd.horizontalSpan= 2;
 			desc= new Label(composite, SWT.LEFT + SWT.WRAP);

@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field containing a label and a text control.
@@ -51,11 +51,10 @@ public class StringDialogField extends DialogField {
 		return 2;	
 	}
 	
-	protected static MGridData gridDataForText(int span) {
-		MGridData gd= new MGridData();
+	protected static GridData gridDataForText(int span) {
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
-		gd.grabExcessHorizontalSpace= true;
-		gd.grabColumn= 0;
+		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;
 		return gd;
 	}	

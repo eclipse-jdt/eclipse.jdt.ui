@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field containing a label and a combo control.
@@ -59,11 +59,10 @@ public class ComboDialogField extends DialogField {
 		return 2;	
 	}
 	
-	protected static MGridData gridDataForCombo(int span) {
-		MGridData gd= new MGridData();
+	protected static GridData gridDataForCombo(int span) {
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
-		gd.grabExcessHorizontalSpace= true;
-		gd.grabColumn= 0;
+		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;
 		return gd;
 	}	

@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridLayout;
 
 public class VariableCreationDialog extends StatusDialog {
 		
@@ -120,8 +120,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		Composite inner= new Composite(composite, SWT.NONE);
 		
-		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
+		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
 		inner.setLayout(layout);
@@ -130,6 +129,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		fNameField.doFillIntoGrid(inner, 2);
 		LayoutUtil.setWidthHint(fNameField.getTextControl(null), fieldWidthHint);
+		LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
 		
 		DialogField.createEmptySpace(inner, 1);
 		

@@ -7,14 +7,14 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.util.Assert;
 
@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -91,11 +90,11 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
-		int minimalWidth= convertWidthInCharsToPixels(80);
-		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, minimalWidth, 0, 0, 0);
+		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, 0, 0);
 		
 		int fieldWidthHint= convertWidthInCharsToPixels(60);
 		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), fieldWidthHint);
+		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		

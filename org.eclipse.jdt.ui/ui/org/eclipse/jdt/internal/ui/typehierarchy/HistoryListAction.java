@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -74,10 +75,18 @@ public class HistoryListAction extends Action {
 		 * @see Dialog#createDialogArea(Composite)
 		 */
 		protected Control createDialogArea(Composite parent) {
+			initializeDialogUnits(parent);
+			
 			Composite composite= (Composite) super.createDialogArea(parent);
-			int minimalWidth= convertWidthInCharsToPixels(80);
-			int minimalHeight= convertHeightInCharsToPixels(20);
-			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, minimalWidth, minimalHeight, SWT.DEFAULT, SWT.DEFAULT);	
+			
+			Composite inner= new Composite(composite, SWT.NONE);
+			inner.setLayoutData(new GridData(GridData.FILL));
+
+			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList }, true, 0, 0);
+			LayoutUtil.setHeigthHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
+			LayoutUtil.setHorizontalGrabbing(fHistoryList.getListControl(null));
+
+				
 			fHistoryList.getTableViewer().addDoubleClickListener(new IDoubleClickListener() {
 				public void doubleClick(DoubleClickEvent event) {
 					if (fHistoryStatus.isOK()) {

@@ -33,8 +33,8 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * A list with a button bar.
@@ -179,17 +179,16 @@ public class ListDialogField extends DialogField {
 		assertEnoughColumns(nColumns);
 		
 		Label label= getLabelControl(parent);
-		MGridData gd= gridDataForLabel(1);
+		GridData gd= gridDataForLabel(1);
 		gd.verticalAlignment= gd.BEGINNING;
 		label.setLayoutData(gd);
 		
 		Control list= getListControl(parent);
-		gd= new MGridData();
+		gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
-		gd.grabExcessHorizontalSpace= true;
+		gd.grabExcessHorizontalSpace= false;
 		gd.verticalAlignment= gd.FILL;
 		gd.grabExcessVerticalSpace= true;
-		gd.grabColumn= 0;
 		gd.horizontalSpan= nColumns - 2;
 		gd.widthHint= converter.convertWidthInCharsToPixels(50);
 		gd.heightHint= converter.convertHeightInCharsToPixels(6);
@@ -197,11 +196,11 @@ public class ListDialogField extends DialogField {
 		list.setLayoutData(gd);
 		
 		Composite buttons= getButtonBox(parent);
-		gd= new MGridData();
+		gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.verticalAlignment= gd.FILL;
-		gd.grabExcessVerticalSpace= false;
+		gd.grabExcessVerticalSpace= true;
 		gd.horizontalSpan= 1;
 		buttons.setLayoutData(gd);
 		
@@ -220,7 +219,7 @@ public class ListDialogField extends DialogField {
 	 */		
 	public void setButtonsMinWidth(int minWidth) {
 		if (fLastSeparator != null) {
-			((MGridData)fLastSeparator.getLayoutData()).widthHint= minWidth;
+			((GridData)fLastSeparator.getLayoutData()).widthHint= minWidth;
 		}
 	}
 	
@@ -280,7 +279,7 @@ public class ListDialogField extends DialogField {
 		Button button= new Button(parent, SWT.PUSH);
 		button.setText(label);
 		button.addSelectionListener(listener);
-		MGridData gd= new MGridData();
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.verticalAlignment= gd.BEGINNING;
@@ -294,7 +293,7 @@ public class ListDialogField extends DialogField {
 	private Label createSeparator(Composite parent) {
 		Label separator= new Label(parent, SWT.NONE);
 		separator.setVisible(false);
-		MGridData gd= new MGridData();
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.verticalAlignment= gd.BEGINNING;
 		gd.heightHint= 4;
@@ -322,7 +321,7 @@ public class ListDialogField extends DialogField {
 			};
 			
 			Composite contents= new Composite(parent, SWT.NULL);
-			MGridLayout layout= new MGridLayout();
+			GridLayout layout= new GridLayout();
 			layout.marginWidth= 0;
 			layout.marginHeight= 0;
 			contents.setLayout(layout);

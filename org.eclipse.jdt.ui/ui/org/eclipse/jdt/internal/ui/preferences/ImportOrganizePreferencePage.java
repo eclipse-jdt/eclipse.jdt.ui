@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
@@ -27,7 +29,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaConventions;
@@ -47,8 +48,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 /*
  * The page for setting the organize import settings
@@ -194,7 +193,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 		Composite composite= new Composite(parent, SWT.NONE);
 		
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
@@ -203,9 +202,10 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fOrderListField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fOrderListField.getLabelControl(null), 2);
+		LayoutUtil.setHorizontalGrabbing(fOrderListField.getLabelControl(null));
 		
 		fThresholdField.doFillIntoGrid(composite, 2);
-		((MGridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
+		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
 		
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 		

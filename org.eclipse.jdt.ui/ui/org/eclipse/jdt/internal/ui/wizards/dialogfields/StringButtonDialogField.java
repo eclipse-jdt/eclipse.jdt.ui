@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field containing a label, text control and a button control.
@@ -75,8 +75,8 @@ public class StringButtonDialogField extends StringDialogField {
 		return 3;	
 	}
 	
-	protected static MGridData gridDataForButton(Button button, int span) {
-		MGridData gd= new MGridData();
+	protected static GridData gridDataForButton(Button button, int span) {
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;

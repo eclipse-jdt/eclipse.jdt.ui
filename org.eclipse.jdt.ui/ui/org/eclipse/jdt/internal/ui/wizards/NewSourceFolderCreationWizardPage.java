@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -33,7 +34,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -67,8 +67,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
@@ -184,11 +182,11 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
-		layout.minimumWidth= convertWidthInCharsToPixels(80);
-		layout.minimumHeight= convertHeightInCharsToPixels(20);
+		//layout.minimumWidth= convertWidthInCharsToPixels(80);
+		//layout.minimumHeight= convertHeightInCharsToPixels(20);
 		layout.numColumns= 3;
 		composite.setLayout(layout);
 				
@@ -197,7 +195,8 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		fRootDialogField.setFocus();
 		
 		int maxFieldWidth= convertWidthInCharsToPixels(40);
-		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);	
+		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
+		LayoutUtil.setHorizontalGrabbing(fProjectField.getTextControl(null));	
 		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);	
 			
 		(new Separator()).doFillIntoGrid(composite, 3);
@@ -205,9 +204,9 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		fEditClassPathField.doFillIntoGrid(composite, 3);
 
 		Control control= fEditClassPathField.getSelectionButton(null);
-		MGridData gd= (MGridData) control.getLayoutData();
-		gd.verticalAlignment= MGridData.END;
-		gd.horizontalAlignment= MGridData.BEGINNING;		
+		GridData gd= (GridData) control.getLayoutData();
+		gd.verticalAlignment= GridData.END;
+		gd.horizontalAlignment= GridData.BEGINNING;		
 
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);		
@@ -454,7 +453,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);			
 			Control inner= fBuildPathsBlock.createControl(composite);
-			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			inner.setLayoutData(new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_BOTH));
 			return composite;
 		}		
 		

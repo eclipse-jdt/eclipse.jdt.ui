@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field describing a separator.
@@ -61,8 +61,8 @@ public class Separator extends DialogField {
 		return 1;	
 	}
 	
-	protected static MGridData gridDataForSeperator(int span, int height) {
-		MGridData gd= new MGridData();
+	protected static GridData gridDataForSeperator(int span, int height) {
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.verticalAlignment= gd.BEGINNING;
 		gd.heightHint= height;		

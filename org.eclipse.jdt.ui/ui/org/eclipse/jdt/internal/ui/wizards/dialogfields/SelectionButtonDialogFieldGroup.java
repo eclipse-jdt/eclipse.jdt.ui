@@ -15,8 +15,8 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * Dialog field describing a group with buttons (Checkboxes, radio buttons..)
@@ -84,17 +84,15 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 			label.setLayoutData(gridDataForLabel(1));
 		
 			Composite buttonsgroup= getSelectionButtonsGroup(parent);
-			MGridData gd= new MGridData();
+			GridData gd= new GridData();
 			gd.horizontalSpan= nColumns - 1;
-			gd.grabColumn= 0;
 			buttonsgroup.setLayoutData(gd);
 			
 			return new Control[] { label, buttonsgroup };
 		} else {
 			Composite buttonsgroup= getSelectionButtonsGroup(parent);
-			MGridData gd= new MGridData();
+			GridData gd= new GridData();
 			gd.horizontalSpan= nColumns;
-			gd.grabColumn= 0;
 			buttonsgroup.setLayoutData(gd);
 		
 			return new Control[] { buttonsgroup };
@@ -117,7 +115,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 		button.setEnabled(isEnabled() && fButtonsEnabled[index]);
 		button.setSelection(fButtonsSelected[index]);
 		button.addSelectionListener(listener);
-		button.setLayoutData(new MGridData());
+		button.setLayoutData(new GridData());
 		return button;
 	}
 
@@ -130,7 +128,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 		if (fButtonComposite == null) {
 			assertCompositeNotNull(parent);
 			
-			MGridLayout layout= new MGridLayout();
+			GridLayout layout= new GridLayout();
 			layout.makeColumnsEqualWidth= true;
 			layout.numColumns= fGroupNumberOfColumns;			
 			

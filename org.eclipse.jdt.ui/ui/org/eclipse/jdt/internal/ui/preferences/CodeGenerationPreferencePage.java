@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -13,7 +14,6 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaConventions;
@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -190,7 +189,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
@@ -216,10 +215,10 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		getterSetterLabel.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.label")); //$NON-NLS-1$
 		getterSetterLabel.doFillIntoGrid(composite, 2);
 
-		
 		fUseGetterSetterPrefix.doFillIntoGrid(composite, 2);
 		fGetterSetterPrefix.doFillIntoGrid(composite, 2);
 		LayoutUtil.setHorizontalIndent(fGetterSetterPrefix.getLabelControl(null), horizontalIndent);
+		LayoutUtil.setHorizontalGrabbing(fGetterSetterPrefix.getTextControl(null));
 		
 		fUseGetterSetterSuffix.doFillIntoGrid(composite, 2);
 		fGetterSetterSuffix.doFillIntoGrid(composite, 2);		

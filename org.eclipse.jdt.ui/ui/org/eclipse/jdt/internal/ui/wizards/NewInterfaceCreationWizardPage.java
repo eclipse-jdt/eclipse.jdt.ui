@@ -8,18 +8,17 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewInterfaceCreationWizardPage extends TypePage {
 	
@@ -82,8 +81,8 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		
 		int nColumns= 4;
 		
-		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= convertWidthInCharsToPixels(80);
+		GridLayout layout= new GridLayout();
+		//layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
 		

@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog Field containing a single button: e.g. radio or checkbox button.
@@ -77,7 +77,7 @@ public class SelectionButtonDialogField extends DialogField {
 		assertEnoughColumns(nColumns);
 		
 		Button button= getSelectionButton(parent);
-		MGridData gd= new MGridData();
+		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		gd.horizontalAlignment= gd.FILL;
 		if (fButtonStyle == SWT.PUSH) {

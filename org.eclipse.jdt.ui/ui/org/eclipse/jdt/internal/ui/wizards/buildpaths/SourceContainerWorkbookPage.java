@@ -47,8 +47,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
@@ -153,8 +153,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
-		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;		
 		composite.setLayout(layout);
 		
@@ -162,14 +161,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFolderRadioButton.doFillIntoGrid(composite, 2);
 		
 		Control control= fFoldersList.getListControl(composite);
-		MGridData gd= new MGridData(MGridData.FILL_BOTH);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalIndent= converter.convertWidthInCharsToPixels(2);
 		gd.widthHint= converter.convertWidthInCharsToPixels(50);
 		gd.heightHint= converter.convertWidthInCharsToPixels(15);
+		gd.grabExcessHorizontalSpace= true;
 		control.setLayoutData(gd);
 		
 		control= fFoldersList.getButtonBox(composite);
-		gd= new MGridData(gd.VERTICAL_ALIGN_FILL + gd.HORIZONTAL_ALIGN_FILL);
+		gd= new GridData(gd.VERTICAL_ALIGN_FILL + gd.HORIZONTAL_ALIGN_FILL);
 		control.setLayoutData(gd);
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);

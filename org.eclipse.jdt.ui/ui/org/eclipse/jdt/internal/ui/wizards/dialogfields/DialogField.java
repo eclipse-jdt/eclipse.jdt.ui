@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Base class of all dialog fields.
@@ -118,8 +118,8 @@ public class DialogField {
 		return 1;	
 	}	
 	
-	protected static MGridData gridDataForLabel(int span) {
-		MGridData gd= new MGridData();
+	protected static GridData gridDataForLabel(int span) {
+		GridData gd= new GridData();
 		gd.horizontalSpan= span;
 		return gd;
 	}
@@ -165,7 +165,7 @@ public class DialogField {
 	 */			
 	public static Control createEmptySpace(Composite parent, int span) {
 		Label label= new Label(parent, SWT.LEFT);
-		MGridData gd= new MGridData();
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.BEGINNING;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;

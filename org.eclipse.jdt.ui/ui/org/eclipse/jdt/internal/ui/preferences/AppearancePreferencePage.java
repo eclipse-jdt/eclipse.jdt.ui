@@ -3,6 +3,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -23,7 +24,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class AppearancePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -92,7 +92,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	protected Control createContents(Composite parent) {
 		int nColumns= 1;
 		
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= nColumns;

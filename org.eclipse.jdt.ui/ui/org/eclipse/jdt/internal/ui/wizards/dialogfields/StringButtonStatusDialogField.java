@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field containing a label, text control, status label and a button control.
@@ -106,8 +106,8 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		return 4;	
 	}
 	
-	protected MGridData gridDataForStatusLabel(Control aControl, int span) {
-		MGridData gd= new MGridData();
+	protected GridData gridDataForStatusLabel(Control aControl, int span) {
+		GridData gd= new GridData();
 		gd.horizontalAlignment= gd.BEGINNING;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalIndent= 0;

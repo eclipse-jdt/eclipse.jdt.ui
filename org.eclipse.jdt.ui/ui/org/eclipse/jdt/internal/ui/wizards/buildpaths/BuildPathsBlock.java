@@ -77,8 +77,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 public class BuildPathsBlock {
 
@@ -158,16 +158,14 @@ public class BuildPathsBlock {
 		
 		Composite composite= new Composite(parent, SWT.NONE);	
 		
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
-		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
-		layout.minimumHeight= converter.convertHeightInCharsToPixels(20);
 		layout.numColumns= 1;		
 		composite.setLayout(layout);
 		
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new MGridData(MGridData.FILL_BOTH));
+		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		folder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
@@ -222,12 +220,13 @@ public class BuildPathsBlock {
 		Composite editorcomp= new Composite(composite, SWT.NONE);	
 	
 		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
-		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0, 0, 0);
+		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0);
 		
 		int maxFieldWidth= converter.convertWidthInCharsToPixels(40);
-		LayoutUtil.setWidthHint(fBuildPathDialogField.getTextControl(null), maxFieldWidth);	
+		LayoutUtil.setWidthHint(fBuildPathDialogField.getTextControl(null), maxFieldWidth);
+		LayoutUtil.setHorizontalGrabbing(fBuildPathDialogField.getTextControl(null));
 	
-		editorcomp.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
+		editorcomp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		if (fIsNewProject) {
 			folder.setSelection(0);

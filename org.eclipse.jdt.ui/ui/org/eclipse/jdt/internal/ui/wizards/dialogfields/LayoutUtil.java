@@ -8,8 +8,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 public class LayoutUtil {
 	
@@ -49,6 +49,7 @@ public class LayoutUtil {
 	 * @param minHeight The minimal height of the composite
 	 * @param marginWidth The margin width to be used by the composite
 	 * @param marginHeight The margin height to be used by the composite
+	 * @deprecated
 	 */	
 	public static void doDefaultLayout(Composite parent, DialogField[] editors, boolean labelOnTop, int minWidth, int minHeight, int marginWidth, int marginHeight) {
 		int nCulumns= getNumberOfColumns(editors);
@@ -60,15 +61,13 @@ public class LayoutUtil {
 			nCulumns--;
 			modifyLabelSpans(controls, nCulumns);
 		}
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		if (marginWidth != SWT.DEFAULT) {
 			layout.marginWidth= marginWidth;
 		}
 		if (marginHeight != SWT.DEFAULT) {
 			layout.marginHeight= marginHeight;
 		}
-		layout.minimumWidth= minWidth;
-		layout.minimumHeight= minHeight;
 		layout.numColumns= nCulumns;		
 		parent.setLayout(layout);
 	}
@@ -80,37 +79,57 @@ public class LayoutUtil {
 	}
 	
 	/**
-	 * Sets the span of a control. Assumes that MGridData is used.
+	 * Sets the span of a control. Assumes that GridData is used.
 	 */
 	public static void setHorizontalSpan(Control control, int span) {
 		Object ld= control.getLayoutData();
-		if (ld instanceof MGridData) {
-			((MGridData)ld).horizontalSpan= span;
+		if (ld instanceof GridData) {
+			((GridData)ld).horizontalSpan= span;
 		} else if (span != 1) {
-			MGridData gd= new MGridData();
+			GridData gd= new GridData();
 			gd.horizontalSpan= span;
 			control.setLayoutData(gd);
 		}
 	}	
 
 	/**
-	 * Sets the width hint of a control. Assumes that MGridData is used.
+	 * Sets the width hint of a control. Assumes that GridData is used.
 	 */
 	public static void setWidthHint(Control control, int widthHint) {
 		Object ld= control.getLayoutData();
-		if (ld instanceof MGridData) {
-			((MGridData)ld).widthHint= widthHint;
+		if (ld instanceof GridData) {
+			((GridData)ld).widthHint= widthHint;
 		}
 	}
 	
 	/**
-	 * Sets the horizontal indent of a control. Assumes that MGridData is used.
+	 * Sets the heigthHint hint of a control. Assumes that GridData is used.
+	 */
+	public static void setHeigthHint(Control control, int heigthHint) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData)ld).heightHint= heigthHint;
+		}
+	}	
+	
+	/**
+	 * Sets the horizontal indent of a control. Assumes that GridData is used.
 	 */
 	public static void setHorizontalIndent(Control control, int horizontalIndent) {
 		Object ld= control.getLayoutData();
-		if (ld instanceof MGridData) {
-			((MGridData)ld).horizontalIndent= horizontalIndent;
+		if (ld instanceof GridData) {
+			((GridData)ld).horizontalIndent= horizontalIndent;
 		}
-	}	
+	}
+	
+	/**
+	 * Sets the horizontal indent of a control. Assumes that GridData is used.
+	 */
+	public static void setHorizontalGrabbing(Control control) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData)ld).grabExcessHorizontalSpace= true;
+		}
+	}		
 
 }

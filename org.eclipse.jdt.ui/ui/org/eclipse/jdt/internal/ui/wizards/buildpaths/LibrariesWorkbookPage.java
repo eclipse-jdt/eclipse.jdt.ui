@@ -130,7 +130,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, SWT.DEFAULT, SWT.DEFAULT);
+		LayoutUtil.setHorizontalGrabbing(fLibrariesList.getListControl(null));
+		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
 		

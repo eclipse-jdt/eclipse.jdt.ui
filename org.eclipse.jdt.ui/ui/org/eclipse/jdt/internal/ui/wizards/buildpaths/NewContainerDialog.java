@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridLayout;
 
 public class NewContainerDialog extends StatusDialog {
 	
@@ -63,8 +63,7 @@ public class NewContainerDialog extends StatusDialog {
 		int widthHint= convertWidthInCharsToPixels(80);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
-		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= widthHint;
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 1;
@@ -74,7 +73,7 @@ public class NewContainerDialog extends StatusDialog {
 		
 		LayoutUtil.setWidthHint(fContainerDialogField.getLabelControl(null), widthHint);
 		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), widthHint);
-		
+		LayoutUtil.setHorizontalGrabbing(fContainerDialogField.getTextControl(null));
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;

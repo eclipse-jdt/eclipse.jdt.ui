@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -75,8 +77,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 /**
  * <code>TypePage</code> contains controls and validation routines for a 'New Type WizardPage'
@@ -324,7 +324,7 @@ public abstract class TypePage extends ContainerPage {
 	protected void createEnclosingTypeControls(Composite composite, int nColumns) {
 		// #6891
 		Composite tabGroup= new Composite(composite, SWT.NONE);
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
  		tabGroup.setLayout(layout);
@@ -332,13 +332,13 @@ public abstract class TypePage extends ContainerPage {
 		fEnclosingTypeSelection.doFillIntoGrid(tabGroup, 1);
 
 		Control c= fEnclosingTypeDialogField.getTextControl(composite);
-		MGridData gd= new MGridData(MGridData.FILL_HORIZONTAL);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= getMaxFieldWidth();
 		gd.horizontalSpan= 2;
 		c.setLayoutData(gd);
 		
 		Button button= fEnclosingTypeDialogField.getChangeControl(composite);
-		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.heightHint = SWTUtil.getButtonHeigthHint(button);
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 		button.setLayoutData(gd);
@@ -365,7 +365,7 @@ public abstract class TypePage extends ContainerPage {
 		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getLabelControl(composite), 1);
 		
 		Control control= fAccMdfButtons.getSelectionButtonsGroup(composite);
-		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns - 2;
 		control.setLayoutData(gd);
 		
@@ -374,7 +374,7 @@ public abstract class TypePage extends ContainerPage {
 		DialogField.createEmptySpace(composite);
 		
 		control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
-		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns - 2;
 		control.setLayoutData(gd);		
 
@@ -398,7 +398,7 @@ public abstract class TypePage extends ContainerPage {
 	 */			
 	protected void createSuperInterfacesControls(Composite composite, int nColumns) {
 		fSuperInterfacesDialogField.doFillIntoGrid(composite, nColumns);
-		MGridData gd= (MGridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
+		GridData gd= (GridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
 		if (fIsClass) {
 			gd.heightHint= convertHeightInCharsToPixels(3);
 		} else {

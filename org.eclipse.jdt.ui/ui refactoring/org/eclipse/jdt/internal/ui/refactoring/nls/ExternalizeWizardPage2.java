@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.swt.layout.GridLayout;
 
 class ExternalizeWizardPage2 extends UserInputWizardPage {
 
@@ -164,7 +164,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	 */
 	public void createControl(Composite ancestor) {
 		Composite parent= new Composite(ancestor, SWT.NULL);
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		parent.setLayout(layout);
 		

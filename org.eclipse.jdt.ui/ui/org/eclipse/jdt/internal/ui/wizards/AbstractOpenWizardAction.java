@@ -27,6 +27,7 @@ import org.eclipse.ui.actions.NewProjectAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class AbstractOpenWizardAction extends Action implements IWorkbenchWindowActionDelegate {
 
@@ -137,7 +138,11 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		if (wizard instanceof IWorkbenchWizard) {
 			((IWorkbenchWizard)wizard).init(getWorkbench(), getCurrentSelection());
 		}
+		
 		WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+		PixelConverter converter= new PixelConverter(JavaPlugin.getActiveWorkbenchShell());
+		
+		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
 		dialog.getShell().setText(JavaUIMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
 		dialog.open();

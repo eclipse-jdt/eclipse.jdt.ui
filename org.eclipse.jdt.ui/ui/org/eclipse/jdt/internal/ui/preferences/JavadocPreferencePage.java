@@ -9,6 +9,7 @@ import java.io.File;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
@@ -30,8 +31,8 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 /**
  * @version 	1.0
@@ -73,7 +74,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		MGridLayout layout= new MGridLayout();
+		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
@@ -89,6 +90,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		fJavadocSelection.setLabelText("J&avadoc command:");
 		fJavadocSelection.setButtonLabel("Bro&wse...");
 		fJavadocSelection.doFillIntoGrid(fComposite, 3);
+		LayoutUtil.setHorizontalGrabbing(fJavadocSelection.getTextControl(null));
 
 		initFields();
 

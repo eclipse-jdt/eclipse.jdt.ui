@@ -31,7 +31,8 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fClassPathList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fClassPathList }, true, SWT.DEFAULT, SWT.DEFAULT);
+		LayoutUtil.setHorizontalGrabbing(fClassPathList.getListControl(null));
 
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fClassPathList.setButtonsMinWidth(buttonBarWidth);

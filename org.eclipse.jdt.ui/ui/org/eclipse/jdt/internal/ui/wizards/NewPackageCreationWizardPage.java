@@ -13,13 +13,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -36,8 +37,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewPackageCreationWizardPage extends ContainerPage {
 	
@@ -92,23 +91,21 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 */	
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
+			
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		int nColumns= 3;
-		int widthHint= convertWidthInCharsToPixels(80);
-		MGridLayout layout= new MGridLayout();
+		
+		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
-		layout.marginHeight= 0;	
-		layout.minimumWidth= widthHint;
-		layout.minimumHeight= convertHeightInCharsToPixels(20);
+		layout.marginHeight= 0;
 		layout.numColumns= 3;		
 		composite.setLayout(layout);
 		
 		Label label= new Label(composite, SWT.WRAP);
 		label.setText(NewWizardMessages.getString("NewPackageCreationWizardPage.info")); //$NON-NLS-1$
-		MGridData gd= new MGridData();
-		gd.widthHint= widthHint;
+		GridData gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(80);
 		gd.horizontalSpan= 3;
 		label.setLayoutData(gd);
 		
@@ -124,6 +121,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
 		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());
+		LayoutUtil.setHorizontalGrabbing(fPackageDialogField.getTextControl(null));
 		DialogField.createEmptySpace(composite);		
 	}
 				

@@ -57,9 +57,7 @@ public class VariableBlock {
 	}
 	
 	public Control createContents(Composite parent) {		PixelConverter converter= new PixelConverter(parent);		
-		Composite composite= new Composite(parent, SWT.NONE);		int minimalWidth= converter.convertWidthInCharsToPixels(80);		int minimalHeight= converter.convertHeightInCharsToPixels(20);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, minimalWidth, minimalHeight, 0, 0);	
-				fControl= composite;		return composite;
+		Composite composite= new Composite(parent, SWT.NONE);		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 0, 0);		LayoutUtil.setHorizontalGrabbing(fVariablesList.getListControl(null));				fControl= composite;		return composite;
 	}
 	
 	public void addDoubleClickListener(IDoubleClickListener listener) {
