@@ -124,7 +124,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageName(NewTypeWizardPage page) {
-		page.setTypeName(ASTResolving.getSimpleName(fNode), true);
+		page.setTypeName(ASTResolving.getSimpleName(fNode), false);
 		if (fNode.isQualifiedName()) {
 			String packName= ASTResolving.getQualifier(fNode);
 			IPackageFragmentRoot root= (IPackageFragmentRoot) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -159,11 +159,20 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
+		StringBuffer buf= new StringBuffer();
+		buf.append("Open wizard to create ");
 		if (fIsClass) {
-			return "Open new class wizard";
+			buf.append("class <b>");
 		} else {
-			return "Open new interface wizard";
+			buf.append("interface <b>");
 		}
+		buf.append(ASTResolving.getSimpleName(fNode));
+		if (fNode.isQualifiedName()) {
+			buf.append("</b> in package <b>");
+			buf.append(ASTResolving.getQualifier(fNode));
+		}
+		buf.append("</b>");
+		return buf.toString();
 	}
 
 	/**

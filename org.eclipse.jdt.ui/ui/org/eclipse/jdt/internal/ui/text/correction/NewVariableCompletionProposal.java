@@ -15,11 +15,23 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
 
@@ -29,37 +41,34 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 
 	private int  fVariableKind;
 	private SimpleName fOriginalNode;
+	private ITypeBinding fSenderBinding;
+	private boolean fIsInDifferentCU;
 
-	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, int relevance) {
-		super(label, cu, null, relevance, null);
+	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
+		super(label, cu, null, relevance, image);
 	
 		fVariableKind= variableKind;
 		fOriginalNode= node;
-		if (variableKind == FIELD) {
-			setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
-		} else {
-			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
-		}
+		fSenderBinding= senderBinding;
+		fIsInDifferentCU= false;
 	}
 		
 	protected ASTRewrite getRewrite() throws CoreException {
-		AST ast= fOriginalNode.getAST();
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
-		SimpleName node= fOriginalNode;
-
-		ASTRewrite rewrite= new ASTRewrite(cu);
-		
 		if (fVariableKind == PARAM) {
-			doAddParam(ast, node, rewrite);
+			return doAddParam(cu);
 		} else if (fVariableKind == FIELD) {
-			doAddField(ast, node, rewrite);
-		} else if (fVariableKind == LOCAL) {
-			doAddLocal(ast, node, rewrite);
+			return doAddField(cu);
+		} else { // LOCAL
+			return doAddLocal(cu);
 		}
-		return rewrite;
 	}
 
-	private void doAddParam(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
+	private ASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
+		AST ast= cu.getAST();
+		ASTRewrite rewrite= new ASTRewrite(cu);
+		SimpleName node= fOriginalNode;
+
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
@@ -69,9 +78,14 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			rewrite.markAsInserted(newDecl);
 			((MethodDeclaration)decl).parameters().add(newDecl);
 		}
+		return rewrite;
 	}
 
-	private void doAddLocal(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
+	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
+		AST ast= cu.getAST();
+		ASTRewrite rewrite= new ASTRewrite(cu);
+		SimpleName node= fOriginalNode;
+
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
 			
@@ -93,7 +107,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 						newDeclFrag.setInitializer(placeholder);
 				
 						rewrite.markAsReplaced(assignment.getParent(), newDecl);
-						return;
+						return rewrite;
 					} else if (parentParentKind == ASTNode.FOR_STATEMENT) {
 						ForStatement forStatement= (ForStatement) parent.getParent();
 						if (forStatement.initializers().size() == 1 && assignment.equals(forStatement.initializers().get(0))) {
@@ -105,13 +119,13 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 							expression.setType(evaluateVariableType(ast));
 							
 							rewrite.markAsReplaced(assignment, expression);
-							return;
+							return rewrite;
 						}			
 					}			
 				}
 			} else if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 				rewrite.markAsReplaced(parent, newDecl);
-				return;
+				return rewrite;
 			}
 			Statement statement= ASTResolving.findParentStatement(node);
 			if (statement != null && statement.getParent() instanceof Block) {
@@ -122,31 +136,45 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 				rewrite.markAsInserted(newDecl);
 			}
 		}
+		return rewrite;
 	}
 
-	private void doAddField(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
-		ASTNode parentType= ASTResolving.findParentType(node);
-		if (parentType != null) {
+	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
+		SimpleName node= fOriginalNode;
+		ASTRewrite rewrite;
+		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
+		if (newTypeDecl != null) {
+			rewrite= new ASTRewrite(astRoot);
+		} else {
+			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			rewrite= new ASTRewrite(astRoot);
+			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
+			fIsInDifferentCU= true;
+		}
+		
+		if (newTypeDecl != null) {
+			AST ast= newTypeDecl.getAST();
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
 			
+			Type type= evaluateVariableType(ast);
+			
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
-			newDecl.setType(evaluateVariableType(ast));
-			
-			int modifiers= Modifier.PRIVATE;
-			if (ASTResolving.isInStaticContext(node)) {
-				modifiers |= Modifier.STATIC;
+			newDecl.setType(type);
+						
+			newDecl.setModifiers(evaluateFieldModifiers(astRoot));
+			if (fSenderBinding.isInterface()) {
+				fragment.setInitializer(ASTResolving.getInitExpression(type));
 			}
-			
-			newDecl.setModifiers(modifiers);
 		
-			boolean isAnonymous= parentType.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
-			List decls= isAnonymous ?  ((AnonymousClassDeclaration) parentType).bodyDeclarations() :  ((TypeDeclaration) parentType).bodyDeclarations();
+			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
+			List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 							
 			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
 			
 			rewrite.markAsInserted(newDecl);
 		}
+		return rewrite;
 	}
 	
 	private int findInsertIndex(List decls, int currPos) {
@@ -167,6 +195,38 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object"));
 	}
+	
+	private int evaluateFieldModifiers(CompilationUnit cu) {
+		if (fSenderBinding.isInterface()) {
+			// copy the modifiers for interface members
+			IVariableBinding[] fields= fSenderBinding.getDeclaredFields();
+			if (fields.length > 0) {
+				FieldDeclaration fieldDecl= (FieldDeclaration) cu.findDeclaringNode(fields[0]);
+				if (fieldDecl != null) {
+					return fieldDecl.getModifiers();
+				}
+			}
+			return 0;
+		}
+		int modifiers= 0;
+		ITypeBinding typeBinding= ASTResolving.getBindingOfParentType(fOriginalNode);
+		if (fSenderBinding == typeBinding) {
+			modifiers |= Modifier.PRIVATE;
+			if (ASTResolving.isInStaticContext(fOriginalNode)) {
+				modifiers |= Modifier.STATIC;
+			}
+		} else {
+			modifiers |= Modifier.PUBLIC;
+			ASTNode parent= fOriginalNode.getParent();	
+			if (parent instanceof QualifiedName) {
+				Name qualifier= ((QualifiedName)parent).getQualifier();
+				if (qualifier.resolveBinding().getKind() == IBinding.TYPE) {
+					modifiers |= Modifier.STATIC;
+				}
+			}
+		}
+		return modifiers;
+	}	
 
 
 	/**
@@ -176,5 +236,25 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	public int getVariableKind() {
 		return fVariableKind;
 	}
+	
+	public void apply(IDocument document) {
+		try {
+			CompilationUnitChange change= getCompilationUnitChange();
+			
+			IEditorPart part= null;
+			if (fIsInDifferentCU) {
+				change.setKeepExecutedTextEdits(true);
+				part= EditorUtility.openInEditor(getCompilationUnit(), true);
+			}
+			super.apply(document);
+		
+			if (part instanceof ITextEditor) {
+				TextRange range= change.getExecutedTextEdit(change.getEdit()).getTextRange();		
+				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}		
+	}		
 
 }

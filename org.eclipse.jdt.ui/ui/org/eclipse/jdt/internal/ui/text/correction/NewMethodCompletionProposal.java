@@ -43,7 +43,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	private List fArguments;
 	private ITypeBinding fSenderBinding;
-	private boolean fIsLocalChange;
+	private boolean fIsInDifferentCU;
 	
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
@@ -59,16 +59,15 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newTypeDecl= null;
 		if (typeDecl != null) {
-			fIsLocalChange= true;
+			fIsInDifferentCU= false;
 			rewrite= new ASTRewrite(astRoot);
 			newTypeDecl= typeDecl;
 		} else {
-			fIsLocalChange= false;
+			fIsInDifferentCU= true;
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			rewrite= new ASTRewrite(newRoot);
 			
 			newTypeDecl= newRoot.findDeclaringNode(fSenderBinding.getKey());
-			//ASTResolving.findTypeDeclaration(newRoot, fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
 			List methods;
@@ -79,7 +78,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			}
 			MethodDeclaration newStub= getStub(newTypeDecl.getAST());
 			
-			if (fIsLocalChange) {
+			if (!fIsInDifferentCU) {
 				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
 			} else if (isConstructor()) {
 				methods.add(0, newStub);
@@ -192,6 +191,14 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 	
 	private int evaluateModifiers() {
+		if (fSenderBinding.isInterface()) {
+			// copy the modifiers for interface members
+			IMethodBinding[] methods= fSenderBinding.getDeclaredMethods();
+			if (methods.length > 0) {
+				return methods[0].getModifiers();
+			}
+			return 0;
+		}
 		if (fNode instanceof MethodInvocation) {
 			int modifiers= 0;
 			Expression expression= ((MethodInvocation)fNode).getExpression();
@@ -202,15 +209,15 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else if (ASTResolving.isInStaticContext(fNode)) {
 				modifiers |= Modifier.STATIC;
 			}
-			
-			if (fIsLocalChange) {
-				modifiers |= Modifier.PRIVATE;
-			} else if (!fSenderBinding.isInterface()) {
+
+			if (fIsInDifferentCU) {
 				modifiers |= Modifier.PUBLIC;
+			} else {
+				modifiers |= Modifier.PRIVATE;
 			}
 			return modifiers;
 		}
-		return Modifier.PUBLIC;
+		return Modifier.PRIVATE;
 		
 	}
 	
@@ -237,7 +244,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			CompilationUnitChange change= getCompilationUnitChange();
 			
 			IEditorPart part= null;
-			if (!fIsLocalChange) {
+			if (fIsInDifferentCU) {
 				change.setKeepExecutedTextEdits(true);
 				part= EditorUtility.openInEditor(getCompilationUnit(), true);
 			}

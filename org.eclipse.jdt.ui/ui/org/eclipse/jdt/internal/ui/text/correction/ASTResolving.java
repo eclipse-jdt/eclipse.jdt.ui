@@ -150,10 +150,16 @@ public class ASTResolving {
 				}
 			}
 			break;
+		case ASTNode.SUPER_METHOD_INVOCATION:
+			MethodInvocation superMethodInvocation= (MethodInvocation) parent;
+			IMethodBinding superMethodBinding= ASTNodes.getMethodBinding(superMethodInvocation.getName());
+			if (superMethodBinding != null) {
+				return getParameterTypeBinding(node, superMethodInvocation.arguments(), superMethodBinding);
+			}
+			break;			
 		case ASTNode.METHOD_INVOCATION:
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
-			SimpleName name= methodInvocation.getName();
-			IMethodBinding methodBinding= ASTNodes.getMethodBinding(name);
+			IMethodBinding methodBinding= ASTNodes.getMethodBinding(methodInvocation.getName());
 			if (methodBinding != null) {
 				return getParameterTypeBinding(node, methodInvocation.arguments(), methodBinding);
 			}
@@ -233,9 +239,19 @@ public class ASTResolving {
 			break;
 		case ASTNode.CAST_EXPRESSION:
 			return ((CastExpression) parent).getType().resolveBinding();
-        case ASTNode.THROW_STATEMENT:
-        case ASTNode.CATCH_CLAUSE:
+		case ASTNode.THROW_STATEMENT:
+		case ASTNode.CATCH_CLAUSE:
             return parent.getAST().resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+		case ASTNode.FIELD_ACCESS:
+			if (node.equals(((FieldAccess) parent).getName())) {
+				return getPossibleReferenceBinding(parent);
+			}
+			break;
+		case ASTNode.QUALIFIED_NAME:
+			if (node.equals(((QualifiedName) parent).getName())) {
+				return getPossibleReferenceBinding(parent);
+			}
+			break;
 		}
 			
 		return null;
@@ -351,6 +367,23 @@ public class ASTResolving {
 			node= node.getParent();
 		}
 		return node;
+	}
+	
+	/**
+	 * Returns the type binding of the node's parent type declararation
+	 * @param node
+	 * @return CompilationUnit
+	 */
+	public static ITypeBinding getBindingOfParentType(ASTNode node) {
+		while (node != null) {
+			if (node instanceof TypeDeclaration) {
+				return ((TypeDeclaration) node).resolveBinding();
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration) node).resolveBinding();
+			}
+			node= node.getParent();
+		}
+		return null;
 	}		
 	
 	

@@ -9,8 +9,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
@@ -35,42 +35,44 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	private HashSet fResult;
 	private HashSet fOthers;
 
-	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, SimpleName name, int kind) throws JavaModelException {
+	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, Name name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
 		int nArguments= -1;
 		
-		if (name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation invocation= (MethodInvocation) name.getParent();
-			if (name.equals(invocation.getName())) {
-				if ((kind & METHODS) != 0) {
-					nArguments= ((MethodInvocation) name.getParent()).arguments().size();
-				}
-			} else {
-				pos= invocation.getStartPosition(); // workaround for code assist
-				// foo(| code assist here returns only method declaration
-			}
-		} 
-		ITypeBinding binding= ASTResolving.guessBindingForReference(name);
+		String identifier= ASTResolving.getSimpleName(name);
+		String returnType= null;
 		
-		String returnType= (binding != null) ? binding.getName() : null;
-		return findSimilarElement(cu, pos, name.getIdentifier(), kind, nArguments, returnType);
+		if ((kind & REF_TYPES) != 0) {
+			if (name.isQualifiedName()) {
+				pos= ((QualifiedName) name).getName().getStartPosition();
+			} else {
+				pos= name.getStartPosition() + 1; // first letter must be included, other
+			}
+		} else {	
+			if (name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
+				MethodInvocation invocation= (MethodInvocation) name.getParent();
+				if (name.equals(invocation.getName())) {
+					if ((kind & METHODS) != 0) {
+						nArguments= ((MethodInvocation) name.getParent()).arguments().size();
+					}
+				} else if (invocation.arguments().contains(name)) {
+					pos= invocation.getStartPosition(); // workaround for code assist
+					// foo(| code assist here returns only method declaration
+				}
+			}
+			ITypeBinding binding= ASTResolving.guessBindingForReference(name);
+			if (binding != null) {
+				returnType= binding.getName();
+			}
+		}
+		SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
+		return requestor.process(cu, pos);		
 	}
-
-
-	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind) throws JavaModelException {
-		return findSimilarElement(cu, pos, name, kind, 0, null);
-	}
-	
-	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind, int nArguments, String preferredType) throws JavaModelException {
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(name, kind, nArguments, preferredType);
-		return requestor.process(cu, pos);
-	}
-	
 
 	/**
 	 * Constructor for SimilarElementsRequestor.
 	 */
-	public SimilarElementsRequestor(String name, int kind, int nArguments, String preferredType) {
+	private SimilarElementsRequestor(String name, int kind, int nArguments, String preferredType) {
 		super();
 		fName= name;
 		fKind= kind;
@@ -89,7 +91,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		fOthers.add(elem);
 	}	
 	
-	public SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
+	private SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
 		try {
 			IBuffer buf= cu.getBuffer();
 			if (pos < buf.getLength() - 1) {

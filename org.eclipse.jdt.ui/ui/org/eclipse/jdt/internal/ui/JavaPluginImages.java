@@ -45,6 +45,12 @@ public class JavaPluginImages {
 	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_MISC_DEFAULT= NAME_PREFIX + "methdef_obj.gif"; 		//$NON-NLS-1$
+
+	public static final String IMG_FIELD_PUBLIC= NAME_PREFIX + "field_public_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_FIELD_PROTECTED= NAME_PREFIX + "field_protected_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_FIELD_PRIVATE= NAME_PREFIX + "field_private_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
+
 	
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
@@ -124,10 +130,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_MISC_PRIVATE= createManaged(T_OBJ, IMG_MISC_PRIVATE);
 	public static final ImageDescriptor DESC_MISC_DEFAULT= createManaged(T_OBJ, IMG_MISC_DEFAULT);
 
-	public static final ImageDescriptor DESC_FIELD_PUBLIC= create(T_OBJ, "field_public_obj.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_FIELD_PROTECTED= create(T_OBJ, "field_protected_obj.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_FIELD_PRIVATE= create(T_OBJ, "field_private_obj.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_FIELD_DEFAULT= create(T_OBJ, "field_default_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_PUBLIC= createManaged(T_OBJ, IMG_FIELD_PUBLIC); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_PROTECTED= createManaged(T_OBJ, IMG_FIELD_PROTECTED); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_PRIVATE= createManaged(T_OBJ, IMG_FIELD_PRIVATE); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_DEFAULT= createManaged(T_OBJ, IMG_FIELD_DEFAULT); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
