@@ -16,7 +16,6 @@
   <import plugin="org.eclipse.search"/>
   <import plugin="org.eclipse.debug.core"/>
   <import plugin="org.eclipse.debug.ui"/> 
-  <import plugin="org.eclipse.jdt.debug"/>
   <import plugin="org.eclipse.jdt.launching"/>
   <import plugin="org.eclipse.compare"/>
   <import plugin="org.eclipse.team.core"/>

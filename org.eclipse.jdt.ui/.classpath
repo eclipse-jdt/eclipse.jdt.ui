@@ -12,7 +12,6 @@
     <classpathentry kind="src" path="/org.eclipse.search"/>
     <classpathentry kind="src" path="/org.eclipse.debug.core"/>
     <classpathentry kind="src" path="/org.eclipse.debug.ui"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.debug"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.compare"/>
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
