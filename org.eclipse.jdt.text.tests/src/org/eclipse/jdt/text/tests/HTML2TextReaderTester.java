@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.text.tests;
+package org.eclipse.jdt.text.tests;
 
 import java.io.IOException;
 import java.io.Reader;

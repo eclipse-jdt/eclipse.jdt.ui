@@ -8,11 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.text.tests;
+package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -35,7 +33,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
@@ -49,14 +46,6 @@ public class ComilationUnitDocumentProviderTest extends TestCase {
 		super(name);
 	}
 			
-	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(new ComilationUnitDocumentProviderTest("test1"));
-		suite.addTest(new ComilationUnitDocumentProviderTest("test2"));
-		suite.addTest(new ComilationUnitDocumentProviderTest("test3"));
-		return suite;
-	}
-	
 	/**
 	 * Creates a new test Java project.
 	 */	

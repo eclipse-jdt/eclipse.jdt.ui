@@ -8,7 +8,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
     IBM Corporation - Initial implementation
 **********************************************************************/
-package org.eclipse.jdt.ui.text.tests;
+package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
