@@ -339,27 +339,27 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		StringBuffer displayString= getMethodDisplayString(null, name, parameterTypeNames, parameterNames, returnTypeName);
 		displayString.append(" - "); //$NON-NLS-1$
 		displayString.append(JavaTextMessages.getFormattedString("ResultCollector.overridingmethod", new String(declaringTypeName))); //$NON-NLS-1$
-		
+
 		StringBuffer typeName= new StringBuffer();
 		if (declaringTypePackageName.length > 0) {
 			typeName.append(declaringTypePackageName);
 			typeName.append('.');
 		}
 		typeName.append(declaringTypeName);
-		
+
 		String[] paramTypes= new String[parameterTypeNames.length];
 		for (int i= 0; i < parameterTypeNames.length; i++) {
-			paramTypes[i]= Signature.createTypeSignature(parameterTypeNames[i], true);
+			paramTypes[i]= String.valueOf(parameterPackageNames[i]) + "." + String.valueOf(parameterTypeNames[i]); //$NON-NLS-1$
 		}
 
-		JavaCompletionProposal proposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
+		JavaCompletionProposal proposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, String.valueOf(name), paramTypes, start, getLength(start, end), displayString.toString(), String.valueOf(completionName));
 		proposal.setImage(getImage(getMemberDescriptor(modifiers)));
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 		proposal.setRelevance(relevance + 100);
 		fMethods.add(proposal);
-		
+
 		fSuggestedMethodNames.add(new String(name));
-		
+
 	}
 	
 	/*
