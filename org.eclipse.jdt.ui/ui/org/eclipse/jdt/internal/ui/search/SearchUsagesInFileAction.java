@@ -46,6 +46,7 @@ import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -215,17 +216,14 @@ public class SearchUsagesInFileAction extends Action {
 	public final  void run() {
 		ITextSelection ts= getTextSelection();
 		final CompilationUnit root= createAST();
-		IStatusLineManager statusLine= getStatusLineManager();
 		if (root == null) {
-			if (statusLine != null)
-				statusLine.setErrorMessage(SearchMessages.getString("SearchUsagesInFileAction.cannotParse.text")); //$NON-NLS-1$
+			showMessage(SearchMessages.getString("SearchUsagesInFileAction.cannotParse.text")); //$NON-NLS-1$
 			return;
 		}
 		ASTNode node= NodeFinder.perform(root, ts.getOffset(), ts.getLength());
 		
 		if (!(node instanceof Name)) {
-			if (statusLine != null)
-				statusLine.setErrorMessage(SearchMessages.getString("SearchUsagesInFileAction.noJavaElement.text")); //$NON-NLS-1$
+			showMessage(SearchMessages.getString("SearchUsagesInFileAction.noJavaElement.text")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -259,6 +257,13 @@ public class SearchUsagesInFileAction extends Action {
 		run(runnable);
 	}
 	
+	private void showMessage(String msg) {
+		IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null); 
+
+	}
+
 	public CompilationUnit createAST() {
 		IEditorInput input= fEditor.getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
