@@ -90,20 +90,38 @@ public class WorkingSetModel {
 			IAdaptable[] elements= (IAdaptable[])fWorkingSetToElement.remove(new Integer(System.identityHashCode(ws)));
 			if (elements != null) {
 				for (int i= 0; i < elements.length; i++) {
-					IAdaptable element= elements[i];
-					removeFromMap(fElementToWorkingSet, element, ws);
-					IResource resource= (IResource)element.getAdapter(IResource.class);
-					if (resource != null) {
-						removeFromMap(fResourceToWorkingSet, resource, ws);
-					}
+					removeElement(elements[i], ws);
 				}
 			}
 			return elements;
 		}
 		public IAdaptable[] refresh(IWorkingSet ws) {
-			IAdaptable[] result= remove(ws);
-			put(ws);
-			return result;
+ 			Integer workingSetKey= new Integer(System.identityHashCode(ws));
+			IAdaptable[] oldElements= (IAdaptable[])fWorkingSetToElement.get(workingSetKey);
+			if (oldElements == null)
+				return null;
+			IAdaptable[] newElements= ws.getElements();
+			List toRemove= new ArrayList(Arrays.asList(oldElements));
+			List toAdd= new ArrayList(Arrays.asList(newElements));
+			computeDelta(toRemove, toAdd, oldElements, newElements);
+			for (Iterator iter= toAdd.iterator(); iter.hasNext();) {
+				addElement((IAdaptable)iter.next(), ws);
+			}
+			for (Iterator iter= toRemove.iterator(); iter.hasNext();) {
+				removeElement((IAdaptable)iter.next(), ws);
+			}
+			if (toRemove.size() > 0 || toAdd.size() > 0)
+				fWorkingSetToElement.put(workingSetKey, newElements);
+			return oldElements;
+		}
+		private void computeDelta(List toRemove, List toAdd, IAdaptable[] oldElements, IAdaptable[] newElements) {
+			for (int i= 0; i < oldElements.length; i++) {
+				toAdd.remove(oldElements[i]);
+			}
+			for (int i= 0; i < newElements.length; i++) {
+				toRemove.remove(newElements[i]);
+			}
+			
 		}
 		public IWorkingSet getFirstWorkingSet(Object element) {
 			return (IWorkingSet)getFirstElement(fElementToWorkingSet, element);
@@ -124,12 +142,21 @@ public class WorkingSetModel {
 			IAdaptable[] elements= ws.getElements();
 			fWorkingSetToElement.put(workingSetKey, elements);
 			for (int i= 0; i < elements.length; i++) {
-				IAdaptable element= elements[i];
-				addToMap(fElementToWorkingSet, element, ws);
-				IResource resource= (IResource)element.getAdapter(IResource.class);
-				if (resource != null) {
-					addToMap(fResourceToWorkingSet, resource, ws);
-				}
+				addElement(elements[i], ws);
+			}
+		}
+		private void addElement(IAdaptable element, IWorkingSet ws) {
+			addToMap(fElementToWorkingSet, element, ws);
+			IResource resource= (IResource)element.getAdapter(IResource.class);
+			if (resource != null) {
+				addToMap(fResourceToWorkingSet, resource, ws);
+			}
+		}
+		private void removeElement(IAdaptable element, IWorkingSet ws) {
+			removeFromMap(fElementToWorkingSet, element, ws);
+			IResource resource= (IResource)element.getAdapter(IResource.class);
+			if (resource != null) {
+				removeFromMap(fResourceToWorkingSet, resource, ws);
 			}
 		}
 		private void addToMap(Map map, IAdaptable key, IWorkingSet value) {
@@ -355,7 +382,6 @@ public class WorkingSetModel {
 			}
 		}
 	}
-	
     private void workingSetManagerChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
     	if (IWorkingSetManager.CHANGE_WORKING_SET_UPDATER_INSTALLED.equals(property) && event.getSource() == fLocalWorkingSetManager) {

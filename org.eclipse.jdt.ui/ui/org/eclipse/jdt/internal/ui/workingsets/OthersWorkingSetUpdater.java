@@ -49,7 +49,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			IResourceDelta delta= event.getDelta();
 			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
 			if (affectedChildren.length > 0) {
-				updateElements();
+				updateElements(fWorkingSetModel.getActiveWorkingSets());
 			}
 		}
 	}
@@ -58,10 +58,21 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	private class WorkingSetListener implements IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
-				if (event.getNewValue() != fWorkingSet) {
-					updateElements();
+				IWorkingSet changedWorkingSet= (IWorkingSet)event.getNewValue();
+				if (changedWorkingSet != fWorkingSet) {
+					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
+					if (contains(activeWorkingSets, changedWorkingSet)
+						&& !HistoryWorkingSetUpdater.ID.equals(changedWorkingSet.getId()))
+						updateElements(activeWorkingSets);
 				}
 			}
+		}
+		private boolean contains(IWorkingSet[] workingSets, IWorkingSet workingSet) {
+			for (int i= 0; i < workingSets.length; i++) {
+				if (workingSets[i] == workingSet)
+					return true;
+			}
+			return false;
 		}
 	}
 	private IPropertyChangeListener fWorkingSetListener;
@@ -96,7 +107,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		fWorkingSetListener= new WorkingSetListener();
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetListener);
-		updateElements();
+		updateElements(fWorkingSetModel.getActiveWorkingSets());
 	}
 	
 	public void dispose() {
@@ -112,12 +123,15 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 	
 	public void updateElements() {
+		updateElements(fWorkingSetModel.getActiveWorkingSets());
+	}
+	
+	private void updateElements(IWorkingSet[] activeWorkingSets) {
 		List result= new ArrayList();
 		Set projects= new HashSet();
-		IWorkingSet[] workingSets= fWorkingSetModel.getActiveWorkingSets();
-		for (int i= 0; i < workingSets.length; i++) {
-			if (workingSets[i] == fWorkingSet) continue;
-			IAdaptable[] elements= workingSets[i].getElements();
+		for (int i= 0; i < activeWorkingSets.length; i++) {
+			if (activeWorkingSets[i] == fWorkingSet) continue;
+			IAdaptable[] elements= activeWorkingSets[i].getElements();
 			for (int j= 0; j < elements.length; j++) {
 				IAdaptable element= elements[j];
 				IResource resource= (IResource)element.getAdapter(IResource.class);
