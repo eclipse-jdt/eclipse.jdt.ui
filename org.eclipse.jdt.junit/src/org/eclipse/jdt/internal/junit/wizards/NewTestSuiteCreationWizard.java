@@ -115,12 +115,10 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 			//added here
 		}
-		try {
-			IResource resource= cu.getUnderlyingResource();
+		IResource resource= cu.getResource();
+		if (resource != null) {
 			selectAndReveal(resource);
 			openResource(resource);
-		} catch (JavaModelException e) {
-			JUnitPlugin.log(e);
 		}
 	}
 

@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -49,7 +48,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		addPage(fPage2);
 	}	
 	
-/*
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
@@ -61,13 +60,10 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();
 			}	
-			try {
-				IResource resource= cu.getUnderlyingResource();
+			IResource resource= cu.getResource();
+			if (resource != null) {
 				selectAndReveal(resource);
 				openResource(resource);
-			} catch (JavaModelException e) {
-				JUnitPlugin.log(e);
-				// let pass, only reveal and open will fail
 			}
 			fPage.saveWidgetValues();
 			fPage2.saveWidgetValues();

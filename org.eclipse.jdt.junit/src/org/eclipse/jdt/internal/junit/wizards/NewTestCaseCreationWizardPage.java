@@ -654,7 +654,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fTestMethods= createdType.getMethods();
 		ICompilationUnit cu= createdType.getCompilationUnit();
 		cu.save(null, false);
-		IResource res= createdType.getCompilationUnit().getUnderlyingResource();
+		IResource res= createdType.getCompilationUnit().getResource();
+		if (res == null)
+			return;
+			
 		for (int i= getIndexOfFirstMethod(); i < fTestMethods.length; i++) {
 			IMethod method= fTestMethods[i];
 			IMarker marker= res.createMarker("org.eclipse.jdt.junit.junit_task"); //$NON-NLS-1$
