@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -658,8 +659,19 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			Object selectedElement= enum.next();
 			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IClassFile || selectedElement instanceof IFile)
 				fInputGroup.initialCheckListItem(selectedElement);
-			else
+			else {
+				if (selectedElement instanceof IFolder) {
+					// Convert resource to Java element if possible
+					IJavaElement je= JavaCore.create((IResource)selectedElement);
+					try {
+						if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)selectedElement))
+							selectedElement= je;
+					} catch (JavaModelException e) {
+						// Don't convert the selected element to Java element
+					}
+				}					
 				fInputGroup.initialCheckTreeItem(selectedElement);
+			}
 		}
 		
 		TreeItem[] items= fInputGroup.getTree().getItems();
