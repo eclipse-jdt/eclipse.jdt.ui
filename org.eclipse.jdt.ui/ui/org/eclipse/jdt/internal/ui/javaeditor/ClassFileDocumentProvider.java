@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorInput;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IResourceLocator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 
 /**
@@ -228,11 +228,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		IDocument document= super.createDocument(element);
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-			document.setDocumentPartitioner(partitioner);
-			partitioner.connect(document);
+			tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
 		}
-		
 		return document;
 	}
 	

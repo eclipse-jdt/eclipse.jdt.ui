@@ -9,12 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.javaeditor;
+package org.eclipse.jdt.internal.ui.javaeditor.filebuffers;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,11 +20,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -52,60 +46,38 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
 
-public class CompilationUnitDocumentProvider extends FileDocumentProvider implements ICompilationUnitDocumentProvider {
-		
-		/**
-		 * Here for visibility issues only.
-		 */
-		protected class _FileSynchronizer extends FileSynchronizer {
-			public _FileSynchronizer(IFileEditorInput fileEditorInput) {
-				super(fileEditorInput);
-			}
-		}
+public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider {
 		
 		/**
 		 * Bundle of all required informations to allow working copy management. 
 		 */
-		protected class CompilationUnitInfo extends FileInfo {
-			
-			ICompilationUnit fCopy;
-			
-			public CompilationUnitInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer, ICompilationUnit copy) {
-				super(document, model, fileSynchronizer);
-				fCopy= copy;
-			}
-			
-			public void setModificationStamp(long timeStamp) {
-				fModificationStamp= timeStamp;
-			}
+		static protected class CompilationUnitInfo extends FileInfo {
+			public ICompilationUnit fCopy;
 		}
 		
 		/**
@@ -360,9 +332,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 * Also acts as problem requestor for its compilation unit. Initialiy inactive. Must explicitly be
 		 * activated.
 		 */
-		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
+		protected static class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
 			
-			private IFileEditorInput fInput;
+			private ICompilationUnit fCompilationUnit;
 			private List fCollectedProblems;
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
@@ -373,10 +345,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private List fCurrentlyOverlaid= new ArrayList();
 			private CompilationUnitAnnotationModelEvent fCurrentEvent;
 
-			public CompilationUnitAnnotationModel(IFileEditorInput input) {
-				super(input.getFile());
-				fInput= input;
+			public CompilationUnitAnnotationModel(IResource resource) {
+				super(resource);
 				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
+			}
+			
+			public void setCompilationUnit(ICompilationUnit unit)  {
+				fCompilationUnit= unit;
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
@@ -401,15 +376,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 
 				if (markerDeltas != null && markerDeltas.length > 0) {
 					try {
-						ICompilationUnit workingCopy = getWorkingCopy(fInput);
-						if (workingCopy != null)
-							workingCopy.reconcile(true, null);
+						if (fCompilationUnit != null)
+							fCompilationUnit.reconcile(true, null);
 					} catch (JavaModelException ex) {
 						if (!ex.isDoesNotExist())
 							handleCoreException(ex, ex.getMessage());
-					} finally {
-						// ensure problem requestor gets deactivated
-						//fCollectedProblems= null;
 					}
 				}
 			}
@@ -418,8 +389,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
-				ICompilationUnit unit= getWorkingCopy(fInput);
-				if (unit != null && unit.getJavaProject().isOnClasspath(unit))
+				if (fCompilationUnit != null && fCompilationUnit.getJavaProject().isOnClasspath(fCompilationUnit))
 					fCollectedProblems= new ArrayList();
 				else
 					fCollectedProblems= null;
@@ -459,8 +429,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					}
 					
 					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
-						
-						ICompilationUnit cu= getWorkingCopy(fInput);
+												
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
 							
@@ -473,12 +442,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 								
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
+								
 								try {
-									ProblemAnnotation annotation= new ProblemAnnotation(problem, cu);
+									ProblemAnnotation annotation= new ProblemAnnotation(problem, fCompilationUnit);
 									addAnnotation(annotation, position, false);
 									overlayMarkers(position, annotation);								
 									fGeneratedAnnotations.add(annotation);
-									
+								
 									temporaryProblemsChanged= true;
 								} catch (BadLocationException x) {
 									// ignore invalid position
@@ -689,8 +659,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			public void removeListener(IAnnotationModelListener listener) {
 				fListenerList.remove(listener);
 			}			
-		}
-			
+		}		
 		
 	/** Preference key for temporary problems */
 	private final static String HANDLE_TEMPORARY_PROBLEMS= PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS;
@@ -708,7 +677,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	/**
 	 * Constructor
 	 */
-	public CompilationUnitDocumentProvider() {
+	public CompilationUnitDocumentProvider2() {
 		fPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
@@ -732,75 +701,66 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			return (ICompilationUnit) element;
 		return null;
 	}
-
+	
 	/*
-	 * @see AbstractDocumentProvider#createElementInfo(Object)
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo()
 	 */
-	protected ElementInfo createElementInfo(Object element) throws CoreException {
-		
-		if ( !(element instanceof IFileEditorInput))
-			return super.createElementInfo(element);
-			
-		IFileEditorInput input= (IFileEditorInput) element;
-		ICompilationUnit original= createCompilationUnit(input.getFile());
-		if (original != null) {
-				
-			try {
-								
-				try {
-					refreshFile(input.getFile());
-				} catch (CoreException x) {
-					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
-				}
-				
-				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
-				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
-				
-				ICompilationUnit c= null;
-				if (JavaPlugin.USE_WORKING_COPY_OWNERS)  {
-					original.becomeWorkingCopy(r, getProgressMonitor());
-					c= original;
-				} else  {
-					c= (ICompilationUnit) original.getSharedWorkingCopy(getProgressMonitor(), JavaPlugin.getDefault().getBufferFactory(), r);
-				}
-				
-				DocumentAdapter a= null;
-				try {
-					a= (DocumentAdapter) c.getBuffer();
-				} catch (ClassCastException x) {
-					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", x); //$NON-NLS-1$
-					throw new CoreException(status);
-				}
-				
-				_FileSynchronizer f= new _FileSynchronizer(input); 
-				f.install();
-				
-				CompilationUnitInfo info= new CompilationUnitInfo(a.getDocument(), m, f, c);
-				info.setModificationStamp(computeModificationStamp(input.getFile()));
-				info.fStatus= a.getStatus();
-				info.fEncoding= getPersistedEncoding(input);
-				
-				if (r instanceof IProblemRequestorExtension) {
-					IProblemRequestorExtension extension= (IProblemRequestorExtension) r;
-					extension.setIsActive(isHandlingTemporaryProblems());
-				}
-				m.addAnnotationModelListener(fGlobalAnnotationModelListener);
-				
-				return info;
-				
-			} catch (JavaModelException x) {
-				throw new CoreException(x.getStatus());
-			}
-		} else {		
-			return super.createElementInfo(element);
-		}
+	protected FileInfo createEmptyFileInfo() {
+		return new CompilationUnitInfo();
 	}
 	
 	/*
-	 * @see AbstractDocumentProvider#disposeElementInfo(Object, ElementInfo)
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel(org.eclipse.core.resources.IFile)
 	 */
-	protected void disposeElementInfo(Object element, ElementInfo info) {
+	protected IAnnotationModel createAnnotationModel(IFile file) {
+		return new CompilationUnitAnnotationModel(file);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java.lang.Object)
+	 */
+	protected FileInfo createFileInfo(Object element) throws CoreException {
+		if (!(element instanceof IFileEditorInput))
+			return null;
+			
+		IFileEditorInput input= (IFileEditorInput) element;
+		ICompilationUnit original= createCompilationUnit(input.getFile());
+		if (original == null)
+			return null;
 		
+		FileInfo info= super.createFileInfo(element);
+		if (!(info instanceof CompilationUnitInfo))
+			return null;
+			
+		CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
+			
+		IProblemRequestor requestor= cuInfo.fModel instanceof IProblemRequestor ? (IProblemRequestor) cuInfo.fModel : null;
+
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS)  {
+			original.becomeWorkingCopy(requestor, getProgressMonitor());
+			cuInfo.fCopy= original;
+		} else  {
+			cuInfo.fCopy= (ICompilationUnit) original.getSharedWorkingCopy(getProgressMonitor(), JavaPlugin.getDefault().getBufferFactory(), requestor);
+		}
+		
+		if (cuInfo.fModel instanceof CompilationUnitAnnotationModel)   {
+			CompilationUnitAnnotationModel model= (CompilationUnitAnnotationModel) cuInfo.fModel;
+			model.setCompilationUnit(cuInfo.fCopy);
+		}
+		cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
+						
+		if (requestor instanceof IProblemRequestorExtension) {
+			IProblemRequestorExtension extension= (IProblemRequestorExtension) requestor;
+			extension.setIsActive(isHandlingTemporaryProblems());
+		}
+		
+		return cuInfo;
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(java.lang.Object, org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
+	 */
+	protected void disposeFileInfo(Object element, FileInfo info) {
 		if (info instanceof CompilationUnitInfo) {
 			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
 			
@@ -818,18 +778,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			cuInfo.fModel.removeAnnotationModelListener(fGlobalAnnotationModelListener);
 		}
-		
-		super.disposeElementInfo(element, info);
+		super.disposeFileInfo(element, info);
 	}
 	
 	/*
-	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument, boolean)
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#saveDocument(org.eclipse.core.runtime.IProgressMonitor, java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
-	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
-				
-		ElementInfo elementInfo= getElementInfo(element);		
-		if (elementInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+	public void saveDocument(IProgressMonitor monitor, Object element, IDocument ignore, boolean overwrite) throws CoreException {
+		
+		FileInfo fileInfo= getFileInfo(element);		
+		if (fileInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
 			
 			// update structure, assumes lock on info.fCopy
 			info.fCopy.reconcile();
@@ -839,18 +798,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			if (resource == null) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
-				super.doSaveDocument(monitor, element, document, overwrite);
+				super.saveDocument(monitor, element, ignore, overwrite);
 				return;
 			}
-			
-			if (resource != null && !overwrite)
-				checkSynchronizationState(info.fModificationStamp, resource);
 				
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
 			
-			// inform about the upcoming content change
-			fireElementStateChanging(element);	
 			try {
 				
 				fIsAboutToSave= true;
@@ -877,10 +831,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			// Thus, the state changing flag will be reset.
 			
 			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-			model.updateMarkers(info.fDocument);
-			
-			if (resource != null)
-				info.setModificationStamp(computeModificationStamp(resource));
+			IDocument document= getDocument(element);
+			model.updateMarkers(document);
 				
 			if (fSavePolicy != null) {
 				ICompilationUnit unit= fSavePolicy.postSave(original);
@@ -889,108 +841,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
 					if (markers != null && markers.length > 0) {
 						for (int i= 0; i < markers.length; i++)
-							model.updateMarker(markers[i], info.fDocument, null);
+							model.updateMarker(markers[i], document, null);
 					}
 				}
 			}
 				
 			
 		} else {
-			super.doSaveDocument(monitor, element, document, overwrite);
+			super.saveDocument(monitor, element, ignore, overwrite);
 		}		
 	}
-		
-	/**
-	 * Replaces createAnnotionModel of the super class.
-	 */
-	protected IAnnotationModel createCompilationUnitAnnotationModel(Object element) throws CoreException {
-		if ( !(element instanceof IFileEditorInput))
-			throw new CoreException(JavaUIStatus.createError(
-				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, "", null)); //$NON-NLS-1$
-		
-		IFileEditorInput input= (IFileEditorInput) element;
-		return new CompilationUnitAnnotationModel(input);
-	}
-	
-	/*
-	 * @see org.eclipse.ui.editors.text.StorageDocumentProvider#createEmptyDocument()
-	 */
-	protected IDocument createEmptyDocument() {
-		return new PartiallySynchronizedDocument();
-	}
-	
-	/*
-	 * @see AbstractDocumentProvider#createDocument(Object)
-	 */
-	protected IDocument createDocument(Object element) throws CoreException {
-		
-		if (element instanceof IEditorInput) {
-			IDocument document= createEmptyDocument();
-			if (setDocumentContent(document, (IEditorInput) element, getEncoding(element))) {
-				setupDocument(element, document);
-				return document;
-			}
-		}
-	
-		return null;
-	}
-	
-	/*
-	 * @see AbstractDocumentProvider#resetDocument(Object)
-	 */
-	public void resetDocument(Object element) throws CoreException {
-		if (element == null)
-			return;
-			
-		ElementInfo elementInfo= getElementInfo(element);		
-		if (elementInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			
-			IDocument document;
-			IStatus status= null;
-			
-			try {
-				
-				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				IResource resource= original.getResource();
-				if (resource instanceof IFile) {
-					
-					IFile file= (IFile) resource;
-					
-					try {
-						refreshFile(file);
-					} catch (CoreException x) {
-						handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.resetDocument")); //$NON-NLS-1$
-					}
-					
-					IFileEditorInput input= new FileEditorInput(file);
-					document= super.createDocument(input);
-					
-				} else {
-					document= createEmptyDocument();
-				}
-					
-			} catch (CoreException x) {
-				document= createEmptyDocument();
-				status= x.getStatus();
-			}
-			
-			fireElementContentAboutToBeReplaced(element);
-			
-			removeUnchangedElementListeners(element, info);
-			info.fDocument.set(document.get());
-			info.fCanBeSaved= false;
-			info.fStatus= status;
-			addUnchangedElementListeners(element, info);
-			
-			fireElementContentReplaced(element);
-			fireElementDirtyStateChanged(element, false);
-			
-		} else {
-			super.resetDocument(element);
-		}
-	}
-	
+
 	/**
 	 * Returns the preference whether handling temporary problems is enabled.
 	 */
@@ -1004,52 +865,20 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected void enableHandlingTemporaryProblems() {
 		boolean enable= isHandlingTemporaryProblems();
-		for (Iterator iter= getConnectedElements(); iter.hasNext();) {
-			ElementInfo element= getElementInfo(iter.next());
-			if (element instanceof CompilationUnitInfo) {
-				CompilationUnitInfo info= (CompilationUnitInfo)element;
-				if (info.fModel instanceof IProblemRequestorExtension) {
-					IProblemRequestorExtension  extension= (IProblemRequestorExtension) info.fModel;
-					extension.setIsActive(enable);
-				}
+		for (Iterator iter= getFileInfosIterator(); iter.hasNext();) {
+			FileInfo info= (FileInfo) iter.next();
+			if (info.fModel instanceof IProblemRequestorExtension) {
+				IProblemRequestorExtension  extension= (IProblemRequestorExtension) info.fModel;
+				extension.setIsActive(enable);
 			}
 		}
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#saveDocumentContent(org.eclipse.core.runtime.IProgressMonitor, java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#setSavePolicy(org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy)
 	 */
-	public void saveDocumentContent(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
-		
-		if (!fIsAboutToSave)
-			return;
-		
-		if (element instanceof IFileEditorInput) {
-			IFileEditorInput input= (IFileEditorInput) element;
-			try {
-				String encoding= getEncoding(element);
-				if (encoding == null)
-					encoding= ResourcesPlugin.getEncoding();
-				InputStream stream= new ByteArrayInputStream(document.get().getBytes(encoding));
-				IFile file= input.getFile();
-				file.setContents(stream, overwrite, true, monitor);
-			} catch (IOException x)  {
-				IStatus s= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, x.getMessage(), x);
-				throw new CoreException(s);
-			}
-		}
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#shutdown()
-	 */
-	public void shutdown() {
-		
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyListener);
-		
-		Iterator e= getConnectedElements();
-		while (e.hasNext())
-			disconnect(e.next());
+	public void setSavePolicy(ISavePolicy savePolicy) {
+		fSavePolicy= savePolicy;
 	}
 	
 	/*
@@ -1070,48 +899,31 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#getWorkingCopy(java.lang.Object)
 	 */
 	public ICompilationUnit getWorkingCopy(Object element) {
-		
-		ElementInfo elementInfo= getElementInfo(element);		
-		if (elementInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+		FileInfo fileInfo= getFileInfo(element);		
+		if (fileInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
 			return info.fCopy;
 		}
-		
 		return null;
 	}
-
+	
 	/*
-	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#shutdown()
 	 */
-	public boolean isSynchronized(Object element) {
-		Object elementInfo= getElementInfo(element);
-		if (elementInfo instanceof FileInfo) {
-			FileEditorInput input= (FileEditorInput) element;
-			IResource resource= input.getFile();
-			return resource.isSynchronized(IResource.DEPTH_ZERO);
-		}
-		return false;
-	}
-
-	/*
-	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#createEmptyDocument(java.lang.Object)
-	 */
-	public IDocument createEmptyDocument(Object element) {
-		return createEmptyDocument();
+	public void shutdown() {
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyListener);
+		Iterator e= getConnectedElementsIterator();
+		while (e.hasNext())
+			disconnect(e.next());
 	}
 	
-	/**
-	 * Sets up the given document as it would be provided for the given element. The
-	 * content of the document is not changed.
-	 * 
-	 * @param element the blue-print element
-	 * @param document the document to set up
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#saveDocumentContent(org.eclipse.core.runtime.IProgressMonitor, java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
-	public void setupDocument(Object element, IDocument document) {
-		if (document != null) {
-			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-			tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
-		}
+	public void saveDocumentContent(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
+		if (!fIsAboutToSave)
+			return;
+		super.saveDocument(monitor, element, document, overwrite);
 	}
 	
 	/*
@@ -1119,12 +931,5 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	public ILineTracker createLineTracker(Object element) {
 		return new DefaultLineTracker();
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#setSavePolicy(org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy)
-	 */
-	public void setSavePolicy(ISavePolicy savePolicy) {
-		fSavePolicy= savePolicy;
 	}
 }

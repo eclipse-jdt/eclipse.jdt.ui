@@ -56,6 +56,7 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.IOverviewRuler;
@@ -95,6 +96,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
@@ -251,7 +253,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			super.configure(configuration);
 			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
 			fCorrectionAssistant.install(this);
-			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy();
+			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
 		}
 	}
@@ -511,7 +513,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 				
 				try {		
-					ITypedRegion partition= document.getPartition(offset);
+					ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
 					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
 						return;
 						
@@ -757,16 +759,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
 		IDocumentProvider p= getDocumentProvider();
-		if (p instanceof CompilationUnitDocumentProvider) {
-			CompilationUnitDocumentProvider cp= (CompilationUnitDocumentProvider) p;
+		if (p instanceof ICompilationUnitDocumentProvider) {
+			ICompilationUnitDocumentProvider cp= (ICompilationUnitDocumentProvider) p;
 			cp.setSavePolicy(fSavePolicy);
 		}
 		
 		try {
 			super.performSaveOperation(operation, progressMonitor);
 		} finally {
-			if (p instanceof CompilationUnitDocumentProvider) {
-				CompilationUnitDocumentProvider cp= (CompilationUnitDocumentProvider) p;
+			if (p instanceof ICompilationUnitDocumentProvider) {
+				ICompilationUnitDocumentProvider cp= (ICompilationUnitDocumentProvider) p;
 				cp.setSavePolicy(null);
 			}
 		}
@@ -956,8 +958,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private void configureTabConverter() {
 		if (fTabConverter != null) {
 			IDocumentProvider provider= getDocumentProvider();
-			if (provider instanceof CompilationUnitDocumentProvider) {
-				CompilationUnitDocumentProvider cup= (CompilationUnitDocumentProvider) provider;
+			if (provider instanceof ICompilationUnitDocumentProvider) {
+				ICompilationUnitDocumentProvider cup= (ICompilationUnitDocumentProvider) provider;
 				fTabConverter.setLineTracker(cup.createLineTracker(getEditorInput()));
 			}
 		}

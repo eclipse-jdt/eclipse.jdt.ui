@@ -98,7 +98,25 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
+	private String fDocumentPartitioning;
 	
+
+	/**
+	 * Creates a new Java source viewer configuration for viewers in the given editor 
+	 * using the given Java tools and the specified document partitioning.
+	 *
+	 * @param tools the Java text tools to be used
+	 * @param editor the editor in which the configured viewer(s) will reside
+	 * @param partitioning the document partitioning for this configuration
+	 * @see JavaTextTools
+	 * @since 3.0
+	 */
+	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, String partitioning) {
+		fJavaTextTools= tools;
+		fTextEditor= editor;
+		fDocumentPartitioning= partitioning;
+	}
+
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
 	 * using the given Java tools.
@@ -108,8 +126,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see JavaTextTools
 	 */
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
-		fJavaTextTools= tools;
-		fTextEditor= editor;
+		this(tools, editor, null);
 	}
 	
 	/**
@@ -196,6 +213,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 
 		PresentationReconciler reconciler= new PresentationReconciler();
+		reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
 		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(getCodeScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
@@ -233,6 +251,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (getEditor() != null) {
 		
 			ContentAssistant assistant= new ContentAssistant();
+			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 			
 			IContentAssistProcessor processor= new JavaCompletionProcessor(getEditor());
 			assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
@@ -274,10 +293,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (IJavaPartitions.JAVA_DOC.equals(contentType) ||
 				IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
-			return new JavaDocAutoIndentStrategy();
+			return new JavaDocAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
-			return new JavaStringAutoIndentStrategy();
-		return new JavaAutoIndentStrategy();
+			return new JavaStringAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
+		return new JavaAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
 	}
 
 	/*
@@ -290,7 +309,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			return new DefaultTextDoubleClickStrategy();
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType) ||
 				IJavaPartitions.JAVA_CHARACTER.equals(contentType))
-			return new JavaStringDoubleClickSelector();
+			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
 		return new JavaDoubleClickSelector();
 	}
 
@@ -420,16 +439,25 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredDocumentPartitioning(org.eclipse.jface.text.source.ISourceViewer)
+	 */
+	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
+		if (fDocumentPartitioning != null)
+			return fDocumentPartitioning;
+		return super.getConfiguredDocumentPartitioning(sourceViewer);
+	}
+	
+	/*
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		
 		ContentFormatter formatter= new ContentFormatter();
+		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
 		
 		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
 		formatter.enablePartitionAwareFormatting(false);		
-		formatter.setPartitionManagingPositionCategories(fJavaTextTools.getPartitionManagingPositionCategories());
 		
 		return formatter;
 	}
@@ -501,6 +529,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator(sourceViewer));
+		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
@@ -520,6 +549,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer));
+		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
@@ -534,6 +564,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator(sourceViewer));
+		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
@@ -544,6 +575,5 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
 		presenter.setSizeConstraints(50, 20, true, false);
 		return presenter;
-	}	
-	
+	}
 }

@@ -64,14 +64,14 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 	/**
 	 * Report an added annotation
 	 */
-	/*package*/ void annotationAdded(Annotation annotation) {
+	public void annotationAdded(Annotation annotation) {
 		testIfProblemMarker(annotation);
 	}
 
 	/**
 	 * Report an remove annotation
 	 */
-	/*package*/ void annotationRemoved(Annotation annotation) {
+	public void annotationRemoved(Annotation annotation) {
 		testIfProblemMarker(annotation);
 	}
 		

@@ -52,6 +52,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
+import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -62,12 +63,14 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumentProvider2;
+import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -82,12 +85,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/** temporarily */
 	public static final boolean USE_WORKING_COPY_OWNERS= false;
+	/** temporarily */
+	public static final boolean USE_FILE_BUFFERS= true;
 	
 	
 	private static JavaPlugin fgJavaPlugin;
 
 	private IWorkingCopyManager fWorkingCopyManager;
-	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
+	private IBufferFactory fBufferFactory;
+	private ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private JavaTextTools fJavaTextTools;
 	private ProblemMarkerManager fProblemMarkerManager;
@@ -302,10 +308,16 @@ public class JavaPlugin extends AbstractUIPlugin {
 			return null;
 		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
-		
-	public synchronized CompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
+	
+	public synchronized IBufferFactory getBufferFactory() {
+		if (fBufferFactory == null)
+			fBufferFactory= USE_FILE_BUFFERS ? (IBufferFactory) new CustomBufferFactory2() : (IBufferFactory) new CustomBufferFactory();
+		return fBufferFactory;
+	}
+	
+	public synchronized ICompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
 		if (fCompilationUnitDocumentProvider == null)
-			fCompilationUnitDocumentProvider= new CompilationUnitDocumentProvider();
+			fCompilationUnitDocumentProvider= USE_FILE_BUFFERS ? (ICompilationUnitDocumentProvider) new CompilationUnitDocumentProvider2() : (ICompilationUnitDocumentProvider) new CompilationUnitDocumentProvider();
 		return fCompilationUnitDocumentProvider;
 	}
 	
@@ -317,7 +329,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	public synchronized IWorkingCopyManager getWorkingCopyManager() {
 		if (fWorkingCopyManager == null) {
-			CompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
+			ICompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
 			fWorkingCopyManager= new WorkingCopyManager(provider);
 		}
 		return fWorkingCopyManager;
