@@ -2424,8 +2424,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 			
-			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)) {
-				sourceViewer.getTextWidget().setTabs(getSourceViewerConfiguration().getTabWidth(sourceViewer));
+			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)
+					|| DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE.equals(property)
+					|| DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR.equals(property)) {
+				StyledText textWidget= sourceViewer.getTextWidget();
+				int tabWidth= getSourceViewerConfiguration().getTabWidth(sourceViewer);
+				if (textWidget.getTabs() != tabWidth)
+					textWidget.setTabs(tabWidth);
 				return;
 			}
 			

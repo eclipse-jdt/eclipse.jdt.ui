@@ -30,7 +30,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -46,13 +45,14 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -878,18 +878,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
 	private int getVisualTabLengthPreference() {
-		String val;
-		if (fProject == null)
-			val= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-		else
-			val= fProject.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
-		
-		try {
-			return Integer.parseInt(val);
-		} catch (NumberFormatException e) {
-			// sensible default
-			return 4;
-		}
+		return CodeFormatterUtil.getTabWidth(fProject);
 	}
 
 	private int getPeerPosition(IDocument document, DocumentCommand command) {
