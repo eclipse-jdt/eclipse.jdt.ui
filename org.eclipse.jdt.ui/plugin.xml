@@ -55,6 +55,10 @@
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
 	</perspectiveExtension>
 	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaPerspective">
+		<perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
 	</perspectiveExtension>
@@ -741,13 +745,9 @@
 
 <extension
 	point= "org.eclipse.jdt.ui.javaElementFilters">
-	<filter pattern = ".*">
+	<filter pattern = ".*" selected = "true">
 	</filter>
-</extension>
-
-<extension
-	point= "org.eclipse.jdt.ui.javaElementFilters">
-	<filter pattern = "*$*.class">
+	<filter pattern = "*$*.class" selected = "false">
 	</filter>
 </extension>
 
