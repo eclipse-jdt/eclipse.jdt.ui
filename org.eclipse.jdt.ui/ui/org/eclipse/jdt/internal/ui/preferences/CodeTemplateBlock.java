@@ -119,34 +119,6 @@ public class CodeTemplateBlock {
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 		 */
 		public Image getImage(Object element) {
-/*		if (element == COMMENT_NODE) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
-			}
-			if (element == CODE_NODE) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPCONT);
-			}
-			Template template = (Template) element;
-			String name= template.getName();
-			if (CodeTemplates.CATCHBLOCK.equals(name)) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			} else if (CodeTemplates.METHODSTUB.equals(name)) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_DEFAULT);
-			} else if (CodeTemplates.CONSTRUCTORSTUB.equals(name)) {
-				ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
-				return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE));
-			} else if (CodeTemplates.NEWTYPE.equals(name)) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CUNIT);
-			} else if (CodeTemplates.TYPECOMMENT.equals(name)) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
-			} else if (CodeTemplates.METHODCOMMENT.equals(name)) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
-			} else if (CodeTemplates.OVERRIDECOMMENT.equals(name)) {
-				ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
-				return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PROTECTED, JavaElementImageDescriptor.OVERRIDES, JavaElementImageProvider.SMALL_SIZE));
-			} else if (CodeTemplates.CONSTRUCTORCOMMENT.equals(name)) {
-				ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
-				return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE));
-			}*/
 			return null;
 
 		}
@@ -180,6 +152,10 @@ public class CodeTemplateBlock {
 				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.CONSTRUCTORCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label"); //$NON-NLS-1$
+			} else if (CodeTemplates.GETTERCOMMENT.equals(name)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.gettercomment.label"); //$NON-NLS-1$
+			} else if (CodeTemplates.SETTERCOMMENT.equals(name)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.settercomment.label"); //$NON-NLS-1$
 			}
 			return template.getDescription();
 		}

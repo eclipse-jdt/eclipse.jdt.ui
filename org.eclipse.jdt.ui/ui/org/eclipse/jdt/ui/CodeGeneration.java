@@ -101,7 +101,7 @@ public class CodeGeneration {
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
 		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, overridden, lineDelimiter);
 	}
-	
+		
 	/**
 	 * Returns the comment for a method or constructor using the comment code templates (constructor / method / overriding method).
 	 * <code>null</code> is returned if the template is empty.
@@ -111,7 +111,7 @@ public class CodeGeneration {
 	 * @param overridden The method that will be overridden by the created method or
 	 * <code>null</code> for non-overriding methods. If not <code>null</code>, the method must exist.
 	 * @param lineDelimiter The line delimiter to be used
-	 * @return String Returns the constructed comment or <code>null</code> if
+	 * @return Returns the constructed comment or <code>null</code> if
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException 
 	 */
@@ -130,7 +130,7 @@ public class CodeGeneration {
 	 * @param methodName Name of the method.
 	 * @param isConstructor Defines if the created body is for a constructor
 	 * @param bodyStatement The code to be entered at the place of the variable ${body_statement}. 
-	 * @return String Returns the constructed body contnet or <code>null</code> if
+	 * @return Returns the constructed body contnet or <code>null</code> if
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException
 	 */	
@@ -148,7 +148,7 @@ public class CodeGeneration {
 	 * types names (dot separated).
 	 * @param methodName The name of the getter method.
 	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}. 
-	 * @return String Returns the constructed body content or <code>null</code> if
+	 * @return Returns the constructed body content or <code>null</code> if
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException
 	 */	
@@ -165,13 +165,59 @@ public class CodeGeneration {
 	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
 	 * types names (dot separated).
 	 * @param methodName The name of the setter method.
-	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}. 
+	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}.
+	 * @param fieldType The type of the field that is to set, corresponding to the template variable for ${field_type}.
 	 * @param paramName The parameter passed to the setter method, corresponding to the template variable for $(param).
-	 * @return String Returns the constructed body content or <code>null</code> if
+	 * @return Returns the constructed body content or <code>null</code> if
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException
 	 */	
 	public static String getSetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
 		return StubUtility.getSetterMethodBodyContent(cu.getJavaProject(), declaringTypeName, methodName, fieldName, paramName, lineDelimiter);
-	}	
+	}
+	
+	/**
+	 * Returns the comment for a getter method using the getter comment template.
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 * 
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}
+	 * @param methodName Name of the method.
+	 * @param fieldName name of the field that is get.
+	 * @param fieldType The type of the field that is to get.
+	 * @param bareFieldName The field name without prefix or suffix.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the generated getter comment or <code>null</code> if the
+	 * code template is empty. The returned content is not indented.
+	 * @throws CoreException
+	 * @since 3.0
+	 */
+	public static String getGetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
+		return StubUtility.getGetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, bareFieldName, lineDelimiter);
+	}
+	
+	/**
+	 * Returns the comment for a setter method using the setter method body template.
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 * 
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}
+	 * @param methodName Name of the method.
+	 * @param fieldName name of the field that is set.
+	 * @param fieldType The type of the field that is to set.
+	 * @param paramName The name of the parameter that is set.
+	 * @param bareFieldName The field name without prefix or suffix.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the generated setter comment or <code>null</code> if the
+	 * code template is empty. The returned comment is not indented.
+	 * @throws CoreException
+	 * @since 3.0
+	 */
+	public static String getSetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
+		return StubUtility.getSetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, paramName, bareFieldName, lineDelimiter);
+	}		
 }

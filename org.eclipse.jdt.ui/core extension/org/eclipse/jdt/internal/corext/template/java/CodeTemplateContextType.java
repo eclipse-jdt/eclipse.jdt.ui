@@ -40,6 +40,8 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String METHODCOMMENT_CONTEXTTYPE= "methodcomment_context"; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT_CONTEXTTYPE= "constructorcomment_context"; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT_CONTEXTTYPE= "overridecomment_context"; //$NON-NLS-1$
+	public static final String GETTERCOMMENT_CONTEXTTYPE= "gettercomment_context"; //$NON-NLS-1$
+	public static final String SETTERCOMMENT_CONTEXTTYPE= "settercomment_context"; //$NON-NLS-1$
 
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
 	public static final String EXCEPTION_VAR= "exception_var"; //$NON-NLS-1$
@@ -47,6 +49,10 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String ENCLOSING_TYPE= "enclosing_type"; //$NON-NLS-1$
 	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
 	public static final String FIELD= "field"; //$NON-NLS-1$
+	public static final String FIELD_TYPE= "field_type"; //$NON-NLS-1$
+	public static final String BARE_FIELD_NAME= "bare_field_name"; //$NON-NLS-1$
+	
+	
 	public static final String PARAM= "param"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
 	public static final String SEE_TAG= "see_to_overridden"; //$NON-NLS-1$
@@ -97,11 +103,12 @@ public class CodeTemplateContextType extends ContextType {
 		}
 	}
 	
-	private IScanner fScanner;
-	
+	private boolean fIsComment;
 	
 	public CodeTemplateContextType(String contextName) {
 		super(contextName);
+		
+		fIsComment= false;
 		
 		// global
 		addVariable(new GlobalVariables.Dollar());
@@ -141,22 +148,41 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
+			fIsComment= true;
 		} else if (METHODCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(RETURN_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.returntype"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
+			fIsComment= true;
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(SEE_TAG,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.seetag"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
+			fIsComment= true;
 		} else if (CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
+			fIsComment= true;
+		} else if (GETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
+			addCompilationUnitVariables();
+			fIsComment= true;
+		} else if (SETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
+			addCompilationUnitVariables();
+			fIsComment= true;
 		}
 	}
 	
@@ -211,6 +237,8 @@ public class CodeTemplateContextType extends ContextType {
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));		
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.GETTERCOMMENT_CONTEXTTYPE));		
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.SETTERCOMMENT_CONTEXTTYPE));		
 	}
 	
 	
@@ -223,26 +251,17 @@ public class CodeTemplateContextType extends ContextType {
 		if (message != null) {
 			return message;
 		}
-		String contextName= getName();
-		if (METHODCOMMENT_CONTEXTTYPE.equals(contextName) || CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName) 
-				|| TYPECOMMENT_CONTEXTTYPE.equals(contextName) || OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
+		if (fIsComment) {
 			if (!isValidComment(pattern)) {
 				return JavaTemplateMessages.getString("CodeTemplateContextType.validate.invalidcomment"); //$NON-NLS-1$
 			}
 		}
 		return null;
 	}
-	
-	private IScanner getScanner() {
-		if (fScanner == null) {
-			fScanner= ToolFactory.createScanner(true, false, false, false);
-		}
-		return fScanner;
-	}
-	
+		
 	
 	private boolean isValidComment(String template) {
-		IScanner scanner= getScanner();
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(template.toCharArray());
 		try {
 			int next= scanner.getNextToken();

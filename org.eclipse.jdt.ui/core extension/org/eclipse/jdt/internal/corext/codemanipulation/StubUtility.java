@@ -21,7 +21,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -59,6 +75,8 @@ public class StubUtility {
 		}
 		
 	}
+		
+	private static final String[] EMPTY= new String[0];
 	
 	/**
 	 * Generates a method stub including the method comment. Given a template
@@ -281,14 +299,8 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		String str= buffer.getString();
-		if (Strings.containsOnlyWhitespaces(str)) {
-			if (Strings.containsOnlyWhitespaces(bodyStatement)) {
-				return null;
-			}
+		String str= evaluateTemplate(context, template);
+		if (str == null && !Strings.containsOnlyWhitespaces(bodyStatement)) {
 			return bodyStatement;
 		}
 		return str;
@@ -305,14 +317,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
 		
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		String str= buffer.getString();
-		if (Strings.containsOnlyWhitespaces(str)) {
-			return null;
-		}
-		return str;
+		return evaluateTemplate(context, template);
 	}
 	
 	public static String getSetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
@@ -325,33 +330,22 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		context.setVariable(CodeTemplateContextType.FIELD_TYPE, fieldName);
 		context.setVariable(CodeTemplateContextType.PARAM, paramName);
 		
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		String str= buffer.getString();
-		if (Strings.containsOnlyWhitespaces(str)) {
-			return null;
-		}
-		return str;
+		return evaluateTemplate(context, template);
 	}
 	
 	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName, String lineDelimiter) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
-		if (template != null) {
-			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
-			context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
-			context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
-			TemplateBuffer buffer= context.evaluate(template);
-			if (buffer != null) {
-				String res= buffer.getString();
-				if (!Strings.containsOnlyWhitespaces(res)) {
-					return buffer.getString();
-				}
-			}
+		if (template == null) {
+			return null;
 		}
-		return null;
+
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
+		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
+		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
+		return evaluateTemplate(context, template);
 	}		
 	
 	/**
@@ -373,14 +367,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		String content= buffer.getString();
-		if (content.length() == 0) {
-			return null;
-		}
-		return content;
+		return evaluateTemplate(context, template);
 	}		
 
 	/*
@@ -395,14 +382,7 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, Signature.getQualifier(typeQualifiedName));
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getSimpleName(typeQualifiedName));
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		String str= buffer.getString();
-		if (Strings.containsOnlyWhitespaces(str)) {
-			return null;
-		}
-		return str;
+		return evaluateTemplate(context, template);
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
@@ -485,16 +465,18 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+				
 		if (retTypeSig != null) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
 		}
 		if (overridden != null) {
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
 		}
-		
 		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
+		if (buffer == null) {
 			return null;
+		}
+		
 		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
@@ -517,6 +499,60 @@ public class StubUtility {
 		return textBuffer.getContent();
 	}
 
+	
+	/**
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment
+	 */
+	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
+		String templateName= CodeTemplates.SETTERCOMMENT;
+		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}
+		
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		context.setVariable(CodeTemplateContextType.FIELD_TYPE, fieldType);
+		context.setVariable(CodeTemplateContextType.BARE_FIELD_NAME, bareFieldName);
+		context.setVariable(CodeTemplateContextType.PARAM, paramName);
+
+		return evaluateTemplate(context, template);
+	}	
+	
+	/**
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment
+	 */
+	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
+		String templateName= CodeTemplates.GETTERCOMMENT;
+		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}		
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		context.setVariable(CodeTemplateContextType.FIELD_TYPE, fieldType);
+		context.setVariable(CodeTemplateContextType.BARE_FIELD_NAME, bareFieldName);
+
+		return evaluateTemplate(context, template);
+	}
+	
+	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+		return str;
+	}
+
 	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
 	 */
@@ -529,7 +565,7 @@ public class StubUtility {
 			return getMethodComment(cu, typeName, decl, false, false, null, null, lineDelimiter);
 		}
 	}
-
+	
 	/**
 	 * Returns the comment for a method using the comment code templates.
 	 * <code>null</code> is returned if the template is empty.
@@ -571,6 +607,7 @@ public class StubUtility {
 			String methodName= decl.getName().getIdentifier();
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(declaringClassQualifiedName, methodName, parameterTypesQualifiedNames));
 		}
+		
 		TemplateBuffer buffer= context.evaluate(template);
 		if (buffer == null)
 			return null;
@@ -754,7 +791,7 @@ public class StubUtility {
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38487
 		if (!constuctorFound)  {
 			IType objectType= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
-			IMethod curr= objectType.getMethod("Object", new String[0]);  //$NON-NLS-1$
+			IMethod curr= objectType.getMethod("Object", EMPTY);  //$NON-NLS-1$
 			if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
 				constructorMethods.add(curr);
 			}

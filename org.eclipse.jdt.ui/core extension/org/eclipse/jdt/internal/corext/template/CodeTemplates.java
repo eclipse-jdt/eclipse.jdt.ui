@@ -40,8 +40,9 @@ public class CodeTemplates extends TemplateSet {
 	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT= "override" + COMMENT_SUFFIX; //$NON-NLS-1$
-
-
+	public static final String GETTERCOMMENT= "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String SETTERCOMMENT= "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	
 	/** Singleton. */
 	private static CodeTemplates fgTemplates;
 

@@ -163,9 +163,12 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
+		IJavaProject project= field.getJavaProject();
+		
 		boolean isStatic= Flags.isStatic(field.getFlags());
 
 		String typeName= Signature.toString(field.getTypeSignature());
+		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
 		
 		IType parentType= field.getDeclaringType();
 		
@@ -181,7 +184,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			// create the getter stub
 			StringBuffer buf= new StringBuffer();
 			if (addComments) {
-				String comment= CodeGeneration.getMethodComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, EMPTY, EMPTY, field.getTypeSignature(), null, String.valueOf('\n'));
+				String comment= CodeGeneration.getGetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, field.getElementName(), typeName, accessorName, String.valueOf('\n'));
 				if (comment != null) {
 					buf.append(comment);
 					buf.append('\n');
@@ -206,7 +209,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				fieldName= "this." + fieldName; //$NON-NLS-1$
 			}
 			
-			buf.append(CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n')));
+			String body= CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n'));
+			if (body != null) {
+				buf.append(body);
+			}
 			buf.append("}\n"); //$NON-NLS-1$
 			
 			IJavaElement sibling= null;
@@ -256,7 +262,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			// create the setter stub
 			StringBuffer buf= new StringBuffer();
 			if (addComments) {
-				String comment= CodeGeneration.getMethodComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, new String[] { argname }, EMPTY, Signature.SIG_VOID, null, String.valueOf('\n'));
+				String comment= CodeGeneration.getSetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, field.getElementName(), typeName, argname, accessorName, String.valueOf('\n'));
 				if (comment != null) {
 					buf.append(comment);
 					buf.append('\n');
@@ -284,7 +290,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				else
 					fieldName= "this." + fieldName; //$NON-NLS-1$
 			}
-			buf.append(CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, String.valueOf('\n')));
+			String body= CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, String.valueOf('\n'));
+			if (body != null) {
+				buf.append(body);
+			}
 			buf.append("}\n"); //$NON-NLS-1$			
 			
 			IJavaElement sibling= null;
