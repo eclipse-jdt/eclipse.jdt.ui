@@ -48,11 +48,7 @@ public class ParameterEditDialog extends StatusDialog {
 	
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		if (onlyNameEdit()) {
-			newShell.setText(RefactoringMessages.getString("ParameterEditDialog.name.title")); //$NON-NLS-1$
-		} else {
-			newShell.setText(RefactoringMessages.getFormattedString("ParameterEditDialog.all.title", fParameter.getNewName())); //$NON-NLS-1$
-		}
+		newShell.setText(RefactoringMessages.getString("ParameterEditDialog.title")); //$NON-NLS-1$
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -61,9 +57,20 @@ public class ParameterEditDialog extends StatusDialog {
 		layout.numColumns= 2;
 		Label label;
 		GridData gd;
+		
+		label= new Label(result, SWT.NONE);
+		String newName = fParameter.getNewName();
+		if (newName.length() == 0)
+			label.setText(RefactoringMessages.getString("ParameterEditDialog.message.new")); //$NON-NLS-1$
+		else
+			label.setText(RefactoringMessages.getFormattedString("ParameterEditDialog.message", newName)); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		label.setLayoutData(gd);
+		
 		if (fEditType) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.all.type")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.getString("ParameterEditDialog.type")); //$NON-NLS-1$
 			fType= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fType.setLayoutData(gd);
@@ -75,34 +82,25 @@ public class ParameterEditDialog extends StatusDialog {
 					}
 				});
 		}
+
 		label= new Label(result, SWT.NONE);
 		fName= new Text(result, SWT.BORDER);
 		initializeDialogUnits(fName);
-		if (onlyNameEdit()) {
-			label.setText(RefactoringMessages.getFormattedString("ParameterEditDialog.name.message", fParameter.getNewName())); //$NON-NLS-1$
-			gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan= 2;
-			label.setLayoutData(gd);
-			gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.widthHint= convertWidthInCharsToPixels(45);
-			gd.horizontalSpan= 2;
-			fName.setLayoutData(gd);
-		} else {
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.all.name")); //$NON-NLS-1$
-			gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.widthHint= convertWidthInCharsToPixels(45);
-			fName.setLayoutData(gd);
-		}
-		fName.setText(fParameter.getNewName());
+		label.setText(RefactoringMessages.getString("ParameterEditDialog.name")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(45);
+		fName.setLayoutData(gd);
+		fName.setText(newName);
 		fName.addModifyListener(
 			new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					validate((Text)e.widget);
 				}
 			});
+
 		if (fParameter.isAdded()) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ParameterEditDialog.all.defaultValue")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.getString("ParameterEditDialog.defaultValue")); //$NON-NLS-1$
 			fDefaultValue= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fDefaultValue.setLayoutData(gd);
@@ -173,7 +171,7 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String text= fName.getText();
 		if (text.length() == 0)
-			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.all.name.error"));//$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.name.error"));//$NON-NLS-1$
 		return JavaConventions.validateFieldName(text);
 	}
 	
@@ -182,14 +180,10 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String s= fDefaultValue.getText();
 		if (s.length() == 0) {
-			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.all.defaultValue.error"));//$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.defaultValue.error"));//$NON-NLS-1$
 		} else {
 			return createOkStatus(); 
 		}
-	}
-	
-	private boolean onlyNameEdit() {
-		return !fEditType && !fParameter.isAdded();
 	}
 	
 	private Status createOkStatus() {
