@@ -2232,6 +2232,34 @@
    <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
+            targetID="#ClassFileRulerContext"
+            id="org.eclipse.jdt.ui.ClassFileEditorPopupActions">
+         <menu
+			id="projection"
+			label="%Folding.label"
+			path="rest">
+		 </menu>
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="org.eclipse.jdt.internal.ui.actions.FoldingExpandAllRulerAction"
+               menubarPath="projection/additions"
+               id="org.eclipse.jdt.ui.folding.cf.expandAll"
+               definitionId="org.eclipse.ui.edit.text.folding.expand_all">
+         </action>
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="org.eclipse.jdt.internal.ui.actions.FoldingToggleRulerAction"
+               menubarPath="projection/additions"
+               id="org.eclipse.jdt.ui.folding.cf.toggle"
+               definitionId="org.eclipse.ui.edit.text.folding.toggle">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
             targetID="#CompilationUnitRulerContext"
             id="org.eclipse.jdt.ui.CompilationUnitEditorPopupActions">
          <action
@@ -2249,6 +2277,27 @@
                class="org.eclipse.ui.texteditor.BookmarkRulerAction"
                menubarPath="add"
                id="org.eclipse.ui.texteditor.BookmarkRulerAction">
+         </action>
+         <menu
+			id="projection"
+			label="%Folding.label"
+			path="rest">
+		 </menu>
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="org.eclipse.jdt.internal.ui.actions.FoldingExpandAllRulerAction"
+               menubarPath="projection/additions"
+               definitionId="org.eclipse.ui.edit.text.folding.expand_all"
+               id="org.eclipse.jdt.ui.folding.expandAll">
+         </action>
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="org.eclipse.jdt.internal.ui.actions.FoldingToggleRulerAction"
+               menubarPath="projection/additions"
+               definitionId="org.eclipse.ui.edit.text.folding.toggle"
+               id="org.eclipse.jdt.ui.folding.toggle">
          </action>
       </viewerContribution>
    </extension>
@@ -2292,6 +2341,7 @@
                helpContextId="org.eclipse.jdt.ui.quick_fix_action"
                class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"
                menubarPath="additions"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
                id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerMenuAction">
          </action>
       </viewerContribution>
@@ -4247,6 +4297,7 @@
          <action
                label="%quickdiff.toggle.enable"
                style="push"
+               definitionId="org.eclipse.quickdiff.toggle"
                helpContextId="quickdiff.toggle"
                class="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction"
                menubarPath="quickdiff"
