@@ -532,15 +532,13 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 						if (param.endsWith((new Character(Signature.C_NAME_END)).toString() ))
 							end--;
 						
-						if (param.startsWith((new Character(Signature.C_UNRESOLVED)).toString() ,start))
+						if (param.startsWith((new Character(Signature.C_UNRESOLVED)).toString() ,start)
+							|| param.startsWith((new Character(Signature.C_RESOLVED)).toString() ,start))
 							start++;
-						else if (param.startsWith((new Character(Signature.C_RESOLVED)).toString() ,start)) {
-							start++;
-							String paramName= param.substring(start, end);
-							/* if parameter is qualified name, extract simple name */
-							if (paramName.indexOf('.') != -1) {
-								start += paramName.lastIndexOf('.')+1;
-							}
+						String paramName= param.substring(start, end);
+						/* if parameter is qualified name, extract simple name */
+						if (paramName.indexOf('.') != -1) {
+							start += paramName.lastIndexOf('.')+1;
 						}
 						methodName.append(param.substring(start, end));
 						if (param.startsWith( (new Character(Signature.C_ARRAY)).toString() ))

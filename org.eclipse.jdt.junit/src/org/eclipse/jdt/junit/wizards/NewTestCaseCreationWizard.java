@@ -51,15 +51,14 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();
-				//added here
 			}	
 			try {
 				IResource resource= cu.getUnderlyingResource();
 				selectAndReveal(resource);
 				openResource(resource);
 			} catch (JavaModelException e) {
-				// let pass, only reveal and open will fail
 				JUnitPlugin.log(e);
+				// let pass, only reveal and open will fail
 			}
 			return true;
 		}
