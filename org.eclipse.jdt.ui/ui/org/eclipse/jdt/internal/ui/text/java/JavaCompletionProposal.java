@@ -287,8 +287,9 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 				
 			case '\n':
 			case '\r':
+			case ';':
 				return new ExitFlags(LinkedPositionUI.COMMIT, true);
-				
+								
 			default:
 				return null;
 			}						
@@ -569,7 +570,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 		Color foreground= getForegroundColor(text);
 		Color background= getBackgroundColor(text);
-		
+
 		StyleRange range= text.getStyleRangeAtOffset(offset);
 		int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
 
