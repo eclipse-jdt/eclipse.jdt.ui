@@ -60,7 +60,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 				OpenTypeHierarchyUtil.open(new IType[] { type }, JavaPlugin.getActiveWorkbenchWindow());
 			} else {
 				try {
-					IEditorPart part= EditorUtility.openInEditor(type);
+					IEditorPart part= EditorUtility.openInEditor(type, true);
 					EditorUtility.revealInEditor(part, type);
 				} catch (CoreException x) {
 					String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$

@@ -230,6 +230,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 	public void setSelection(ISourceReference reference) {
 		
+		if (reference == null)
+			return;
+		
 		try {
 			// find this source reference in this editor's working copy
 			reference= getJavaSourceReferenceAt(reference.getSourceRange().getOffset());
@@ -237,6 +240,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			// be tolerant, just go with what is there
 		}
 		
+		if (reference == null)
+			return;
+			
 		// set hightlight range
 		setSelection(reference, true);
 		
@@ -245,7 +251,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			fOutlinePage.removeSelectionChangedListener(this);
 			fOutlinePage.select(reference);
 			fOutlinePage.addSelectionChangedListener(this);
-		}	
+		}
 	}	
 	
 	public void selectionChanged(SelectionChangedEvent event) {

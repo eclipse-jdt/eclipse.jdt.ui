@@ -149,7 +149,7 @@ public class OpenTypeHierarchyUtil {
 	}
 
 	private static void openEditor(Object input) throws PartInitException, JavaModelException {
-		IEditorPart part= EditorUtility.openInEditor(input, false);
+		IEditorPart part= EditorUtility.openInEditor(input, true);
 		if (input instanceof ISourceReference)
 			EditorUtility.revealInEditor(part, (ISourceReference)input);
 	}

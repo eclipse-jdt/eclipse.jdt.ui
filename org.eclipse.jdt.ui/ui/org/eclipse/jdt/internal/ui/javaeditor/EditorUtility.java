@@ -114,8 +114,11 @@ public class EditorUtility {
 	private static IEditorPart openInEditor(IFile file) throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
-			if (p != null)
-				return p.openEditor(file);
+			if (p != null) {
+				IEditorPart e= p.openEditor(file);
+				p.activate(e);
+				return e;
+			}
 		}
 		return null;
 	}
