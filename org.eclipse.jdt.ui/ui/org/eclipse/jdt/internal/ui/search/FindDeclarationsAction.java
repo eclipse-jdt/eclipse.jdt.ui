@@ -6,16 +6,20 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class FindDeclarationsAction extends ElementSearchAction {
-
+	
 	public FindDeclarationsAction() {
 		this(SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
@@ -26,11 +30,22 @@ public class FindDeclarationsAction extends ElementSearchAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
-	protected int getLimitTo() {
-		return IJavaSearchConstants.DECLARATIONS;
+	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+		if (element.getElementType() == IJavaElement.METHOD) {
+			IMethod method= (IMethod)element;
+			int searchFor= IJavaSearchConstants.METHOD;
+			if (method.isConstructor())
+				searchFor= IJavaSearchConstants.CONSTRUCTOR;
+			IType type= getType(element);
+			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern,
+				searchFor, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
+		}
+		else
+			return super.makeOperation(element);
 	}
 
-	protected boolean shouldUserBePrompted() {
-		return false;
+	protected int getLimitTo() {
+		return IJavaSearchConstants.DECLARATIONS;
 	}
 }

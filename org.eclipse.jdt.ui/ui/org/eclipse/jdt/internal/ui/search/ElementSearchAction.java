@@ -98,7 +98,7 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 	}
 
-	private IType getType(IJavaElement element) {
+	protected IType getType(IJavaElement element) {
 		IType type= null;
 		if (element.getElementType() == IJavaElement.TYPE)
 			type= (IType)element;

@@ -10,7 +10,9 @@ import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -27,7 +29,16 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		IWorkingSet workingSet= queryWorkingSet();
 		if (workingSet == null)
 			return null;
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+		if (element.getElementType() == IJavaElement.METHOD) {
+			IMethod method= (IMethod)element;
+			int searchFor= IJavaSearchConstants.METHOD;
+			if (method.isConstructor())
+				searchFor= IJavaSearchConstants.CONSTRUCTOR;
+			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, searchFor, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+		}
+		else
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
 	};
 
 
