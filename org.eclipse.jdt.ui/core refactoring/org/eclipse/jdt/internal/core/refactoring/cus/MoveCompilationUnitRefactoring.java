@@ -581,7 +581,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	/* non java doc
 	 * returns <code>true</code> if the import declaration has been added and <code>false</code> otherwise.
 	 */
-	private static boolean addImport(ITextBufferChange change, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
+	private static boolean addImport(ITextBufferChange change, final IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
 		if (cu.getImport(pack.getElementName() + ".*").exists()) //$NON-NLS-1$
 			return false;
 					
@@ -600,11 +600,13 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			start= sr.getOffset() + sr.getLength() - 1;
 		}	
 		
-		// Begin 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		String lineDelimiter= org.eclipse.jdt.internal.ui.codemanipulation.StubUtility.getLineDelimiterUsed(cu);
-		String newImportText= lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter; //$NON-NLS-2$ //$NON-NLS-1$
-		// End 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		change.addInsert(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.add_import", pack.getElementName()), start + 1, newImportText); //$NON-NLS-1$
+		change.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.add_import", pack.getElementName()), start + 1){
+			public SimpleTextChange[] adjust(ITextBuffer buffer) {
+				String lineDelimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(getOffset()));
+				setText(lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter);//$NON-NLS-2$ //$NON-NLS-1$
+				return null;
+			}
+		});
 		return true;
 	}
 	
