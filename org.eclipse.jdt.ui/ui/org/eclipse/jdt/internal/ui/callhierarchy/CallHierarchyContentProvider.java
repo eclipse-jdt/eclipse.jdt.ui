@@ -30,7 +30,8 @@ import org.eclipse.ui.progress.DeferredTreeContentManager;
 public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
 
-    private DeferredTreeContentManager manager;
+    private DeferredTreeContentManager fManager;
+    private CallHierarchyViewPart fPart;
     
     private class MethodWrapperRunnable implements IRunnableWithProgress {
         private MethodWrapper fMethodWrapper;
@@ -52,8 +53,9 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         }
     }
 
-    public CallHierarchyContentProvider() {
+    public CallHierarchyContentProvider(CallHierarchyViewPart part) {
         super();
+        fPart= part;
     }
 
     /**
@@ -70,8 +72,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             if (shouldStopTraversion(methodWrapper)) {
                 return EMPTY_ARRAY;
             } else {
-                if (manager != null) {
-                    Object[] children = manager.getChildren(new DeferredMethodWrapper(this, methodWrapper));
+                if (fManager != null) {
+                    Object[] children = fManager.getChildren(new DeferredMethodWrapper(this, methodWrapper));
                     if (children != null)
                         return children;
                 }
@@ -157,7 +159,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         cancelJobs();
         if (viewer instanceof AbstractTreeViewer) {
-            manager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer);
+            fManager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer);
         }
     }
 
@@ -165,8 +167,29 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * Cancel all current jobs. 
      */
     void cancelJobs() {
-        if (manager != null) {
-        	manager.cancel(null);
+        if (fManager != null) {
+        	fManager.cancel(null);
+            if (fPart != null) {
+                fPart.setCancelEnabled(false);
+            }
+        }
+    }
+
+    /**
+     * 
+     */
+    public void doneFetching() {
+        if (fPart != null) {
+            fPart.setCancelEnabled(false);
+        }
+    }
+
+    /**
+     * 
+     */
+    public void startFetching() {
+        if (fPart != null) {
+            fPart.setCancelEnabled(true);
         }
     }
 }

@@ -55,7 +55,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
 
-        fProvider= new CallHierarchyContentProvider();
+        fProvider= new CallHierarchyContentProvider(null);
 
         CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
     }

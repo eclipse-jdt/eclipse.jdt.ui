@@ -715,6 +715,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fHistoryDropDownAction = new HistoryDropDownAction(this);
         fHistoryDropDownAction.setEnabled(false);
         fCancelSearchAction = new CancelSearchAction(this);
+        setCancelEnabled(false);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
@@ -800,5 +801,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     void cancelJobs() {
         fCallHierarchyViewer.cancelJobs();
+    }
+
+    /**
+     * Sets the enablement state of the cancel button.
+     * @param enabled 
+     */
+    void setCancelEnabled(boolean enabled) {
+        fCancelSearchAction.setEnabled(enabled);
     }
 }

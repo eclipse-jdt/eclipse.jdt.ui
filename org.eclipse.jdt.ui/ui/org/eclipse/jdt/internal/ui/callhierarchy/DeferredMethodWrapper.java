@@ -74,6 +74,7 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
      */
     public void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor) {
         try {
+            fProvider.startFetching();
             DeferredMethodWrapper methodWrapper = (DeferredMethodWrapper) object;
             collector.add((Object[]) methodWrapper.getCalls(monitor), monitor);
             collector.done();
@@ -81,6 +82,8 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
             collector.add(new Object[] { TreeTermination.SEARCH_CANCELED }, monitor);
         } catch (Exception e) {
             JavaPlugin.log(e);
+        } finally {
+            fProvider.doneFetching();
         }
     }
 
@@ -126,7 +129,7 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
      */
     public String getLabel(Object o) {
-        return ""; //$NON-NLS-1$
+        return fMethodWrapper.getMember().getElementName();
     }
 
     /*

@@ -50,7 +50,7 @@ class CallHierarchyViewer extends TreeViewer {
         getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
         setUseHashlookup(true);
         setAutoExpandLevel(2);
-        fContentProvider = new CallHierarchyContentProvider();
+        fContentProvider = new CallHierarchyContentProvider(fPart);
         setContentProvider(fContentProvider);
         setLabelProvider(new CallHierarchyLabelProvider());
 
