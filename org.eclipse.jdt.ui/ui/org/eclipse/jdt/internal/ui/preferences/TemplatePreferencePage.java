@@ -94,20 +94,19 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite ancestor) {	
-		Composite parent= new Composite(ancestor, SWT.NULL);
+		Composite parent= new Composite(ancestor, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		parent.setLayout(layout);				
-		
-		fTableViewer= new CheckboxTableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
-		Table table= fTableViewer.getTable();
+
+		Table table= new Table(parent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= convertWidthInCharsToPixels(80);
 		data.heightHint= convertHeightInCharsToPixels(10);
-		fTableViewer.getTable().setLayoutData(data);
+		table.setLayoutData(data);
 				
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);		
@@ -115,19 +114,20 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
 
-		TableColumn column1= new TableColumn(table, SWT.NULL);		
+		TableColumn column1= new TableColumn(table, SWT.NONE);		
 		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
 
-		TableColumn column2= new TableColumn(table, SWT.NULL);
+		TableColumn column2= new TableColumn(table, SWT.NONE);
 		column2.setText(TemplateMessages.getString("TemplatePreferencePage.column.context")); //$NON-NLS-1$
 	
-		TableColumn column3= new TableColumn(table, SWT.NULL);
+		TableColumn column3= new TableColumn(table, SWT.NONE);
 		column3.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
 		tableLayout.addColumnData(new ColumnWeightData(30));
 		tableLayout.addColumnData(new ColumnWeightData(20));
 		tableLayout.addColumnData(new ColumnWeightData(70));
-		
+
+		fTableViewer= new CheckboxTableViewer(table);		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
 		fTableViewer.setContentProvider(new TemplateContentProvider());
 
