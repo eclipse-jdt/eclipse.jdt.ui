@@ -1,8 +1,0 @@
-# Prints debug information
-org.eclipse.jdt.ui/debug=true
-
-# Prints debug information related to the AST provider
-org.eclipse.jdt.ui/debug/ASTProvider=false
-
-# Turn on tracing of the all types cache
-org.eclipse.jdt.ui/debug/allTypesCache=false
