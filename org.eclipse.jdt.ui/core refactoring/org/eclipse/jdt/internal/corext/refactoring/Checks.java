@@ -114,14 +114,7 @@ public class Checks {
 	 *  name is not a valid java package name.
 	 */
 	public static RefactoringStatus checkPackageName(String name) {
-		RefactoringStatus result= checkName(name, JavaConventions.validatePackageName(name));
-		if (! result.isOK())
-			return result;
-		//if name == null or "", then JavaConventions.validatePackageName reports an error anyway
-		//so this call is safe
-		if (! Character.isLowerCase(name.charAt(0))) 
-			result.addWarning(RefactoringCoreMessages.getString("Checks.should_start_lowercase")); //$NON-NLS-1$
-		return result;	
+		return checkName(name, JavaConventions.validatePackageName(name));
 	}
 	
 	/**
@@ -129,19 +122,12 @@ public class Checks {
 	 *
 	 * @param the compilation unit name.
 	 * @return a refactoring status containing the error message if the
-	 *  name is not a valid java package name.
+	 *  name is not a valid compilation unit name.
 	 */
 	public static RefactoringStatus checkCompilationUnitName(String name) {
-		if (hasTwoDots(name)) //$NON-NLS-2$ //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.no_two_dots"));//$NON-NLS-1$
-		else	
-			return checkName(name, JavaConventions.validateCompilationUnitName(name));
+		return checkName(name, JavaConventions.validateCompilationUnitName(name));
 	}
 
-	private static boolean hasTwoDots(String name) {
-		return name.indexOf(".") != name.lastIndexOf(".");
-	}
-	
 	/**
 	 * Returns ok status if the new name is ok ie. no other file with that name exists.
 	 * @param newName just a simple name - no extension.
