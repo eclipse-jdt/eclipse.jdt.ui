@@ -91,7 +91,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		layout.marginWidth= 0;		
 		inner.setLayout(layout);
 		
-		GridData gd= new GridData();
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.widthHint= convertWidthInCharsToPixels(80);
 		
 		Label label= new Label(inner, SWT.LEFT + SWT.WRAP);

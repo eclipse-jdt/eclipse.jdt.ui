@@ -5,16 +5,12 @@
 package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
@@ -30,9 +26,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -128,9 +123,10 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 */
 	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJRE) {
 		if (entries != null && appendDefaultJRE) {
-			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
+			IClasspathEntry[] jreEntry= NewJavaProjectPreferencePage.getDefaultJRELibrary();
+			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + jreEntry.length];
 			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-			newEntries[entries.length]= JavaRuntime.getJREVariableEntry();
+			System.arraycopy(jreEntry, 0, newEntries, entries.length, jreEntry.length);
 			entries= newEntries;
 		}
 		fClasspathEntries= entries;

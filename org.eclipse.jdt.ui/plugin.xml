@@ -383,6 +383,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page name="%newJavaProjectreferencePageName"
+		id = "org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>	
 </extension>
 
 <extension point="org.eclipse.ui.actionSets">

@@ -14,6 +14,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -27,14 +29,12 @@ import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 
 /**
  * Preference constants used in the JDT-UI preference store.
- * <p>
- * Note: this API is work in progress. The API might change before final 2.0 version.
- * </p>
  * @since 2.0
   */
 public class PreferenceConstants {
@@ -88,7 +88,7 @@ public class PreferenceConstants {
 	public static final String CODEGEN__JAVADOC_STUBS= CodeGenerationPreferencePage.PREF_JAVADOC_STUBS;
 
 	/**
-	 * Enable / Disable adding a non-javadoc comment to methods that override.
+	 * Enable / Disable adding a non-javadoc comment to methods that override. Boolean value.
 	 */
 	public static final String CODEGEN__NON_JAVADOC_COMMENTS= CodeGenerationPreferencePage.PREF_NON_JAVADOC_COMMENTS;
 
@@ -98,7 +98,7 @@ public class PreferenceConstants {
 	public static final String CODEGEN__FILE_COMMENTS= CodeGenerationPreferencePage.PREF_FILE_COMMENTS;
 	
 	/**
-	 * Specifies the import order. Strung value, semicolon separated.
+	 * Specifies the import order. String value, semicolon separated.
 	 */
 	public static final String ORGIMPORTS_IMPORTORDER= ImportOrganizePreferencePage.PREF_IMPORTORDER;
 	
@@ -130,17 +130,32 @@ public class PreferenceConstants {
 	/**
 	 * Enable / Disable to use folders for source and output when creating a new Java project. Boolean value.
 	 */
-	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= JavaBasePreferencePage.SRCBIN_FOLDERS_IN_NEWPROJ;
+	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= NewJavaProjectPreferencePage.SRCBIN_FOLDERS_IN_NEWPROJ;
 
 	/**
 	 * Source folder name used when creating a new Java project. String value.
 	 */
-	public static final String SRCBIN_SRCNAME= JavaBasePreferencePage.SRCBIN_SRCNAME;
+	public static final String SRCBIN_SRCNAME= NewJavaProjectPreferencePage.SRCBIN_SRCNAME;
 
 	/**
 	 * Output folder name used when creating a new Java project. String value.
 	 */
-	public static final String SRCBIN_BINNAME= JavaBasePreferencePage.SRCBIN_BINNAME;
+	public static final String SRCBIN_BINNAME= NewJavaProjectPreferencePage.SRCBIN_BINNAME;
+
+	/**
+	 * List of possible JRE libraries used by the New Java Project wizard. An library consists of an arbitrary number of
+	 * <code>IClasspathEntry</code>s, that will represent the JRE on the new project's classpath. String value, semicolon
+	 * separated list of encoded JRE libraries. NEWPROJECT_JRELIBRARY_INDEX defines the currently used library.
+	 * @see #encodeJRELibrary
+	 * @see #decodeJRELibraryDescription
+	 * @see #decodeJRELibraryClasspathEntries
+	 */
+	public static final String NEWPROJECT_JRELIBRARY_LIST= NewJavaProjectPreferencePage.CLASSPATH_JRELIBRARY_LIST;
+
+	/**
+	 * Chosen JRE library from the list of JRE entries (index). Int value. See NEWPROJECT_JRELIBRARY_LIST.
+	 */
+	public static final String NEWPROJECT_JRELIBRARY_INDEX= NewJavaProjectPreferencePage.CLASSPATH_JRELIBRARY_INDEX;
 
 	/**
 	 * Selects the behaviour when opening a type in the hierarchy. String value, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE or OPEN_TYPE_HIERARCHY_IN_VIEW_PART.
@@ -554,5 +569,35 @@ public class PreferenceConstants {
 	public IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
-
+	
+	/**
+	 * Encodes a JRE library to be used in NEWPROJECT_JRELIBRARY_LIST. 
+	*/
+	public static String encodeJRELibrary(String description, IClasspathEntry[] entries) {
+		return NewJavaProjectPreferencePage.encodeJRELibrary(description, entries);
+	}
+	
+	/**
+	 * Decodes an encoded JRE library and returns its description string.
+	 */
+	public static String decodeJRELibraryDescription(String encodedLibrary) {
+		return NewJavaProjectPreferencePage.decodeJRELibraryDescription(encodedLibrary);
+	}
+	
+	/**
+	 * Decodes an encoded JRE library and returns its classpath entries.
+	 */
+	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encodedLibrary) {
+		return NewJavaProjectPreferencePage.decodeJRELibraryClasspathEntries(encodedLibrary);
+	}
+	
+	/**
+	 * Returns the current configuration for the JRE to be used as default in new Java projects.
+	 * Convenience method: Library defined by NEWPROJECT_JRELIBRARY_LIST and NEWPROJECT_JRELIBRARY_INDEX.
+	 */
+	public static IClasspathEntry[] getDefaultJRELibrary() {
+		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
+	}	
+	
+		
 }

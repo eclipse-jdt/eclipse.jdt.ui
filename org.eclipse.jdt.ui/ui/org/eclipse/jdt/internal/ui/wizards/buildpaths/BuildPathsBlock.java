@@ -55,9 +55,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -65,7 +62,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -336,11 +333,12 @@ public class BuildPathsBlock {
 			switch (curr.getEntryKind()) {
 				case IClasspathEntry.CPE_CONTAINER:
 					res= null;
-					try {
-						isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
-					} catch (JavaModelException e) {
+					//try {
+					//	isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
+					//} catch (JavaModelException e) {
 						isMissing= true;
-					}
+					//}
+					isMissing= false;
 					break;
 				case IClasspathEntry.CPE_VARIABLE:
 					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
@@ -421,26 +419,22 @@ public class BuildPathsBlock {
 	private List getDefaultClassPath(IJavaProject jproj) {
 		List list= new ArrayList();
 		IResource srcFolder;
-		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-			String sourceFolderName= JavaBasePreferencePage.getSourceFolderName();
+		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
+			String sourceFolderName= NewJavaProjectPreferencePage.getSourceFolderName();
 			srcFolder= jproj.getProject().getFolder(sourceFolderName);
 		} else {
 			srcFolder= jproj.getProject();
 		}
 		list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
-		IPath libPath= new Path(JavaRuntime.JRELIB_VARIABLE);
-		IPath attachPath= new Path(JavaRuntime.JRESRC_VARIABLE);
-		IPath attachRoot= new Path(JavaRuntime.JRESRCROOT_VARIABLE);
-		CPListElement elem= new CPListElement(jproj, IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot, false);
-		list.add(elem);
-
+		IClasspathEntry[] jreEntries= NewJavaProjectPreferencePage.getDefaultJRELibrary();
+		list.addAll(getExistingEntries(jreEntries));
 		return list;
 	}
 	
 	private IPath getDefaultBuildPath(IJavaProject jproj) {
-		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-			String outputLocationName= JavaBasePreferencePage.getOutputLocationName();
+		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
+			String outputLocationName= NewJavaProjectPreferencePage.getOutputLocationName();
 			return jproj.getProject().getFullPath().append(outputLocationName);
 		} else {
 			return jproj.getProject().getFullPath();

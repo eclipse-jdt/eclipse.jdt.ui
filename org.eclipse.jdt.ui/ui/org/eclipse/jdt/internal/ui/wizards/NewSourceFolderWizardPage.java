@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -328,7 +328,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				IStatus status= JavaConventions.validateClasspath(fCurrJProject, newEntriesArray, fOutputLocation);
 				if (!status.isOK()) {
 					if (fIsProjectAsSourceFolder && fOutputLocation.equals(projPath)) {
-						IPath newOutputLocation= projPath.append(JavaBasePreferencePage.getOutputLocationName());
+						IPath newOutputLocation= projPath.append(NewJavaProjectPreferencePage.getOutputLocationName());
 						IStatus status2= JavaConventions.validateClasspath(fCurrJProject, newEntriesArray, newOutputLocation);
 						if (status2.isOK()) {
 							fRootStatus.setWarning(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", newOutputLocation.toString())); //$NON-NLS-1$
@@ -387,7 +387,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				newEntries[i]= curr;
 			}
 			if (outputLocation.equals(projPath)) {
-				outputLocation= projPath.append(JavaBasePreferencePage.getOutputLocationName());
+				outputLocation= projPath.append(NewJavaProjectPreferencePage.getOutputLocationName());
 				if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
 					if (BuildPathsBlock.getRemoveOldBinariesQuery(shell).doQuery(projPath)) {
 						BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());

@@ -7,16 +7,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -33,30 +28,21 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 	
 /*
- * The page for setting java plugin preferences.
+ * The page for setting general java plugin preferences.
+ * See PreferenceConstants to access or change these values through public API.
  */
 public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	
 	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
 	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
-	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
-	public static final String SRCBIN_SRCNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersSrcName"; //$NON-NLS-1$
-	public static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
@@ -68,26 +54,12 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static final String DOUBLE_CLICK_EXPANDS= "packageview.doubleclick.expands"; //$NON-NLS-1$
 	public static final String RECONCILE_JAVA_VIEWS= "JavaUI.reconcile"; //$NON-NLS-1$
 
-	public static boolean useSrcAndBinFolders() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(SRCBIN_FOLDERS_IN_NEWPROJ);
-	}
-	
+
 	public static boolean linkBrowsingViewSelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(JavaBasePreferencePage.LINK_BROWSING_VIEW_TO_EDITOR);
 	}
-	
-	public static String getSourceFolderName() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(SRCBIN_SRCNAME);
-	}
-	
-	public static String getOutputLocationName() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(SRCBIN_BINNAME);
-	}		
-	
+		
 	public static boolean linkPackageSelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(LINK_PACKAGES_TO_EDITOR);
@@ -120,6 +92,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static boolean reconcileJavaViews() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);
 	}
+	
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
@@ -127,11 +100,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	
 	private SelectionListener fSelectionListener;
 	private ModifyListener fModifyListener;
-	
-	
-	private Button fFolderButton;
-	private Text fBinFolderNameText;
-	private Text fSrcFolderNameText;
 
 	public JavaBasePreferencePage() {
 		super();
@@ -165,14 +133,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 
-		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
-		store.setDefault(SRCBIN_SRCNAME, "src"); //$NON-NLS-1$
-		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
-
 		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
 		store.setDefault(RECONCILE_JAVA_VIEWS, true);
 	}
-	
+
+
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
@@ -245,24 +210,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.reconcileJavaViews"), RECONCILE_JAVA_VIEWS); //$NON-NLS-1$
 		
-		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ); //$NON-NLS-1$
-		fFolderButton.addSelectionListener(fSelectionListener);
-		
-		Composite folders= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		folders.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalIndent= convertWidthInCharsToPixels(4);
-		folders.setLayoutData(gd);
-		
-		fSrcFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.src"), SRCBIN_SRCNAME); //$NON-NLS-1$
-		fBinFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.bin"), SRCBIN_BINNAME); //$NON-NLS-1$
-		fSrcFolderNameText.addModifyListener(fModifyListener);
-		fBinFolderNameText.addModifyListener(fModifyListener);
-		
 		new Label(composite, SWT.NONE); // spacer
 		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
@@ -301,51 +248,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});
 		*/
-			
-		validateFolders();
+
 	
 		return composite;
 	}
 	
-	private void validateFolders() {
-		boolean useFolders= fFolderButton.getSelection();
-		
-		fSrcFolderNameText.setEnabled(useFolders);
-		fBinFolderNameText.setEnabled(useFolders);
-		if (useFolders) {
-			String srcName= fSrcFolderNameText.getText();
-			String binName= fBinFolderNameText.getText();
-			if (srcName.length() + binName.length() == 0) {
-				updateStatus(new StatusInfo(IStatus.ERROR,  JavaUIMessages.getString("JavaBasePreferencePage.folders.error.namesempty"))); //$NON-NLS-1$
-				return;
-			}
-			IWorkspace workspace= JavaPlugin.getWorkspace();
-			IStatus status;
-			if (srcName.length() != 0) {
-				status= workspace.validateName(srcName, IResource.FOLDER);
-				if (!status.isOK()) {
-					String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidsrcname", status.getMessage()); //$NON-NLS-1$
-					updateStatus(new StatusInfo(IStatus.ERROR, message));
-					return;
-				}
-			}
-			status= workspace.validateName(binName, IResource.FOLDER);
-			if (!status.isOK()) {
-				String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidbinname", status.getMessage()); //$NON-NLS-1$
-				updateStatus(new StatusInfo(IStatus.ERROR, message));
-				return;
-			}
-			IProject dmy= workspace.getRoot().getProject("dmy"); //$NON-NLS-1$
-			IClasspathEntry entry= JavaCore.newSourceEntry(dmy.getFullPath().append(srcName));
-			IPath outputLocation= dmy.getFullPath().append(binName);
-			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, outputLocation);
-			if (!status.isOK()) {
-				updateStatus(status);
-				return;
-			}
-		}
-		updateStatus(new StatusInfo()); // set to OK
-	}
 		
 	private void updateStatus(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
@@ -353,15 +260,9 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	}		
 	
 	private void controlChanged(Widget widget) {
-		if (widget == fFolderButton) {
-			validateFolders();
-		}
 	}
 	
 	private void controlModified(Widget widget) {
-		if (widget == fSrcFolderNameText || widget == fBinFolderNameText) {
-			validateFolders();
-		}
 	}	
 	
 	/*
@@ -384,7 +285,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
-		validateFolders();
 		super.performDefaults();
 	}
 
@@ -409,11 +309,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			Text text= (Text) fTextControls.get(i);
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
-		}			
+		}
 		
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
+
+
 }
 
 
