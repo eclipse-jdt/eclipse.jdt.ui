@@ -59,6 +59,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	
 	public JavaDoc2HTMLTextReader(Reader reader) {
 		super(new PushbackReader(reader, MAX_TAG_LENGTH));
+		setSkipWhitespace(false);
 	}
 	
 	private int getTag(StringBuffer buffer) throws IOException {
@@ -128,7 +129,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 				
 				int i= 0;
 				while (i < s.length() && Character.isLetterOrDigit(s.charAt(i))) { ++i; }
-				if (i < s.length()) {
+				if (i <= s.length()) {
 					buffer.append(s.substring(0, i));
 					buffer.append("</b>"); //$NON-NLS-1$
 					buffer.append(s.substring(i));

@@ -25,6 +25,11 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 	private Reader fReader;
 	private boolean fWasWhiteSpace;
 	private int fCharAfterWhiteSpace;
+
+	/**
+	 * Tells whether white space characters are skipped.
+	 */
+	private boolean fSkipWhiteSpace= true;
 	
 	private boolean fReadFromBuffer;
 	private StringBuffer fBuffer;
@@ -71,7 +76,7 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 			if (ch == -1) {
 				ch= fReader.read();
 			}
-			if (Character.isWhitespace((char)ch)) {
+			if (fSkipWhiteSpace && Character.isWhitespace((char)ch)) {
 				do {
 					ch= fReader.read();
 				} while (Character.isWhitespace((char)ch));
@@ -103,8 +108,7 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 				c= nextChar();
 			}
 			
-		} while (fWasWhiteSpace && (c == ' '));
-				
+		} while (fSkipWhiteSpace && fWasWhiteSpace && (c == ' '));
 		fWasWhiteSpace= (c == ' ' || c == '\r' || c == '\n');
 		return c;
 	}
@@ -132,5 +136,13 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 		fCharAfterWhiteSpace= -1;
 		fBuffer.setLength(0);
 		fIndex= 0;		
+	}
+
+	protected final void setSkipWhitespace(boolean state) {
+		fSkipWhiteSpace= state;
+	}
+
+	protected final boolean isSkippingWhitespace() {
+		return fSkipWhiteSpace;
 	}
 }

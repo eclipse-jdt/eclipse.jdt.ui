@@ -31,6 +31,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	
 	
 	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
 	private static final Map fgEntityLookup;
 	private static final Set fgTags;
 	
@@ -46,6 +47,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		fgTags.add("dd"); //$NON-NLS-1$
 		fgTags.add("li"); //$NON-NLS-1$
 		fgTags.add("ul"); //$NON-NLS-1$
+		fgTags.add("pre"); //$NON-NLS-1$
 		
 		fgEntityLookup= new HashMap(7);
 		fgEntityLookup.put("lt", "<"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -62,7 +64,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private int fBold= 0;
 	private int fStartOffset= -1;
 	private boolean fInParagraph= false;
-
+	private boolean fIsPreformattedText= false;
+	
 	/**
 	 * Transforms the html text from the reader to formatted text.
 	 * @param presentation If not <code>null</code>, formattings will be applied to 
@@ -85,6 +88,16 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			fStartOffset= fCounter;
 		++ fBold;
 	}
+
+	protected void startPreformattedText() {
+		fIsPreformattedText= true;
+		setSkipWhitespace(false);
+	}
+
+	protected void stopPreformattedText() {
+		fIsPreformattedText= false;
+		setSkipWhitespace(true);
+	}
 	
 	protected void stopBold() {
 		-- fBold;
@@ -100,10 +113,14 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	 * @see SubstitutionTextReader#computeSubstitution(char)
 	 */
 	protected String computeSubstitution(int c) throws IOException {
+		
 		if (c == '<')
 			return  processHTMLTag();
 		else if (c == '&')
 			return processEntity();
+		else if (fIsPreformattedText) {
+			return processPreformattedText(c);
+		}
 		
 		return null;
 	}
@@ -115,16 +132,30 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			tag= tag.substring(1);
 			
 		if (!fgTags.contains(tag))
-			return ""; //$NON-NLS-1$
+			return EMPTY_STRING;
+
+
+		if ("pre".equals(html)) { //$NON-NLS-1$
+			startPreformattedText();
+			return EMPTY_STRING;
+		}
+
+		if ("/pre".equals(html)) { //$NON-NLS-1$
+			stopPreformattedText();
+			return EMPTY_STRING;
+		}
+
+		if (fIsPreformattedText)
+			return EMPTY_STRING;
 
 		if ("b".equals(html)) { //$NON-NLS-1$
 			startBold();
-			return ""; //$NON-NLS-1$
+			return EMPTY_STRING;
 		}
 				
 		if ("h5".equals(html) || "dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
 			startBold();
-			return ""; //$NON-NLS-1$
+			return EMPTY_STRING;
 		}
 		
 		if ("dl".equals(html)) //$NON-NLS-1$
@@ -138,7 +169,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 					
 		if ("/b".equals(html)) { //$NON-NLS-1$
 			stopBold();
-			return ""; //$NON-NLS-1$
+			return EMPTY_STRING;
 		}
 
 		if ("p".equals(html))  { //$NON-NLS-1$
@@ -152,7 +183,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		if ("/p".equals(html))  { //$NON-NLS-1$
 			boolean inParagraph= fInParagraph;
 			fInParagraph= false;
-			return inParagraph ? "" : LINE_DELIM; //$NON-NLS-1$
+			return inParagraph ? EMPTY_STRING : LINE_DELIM;
 		}
 			
 		if ("/h5".equals(html) || "/dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -163,7 +194,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		if ("/dd".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
 				
-		return ""; //$NON-NLS-1$
+		return EMPTY_STRING;
 	}
 	
 	/*
@@ -210,6 +241,13 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		 
 		return html2Text(buf.toString());
 	}
+
+	private String processPreformattedText(int c) {
+		if  (c == '\r' || c == '\n')
+			fCounter++;
+		return new String(new char[] { (char)c });
+	}
+
 	
 	private void unread(int ch) throws IOException {
 		((PushbackReader) getReader()).unread(ch);
@@ -224,7 +262,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 				} else {
 					ch= Integer.parseInt(symbol.substring(1), 10);
 				}
-				return "" + (char)ch; //$NON-NLS-1$
+				return EMPTY_STRING + (char)ch;
 			} catch (NumberFormatException e) {
 			}
 		} else {
