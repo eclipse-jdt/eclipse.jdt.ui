@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
@@ -276,6 +275,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Selects an member in the methods list
 	 */	
 	public void selectMember(IMember member) {
+		ICompilationUnit cu= member.getCompilationUnit();
+		if (cu != null && cu.isWorkingCopy()) {
+			member= (IMember) cu.getOriginal(member);
+			if (member == null) {
+				return;
+			}
+		}
 		Control methodControl= fMethodsViewer.getControl();
 		if (methodControl != null && !methodControl.isDisposed()) {
 			fMethodsViewer.getControl().setFocus();
@@ -411,26 +417,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		};
 		
-		KeyListener keyListener= new KeyAdapter() {
-			public void keyPressed(KeyEvent event) {
-				if (event.stateMask == SWT.NONE) {
-					if (event.keyCode == SWT.F4) {
-						Object elem= SelectionUtil.getSingleElement(getCurrentViewer().getSelection());
-						if (elem instanceof IType) {
-							IType[] arr= new IType[] { (IType) elem };
-							OpenTypeHierarchyUtil.open(arr, getSite().getWorkbenchWindow());			
-						} else {
-							getCurrentViewer().getControl().getDisplay().beep();
-						}
-						return;
-					} else if (event.keyCode == SWT.F5) {
-						updateHierarchyViewer();
-						return;
-					}
-				}
-				viewPartKeyShortcuts(event);					
-			}
-		};
+		KeyListener keyListener= createKeyListener();
 		
 		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(this, new MarkerErrorTickProvider());
 				
@@ -471,6 +458,24 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				
 		return fViewerbook;
 	}
+	
+	private KeyListener createKeyListener() {
+		return new KeyAdapter() {
+			public void keyPressed(KeyEvent event) {
+				if (event.stateMask == SWT.NONE) {
+					if (event.keyCode == SWT.F4) {
+						OpenTypeHierarchyUtil.open(getSite().getSelectionProvider().getSelection(), getSite().getWorkbenchWindow());
+						return;
+					} else if (event.keyCode == SWT.F5) {
+						updateHierarchyViewer();
+						return;
+					}
+				}
+				viewPartKeyShortcuts(event);					
+			}
+		};		
+	}
+	
 
 	private void initializeTypesViewer(final TypeHierarchyViewer typesViewer, ISelectionChangedListener selectionChangedListener, KeyListener keyListener, String cotextHelpId) {
 		typesViewer.getControl().setVisible(false);
@@ -496,11 +501,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		});
 		Control control= fMethodsViewer.getTable();
-		control.addKeyListener(new KeyAdapter() { 
-			public void keyPressed(KeyEvent event) {
-				viewPartKeyShortcuts(event);
-			}
-		});
+		control.addKeyListener(createKeyListener());
 		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fMethodsViewer);
 		return control;
