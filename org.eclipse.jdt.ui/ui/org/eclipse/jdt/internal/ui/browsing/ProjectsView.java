@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+
 public class ProjectsView extends JavaBrowsingPart {
 
 	/**
@@ -118,5 +120,10 @@ public class ProjectsView extends JavaBrowsingPart {
 			super.setInput(input);
 		else
 			getViewer().setSelection(null);
-	}	
+	}
+	
+	protected void createActions() {		
+		super.createActions();
+		fActionGroups.addGroup(new ProjectActionGroup(this));
+	}		
 }

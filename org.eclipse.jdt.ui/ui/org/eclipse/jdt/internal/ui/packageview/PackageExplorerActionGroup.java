@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Shell;
@@ -25,17 +22,19 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionGroup;
@@ -56,9 +55,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -68,13 +70,9 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
-
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 public class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
 
@@ -103,8 +101,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
-		Shell shell= fPart.getSite().getShell();
-		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
+		IWorkbenchPartSite site = fPart.getSite();
+		Shell shell= site.getShell();
+		ISelectionProvider provider= site.getSelectionProvider();
 		IStructuredSelection selection= (IStructuredSelection) provider.getSelection();
 		setGroups(new ActionGroup[] {
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
@@ -115,6 +114,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 			new GenerateActionGroup(fPart), 
 			fBuildActionGroup= new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart, fPart.getViewer()),
+			new ProjectActionGroup(fPart), 
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater())});
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
@@ -128,7 +128,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 		
 		fRenameResourceAction= new RenameResourceAction(shell);		
 		fMoveResourceAction= new MoveResourceAction(shell);
-
+		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		

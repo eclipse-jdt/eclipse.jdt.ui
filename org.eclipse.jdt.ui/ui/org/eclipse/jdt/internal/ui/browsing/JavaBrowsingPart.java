@@ -134,7 +134,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
-	private CompositeActionGroup fActionGroups;
+	protected CompositeActionGroup fActionGroups;
 	
 	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
@@ -407,7 +407,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			new PatchedOpenInNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
-	private void createActions() {		
+	protected void createActions() {		
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
