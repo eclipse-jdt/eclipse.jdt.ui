@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
@@ -120,10 +121,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			if (event.detail == DND.DROP_MOVE) {
 				handleDropMove(target, event);
 				
-				if (! canPasteSourceReferences(target, event))
+				if (! canPasteSourceReferences(target))
 					return;
 				DeleteSourceReferencesAction delete= ReorgActionFactory.createDeleteSourceReferencesAction(getDragableSourceReferences());
-				delete.setAskForDeleteConfirmation(false);
+				delete.setAskForDeleteConfirmation(true);
 				delete.setCanDeleteGetterSetter(false);
 				delete.update();
 				if (delete.isEnabled())
@@ -147,8 +148,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		if (canPasteSourceReferences(target, event))
-			return DND.DROP_COPY; //XXX for now
+		/*in case of source references (fields, methods, etc.) - we flip the copy/move behavior*/
+		if (canPasteSourceReferences(target))
+			return DND.DROP_COPY;
 		
 		if (fMoveRefactoring == null){
 			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
@@ -182,7 +184,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event)){
+		if (canPasteSourceReferences(target)){
 			pasteSourceReferences(target, event);
 			return;
 		}
@@ -202,8 +204,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event))
-			return DND.DROP_COPY;
+
+		/*in case of source references (fields, methods, etc.) - we flip the copy/move behavior*/
+		if (canPasteSourceReferences(target)){
+			if (canMoveSelectedSourceReferences(target))
+				return DND.DROP_MOVE;
+			else	
+				return DND.DROP_NONE; //better than copy - changes the cursor which makes the ui more responsive
+		}		
 		
 		if (fCopyRefactoring == null)
 			fCopyRefactoring= new CopyRefactoring(fElements);
@@ -217,7 +225,27 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return DND.DROP_NONE;					
 	}
 
-	private boolean canPasteSourceReferences(Object target, DropTargetEvent event) throws JavaModelException{
+	private boolean canMoveSelectedSourceReferences(Object target) throws JavaModelException{
+		ICompilationUnit targetCu= getCompilationUnit(target);
+		if (targetCu == null)
+			return false;
+			
+		ISourceReference[] elements= getDragableSourceReferences();		
+		for (int i= 0; i < elements.length; i++) {
+			if (targetCu.equals(SourceReferenceUtil.getCompilationUnit(elements[i])))	
+				return false;
+		}
+		return true;
+	}
+	
+	private static ICompilationUnit getCompilationUnit(Object target){
+		if (target instanceof ISourceReference)
+			return SourceReferenceUtil.getCompilationUnit((ISourceReference)target);
+		else
+			return null;	
+	}
+	
+	private boolean canPasteSourceReferences(Object target) throws JavaModelException{
 		ISourceReference[] elements= getDragableSourceReferences();
 		if (elements.length != fElements.size())
 			return false;
@@ -257,7 +285,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event)){
+		if (canPasteSourceReferences(target)){
 			pasteSourceReferences(target, event);
 			return;
 		}
