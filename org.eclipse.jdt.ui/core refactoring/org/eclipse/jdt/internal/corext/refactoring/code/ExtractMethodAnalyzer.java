@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -189,7 +190,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
-				fExpressionBinding= expression.resolveTypeBinding();
+				if (expression.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+					fExpressionBinding= ASTNodes.getTypeBinding(((ClassInstanceCreation)expression).getName());
+				} else {
+					fExpressionBinding= expression.resolveTypeBinding();
+				}
 				if (fExpressionBinding != null) {
 					fReturnType= Bindings.createType(fExpressionBinding, ast);
 					break;

@@ -70,7 +70,9 @@ public class Bindings {
 			return new String[] { type.getName() };
 		List result= new ArrayList(3);
 		while(type != null) {
-			if (!type.isAnonymous())
+			if (type.isAnonymous())
+				result.add(0, "$local$"); //$NON-NLS-1$
+			else
 				result.add(0, type.getName());
 			type= type.getDeclaringClass();
 		}
