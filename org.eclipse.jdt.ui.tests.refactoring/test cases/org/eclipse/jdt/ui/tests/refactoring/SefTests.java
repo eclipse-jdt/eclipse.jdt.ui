@@ -42,6 +42,10 @@ public class SefTests extends AbstractSelectionTestCase {
 		fgTestSetup= new SefTestSetup(new TestSuite(SefTests.class));
 		return fgTestSetup;
 	}
+	
+	public static Test setUpTest(Test test) {
+		return new SefTestSetup(test);
+	}
 
 	protected IPackageFragmentRoot getRoot() {
 		return fgTestSetup.getRoot();
