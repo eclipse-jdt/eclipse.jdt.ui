@@ -32,8 +32,7 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 	private RunInPackageAction fRunInAction;
 	private InspectAction fInspectAction;
 	private SnippetOpenOnSelectionAction fOpenOnSelectionAction;
-	
-	
+	private SnippetOpenHierarchyOnSelectionAction fOpenOnTypeSelectionAction;
 	
 	public SnippetEditorActionContributor() {
 		super();
@@ -65,6 +64,7 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {	
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelectionAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelectionAction);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fDisplayAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRunAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fInspectAction);
@@ -88,13 +88,14 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		fInspectAction.setEditor(fSnippetEditor);			
 		fRunInAction.setEditor(fSnippetEditor);
 		fOpenOnSelectionAction.setContentEditor(fSnippetEditor);
-		
+		fOpenOnTypeSelectionAction.setContentEditor(fSnippetEditor);
 		updateStatus(fSnippetEditor);			
 	}
 	 
 	protected void initializeActions() {
 		 
 		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction(fSnippetEditor);
+		fOpenOnTypeSelectionAction= new SnippetOpenHierarchyOnSelectionAction(fSnippetEditor);
 		fDisplayAction= new DisplayAction(fSnippetEditor);		
 		fRunAction= new RunAction(fSnippetEditor);
 		fInspectAction= new InspectAction(fSnippetEditor);

@@ -22,7 +22,7 @@ public class DisplayAction extends SnippetAction implements IUpdate {
 
 		setText(SnippetMessages.getString("DisplayAction.label")); //$NON-NLS-1$
 		setToolTipText(SnippetMessages.getString("DisplayAction.tooltip")); //$NON-NLS-1$
-		setDescription(SnippetMessages.getString("DisplayAction.descriptioni")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("DisplayAction.description")); //$NON-NLS-1$
 	}
 	
 	public void run() {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
  */
 public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 	
-	private JavaSnippetEditor fEditor;
+	protected JavaSnippetEditor fEditor;
 	private String fDialogTitle;
 	private String fDialogMessage;
 	
@@ -31,14 +31,17 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 		super();
 		
 		fEditor= editor;
-		
-		setText(SnippetMessages.getString("SnippetOpenOnSelectionaction.label")); //$NON-NLS-1$
-		setDescription(SnippetMessages.getString("SnippetOpenOnSelectionaction.tooltip")); //$NON-NLS-1$
-		setToolTipText(SnippetMessages.getString("SnippetOpenOnSelectionaction.desription")); //$NON-NLS-1$
-		setDialogTitle(SnippetMessages.getString("SnippetOpenOnSelectiondialog.title")); //$NON-NLS-1$
-		setDialogMessage(SnippetMessages.getString("SnippetOpenOnSelectiondialog.message")); //$NON-NLS-1$
+		setResources();
 	}
 	
+	protected void setResources() {
+		setText(SnippetMessages.getString("SnippetOpenOnSelectionAction.label")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("SnippetOpenOnSelectionAction.tooltip")); //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("SnippetOpenOnSelectionAction.description")); //$NON-NLS-1$
+		setDialogTitle(SnippetMessages.getString("SnippetOpenOnSelectionDialog.title")); //$NON-NLS-1$
+		setDialogMessage(SnippetMessages.getString("SnippetOpenOnSelectionDialog.message")); //$NON-NLS-1$
+	}
+		
 	public SnippetOpenOnSelectionAction() {
 		this(null);
 	}
@@ -57,14 +60,12 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 			
 	public void run() {
 		
-		Shell w= getShell();
-		
 		try {
 			IJavaElement[] result= fEditor.codeResolve();
 			if (result != null && result.length > 0) {
 				ISourceReference chosen= selectSourceReference(
 										filterResolveResults(result),
-										w, 
+										getShell(), 
 										fDialogTitle, 
 										fDialogMessage
 										);
@@ -77,7 +78,7 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 		} catch (PartInitException x) {
 		}
 		
-		w.getDisplay().beep();		
+		getShell().getDisplay().beep();		
 	}
 	
 	protected Shell getShell() {
