@@ -16,7 +16,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,16 +35,11 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
-public class FiltersDialog extends StatusDialog {
+class FiltersDialog extends StatusDialog {
+    private Label fNamesHelpText;
     private Button fFilterOnNames;
     private Text fNames;
     private Text fMaxCallDepth;
-
-    private SelectionListener selectionListener = new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-            FiltersDialog.this.widgetSelected(e);
-        }
-    };
 
     /**
      * @param parentShell
@@ -90,10 +84,15 @@ public class FiltersDialog extends StatusDialog {
         return composite;
     }
     
-    void createMaxCallDepthArea(Composite parent) {
-        new Label(parent, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth")); //$NON-NLS-1$
+    private void createMaxCallDepthArea(Composite parent) {
+        Composite composite= new Composite(parent, SWT.NONE);
+        GridLayout layout = new GridLayout();
+        layout.numColumns = 2;
+        composite.setLayout(layout);
+
+        new Label(composite, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth")); //$NON-NLS-1$
         
-        fMaxCallDepth = new Text(parent, SWT.SINGLE | SWT.BORDER);
+        fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setTextLimit(6);
         fMaxCallDepth.addModifyListener(new ModifyListener() {
                 public void modifyText(ModifyEvent e) {
@@ -106,7 +105,7 @@ public class FiltersDialog extends StatusDialog {
         fMaxCallDepth.setLayoutData(gridData);
     }
 
-    void createNamesArea(Composite parent) {
+    private void createNamesArea(Composite parent) {
         fFilterOnNames = createCheckbox(parent,
                 CallHierarchyMessages.getString("FiltersDialog.filterOnNames"), true); //$NON-NLS-1$
         
@@ -121,7 +120,8 @@ public class FiltersDialog extends StatusDialog {
         gridData.widthHint = convertWidthInCharsToPixels(60);
         fNames.setLayoutData(gridData);
         
-        new Label(parent, SWT.LEFT).setText(CallHierarchyMessages.getString("FiltersDialog.filterOnNamesSubCaption")); //$NON-NLS-1$
+        fNamesHelpText= new Label(parent, SWT.LEFT);
+        fNamesHelpText.setText(CallHierarchyMessages.getString("FiltersDialog.filterOnNamesSubCaption")); //$NON-NLS-1$
     }
 
     /**
@@ -134,7 +134,7 @@ public class FiltersDialog extends StatusDialog {
      *
      * @return the check box button
      */
-    Button createCheckbox(Composite parent, String text, boolean grabRow) {
+    private Button createCheckbox(Composite parent, String text, boolean grabRow) {
         Button button = new Button(parent, SWT.CHECK);
 
         if (grabRow) {
@@ -143,7 +143,12 @@ public class FiltersDialog extends StatusDialog {
         }
 
         button.setText(text);
-        button.addSelectionListener(selectionListener);
+        button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				validateInput();
+				updateEnabledState();
+			}
+		});
 
         return button;
     }
@@ -151,8 +156,9 @@ public class FiltersDialog extends StatusDialog {
     /**
      * Updates the enabled state of the widgetry.
      */
-    void updateEnabledState() {
+    private void updateEnabledState() {
         fNames.setEnabled(fFilterOnNames.getSelection());
+        fNamesHelpText.setEnabled(fFilterOnNames.getSelection());
     }
     
     /**
@@ -160,7 +166,7 @@ public class FiltersDialog extends StatusDialog {
      *
      * @param filter the filter to update
      */
-    void updateFilterFromUI() {
+    private void updateFilterFromUI() {
         int maxCallDepth = Integer.parseInt(this.fMaxCallDepth.getText());
 
         CallHierarchyUI.getDefault().setMaxCallDepth(maxCallDepth);
@@ -173,36 +179,29 @@ public class FiltersDialog extends StatusDialog {
      *
      * @param filter the filter to use
      */
-    void updateUIFromFilter() {
-      fMaxCallDepth.setText(""+CallHierarchyUI.getDefault().getMaxCallDepth()); //$NON-NLS-1$
+    private void updateUIFromFilter() {
+      fMaxCallDepth.setText(String.valueOf(CallHierarchyUI.getDefault().getMaxCallDepth()));
       fNames.setText(CallHierarchy.getDefault().getFilters());
       fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
       updateEnabledState();
     }
     
-    /**
-     * Handles selection on a check box or combo box.
-     */
-    void widgetSelected(SelectionEvent e) {
-        validateInput();
-        updateEnabledState();
-    }
-    
-    /**
+	/**
      * Updates the filter from the UI state.
      * Must be done here rather than by extending open()
      * because after super.open() is called, the widgetry is disposed.
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
      */
     protected void okPressed() {
-            if (!isMaxCallDepthValid()) {
-                if (fMaxCallDepth.forceFocus()) {
-                    fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());
-                    fMaxCallDepth.showSelection();
-                }
+        if (!isMaxCallDepthValid()) {
+            if (fMaxCallDepth.forceFocus()) {
+                fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());
+                fMaxCallDepth.showSelection();
             }
-            
-            updateFilterFromUI();
-            super.okPressed();
+        }
+        
+        updateFilterFromUI();
+        super.okPressed();
     }
 
     private boolean isMaxCallDepthValid() {
