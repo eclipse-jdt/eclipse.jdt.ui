@@ -58,7 +58,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		Table table= createComposite(parent);
+		Table table= createTableComposite(parent);
 		
 		fViewer= new TableViewer(table);
 		fViewer.setUseHashlookup(true);
@@ -137,20 +137,25 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		return result;
 	}
 	
-	private Table createComposite(Composite parent){
+	private Table createTableComposite(Composite parent){
 		Composite c= new Composite(parent, SWT.NONE);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
+		Table table= addTable(c);
 		addCheckBox(c);
-		
+		setControl(c);
+		return table;
+	}
+	
+	private Table addTable(Composite c){
 		Table table= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * 5;
+		table.setLayoutData(gd);
 		table.setLayout(createTableLayout(table));
-		
-		setControl(c);
 		return table;
 	}
 

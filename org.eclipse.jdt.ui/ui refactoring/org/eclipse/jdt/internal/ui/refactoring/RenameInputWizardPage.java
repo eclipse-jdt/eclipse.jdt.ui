@@ -29,7 +29,7 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 		Composite result= new Composite(parent, SWT.NONE);
 		setControl(result);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= 2;		layout.verticalSpacing= 8;
 		result.setLayout(layout);
 		RowLayouter layouter= new RowLayouter(2);
 		
