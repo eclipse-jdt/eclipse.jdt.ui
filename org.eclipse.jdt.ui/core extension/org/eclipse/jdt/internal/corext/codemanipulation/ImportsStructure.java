@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.resources.IFile;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -47,6 +50,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -591,7 +595,7 @@ public final class ImportsStructure implements IImportsStructure {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				IPath path= file.getFullPath();
+				IPath path= fCompilationUnit.getPath();
 				bufferManager.connect(path, null);
 				return bufferManager.getTextFileBuffer(path).getDocument();
 			}
@@ -660,6 +664,7 @@ public final class ImportsStructure implements IImportsStructure {
 		int importsLen= textRange.getLength();
 				
 		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+		boolean useSpaceBetween= useSpaceBetweenGroups();
 		
 		StringBuffer buf= new StringBuffer();
 				
@@ -684,12 +689,14 @@ public final class ImportsStructure implements IImportsStructure {
 				continue;
 			}
 			
-			// add a space between two different groups by looking at the two adjacent imports
-			if (lastPackage != null && !pack.isComment() && !pack.isSameGroup(lastPackage)) {
-				ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
-				ImportDeclEntry first= pack.getImportAt(0);
-				if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
-					buf.append(lineDelim);
+			if (useSpaceBetween) {
+				// add a space between two different groups by looking at the two adjacent imports
+				if (lastPackage != null && !pack.isComment() && !pack.isSameGroup(lastPackage)) {
+					ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
+					ImportDeclEntry first= pack.getImportAt(0);
+					if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
+						buf.append(lineDelim);
+					}
 				}
 			}
 			lastPackage= pack;
@@ -737,6 +744,27 @@ public final class ImportsStructure implements IImportsStructure {
 		return null;
 	}
 	
+	/**
+	 * Probes if the formatter allows
+	 * @return
+	 */
+	private boolean useSpaceBetweenGroups() {
+		try {
+			String sample= "import a.A;\n\n import b.B;\nclass C {}"; //$NON-NLS-1$
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, sample, 0, String.valueOf('\n'), fCompilationUnit.getJavaProject().getOptions(true));
+			Document doc= new Document(sample);
+			res.apply(doc);
+			int idx1= doc.search(0, "import", true, true, false); //$NON-NLS-1$
+			int line1= doc.getLineOfOffset(idx1);
+			int idx2= doc.search(idx1 + 1, "import", true, true, false); //$NON-NLS-1$
+			int line2= doc.getLineOfOffset(idx2);
+			return line2 - line1 > 1; 
+		} catch (BadLocationException e) {
+			// should not happen 
+		}
+		return true;
+	}
+
 	private Set evaluateStarImportConflicts() throws JavaModelException {
 		int nPackageEntries= fPackageEntries.size();
 		HashSet starImportPackages= new HashSet(nPackageEntries);
