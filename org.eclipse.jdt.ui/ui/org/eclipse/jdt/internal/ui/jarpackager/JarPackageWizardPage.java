@@ -104,7 +104,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE"; //$NON-NLS-1$
 
 	// other constants
-	private final static int SIZING_SELECTION_WIDGET_WIDTH= 400;
+	private final static int SIZING_SELECTION_WIDGET_WIDTH= 480;
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 150;
 	
 	/**
