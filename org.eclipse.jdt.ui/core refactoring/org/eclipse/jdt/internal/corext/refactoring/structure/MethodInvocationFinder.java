@@ -71,6 +71,7 @@ class MethodInvocationFinder {
 			return false;
 		}
 		
+		//--- visit methods ----
 		public boolean visit(MethodInvocation node) {
 			if (! isReported(node))
 				return true;
