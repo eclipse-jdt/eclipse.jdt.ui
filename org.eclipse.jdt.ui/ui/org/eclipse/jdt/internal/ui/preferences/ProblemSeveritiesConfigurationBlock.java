@@ -79,7 +79,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING);
 	private static final Key PREF_PB_UNQUALIFIED_FIELD_ACCESS= getJDTCoreKey(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS);
 	
-	private static final Key PREF_15_PB_UNSAVE_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION);
+	private static final Key PREF_15_PB_UNCHECKED_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION);
 	private static final Key PREF_15_PB_FINAL_PARAM_BOUND= getJDTCoreKey(JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND);
 	private static final Key PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= getJDTCoreKey(JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST);
 
@@ -120,7 +120,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
 				PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_MISSING_SERIAL_VERSION, 				
-				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST
+				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST
 			};
 	}
 	
@@ -360,7 +360,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		excomposite.setClient(inner);
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_unsafe_type_op.label"); //$NON-NLS-1$
-		addComboBox(inner, label, PREF_15_PB_UNSAVE_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+		addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_final_param_bound.label"); //$NON-NLS-1$
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
