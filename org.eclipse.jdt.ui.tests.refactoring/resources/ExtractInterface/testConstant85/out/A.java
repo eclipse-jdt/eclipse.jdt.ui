@@ -1,12 +1,12 @@
 package p;
 
-import javax.swing.JTextField;
+import java.util.ArrayList;
 
-class A extends JTextField implements I{
+class A extends ArrayList implements I{
 }
 class Test{
 	void f(A a){
 		x(a);
 	}
-	void x(JTextField o){}
+	void x(ArrayList o){}
 }
