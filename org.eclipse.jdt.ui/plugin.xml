@@ -10,7 +10,6 @@
    <runtime>
       <library name="jdt.jar">
          <export name="*"/>
-         <packages prefixes="org.eclipse.jdt.ui,org.eclipse.jdt.internal.ui,org.eclipse.jdt.internal.corext,org.eclipse.ltk"/>
       </library>
    </runtime>
    <requires>

@@ -9,7 +9,6 @@
   <runtime>
     <library name="junit.jar">
       <export name="*"/>
-	  <packages prefixes="junit"/>
     </library>
   </runtime>
 </plugin>
