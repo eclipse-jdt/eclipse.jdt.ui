@@ -13,6 +13,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
@@ -40,11 +42,18 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	private OpenJavaElementAction fOpen;
 	private ContextMenuGroup[] fStandardGroups;
 			
-	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, ILabelProvider lprovider, IWorkbenchPart part) {
+	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
-				
+
+		ILabelProvider baseLProvider= new StandardJavaUILabelProvider(
+			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
+		);
+		
+		setLabelProvider(new DecoratingLabelProvider(baseLProvider, part.getSite().getDecoratorManager()));
+			
 		setContentProvider(contentProvider);
-		setLabelProvider(lprovider);
 		setSorter(new ViewerSorter() {
 			public boolean isSorterProperty(Object element, Object property) {
 				return true;

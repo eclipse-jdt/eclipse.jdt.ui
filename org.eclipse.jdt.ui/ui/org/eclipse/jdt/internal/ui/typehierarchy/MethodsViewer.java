@@ -21,7 +21,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -71,18 +70,17 @@ public class MethodsViewer extends ProblemTableViewer {
 
 	private ContextMenuGroup[] fStandardGroups;	
 	
-	public MethodsViewer(Composite parent, DecoratingLabelProvider labelProvider, IWorkbenchPart part) {
+	public MethodsViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		ILabelProvider inner= ((DecoratingLabelProvider) labelProvider).getLabelProvider();
-		if (inner instanceof JavaUILabelProvider) {
-			fLabelProvider= (JavaUILabelProvider) inner;
-		}
-			
-		MethodsContentProvider contentProvider= new MethodsContentProvider();
-
-		setLabelProvider(labelProvider);
-		setContentProvider(contentProvider);
+		fLabelProvider= new StandardJavaUILabelProvider(
+			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
+		);
+		
+		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, part.getSite().getDecoratorManager()));
+		setContentProvider(new MethodsContentProvider(lifeCycle));
 				
 		fOpen= new OpenJavaElementAction(this);
 		

@@ -1,24 +1,28 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.*;
-import org.eclipse.jdt.internal.ui.*;
-import org.eclipse.jdt.internal.ui.preferences.*;
-import org.eclipse.jdt.internal.ui.viewsupport.*;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
+import org.eclipse.jdt.internal.ui.viewsupport.IAdornmentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class HierarchyAdornmentProvider implements IAdornmentProvider {
 
-	private TypeHierarchyViewPart fViewPart;
 	private TypeHierarchyLifeCycle fHierarchy;
 
 	/**
 	 * Constructor for HierarchyLabelProvider.
 	 * @param flags
 	 */
-	public HierarchyAdornmentProvider(TypeHierarchyViewPart viewPart, TypeHierarchyLifeCycle hierarchy) {
+	public HierarchyAdornmentProvider(TypeHierarchyLifeCycle hierarchy) {
 		super();
-		fViewPart= viewPart;
 		fHierarchy= hierarchy;
 	}
 
@@ -28,7 +32,7 @@ public class HierarchyAdornmentProvider implements IAdornmentProvider {
 	public int computeAdornmentFlags(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType) element;
-			IJavaElement input= fViewPart.getInputElement();
+			IJavaElement input= fHierarchy.getInputElement();
 			if (input != null && input.getElementType() != IJavaElement.TYPE) {
 				IJavaElement parent= JavaModelUtil.findElementOfKind(type, input.getElementType());
 				if (!input.equals(parent)) {

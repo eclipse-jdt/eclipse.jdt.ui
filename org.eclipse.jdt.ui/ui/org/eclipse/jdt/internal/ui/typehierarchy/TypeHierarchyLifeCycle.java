@@ -190,7 +190,9 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		} else {
 			ArrayList changedTypes= new ArrayList();
 			processDelta(event.getDelta(), changedTypes);
-			fireChange((IType[]) changedTypes.toArray(new IType[changedTypes.size()]));
+			if (changedTypes.size() > 0) {
+				fireChange((IType[]) changedTypes.toArray(new IType[changedTypes.size()]));
+			}
 		}
 	}
 	

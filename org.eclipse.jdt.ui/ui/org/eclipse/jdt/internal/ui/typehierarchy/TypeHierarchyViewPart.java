@@ -39,10 +39,8 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -89,7 +87,6 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
@@ -433,32 +430,20 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		super.dispose();
 	}
-	
-	private DecoratingLabelProvider createHierarchyLabelProvider() {
-		ILabelProvider baseLProvider= new StandardJavaUILabelProvider(
-			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(this, fHierarchyLifeCycle))
-		);
-		
-		return new DecoratingLabelProvider(baseLProvider, getSite().getDecoratorManager());
-	}
-	
-	
-		
+			
 	private Control createTypeViewerControl(Composite parent) {
 		fViewerbook= new PageBook(parent, SWT.NULL);
 				
 		KeyListener keyListener= createKeyListener();
 						
 		// Create the viewers
-		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
+		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(superTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW);
 		
-		TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
+		TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(subTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW);
 		
-		TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
+		TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(vajViewer, keyListener, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW);
 
 		fAllViewers= new TypeHierarchyViewer[3];
@@ -519,7 +504,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
-		fMethodsViewer= new MethodsViewer(parent, createHierarchyLabelProvider(), this);
+		fMethodsViewer= new MethodsViewer(parent, fHierarchyLifeCycle, this);
 		fMethodsViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillMethodsViewerContextMenu(menu);
@@ -858,7 +843,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (getCurrentViewer().containsElements() != null) {
 				Runnable runnable= new Runnable() {
 					public void run() {
-						getCurrentViewer().updateContent();
+						getCurrentViewer().updateContent(); // refresh
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);
@@ -1131,6 +1116,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
 				}
 			}
+			fMethodsViewer.refresh();
 		}
 	}	
 	
