@@ -17,6 +17,8 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -31,24 +33,31 @@ public class MoveAction extends SelectionDispatchAction{
 	public MoveAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
-		fMoveMembersAction= MoveAction.createMoveMembersAction(site);
+		fMoveMembersAction= new MoveMembersAction(site);
 		fJdtMoveAction= new JdtMoveAction(site);
 	}
+	
+	public MoveAction(CompilationUnitEditor editor) {
+		super(editor.getEditorSite());
+		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
+		fMoveMembersAction= new MoveMembersAction(editor);
+	}	
 
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		fMoveMembersAction.selectionChanged(event);
-		fJdtMoveAction.selectionChanged(event);
-		setEnabled(fMoveMembersAction.isEnabled() || fJdtMoveAction.isEnabled());
+		if (fJdtMoveAction != null)
+			fJdtMoveAction.selectionChanged(event);
+		setEnabled(computeEnableState());	
 	}
 
 	/*
 	 * @see IAction#run()
 	 */
 	public void run() {
-		if (fJdtMoveAction.isEnabled())
+		if (fJdtMoveAction != null && fJdtMoveAction.isEnabled())
 			fJdtMoveAction.run();
 		else if (fMoveMembersAction.isEnabled())	
 			fMoveMembersAction.run();
@@ -59,32 +68,15 @@ public class MoveAction extends SelectionDispatchAction{
 	 */
 	public void update() {
 		fMoveMembersAction.update();
-		fJdtMoveAction.update();
-		setEnabled(fMoveMembersAction.isEnabled() || fJdtMoveAction.isEnabled());
+		if (fJdtMoveAction != null)
+			fJdtMoveAction.update();
+		setEnabled(computeEnableState());
 	}
-
-	private static OpenRefactoringWizardAction createMoveMembersAction(IWorkbenchSite site) {
-		String label= RefactoringMessages.getString("RefactoringGroup.move_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, site, IMember.class) {
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				Set memberSet= new HashSet();
-				memberSet.addAll(Arrays.asList((Object[])obj));
-				IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-				return new MoveMembersRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
-			}
-			protected boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((MoveMembersRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
-			}
-			protected boolean canOperateOnMultiSelection(){
-				return true;
-			}	
-			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= RefactoringMessages.getString("RefactoringGroup.move_Members"); //$NON-NLS-1$
-				//FIX ME: wrong
-				String helpId= "HELPID"; //$NON-NLS-1$
-				return new MoveMembersWizard((MoveMembersRefactoring)ref, title, helpId);
-			}
-		};
-	}	
-
+	
+	private boolean computeEnableState(){
+		if (fJdtMoveAction == null)	
+			return fMoveMembersAction.isEnabled();
+		else
+			return fMoveMembersAction.isEnabled() || fJdtMoveAction.isEnabled();
+	}
 }
