@@ -25,6 +25,19 @@ Also used in the 'Add annonymous inner class' code assist.</li>
 Packages Views supports the same filtering options for members as in the
 outliner and the type hierarchy, i.e., hide fields, hide statics, hide
 non-public.</li>
+<li>
+Pull Up Methods refactoring - to activate, select a set of methods belonging to the same type and choose
+'Pull Up...' from the context menu or 'Pull Up Methods...' from the global 'Refactor' menu. 
+Then, select the  methods that you want to delete (in subclasses of the class you are pulling the methods to.)
+You are reponsible for choosing only those methods that have the same behavios as those you are pulling up.
+</li>
+<li>
+Reorder Method Parameters refactoring - to activate, select a method that has more than 1 parameter and choose
+'Reorder Parameters...' from the context menu or 'Reorder Method Parameters...' from the global 'Refactor' menu.
+Then, specify the new parameter order. This operation is not behavior preserving if expressions used to compute
+values passed as parameters have side effects.<br>
+The order of parameters will be changed also in all methods overriding/implementing the one you selected.
+</li>
 </ul>
 
 <h3>
