@@ -2,7 +2,7 @@
 <site>
 
    <description>
-      Update site for AST View, new
+      Update site for AST View
    </description>
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.1.jar" id="org.eclipse.jdt.astview.feature" version="1.0.1">
       <category name="ast-view-1.0.1"/>
