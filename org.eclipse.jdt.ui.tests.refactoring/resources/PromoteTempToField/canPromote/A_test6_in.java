@@ -6,6 +6,6 @@ class A{
 				int i= s();
 			}
 			int s(){return 3;}
-		}	
+		};
 	}
 }

@@ -5,6 +5,6 @@ class A{
 			void fx(){
 				int i= 0;
 			}	
-		}	
+		};
 	}
 }

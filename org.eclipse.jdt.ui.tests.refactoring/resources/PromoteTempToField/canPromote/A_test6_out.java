@@ -6,6 +6,6 @@ class A{
 			void fx(){
 			}
 			int s(){return 3;}
-		}	
+		};
 	}
 }
