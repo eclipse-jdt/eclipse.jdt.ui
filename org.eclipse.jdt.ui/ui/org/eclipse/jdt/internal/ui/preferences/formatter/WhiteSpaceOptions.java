@@ -831,7 +831,8 @@ public final class WhiteSpaceOptions {
    
     private static InnerNode createArrayInitializerTree(Map workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.arrayinit"); //$NON-NLS-1$
-        
+   
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_brace", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_comma", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, ARRAY_DECL_PREVIEW); //$NON-NLS-1$
