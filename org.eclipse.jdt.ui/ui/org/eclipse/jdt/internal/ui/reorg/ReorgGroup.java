@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.ui.reorg;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -44,4 +47,10 @@ public class ReorgGroup extends ContextMenuGroup {
 			new DeleteAction(p)
 		};		
 	}	
+	
+	public static void addGlobalReorgActions(IActionBars actionBars, ISelectionProvider provider) {
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, new CopySourceReferencesToClipboardAction(provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, new CutSourceReferencesToClipboardAction(provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, new PasteSourceReferencesAction(provider));
+	}
 }
