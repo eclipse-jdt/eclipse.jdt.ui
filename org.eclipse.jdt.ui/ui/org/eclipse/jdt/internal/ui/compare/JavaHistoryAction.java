@@ -133,6 +133,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		try {
 			return EditorUtility.getWorkingCopy(input, true);
 		} catch (JavaModelException ex) {
+			// NeedWork
 		}
 		return null;
 	}

@@ -68,6 +68,7 @@ public class JavaHistoryEditorAction extends Action implements IUpdate {
 		try {
 			element= SelectionConverter.getElementAtOffset(fEditor);
 		} catch (JavaModelException e) {
+			// NeedWork
 		}
 		ISelection selection= StructuredSelection.EMPTY;
 		if (element != null) {

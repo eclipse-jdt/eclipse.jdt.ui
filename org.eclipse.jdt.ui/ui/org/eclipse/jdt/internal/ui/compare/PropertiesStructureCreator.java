@@ -93,7 +93,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			if (fParent != null)
 				fParent.nodeChanged(node);
 		}
-	};
+	}
 	
 	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
 	private static final String SEPARATORS= "=:"; //$NON-NLS-1$
@@ -194,6 +194,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			
 			return doc.get(start, length);
 		} catch (BadLocationException ex) {
+			// silently ignored
 		}
 		return null;
 	}
@@ -292,6 +293,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 						length--;
 					}
 				} catch (BadLocationException e) {
+					// silently ignored
 				}
 	    		
 	     		new PropertyNode(root, 0, key, value, doc, start, length);

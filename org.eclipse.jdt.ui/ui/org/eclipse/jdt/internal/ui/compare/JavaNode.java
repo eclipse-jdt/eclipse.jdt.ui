@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.ITypedElement;
@@ -142,16 +142,16 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 					
 		switch (getTypeCode()) {
 		case CU:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.COMPILATION_UNIT);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.COMPILATION_UNIT);
 			break;
 		case PACKAGE:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.PACKAGE_DECLARATION);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.PACKAGE_DECLARATION);
 			break;
 		case IMPORT:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.IMPORT_DECLARATION);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.IMPORT_DECLARATION);
 			break;
 		case IMPORT_CONTAINER:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.IMPORT_CONTAINER);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.IMPORT_CONTAINER);
 			break;
 		case CLASS:
 			id= JavaCompareUtilities.getTypeImageDescriptor(true);
@@ -160,14 +160,14 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			id= JavaCompareUtilities.getTypeImageDescriptor(false);
 			break;
 		case INIT:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.INITIALIZER);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.INITIALIZER);
 			break;
 		case CONSTRUCTOR:
 		case METHOD:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.METHOD);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.METHOD);
 			break;
 		case FIELD:
-			id= JavaCompareUtilities.getImageDescriptor(IMember.FIELD);
+			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.FIELD);
 			break;					
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);

@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
@@ -188,6 +187,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			try {
 				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {
+				// NeedWork
 				// parse error: bail out
 				return null;
 			}
@@ -270,6 +270,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				}
 				content= buf.toString();	// success!
 			} catch (InvalidInputException ex) {
+				// NeedWork
 			}
 		}
 		return content;
@@ -332,10 +333,10 @@ public class JavaStructureCreator implements IStructureCreator {
 					// since a rename or arg list change looks
 					// like a pair of addition and deletions
 					if (type != JavaNode.CONSTRUCTOR)
-						nameInfo.setDiff((ICompareInput)diff);
+						nameInfo.setDiff(diff);
 					
 					if (argInfo != null)
-						argInfo.setDiff((ICompareInput)diff);
+						argInfo.setDiff(diff);
 					break;
 				default:
 					break;
@@ -344,7 +345,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			
 			// recurse
 			if (diff instanceof IDiffContainer)
-				rewriteTree(differencer, (IDiffContainer)diff);
+				rewriteTree(differencer, diff);
 		}
 		
 		// now we have to rebuild the diff tree according to the combined
@@ -464,14 +465,14 @@ public class JavaStructureCreator implements IStructureCreator {
 			return false;
 			
 		switch (je.getElementType()) {
-		case JavaElement.COMPILATION_UNIT:
-		case JavaElement.TYPE:
-		case JavaElement.FIELD:
-		case JavaElement.METHOD:
-		case JavaElement.INITIALIZER:
-		case JavaElement.PACKAGE_DECLARATION:
-		case JavaElement.IMPORT_CONTAINER:
-		case JavaElement.IMPORT_DECLARATION:
+		case IJavaElement.COMPILATION_UNIT:
+		case IJavaElement.TYPE:
+		case IJavaElement.FIELD:
+		case IJavaElement.METHOD:
+		case IJavaElement.INITIALIZER:
+		case IJavaElement.PACKAGE_DECLARATION:
+		case IJavaElement.IMPORT_CONTAINER:
+		case IJavaElement.IMPORT_DECLARATION:
 			return true;
 		}
 		return false;

@@ -202,6 +202,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancable
+			// NeedWork: use assert
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
@@ -221,6 +222,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			children= container.getChildren();
 		} catch(JavaModelException ex) {
+			// NeedWork
 		}
 		
 		if (children != null) {

@@ -41,6 +41,7 @@ class JavaCompareUtilities {
 				return i;
 			}
 		} catch (NumberFormatException e) {
+			// NeedWork
 		}
 		return 4;
 	}
@@ -51,6 +52,7 @@ class JavaCompareUtilities {
 			try {
 				return bundle.getString(key);
 			} catch (MissingResourceException x) {
+				// NeedWork
 			}
 		}
 		return dfltValue;
@@ -68,7 +70,9 @@ class JavaCompareUtilities {
 				if (s != null)
 					return Integer.parseInt(s);
 			} catch (NumberFormatException x) {
+				// NeedWork
 			} catch (MissingResourceException x) {
+				// NeedWork
 			}
 		}
 		return dfltValue;
@@ -76,18 +80,18 @@ class JavaCompareUtilities {
 
 	static ImageDescriptor getImageDescriptor(int type) {
 		switch (type) {			
-		case IMember.INITIALIZER:
-		case IMember.METHOD:
+		case IJavaElement.INITIALIZER:
+		case IJavaElement.METHOD:
 			return getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$			
-		case IMember.FIELD:
+		case IJavaElement.FIELD:
 			return getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
-		case IMember.PACKAGE_DECLARATION:
+		case IJavaElement.PACKAGE_DECLARATION:
 			return JavaPluginImages.DESC_OBJS_PACKDECL;
-		case IMember.IMPORT_DECLARATION:
+		case IJavaElement.IMPORT_DECLARATION:
 			return JavaPluginImages.DESC_OBJS_IMPDECL;
-		case IMember.IMPORT_CONTAINER:
+		case IJavaElement.IMPORT_CONTAINER:
 			return JavaPluginImages.DESC_OBJS_IMPCONT;
-		case IMember.COMPILATION_UNIT:
+		case IJavaElement.COMPILATION_UNIT:
 			return JavaPluginImages.DESC_OBJS_CUNIT;
 		}	
 		return ImageDescriptor.getMissingImageDescriptor();
@@ -101,7 +105,7 @@ class JavaCompareUtilities {
 
 	static ImageDescriptor getImageDescriptor(IMember element) {
 		int t= element.getElementType();
-		if (t == IMember.TYPE) {
+		if (t == IJavaElement.TYPE) {
 			IType type= (IType) element;
 			try {
 				return getTypeImageDescriptor(type.isClass());
@@ -125,34 +129,34 @@ class JavaCompareUtilities {
 		StringBuffer sb= new StringBuffer();
 		
 		switch (je.getElementType()) {
-		case JavaElement.COMPILATION_UNIT:
+		case IJavaElement.COMPILATION_UNIT:
 			sb.append(JavaElement.JEM_COMPILATIONUNIT);
 			break;
-		case JavaElement.TYPE:
+		case IJavaElement.TYPE:
 			sb.append(JavaElement.JEM_TYPE);
 			sb.append(je.getElementName());
 			break;
-		case JavaElement.FIELD:
+		case IJavaElement.FIELD:
 			sb.append(JavaElement.JEM_FIELD);
 			sb.append(je.getElementName());
 			break;
-		case JavaElement.METHOD:
+		case IJavaElement.METHOD:
 			sb.append(JavaElement.JEM_METHOD);
 			sb.append(JavaElementLabels.getElementLabel(je, JavaElementLabels.M_PARAMETER_TYPES));
 			break;
-		case JavaElement.INITIALIZER:
+		case IJavaElement.INITIALIZER:
 			String id= je.getHandleIdentifier();
 			int pos= id.lastIndexOf(JavaElement.JEM_INITIALIZER);
 			if (pos >= 0)
 				sb.append(id.substring(pos));
 			break;
-		case JavaElement.PACKAGE_DECLARATION:
+		case IJavaElement.PACKAGE_DECLARATION:
 			sb.append(JavaElement.JEM_PACKAGEDECLARATION);
 			break;
-		case JavaElement.IMPORT_CONTAINER:
+		case IJavaElement.IMPORT_CONTAINER:
 			sb.append('<');
 			break;
-		case JavaElement.IMPORT_DECLARATION:
+		case IJavaElement.IMPORT_DECLARATION:
 			sb.append(JavaElement.JEM_IMPORTDECLARATION);
 			sb.append(je.getElementName());			
 			break;
@@ -267,12 +271,13 @@ class JavaCompareUtilities {
 			return buffer.toString();
 			
 		} catch (IOException ex) {
+			// NeedWork
 		} finally {
 			if (reader != null) {
 				try {
 					reader.close();
 				} catch (IOException ex) {
-					JavaPlugin.log(ex);
+					// silently ignored
 				}
 			}
 		}
@@ -335,7 +340,7 @@ class JavaCompareUtilities {
 				try {
 					reader.close();
 				} catch (IOException ex) {
-					JavaPlugin.log(ex);
+					// silently ignored
 				}
 			}
 		}

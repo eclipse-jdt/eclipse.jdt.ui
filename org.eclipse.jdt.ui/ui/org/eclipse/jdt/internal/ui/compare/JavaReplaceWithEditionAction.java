@@ -165,6 +165,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancable
+			// NeedWork: use assert
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);

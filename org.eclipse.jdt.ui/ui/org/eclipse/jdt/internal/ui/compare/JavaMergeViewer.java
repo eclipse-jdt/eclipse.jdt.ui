@@ -291,6 +291,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			line= doc.getLineOfOffset(pos);
 			pos= doc.getLineOffset(line+1);
 		} catch (BadLocationException ex) {
+			// silently ignored
 		}
 		
 		// ensure that pos is within container range

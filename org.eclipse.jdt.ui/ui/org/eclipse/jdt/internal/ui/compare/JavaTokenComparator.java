@@ -64,6 +64,7 @@ public class JavaTokenComparator implements ITokenComparator {
 				fCount++;
 			}
 		} catch (InvalidInputException ex) {
+			// NeedWork
 		}
 	}	
 
