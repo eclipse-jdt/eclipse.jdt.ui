@@ -447,6 +447,13 @@
 			enablesFor="2+"
 			class="org.eclipse.compare.internal.CompareAction">
 		</action>
+		<action
+			id="compareWithPatch"
+			label="%CompareWithPatchAction.label"
+			tooltip="%CompareWithPatchAction.tooltip"
+			menubarPath="compareWithMenu/compareWithGroup"
+			class="org.eclipse.compare.patch.CompareWithPatchAction">
+		</action>
 	</objectContribution>
 	
 	<objectContribution
