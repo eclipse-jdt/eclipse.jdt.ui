@@ -79,7 +79,8 @@ public class ReorgCorrectionsSubProcessor {
 			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
 			
 			// correct pack decl
-			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, 5));
+			int relevance= cu.getPackageDeclarations().length == 0 ? 7 : 5; // bug 38357
+			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
 
 			// move to pack
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
