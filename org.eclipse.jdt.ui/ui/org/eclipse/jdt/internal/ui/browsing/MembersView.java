@@ -216,7 +216,7 @@ public class MembersView extends JavaBrowsingPart {
 
 	protected void restoreState(IMemento memento) {
 		super.restoreState(memento);
-		fMemberFilterActionGroup.restoreState(memento);
+		fMemberFilterActionGroup.restoreState(memento, true);
 	}	
 
 	protected void hookViewerListeners() {
