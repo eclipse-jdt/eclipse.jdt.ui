@@ -72,7 +72,6 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -119,7 +118,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
-	private final CodeGenerationSettings fCodeGenerationSettings;
 
 	private CompilationUnit fCU;
 	private List fExceptionInfos;
@@ -136,21 +134,20 @@ public class ChangeSignatureRefactoring extends Refactoring {
 //	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
 //	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 
-	private ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		//fExceptionInfos is created in checkActivation
-		fCodeGenerationSettings= codeGenerationSettings;
 		fReturnTypeName= getInitialReturnTypeName();
 		fMethodName= getInitialMethodName();
 		fVisibility= getInitialMethodVisibility();
 	}
 	
-	public static ChangeSignatureRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+	public static ChangeSignatureRefactoring create(IMethod method) throws JavaModelException{
 		if (! isAvailable(method))
 			return null;
-		return new ChangeSignatureRefactoring(method, codeGenerationSettings);
+		return new ChangeSignatureRefactoring(method);
 	}
 	
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
@@ -1295,7 +1292,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
 
-		public void updateNode() throws JavaModelException {
+		public void updateNode() {
 			reshuffleElements();
 			changeMethodName();
 		}
@@ -1817,7 +1814,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fNode= node;
 		}
 
-		public void updateNode() throws JavaModelException {
+		public void updateNode() {
 			changeParamguments();
 			
 			if (canChangeNameAndReturnType())

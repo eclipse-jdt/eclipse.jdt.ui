@@ -21,10 +21,9 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameParametersTests extends RefactoringTest{
@@ -66,7 +65,7 @@ public class RenameParametersTests extends RefactoringTest{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		//ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
 		//ref.setNewNames(createRenamings(method, newNames));
@@ -87,7 +86,7 @@ public class RenameParametersTests extends RefactoringTest{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		modifyInfos(ref.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);

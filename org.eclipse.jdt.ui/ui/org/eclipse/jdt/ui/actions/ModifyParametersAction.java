@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
@@ -199,7 +198,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 	
 	private static ChangeSignatureRefactoring createRefactoring(IMethod method) throws JavaModelException{
-		return ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		return ChangeSignatureRefactoring.create(method);
 	}
 	
 	private IJavaElement[] resolveElements() {
@@ -211,14 +210,14 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 	
 	private void startRefactoring(IMethod method) throws JavaModelException {
-		ChangeSignatureRefactoring refactoring= createRefactoring(method); 
-		Assert.isNotNull(refactoring);
+		ChangeSignatureRefactoring changeSigRefactoring= createRefactoring(method); 
+		Assert.isNotNull(changeSigRefactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getMethod()))
+		if (!ActionUtil.isProcessable(getShell(), changeSigRefactoring.getMethod()))
 			return;
 		UserInterfaceStarter starter= new UserInterfaceStarter() {
 			public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
-				ChangeSignatureRefactoring cr= (ChangeSignatureRefactoring)refactoring;
+				ChangeSignatureRefactoring cr= (ChangeSignatureRefactoring) refactoring;
 				RefactoringStatus status= cr.checkInitialConditions(new NullProgressMonitor());
 				if (status.hasFatalError()) {
 					RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
@@ -250,9 +249,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 				super.activate(refactoring, parent, save);
 			}
 		};
-		starter.initialize(createWizard(refactoring));
+		starter.initialize(createWizard(changeSigRefactoring));
 		try {
-			starter.activate(refactoring, getShell(), true);
+			starter.activate(changeSigRefactoring, getShell(), true);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, 
 				RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),  //$NON-NLS-1$

@@ -32,8 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -114,7 +112,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -135,7 +133,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method m does not exist in A", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		ref.setNewMethodName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -163,7 +161,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -198,7 +196,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -293,7 +291,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature));
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -302,7 +300,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature));
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -323,7 +321,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, null, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -351,7 +349,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		if (returnTypeName != null)
 		ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -384,7 +382,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 	
 		// from RefactoringTest#performRefactoring():
 		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
