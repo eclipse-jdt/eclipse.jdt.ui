@@ -35,10 +35,7 @@ import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 /**
  * A template proposal.
  */
-public class TemplateProposal implements ICompletionProposal, LinkedPositionUI.ExitListener {
-
-	private static final String TEMPLATE_POSITION= "TemplateProposal.template.position";	
-	private static final IPositionUpdater fgTemplateUpdater= new DefaultPositionUpdater(TEMPLATE_POSITION);
+public class TemplateProposal implements ICompletionProposal {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -80,21 +77,9 @@ public class TemplateProposal implements ICompletionProposal, LinkedPositionUI.E
 			int start= fRegion.getOffset();
 			int end= fRegion.getOffset() + fRegion.getLength();
 			
-			String templateString= fTemplateBuffer.getString();
-
-			// backup and replace with template
-			fOldText= document.get(start, end - start);			
+			// insert template string
+			String templateString= fTemplateBuffer.getString();	
 			document.replace(start, end - start, templateString);	
-
-			// register template position
-			document.addPositionCategory(TEMPLATE_POSITION);
-			document.addPositionUpdater(fgTemplateUpdater);
-			try {
-				document.addPosition(TEMPLATE_POSITION, new Position(start, templateString.length()));
-			} catch (BadPositionCategoryException e) {
-				JavaPlugin.log(e);
-				Assert.isTrue(false);	
-			}
 
 			// translate positions
 			LinkedPositionManager manager= new LinkedPositionManager(document);
@@ -114,7 +99,6 @@ public class TemplateProposal implements ICompletionProposal, LinkedPositionUI.E
 			
 			LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
 			editor.setFinalCaretOffset(getCaretOffset(fTemplateBuffer) + start);
-			editor.setCancelListener(this);
 			editor.enter();
 
 			fSelectedRegion= editor.getSelectedRegion();
@@ -224,12 +208,7 @@ public class TemplateProposal implements ICompletionProposal, LinkedPositionUI.E
 		buffer.append("</pre>"); //$NON-NLS-1$
 		return buffer.toString();
 	}
-/*
-	private void openErrorDialog(JavaModelException e) {
-		Shell shell= fViewer.getTextWidget().getShell();
-		ErrorDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.accessing.title"), TemplateMessages.getString("TemplateEvaluator.error.accessing.message"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-	}	
-*/
+
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= fViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
@@ -239,31 +218,5 @@ public class TemplateProposal implements ICompletionProposal, LinkedPositionUI.E
 		Shell shell= fViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
-	
-	public void exit(boolean accept) {
-		IDocument document= fViewer.getDocument();		
 
-		try {
-			if (!accept) {
-				Position[] positions= document.getPositions(TEMPLATE_POSITION);
-				Assert.isTrue((positions != null) && (positions.length == 1));
-				
-				int offset= positions[0].getOffset();
-				int length= positions[0].getLength();
-						
-				document.replace(offset, length, fOldText);	
-			}
-
-			document.removePositionUpdater(fgTemplateUpdater);
-			document.removePositionCategory(TEMPLATE_POSITION);		
-
-		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-			openErrorDialog(e);
-		}
-	}
-	
 }

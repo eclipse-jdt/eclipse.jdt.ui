@@ -202,7 +202,7 @@ public class ResultCollector implements ICompletionRequestor {
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end) {
 	
-		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 
 		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
@@ -257,7 +257,7 @@ public class ResultCollector implements ICompletionRequestor {
 	 */
 	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
 		// XXX: To be revised
-		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		JavaCompletionProposal proposal= createMethodDeclarationCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		fMethods.add(proposal);
 	}
 	
@@ -302,7 +302,7 @@ public class ResultCollector implements ICompletionRequestor {
 		return (JavaCompletionProposal[]) result.toArray(new JavaCompletionProposal[result.size()]);
 	}
 
-	protected JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+	private JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
 		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
 		if (Flags.isDeprecated(modifiers))
 		 	descriptor= getDeprecatedDescriptor(descriptor);
@@ -323,6 +323,14 @@ public class ResultCollector implements ICompletionRequestor {
 			nameBuffer.append(declaringTypeName);
 		}
 		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
+	}
+
+	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+		return createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+	}
+
+	protected JavaCompletionProposal createMethodDeclarationCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+		return createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 	}
 
 	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {

@@ -14,9 +14,8 @@ public class ExperimentalResultCollector extends ResultCollector {
 	
 	private ITextViewer fViewer;
 		
-// XXX experimental
-	protected JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
-		JavaCompletionProposal original= super.createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+		JavaCompletionProposal original= super.createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		
 		// XXX hack to handle empty code completion
 		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
@@ -39,9 +38,6 @@ public class ExperimentalResultCollector extends ResultCollector {
 		}
 		buffer.append(')');
 		
-        if (new String(returnTypeName).equals("void"))
-        	buffer.append(';');
-
 		return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(),
 			original.getDisplayString(), offsets, lengths, fViewer);
 	}
