@@ -158,7 +158,7 @@ public class JavaModelUtil {
 					result= findMethod(meth.getElementName(), meth.getParameterTypes(), meth.isConstructor(), declaringType);
 					break;
 				case IJavaElement.INITIALIZER:
-					result= declaringType.getInitializer(0);
+					result= declaringType.getInitializer(1);
 					break;					
 				}
 				if (result != null && result.exists()) {
