@@ -145,6 +145,11 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 	}
 	
 	public Object getLaunchObject(String memento) {
-		return JavaCore.create(memento);
+		IJavaElement e = JavaCore.create(memento);
+		if (e.exists()) {
+			return e;
+		} else {
+			return null;
+		}
 	}
 }

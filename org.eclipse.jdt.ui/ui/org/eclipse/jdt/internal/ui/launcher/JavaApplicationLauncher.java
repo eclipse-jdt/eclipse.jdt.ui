@@ -243,6 +243,11 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}
 	
 	public Object getLaunchObject(String memento) {
-		return JavaCore.create(memento);
+		IJavaElement e = JavaCore.create(memento);
+		if (e.exists()) {
+			return e;
+		} else {
+			return null;
+		}
 	}
 }
