@@ -3,7 +3,10 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 
 public class JdtFlags {
 	private JdtFlags(){
@@ -48,6 +51,8 @@ public class JdtFlags {
 	}
 
 	public static boolean isStatic(IMember member) throws JavaModelException{
+		if (isNestedInterface(member))
+			return true;
 		if (isInterfaceField(member))
 			return true;
 		return Flags.isStatic(member.getFlags());
@@ -84,6 +89,10 @@ public class JdtFlags {
 	private static boolean isInterfaceMember(IMember member) throws JavaModelException {
 		return member.getDeclaringType() != null && member.getDeclaringType().isInterface();
 	}
-
+	private static boolean isNestedInterface(IMember member) throws JavaModelException{
+		return member.getElementType() == IJavaElement.TYPE && 
+				!Checks.isTopLevel((IType)member) &&
+				((IType)member).isInterface();
+	}
 	
 }
