@@ -13,18 +13,20 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 class TestUtil {
 	private TestUtil(){
 	}
 	
-	static IMember[] merge(IMember[] a1, IMember[] a2){
-		Set result= new HashSet(a1.length + a2.length);
-		result.addAll(Arrays.asList(a1));
-		result.addAll(Arrays.asList(a2));
-		return (IMember[]) result.toArray(new IMember[result.size()]);
+	static IMember[] merge(IMember[] a1, IMember[] a2, IMember[] a3){
+		return JavaElementUtil.merge(JavaElementUtil.merge(a1, a2), a3);
 	}
-	
+
+	static IMember[] merge(IMember[] a1, IMember[] a2){
+		return JavaElementUtil.merge(a1, a2);
+	}
+		
 	static IField[] getFields(IType type, String[] names) throws JavaModelException{
 	    if (names == null )
 	        return new IField[0];
@@ -35,6 +37,18 @@ class TestUtil {
 			fields.add(field);
 		}
 		return (IField[]) fields.toArray(new IField[fields.size()]);	
+	}
+
+	static IType[] getMemberTypes(IType type, String[] names) throws JavaModelException{
+		if (names == null )
+			return new IType[0];
+		Set memberTypes= new HashSet();
+		for (int i = 0; i < names.length; i++) {
+			IType memberType= type.getType(names[i]);
+			Assert.isTrue(memberType.exists(), "member type " + memberType.getElementName() + " does not exist");
+			memberTypes.add(memberType);
+		}
+		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);	
 	}
 	
 	static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
@@ -47,6 +61,19 @@ class TestUtil {
 			methods.add(method);
 		}
 		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
+	}
+
+	static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp) {
+		List found= new ArrayList(types.length);
+		for (int i= 0; i < types.length; i++) {
+			IType type= types[i];
+			for (int j= 0; j < namesOfTypesToPullUp.length; j++) {
+				String name= namesOfTypesToPullUp[j];
+				if (type.getElementName().equals(name))
+					found.add(type);					
+			}
+		}
+		return (IType[]) found.toArray(new IType[found.size()]);
 	}
 	
 	static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
