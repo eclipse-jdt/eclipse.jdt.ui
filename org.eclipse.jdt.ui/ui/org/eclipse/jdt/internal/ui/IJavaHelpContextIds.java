@@ -92,6 +92,7 @@ public interface IJavaHelpContextIds {
 	public static final String EXTRACT_CONSTANT_ACTION= 											PREFIX + "extract_constant_action"; //$NON-NLS-1$	
 	public static final String INTRODUCE_PARAMETER_ACTION=								PREFIX + "introduce_parameter_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$	
+	public static final String CHANGE_TYPE_ACTION= 											PREFIX + "change_type_action"; //$NON-NLS-1$
 	public static final String MOVE_INNER_TO_TOP_ACTION= 									PREFIX + "move_inner_to_top_level_action"; //$NON-NLS-1$
 	public static final String USE_SUPERTYPE_ACTION= 										PREFIX + "use_supertype_action"; //$NON-NLS-1$
 	public static final String FIND_DECLARATIONS_IN_WORKSPACE_ACTION= 						PREFIX + "find_declarations_in_workspace_action"; //$NON-NLS-1$	

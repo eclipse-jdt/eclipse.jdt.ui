@@ -95,7 +95,9 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fIntroduceParameterAction;
     private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
-	
+
+	private SelectionDispatchAction fChangeTypeAction;
+
 	private SelectionDispatchAction fRenameRefactoringAction;
 	
 	/**
@@ -199,6 +201,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractInterfaceAction.update(selection);
 		editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
 
+		fChangeTypeAction= new ChangeTypeAction(editor);
+		fChangeTypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CHANGE_TYPE);
+		initAction(fChangeTypeAction, provider, selection);
+		editor.setAction("ChangeType", fChangeTypeAction); //$NON-NLS-1$
+
 		fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
 		fConvertNestedToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 		fConvertNestedToTopAction.update(selection);
@@ -236,6 +243,9 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
 		initAction(fExtractInterfaceAction, provider, selection);
 
+		fChangeTypeAction= new ChangeTypeAction(fSite);
+		initAction(fChangeTypeAction, provider, selection);
+
 		fConvertNestedToTopAction= new ConvertNestedToTopAction(fSite);
 		initAction(fConvertNestedToTopAction, provider, selection);
 
@@ -271,6 +281,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
@@ -302,6 +313,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fInlineAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
+		disposeAction(fChangeTypeAction, provider);
 		disposeAction(fConvertNestedToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
 		disposeAction(fConvertLocalToFieldAction, provider);
@@ -327,6 +339,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fPullUpAction);
 		added+= addAction(refactorSubmenu, fPushDownAction);
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
+		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING));
 		added+= addAction(refactorSubmenu, fInlineAction);

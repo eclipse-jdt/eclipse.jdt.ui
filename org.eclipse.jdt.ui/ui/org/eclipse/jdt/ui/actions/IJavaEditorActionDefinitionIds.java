@@ -340,6 +340,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.edit.text.java.extract.interface"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> change type action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.change.type"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String CHANGE_TYPE= "org.eclipse.jdt.ui.edit.text.java.change.type"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> move inner type to top level action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"</code>).
 	 * 

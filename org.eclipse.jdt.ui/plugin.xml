@@ -1300,6 +1300,13 @@
                id="org.eclipse.jdt.ui.actions.UseSupertype">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.change.type"
+               label="%Refactoring.changeTypeAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+               id="org.eclipse.jdt.ui.actions.ChangeType">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.extract.interface"
                label="%Refactoring.extractInterfaceAction.label"
                retarget="true"
@@ -2574,6 +2581,18 @@
             string=""
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.changeType.name"
+            description="%ActionDefinition.changeType.description"
+            category="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.change.type">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.generalize.type"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command

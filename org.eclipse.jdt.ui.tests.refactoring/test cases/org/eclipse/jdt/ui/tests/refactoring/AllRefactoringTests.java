@@ -53,6 +53,7 @@ public class AllRefactoringTests {
 		
 		//--types
 		suite.addTest(RenameTypeTests.suite());	
+		suite.addTest(ChangeTypeRefactoringTests.suite());
 		
 		//--packages
 		suite.addTest(RenamePackageTests.suite());
