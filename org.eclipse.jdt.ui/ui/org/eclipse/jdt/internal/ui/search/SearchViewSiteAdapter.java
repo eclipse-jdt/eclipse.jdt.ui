@@ -102,14 +102,14 @@ class SearchViewSiteAdapter implements IWorkbenchPartSite {
 		Object element= SelectionUtil.getSingleElement(selection);
 		if (element instanceof ISearchResultViewEntry) {
 			IMarker marker= ((ISearchResultViewEntry)element).getSelectedMarker();
-			try {
-				IJavaElement je= JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
-				if (je != null)
-					return new StructuredSelection(je);
-			} catch (CoreException ex) {
-				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-1$
-				return null;
-			}
+			if (marker != null && marker.exists())
+				try {
+					IJavaElement je= JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
+					if (je != null)
+						return new StructuredSelection(je);
+				} catch (CoreException ex) {
+					ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-1$
+				}
 		}
 		return StructuredSelection.EMPTY;		
 	}
