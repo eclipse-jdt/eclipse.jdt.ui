@@ -53,6 +53,7 @@ public interface IJavaHelpContextIds {
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
 	
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
+	public static final String JAVA_WORKING_SET_PAGE= PREFIX + "java_working_set_page_context"; //$NON-NLS-1$
 	
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
 	

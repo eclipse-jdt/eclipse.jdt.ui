@@ -175,27 +175,28 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_RUN= create(T_OVR, "run_co.gif"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= create(T_OVR, "warning_co.gif"); 					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_OVERRIDES= create(T_OVR, "over_co.gif");  						//$NON-NLS-1$
-	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_OVERRIDES= create(T_OVR, "over_co.gif");  					//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= create(T_WIZBAN, "newint_wiz.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= create(T_WIZBAN, "newsrcfldr_wiz.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= create(T_WIZBAN, "newsrcfldr_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= create(T_WIZBAN, "newmeth_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= create(T_WIZBAN, "newpack_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= create(T_WIZBAN, "newsbook_wiz.gif");		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= create(T_WIZBAN, "java_app_wiz.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= create(T_WIZBAN, "java_attach_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR= create(T_WIZBAN, "refactor_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_METHOD= create(T_WIZBAN, "methrefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_METHOD= create(T_WIZBAN, "methrefact_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_TYPE= create(T_WIZBAN, "typerefact_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PACKAGE= create(T_WIZBAN, "packrefact_wiz.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CODE= create(T_WIZBAN, "coderefact_wiz.gif"); 	//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= create(T_WIZBAN, "compunitrefact_wiz.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= create(T_WIZBAN, "compunitrefact_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= create(T_WIZBAN, "jar_pack_wiz.gif"); 		//$NON-NLS-1$
-	
+	public static final ImageDescriptor DESC_WIZBAN_JAVA_WORKINGSET= create(T_WIZBAN, "java_workingset_wiz.gif");//$NON-NLS-1$
+		
 	public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_INSPSNIPPET= create(T_CTOOL, "insp_sbook.gif"); 			//$NON-NLS-1$
