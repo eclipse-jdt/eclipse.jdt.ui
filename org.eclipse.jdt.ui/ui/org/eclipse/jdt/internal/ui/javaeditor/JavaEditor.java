@@ -6,46 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import java.util.Iterator;
-import java.util.ResourceBundle;
-
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.IEditorActionBarContributor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IPartService;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.part.EditorActionBarContributor;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.DefaultRangeIndicator;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
-import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
-import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
-import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.Iterator;import java.util.ResourceBundle;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorActionBarContributor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IPartService;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.DefaultRangeIndicator;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
 
@@ -141,14 +102,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page));
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction(page));
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page));
-
-		IStatusLineManager statusLineManager= getStatusLineManager();
-		if (statusLineManager != null) {
-			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
-			page.addSelectionChangedListener(updater);
-		}
-
-		
+	
 		return page;
 	}
 	

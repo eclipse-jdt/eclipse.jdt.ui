@@ -6,60 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.util.ArrayUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.util.Enumeration;import java.util.Hashtable;import java.util.Vector;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
 /**
@@ -446,7 +393,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Menu fMenu;
 	private JavaOutlineViewer fOutlineViewer;
 	private JavaEditor fEditor;
-	
+		
 	private ListenerList fSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
@@ -497,7 +444,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			public void selectionChanged(SelectionChangedEvent e) {
 				fireSelectionChanged(e.getSelection());
 			}
-		});
+		});		
 	}
 	
 	public void dispose() {
@@ -613,6 +560,16 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	}
 	
 	/**
+	 * @see Page#makeContributions(IMenuManager, IToolBarManager, IStatusLineManager)
+	 */
+	public void makeContributions(IMenuManager menuManager, IToolBarManager toolBarManager, IStatusLineManager statusLineManager) {
+		if (statusLineManager != null) {
+			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
+			addSelectionChangedListener(updater);
+		}
+	}	
+	
+	/**
 	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
@@ -642,4 +599,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (fOutlineViewer != null)
 			fOutlineViewer.setSelection(selection);		
 	}
+
+
 }
