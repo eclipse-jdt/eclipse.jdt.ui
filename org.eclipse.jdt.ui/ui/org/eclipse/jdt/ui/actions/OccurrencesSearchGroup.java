@@ -43,6 +43,14 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * <p>
+ * The quick menu shortcut is currently not visible in the global sub-menu,
+ * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=79162
+ * </p>
+ * <p>
+ * The quick menu is currently not working for <code>IPage</code>s, e.g. Outline pages
+ * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=53812
+ * </p>
  * 
  * @since 3.1
  */
@@ -116,7 +124,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		} else if (site instanceof IPageSite) {
 			/*
 			 * FIXME: Can't get key binding service for page site (e.g. Outline view)
-			 * 		  see:
+			 * 		  see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=53812
 			 */  
 		}
 	}
