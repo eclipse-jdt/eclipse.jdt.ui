@@ -78,7 +78,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 
-		ASTRewriteCorrectionProposal castProposal= getCastProposal(context, castType, nodeToCast);
+		ASTRewriteCorrectionProposal castProposal= getCastProposal(context, castType, nodeToCast, 5);
 		if (castProposal != null) {
 			proposals.add(castProposal);
 		}
@@ -105,7 +105,7 @@ public class LocalCorrectionsSubProcessor {
 	
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", binding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 				String returnTypeName= proposal.addImport(binding);
 				
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
@@ -137,7 +137,7 @@ public class LocalCorrectionsSubProcessor {
 				String typeName= edit.addImport(args[0]);
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", typeName); //$NON-NLS-1$
-				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 1);
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
 				varProposal.getRootTextEdit().add(edit);	
 				proposals.add(varProposal);
 			}
@@ -179,7 +179,7 @@ public class LocalCorrectionsSubProcessor {
 	
 	
 
-	public static ASTRewriteCorrectionProposal getCastProposal(IAssistContext context, String castType, Expression nodeToCast) throws CoreException {
+	public static ASTRewriteCorrectionProposal getCastProposal(IAssistContext context, String castType, Expression nodeToCast, int relevance) throws CoreException {
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
 		if (binding != null && !canCast(castType, binding)) {
 			return null;
@@ -192,7 +192,7 @@ public class LocalCorrectionsSubProcessor {
 		
 		String label;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 1, image); //$NON-NLS-1$
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, relevance, image); //$NON-NLS-1$
 		String simpleCastType= proposal.addImport(castType);
 		
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
@@ -371,7 +371,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
 		
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5) {
 			public void apply(IDocument document) {
 				try {
 					NLSRefactoring refactoring= NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
@@ -450,7 +450,7 @@ public class LocalCorrectionsSubProcessor {
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostaticdefining.description", declaringTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 				String typeName= proposal.addImport(declaringTypeBinding);
 				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
 				
@@ -466,7 +466,7 @@ public class LocalCorrectionsSubProcessor {
 				
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", instanceTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 				String typeName= proposal.addImport(instanceTypeBinding);
 				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
 
@@ -476,7 +476,7 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(proposal);
 			}
 		}
-		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC);
+		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, 4);
 	}
 
 	public static void addUnimplementedMethodsProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
@@ -498,7 +498,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		if (typeNode instanceof TypeDeclaration) {
 			TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
-			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeStaticProposal(cu, typeDeclaration);
+			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeStaticProposal(cu, typeDeclaration, 5);
 			proposals.add(proposal);
 		}
 	}
@@ -556,7 +556,7 @@ public class LocalCorrectionsSubProcessor {
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding curr= methods[i];
 			if (curr.isConstructor() && !Modifier.isPrivate(curr.getModifiers())) {
-				proposals.add(new ConstructorFromSuperclassProposal(cu, typeDeclaration, curr, 2));
+				proposals.add(new ConstructorFromSuperclassProposal(cu, typeDeclaration, curr, 5));
 			}
 		}
 	}
@@ -573,7 +573,7 @@ public class LocalCorrectionsSubProcessor {
 		if (name != null) {
 			IBinding binding= name.resolveBinding();
 			if (binding != null) {
-				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), context.getASTRoot(), binding, 1));
+				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), context.getASTRoot(), binding, 5));
 			}
 		}
 	}	

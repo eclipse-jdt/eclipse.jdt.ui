@@ -225,7 +225,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, 5); 
 				break;				
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
@@ -238,7 +238,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 5); 
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
@@ -276,7 +276,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.NeedToEmulateFieldWriteAccess:
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE);
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, 5);
 				break;
 			default:
 		}

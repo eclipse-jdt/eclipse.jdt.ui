@@ -35,7 +35,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	
-	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -112,7 +112,7 @@ public class ModifierCorrectionSubProcessor {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
 		}
 	}
@@ -129,7 +129,7 @@ public class ModifierCorrectionSubProcessor {
 		if (binding instanceof IVariableBinding) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
-			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 0, image));
+			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
 		
@@ -210,7 +210,7 @@ public class ModifierCorrectionSubProcessor {
 	
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removeabstract.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
@@ -221,13 +221,13 @@ public class ModifierCorrectionSubProcessor {
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 			proposal2.ensureNoModifications();
 			proposals.add(proposal2);
 		}
 		
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
-			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, parentTypeDecl);
+			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, parentTypeDecl, 5);
 			proposals.add(proposal);
 		}		
 		
@@ -273,7 +273,7 @@ public class ModifierCorrectionSubProcessor {
 	
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removenative.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
@@ -284,7 +284,7 @@ public class ModifierCorrectionSubProcessor {
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 			proposal2.ensureNoModifications();
 			proposals.add(proposal2);
 		}
@@ -293,7 +293,7 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	
-	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration) throws CoreException {
+	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) throws CoreException {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
 		
 		AST ast= typeDeclaration.getAST();
@@ -304,7 +304,7 @@ public class ModifierCorrectionSubProcessor {
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier()); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
 		proposal.ensureNoModifications();
 		return proposal;
 	}
@@ -343,7 +343,7 @@ public class ModifierCorrectionSubProcessor {
 
 		String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
 		proposal.ensureNoModifications();
 
 		proposals.add(proposal);
@@ -362,7 +362,7 @@ public class ModifierCorrectionSubProcessor {
 		if (binding instanceof IVariableBinding) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
-			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 0, image));
+			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
 

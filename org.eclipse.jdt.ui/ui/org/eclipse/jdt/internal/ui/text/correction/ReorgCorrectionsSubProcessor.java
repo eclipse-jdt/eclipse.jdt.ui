@@ -54,7 +54,7 @@ public class ReorgCorrectionsSubProcessor {
 			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
 			
 			// rename type
-			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 1));
+			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 5));
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
@@ -63,7 +63,7 @@ public class ReorgCorrectionsSubProcessor {
 	
 				// rename cu
 				String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
-				proposals.add(new ChangeCorrectionProposal(label, change, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
+				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
 			}
 		}
 	}
@@ -75,7 +75,7 @@ public class ReorgCorrectionsSubProcessor {
 			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
 			
 			// correct pack decl
-			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, 1));
+			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, 5));
 
 			// move to pack
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
@@ -96,7 +96,7 @@ public class ReorgCorrectionsSubProcessor {
 				composite.add(new CreatePackageChange(newPack));
 				composite.add(new MoveCompilationUnitChange(cu, newPack));
 	
-				proposals.add(new ChangeCorrectionProposal(label, composite, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
+				proposals.add(new ChangeCorrectionProposal(label, composite, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
 			}
 		}
 	}
@@ -115,14 +115,14 @@ public class ReorgCorrectionsSubProcessor {
 				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
 
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
 		}
 		
 		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5) {
 			public void apply(IDocument document) {
 				IEditorInput input= new FileEditorInput((IFile) JavaModelUtil.toOriginal(cu).getResource());
 				IWorkbenchPage p= JavaPlugin.getActivePage();
