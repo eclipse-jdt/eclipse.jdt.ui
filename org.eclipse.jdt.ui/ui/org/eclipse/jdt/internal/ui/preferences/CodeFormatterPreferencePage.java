@@ -329,7 +329,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
-		previewViewer.getTextWidget().setTabs(Integer.parseInt((String) fWorkingValues.get(PREF_TAB_SIZE)));
+		previewViewer.getTextWidget().setTabs(getIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
 		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
 		Control control= previewViewer.getControl();
@@ -405,7 +405,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			fWorkingValues.put(key, number);
 		}
 		if (PREF_TAB_SIZE.equals(key)) {
-			fSourceViewer.getTextWidget().setTabs(Integer.parseInt(number));
+			fSourceViewer.getTextWidget().setTabs(getIntValue(number, 0));
 		}		
 		updateStatus(status);
 		updatePreview();
