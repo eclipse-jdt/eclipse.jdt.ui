@@ -212,6 +212,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif");
 	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= create(T_WIZBAN, "newmeth_wiz.gif");
 	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= create(T_WIZBAN, "newpack_wiz.gif");
+	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= create(T_WIZBAN, "newsbook_wiz.gif");
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= create(T_WIZBAN, "java_app_wiz.gif");
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= create(T_WIZBAN, "java_attach_wiz.gif");
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR= create(T_WIZBAN, "refactor_wiz.gif");

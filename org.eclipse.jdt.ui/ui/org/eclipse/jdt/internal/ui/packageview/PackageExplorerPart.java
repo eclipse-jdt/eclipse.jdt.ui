@@ -229,8 +229,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		} else if (input instanceof IContainer) {
 			return JavaCore.create((IContainer)input);
 		}
-		
-		return null;	
+		//1GERPRT: ITPJUI:ALL - Packages View is empty when shown in Type Hierarchy Perspective
+		// we can't handle the input
+		// fall back to show the workspace
+		return JavaCore.create(JavaPlugin.getWorkspace().getRoot());	
 	}
 	
 	/**
@@ -325,11 +327,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fAddBookmarkAction.canOperateOnSelection())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddBookmarkAction);
 					
+		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
+		fRefreshAction.selectionChanged(selection);
+
 		if (selectionHasElements) {
 			// update the action to use the right selection since the refresh
 			// action doesn't listen to selection changes.
-			fRefreshAction.selectionChanged(selection);
-			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
 		}	
 	}

@@ -43,9 +43,9 @@ public class ShowInPackageViewAction extends JavaUIAction implements IUpdate {
 		if (!(element instanceof IPackageDeclaration || element instanceof IImportDeclaration || element instanceof IType))
 			return false;
 		
-		IAdaptable input= fSite.getPage().getInput();
+		/*IAdaptable input= fSite.getPage().getInput();
 		if (!(input.getAdapter(IResource.class) instanceof IContainer))
-			return false;
+			return false;*/
 			
 		return true;	
 	}

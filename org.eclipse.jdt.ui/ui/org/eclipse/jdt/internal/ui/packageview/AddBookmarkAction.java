@@ -43,6 +43,8 @@ public class AddBookmarkAction extends JavaUIAction {
 	
 	public boolean canOperateOnSelection() {
 		IStructuredSelection selection = getStructuredSelection();
+		if (selection.isEmpty())
+			return false;
 		for (Iterator enum = selection.iterator(); enum.hasNext();) {
 			Object o = enum.next();
 			if (o instanceof IAdaptable) {

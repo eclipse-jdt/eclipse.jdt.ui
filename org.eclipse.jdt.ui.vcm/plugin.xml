@@ -4,7 +4,7 @@
 <!-- This plugin provides basic VCM functionality to the Eclipse Java UI	     -->
 <!-- ======================================================================= -->
 <plugin
-	name = "Eclipse Java Development Tools VCM UI"
+	name = "Java Development Tools VCM UI"
 	id = "org.eclipse.jdt.ui.vcm"
 	version = "0.9"
 	provider-name = "Object Technology International, Inc.">

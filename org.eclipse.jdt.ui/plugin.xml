@@ -749,7 +749,7 @@
 
 <extension
 	point= "org.eclipse.ui.resourceFilters">
-	<filter pattern = "*.class">
+	<filter pattern = "*.class" selected = "true" >
 	</filter>
 </extension>
 

@@ -48,6 +48,6 @@ public class NewSnippetCreationWizard extends Wizard implements INewWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fWorkbench= workbench;
 		fSelection= selection;
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSCRAPPAGE);
 	}
 }
