@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -127,6 +128,13 @@ public class ASTNodeSearchUtil {
 
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
 		return (MethodDeclaration)ASTNodes.getParent(getDeclarationNode(iMethod, astManager), MethodDeclaration.class);
+	}
+	
+	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
+		ASTNode node= getDeclarationNode(iField, astManager);
+		if (node instanceof VariableDeclarationFragment)
+			return  (VariableDeclarationFragment)node;
+		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
 	}
 	
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
