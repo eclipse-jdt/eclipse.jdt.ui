@@ -99,7 +99,11 @@ public class ResultCollector extends CompletionRequestor {
 	
 	
 	/**
-	 * Creates a new instance ready to collect
+	 * Creates a new instance ready to collect proposals. If the passed
+	 * <code>ICompilationUnit</code> is not contained in an
+	 * {@link IJavaProject}, no javadoc will be available as
+	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
+	 * on the created proposals.
 	 * 
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
@@ -109,9 +113,21 @@ public class ResultCollector extends CompletionRequestor {
 	}
 	
 	/**
-	 * Creates a new instance ready to collect
+	 * Creates a new instance ready to collect proposals. Note that proposals
+	 * for anonymous types and method declarations are not created when using
+	 * this constructor, as those need to know the compilation unit that they
+	 * are created on. Use
+	 * {@link ResultCollector#ResultCollector(ICompilationUnit)} instead to get
+	 * all proposals.
+	 * <p>
+	 * If the passed java project is <code>null</code>, no javadoc will be
+	 * available as
+	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
+	 * on the created (e.g. method and type) proposals.
+	 * </p>
 	 * 
-	 * @param project the project that the result collector will operate on
+	 * @param project the project that the result collector will operate on, or
+	 *        <code>null</code>
 	 */
 	public ResultCollector(IJavaProject project) {
 		fJavaProject= project;
