@@ -37,9 +37,6 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_LIBRARY= "org.eclipse.jdt.ui.build.jdk.library.label";
 	public static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
-	public static final String KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenameToRefactoring";
-
-
 
 	public JavaBasePreferencePage() {
 		super(GRID);
@@ -49,7 +46,6 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING, false);
 	}
 
 	protected void createFieldEditors() {
@@ -74,12 +70,6 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
         );
 		addField(boolEditor);
 		
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING,
-			JavaPlugin.getResourceString(KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING),
-			parent
-		);
-		addField(boolEditor);
 	}
 
 	public void init(IWorkbench workbench) {
@@ -111,8 +101,6 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		}
 		return null;
 	}
-
-
 }
 
 

@@ -3,22 +3,21 @@
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-package org.eclipse.jdt.internal.ui.reorg;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+package org.eclipse.jdt.internal.ui.reorg;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 
 public class RefactoringSupportFactory {
 
 	private abstract static class RenameSupport implements IRefactoringRenameSupport {
 		private Refactoring fRefactoring;
-		
+		private static IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
+
 		public boolean canRename(Object element) {
 			fRefactoring= createRefactoring(element, new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider()));
 			try {
-				RefactoringStatus status= fRefactoring.checkActivation(new NullProgressMonitor());
-				if (status.hasFatalError()) {
-					fRefactoring= null;
-					return false;
-				}
-				return true;
+				if (fRefactoring.checkActivation(fgNullProgressMonitor).isOK())
+					return true;
+				fRefactoring= null;
+				return false;	
 			} catch (JavaModelException e) {
 				fRefactoring= null;
 				return false;
@@ -46,7 +45,7 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			return new RenameRefactoringWizard("Rename Package"); 
+			return new RenameRefactoringWizard("Refactoring.RenamePackage"); 
 		}
 	}
 
@@ -56,14 +55,11 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			return new RenameRefactoringWizard("Rename Compilation Unit"); 
+			return new RenameRefactoringWizard("Refactoring.RenameCompilationUnit"); 
 		}
 	}
 
 	public static IRefactoringRenameSupport createRenameSupport(Object element) {
-		if(! JavaPlugin.getDefault().getPreferenceStore().getBoolean(
-				IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING))
-			return null;
 			
 		if (element instanceof IPackageFragment)
 			return new RenamePackage();
