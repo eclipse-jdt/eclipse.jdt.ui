@@ -17,15 +17,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -34,6 +41,8 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -48,6 +57,15 @@ public final class RefactoringAvailabilityTester {
 		if (!(element instanceof IType))
 			element= element.getAncestor(IJavaElement.TYPE);
 		return (IType) element;
+	}
+
+	public static IJavaElement[] getJavaElements(final Object[] elements) {
+		List result= new ArrayList();
+		for (int index= 0; index < elements.length; index++) {
+			if (elements[index] instanceof IJavaElement)
+				result.add(elements[index]);
+		}
+		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
 	}
 
 	public static IMember[] getPullUpMembers(final IType type) throws JavaModelException {
@@ -83,6 +101,15 @@ public final class RefactoringAvailabilityTester {
 				list.add(members[index]);
 		}
 		return (IMember[]) list.toArray(new IMember[list.size()]);
+	}
+
+	public static IResource[] getResources(final Object[] elements) {
+		List result= new ArrayList();
+		for (int index= 0; index < elements.length; index++) {
+			if (elements[index] instanceof IResource)
+				result.add(elements[index]);
+		}
+		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
 
 	public static IType getTopLevelType(final IMember[] members) {
@@ -130,20 +157,92 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IType) {
 				final IType type= (IType) selection.getFirstElement();
-				return type.isAnonymous() && !(type.getParent() instanceof IField);
+				final IJavaElement element= type.getParent();
+				if (element instanceof IField && JdtFlags.isEnum((IMember) element))
+					return false;
+				return type.isAnonymous();
 			}
 		}
 		return false;
 	}
 
 	public static boolean isConvertAnonymousAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && type.isAnonymous() && !(type.getParent() instanceof IField);
+		if (Checks.isAvailable(type)) {
+			final IJavaElement element= type.getParent();
+			if (element instanceof IField && JdtFlags.isEnum((IMember) element))
+				return false;
+			return type.isAnonymous();
+		}
+		return false;
 	}
 
 	public static boolean isConvertAnonymousAvailable(final JavaTextSelection selection) throws JavaModelException {
 		final IType type= RefactoringActions.getEnclosingType(selection);
 		if (type != null)
 			return RefactoringAvailabilityTester.isConvertAnonymousAvailable(type);
+		return false;
+	}
+
+	public static boolean isCopyAvailable(final IResource[] resources, final IJavaElement[] elements) throws JavaModelException {
+		if (resources.length != 0 && elements.length != 0)
+			return ReorgPolicyFactory.createCopyPolicy(resources, elements).canEnable();
+		return false;
+	}
+
+	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
+		if (!element.exists())
+			return false;
+		if (element instanceof IJavaModel || element instanceof IJavaProject)
+			return false;
+		if (element.getParent() != null && element.getParent().isReadOnly())
+			return false;
+		if (element instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO rename isClasspathDelete
+				return false;
+		}
+		final IPackageFragment fragment= (IPackageFragment) element;
+		if (element instanceof IPackageFragment && (fragment.hasSubpackages() && fragment.getNonJavaResources().length == 0 && fragment.getChildren().length == 0))
+			return false;
+		if (element.getResource() == null && !RefactoringAvailabilityTester.isWorkingCopyElement(element))
+			return false;
+		if (element instanceof IMember && ((IMember) element).isBinary())
+			return false;
+		if (ReorgUtils.isDeletedFromEditor(element))
+			return false;
+		return true;
+	}
+
+	public static boolean isDeleteAvailable(final IResource resource) {
+		if (!resource.exists() || resource.isPhantom())
+			return false;
+		if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
+			return false;
+		return true;
+	}
+
+	public static boolean isDeleteAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (!selection.isEmpty())
+			return isDeleteAvailable(selection.toArray());
+		return false;
+	}
+
+	public static boolean isDeleteAvailable(final Object[] objects) throws JavaModelException {
+		if (objects.length != 0) {
+			final IResource[] resources= RefactoringAvailabilityTester.getResources(objects);
+			final IJavaElement[] elements= RefactoringAvailabilityTester.getJavaElements(objects);
+			if (objects.length != resources.length + elements.length)
+				return false;
+			for (int index= 0; index < resources.length; index++) {
+				if (!isDeleteAvailable(resources[index]))
+					return false;
+			}
+			for (int index= 0; index < elements.length; index++) {
+				if (!isDeleteAvailable(elements[index]))
+					return false;
+			}
+			return true;
+		}
 		return false;
 	}
 
@@ -343,6 +442,28 @@ public final class RefactoringAvailabilityTester {
 		return selection.resolveInMethodBody() && isIntroduceParameterAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
 	}
 
+	public static boolean isMoveAvailable(final IResource[] resources, final IJavaElement[] elements) throws JavaModelException {
+		if (elements != null) {
+			for (int index= 0; index < elements.length; index++) {
+				IJavaElement element= elements[index];
+				if ((element instanceof IType) && ((IType) element).isLocal())
+					return false;
+				if ((element instanceof IPackageDeclaration))
+					return false;
+				if (element instanceof IField && JdtFlags.isEnum((IMember) element))
+					return false;
+			}
+		}
+		return ReorgPolicyFactory.createMovePolicy(resources, elements).canEnable();
+	}
+
+	public static boolean isMoveAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement element= selection.resolveEnclosingElement();
+		if (element == null)
+			return false;
+		return isMoveAvailable(new IResource[0], new IJavaElement[] { element});
+	}
+
 	public static boolean isMoveInnerAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
 			IType type= null;
@@ -384,6 +505,57 @@ public final class RefactoringAvailabilityTester {
 		if (!(method instanceof IMethod))
 			return false;
 		return isMoveMethodAvailable((IMethod) method);
+	}
+
+	public static boolean isMoveStaticAvailable(final IMember member) throws JavaModelException {
+		final int type= member.getElementType();
+		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
+			return false;
+		if (JdtFlags.isEnum(member))
+			return false;
+		final IType declaring= member.getDeclaringType();
+		if (declaring == null)
+			return false;
+		if (!Checks.isAvailable(member))
+			return false;
+		if (type == IJavaElement.METHOD && declaring.isInterface())
+			return false;
+		if (type == IJavaElement.METHOD && !JdtFlags.isStatic(member))
+			return false;
+		if (type == IJavaElement.METHOD && ((IMethod) member).isConstructor())
+			return false;
+		if (type == IJavaElement.TYPE && !JdtFlags.isStatic(member))
+			return false;
+		if (!declaring.isInterface() && !JdtFlags.isStatic(member))
+			return false;
+		return true;
+	}
+
+	public static boolean isMoveStaticAvailable(final IMember[] members) throws JavaModelException {
+		for (int index= 0; index < members.length; index++) {
+			if (!isMoveStaticAvailable(members[index]))
+				return false;
+		}
+		return true;
+	}
+
+	public static boolean isMoveStaticAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement element= selection.resolveEnclosingElement();
+		if (!(element instanceof IMember))
+			return false;
+		return RefactoringAvailabilityTester.isMoveStaticMembersAvailable(new IMember[] { (IMember) element});
+	}
+
+	public static boolean isMoveStaticMembersAvailable(final IMember[] members) throws JavaModelException {
+		if (members == null)
+			return false;
+		if (members.length == 0)
+			return false;
+		if (!isMoveStaticAvailable(members))
+			return false;
+		if (!isCommonDeclaringType(members))
+			return false;
+		return true;
 	}
 
 	public static boolean isPromoteTempAvailable(final ILocalVariable variable) throws JavaModelException {
@@ -549,6 +721,14 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isUseSuperTypeAvailable(final JavaTextSelection selection) throws JavaModelException {
 		return isUseSuperTypeAvailable(RefactoringActions.getEnclosingOrPrimaryType(selection));
+	}
+
+	public static boolean isWorkingCopyElement(final IJavaElement element) {
+		if (element instanceof ICompilationUnit)
+			return ((ICompilationUnit) element).isWorkingCopy();
+		if (ReorgUtils.isInsideCompilationUnit(element))
+			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
+		return false;
 	}
 
 	private RefactoringAvailabilityTester() {
