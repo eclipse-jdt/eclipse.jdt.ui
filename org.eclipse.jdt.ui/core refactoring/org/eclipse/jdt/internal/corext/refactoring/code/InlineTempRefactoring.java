@@ -203,6 +203,8 @@ public class InlineTempRefactoring extends Refactoring {
 			inlineTemp(change, new SubProgressMonitor(pm, 1));
 			removeTemp(change);
 			return change;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} finally{
