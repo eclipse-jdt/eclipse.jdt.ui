@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceManipulation;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -47,6 +48,8 @@ import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.JavaElementTransfer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 
 public class CopyToClipboardActionTest extends RefactoringTest{
@@ -152,7 +155,13 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		}
 	}
 	
-	private void checkEnabled(Object[] elements){
+	private void checkDisabled(Object[] elements){
+		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
+		copyAction.update(copyAction.getSelection());
+		assertTrue("action should be disabled", ! copyAction.isEnabled());
+	}
+
+	private void checkEnabled(Object[] elements) throws JavaModelException{
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be enabled", copyAction.isEnabled());
@@ -160,40 +169,31 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkClipboard(elements);
 	}
 
-	private void checkDisabled(Object[] elements){
-		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
-		copyAction.update(copyAction.getSelection());
-		assertTrue("action should be disabled", ! copyAction.isEnabled());
-	}
-
-	private void checkClipboard(Object[] elementsCopied) {
+	private void checkClipboard(Object[] elementsCopied) throws JavaModelException {
+		IResource[] resourcesCopied= getResources(elementsCopied);
+		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
+		IType[] mainTypesCopied= ReorgUtils2.getMainTypes(javaElementsCopied);
+		
+		IResource[] resourcesExpected= computeResourcesExpectedInClipboard(resourcesCopied, mainTypesCopied);
+		IJavaElement[] javaElementsExpected= computeJavaElementsExpectedInClipboard(javaElementsCopied, mainTypesCopied);
+		
 		String[] clipboardFiles= getClipboardFiles();
 		IResource[] clipboardResources= getClipboardResources();
 		String clipboardText= getClipboardText();
 		IJavaElement[] clipboardJavaElements= getClipboardJavaElements();
-	
-		IResource[] resourcesCopied= getResources(elementsCopied);
-		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
-		
-		assertEquals("names", computeExpectedNames(resourcesCopied, javaElementsCopied), clipboardText);
-		checkFiles(resourcesCopied, javaElementsCopied, clipboardFiles);
-		checkElements(resourcesCopied, clipboardResources);
-		checkElements(javaElementsCopied, clipboardJavaElements);
+
+		checkNames(resourcesCopied, javaElementsCopied, clipboardText);
+		checkFiles(resourcesCopied, javaElementsCopied, mainTypesCopied, clipboardFiles);
+		checkElements(resourcesExpected, clipboardResources);
+		checkElements(javaElementsExpected, clipboardJavaElements);
 	}
 	
-	private String computeExpectedNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied) {
-		StringBuffer buff= new StringBuffer();
-		for (int i= 0; i < resourcesCopied.length; i++) {
-			if (i>0)
-				buff.append('\n');
-			buff.append(getName(resourcesCopied[i]));
-		}
-		for (int i= 0; i < javaElementsCopied.length; i++) {
-			if (resourcesCopied.length > 0 || i > 0)
-				buff.append('\n');
-			buff.append(getName(javaElementsCopied[i]));
-		}
-		return buff.toString();
+	private IResource[] computeResourcesExpectedInClipboard(IResource[] resourcesCopied, IType[] mainTypesCopied) throws JavaModelException {
+		return ReorgUtils2.union(resourcesCopied, ReorgUtils2.getResources(ReorgUtils2.getCompilationUnits(mainTypesCopied)));
+	}
+
+	private static IJavaElement[] computeJavaElementsExpectedInClipboard(IJavaElement[] javaElementsExpected, IType[] mainTypesCopied) throws JavaModelException {
+		return ReorgUtils2.union(javaElementsExpected, ReorgUtils2.getCompilationUnits(mainTypesCopied));
 	}
 
 	private String getName(IResource resource){
@@ -239,10 +239,29 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		});
 	}
 
-	private static void checkFiles(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String[] clipboardFiles) {
+	private void checkNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String clipboardText){
+		List stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
+		assertEquals("different number of names", resourcesCopied.length + javaElementsCopied.length, stringLines.size());
+		for (int i= 0; i < resourcesCopied.length; i++) {
+			String name= getName(resourcesCopied[i]);
+			assertTrue("name not in set:" + name, stringLines.contains(name));
+		}
+		for (int i= 0; i < javaElementsCopied.length; i++) {
+			IJavaElement element= javaElementsCopied[i];
+			if (! ReorgUtils2.isInsideCompilationUnit(element)){
+				String name= getName(element);
+				assertTrue("name not in set:" + name, stringLines.contains(name));				
+			}
+		}
+	}	
+	
+	private static void checkFiles(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, IType[] mainTypes, String[] clipboardFiles) {
 		int expected= 0;
 		expected += resourcesCopied.length;
 		expected += countResources(javaElementsCopied);
+		expected += mainTypes.length;
+		
+		//we cannot compare file names here because they're absolute and depend on the worspace location
 		assertEquals("different number of files in clipboard", expected, clipboardFiles.length);
 	}
 
@@ -250,7 +269,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		int count= 0;
 		for (int i= 0; i < javaElementsCopied.length; i++) {
 			IJavaElement element= javaElementsCopied[i];
-			if (element instanceof ICompilationUnit || null == element.getAncestor(IJavaElement.COMPILATION_UNIT))
+			if (! ReorgUtils2.isInsideCompilationUnit(element))
 				count++;
 		}
 		return count;
@@ -537,5 +556,12 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	public void testEnabled21() throws Exception{
 		checkEnabled(new Object[]{fOlder});
+	}
+
+	public void testEnabled22() throws Exception{
+		Object classA= fCuA.getType("A");
+		Object packDecl= fCuA.getPackageDeclarations()[0];
+		Object[] elements= {classA, packDecl};
+		checkEnabled(elements);
 	}
 }

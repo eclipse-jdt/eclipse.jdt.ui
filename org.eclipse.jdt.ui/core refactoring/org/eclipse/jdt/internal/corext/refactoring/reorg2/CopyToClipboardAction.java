@@ -31,9 +31,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ResourceTransfer;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -90,7 +92,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 	}
 
-	private void doRun(IResource[] resources, IJavaElement[] javaElements) {
+	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		new ClipboardCopier(resources, javaElements, fClipboard, getShell()).copyToClipboard();
 
 		// update the enablement of the paste action
@@ -124,16 +126,35 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			fLabelProvider= createLabelProvider();
 		}
 
-		public void copyToClipboard(){
-			//List<String>
+		public void copyToClipboard() throws JavaModelException{
+			//List<String> fileNameList
 			List fileNameList= new ArrayList(fResources.length + fJavaElements.length);
 			StringBuffer namesBuf = new StringBuffer();
 			processResources(fileNameList, namesBuf);
 			processJavaElements(fileNameList, namesBuf);
+
+			IType[] mainTypes= ReorgUtils2.getMainTypes(fJavaElements);
+			processMainTypes(fileNameList, mainTypes);
+			
+			ICompilationUnit[] cusOfMainTypes= ReorgUtils2.getCompilationUnits(mainTypes);
+			IResource[] resourcesForClipboard= ReorgUtils2.union(fResources, ReorgUtils2.getResources(cusOfMainTypes));
+			IJavaElement[] javaElementsForClipboard= ReorgUtils2.union(fJavaElements, cusOfMainTypes);
+			
 			String[] fileNames= (String[]) fileNameList.toArray(new String[fileNameList.size()]);
-			copyToClipboard(fResources, fileNames, namesBuf.toString(), fJavaElements);
+			copyToClipboard(resourcesForClipboard, fileNames, namesBuf.toString(), javaElementsForClipboard);
 		}
-		
+
+		private void processResources(List fileNameList, StringBuffer namesBuf) {
+			for (int i= 0; i < fResources.length; i++) {
+				IResource resource= fResources[i];
+				addFileNameToList(fileNameList, resource);
+
+				if (i > 0)
+					namesBuf.append('\n');
+				namesBuf.append(getName(resource));
+			}
+		}
+
 		private void processJavaElements(List fileNameList, StringBuffer namesBuf) {
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
@@ -146,14 +167,11 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 		}
 
-		private void processResources(List fileNameList, StringBuffer namesBuf) {
-			for (int i= 0; i < fResources.length; i++) {
-				IResource resource= fResources[i];
+		private void processMainTypes(List fileNameList, IType[] mainTypes) {
+			for (int i= 0; i < mainTypes.length; i++) {
+				IType mainType= mainTypes[i];
+				IResource resource= ReorgUtils2.getResource(mainType.getCompilationUnit());
 				addFileNameToList(fileNameList, resource);
-
-				if (i > 0)
-					namesBuf.append('\n');
-				namesBuf.append(getName(resource));
 			}
 		}
 
@@ -169,7 +187,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements){
 			try{
 				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names),
-										createDataTypeArray(resources, javaElements, fileNames, names));
+										createDataTypeArray(resources, javaElements, fileNames));
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 					throw e;
@@ -178,7 +196,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 		}
 		
-		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names) {
+		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames) {
 			List result= new ArrayList(4);
 			if (resources.length != 0)
 				result.add(ResourceTransfer.getInstance());
