@@ -4,10 +4,11 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -35,6 +36,15 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		Assert.isTrue(! cu.isWorkingCopy());
 		fCu= cu;
 		computeRenameTypeRefactoring();
+		fNewName= fCu.getElementName();
+	}
+	
+	public Object getNewElement(){
+		IJavaElement parent= fCu.getParent();
+		if (parent.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
+			return fCu; //??
+		IPackageFragment pack= (IPackageFragment)parent;
+		return pack.getCompilationUnit(fNewName);
 	}
 	
 	/* non java-doc
