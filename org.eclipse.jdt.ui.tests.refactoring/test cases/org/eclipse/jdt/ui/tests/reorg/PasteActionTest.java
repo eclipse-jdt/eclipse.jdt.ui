@@ -67,6 +67,7 @@ public class PasteActionTest extends RefactoringTest{
 		
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
 		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard, pasteAction);
+		copyToClipboardAction.setAutoRepeatOnFailure(true);
 		copyToClipboardAction.update(copyToClipboardAction.getSelection());
 		assertTrue("copy not enabled", copyToClipboardAction.isEnabled());
 		copyToClipboardAction.run();
@@ -80,6 +81,7 @@ public class PasteActionTest extends RefactoringTest{
 		
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
 		CopyToClipboardAction copyToClipboardAction= new CopyToClipboardAction(new MockWorkbenchSite(merge(copySelectedResources, copySelectedJavaElements)), fClipboard, pasteAction);
+		copyToClipboardAction.setAutoRepeatOnFailure(true);
 		copyToClipboardAction.update(copyToClipboardAction.getSelection());
 		assertTrue("copy not enabled", copyToClipboardAction.isEnabled());
 		copyToClipboardAction.run();

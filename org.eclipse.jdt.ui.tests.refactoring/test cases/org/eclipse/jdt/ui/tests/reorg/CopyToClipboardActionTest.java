@@ -159,6 +159,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	
 	private void checkDisabled(Object[] elements){
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
+		copyAction.setAutoRepeatOnFailure(true);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be disabled", ! copyAction.isEnabled());
 	}
