@@ -206,7 +206,7 @@ public class TemplateSet {
 		try {
 			fgTemplateSet.save(new FileOutputStream(getTemplateFile()));
 			return true;
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			JavaPlugin.log(e);
 			return false;
 		}
