@@ -193,7 +193,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	private boolean isInTree(IType type) throws JavaModelException {
 		if (isInWorkingSet(type)) {
 			if (fMemberFilter != null) {
-				return hasMemberFilterChildren(type);
+				return hasMemberFilterChildren(type) || hasTypeChildren(type);
 			} else {
 				return true;
 			}
