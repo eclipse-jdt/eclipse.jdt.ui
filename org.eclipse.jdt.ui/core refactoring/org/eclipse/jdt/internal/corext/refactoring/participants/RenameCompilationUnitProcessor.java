@@ -10,16 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
