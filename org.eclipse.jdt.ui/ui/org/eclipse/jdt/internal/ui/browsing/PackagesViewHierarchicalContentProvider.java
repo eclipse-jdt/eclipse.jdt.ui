@@ -357,7 +357,20 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					if (element.exists())
 						postRefresh(input);
 					else
-						postRemove(element);
+						postRemove(input);
+					return;
+				}
+			}
+		}
+		
+		if (kind == IJavaElementDelta.REMOVED) {
+			Object input= fViewer.getInput();
+			if (input != null) {
+				if (fInputIsProject && input.equals(element.getJavaProject())) {
+					postRemove(input);
+					return;
+				} else if (!fInputIsProject && input.equals(element)) {
+					postRemove(input);
 					return;
 				}
 			}
