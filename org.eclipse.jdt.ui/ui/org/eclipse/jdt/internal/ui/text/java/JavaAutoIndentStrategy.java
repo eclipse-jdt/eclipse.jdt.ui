@@ -775,7 +775,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (!Character.isWhitespace(ch))
 				break;
 			toDelete -= computeVisualLength(ch);
-			to++;
+			if (toDelete >= 0)
+				to++;
+			else
+				break;
 		}
 		
 		document.replace(from, to - from, null);
