@@ -151,12 +151,16 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	public void apply(IDocument document, char trigger) {
 		try {
 			
-			if (trigger == (char) 0)
+			if (trigger == (char) 0) {
 				document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
-			else {
+			} else {
 				StringBuffer buffer= new StringBuffer(fReplacementString);
-				buffer.insert(fCursorPosition, trigger);
-				++fCursorPosition;
+
+				if ((fReplacementLength < buffer.length() && buffer.charAt(fReplacementLength) != trigger)) {
+					buffer.insert(fCursorPosition, trigger);
+					++fCursorPosition;
+				}
+				
 				document.replace(fReplacementOffset, fReplacementLength, buffer.toString());
 			}
 			
