@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -654,6 +655,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fSourceBinding, fMemberBindings, target);
 			declaration.accept(analyzer);
+			fSource.rewriter.markAsTracked(declaration, new GroupDescription("moved member declaration"));
 			targetNeedsSourceImport &= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
 		}
@@ -664,30 +666,29 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			ITypeBinding binding= (ITypeBinding)iter.next();
 			fTarget.imports.addImport(binding);
 		}
-		
-		String[] result= new String[fMembers.length];
+		// extract updated members
+		String[] updatedMemberSources= new String[fMembers.length];
 		TextBuffer buffer= TextBuffer.create(fSource.unit.getSource());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		MultiTextEdit edit= new MultiTextEdit();
 		fSource.rewriter.rewriteNode(buffer, edit);
 		editor.add(edit);
 		editor.performEdits(new NullProgressMonitor());
-		ICompilationUnit wc= (ICompilationUnit)JavaModelUtil.toOriginal(fSource.unit).getWorkingCopy();
-		try {
-			wc.getBuffer().setContents(buffer.getContent());
-			wc.reconcile();
-			for (int i= 0; i < fMembers.length; i++) {
-				IMember member= JavaModelUtil.findMemberInCompilationUnit(wc, fMembers[i]);
-				result[i]= Strings.trimIndentation(member.getSource(), fPreferences.tabWidth, false);
-			}
-			
-		} finally {
-			wc.destroy();
+		for (int i= 0; i < members.length; i++) {
+			updatedMemberSources[i]= getUpdatedMember(buffer, members[i]);
 		}
+
 		fSource.removeModifications();
-		return result;		
+		return updatedMemberSources;		
 	}
 	
+	private String getUpdatedMember(TextBuffer buffer, BodyDeclaration declaration) {
+		GroupDescription groupDescription= fSource.rewriter.getTrackedNodeData(declaration);
+		TextRange textRange= groupDescription.getTextRange();
+		String newSource= buffer.getContent(textRange.getOffset(), textRange.getLength());
+		return Strings.trimIndentation(newSource, fPreferences.tabWidth, false);
+	}
+
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		TypeDeclaration destination= getDestinationDeclaration();
