@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.Transfer;
@@ -132,6 +133,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private TableViewer fLocationViewer;
     private Menu fLocationContextMenu;
     private SashForm fHierarchyLocationSplitter;
+    private Clipboard fClipboard;
     private SearchScopeActionGroup fSearchScopeActions;
     private ToggleOrientationAction[] fToggleOrientationActions;
     private ToggleCallModeAction[] fToggleCallModeActions;
@@ -141,6 +143,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private RefreshAction fRefreshAction;
     private OpenLocationAction fOpenLocationAction;
     private FocusOnSelectionAction fFocusOnSelectionAction;
+    private CopyCallHierarchyAction fCopyAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -205,6 +208,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         return fShownMethod;
     }
 
+    public MethodWrapper getCurrentMethodWrapper() {
+        if (fCurrentCallMode == CALL_MODE_CALLERS) {
+            return fCallerRoot;
+        } else {
+            return fCalleeRoot;
+        }
+    }
+           
     /**
      * called from ToggleOrientationAction.
      * @param orientation VIEW_ORIENTATION_HORIZONTAL or VIEW_ORIENTATION_VERTICAL
@@ -336,6 +347,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 slManager));
         getSite().setSelectionProvider(fSelectionProviderMediator);
 
+        fClipboard= new Clipboard(parent.getDisplay());
+        
         makeActions();
         fillViewMenu();
         fillActionBars();
@@ -487,6 +500,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         if (fActionGroups != null)
             fActionGroups.dispose();
+		
+		if (fClipboard != null)
+	        fClipboard.dispose();
 
         super.dispose();
     }
@@ -795,6 +811,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fFocusOnSelectionAction.canActionBeAdded()) {
             menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
         }
+        menu.appendToGroup(GROUP_FOCUS, fCopyAction);
 
         fActionGroups.setContext(new ActionContext(getSelection()));
         fActionGroups.fillContextMenu(menu);
@@ -835,6 +852,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void makeActions() {
         fRefreshAction = new RefreshAction(this);
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
+        fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);

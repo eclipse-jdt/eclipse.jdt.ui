@@ -302,4 +302,24 @@ public abstract class MethodWrapper implements IAdaptable {
         Map cachedCalls = new HashMap();
         getMethodCache().put(this.getMethodCall().getKey(), cachedCalls);
     }
+    
+    /**
+     * Allows a visitor to traverse the call hierarchy. The visiting is stopped when
+     * a recursive node is reached.
+     *  
+     * @param visitor
+     */
+    public void accept(CallHierarchyVisitor visitor) {
+        if (getParent() != null && getParent().isRecursive()) {
+            return;
+        }
+        visitor.preVisit(this);
+        if (visitor.visit(this)) {
+            MethodWrapper[] methodWrappers= getCalls();
+            for (int i= 0; i < methodWrappers.length; i++) {
+                methodWrappers[i].accept(visitor);
+            }
+        }
+        visitor.postVisit(this);
+    }
 }
