@@ -50,7 +50,7 @@ public class CreateTextFileChange extends CreateFileChange {
 		}	
 	}
 	
-	public String getPreview() throws JavaModelException {
+	public String getPreview() {
 		return getSource();
 	}
 }
