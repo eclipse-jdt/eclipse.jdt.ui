@@ -130,7 +130,7 @@ class RefactoringStatusViewer extends SashForm {
 		}
 	}
 	
-	private class RefactoringStatusSorter extends ViewerSorter {
+	private static class RefactoringStatusSorter extends ViewerSorter {
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			int r1= ((RefactoringStatusEntry)e1).getSeverity();
 			int r2= ((RefactoringStatusEntry)e2).getSeverity();
