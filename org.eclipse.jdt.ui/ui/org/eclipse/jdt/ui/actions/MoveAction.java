@@ -197,7 +197,7 @@ public class MoveAction extends SelectionDispatchAction{
 			return false;
 		
 		IMethod method= (IMethod)element;
-		if (! MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings()))
+		if (! MoveInstanceMethodRefactoring.isAvailable(method))
 			return false;	
 		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null)
@@ -210,7 +210,7 @@ public class MoveAction extends SelectionDispatchAction{
 		IMethod method= (IMethod)getSingleSelectedMethod(selection);
 		if (method == null)
 			return false;	
-		if (! MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings()))
+		if (! MoveInstanceMethodRefactoring.isAvailable(method))
 			return false;	
 		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null)

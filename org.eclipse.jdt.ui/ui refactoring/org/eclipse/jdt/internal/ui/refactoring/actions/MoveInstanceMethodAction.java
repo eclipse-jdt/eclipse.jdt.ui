@@ -85,7 +85,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		IMethod method= getSingleSelectedMethod(selection);
 		if (method == null)
 			return false;
-		return MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		return MoveInstanceMethodRefactoring.isAvailable(method);
 	}
 
 	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
