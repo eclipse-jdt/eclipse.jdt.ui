@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -1158,7 +1159,7 @@ public class UnresolvedElementsSubProcessor {
 		IJavaElement[] elements= cu.codeSelect(offset, len);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement curr= elements[i];
-			if (curr instanceof IType) {
+			if (curr instanceof IType && !TypeFilter.isFiltered((IType) curr)) {
 				String qualifiedTypeName= JavaModelUtil.getFullyQualifiedName((IType) curr);
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importexplicit.description", qualifiedTypeName); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);

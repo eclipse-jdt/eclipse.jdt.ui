@@ -15,6 +15,8 @@ import java.util.StringTokenizer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -42,6 +44,14 @@ public class TypeFilter implements IPropertyChangeListener {
 		return getDefault().filter(new String(packageName));
 	}
 	
+	public static boolean isFiltered(IType type) {
+		TypeFilter typeFilter = getDefault();
+		if (typeFilter.hasFilters()) {
+			return typeFilter.filter(JavaModelUtil.getTypeContainerName(type));
+		}
+		return false;
+	}
+	
 
 	private StringMatcher[] fStringMatchers;
 
@@ -66,6 +76,9 @@ public class TypeFilter implements IPropertyChangeListener {
 		return fStringMatchers;
 	}
 	
+	public boolean hasFilters() {
+		return getStringMatchers().length > 0;
+	}
 	
 	
 	public boolean filter(String packageName) {
