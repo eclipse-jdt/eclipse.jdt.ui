@@ -1,6 +1,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -14,43 +16,36 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.Block;
-import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
-import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
-import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.NewSelectionAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.corext.util.Bindings;
 
 public class ExtractTempRefactoring extends Refactoring {
 	
@@ -65,7 +60,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private boolean fDeclareFinal;
 	private String fTempName;
 	private Map fAlreadyUsedNameMap; //String -> ISourceRange
-	private AST fAST;
+	private CompilationUnit fCompilationUnitNode;
 	
 	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings, int tabSize, boolean compactAssignments) {
 		Assert.isTrue(selectionStart >= 0);
@@ -112,10 +107,6 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
 			pm.worked(1);
 		
-			if (!(fCu instanceof CompilationUnit))
-				return RefactoringStatus.createFatalErrorStatus("Internal Error");
-			pm.worked(1);
-
 			initializeAST();
 		
 			return checkSelection(new SubProgressMonitor(pm, 5));
@@ -126,14 +117,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 9);
-			
-			if (fAST.hasProblems()){
-				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
-				if (compileErrors.hasFatalError())
-					return compileErrors;
-			}
-			pm.worked(1);
+			pm.beginTask("", 8);
 	
 			if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
 				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
@@ -161,8 +145,12 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 			pm.worked(1);
 			
-			if (analyzeSelection().getExpressionTypeBinding() == null)
-				result.addFatalError("An expression must be selected to activate this refactoring.");
+			ITypeBinding tb= getSelectedExpression().resolveTypeBinding();
+			if (tb == null)
+				result.addFatalError("This expression cannot currenty be extracted.");
+			else if (tb.getName().equals("void"))
+				result.addFatalError("Cannot extract an expression of type 'void'.");
+				
 			if (result.hasFatalError())
 				return result;
 				
@@ -177,38 +165,32 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void initializeTempNames() throws JavaModelException {
-		fAlreadyUsedNameMap= TempNameUtil.getLocalNameMap(getSelectedMethodNode().scope);
+		fAlreadyUsedNameMap= TempNameUtil.getLocalNameMap(getSelectedMethodNode());
 	}
 
 	private void initializeAST() throws JavaModelException {
-		fAST= new AST(fCu);
+		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
-		NewSelectionAnalyzer analyzer= analyzeSelection();
-		AstNode[] nodes= analyzer.getSelectedNodes();
+		SelectionAnalyzer analyzer= analyzeSelection();
+		ASTNode[] nodes= analyzer.getSelectedNodes();
 		if (nodes == null || nodes.length != 1) 
 			return null;
 		
-		AstNode node= nodes[0];
+		ASTNode node= nodes[0];
 		if (node instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus("Cannot extract the single keyword null.");
-		} if (node instanceof StringLiteral) {
-			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single string literal.");
+			return RefactoringStatus.createFatalErrorStatus("Cannot extract single null literals.");
 		} else if (node instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract an array initializer.");
-		} else if (node instanceof TypeReference) {
-			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single type reference.");
+			return RefactoringStatus.createFatalErrorStatus("Operation not applicable to an array initializer.");
 		} else if (node instanceof Assignment) {
-			AstNode[] parents= findParents(node);
+			ASTNode[] parents= findParents(node);
 			if (parents != null && parents.length != 0 && parents[parents.length - 1] instanceof Expression)
 				return RefactoringStatus.createFatalErrorStatus("Cannot extract assignment that is part of another expression.");
 			else
 				return null;
 		} else if (node instanceof ConditionalExpression) {
 			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single conditional expression.");
-		} else if (node instanceof Reference) {
-			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single variable or field reference.");
 		} else
 			return null;
 	}
@@ -238,24 +220,20 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
-		AstNode[] parents= analyzeSelection().getParents();
-		for (int i= parents.length - 1; i >= 0; i--) {
-			if (parents[i] instanceof ExplicitConstructorCall)
-				return true;
-		}
+		//FIX ME
+		
+//		ASTNode[] parents= getParentsOfSelectedNode();
+//		for (int i= parents.length - 1; i >= 0; i--) {
+//			if (parents[i] instanceof ExplicitConstructorCall)
+//				return true;
+//		}
 		return false;
 	}
 	
 	private boolean isSelectionUsedAsExpression() throws JavaModelException {		
-		Expression expression= getSelectedExpression();
-		Selection selection= Selection.createFromStartEnd(ASTUtil.getSourceStart(expression), ASTUtil.getSourceEnd(expression));
-		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), selection);
-		fAST.accept(selAnalyzer);
-		AstNode[] parents= selAnalyzer.getParents();
+		ASTNode[] parents= getParents(getSelectedExpression());
 		for (int i= parents.length - 1; i >= 0; i--) {
 			if (parents[i] instanceof Expression)
-				return true;
-			if (parents[i] instanceof LocalDeclaration)
 				return true;
 			if ((parents[i] instanceof Statement)){
 				 if (parents[i] instanceof Block)
@@ -287,29 +265,29 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void addImportIfNeeded(TextChange change) throws CoreException {
-		TypeBinding type= analyzeSelection().getExpressionTypeBinding();
-		if (type.isBaseType())
+		ITypeBinding type= getSelectedExpression().resolveTypeBinding();
+		if (type.isPrimitive())
 			return;
 			
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
-		importEdit.addImport(Bindings.makeFullyQualifiedName(type.qualifiedPackageName(), type.qualifiedSourceName()));
+		importEdit.addImport(Bindings.asPackageQualifiedName(type));
 		if (!importEdit.isEmpty())
 			change.addTextEdit("Update imports", importEdit);
 	}
 	
 	private void addTempDeclaration(TextChange change) throws CoreException {
-		AstNode insertBefore= getNodeToInsertTempDeclarationBefore();		
-		int insertOffset= ASTUtil.getSourceStart(insertBefore);
+		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
+		int insertOffset= insertBefore.getStartPosition();
 		String text= createTempDeclarationSource() + getIndent(insertBefore);
 		change.addTextEdit("Declare local variable", SimpleTextEdit.createInsert(insertOffset, text));
 	}
 
-	private AstNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
+	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
 		if ((! fReplaceAllOccurrences) || (getNodesToReplace().length == 1))
 			return getInnermostStatement(getSelectedExpression());
 		
-		AstNode[] firstReplaceNodeParents= findParents(getFirstReplacedExpression());
-		AstNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
+		ASTNode[] firstReplaceNodeParents= findParents(getFirstReplacedExpression());
+		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 
 		if (isBlock(firstReplaceNodeParents[commonPath.length - 1]))
@@ -318,22 +296,18 @@ public class ExtractTempRefactoring extends Refactoring {
 			return findInnermostStatement(firstReplaceNodeParents);
 	}
 	
-	private static boolean isBlock(AstNode node){
-		if (node instanceof Block)
-			return true;
-		if (node instanceof AbstractMethodDeclaration)
-			return true;
-		return false;	
+	private static boolean isBlock(ASTNode node){
+		return (node instanceof Block);
 	}
 	
-	private AstNode[] findDeepestCommonSuperNodePathForReplacedNodes() throws JavaModelException {
-		AstNode[] matchingNodes= getNodesToReplace();
-		AstNode[][] matchingNodesParents= new AstNode[matchingNodes.length][];
+	private ASTNode[] findDeepestCommonSuperNodePathForReplacedNodes() throws JavaModelException {
+		ASTNode[] matchingNodes= getNodesToReplace();
+		ASTNode[][] matchingNodesParents= new ASTNode[matchingNodes.length][];
 		for (int i= 0; i < matchingNodes.length; i++) {
 			matchingNodesParents[i]= findParents(matchingNodes[i]);
 		}
 		List l=Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
-		return (AstNode[]) l.toArray(new AstNode[l.size()]);
+		return (ASTNode[]) l.toArray(new ASTNode[l.size()]);
 	}
 	
 	private static Object[] getLongestArrayPrefix(Object[][] arrays){
@@ -368,22 +342,19 @@ public class ExtractTempRefactoring extends Refactoring {
 		return prefix;
 	}
 	
-	private AstNode[] findParents(AstNode astNode)  throws JavaModelException {
-		int start= ASTUtil.getSourceStart(astNode);
-		int end= ASTUtil.getSourceEnd(astNode);
-		int length= end - start +1;
-		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), Selection.createFromStartLength(start, length));
-		fAST.accept(selAnalyzer);
-		return selAnalyzer.getParents();
+	private ASTNode[] findParents(ASTNode astNode)  throws JavaModelException {
+		SelectionAnalyzer selAnalyzer= new SelectionAnalyzer(Selection.createFromStartLength(astNode.getStartPosition(), astNode.getLength()), true);
+		fCompilationUnitNode.accept(selAnalyzer);
+		return getParents(selAnalyzer.getFirstSelectedNode());
 	}
 	
 	private Expression getFirstReplacedExpression() throws JavaModelException {
 		if (! fReplaceAllOccurrences)
 			return getSelectedExpression();
-		AstNode[] nodesToReplace= getNodesToReplace();
+		ASTNode[] nodesToReplace= getNodesToReplace();
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
-				return ASTUtil.getSourceStart((AstNode)o1) - ASTUtil.getSourceStart((AstNode)o2);
+				return ((ASTNode)o1).getStartPosition() - ((ASTNode)o2).getStartPosition();
 			}	
 		};
 		Arrays.sort(nodesToReplace, comparator);
@@ -391,19 +362,18 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private void addReplaceExpressionWithTemp(TextChange change) throws JavaModelException {
-		AstNode[] nodesToReplace= getNodesToReplace();
+		ASTNode[] nodesToReplace= getNodesToReplace();
 		for (int i= 0; i < nodesToReplace.length; i++) {
-			AstNode astNode= nodesToReplace[i];
-			int offset= ASTUtil.getSourceStart(astNode);
-			int end= ASTUtil.getSourceEnd(astNode);
-			int length= end - offset + 1;
+			ASTNode astNode= nodesToReplace[i];
+			int offset= astNode.getStartPosition();
+			int length= astNode.getLength();
 			change.addTextEdit("Replace expression with a local variable reference", SimpleTextEdit.createReplace(offset, length, fTempName));
 		}
 	}
 
 	//without the trailing indent
 	private String createTempDeclarationSource() throws CoreException {
-		String typeName= new String(analyzeSelection().getExpressionTypeBinding().sourceName());
+		String typeName= getSelectedExpression().resolveTypeBinding().getName();
 		String modifier= fDeclareFinal ? "final ": "";
 		return (modifier + typeName + " " + fTempName + getAssignmentString() + getInitializerSource()) + ";" + getLineDelimiter();
 	}
@@ -420,11 +390,11 @@ public class ExtractTempRefactoring extends Refactoring {
 		return removeTrailingSemicolons(arg.substring(0, arg.length() - 1));	
 	}
 
-	private String getIndent(AstNode insertBefore) throws CoreException {
+	private String getIndent(ASTNode insertBefore) throws CoreException {
 		TextBuffer buffer= null;
 		try{
 			buffer= TextBuffer.acquire(getFile());
-			int startLine= buffer.getLineOfOffset(ASTUtil.getSourceStart(insertBefore));
+			int startLine= buffer.getLineOfOffset(insertBefore.getStartPosition());
 			return TextUtil.createIndentString(buffer.getLineIndent(startLine, getTabSize()));	
 		} finally {
 			if (buffer != null)
@@ -444,14 +414,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private Statement getInnermostStatement(Expression expression) throws JavaModelException {
-		Selection selection= Selection.createFromStartEnd(ASTUtil.getSourceStart(expression), ASTUtil.getSourceEnd(expression));
-		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), selection);
-		fAST.accept(selAnalyzer);
-		AstNode[] parents= selAnalyzer.getParents();
-		return findInnermostStatement(parents);	
+		return findInnermostStatement(findParents(expression));	
 	}
 
-	private Statement findInnermostStatement(AstNode[] parents) {
+	private Statement findInnermostStatement(ASTNode[] parents) {
 		if (parents.length < 2)
 			return null;
 		for (int i= parents.length - 2; i >= 0; i--) {
@@ -461,38 +427,50 @@ public class ExtractTempRefactoring extends Refactoring {
 		return null;	
 	}	
 	
-	private AstNode[] getNodesToReplace() throws JavaModelException {
+	private ASTNode[] getNodesToReplace() throws JavaModelException {
 		Expression expression= getSelectedExpression();
 	
 		if (fReplaceAllOccurrences)
 			return  AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), expression);
 		else 
-			return new AstNode[]{expression};	
+			return new ASTNode[]{expression};	
 	}
-	
-	private AbstractMethodDeclaration getSelectedMethodNode() throws JavaModelException {
-		NewSelectionAnalyzer selAnalyzer= analyzeSelection();
 		
-		AstNode[] parents= selAnalyzer.getParents();
+	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {
+		ASTNode[] parents= getParentsOfSelectedNode();
 		if (parents == null)
 			return null;
 		for (int i= parents.length - 1; i >= 0 ; i--) {
-			AstNode astNode= parents[i];
-			if (astNode instanceof AbstractMethodDeclaration)
-				return (AbstractMethodDeclaration)astNode;
+			ASTNode astNode= parents[i];
+			if (astNode instanceof MethodDeclaration)
+				return (MethodDeclaration)astNode;
 		}
 		return null;
 	}
+	
+	private static ASTNode[] getParents(ASTNode node){
+		ASTNode current= node;
+		List parents= new ArrayList();
+		do{
+			parents.add(current.getParent());
+			current= current.getParent();
+		} while(current.getParent() != null);
+		Collections.reverse(parents);
+		return (ASTNode[]) parents.toArray(new ASTNode[parents.size()]);
+	}
+	
+	private ASTNode[] getParentsOfSelectedNode() throws JavaModelException {
+		return getParents(analyzeSelection().getFirstSelectedNode());
+	}
 
-	private NewSelectionAnalyzer analyzeSelection() throws JavaModelException {
-		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), Selection.createFromStartLength(fSelectionStart, fSelectionLength));
-		fAST.accept(selAnalyzer);
-		return selAnalyzer;
+	private SelectionAnalyzer analyzeSelection() throws JavaModelException {
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fSelectionStart, fSelectionLength), true);
+		fCompilationUnitNode.accept(analyzer);
+		return analyzer;
 	}
 	
 	private Expression getSelectedExpression() throws JavaModelException {
-		NewSelectionAnalyzer selAnalyzer= analyzeSelection();
-		AstNode[] selected= selAnalyzer.getSelectedNodes();
+		ASTNode[] selected= analyzeSelection().getSelectedNodes();
 		if (selected[0] instanceof Expression)
 			return (Expression)selected[0];
 		else 
