@@ -587,6 +587,54 @@ public class JavaPlugin extends AbstractUIPlugin {
 				}
 			};
 			sorter.sort(fJavaEditorTextHoverDescriptors);
+		
+			// The Problem hover has to be the first and the Annotation hover has to be the last one in the JDT UI's hover list
+			int length= fJavaEditorTextHoverDescriptors.length;
+			int first= -1;
+			int last= length - 1;
+			int problemHoverIndex= -1;
+			int annotationHoverIndex= -1;
+			for (int i= 0; i < length; i++) {
+				if (!fJavaEditorTextHoverDescriptors[i].getId().startsWith(JavaUI.ID_PLUGIN)) {
+					if (problemHoverIndex == -1 || annotationHoverIndex == -1)
+						continue;
+					else {
+						last= i - 1;
+						break;
+					}
+				}
+				if (first == -1)
+					first= i;
+				
+				if (fJavaEditorTextHoverDescriptors[i].getId().equals("org.eclipse.jdt.ui.AnnotationHover")) { //$NON-NLS-1$
+					annotationHoverIndex= i;
+					continue;
+				}
+				if (fJavaEditorTextHoverDescriptors[i].getId().equals("org.eclipse.jdt.ui.ProblemHover")) { //$NON-NLS-1$
+					problemHoverIndex= i;
+					continue;
+				}
+			}
+	
+			JavaEditorTextHoverDescriptor hoverDescriptor= null;
+			
+			if (first > -1 && problemHoverIndex > -1 && problemHoverIndex != first) {
+				// move problem hover to beginning
+				hoverDescriptor= fJavaEditorTextHoverDescriptors[first];
+				fJavaEditorTextHoverDescriptors[first]= fJavaEditorTextHoverDescriptors[problemHoverIndex];
+				fJavaEditorTextHoverDescriptors[problemHoverIndex]= hoverDescriptor;
+
+				// update annotation hover index if needed
+				if (annotationHoverIndex == first)
+					annotationHoverIndex= problemHoverIndex;
+			}
+			
+			if (annotationHoverIndex > -1 && annotationHoverIndex != last) {
+				// move annotation hover to end
+				hoverDescriptor= fJavaEditorTextHoverDescriptors[last];
+				fJavaEditorTextHoverDescriptors[last]= fJavaEditorTextHoverDescriptors[annotationHoverIndex];
+				fJavaEditorTextHoverDescriptors[annotationHoverIndex]= hoverDescriptor;
+			}
 		}
 		
 		return fJavaEditorTextHoverDescriptors;

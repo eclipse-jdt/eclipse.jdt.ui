@@ -170,27 +170,24 @@
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
             id="org.eclipse.jdt.ui.JavadocHover">
       </hover>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.ui.javaEditorTextHovers">
       <hover
             label="%sequentialHover"
             description="%sequentialHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover"
             id="org.eclipse.jdt.ui.BestMatchHover">
       </hover>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.ui.javaEditorTextHovers">
       <hover
             label="%sourceHover"
             description="%sourceHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
             id="org.eclipse.jdt.ui.JavaSourceHover">
       </hover>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.ui.javaEditorTextHovers">
+      <hover
+            label="%problemHover"
+            description="%problemHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.ProblemHover"
+            id="org.eclipse.jdt.ui.ProblemHover">
+      </hover>
       <hover
             label="%annotationHover"
             description="%annotationHoverDescription"
