@@ -106,7 +106,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & CompilationUnit.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -223,7 +223,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -343,7 +343,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -439,7 +439,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -502,7 +502,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -571,7 +571,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -632,7 +632,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -690,7 +690,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
-		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");

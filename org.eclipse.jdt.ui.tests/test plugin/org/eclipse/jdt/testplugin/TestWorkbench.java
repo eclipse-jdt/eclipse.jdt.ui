@@ -33,7 +33,7 @@ public class TestWorkbench extends Workbench {
 				break;
 			}
 		}
-		IPath location= JavaTestPlugin.getDefault().getWorkspace().getRoot().getLocation();
+		IPath location= JavaTestPlugin.getWorkspace().getRoot().getLocation();
 		System.out.println("Workspace-location: " + location.toString());
 				
 		

@@ -37,7 +37,7 @@ public class JavaTestPlugin extends Plugin {
 	
 	public static void enableAutobuild(boolean enable) throws CoreException {
 		// disable auto build
-		IWorkspace workspace= fgDefault.getWorkspace();
+		IWorkspace workspace= JavaTestPlugin.getWorkspace();
 		IWorkspaceDescription desc= workspace.getDescription();
 		desc.setAutoBuilding(enable);
 		workspace.setDescription(desc);
