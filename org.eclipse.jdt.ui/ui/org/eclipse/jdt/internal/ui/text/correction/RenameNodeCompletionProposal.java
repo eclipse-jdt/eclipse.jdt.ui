@@ -15,7 +15,10 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -23,7 +26,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 /**
  *  
  */
@@ -43,8 +45,8 @@ public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected void addEdits(TextBuffer buffer) throws CoreException {
-		super.addEdits(buffer);
+	protected void addEdits(IDocument doc) throws CoreException {
+		super.addEdits(doc);
 		
 		TextEdit root= getRootTextEdit();
 		

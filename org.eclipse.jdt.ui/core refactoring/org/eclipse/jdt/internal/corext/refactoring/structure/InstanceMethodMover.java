@@ -630,7 +630,7 @@ class InstanceMethodMover {
 			private boolean replaceExplicitThisReferencesWith(String name) {
 				ThisExpression[] thisReferences= fMethod.getExplicitThisReferences();
 				for(int i= 0; i < thisReferences.length; i++)
-					fRewrite.markAsReplaced(thisReferences[i], thisReferences[i].getAST().newSimpleName(name));
+					fRewrite.markAsReplaced(thisReferences[i], thisReferences[i].getAST().newSimpleName(name), null);
 				return thisReferences.length != 0;
 			}
 	
@@ -641,7 +641,7 @@ class InstanceMethodMover {
 					FieldAccess replacement= fieldName.getAST().newFieldAccess();
 					replacement.setExpression(fieldName.getAST().newSimpleName(name));
 					replacement.setName(fieldName.getAST().newSimpleName(fieldName.getIdentifier()));
-					fRewrite.markAsReplaced(fieldName, replacement);
+					fRewrite.markAsReplaced(fieldName, replacement, null);
 				}
 				return fieldReferences.length != 0;
 			}
@@ -694,11 +694,11 @@ class InstanceMethodMover {
 			}
 			
 			private void replaceReceiverWithImplicitThis(MethodInvocation invocation) {
-				fRewrite.markAsRemoved(invocation.getExpression());
+				fRewrite.markAsRemoved(invocation.getExpression(), null);
 			}
 	
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
-				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));			
+				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);			
 			}
 			
 			/**
@@ -706,11 +706,11 @@ class InstanceMethodMover {
 			 */
 			private void replaceReceiverWithImplicitThis(QualifiedName fieldAccess) {
 				Assert.isTrue(isFieldAccess(fieldAccess));
-				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));
+				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);
 			}
 	
 			private void replaceExpressionWithExplicitThis(Expression expression) {
-				fRewrite.markAsReplaced(expression, expression.getAST().newThisExpression());
+				fRewrite.markAsReplaced(expression, expression.getAST().newThisExpression(), null);
 			}
 	
 			private static boolean isQualifiedNameUsedAsFieldAccessOnObject(QualifiedName fieldAccess, Expression object) {
@@ -757,7 +757,7 @@ class InstanceMethodMover {
 					name,
 					name.getAST().newQualifiedName(
 						getClassNameQualifiedToTopLevel(declaring, name.getAST()),
-						(SimpleName) fRewrite.createCopy(name)));
+						(SimpleName) fRewrite.createCopy(name)), null);
 						
 				fTypeReferences.addOneReference(getTopLevel(declaring));
 				if(nameBinding instanceof ITypeBinding)
@@ -810,7 +810,7 @@ class InstanceMethodMover {
 				Assert.isNotNull(newName);
 				SimpleName originalName= fMethod.getNameNode();
 				if (! originalName.getIdentifier().equals(newName))
-					fRewrite.markAsReplaced(originalName, originalName.getAST().newSimpleName(newName));
+					fRewrite.markAsReplaced(originalName, originalName.getAST().newSimpleName(newName), null);
 			}
 			
 			public void addNewFirstParameter(ITypeBinding parameterType, String parameterName) {
@@ -823,7 +823,7 @@ class InstanceMethodMover {
 			}
 			
 			public void removeParameter(Parameter parameter) {
-				fRewrite.markAsRemoved(fMethod.getParameterDeclaration(parameter));
+				fRewrite.markAsRemoved(fMethod.getParameterDeclaration(parameter), null);
 				ITypeBinding parameterType= parameter.getType();
 				if(parameterType.isClass() || parameterType.isInterface()) {
 					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	 //$NON-NLS-1$
@@ -834,7 +834,7 @@ class InstanceMethodMover {
 			private Block replaceBody() {
 				Block originalBody= fMethod.getBody();
 				Block newBody= originalBody.getAST().newBlock();
-				fRewrite.markAsReplaced(originalBody, newBody);
+				fRewrite.markAsReplaced(originalBody, newBody, null);
 				return newBody;	
 			}
 			

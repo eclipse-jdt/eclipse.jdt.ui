@@ -43,7 +43,7 @@ public class ASTNodeDeleteUtil {
 		for (int i= 0; i < declarationNodes.length; i++) {
 			ASTNode node= declarationNodes[i];
 			if (node != null)
-				rewrite.markAsRemoved(node);
+				rewrite.markAsRemoved(node, null);
 		}
 	}
 
@@ -74,7 +74,7 @@ public class ASTNodeDeleteUtil {
 				if (node.getParent() instanceof FieldDeclaration){
 					FieldDeclaration fd= (FieldDeclaration)node.getParent();
 					if (! rewrite.isRemoved(fd) && removedNodes.containsAll(fd.fragments()))
-						rewrite.markAsRemoved(fd);
+						rewrite.markAsRemoved(fd, null);
 				}
 			}
 		}

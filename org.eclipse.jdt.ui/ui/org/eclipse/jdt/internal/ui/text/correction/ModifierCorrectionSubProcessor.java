@@ -242,11 +242,11 @@ public class ModifierCorrectionSubProcessor {
 			
 			AST ast= astRoot.getAST();
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
-				rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
+				rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 				
 				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 				if (expr != null) {
@@ -265,7 +265,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			rewrite.markAsRemoved(decl.getBody());
+			rewrite.markAsRemoved(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -305,10 +305,10 @@ public class ModifierCorrectionSubProcessor {
 			AST ast= astRoot.getAST();
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.NATIVE;
-			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			Block newBody= ast.newBlock();
-			rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
+			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 			
 			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 			if (expr != null) {
@@ -326,7 +326,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		if (decl.getBody() != null) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			rewrite.markAsRemoved(decl.getBody());
+			rewrite.markAsRemoved(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -343,7 +343,7 @@ public class ModifierCorrectionSubProcessor {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
 				
 		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
-		rewrite.markAsReplaced(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		rewrite.set(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier()); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -365,10 +365,10 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
+			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
 			
 			Block body= ast.newBlock();
-			rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, body, null);
+			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, body, null);
 			
 			Type returnType= decl.getReturnType();
 			if (!decl.isConstructor()) {
@@ -391,7 +391,7 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.setmethodabstract.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

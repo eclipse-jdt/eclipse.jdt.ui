@@ -16,9 +16,9 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
@@ -36,8 +36,8 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected void addEdits(TextBuffer buffer) throws CoreException {
-		super.addEdits(buffer);
+	protected void addEdits(IDocument doc) throws CoreException {
+		super.addEdits(doc);
 
 		TextEdit edit= new ReplaceEdit(fOffset, fLength, fReplacementString);
 		getRootTextEdit().addChild(edit);

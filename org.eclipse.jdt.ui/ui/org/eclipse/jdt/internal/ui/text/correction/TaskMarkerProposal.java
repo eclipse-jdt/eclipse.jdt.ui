@@ -15,7 +15,11 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,9 +31,8 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
   */
@@ -48,23 +51,26 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected void addEdits(TextBuffer buffer) throws CoreException {
-		super.addEdits(buffer);
+	protected void addEdits(IDocument document) throws CoreException {
+		super.addEdits(document);
 		
 		TextEdit rootEdit= getRootTextEdit();
 		
-		Position pos= getUpdatedPosition(buffer);
-		if (pos != null) {
-			rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
-		} else {
-			rootEdit.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
+		try {
+			Position pos= getUpdatedPosition(document);
+			if (pos != null) {
+				rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
+			} else {
+				rootEdit.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
+			}
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
 		}
-		
 	}
 	
-	private Position getUpdatedPosition(TextBuffer buffer) {
+	private Position getUpdatedPosition(IDocument document) throws BadLocationException {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(buffer.getContent().toCharArray());
+		scanner.setSource(document.get().toCharArray());
 		
 		int token= getSurroundingComment(scanner);
 		if (token == ITerminalSymbols.TokenNameEOF) {
@@ -81,13 +87,13 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		} else if (token == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
 			contentEnd= commentEnd - 2;
 		}
-		if (hasContent(buffer, contentStart, fLocation.getOffset()) || hasContent(buffer, contentEnd, fLocation.getOffset() + fLocation.getLength())) {
+		if (hasContent(document, contentStart, fLocation.getOffset()) || hasContent(document, contentEnd, fLocation.getOffset() + fLocation.getLength())) {
 			return new Position(fLocation.getOffset(), fLocation.getLength());
 		}
 		
-		TextRegion startRegion= buffer.getLineInformationOfOffset(commentStart);
+		IRegion startRegion= document.getLineInformationOfOffset(commentStart);
 		int start= startRegion.getOffset();
-		boolean contentAtBegining= hasContent(buffer, start, commentStart);
+		boolean contentAtBegining= hasContent(document, start, commentStart);
 		
 		if (contentAtBegining) {
 			start= commentStart;
@@ -101,16 +107,16 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 				end= commentEnd; // includes new line
 			}
 		} else {
-			int endLine= buffer.getLineOfOffset(commentEnd - 1);
-			if (endLine + 1 == buffer.getNumberOfLines() || contentAtBegining) {
-				TextRegion endRegion= buffer.getLineInformation(endLine);
+			int endLine= document.getLineOfOffset(commentEnd - 1);
+			if (endLine + 1 == document.getNumberOfLines() || contentAtBegining) {
+				IRegion endRegion= document.getLineInformation(endLine);
 				end= endRegion.getOffset() + endRegion.getLength();
 			} else {
-				TextRegion endRegion= buffer.getLineInformation(endLine + 1);
+				IRegion endRegion= document.getLineInformation(endLine + 1);
 				end= endRegion.getOffset();
 			}					
 		}
-		if (hasContent(buffer, commentEnd, end)) {
+		if (hasContent(document, commentEnd, end)) {
 			end= commentEnd;
 			start= commentStart; // only remove comment
 		}
@@ -140,9 +146,9 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		return ITerminalSymbols.TokenNameEOF;
 	}	
 	
-	private boolean hasContent(TextBuffer buf, int start, int end) {
+	private boolean hasContent(IDocument document, int start, int end) throws BadLocationException {
 		for (int i= start; i < end; i++) {
-			char ch= buf.getChar(i);
+			char ch= document.getChar(i);
 			if (!Character.isWhitespace(ch)) {
 				return true;
 			}

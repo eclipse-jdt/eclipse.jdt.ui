@@ -676,7 +676,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
 		if (constructor == null || (constructor.getModifiers() & VISIBILITY_MASK) == fConstructorVisibility)
 			return false;
-		unitRewriter.markAsReplaced(
+		unitRewriter.set(
 			constructor, MethodDeclaration.MODIFIERS_PROPERTY,
 			new Integer(ASTNodes.changeVisibility(constructor.getModifiers(), fConstructorVisibility)),
 			declGD);

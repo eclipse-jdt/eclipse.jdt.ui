@@ -73,11 +73,13 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	private final ASTRewriteFormatter fFormatter;
 	private RewriteEventStore fEventStore;
 	private NodeInfoStore fNodeInfos;
+	private CompilationUnit fAstRoot;
 	
 	/*
 	 * Constructor for ASTRewriteAnalyzer.
 	 */
-	public ASTRewriteAnalyzer(IDocument document, TextEdit rootEdit, RewriteEventStore eventStore, NodeInfoStore nodeInfos) {
+	public ASTRewriteAnalyzer(IDocument document, CompilationUnit astRoot, TextEdit rootEdit, RewriteEventStore eventStore, NodeInfoStore nodeInfos) {
+		fAstRoot= astRoot;
 		fEventStore= eventStore;
 		fDocument= document;
 		fNodeInfos= nodeInfos;
@@ -99,15 +101,15 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	final int getExtendedOffset(ASTNode node) {
-		return CommentMapper.getExtendedOffset(node);
+		return fAstRoot.getExtendedStartPosition(node);
 	}
 	
 	final int getExtendedLength(ASTNode node) {
-		return CommentMapper.getExtendedLength(node);
+		return fAstRoot.getExtendedLength(node);
 	}
 	
 	final int getExtendedEnd(ASTNode node) {
-		return CommentMapper.getExtendedEnd(node);
+		return  fAstRoot.getExtendedStartPosition(node) +  fAstRoot.getExtendedLength(node);
 	}
 				
 	final private CopySourceEdit[] getCopySources(ASTNode node) {

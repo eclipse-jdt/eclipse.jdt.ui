@@ -13,12 +13,12 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -28,12 +28,23 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.ProposalPosition;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -42,7 +53,11 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ITrackedNodePosition;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -52,59 +67,27 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  *
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
+
+	private static class LinkedModeGroup {
+		public List positions= new ArrayList(); // list of ITrackedNodePosition
+		public List proposals= new ArrayList(); // list of ICompletionProposal
+	}
 	
-	private TextEditGroup fSelectionDescription;
-	private List fLinkedPositions;
-	private Map fLinkProposals;
+	private ITrackedNodePosition fSelectionDescription;
+	private Map fLinkGroups;
+	private List fPositionOrder;
 
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
 		fSelectionDescription= null;
-		fLinkedPositions= null;
-		fLinkProposals= null;
+		fLinkGroups= null;
+	}
+		
+	
+	public void markAsSelection(ASTRewrite rewrite, ASTNode node) {
+		fSelectionDescription= rewrite.markAsTracked(node);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected TextEditGroup getSelectionDescription() {
-		return fSelectionDescription;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
-	 */
-	protected TextEditGroup[] getLinkedRanges() {
-		if (fLinkedPositions != null && !fLinkedPositions.isEmpty()) {
-			return (TextEditGroup[]) fLinkedPositions.toArray(new TextEditGroup[fLinkedPositions.size()]);
-		}
-		return null;
-	}
-	
-	public TextEditGroup markAsSelection(ASTRewrite rewrite, ASTNode node) {
-		fSelectionDescription= new TextEditGroup("selection"); //$NON-NLS-1$
-		rewrite.markAsTracked(node, fSelectionDescription);
-		return fSelectionDescription;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedModeProposals(java.lang.String)
-	 */
-	protected ICompletionProposal[] getLinkedModeProposals(String name) {
-		if (fLinkProposals == null) {
-			return null;
-		}
-		List proposals= (List) fLinkProposals.get(name);
-		if (proposals != null) {
-			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-			if (res.length > 1) {
-				// keep first entry at first position
-				Arrays.sort(res, 1, res.length - 1, new JavaCompletionProposalComparator());
-			}
-			return res;
-		}
-		return null;
-	}
 	
 	public void addLinkedModeProposal(String name, String proposal) {
 		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
@@ -115,34 +98,136 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}	
 	
 	public void addLinkedModeProposal(String name, IJavaCompletionProposal proposal) {
-		if (fLinkProposals == null) {
-			fLinkProposals= new HashMap();
-		}
-		List proposals= (List) fLinkProposals.get(name);
-		if (proposals == null) {
-			proposals= new ArrayList(10);
-			fLinkProposals.put(name, proposals);			
-		}
-		proposals.add(proposal);
+		getLinkedModeGroup(name).proposals.add(proposal);
 	}
 	
-	public TextEditGroup markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String kind) {
-		TextEditGroup description= new TextEditGroup(kind);
-		rewrite.markAsTracked(node, description);
-		if (fLinkedPositions == null) {
-			fLinkedPositions= new ArrayList();
+	public void markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String name) {
+		ITrackedNodePosition position= rewrite.markAsTracked(node);
+		getLinkedModeGroup(name).positions.add(position);
+		if (fPositionOrder == null) {
+			fPositionOrder= new ArrayList();
 		}
 		if (isFirst) {
-			fLinkedPositions.add(0, description);
+			fPositionOrder.add(0, position);
 		} else {
-			fLinkedPositions.add(description);
+			fPositionOrder.add(position);
 		}
-		return description;
 	}
 	
-	public void setSelectionDescription(TextEditGroup desc) {
-		fSelectionDescription= desc;
+	private LinkedModeGroup getLinkedModeGroup(String name) {
+		if (fLinkGroups == null) {
+			fLinkGroups= new HashMap();
+		}
+		LinkedModeGroup linkedGroup= (LinkedModeGroup) fLinkGroups.get(name);
+		if (linkedGroup == null) {
+			linkedGroup= new LinkedModeGroup();
+			fLinkGroups.put(name, linkedGroup);			
+		}
+		return linkedGroup;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument)
+	 */
+	protected void performChange(IDocument document) throws CoreException {
+		try {
+			ICompilationUnit unit= getCompilationUnit();
+			getCompilationUnitChange(); // force creation of the change
+						
+			IEditorPart part= null;
+			if (fSelectionDescription != null || (fLinkGroups != null && !fLinkGroups.isEmpty())) {
+				part= EditorUtility.isOpenInEditor(unit);
+				if (part == null) {
+					part= EditorUtility.openInEditor(unit, true);
+				}
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page != null && part != null) {
+					page.bringToTop(part);
+				}
+				if (part != null) {
+					part.setFocus();
+				}
+			}
+			
+			super.performChange(document);
+
+			if (part == null) {
+				return;
+			}
+			
+			if (fLinkGroups != null && !fLinkGroups.isEmpty() && part instanceof JavaEditor) {
+				// enter linked mode
+				ITextViewer viewer= ((JavaEditor) part).getViewer();
+				enterLinkedMode(viewer);
+			} else if (fSelectionDescription != null && part instanceof ITextEditor) {
+				// select a result
+				int pos= fSelectionDescription.getStartPosition() + fSelectionDescription.getLength();
+				((ITextEditor) part).selectAndReveal(pos, 0);
+			}
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+		}
+
+	}
+	
+	private void enterLinkedMode(ITextViewer viewer) throws BadLocationException {
+		IDocument document= viewer.getDocument();
+		
+		LinkedEnvironment environment= new LinkedEnvironment();
+		boolean added= false;
+		
+		Iterator iterator= fLinkGroups.values().iterator();
+		while (iterator.hasNext()) {
+			LinkedModeGroup curr= (LinkedModeGroup) iterator.next();
+			List positions= curr.positions;
+			
+			if (!positions.isEmpty()) {
+				LinkedPositionGroup group= new LinkedPositionGroup();
+
+				List proposals= curr.proposals;
+				if (proposals.size() <= 1) {
+					for (int i= 0; i < positions.size(); i++) {
+						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
+						if (pos.getStartPosition() != -1) {
+							group.createPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos));
+						}
+					}
+				} else {
+					ICompletionProposal[] linkedModeProposals= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+					Arrays.sort(linkedModeProposals, JavaCompletionProposalComparator.getInstance());
+					for (int i= 0; i < positions.size(); i++) {
+						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
+						if (pos.getStartPosition() != -1) {
+							group.addPosition(new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals));
+						}
+					}
+				}
+				environment.addGroup(group);
+				added= true;
+			}
+		}
+
+		environment.forceInstall();
+		
+		if (added) { // only set up UI if there are any positions set
+			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
+			ui.setPositionListener(new EditorHistoryUpdater());
+			if (fSelectionDescription != null && fSelectionDescription.getStartPosition() != -1) {
+				ui.setExitPosition(viewer, fSelectionDescription.getStartPosition() + fSelectionDescription.getLength(), 0, Integer.MAX_VALUE);				
+			} else {
+				int cursorPosition= viewer.getSelectedRange().x;
+				if (cursorPosition != 0) {
+					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
+				}
+			}	
+			ui.enter();
+			
+			IRegion region= ui.getSelectedRegion();
+			viewer.setSelectedRange(region.getOffset(), region.getLength());	
+			viewer.revealRange(region.getOffset(), region.getLength());
+		}
+	}
+	
 	
 	public static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 

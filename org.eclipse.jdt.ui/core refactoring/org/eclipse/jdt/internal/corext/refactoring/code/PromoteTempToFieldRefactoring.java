@@ -478,7 +478,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			ASTNode occurence= tempRefs[j];
 			if (occurence instanceof SimpleName){
 				SimpleName newName= getAST().newSimpleName(fFieldName);
-				rewrite.markAsReplaced(occurence, newName);
+				rewrite.markAsReplaced(occurence, newName, null);
 			}
 		}
     }
@@ -617,10 +617,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
         for (int i1= fragmentIndex, n = fragments.size(); i1 < n; i1++) {
         	VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i1);
-        	rewrite.markAsRemoved(fragment);
+        	rewrite.markAsRemoved(fragment, null);
         }
         if (fragmentIndex == 0)
-           	rewrite.markAsRemoved(tempDeclarationStatement);
+           	rewrite.markAsRemoved(tempDeclarationStatement, null);
         
         Assert.isTrue(tempHasInitializer());
         ExpressionStatement assignmentStatement= createExpressionStatementThatInitializesField(rewrite);
@@ -665,9 +665,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
     	Assert.isTrue(fragmentIndex != -1);
         VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(fragmentIndex);
-        rewrite.markAsRemoved(fragment);
+        rewrite.markAsRemoved(fragment, null);
         if (fragments.size() == 1)
-			rewrite.markAsRemoved(tempDeclarationStatement);
+			rewrite.markAsRemoved(tempDeclarationStatement, null);
     }
 
     private void addFieldDeclaration(ASTRewrite rewrite) {

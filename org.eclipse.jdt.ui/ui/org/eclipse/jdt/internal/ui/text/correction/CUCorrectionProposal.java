@@ -11,9 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
@@ -27,21 +24,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.link.LinkedEnvironment;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
-import org.eclipse.jface.text.link.ProposalPosition;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -56,9 +40,8 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
@@ -99,7 +82,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire(change.getFile());
-			addEdits(buffer);
+			addEdits(buffer.getDocument());
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
 				getRootTextEdit().addChild(fImportRewrite.createEdit(buffer));
 			}
@@ -114,10 +97,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/**
 	 * Called when the <code>CompilationUnitChange</code> is created. Subclasses can override to
 	 * add text edits to the change.
-	 * @param buffer Buffer of the underlying compilation unit. To be accessed read only.
+	 * @param document Buffer of the underlying compilation unit. To be accessed read only.
 	 * @throws CoreException
 	 */
-	protected void addEdits(TextBuffer buffer) throws CoreException {
+	protected void addEdits(IDocument document) throws CoreException {
 	}
 
 	/*
@@ -239,120 +222,26 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	public void apply(IDocument document) {
 		try {
-			ICompilationUnit unit= getCompilationUnit();
-			IStatus status= Resources.makeCommittable(unit.getResource(), null);
-			if (!status.isOK()) {
-				String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$
-				String message= CorrectionMessages.getString("CUCorrectionProposal.error.message"); //$NON-NLS-1$
-				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
+			boolean canEdit= performValidateEdit();
+			if (!canEdit) {
 				return;
 			}
-			
-			CompilationUnitChange change= getCompilationUnitChange();
-			
-			TextEditGroup selection= getSelectionDescription();
-			TextEditGroup[] linked= getLinkedRanges();
-			
-			IEditorPart part= null;
-			if (selection != null || linked != null) {
-				part= EditorUtility.isOpenInEditor(unit);
-				if (part == null) {
-					part= EditorUtility.openInEditor(unit, true);
-				}
-				IWorkbenchPage page= JavaPlugin.getActivePage();
-				if (page != null && part != null) {
-					page.bringToTop(part);
-				}
-				if (part != null) {
-					part.setFocus();
-				}
-			}
-			
-			super.apply(document);
-
-			if (part == null) {
-				return;
-			}
-			
-			if (linked != null && part instanceof JavaEditor) {
-				// enter linked mode
-				ITextViewer viewer= ((JavaEditor) part).getViewer();
-				enterLinkedMode(change, viewer, linked, selection);
-			} else if (selection != null && part instanceof ITextEditor) {
-				// select a result
-				IRegion range= TextEdit.getCoverage(selection.getTextEdits());
-				int pos= range.getOffset() + range.getLength();
-				((ITextEditor) part).selectAndReveal(pos, 0);
-			}
+			performChange(document);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		}		
+			ExceptionHandler.handle(e, CorrectionMessages.getString("CUCorrectionProposal.error.title"), CorrectionMessages.getString("CUCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+		}
 	}
-					
-	private void enterLinkedMode(CompilationUnitChange change, ITextViewer viewer, TextEditGroup[] linked, TextEditGroup selection) throws BadLocationException {
-		IDocument document= viewer.getDocument();
-		
-		HashMap map= new HashMap();
-		
-		for (int i= 0; i < linked.length; i++) {
-			TextEditGroup curr= linked[i];
-			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
-			LinkedPositionGroup group= (LinkedPositionGroup) map.get(name);
-			if (group == null) {
-				group= new LinkedPositionGroup();
-				map.put(name, group);
-			}
-				
-			TextEdit[] textEdits= curr.getTextEdits();
-			if (name != null && textEdits.length > 0) {
-				IRegion range= TextEdit.getCoverage(textEdits);
-				if (range != null) {	// all edits could be deleted
-					ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
-					if (linkedModeProposals != null && linkedModeProposals.length > 1) {
-						group.addPosition(new ProposalPosition(document, range.getOffset(), range.getLength(), i, linkedModeProposals));
-					} else {
-						group.createPosition(document, range.getOffset(), range.getLength(), i);
-					}
-				}
-			}
+	
+	protected boolean performValidateEdit() {
+		ICompilationUnit unit= getCompilationUnit();
+		IStatus status= Resources.makeCommittable(unit.getResource(), null);
+		if (!status.isOK()) {
+			String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$
+			String message= CorrectionMessages.getString("CUCorrectionProposal.error.message"); //$NON-NLS-1$
+			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
+			return false;
 		}
-		
-		LinkedEnvironment environment= new LinkedEnvironment();
-		boolean added= false;
-		for (Iterator it= map.values().iterator(); it.hasNext(); ) {
-			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
-			if (!group.isEmtpy()) {
-				environment.addGroup(group);
-				added= true;
-			}
-		}
-		
-		environment.forceInstall();
-		
-		if (added) { // only set up UI if there are any positions set
-			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
-			ui.setPositionListener(new EditorHistoryUpdater());
-			if (selection != null) {
-				TextEdit[] textEdits= selection.getTextEdits();
-				if (textEdits.length > 0) {
-					IRegion range= TextEdit.getCoverage(textEdits);
-					if (range != null)
-						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, Integer.MAX_VALUE);
-				}					
-			} else {
-				int cursorPosition= viewer.getSelectedRange().x;
-				if (cursorPosition != 0) {
-					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
-				}
-			}	
-			ui.enter();
-			
-			IRegion region= ui.getSelectedRegion();
-			viewer.setSelectedRange(region.getOffset(), region.getLength());	
-			viewer.revealRange(region.getOffset(), region.getLength());
-		}
+		return true;
 	}
 
 	/**

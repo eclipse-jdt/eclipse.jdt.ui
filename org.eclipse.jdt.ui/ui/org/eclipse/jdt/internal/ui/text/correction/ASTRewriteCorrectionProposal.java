@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.dom.RewriteException;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
   */
@@ -30,12 +36,17 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		fRewrite= rewrite;
 	}
 		
-	protected void addEdits(TextBuffer buffer) throws CoreException {
-		super.addEdits(buffer);
+	protected void addEdits(IDocument document) throws CoreException {
+		super.addEdits(document);
 		ASTRewrite rewrite= getRewrite();
 		if (rewrite != null) {
-			rewrite.rewriteNode(buffer, getRootTextEdit());
-			rewrite.removeModifications();
+			try {
+				TextEdit edit= rewrite.rewriteAST(document, null);
+				getRootTextEdit().addChild(edit);
+				rewrite.removeModifications();
+			} catch (RewriteException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+			}
 		}
 	}
 	

@@ -368,7 +368,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void modifyConstructorCall(ASTRewrite rewrite) {
-        rewrite.markAsReplaced(getClassInstanceCreation(), createNewClassInstanceCreation(rewrite));
+        rewrite.markAsReplaced(getClassInstanceCreation(), createNewClassInstanceCreation(rewrite), null);
     }
 
     private ASTNode createNewClassInstanceCreation(ASTRewrite rewrite) {
@@ -443,7 +443,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext(); ) {
             VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
             Assert.isNotNull(fragment.getInitializer());
-            rewrite.markAsRemoved(fragment.getInitializer());
+            rewrite.markAsRemoved(fragment.getInitializer(), null);
         }
     }
 

@@ -78,7 +78,7 @@ public final class RewriteEventStore {
 		public boolean isMoveSource= false; // true if this node is moved
 		int copyCount= 0; // number of times this node is copied
 	}
-	
+		
 	/**
 	 * Iterates over all event parent nodes, tracked nodes and all copy/move sources 
 	 */

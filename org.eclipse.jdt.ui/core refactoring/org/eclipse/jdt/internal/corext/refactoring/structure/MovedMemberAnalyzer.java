@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		}
 		if (isTargetAccess(binding)) {
 			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
-			fAst.rewriter.markAsReplaced(node, replace);
+			fAst.rewriter.markAsReplaced(node, replace, null);
 		}
 		return super.visit(node);
 	}
@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		if (isSourceAccess(binding))
 			rewrite(node, fSource);
 		if (isTargetAccess(binding)) {
-			fAst.rewriter.markAsRemoved(node.getExpression());
+			fAst.rewriter.markAsRemoved(node.getExpression(), null);
 		}
 		return super.visit(node);
 	}
@@ -94,7 +94,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		if (isSourceAccess(binding))
 			rewrite(node, fSource);
 		if (isTargetAccess(binding)) {
-			fAst.rewriter.markAsRemoved(node.getExpression());
+			fAst.rewriter.markAsRemoved(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}

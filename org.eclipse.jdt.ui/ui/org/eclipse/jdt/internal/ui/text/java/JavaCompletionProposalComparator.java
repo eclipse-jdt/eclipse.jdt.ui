@@ -19,6 +19,13 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 public class JavaCompletionProposalComparator implements Comparator {
+	
+	private static JavaCompletionProposalComparator fgInstance= new JavaCompletionProposalComparator();
+
+	public static JavaCompletionProposalComparator getInstance() {
+		return fgInstance;
+	}
+	
 
 	private boolean fOrderAlphabetically;
 

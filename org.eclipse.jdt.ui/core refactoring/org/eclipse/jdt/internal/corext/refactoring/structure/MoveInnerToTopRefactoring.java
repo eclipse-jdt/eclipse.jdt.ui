@@ -391,7 +391,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			}
 			modifyAccessesToMembersFromEnclosingInstance(td, rewrite);
 			if (removeTypeDeclaration)
-				rewrite.markAsRemoved(td);
+				rewrite.markAsRemoved(td, null);
 			else 
 				removeUnusedTypeModifiers(td, rewrite);
 		}
@@ -583,7 +583,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			FieldAccess access= simpleName.getAST().newFieldAccess();
 			access.setExpression(newExpression);
 			access.setName(simpleName.getAST().newSimpleName(simpleName.getIdentifier()));
-			rewrite.markAsReplaced(simpleName, access);
+			rewrite.markAsReplaced(simpleName, access, null);
 		}
 	}
 
@@ -598,7 +598,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (vb == null)
 				continue;
 			Expression newExpression= createAccessExpressionToEnclosingInstanceFieldText(fieldAccess, vb, inputType);
-			rewrite.markAsReplaced(fieldAccess.getExpression(), newExpression);
+			rewrite.markAsReplaced(fieldAccess.getExpression(), newExpression, null);
 		}
 	}
 
@@ -617,7 +617,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				if (! (methodInvocation.getExpression() instanceof ThisExpression) || !(((ThisExpression)methodInvocation.getExpression()).getQualifier() != null))
 					continue;
 				Expression newExpression= createAccessExpressionToEnclosingInstanceFieldText(methodInvocation, mb, inputType);
-				rewrite.markAsReplaced(invocExpression, newExpression);
+				rewrite.markAsReplaced(invocExpression, newExpression, null);
 			}
 		}
 	}	
@@ -761,7 +761,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void removeUnusedTypeModifiers(TypeDeclaration type, ASTRewrite rewrite) {
 		int newModifiers= JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, type.getModifiers());
-		rewrite.markAsReplaced(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		
 	}
 	
@@ -824,10 +824,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (name instanceof SimpleName)	
 			return false;
 		if (isFullyQualifiedName(name)){
-			rewrite.markAsReplaced(name, name.getAST().newName(Strings.splitByToken(getNewFullyQualifiedNameOfInputType(), "."))); //$NON-NLS-1$
+			rewrite.markAsReplaced(name, name.getAST().newName(Strings.splitByToken(getNewFullyQualifiedNameOfInputType(), ".")), null); //$NON-NLS-1$
 			return true;
 		}
-		rewrite.markAsReplaced(name, name.getAST().newSimpleName(fType.getElementName()));
+		rewrite.markAsReplaced(name, name.getAST().newSimpleName(fType.getElementName()), null);
 		return true;
 	}
 
@@ -921,14 +921,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (fCreateInstanceField)
 			insertExpressionAsParameter(sci, rewrite, cu);
 		if (sci.getExpression() != null)
-			rewrite.markAsRemoved(sci.getExpression());
+			rewrite.markAsRemoved(sci.getExpression(), null);
 	}
 
 	private void updateConstructorReference(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
 		if (fCreateInstanceField)
 			insertExpressionAsParameter(cic, rewrite, cu);
 		if (cic.getExpression() != null)
-			rewrite.markAsRemoved(cic.getExpression());
+			rewrite.markAsRemoved(cic.getExpression(), null);
 	}
 	
 	private MethodDeclaration[] getConstructorDeclarationNodes(TypeDeclaration declaration){

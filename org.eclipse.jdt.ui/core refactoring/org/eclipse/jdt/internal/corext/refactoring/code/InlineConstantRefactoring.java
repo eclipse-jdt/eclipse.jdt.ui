@@ -745,7 +745,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		private TextEdit createSubstituteStringForExpressionEdit(String string, Expression expression) throws JavaModelException {
 			ASTRewrite rewrite= new ASTRewrite(expression.getRoot());
 
-			rewrite.markAsReplaced(expression, rewrite.createPlaceholder(string, ASTRewrite.getPlaceholderType(expression)));
+			rewrite.markAsReplaced(expression, rewrite.createPlaceholder(string, ASTRewrite.getPlaceholderType(expression)), null);
 			
 			TextEdit edit= new MultiTextEdit();
 			TextBuffer textBuffer= TextBuffer.create(fUnit.getBuffer().getContents());
@@ -1114,7 +1114,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		ASTRewrite rewrite= new ASTRewrite(toRemove.getRoot());
 	
-		rewrite.markAsRemoved(toRemove);
+		rewrite.markAsRemoved(toRemove, null);
 			
 		TextEdit edit= new MultiTextEdit();
 		TextBuffer textBuffer= TextBuffer.create(getDeclaringCompilationUnit().getBuffer().getContents());

@@ -97,7 +97,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
 		
-		rewrite.markAsReplaced(fNodeToAssign, newDecl); 
+		rewrite.markAsReplaced(fNodeToAssign, newDecl, null); 
 		
 		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
@@ -184,7 +184,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			selectionNode= statement;
 			
 		} else {			
-			rewrite.markAsReplaced(expression, assignment);
+			rewrite.markAsReplaced(expression, assignment, null);
 			selectionNode= fNodeToAssign;
 		} 
 		

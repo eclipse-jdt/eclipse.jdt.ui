@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
@@ -132,7 +133,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
 		try {
-			TextEdit res= rewriteAST(textBuffer.getDocument());
+			TextEdit res= rewriteAST(textBuffer.getDocument(), null);
 			rootEdit.addChildren(res.removeChildren());
 		} catch (RewriteException e) {
 			JavaPlugin.log(e);
@@ -142,9 +143,9 @@ public final class ASTRewrite extends NewASTRewrite {
 	/**
 	 * New API.
 	 */
-	public TextEdit rewriteAST(IDocument document) throws RewriteException {
+	public TextEdit rewriteAST(IDocument document, Map options) throws RewriteException {
 		convertOldToNewEvents();
-		return super.rewriteAST(document);
+		return super.rewriteAST(document, options);
 	}
 	
 	/**
@@ -282,6 +283,18 @@ public final class ASTRewrite extends NewASTRewrite {
 		return res;
 	}
 	
+	/**
+	 * Track a node, old API
+	 * @param node
+	 * @param editGroup
+	 */
+	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
+		if (fEventStore.getTrackedNodeData(node) != null) {
+			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
+		}
+		
+		fEventStore.setTrackedNodeData(node, editGroup);
+	}	
 	
 	/**
 	 * Creates a target node for a node to be copied. A target node can be inserted or used
@@ -290,7 +303,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @return
 	 */
 	public final ASTNode createCopy(ASTNode node) {
-		return createCopyPlaceholder(node);
+		return createCopyTarget(node);
 	}
 	
 	/**
@@ -302,7 +315,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 */
 	public final ASTNode createMove(ASTNode node) {
 
-		return createMovePlaceholder(node);
+		return createMoveTarget(node);
 	}
 	
 	public final ASTNode createPlaceholder(String code, int nodeType) {

@@ -836,13 +836,13 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
-						fSource.rewriter.markAsReplaced(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
+						fSource.rewriter.set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
 				} else if (declaration instanceof TypeDeclaration) {
 					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
-						fSource.rewriter.markAsReplaced(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
+						fSource.rewriter.set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
 					}
 				}
 			}

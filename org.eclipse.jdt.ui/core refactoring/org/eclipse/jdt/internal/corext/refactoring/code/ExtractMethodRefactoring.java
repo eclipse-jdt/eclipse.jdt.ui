@@ -711,7 +711,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				for (int n= 0; n < selected.length; n++) {
 					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selected[n], (IBinding) parameter.getData());
 					for (int i= 0; i < oldNames.length; i++) {
-						fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()));
+						fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()), null);
 					}
 				}
 			}

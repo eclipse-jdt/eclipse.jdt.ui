@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -21,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
@@ -76,17 +78,14 @@ public class NewASTRewrite {
 	 * constructor. This document is accessed read-only.
 	 * @return Returns the edit describing the text changes.
 	 */
-	public TextEdit rewriteAST(IDocument document) throws RewriteException {
+	public TextEdit rewriteAST(IDocument document, Map options) throws RewriteException {
 		TextEdit result= new MultiTextEdit();
 		
 		ASTNode rootNode= getRootNode();
 		if (rootNode != null) {
 			try {
-				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, fEventStore, fNodeStore);
-
-				// update extra comment ranges
-				CommentMapper.annotateExtraRanges(rootNode, visitor.getScanner());
-
+				CompilationUnit astRoot= (CompilationUnit) rootNode.getRoot();
+				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, astRoot, result, fEventStore, fNodeStore);
 				rootNode.accept(visitor);
 			} catch (RewriteRuntimeException e) {
 				throw new RewriteException(e.getCause());
@@ -133,45 +132,7 @@ public class NewASTRewrite {
 		return node;
 
 	}
-	
-	
-	
-	/**
-	 * Marks a node to be inserted. The inserted node must be either new or a placeholder.
-	 * @param parent The node to change
-	 * @param childProperty The propert of the child to be inserted.
-	 * @param insertedNode The node or attribute to insert.
-	 * @param editGroup Description of the change.
-	 */
-	public final void markAsInsert(ASTNode parent, StructuralPropertyDescriptor childProperty, ASTNode insertedNode, TextEditGroup editGroup) {
-		validateIsInsideAST(parent);
-		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
-		nodeEvent.setNewValue(insertedNode);
-
-		if (editGroup != null) {
-			fEventStore.setEventEditGroup(nodeEvent, editGroup);
-		}
-	}
-
 		
-	/**
-	 * Marks a node or attribute as removed.  
-	 * @param parent The node's parent node.
-	 * @param childProperty The node's child property in the parent. 
-	 * @param editGroup Collect the generated text edits or <code>null</code> if
-	 * no edits should be collected.
-	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
-	 * not inside the rewriters parent or the property is not a node property.
-	 */
-	public final void markAsRemoved(ASTNode parent, StructuralPropertyDescriptor childProperty, TextEditGroup editGroup) {
-		validateIsInsideAST(parent);
-		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
-		nodeEvent.setNewValue(null);
-		if (editGroup != null) {
-			fEventStore.setEventEditGroup(nodeEvent, editGroup);
-		}
-	}
-	
 	/**
 	 * Marks an existing node as removed.
 	 * @param node The node to be marked as removed.
@@ -182,39 +143,9 @@ public class NewASTRewrite {
 		if (property.isChildListProperty()) {
 			getListRewrite(node.getParent(), (ChildListPropertyDescriptor) property).remove(node, editGroup);
 		} else {
-			markAsRemoved(node.getParent(), property, editGroup);
+			set(node.getParent(), property, null, editGroup);
 		}
 	}
-
-	/**
-	 * Marks an existing node as removed.
-	 * @param node The node to be marked as removed.
-	 */	
-	public final void markAsRemoved(ASTNode node) {
-		markAsRemoved(node, (TextEditGroup) null);
-	}
-
-	/**
-	 * Marks a node or attribute as replaced.  The replacing node must be new or
-	 * a placeholder.
-	 * @param parent The node's parent node.
-	 * @param childProperty The node's child property in the parent. 
-	 * @param replacingNode The node that replaces the original node.
-	 * @param editGroup Collects the generated text edits or <code>null</code> if
-	 * no edits should be collected.
-	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
-	 * not inside the rewriters parent or the property is not a node property.
-	 */
-	public final void markAsReplaced(ASTNode parent, StructuralPropertyDescriptor childProperty, Object replacingNode, TextEditGroup editGroup) {
-		validateIsInsideAST(parent);
-		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
-		nodeEvent.setNewValue(replacingNode);
-		if (editGroup != null) {
-			fEventStore.setEventEditGroup(nodeEvent, editGroup);
-		}
-	}
-	
-
 	
 	/**
 	 * Marks an existing node as replaced by a new node. The replacing node must be new or
@@ -228,20 +159,34 @@ public class NewASTRewrite {
 		if (property.isChildListProperty()) {
 			getListRewrite(node.getParent(), (ChildListPropertyDescriptor) property).replace(node, replacingNode, editGroup);
 		} else {
-			markAsReplaced(node.getParent(), property, replacingNode, editGroup);
+			set(node.getParent(), property, replacingNode, editGroup);
 		}
 	}
-	
+
 	/**
-	 * Marks an existing node as replaced by a new node. The replacing node must be new or
-	 * a placeholder.
-	 * @param node The node to be marked as replaced.
-	 * @param replacingNode The node replacing the node.
-	 */		
-	public final void markAsReplaced(ASTNode node, ASTNode replacingNode) {
-		markAsReplaced(node, replacingNode, (TextEditGroup) null);
+	 * Describes a change of a property  The replacing node must be new or a placeholder or can be
+	 * <code>null</code> to remove the property.
+	 * @param parent The node's parent node.
+	 * @param childProperty The node's child property in the parent. 
+	 * @param replacingNode The node that replaces the original node or <code>null</code>
+	 * @param editGroup Collects the generated text edits or <code>null</code> if
+	 * no edits should be collected.
+	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
+	 * not inside the rewriters parent, the property is not a node property or the described modification is not
+	 * valid (e.g. when removing a required node).
+	 */
+	public final void set(ASTNode parent, StructuralPropertyDescriptor childProperty, Object replacingNode, TextEditGroup editGroup) {
+		validateIsInsideAST(parent);
+		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
+		if (replacingNode == null) {
+			validatePropertyType(childProperty, replacingNode);
+		}
+		nodeEvent.setNewValue(replacingNode);
+		if (editGroup != null) {
+			fEventStore.setEventEditGroup(nodeEvent, editGroup);
+		}
 	}
-	
+
 	/**
 	 * Gets a rewriter to modify the given list.
 	 * @param parent The parent node.
@@ -259,13 +204,14 @@ public class NewASTRewrite {
 	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the
 	 * position of the node after the rewrite operation.
 	 * @param node The node to track
-	 * @param editGroup Collects the range markers describing the node position.
 	 */
-	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
+	public final ITrackedNodePosition markAsTracked(ASTNode node) {
 		if (fEventStore.getTrackedNodeData(node) != null) {
 			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
 		}
+		TextEditGroup editGroup= new TextEditGroup("internal"); //$NON-NLS-1$
 		fEventStore.setTrackedNodeData(node, editGroup);
+		return new TrackedNodePosition(editGroup, node);
 	}	
 			
 	protected final void validateIsInsideAST(ASTNode node) {
@@ -283,6 +229,24 @@ public class NewASTRewrite {
 			String message= property.getId() + " is not a list property"; //$NON-NLS-1$
 			throw new IllegalArgumentException(message);
 		}
+	}
+	
+	private void validatePropertyType(StructuralPropertyDescriptor prop, Object node) {
+		if (prop.isChildListProperty()) {
+			String message= "Can not modify a list property, use a list rewriter"; //$NON-NLS-1$
+			throw new IllegalArgumentException(message);		
+		}
+//		if (node == null) {
+//			if (prop.isSimpleProperty() || (prop.isChildProperty() && ((ChildPropertyDescriptor) prop).isMandatory())) {
+//				String message= "Can not remove property " + prop.getId(); //$NON-NLS-1$
+//				throw new IllegalArgumentException(message);
+//			}
+//		} else {
+//			if (!prop.getNodeClass().isInstance(node)) {
+//				String message= node.getClass().getName() +  " is not a valid type for property " + prop.getId(); //$NON-NLS-1$
+//				throw new IllegalArgumentException(message);
+//			}
+//		}
 	}
 	
 	/**
@@ -324,7 +288,7 @@ public class NewASTRewrite {
 	 * @param node The node to create a copy placeholder for.
 	 * @return The placeholder to be used at the copy destination.
 	 */
-	public final ASTNode createCopyPlaceholder(ASTNode node) {
+	public final ASTNode createCopyTarget(ASTNode node) {
 		validateIsInsideAST(node);
 		fEventStore.increaseCopyCount(node);
 	
@@ -343,13 +307,13 @@ public class NewASTRewrite {
 	 * @param node The node to create a move placeholder for.
 	 * @return The placeholder to be used at the move destination.
 	 */
-	public final ASTNode createMovePlaceholder(ASTNode node) {
+	public final ASTNode createMoveTarget(ASTNode node) {
 		validateIsInsideAST(node);
 		fEventStore.setAsMoveSource(node);
 		
 		int changeKind= fEventStore.getChangeKind(node);
 		if (changeKind != RewriteEvent.REMOVED && changeKind != RewriteEvent.REPLACED) {
-			markAsRemoved(node);
+			markAsRemoved(node, null);
 		}
 		
 		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));

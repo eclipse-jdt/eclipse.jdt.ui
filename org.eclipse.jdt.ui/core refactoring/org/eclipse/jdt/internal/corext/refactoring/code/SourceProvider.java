@@ -223,7 +223,7 @@ public class SourceProvider {
 	
 	public TextEdit getDeleteEdit() {
 		ASTRewrite rewriter= new ASTRewrite(fDeclaration.getParent());
-		rewriter.markAsRemoved(fDeclaration);
+		rewriter.markAsRemoved(fDeclaration, null);
 		MultiTextEdit result= new MultiTextEdit();
 		rewriter.rewriteNode(fBuffer, result);
 		rewriter.removeModifications();
@@ -296,7 +296,7 @@ public class SourceProvider {
 			for (Iterator iter= references.iterator(); iter.hasNext();) {
 				ASTNode element= (ASTNode) iter.next();
 				ASTNode newNode= fRewriter.createPlaceholder(expression, ASTRewrite.getPlaceholderType(element));
-				fRewriter.markAsReplaced(element, newNode);
+				fRewriter.markAsReplaced(element, newNode, null);
 			}
 		}
 	}
@@ -311,7 +311,7 @@ public class SourceProvider {
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();
 					ASTNode newNode= fRewriter.createPlaceholder(newName, ASTRewrite.EXPRESSION);
-					fRewriter.markAsReplaced(element, newNode);
+					fRewriter.markAsReplaced(element, newNode, null);
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class SourceProvider {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
 				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
 			} else if (node instanceof Expression) {
-				fRewriter.markAsReplaced(node, fRewriter.createPlaceholder(context.receiver, ASTRewrite.EXPRESSION));
+				fRewriter.markAsReplaced(node, fRewriter.createPlaceholder(context.receiver, ASTRewrite.EXPRESSION), null);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ public class SourceProvider {
 			if (binding != null && !binding.isLocal()) {
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.markAsReplaced(element, fRewriter.createPlaceholder(s, ASTRewrite.EXPRESSION));
+					fRewriter.markAsReplaced(element, fRewriter.createPlaceholder(s, ASTRewrite.EXPRESSION), null);
 				}
 			}
 		}

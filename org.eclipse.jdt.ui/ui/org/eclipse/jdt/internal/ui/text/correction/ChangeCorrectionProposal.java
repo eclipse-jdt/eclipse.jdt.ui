@@ -54,6 +54,14 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
+		try {
+			performChange(document);
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+		}
+	}
+	
+	protected void performChange(IDocument document) throws CoreException {
 		Change change= null;
 		try {
 			change= getChange();
@@ -71,8 +79,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 					change.perform(new NullProgressMonitor());
 				}
 			}
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		} finally {
 			if (change != null) {
 				change.dispose();

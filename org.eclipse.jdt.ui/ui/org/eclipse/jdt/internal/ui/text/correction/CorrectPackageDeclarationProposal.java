@@ -18,6 +18,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -27,7 +29,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -44,8 +45,8 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected void addEdits(TextBuffer buffer) throws CoreException {
-		super.addEdits(buffer);
+	protected void addEdits(IDocument doc) throws CoreException {
+		super.addEdits(doc);
 		
 		TextEdit root= getRootTextEdit();
 		ICompilationUnit cu= getCompilationUnit();

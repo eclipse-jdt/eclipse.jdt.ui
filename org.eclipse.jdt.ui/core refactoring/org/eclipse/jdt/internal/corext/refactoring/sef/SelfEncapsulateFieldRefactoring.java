@@ -403,7 +403,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			TextEditGroup description= new TextEditGroup(
 				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 			result.add(description);
-			rewriter.markAsReplaced(decl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), description);
+			rewriter.set(decl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), description);
 		}
 		
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class);

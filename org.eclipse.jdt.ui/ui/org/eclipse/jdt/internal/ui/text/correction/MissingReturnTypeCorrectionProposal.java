@@ -57,7 +57,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			
 			Expression expression= evaluateReturnExpressions(ast, returnBinding, fExistingReturn.getStartPosition());
 			if (expression != null) {
-				rewrite.markAsInsert(fExistingReturn, ReturnStatement.EXPRESSION_PROPERTY, expression, null);
+				rewrite.set(fExistingReturn, ReturnStatement.EXPRESSION_PROPERTY, expression, null);
 				
 				markAsLinked(rewrite, expression, true, RETURN_EXPRESSION_KEY);
 			}
@@ -83,7 +83,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(placeHolder);
 					
-					rewrite.markAsReplaced(lastStatement, returnStatement);
+					rewrite.markAsReplaced(lastStatement, returnStatement, null);
 					return rewrite;
 				}
 			}

@@ -169,8 +169,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration decl1= (SingleVariableDeclaration) parameters.get(k);
 				SingleVariableDeclaration decl2= (SingleVariableDeclaration) parameters.get(((SwapDescription) curr).index);
 				
-				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2));
-				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1));
+				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), null);
+				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), null);
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	

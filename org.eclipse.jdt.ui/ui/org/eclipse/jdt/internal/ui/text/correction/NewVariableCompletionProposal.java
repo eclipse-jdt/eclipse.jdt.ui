@@ -144,7 +144,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-			rewrite.markAsReplaced(dominantStatement, newDecl);
+			rewrite.markAsReplaced(dominantStatement, newDecl, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 			markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
@@ -164,7 +164,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			frag.setInitializer(placeholder);
 			expression.setType(evaluateVariableType(ast));
 			
-			rewrite.markAsReplaced(assignment, expression);
+			rewrite.markAsReplaced(assignment, expression, null);
 			
 			markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
 			markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 

@@ -193,7 +193,7 @@ public class UnresolvedElementsSubProcessor {
 			if (assignment.getLeftHandSide() == node && assignment.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 				ASTNode statement= assignment.getParent();
 				ASTRewrite rewrite= new ASTRewrite(statement.getParent());
-				rewrite.markAsRemoved(statement);
+				rewrite.markAsRemoved(statement, null);
 		
 				String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
 				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
@@ -622,8 +622,8 @@ public class UnresolvedElementsSubProcessor {
 			parents.setExpression(newCast);
 			
 			ASTNode node= rewrite.createCopy(expression.getExpression());
-			rewrite.markAsReplaced(expression, node);
-			rewrite.markAsReplaced(accessExpression, parents);
+			rewrite.markAsReplaced(expression, node, null);
+			rewrite.markAsReplaced(accessExpression, parents, null);
 
 			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.missingcastbrackets.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -792,7 +792,7 @@ public class UnresolvedElementsSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
 			
 			for (int i= diff - 1; i >= 0; i--) {
-				rewrite.markAsRemoved((Expression) arguments.get(indexSkipped[i]));
+				rewrite.markAsRemoved((Expression) arguments.get(indexSkipped[i]), null);
 			}
 			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
 			String label;
@@ -962,8 +962,8 @@ public class UnresolvedElementsSubProcessor {
 				Expression arg2= (Expression) arguments.get(idx2);
 				
 				ASTRewrite rewrite= new ASTRewrite(arg1.getParent());
-				rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2));
-				rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1));
+				rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2), null);
+				rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1), null);
 				{
 					String[] arg= new String[] { getArgumentName(cu, arguments, idx1), getArgumentName(cu, arguments, idx2) };
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swaparguments.description", arg); //$NON-NLS-1$
@@ -1071,7 +1071,7 @@ public class UnresolvedElementsSubProcessor {
 			newExpression= name;
 		}
 		
-		rewrite.markAsInsert(invocationNode, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
+		rewrite.set(invocationNode, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 
 		String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetoouter.description", currType.getName()); //$NON-NLS-1$	
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

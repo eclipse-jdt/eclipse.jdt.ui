@@ -525,9 +525,9 @@ public class CallInliner {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
-				fRewriter.markAsReplaced(fTargetNode, fTargetNode.getAST().newEmptyStatement());
+				fRewriter.markAsReplaced(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
 			} else {
-				fRewriter.markAsRemoved(fTargetNode);
+				fRewriter.markAsRemoved(fTargetNode, null);
 			}
 		} else {
 			ASTNode node= null;
@@ -583,11 +583,11 @@ public class CallInliner {
 					fRewriter.markAsInserted(node);
 					fStatements.add(fInsertionIndex++, node);
 				} else {
-					fRewriter.markAsReplaced(fTargetNode, node);
+					fRewriter.markAsReplaced(fTargetNode, node, null);
 				}
 			} else {
 				if (fTargetNode != null) {
-					fRewriter.markAsRemoved(fTargetNode);
+					fRewriter.markAsRemoved(fTargetNode, null);
 				}
 			}
 		}
@@ -707,7 +707,7 @@ public class CallInliner {
 					// have to insert all statements to be inlined.
 					fTargetNode= null;
 				}
-				fRewriter.markAsReplaced(currentStatement, block);
+				fRewriter.markAsReplaced(currentStatement, block, null);
 			}
 		}
 		// We only insert one new statement or we delete the existing call. 

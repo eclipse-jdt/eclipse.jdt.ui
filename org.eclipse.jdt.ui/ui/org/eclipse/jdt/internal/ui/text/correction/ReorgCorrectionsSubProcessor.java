@@ -116,7 +116,7 @@ public class ReorgCorrectionsSubProcessor {
 			if (node instanceof ImportDeclaration) {
 				ASTRewrite rewrite= new ASTRewrite(node.getParent());
 
-				rewrite.markAsRemoved(node);
+				rewrite.markAsRemoved(node, null);
 			
 				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);

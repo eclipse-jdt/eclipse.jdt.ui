@@ -141,7 +141,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
 		Expression placeholder= (Expression) rewrite.createMove(assignment.getRightHandSide());
-		rewrite.markAsInsert(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
+		rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
 		
 		if (assignParent instanceof ExpressionStatement) {
 			int statementParent= assignParent.getParent().getNodeType();
@@ -149,12 +149,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| statementParent == ASTNode.FOR_STATEMENT) {
 				
 				Block block= ast.newBlock();
-				rewrite.markAsReplaced(assignParent, block);
+				rewrite.markAsReplaced(assignParent, block, null);
 			} else {
-				rewrite.markAsRemoved(assignParent);	
+				rewrite.markAsRemoved(assignParent, null);	
 			}	
 		} else {
-			rewrite.markAsRemoved(assignment);
+			rewrite.markAsRemoved(assignment, null);
 		}		
 		
 		proposal.markAsSelection(rewrite, fragment.getName());
@@ -220,10 +220,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			int modifiers= ((VariableDeclarationStatement) statement).getModifiers();
 			if (Modifier.isFinal(modifiers)) {
-				rewrite.markAsReplaced(statement, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(modifiers & ~Modifier.FINAL), null);
+				rewrite.set(statement, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(modifiers & ~Modifier.FINAL), null);
 			}
 		} else {
-			rewrite.markAsReplaced(fragment.getParent(), assignment);
+			rewrite.markAsReplaced(fragment.getParent(), assignment, null);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
 			newFrag.setExtraDimensions(fragment.getExtraDimensions());
@@ -328,7 +328,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= tryStatement.getAST();
 		Block finallyBody= ast.newBlock();
 
-		rewrite.markAsInsert(tryStatement, TryStatement.FINALLY_PROPERTY, finallyBody, null);
+		rewrite.set(tryStatement, TryStatement.FINALLY_PROPERTY, finallyBody, null);
 				
 		String label= CorrectionMessages.getString("QuickAssistProcessor.addfinallyblock.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
@@ -356,7 +356,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		Block body= ast.newBlock();
 
-		rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, body, null);
+		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, body, null);
 				
 		String label= CorrectionMessages.getString("QuickAssistProcessor.addelseblock.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
@@ -429,14 +429,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static void removeCatchBlock(ASTRewrite rewrite, MethodDeclaration methodDeclaration, CatchClause catchClause) {
 		TryStatement tryStatement= (TryStatement) catchClause.getParent();
 		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
-			rewrite.markAsRemoved(catchClause);
+			rewrite.markAsRemoved(catchClause, null);
 		} else {
 			List statements= tryStatement.getBody().statements();
 			if (statements.size() > 0) {
 				ASTNode placeholder= rewrite.collapseNodes(statements, 0, statements.size());
-				rewrite.markAsReplaced(tryStatement, rewrite.createCopy(placeholder));
+				rewrite.markAsReplaced(tryStatement, rewrite.createCopy(placeholder), null);
 			} else {
-				rewrite.markAsRemoved(tryStatement);
+				rewrite.markAsRemoved(tryStatement, null);
 			}
 		}
 	}
@@ -577,7 +577,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 			
-		rewrite.markAsReplaced(outer, inner);
+		rewrite.markAsReplaced(outer, inner, null);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		proposal.ensureNoModifications();
@@ -681,7 +681,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode childPlaceholder= rewrite.createMove(child);
 		Block replacingBody= ast.newBlock();
 		replacingBody.statements().add(childPlaceholder);
-		rewrite.markAsInsert(statement, childProperty, replacingBody, null);
+		rewrite.set(statement, childProperty, replacingBody, null);
 
 		String label;
 		if (childProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
@@ -728,20 +728,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			replacement.setName((SimpleName) rewrite.createCopy(method.getName()));
 			replacement.arguments().add(ast.newThisExpression());
 			replacement.setExpression((Expression) rewrite.createCopy(right));
-			rewrite.markAsReplaced(method, replacement);
+			rewrite.markAsReplaced(method, replacement, null);
 		} else if (right instanceof ThisExpression) { // x.equals(this) -> equals(x)
 			rewrite= new ASTRewrite(method.getParent());
 			MethodInvocation replacement= rewrite.getAST().newMethodInvocation();
 			replacement.setName((SimpleName) rewrite.createCopy(method.getName()));
 			replacement.arguments().add(rewrite.createCopy(left));
-			rewrite.markAsReplaced(method, replacement);
+			rewrite.markAsReplaced(method, replacement, null);
 		} else {
 			rewrite= new ASTRewrite(method);
 			if (left instanceof ParenthesizedExpression) {
 				Expression ex= ((ParenthesizedExpression) left).getExpression();
-				rewrite.markAsReplaced(right, rewrite.createCopy(ex));
+				rewrite.markAsReplaced(right, rewrite.createCopy(ex), null);
 			} else {
-				rewrite.markAsReplaced(right, rewrite.createCopy(left));
+				rewrite.markAsReplaced(right, rewrite.createCopy(left), null);
 			}
 			if ((right instanceof CastExpression)
 				|| (right instanceof Assignment)
@@ -749,9 +749,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| (right instanceof InfixExpression)) {
 				ParenthesizedExpression paren= rewrite.getAST().newParenthesizedExpression();
 				paren.setExpression((Expression) rewrite.createCopy(right));
-				rewrite.markAsReplaced(left, paren);
+				rewrite.markAsReplaced(left, paren, null);
 			} else {
-				rewrite.markAsReplaced(left, rewrite.createCopy(right));
+				rewrite.markAsReplaced(left, rewrite.createCopy(right), null);
 			}
 		}
 		

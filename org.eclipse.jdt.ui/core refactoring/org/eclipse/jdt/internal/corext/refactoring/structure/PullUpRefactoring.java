@@ -1259,12 +1259,12 @@ public class PullUpRefactoring extends Refactoring {
 				if (node.getParent() instanceof FieldDeclaration){
 					FieldDeclaration fd= (FieldDeclaration)node.getParent();
 					if (areAllFragmentsDeleted(fd, declarationNodes))
-						rewrite.markAsRemoved(fd);
+						rewrite.markAsRemoved(fd, null);
 					else
-						rewrite.markAsRemoved(node);
+						rewrite.markAsRemoved(node, null);
 				}
 			} else {
-				rewrite.markAsRemoved(node);
+				rewrite.markAsRemoved(node, null);
 			}
 		}
 	}
@@ -1349,7 +1349,7 @@ public class PullUpRefactoring extends Refactoring {
 			MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cuNode);//getMethodDeclarationNode(method);
 		
 			int newModifiers= getModifiersWithUpdatedVisibility(method, methodDeclaration.getModifiers(), pm, false);
-			rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			rewrite.set(methodDeclaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		}
 	}
 
@@ -1509,7 +1509,7 @@ public class PullUpRefactoring extends Refactoring {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), cuNode);
 	
 		int newModifiers= targetClass.getModifiers() | Modifier.ABSTRACT;
-		rewrite.markAsReplaced(targetClass, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		rewrite.set(targetClass, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private boolean shouldMakeTargetClassAbstract() throws JavaModelException {

@@ -180,7 +180,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			List newStatements= createLocals();
 			newStatements.add(createTryCatchStatement(buffer.getLineDelimiter()));
 			if (newStatements.size() == 1) {
-				fRewriter.markAsReplaced(fSelectedNode, (ASTNode)newStatements.get(0));
+				fRewriter.markAsReplaced(fSelectedNode, (ASTNode)newStatements.get(0), null);
 			} else {
 				List container= getSelectedNodeContainer();
 				if (selectedNodeIsDeclaration()) {
@@ -192,10 +192,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					}
 				} else {
 					if (newStatements.isEmpty()) {
-						fRewriter.markAsRemoved(fSelectedNode);
+						fRewriter.markAsRemoved(fSelectedNode, null);
 					} else {
 						Statement[] collapsedTargetStatements= ((Statement[])newStatements.toArray(new Statement[newStatements.size()]));
-						fRewriter.markAsReplaced(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements));
+						fRewriter.markAsReplaced(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
 					}
 				}
 			}
@@ -243,7 +243,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				Block block= getAST().newBlock();
 				fStatementsOfSelectedNode= block.statements();
 				fStatementsOfSelectedNode.add(fRewriter.createCopy(fSelectedNode));
-				fRewriter.markAsRemoved(fSelectedNode);
+				fRewriter.markAsRemoved(fSelectedNode, null);
 			}
 		}
 		return fStatementsOfSelectedNode;
@@ -293,7 +293,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				Assignment assignment= ast.newAssignment();
 				assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
 				assignment.setRightHandSide((Expression)fRewriter.createCopy(initializer));
-				fRewriter.markAsRemoved(initializer);
+				fRewriter.markAsRemoved(initializer, null);
 				ExpressionStatement es= ast.newExpressionStatement(assignment);
 				if (isSelectedNode) {
 					fTryBody.add(es);
@@ -303,10 +303,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			}
 		}
 		if (newAssignments.isEmpty()) {
-			fRewriter.markAsRemoved(statement);
+			fRewriter.markAsRemoved(statement, null);
 		} else {
 			Statement[] collapsedTargetStatements= ((Statement[]) newAssignments.toArray(new Statement[newAssignments.size()]));
-			fRewriter.markAsReplaced(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements));
+			fRewriter.markAsReplaced(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
 		}
 		return result;
 	}

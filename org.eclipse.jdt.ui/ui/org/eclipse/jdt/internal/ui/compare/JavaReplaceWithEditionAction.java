@@ -122,7 +122,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				}
 				
 				ASTRewrite rewriter= new ASTRewrite(root);
-				rewriter.markAsReplaced(node, rewriter.createPlaceholder(newContent, ASTRewrite.getPlaceholderType(node)));
+				rewriter.markAsReplaced(node, rewriter.createPlaceholder(newContent, ASTRewrite.getPlaceholderType(node)), null);
 				
 				if (inEditor) {
 					JavaEditor je= getEditor(file);

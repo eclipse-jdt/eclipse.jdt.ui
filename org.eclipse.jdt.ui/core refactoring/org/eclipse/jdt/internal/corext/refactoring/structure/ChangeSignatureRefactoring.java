@@ -1182,7 +1182,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			// replace changing nodes with the ones from newPermutation:
 			for (int i= 0; i < Math.min(nodes.length, newPermutation.length); i++) {
 				if (nodes[i] != newPermutation[i])
-					fRewrite.markAsReplaced(nodes[i], newPermutation[i]);
+					fRewrite.markAsReplaced(nodes[i], newPermutation[i], null);
 			}
 			
 			// add fresh nodes at end:
@@ -1227,12 +1227,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 		protected final void replaceTypeNode(Type typeNode, String newTypeName){
 			Type newTypeNode= createNewTypeNode(newTypeName);
-			fRewrite.markAsReplaced(typeNode, newTypeNode);
+			fRewrite.markAsReplaced(typeNode, newTypeNode, null);
 		}
 	
 		private void deleteExcessiveElements(ASTNode[] nodes) {
 			for (int i= getNotDeletedInfos().size(); i < nodes.length; i++) {
-				fRewrite.markAsRemoved(nodes[i]);
+				fRewrite.markAsRemoved(nodes[i], null);
 			}
 		}
 
@@ -1244,7 +1244,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (! isMethodNameSameAsInitial()) {
 				SimpleName nameNode= getMethodNameNode();
 				SimpleName newNameNode= nameNode.getAST().newSimpleName(fMethodName);
-				fRewrite.markAsReplaced(nameNode, newNameNode);
+				fRewrite.markAsReplaced(nameNode, newNameNode, null);
 			}
 		}
 
@@ -1412,7 +1412,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode occurence= paramOccurrences[j];
 				if (occurence instanceof SimpleName){
 					SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
-					fRewrite.markAsReplaced(occurence, newName);
+					fRewrite.markAsReplaced(occurence, newName, null);
 				}
 			}
 		}
@@ -1431,7 +1431,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
 			if (oldParam.getExtraDimensions() != 0) {		
-				fRewrite.markAsReplaced(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+				fRewrite.set(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			}
 		}
 	
@@ -1450,7 +1450,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		private void changeVisibility() {
 			int newModifiers= JdtFlags.clearAccessModifiers(fMethDecl.getModifiers()) | fVisibility;
-			fRewrite.markAsReplaced(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			fRewrite.set(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		}
 	
 		private void changeExceptions() {
@@ -1481,7 +1481,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (currentType == null)
 					continue; // newly added or unresolvable type
 				if (Bindings.equals(typeToRemove, currentType))
-					fRewrite.markAsRemoved(currentName);
+					fRewrite.markAsRemoved(currentName, null);
 			}
 		}
 	
@@ -1527,7 +1527,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					for (int i = 0; i < tags.size(); i++) {
 						TagElement tag= (TagElement) tags.get(i);
 						if (TagElement.TAG_RETURN.equals(tag.getTagName()))
-							fRewrite.markAsRemoved(tag);
+							fRewrite.markAsRemoved(tag, null);
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
 					TagElement returnNode= createReturnTag();
@@ -1553,11 +1553,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
 						if (identifier.equals(info.getOldName())) {
 							if (info.isDeleted()) {
-								fRewrite.markAsRemoved(tag);
+								fRewrite.markAsRemoved(tag, null);
 								removed= true;
 							} else if (info.isRenamed()) {
 								SimpleName newName= simpleName.getAST().newSimpleName(info.getNewName());
-								fRewrite.markAsReplaced(simpleName, newName);
+								fRewrite.markAsReplaced(simpleName, newName, null);
 							}
 							break;
 						}
@@ -1618,7 +1618,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					for (int j= 0; j < fExceptionInfos.size(); j++) {
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
 						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
-							fRewrite.markAsRemoved(tag);
+							fRewrite.markAsRemoved(tag, null);
 							break;
 						}
 						exceptionTags.add(tag);
@@ -1849,7 +1849,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return;
 			
 			SimpleName newName= oldParamName.getAST().newSimpleName(info.getNewName());
-			fRewrite.markAsReplaced(oldParamName, newName);
+			fRewrite.markAsReplaced(oldParamName, newName, null);
 		}
 		
 		protected void changeParamgumentType(ParameterInfo info) {

@@ -105,7 +105,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		if (binding.getKind() != IBinding.VARIABLE) {
 			ASTNode declaration= root.findDeclaringNode(binding);
 			rewrite= new ASTRewrite(declaration.getParent());
-			rewrite.markAsRemoved(declaration);
+			rewrite.markAsRemoved(declaration, null);
 		} else { // variable
 			// needs full AST
 			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true, null, null);
@@ -124,7 +124,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 					if (javadoc != null) {
 						TagElement tagElement= findThrowsTag(javadoc, nameNode.resolveBinding());
 						if (tagElement != null) {
-							rewrite.markAsRemoved(tagElement);
+							rewrite.markAsRemoved(tagElement, null);
 						}
 					}
 				}
@@ -166,10 +166,10 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
 				removeVariableWithInitializer(rewrite, rightHand, parent);
 			}	else {
-				rewrite.markAsReplaced(assignment, rewrite.createCopy(rightHand));
+				rewrite.markAsReplaced(assignment, rewrite.createCopy(rightHand), null);
 			}
 		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			rewrite.markAsRemoved(reference.getParent());
+			rewrite.markAsRemoved(reference.getParent(), null);
 		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) reference.getParent();
 			ASTNode varDecl= frag.getParent();
@@ -182,9 +182,9 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 				fragments= ((VariableDeclarationStatement) varDecl).fragments();
 			}
 			if (fragments.size() == 1) {
-				rewrite.markAsRemoved(varDecl);
+				rewrite.markAsRemoved(varDecl, null);
 			} else {
-				rewrite.markAsRemoved(frag); // don't try to preserve
+				rewrite.markAsRemoved(frag, null); // don't try to preserve
 			}
 		}
 	}
@@ -194,7 +194,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {
-			rewrite.markAsRemoved(statementNode); 
+			rewrite.markAsRemoved(statementNode, null); 
 		} else {
 			// do nothing yet
 		}

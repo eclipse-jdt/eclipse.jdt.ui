@@ -880,12 +880,12 @@ public class PushDownRefactoring extends Refactoring {
 				if (node.getParent() instanceof FieldDeclaration){
 					FieldDeclaration fd= (FieldDeclaration)node.getParent();
 					if (areAllFragmentsDeleted(fd, declarationNodes))
-						rewrite.markAsRemoved(fd);
+						rewrite.markAsRemoved(fd, null);
 					else
-						rewrite.markAsRemoved(node);
+						rewrite.markAsRemoved(node, null);
 				}
 			} else {
-				rewrite.markAsRemoved(node);
+				rewrite.markAsRemoved(node, null);
 			}
 		}
 	}
@@ -1150,7 +1150,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private void makeDeclaringClassAbstract(TypeDeclaration declaration, ASTRewrite rewrite) {
 		int newModifiers= createNewModifiersForMakingDeclaringClassAbstract(declaration);
-		rewrite.markAsReplaced(declaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		rewrite.set(declaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private int createNewModifiersForMakingDeclaringClassAbstract(TypeDeclaration declaration) {
@@ -1185,10 +1185,10 @@ public class PushDownRefactoring extends Refactoring {
 		if (JdtFlags.isAbstract(method))
 			return;
 		MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cuNode);
-		rewrite.markAsRemoved(declaration.getBody());
+		rewrite.markAsRemoved(declaration.getBody(), null);
 		
 		int newModifiers= createModifiersForMethodMadeAbstract(info, declaration.getModifiers());
-		rewrite.markAsReplaced(declaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+		rewrite.set(declaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private int createModifiersForMethodMadeAbstract(MemberActionInfo info, int oldModifiers) throws JavaModelException {

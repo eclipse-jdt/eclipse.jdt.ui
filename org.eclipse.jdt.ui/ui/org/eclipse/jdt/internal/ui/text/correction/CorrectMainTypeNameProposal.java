@@ -61,7 +61,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		if (decl != null) {
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());
 			for (int i= 0; i < sameNodes.length; i++) {
-				rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName));
+				rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName), null);
 			}
 		}
 		return rewrite;
