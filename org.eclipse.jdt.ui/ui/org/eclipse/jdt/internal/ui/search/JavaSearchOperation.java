@@ -13,21 +13,14 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 public class JavaSearchOperation extends WorkspaceModifyOperation {
 	
@@ -87,10 +80,8 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		
 		// Also search working copies
 		SearchEngine engine;
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+		if (true) {
 			engine= new SearchEngine();
-		} else {
-			engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
 		}
 		
 		if (fElementPattern != null)

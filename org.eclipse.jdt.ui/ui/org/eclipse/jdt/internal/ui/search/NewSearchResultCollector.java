@@ -24,12 +24,14 @@ public class NewSearchResultCollector implements IJavaSearchResultCollector {
 	private IProgressMonitor fProgressMonitor;
 	private int fMatchCount;
 	private boolean fIgnoreImports;
+	private boolean fIgnorePotentials;
 
-	public NewSearchResultCollector(JavaSearchResult search, IProgressMonitor monitor, boolean ignoreImports) {
+	public NewSearchResultCollector(JavaSearchResult search, IProgressMonitor monitor, boolean ignoreImports, boolean ignorePotentials) {
 		super();
 		fSearch= search;
 		fProgressMonitor= monitor;
 		fIgnoreImports= ignoreImports;
+		fIgnorePotentials= ignorePotentials;
 	}
 
 	public void aboutToStart() {
@@ -40,6 +42,8 @@ public class NewSearchResultCollector implements IJavaSearchResultCollector {
 		fMatchCount++;
 		if (enclosingElement != null) {
 			if (fIgnoreImports && enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
+				return;
+			if (fIgnorePotentials && (accuracy == IJavaSearchResultCollector.POTENTIAL_MATCH))
 				return;
 			fSearch.addMatch(new JavaElementMatch(enclosingElement, start, end-start, accuracy));
 		}

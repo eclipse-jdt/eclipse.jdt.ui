@@ -71,7 +71,7 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 		return null;
 	}
 
-	private boolean hasPotentialMatches(Object element) {
+	protected boolean hasPotentialMatches(Object element) {
 		AbstractTextSearchResult result= fPage.getInput();
 		if (result != null) {
 			Match[] matches= result.getMatches(element);

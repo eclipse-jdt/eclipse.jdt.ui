@@ -86,13 +86,6 @@ public class SearchUtil {
 				}
 			}
 			
-			if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-				IJavaElement wcElem= JavaModelUtil.toWorkingCopy(je);
-				if (wcElem.exists()) {
-					return wcElem;
-				}
-			}
-
 			if (!je.exists()) {
 				IJavaElement[] jElements= cu.findElements(je);
 				if (jElements == null || jElements.length == 0)

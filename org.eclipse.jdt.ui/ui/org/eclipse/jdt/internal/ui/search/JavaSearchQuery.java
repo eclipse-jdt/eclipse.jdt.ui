@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -32,12 +30,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.search.IQueryParticipant;
 import org.eclipse.jdt.ui.search.ISearchRequestor;
 import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
@@ -100,8 +98,8 @@ public class JavaSearchQuery implements ISearchQuery {
 	public IStatus run(IProgressMonitor monitor) {
 		final JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
 		textResult.removeAll();
-		// Also search working copies
-		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
+		// Don't need to pass in working copies in 3.0 here
+		SearchEngine engine= new SearchEngine();
 		int matchCount= 0;
 
 		try {
@@ -119,7 +117,8 @@ public class JavaSearchQuery implements ISearchQuery {
 
 			boolean ignoreImports= (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES);
 			ignoreImports &= PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_IGNORE_IMPORTS);
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, mainSearchPM, ignoreImports);
+			boolean ignorePotentials= SearchPreferencePage.arePotentialMatchesIgnored();
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, mainSearchPM, ignoreImports, ignorePotentials);
 			
 			ISearchPattern pattern;
 			String stringPattern= null;
@@ -148,7 +147,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			return e.getStatus();
 		}
 		// TODO fix status message
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+matchCount+" matches.", null); //$NON-NLS-1$
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+matchCount+" matches.", null);
 	}
 
 

@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.text.MessageFormat;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -51,11 +51,24 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		}
 		int matchCount= fPage.getInput().getMatchCount(element);
 		String text=internalGetText(element);
-		if (matchCount == 0)
-			return text+postfix;
-		if (matchCount == 1)
-			return text;
-		return text + " (" + matchCount + " matches)"+postfix;
+		if (matchCount < 2) {
+			String label= getSingularLabel(element);
+			return MessageFormat.format(label, new String[] { text, postfix.toString() });
+		}
+		String label= getPluralLabel(element);
+		return MessageFormat.format(label, new Object[] { text, new Integer(matchCount), postfix.toString() });
+	}
+
+	private String getSingularLabel(Object element) {
+		if (hasPotentialMatches(element))
+			return SearchMessages.getString("PostfixLabelProvider.potential_singluar"); //$NON-NLS-1$
+		return SearchMessages.getString("PostfixLabelProvider.exact_singular"); //$NON-NLS-1$
+	}
+
+	private String getPluralLabel(Object element) {
+		if (hasPotentialMatches(element))
+			return SearchMessages.getString("PostfixLabelProvider.potential_plural"); //$NON-NLS-1$
+		return SearchMessages.getString("PostfixLabelProvider.exact_plural"); //$NON-NLS-1$
 	}
 
 	private String internalGetText(Object element) {

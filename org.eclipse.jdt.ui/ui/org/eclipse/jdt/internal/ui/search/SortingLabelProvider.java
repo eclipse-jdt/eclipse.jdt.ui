@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.text.MessageFormat;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -42,9 +42,24 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	public final String getText(Object element) {
 		int matchCount= fPage.getInput().getMatchCount(element);
 		String text= internalGetText(element);
-		if (matchCount < 2)
-			return text;
-		return text + " (" + matchCount + " matches)";
+		if (matchCount < 2) {
+			String label= getSingularLabel(element);
+			return MessageFormat.format(label, new String[] { text });
+		}
+		String label= getPluralLabel(element);
+		return MessageFormat.format(label, new Object[] { text,  new Integer(matchCount) });
+	}
+
+	private String getSingularLabel(Object element) {
+		if (hasPotentialMatches(element))
+			return SearchMessages.getString("SortingLabelProvider.potential_singular"); //$NON-NLS-1$
+		return SearchMessages.getString("SortingLabelProvider.exact_singular"); //$NON-NLS-1$
+	}
+
+	private String getPluralLabel(Object element) {
+		if (hasPotentialMatches(element))
+			return SearchMessages.getString("SortingLabelProvider.potential_plural"); //$NON-NLS-1$
+		return SearchMessages.getString("SortingLabelProvider.exact_plural"); //$NON-NLS-1$
 	}
 
 	private String internalGetText(Object o) {
