@@ -10,20 +10,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -37,11 +43,12 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -76,20 +83,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		String fieldName= field.getElementName();
 		return CodeGeneration.getFieldComment(field.getCompilationUnit(), typeName, fieldName, String.valueOf('\n'));
 	}		
-	
-	private void sortEntries() {
-		Arrays.sort(fMembers, new Comparator() {
-			public int compare(Object object1, Object object2) {
-				try {
-					return ((IMember)object2).getSourceRange().getOffset() - ((IMember)object1).getSourceRange().getOffset();
-				} catch (JavaModelException e) {
-					// ignore
-				}
-				return 0;
-			}
-		});	
-	}
-	
+		
 	/**
 	 * @return Returns the scheduling rule for this operation
 	 */
@@ -102,27 +96,40 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		TextBuffer buffer= null;
+		
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
-			}			
+			}
 			
-			monitor.beginTask(CodeGenerationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length); //$NON-NLS-1$
 			if (fMembers.length == 0) {
 				return;
 			}
-			ICompilationUnit cu= fMembers[0].getCompilationUnit();
-			buffer= TextBuffer.acquire((IFile) cu.getResource());				
 			
-			sortEntries(); // sort botton to top, so changing the document does not invalidate positions
+			monitor.beginTask(CodeGenerationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length + 2); //$NON-NLS-1$
+
+			addJavadocComments(monitor);
+		} finally {
+			monitor.done();
+		}
+	}
+		
+	private void addJavadocComments(IProgressMonitor monitor) throws CoreException {
+		ICompilationUnit cu= fMembers[0].getCompilationUnit();
+		
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath path= cu.getPath();
+		
+		manager.connect(path, new SubProgressMonitor(monitor, 1));
+		try {
+			IDocument document= manager.getTextFileBuffer(path).getDocument();
 			
-			String lineDelim= buffer.getLineDelimiter();
+			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+			MultiTextEdit edit= new MultiTextEdit();
 			
 			for (int i= 0; i < fMembers.length; i++) {
 				IMember curr= fMembers[i];
-				int memberStartOffset= curr.getSourceRange().getOffset();
-				
+				int memberStartOffset= getMemberStartOffset(curr, document);
 				
 				String comment= null;
 				switch (curr.getElementType()) {
@@ -149,27 +156,34 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				}
 				
 				int tabWidth= CodeFormatterUtil.getTabWidth();
+				IRegion region= document.getLineInformationOfOffset(memberStartOffset);
 				
-				String line= buffer.getLineContentOfOffset(memberStartOffset);
+				String line= document.get(region.getOffset(), region.getLength());
 				String indentString= Strings.getIndentString(line, tabWidth);
 				
 				String indentedComment= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelim);
 
-				String insertString= indentedComment;
-				IRegion range= new Region(memberStartOffset, 0);
-				buffer.replace(range, insertString);
+				edit.addChild(new InsertEdit(memberStartOffset, indentedComment));
 
 				monitor.worked(1);
-
-			}				
-
-		} finally {
-			if (buffer != null) {
-				TextBuffer.release(buffer);
 			}
-			
-			monitor.done();
+			edit.apply(document); // apply all edits
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+		} finally {
+			manager.disconnect(path, new SubProgressMonitor(monitor, 1));
 		}
+	}
+
+	private int getMemberStartOffset(IMember curr, IDocument document) throws JavaModelException {
+		int offset= curr.getSourceRange().getOffset();
+		TokenScanner scanner= new TokenScanner(document);
+		try {
+			return scanner.getNextStartOffset(offset, true); // read to the first real non comment token
+		} catch (CoreException e) {
+			// ignore
+		}
+		return offset;
 	}
 		
 }
