@@ -1,276 +1,277 @@
-<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en"><html><head>
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.75 [en] (Windows NT 5.0; U) [Netscape]"><title>Java Tooling Release Notes</title></head><body>
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>Java Tooling Release Notes</title>
+</head>
+<body>
 
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input January 28<sup>th</sup> 2003
 <h2>
 What's new in this drop</h2>
 
+<ul>
+<li>
+New Non-Java projects are now shown in the Package Explorer. Added a filter
+to hide non-Java projects.</li>
+
+<li>
+Open Type Dialog no support the special end of type name character &lt;.
+If you want to see all types that end with factory you have to use the
+pattern *factory&lt;. If a pattern doesn't end with &lt; then a star is
+automatically added to the pattern.</li>
+
+<li>
+The Project menu now contains two actions to quickly open the Generate
+Javadoc and the Java Build Path dialog.</li>
+
+<li>
+The Java editor preference pages have been reworked. Java editor text hovers
+are now fully user configurable.</li>
+
+<li>
+New <i>Push Down</i> refactoring. To use it, select set of non-static methods
+and fields (declared in a class) and choose 'Push Down' from the menu.
+You can then, for each of the class methods and fields choose if you want
+to either</li>
 
 <ul>
-<li>New Non-Java projects are now shown in the Package Explorer. Added a filter to hide non-Java projects.</li>
-<li>Open Type Dialog no support the special end of type name character &lt;. If you want to see all types that end 
-    with factory you have to use the pattern *factory&lt;. If a pattern doesn't end with &lt; then a star is automatically
-    added to the pattern.</li>
-<li>The Project menu now contains two actions to quickly open the Generate Javadoc and the Java Build Path dialog.</li>
-<li>The Java editor preference pages have been reworked. Java editor text hovers are now fully user configurable.<br>
-</li>
-<li>New <i>Push Down</i> refactoring. To use it, select set of non-static methods and fields (declared in a class) 
-and choose 'Push Down' from the menu.
-   You can then, for each of the class methods and fields choose if you want to either 
-   <ul>
-   <li>push it down to subclasses or</li>
-   <li> (in the case of methods) push down to subclasses and declare abstract in the class that currently declares the method or </li>
-   <li> leave as is </li>
-   </ul>
-</li>
+<li>
+push it down to subclasses or</li>
 
+<li>
+(in the case of methods) push down to subclasses and declare abstract in
+the class that currently declares the method or</li>
+
+<li>
+leave as is</li>
 </ul>
 
-<h2>Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2003%2F01%2F14&amp;chfieldto=2003%2F01%2F21&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<li>
+Class file editor and compilation unit editor have been unified. Both are
+supporting now: current line highlighting, line numbers, overview rulers,
+bracket matching (painting + navigation), squiggly lines, print margin
+indication, error navigation.</li>
+</ul>
+
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2003%2F01%2F14&chfieldto=2003%2F01%2F21&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2003/01/14 and 2003/01/21<br>
-<br>
-
-
-Eclipse Build Input January 21<sup>th</sup> 2003
+between 2003/01/14 and 2003/01/21
+<p>Eclipse Build Input January 21<sup>th</sup> 2003
 <h2>
 What's new in this drop</h2>
 
+<ul>
+<li>
+<i>Pull Up</i> refactoring is more powerful now. Additional functionality
+includes:</li>
 
 <ul>
-<li><i>Pull Up</i> refactoring is more powerful now. Additional functionality includes:
-	<ul>
-	<li>You can add new members to pull up after the refactoring dialog appears.</li>
-	<li>Members can be pulled up more than 1 level in the class hierarchy.</li>
-	<li>Instead of pulling methods up you can choose to declare them abstract in the destination class.
-	Refactoring will then add method stubs to all non-abstract subclasses of the destination class 
-	(only those that require such additions).</li>
-	<li>By pressing 'Pull Up Required Members' you can compute the set of all members that are 
-	required to be pulled up together with those already selected.</li>
-	</ul>
-</li>
-<li><i>Move</i> refactoring now supports updating qualified names in non Java files as well.
-</li>
+<li>
+You can add new members to pull up after the refactoring dialog appears.</li>
+
+<li>
+Members can be pulled up more than 1 level in the class hierarchy.</li>
+
+<li>
+Instead of pulling methods up you can choose to declare them abstract in
+the destination class. Refactoring will then add method stubs to all non-abstract
+subclasses of the destination class (only those that require such additions).</li>
+
+<li>
+By pressing 'Pull Up Required Members' you can compute the set of all members
+that are required to be pulled up together with those already selected.</li>
 </ul>
-<h2>Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2003%2F01%2F14&amp;chfieldto=2003%2F01%2F21&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+
+<li>
+<i>Move</i> refactoring now supports updating qualified names in non Java
+files as well.</li>
+</ul>
+
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2003%2F01%2F14&chfieldto=2003%2F01%2F21&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2003/01/14 and 2003/01/21<br>
-<br>
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
+between 2003/01/14 and 2003/01/21
+<br>&nbsp;
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input January 14<sup>th</sup> 2003
 <h2>
 What's new in this drop</h2>
 
-
-
-
 <ul>
-<li>New <i>Move instance method refactoring</i>: you can select a virtual method and select Move from the context menu. 
- It allows you to move the method to the declared class of a field of the class or the declared class of one of the method's
- parameters. The refactoring will creat the new method and convert the old method into a delegate (passing 'this' if necessary).<br>
-</li>
+<li>
+New <i>Move instance method refactoring</i>: you can select a virtual method
+and select Move from the context menu. It allows you to move the method
+to the declared class of a field of the class or the declared class of
+one of the method's parameters. The refactoring will creat the new method
+and convert the old method into a delegate (passing 'this' if necessary).</li>
 </ul>
 
-
-
-
-
-
-<h2>Problem Reports</h2>
-
-
-
-
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2003%2F01%2F07&amp;chfieldto=2003%2F01%2F14&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2003%2F01%2F07&chfieldto=2003%2F01%2F14&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2003/01/07 and 2003/01/14<br>
-<br>
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
-
-
-
-
+between 2003/01/07 and 2003/01/14
+<br>&nbsp;
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input January 7<sup>th</sup> 2003
 <h2>
 What's new in this drop</h2>
 
-
-
 <ul>
-  <li>A new font definition for Java editors has been added. As a
-consequence, the Java editor font preference has moved from the Java
-Editor preference page to the <span style="font-style: italic;">Workbench's </span><span style="font-style: italic;">Font</span><span style="font-style: italic;"> preference page</span>.<br>
-  </li>
-  <li>Run the currently selected method as a JUnit test.</li>
-  <li>New search action: Occurrences in File - the action finds all the
-  occurrences of the selected element in a Java editor. For variables the
-  read or write access is indicated in the search results.</li>
+<li>
+A new font definition for Java editors has been added. As a consequence,
+the Java editor font preference has moved from the Java Editor preference
+page to the&nbsp;<span style="font-style: italic;">Workbench's&nbsp;</span><span style="font-style: italic;">Font</span><span style="font-style: italic;">
+preference page</span>.</li>
+
+<li>
+Run the currently selected method as a JUnit test.</li>
+
+<li>
+New search action: Occurrences in File - the action finds all the occurrences
+of the selected element in a Java editor. For variables the read or write
+access is indicated in the search results.</li>
 </ul>
 
-
-
-
-
-<h2>Problem Reports</h2>
-
-
-
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F12%2F16&amp;chfieldto=2003%2F01%2F07&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F12%2F16&chfieldto=2003%2F01%2F07&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/12/16 and 2003/01/07<br>
-<br>
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
-
-
+between 2002/12/16 and 2003/01/07
+<br>&nbsp;
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input December 16<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
 
-
 <ul>
-<li><br>
+<li>
 </li>
 </ul>
 
-
-
-
-<h2>Problem Reports</h2>
-
-
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F12%2F13&amp;chfieldto=2002%2F12%2F16&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F12%2F13&chfieldto=2002%2F12%2F16&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/12/13 and 2002/12/16<br>
-<br>
-
-
-
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
-
+between 2002/12/13 and 2002/12/16
+<br>&nbsp;
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input December 13<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
 
 <ul>
-<li>Hovers in overview ruler</li>
+<li>
+Hovers in overview ruler</li>
 </ul>
 
-
-
-<h2>Problem Reports</h2>
-
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F12%2F10&amp;chfieldto=2002%2F12%2F13&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F12%2F10&chfieldto=2002%2F12%2F13&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/11/27 and 2002/12/13<br>
-
-
-
-<br>
-<h1>Eclipse Platform Build Notes<br>Java Development Tooling UI</h1>
-
-
+between 2002/11/27 and 2002/12/13
+<br>&nbsp;
+<h1>
+Eclipse Platform Build Notes<br>
+Java Development Tooling UI</h1>
 Eclipse Build Input December 10<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
+
 <ul>
-    <li>New lightweight refactoring user interface implemented. It is enabled per default, but if you expierence any 
-        problems you can disable the new UI and switch back to the old wizard based UI using the preferences 
-        Java-&gt;Refactoring-&gt;User Interface mode.</li>
-    <li>Package Explorer now retargets action Navigate-&gt;Go To-&gt;Resource.</li>
+<li>
+New lightweight refactoring user interface implemented. It is enabled per
+default, but if you expierence any problems you can disable the new UI
+and switch back to the old wizard based UI using the preferences Java->Refactoring->User
+Interface mode.</li>
+
+<li>
+Package Explorer now retargets action Navigate->Go To->Resource.</li>
 </ul>
 
-
-<h2>Problem Reports</h2>
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F11%2F27&amp;chfieldto=2002%2F12%2F10&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<h2>
+Problem Reports</h2>
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F11%2F27&chfieldto=2002%2F12%2F10&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/11/27 and 2002/12/10<br>
-<br>
-
-
+between 2002/11/27 and 2002/12/10
+<br>&nbsp;
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
-
 Eclipse Build Input December 3<sup>rd</sup> 2002
 <h2>
 What's new in this drop</h2>
-<ul>
-  <ul>
-    <li>Added automatic closing of braces to Java editor
-      (can be turned off in behaviour tab of Java editor preference page)
-    </li>
-  </ul>
-</ul>
 
+<ul>
+<ul>
+<li>
+Added automatic closing of braces to Java editor (can be turned off in
+behaviour tab of Java editor preference page)</li>
+</ul>
+</ul>
 
 <h2>
 Problem Reports</h2>
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F12%2F03&amp;chfieldto=2002%2F12%2F10&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F12%2F03&chfieldto=2002%2F12%2F10&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/12/03 and 2002/12/10<br>
-<br>
-
+between 2002/12/03 and 2002/12/10
+<br>&nbsp;
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
-
 Eclipse Build Input November 26<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
-<ul>
-  <li>outline of compilation unit in a content assist like lightweight 
-              window available inside the editor:</li>
-  <ul>
-    <li><i>Show Outline</i> (Ctrl+O) shows the outline for the editor's input</li>
-    <li><i>Open Structure</i> (Ctrl+F3) shows the outline for the element at caret position<br>
-    </li>
-  </ul>
-</ul>
 
+<ul>
+<li>
+outline of compilation unit in a content assist like lightweight window
+available inside the editor:</li>
+
+<ul>
+<li>
+<i>Show Outline</i> (Ctrl+O) shows the outline for the editor's input</li>
+
+<li>
+<i>Open Structure</i> (Ctrl+F3) shows the outline for the element at caret
+position</li>
+</ul>
+</ul>
 
 <h2>
 Problem Reports</h2>
-
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F11%2F19&amp;chfieldto=2002%2F11%2F26&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F11%2F19&chfieldto=2002%2F11%2F26&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
-between 2002/11/19 and 2002/11/26<br>
-<br>
-
-
+between 2002/11/19 and 2002/11/26
+<br>&nbsp;
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
-
 Eclipse Build Input November 19<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F11%2F16&amp;chfieldto=2002%2F11%2F19&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F11%2F16&chfieldto=2002%2F11%2F19&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/11/16 and 2002/11/19
-
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
@@ -280,28 +281,26 @@ What's new in this drop</h2>
 
 <ul>
 <li>
-JUnit 3.8.1 support.
-</li>
-<li>
-Overloaded F2 key to make a text hover sticky in the Java editor.
-</li>
-<li>
-Added smart pasting for correct indentation in Java source code.
-The feature can be turned off in the Java Editor behavior preferences.</li><li>Java Editor hover configuration now allows to configure default hovers.<br>
-    <i>Note: Existing current hover preferences in an old/existing workspace will be reset to default.</i><br>
-  </li>
+JUnit 3.8.1 support.</li>
 
-</ul>
+<li>
+Overloaded F2 key to make a text hover sticky in the Java editor.</li>
+
+<li>
+Added smart pasting for correct indentation in Java source code. The feature
+can be turned off in the Java Editor behavior preferences.</li>
+
+<li>
+Java Editor hover configuration now allows to configure default hovers.</li>
+
+<br><i>Note: Existing current hover preferences in an old/existing workspace
+will be reset to default.</i></ul>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F11%2F05&amp;chfieldto=2002%2F11%2F12&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F11%2F05&chfieldto=2002%2F11%2F12&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/11/05 and 2002/11/12
-
-
-
-
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
@@ -311,50 +310,55 @@ What's new in this drop</h2>
 
 <ul>
 <li>
-Added link-like navigation for declarations to Java editor.
-While the Control key is pressed, text over which the mouse hovers and which
-have a declaration turn into links which can be clicked. The link color can
-be changed on the Java Editor Appearance Preference page.
-</li>
+Added link-like navigation for declarations to Java editor. While the Control
+key is pressed, text over which the mouse hovers and which have a declaration
+turn into links which can be clicked. The link color can be changed on
+the Java Editor Appearance Preference page.</li>
+
 <li>
-Applied patch submitted by Scott Rutledge to go into top level type in Java outliner.</li><li>Added
-new view menu option in the Package Explorer called "Layout" which allows
-to switch between "Flat" and "Hierarchical" (default is flat). The "Hierarchical"
-layout displays the package structure in a tree. There is also a preference
-(Java -&gt; Appearance) <br>
-which allows to set if empty package fragments are folded together when in hierarchical view (default is folded).</li>
-  <li><i>Work in progress:</i> Java Editor hovers can now be configured per
-modifier (Window -&gt; Preferences -&gt; Java -&gt; Editor -&gt; Hovers).
-The enable/disable button in the workbench toolbar affects all configured
-hovers.<br>
-  </li>
+Applied patch submitted by Scott Rutledge to go into top level type in
+Java outliner.</li>
+
 <li>
-Applied patch submitted by Sebastian Davids. It adds the new template variable ${year}.
-</li>
-<li>Added a new refactoring, Inline Constant.  This refactoring operates
-on multiple compilation files, and lets the user automatically replace references
+Added new view menu option in the Package Explorer called "Layout" which
+allows to switch between "Flat" and "Hierarchical" (default is flat). The
+"Hierarchical" layout displays the package structure in a tree. There is
+also a preference (Java -> Appearance)</li>
+
+<br>which allows to set if empty package fragments are folded together
+when in hierarchical view (default is folded).
+<li>
+<i>Work in progress:</i> Java Editor hovers can now be configured per modifier
+(Window -> Preferences -> Java -> Editor -> Hovers). The enable/disable
+button in the workbench toolbar affects all configured hovers.</li>
+
+<li>
+Applied patch submitted by Sebastian Davids. It adds the new template variable
+${year}.</li>
+
+<li>
+Added a new refactoring, Inline Constant. This refactoring operates on
+multiple compilation files, and lets the user automatically replace references
 to a static final field with expressions equivalent to the field's initializer
 (provided the static final field is not blank). The action can be invoked
 when a reference to, or declaration of, such a constant is selected, either
-in the editor, or in an outline.  The user can choose to only inline the
-selected reference (if a reference is selected), inline all references (anywhere
-in the workspace), or inline only some references, selecting only the desired
-changes from the preview page.  If all references are to be replaced, the
-user can choose to have the constant declaration removed. When the initializer
-expression refers to entities not visible from a particular inline site,
-the initializer will be adapted to that inline site by qualifying the names
-of some of the entities (by prepending multiple levels of enclosing class
-names).  If the initializer refers to non-static or non-final fields, the
-user will be unobtrusively warned.</li>
+in the editor, or in an outline. The user can choose to only inline the
+selected reference (if a reference is selected), inline all references
+(anywhere in the workspace), or inline only some references, selecting
+only the desired changes from the preview page. If all references are to
+be replaced, the user can choose to have the constant declaration removed.
+When the initializer expression refers to entities not visible from a particular
+inline site, the initializer will be adapted to that inline site by qualifying
+the names of some of the entities (by prepending multiple levels of enclosing
+class names). If the initializer refers to non-static or non-final fields,
+the user will be unobtrusively warned.</li>
 </ul>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F10%2F31&amp;chfieldto=2002%2F11%2F05&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F10%2F31&chfieldto=2002%2F11%2F05&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/10/31 and 2002/11/05
-
-
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
@@ -401,20 +405,18 @@ the compiler will generate a marker when detected. Example usage of a task
 tag is 'TODO' to mark code that has to be revisited.</li>
 
 <li>
-Added name guessing for the Extract Constant refactoring.
-</li>
+Added name guessing for the Extract Constant refactoring.</li>
+
 <li>
-JUnit: added support to find and navigate to tests that reference a particular type or method.
-The action is in "Navigate&gt;Go To&gt;Referring Tests".
-</li>
+JUnit: added support to find and navigate to tests that reference a particular
+type or method. The action is in "Navigate>Go To>Referring Tests".</li>
 </ul>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F10%2F22&amp;chfieldto=2002%2F10%2F29&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F10%2F22&chfieldto=2002%2F10%2F29&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/10/22 and 2002/10/29
-
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
@@ -429,11 +431,11 @@ Added "Goto Matching Bracket" action to Java editor (Ctrl+Shift+P)</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F10%2F09&amp;chfieldto=2002%2F10%2F16&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F10%2F09&chfieldto=2002%2F10%2F16&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/10/09 and 2002/10/16
 <p>Eclipse Build Input October 9<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <ul>
@@ -471,8 +473,8 @@ usages of a type with one of its supertypes.</li>
 Extract Constant refactoring: new refactoring to create a constant (a static
 final field) out of a selected expression. To activate, select an expression
 in the editor and choose <i>Extract Constant</i> from the context or global
-<i>Refactor</i> menu. You can replace all matching or only the selected
-expression.</li>
+<i>Refactor</i>
+menu. You can replace all matching or only the selected expression.</li>
 
 <li>
 New Quick fixes</li>
@@ -509,17 +511,17 @@ plug-ins (not all referenced plugins have to be available as binary projects).</
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F10%2F01&amp;chfieldto=2002%2F10%2F08&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F10%2F01&chfieldto=2002%2F10%2F08&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/10/01 and 2002/10/08
 <p>Eclipse Build Input October 1<sup>st</sup> 2002
-</p><h2>
+<h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F09%2F24&amp;chfieldto=2002%2F10%2F01&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F09%2F24&chfieldto=2002%2F10%2F01&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/09/24 and 2002/10/01
 <p>Eclipse Build Input September 24<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <ul>
@@ -533,7 +535,7 @@ Different icon for empty package</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F09%2F18&amp;chfieldto=2002%2F09%2F24&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F09%2F18&chfieldto=2002%2F09%2F24&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/09/18 and 2002/09/24
 <br>Eclipse Build Input September 17<sup>th</sup> 2002
@@ -584,38 +586,38 @@ then a field is created to access the enclosing instance.</ul>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F09%2F11&amp;chfieldto=2002%2F09%2F17&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F09%2F11&chfieldto=2002%2F09%2F17&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/09/11 and 2002/09/17
 <p>Eclipse Build Input September 10<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F09%2F04&amp;chfieldto=2002%2F09%2F10&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F09%2F04&chfieldto=2002%2F09%2F10&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/09/04 and 2002/09/10
 <p>Eclipse Build Input September 3<sup>rd</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F08%2F28&amp;chfieldto=2002%2F09%2F03&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F08%2F28&chfieldto=2002%2F09%2F03&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/08/28 and 2002/09/03
 <p>Eclipse Build Input August 27<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F08%2F21&amp;chfieldto=2002%2F08%2F27&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F08%2F21&chfieldto=2002%2F08%2F27&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/08/21 and 2002/08/27
 <p>Eclipse Build Input August 20<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <ul>
@@ -628,38 +630,38 @@ added feature to wrap a selection with a template</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F08%2F14&amp;chfieldto=2002%2F08%2F20&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F08%2F14&chfieldto=2002%2F08%2F20&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/08/14 and 2002/08/20
 <p>Eclipse Build Input August 13<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F08%2F07&amp;chfieldto=2002%2F08%2F13&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F08%2F07&chfieldto=2002%2F08%2F13&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/08/07 and 2002/08/13
 <p>Eclipse Build Input August 6<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F07%2F31&amp;chfieldto=2002%2F08%2F06&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F07%2F31&chfieldto=2002%2F08%2F06&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/07/31 and 2002/08/06
 <p>Eclipse Build Input July 30<sup>th</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F07%2F24&amp;chfieldto=2002%2F07%2F30&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F07%2F24&chfieldto=2002%2F07%2F30&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/07/24 and 2002/07/30
 <p>Eclipse Build Input July 23<sup>rd</sup> 2002
-</p><h2>
+<h2>
 What's new in this drop</h2>
 
 <ul>
@@ -669,14 +671,14 @@ Removed all 2.0 build notes. They can be found in <a href="buildnotes_jdt-ui_2_0
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F06%2F29&amp;chfieldto=2002%2F07%2F23&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F06%2F29&chfieldto=2002%2F07%2F23&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 between 2002/06/29 and 2002/07/23
 <br>&nbsp;
-<p><a href="doc/hglegal2002.htm"><img src="doc/ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002." border="0" height="14" width="324"></a>
+<p><a href="doc/hglegal2002.htm"><img SRC="ngibmcpy2002.gif" ALT="Copyright IBM Corporation and others 2000, 2002." BORDER=0 height=14 width=324></a>
 <br>&nbsp;
-</p><br>
-<br>
-<br>
-<br>
-</body></html>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>
