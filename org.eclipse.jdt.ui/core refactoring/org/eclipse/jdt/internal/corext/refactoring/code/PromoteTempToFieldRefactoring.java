@@ -66,7 +66,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	
 	//------ settings ---------//
 	private String fFieldName;
-	private int fVisibility; 	/*see JdtFlags*/
+	private int fVisibility; 	/*see Modifier*/
 	private boolean fDeclareStatic;
 	private boolean fDeclareFinal;
 	private int fInitializeIn; /*see INITIALIZE_IN_* constaints */
