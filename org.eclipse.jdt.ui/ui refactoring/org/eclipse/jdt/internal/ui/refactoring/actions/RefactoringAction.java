@@ -87,11 +87,10 @@ public abstract class RefactoringAction extends Action {
 	 */
 	public void update() {
 		IStructuredSelection selection= getStructuredSelection();
-		boolean enabled= false;
-		if (selection != null)
-			enabled= canOperateOn(selection);
-			
-		setEnabled(enabled);
+		if (selection == null)
+			setEnabled(false);
+		else	
+			setEnabled(canOperateOn(selection));
 	}	
 	
 	//--- wizard related methods + editor saving

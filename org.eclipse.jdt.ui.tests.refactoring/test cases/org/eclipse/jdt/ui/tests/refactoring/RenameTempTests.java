@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		assertEquals("incorrect renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}	
 	private void helper1(String newName) throws Exception{
 		helper1(newName, true);
@@ -96,7 +96,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
-	
 	private void helper2(String newName) throws Exception{
 		helper2(newName, true);
 	}
