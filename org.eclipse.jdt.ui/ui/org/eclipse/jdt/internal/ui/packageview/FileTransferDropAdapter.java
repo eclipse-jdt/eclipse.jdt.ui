@@ -83,7 +83,7 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 			
 		if (isContainer) {
 			IContainer container= (IContainer)target;
-			if (!container.isReadOnly())
+			if (container.isAccessible() && !container.isReadOnly())
 				event.detail= DND.DROP_COPY;
 		} else {
 			IJavaElement element= (IJavaElement)target;
