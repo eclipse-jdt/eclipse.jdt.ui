@@ -209,8 +209,24 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 	
 	public void test28() throws Exception{
-		printTestDisabledMessage("regression test for 11026");
-//		helper1(4, 16, 4, 31, true, false, "temp");
+//		printTestDisabledMessage("regression test for 11026");
+		helper1(4, 16, 4, 31, true, false, "temp");
+	}
+	
+	public void test29() throws Exception{
+		helper1(4, 19, 4, 22, true, false, "temp");
+	}
+	
+	public void test30() throws Exception{
+		helper1(5, 16, 5, 20, true, false, "temp");
+	}
+
+	public void test31() throws Exception{
+		helper1(5, 16, 5, 20, true, false, "temp");
+	}
+
+	public void test32() throws Exception{
+		helper1(4, 16, 4, 22, true, false, "temp");
 	}
 	
 	// -- testing failing preconditions
@@ -246,9 +262,10 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(4, 15, 4, 20, false, false, "temp");
 	}	
 
-	public void testFail8() throws Exception{
-		failHelper1(5, 16, 5, 20, false, false, "temp");
-	}	
+//	public void testFail8() throws Exception{
+//		printTestDisabledMessage("removed");
+//		failHelper1(5, 16, 5, 20, false, false, "temp");
+//	}	
 
 	public void testFail9() throws Exception{
 		failHelper1(4, 19, 4, 23, false, false, "temp");
@@ -266,17 +283,18 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(4, 16, 4, 29, false, false, "temp");
 	}	
 
-	public void testFail13() throws Exception{
-		//need to fix this one - cannot extract assignments
-		failHelper1(5, 16, 5, 20, false, false, "temp");
-	}	
+//	public void testFail13() throws Exception{
+//		printTestDisabledMessage("removed");
+//		failHelper1(5, 16, 5, 20, false, false, "temp");
+//	}	
 
-	public void testFail14() throws Exception{
-		failHelper1(4, 16, 4, 22, false, false, "temp");
-	}	
+//	public void testFail14() throws Exception{
+//		printTestDisabledMessage("removed");
+//		failHelper1(4, 16, 4, 22, false, false, "temp");
+//	}	
 
-	public void testFail15() throws Exception{
-		//need to fix - cannot extract string literals
-		failHelper1(4, 19, 4, 22, false, false, "temp");
-	}	
+//	public void testFail15() throws Exception{
+//		printTestDisabledMessage("removed");
+//		failHelper1(4, 19, 4, 22, false, false, "temp");
+//	}	
 }
