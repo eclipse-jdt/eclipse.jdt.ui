@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.ui.actions.*;
 public class SelfEncapsulateFieldActionDelegate extends RefactoringActionDelegate {
 
 	public SelfEncapsulateFieldActionDelegate() {
-		super("Self Encapsulate Field", "Operation unavailable on the current selection. Select a field.");
+		super(RefactoringMessages.getString("SelfEncapsulateFieldActionDelegate.sef"), RefactoringMessages.getString("SelfEncapsulateFieldActionDelegate.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)

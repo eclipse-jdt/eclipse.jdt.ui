@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 
 	public ExtractTempAction() {
-		super("Extract Local Variable");
+		super(RefactoringMessages.getString("ExtractTempAction.extract_temp")); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
-		String pageTitle= "Extract Local Variable";
+		String pageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
 	}
 
@@ -43,6 +43,6 @@ public class ExtractTempAction extends TextSelectionBasedRefactoringAction {
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected String getMessageDialogTitle() {
-		return "Extract Local Variable";
+		return RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 	}
 }

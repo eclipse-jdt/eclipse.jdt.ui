@@ -54,6 +54,6 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected String getMessageDialogTitle() {
-		return "Extract Method";
+		return RefactoringMessages.getString("ExtractMethodAction.extract_Method"); //$NON-NLS-1$
 	}
 }

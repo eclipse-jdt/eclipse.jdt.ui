@@ -11,7 +11,7 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 public class ModifyParametersActionDelegate extends RefactoringActionDelegate {
 
 	public ModifyParametersActionDelegate() {
-		super("Modify Method Parameters", "Operation unavailable on the current selection. Select a declaration or a reference to a source method with parameters.");
+		super(RefactoringMessages.getString("ModifyParametersActionDelegate.modify_parameters"), RefactoringMessages.getString("ModifyParametersActionDelegate.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)

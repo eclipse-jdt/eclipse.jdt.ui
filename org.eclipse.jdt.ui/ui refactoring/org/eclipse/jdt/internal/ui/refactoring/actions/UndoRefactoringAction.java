@@ -65,14 +65,14 @@ public class UndoRefactoringAction extends UndoManagerAction {
 					return;
 				action.setEnabled(true);
 				action.setText(RefactoringMessages.getFormattedString(
-					"UndoRefactoringAction.extendedLabel",
+					"UndoRefactoringAction.extendedLabel", //$NON-NLS-1$
 					Refactoring.getUndoManager().peekUndoName()));
 			}
 			public void noMoreUndos() {
 				IAction action= getAction();
 				if (action == null)
 					return;
-				action.setText(RefactoringMessages.getString("UndoRefactoringAction.label"));
+				action.setText(RefactoringMessages.getString("UndoRefactoringAction.label")); //$NON-NLS-1$
 				action.setEnabled(false);
 			}
 		};

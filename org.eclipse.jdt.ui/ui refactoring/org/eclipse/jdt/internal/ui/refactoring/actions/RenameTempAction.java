@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
 	public RenameTempAction() {
-		super("Rename Local Variable");
+		super(RefactoringMessages.getString("RenameTempAction.rename_Local_Variable")); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ class RenameTempAction extends TextSelectionBasedRefactoringAction{
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
-		String message= "Choose a new name for the local variable.";
+		String message= RefactoringMessages.getString("RenameTempAction.choose_new_name"); //$NON-NLS-1$
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getText(), message, wizardPageHelp, errorPageHelp);
@@ -45,7 +45,7 @@ class RenameTempAction extends TextSelectionBasedRefactoringAction{
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected String getMessageDialogTitle() {
-		return "Rename Local Variable";
+		return RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)

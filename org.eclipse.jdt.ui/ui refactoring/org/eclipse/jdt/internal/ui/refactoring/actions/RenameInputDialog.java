@@ -41,7 +41,7 @@ class RenameInputDialog extends InputDialog{
 		
 		final Button checkBox= new Button(composite, SWT.CHECK);
 		checkBox.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		checkBox.setText("&Update references to the renamed element");		
+		checkBox.setText(RefactoringMessages.getString("RenameInputDialog.update_references"));		 //$NON-NLS-1$
 		checkBox.setSelection(ref.getUpdateReferences());
 		ref.setUpdateReferences(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){

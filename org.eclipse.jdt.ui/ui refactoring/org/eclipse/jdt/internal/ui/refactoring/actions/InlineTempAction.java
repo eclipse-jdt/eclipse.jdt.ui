@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 
 	public InlineTempAction() {
-		super("Inline Local Variable");
+		super(RefactoringMessages.getString("InlineTempAction.inline_temp")); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -29,7 +29,7 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
-		String pageTitle= "Inline Local Variable";
+		String pageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
 		RefactoringWizard result= new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
 		result.setExpandFirstNode(true);
 		return result;
@@ -39,7 +39,7 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected String getMessageDialogTitle() {
-		return "Inline Local Variable";
+		return RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)

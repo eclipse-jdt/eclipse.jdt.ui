@@ -29,14 +29,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class SurroundWithTryCatchAction extends TextSelectionAction {
 
-	private static final String TITLE= "Surround with try/catch block";
+	private static final String TITLE= RefactoringMessages.getString("SurroundWithTryCatchAction.title"); //$NON-NLS-1$
 
 	public SurroundWithTryCatchAction() {
 		this(null);
 	}
 	
 	public SurroundWithTryCatchAction(JavaEditor editor) {
-		super("Surround with try/catch"); 
+		super(RefactoringMessages.getString("SurroundWithTryCatchAction.surround_trycatch"));  //$NON-NLS-1$
 		setEditor(editor);
 	}
 	
@@ -62,9 +62,9 @@ public class SurroundWithTryCatchAction extends TextSelectionAction {
 			op.setChangeContext(new ChangeContext(new AbortChangeExceptionHandler()));
 			new BusyIndicatorRunnableContext().run(false, false, op);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, TITLE, "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, TITLE, RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, TITLE, "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, TITLE, RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// not cancelable
 		}

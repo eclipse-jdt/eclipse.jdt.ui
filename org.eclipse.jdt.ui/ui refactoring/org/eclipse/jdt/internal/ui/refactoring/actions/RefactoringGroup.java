@@ -68,7 +68,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// -------------------- method refactorings ----------------------
 	
 	static OpenRefactoringWizardAction createModifyParametersAction(StructuredSelectionProvider selectionProvider) {
-		String label= "M&odify Parameters...";
+		String label= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new ModifyParametersRefactoring((IMethod)obj);
@@ -77,7 +77,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return ((ModifyParametersRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Modify Method Parameters";
+				String title= RefactoringMessages.getString("RefactoringGroup.modify_method_parameters"); //$NON-NLS-1$
 				//FIX ME: wrong
 				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
 				return new ModifyParametersWizard((ModifyParametersRefactoring)ref, title, helpId);
@@ -86,7 +86,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	static OpenRefactoringWizardAction createPullUpAction(StructuredSelectionProvider selectionProvider) {
-		String label= "Pu&ll Up...";
+		String label= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
@@ -101,16 +101,16 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return true;
 			}	
 			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Pull up";
+				String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
 				//FIX ME: wrong
-				String helpId= "HELPID";
+				String helpId= "HELPID"; //$NON-NLS-1$
 				return new PullUpWizard((PullUpRefactoring)ref, title, helpId);
 			}
 		};
 	}
 	
 	static OpenRefactoringWizardAction createMoveMembersAction(StructuredSelectionProvider selectionProvider) {
-		String label= "&Move...";
+		String label= RefactoringMessages.getString("RefactoringGroup.move_label"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
@@ -125,9 +125,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return true;
 			}	
 			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Move Members";
+				String title= RefactoringMessages.getString("RefactoringGroup.move_Members"); //$NON-NLS-1$
 				//FIX ME: wrong
-				String helpId= "HELPID";
+				String helpId= "HELPID"; //$NON-NLS-1$
 				return new MoveMembersWizard((MoveMembersRefactoring)ref, title, helpId);
 			}
 		};

@@ -62,9 +62,9 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	public void run() {
 		Assert.isNotNull(fRefactoring);
 		try{
-			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), "Refactoring", true);
+			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Refactoring", "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}	
 	}
 		

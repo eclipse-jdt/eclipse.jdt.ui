@@ -29,7 +29,7 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	private String fOperationNotAvailableDialogTitle;
 	
 	protected RefactoringActionDelegate() {
-		this("Refactoring", "Operation not available on current selection.");
+		this(RefactoringMessages.getString("RefactoringActionDelegate.refactoring"), RefactoringMessages.getString("RefactoringActionDelegate.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	protected RefactoringActionDelegate(String operationNotAvailableDialogTitle, String operationNotAvailableDialogMessage) {

@@ -30,7 +30,7 @@ public class RefactoringErrorDialogUtil {
 		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
 		dialog.setInput(status);
 		dialog.setTitle(dialogTitle);
-		dialog.setMessage("This operation cannot be performed:");
+		dialog.setMessage(RefactoringMessages.getString("RefactoringErrorDialogUtil.cannot_perform")); //$NON-NLS-1$
 		dialog.setContentProvider(new RefactoringStatusContentProvider());
 		dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
 		dialog.open();	

@@ -11,7 +11,7 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 public class PullUpActionDelegate extends RefactoringActionDelegate {
 
 	public PullUpActionDelegate() {
-		super("Pull Up", "Operation unavailable on the current selection. Select methods or/and fields declared in one type.");
+		super(RefactoringMessages.getString("PullUpActionDelegate.pull_Up"), RefactoringMessages.getString("PullUpActionDelegate.unavailable")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)
