@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -23,9 +22,11 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.RTFTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -33,6 +34,7 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextOperationTarget;
@@ -226,13 +228,22 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		});
 	}
 	
-	private Display getDisplay() {
+	private Shell getShell() {
 		ITextEditor editor= getTextEditor();
 		if (editor != null) {
 			IWorkbenchPartSite site= editor.getSite();
 			Shell shell= site.getShell();
-			if (shell != null && !shell.isDisposed()) 
-				return shell.getDisplay();
+			if (shell != null && !shell.isDisposed()) {
+				return shell;
+			}
+		}
+		return null;
+	}
+	
+	private Display getDisplay() {
+		Shell shell= getShell();
+		if (shell != null) {
+			return shell.getDisplay();
 		}
 		return null;
 	}
@@ -295,29 +306,50 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		
 		if (clipboardData != null) {
 			Clipboard clipboard= new Clipboard(getDisplay());
-
-			// see bug 61876, I currently make assumptions about what the styled text widget sets
-			Object textData= clipboard.getContents(TextTransfer.getInstance());
-			Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
-			
-			ArrayList datas= new ArrayList(3);
-			ArrayList transfers= new ArrayList(3);
-			if (textData != null) {
-				datas.add(textData);
-				transfers.add(TextTransfer.getInstance());
+			try {
+				// see bug 61876, I currently make assumptions about what the styled text widget sets
+				Object textData= clipboard.getContents(TextTransfer.getInstance());
+				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
+				
+				ArrayList datas= new ArrayList(3);
+				ArrayList transfers= new ArrayList(3);
+				if (textData != null) {
+					datas.add(textData);
+					transfers.add(TextTransfer.getInstance());
+				}
+				if (rtfData != null) {
+					datas.add(rtfData);
+					transfers.add(RTFTransfer.getInstance());
+				}
+				datas.add(clipboardData);
+				transfers.add(fgTransferInstance);
+	
+				Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
+				Object[] data= datas.toArray();
+				setClipboardContents(clipboard, data, dataTypes);
+			} finally {
+				clipboard.dispose();
 			}
-			if (rtfData != null) {
-				datas.add(rtfData);
-				transfers.add(RTFTransfer.getInstance());
-			}
-			datas.add(clipboardData);
-			transfers.add(fgTransferInstance);
-
-			Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
-			Object[] data= datas.toArray();
-			clipboard.setContents(data, dataTypes);
 		}
 	}
+	
+	private void setClipboardContents(Clipboard clipboard, Object[] datas, Transfer[] transfers) {
+		final int MAX_REPEAT_COUNT= 10;
+		int repeatCount= 0;
+		do {
+			try {
+				clipboard.setContents(datas, transfers);
+				return; // success
+			} catch (SWTError e) {
+				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeatCount >= MAX_REPEAT_COUNT) {
+					throw e;
+				}
+			}
+			repeatCount++;
+		} while (MessageDialog.openQuestion(getShell(), JavaEditorMessages.getString("ClipboardOperationAction.error.title"), JavaEditorMessages.getString("ClipboardOperationAction.error.message"))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	
 	
 	private boolean isNonTrivialSelection(ITextSelection selection) {
 		if (selection.getLength() < 30) {
