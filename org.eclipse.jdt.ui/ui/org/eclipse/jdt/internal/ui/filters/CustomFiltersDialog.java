@@ -72,13 +72,12 @@ public class CustomFiltersDialog extends SelectionDialog {
 	
 	/**
 	 * Creates a dialog to customize Java element filters.
-	 *
-	 * @param parentShell the parent shell
-	 * @param input the root element to populate this dialog with
-	 * @param contentProvider the content provider for navigating the model
-	 * @param labelProvider the label provider for displaying model elements
-	 * @param message the message to be displayed at the top of this dialog, or
-	 *    <code>null</code> to display a default message
+	 * 
+	 * @param shell the parent shell
+	 * @param viewId the id of the view
+	 * @param enablePatterns <code>true</code> if pattern filters are enabled
+	 * @param patterns the filter patterns
+	 * @param enabledFilterIds the Ids of the enabled filters
 	 */
 	public CustomFiltersDialog(
 			Shell shell,
@@ -245,7 +244,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		// Deselect All button
+		// De-select All button
 		label= FilterMessages.getString("CustomFiltersDialog.DeselectAllButton.label"); //$NON-NLS-1$
 		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, label, false);
 		SWTUtil.setButtonDimensionHint(deselectButton);
@@ -315,7 +314,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	}
 
 	/**
-	 * @return the ids of the enabled built-in filters
+	 * @return the Ids of the enabled built-in filters
 	 */
 	public String[] getEnabledFilterIds() {
 		Object[] result= getResult();
@@ -354,26 +353,67 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 
 	public static String[] convertFromString(String patterns, String separator) {
-		StringTokenizer tokenizer= new StringTokenizer(patterns, separator);
-		String[] result= new String[tokenizer.countTokens()];
-		for (int i= 0; i < result.length; i++)
-			result[i]= tokenizer.nextToken().trim();
-		return result;
+		StringTokenizer tokenizer= new StringTokenizer(patterns, separator, true);
+		int tokenCount= tokenizer.countTokens();
+		List result= new ArrayList(tokenCount);
+		boolean escape= false;
+		boolean append= false;
+		while (tokenizer.hasMoreTokens()) {
+			String token= tokenizer.nextToken().trim();
+			if (separator.equals(token)) {
+				if (!escape)
+					escape= true;
+				else {
+					addPattern(result, separator);
+					append= true;
+				}
+			} else  {
+				if (!append)
+ 					result.add(token);
+				else
+					addPattern(result, token);
+				append= false;
+				escape= false;
+			}
+		}
+		return (String[])result.toArray(new String[result.size()]);
+	}
+	
+	private static void addPattern(List list, String pattern) {
+		if (list.isEmpty())
+			list.add(pattern);
+		else {
+			int index= list.size() - 1;
+			list.set(index, ((String)list.get(index)) + pattern);
+		}
 	}
 
 	public static String convertToString(String[] patterns, String separator) {
 		int length= patterns.length;
 		StringBuffer strBuf= new StringBuffer();
 		if (length > 0)
-			strBuf.append(patterns[0]);
+			strBuf.append(escapeSeparator(patterns[0], separator));
 		else
 			return ""; //$NON-NLS-1$
 		int i= 1;
 		while (i < length) {
 			strBuf.append(separator);
 			strBuf.append(" "); //$NON-NLS-1$
-			strBuf.append(patterns[i++]);
+			strBuf.append(escapeSeparator(patterns[i++], separator));
 		}
 		return strBuf.toString();
+	}
+	
+	private static String escapeSeparator(String pattern, String separator) {
+		int length= pattern.length();
+		StringBuffer buf= new StringBuffer(length);
+		for (int i= 0; i < length; i++) {
+			char ch= pattern.charAt(i); //$NON-NLS-1$
+			if (separator.equals(String.valueOf(ch)))
+				buf.append(ch);
+			buf.append(ch);
+		}
+		return buf.toString();
+		
 	}
 }
