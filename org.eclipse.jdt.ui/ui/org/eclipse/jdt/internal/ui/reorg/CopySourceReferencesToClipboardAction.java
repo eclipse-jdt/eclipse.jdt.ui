@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
@@ -81,37 +82,18 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 	private static IType[] getMainTypes(ISourceReference[] refs){
 		List mainTypes= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
-			if (isMainType(refs[i]))
-				mainTypes.add(refs[i]);
+			try {
+				if ((refs[i] instanceof IType) && JavaElementUtil.isMainType((IType)refs[i]))
+					mainTypes.add(refs[i]);
+			} catch(JavaModelException e) {
+				JavaPlugin.log(e);//cannot show dialog
+			}
 		}
 		return (IType[]) mainTypes.toArray(new IType[mainTypes.size()]);
 	}
 	
-	private static boolean isMainType(ISourceReference ref){
-		if (! (ref  instanceof IType))
-			return false;
-		if (! ref.exists())	
-			return false;
-		IType type= (IType)ref;	
-		
-		if (type.getDeclaringType() != null)
-			return false;
-		
-		try {
-			return isPrimaryType(type) || isCuOnlyType(type);
-		} catch(JavaModelException e) {
-			JavaPlugin.log(e);//cannot show a dialog here
-			return false;
-		}
-	}
 	
-	private static boolean isPrimaryType(IType type){
-		return type.getElementName().equals(Signature.getQualifier(type.getCompilationUnit().getElementName()));
-	}
 	
-	private static boolean isCuOnlyType(IType type) throws JavaModelException{
-		return (type.getCompilationUnit().getTypes().length == 1);
-	}
 	
 	private static IResource getResource(IType type){
 		try {
