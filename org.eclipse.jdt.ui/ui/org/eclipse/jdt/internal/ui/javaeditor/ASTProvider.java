@@ -402,6 +402,7 @@ public final class ASTProvider {
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
 	void reconciled(CompilationUnit ast, IJavaElement javaElement) {
+		Assert.isNotNull(javaElement);
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "reconciled AST: " + toString(ast)); //$NON-NLS-1$
@@ -410,7 +411,7 @@ public final class ASTProvider {
 
 		
 			fIsReconciling= false;
-			if (!fReconcilingJavaElement.equals(javaElement)) {
+			if (!javaElement.equals(fReconcilingJavaElement)) {
 				
 				if (DEBUG)
 					System.out.println(DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$
