@@ -4,27 +4,22 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.custom.StyledText;
 /**
  * A template proposal.
  */
@@ -37,7 +32,6 @@ public class TemplateProposal implements ICompletionProposal {
 	private int fSelectionEnd;
 	
 	private CursorSelectionEvaluator fCursorSelectionEvaluator= new CursorSelectionEvaluator();
-	private VariableEvaluator fLocalVariableEvaluator= new LocalVariableEvaluator();
 	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
 	private ArgumentEvaluator fArgumentEvaluator;
 	private ModelEvaluator fModelEvaluator= new ModelEvaluator();
@@ -51,7 +45,6 @@ public class TemplateProposal implements ICompletionProposal {
 	 * @param start     the starting position of the key.
 	 * @param end       the ending position of the key (exclusive).
 	 */	
-
 	TemplateProposal(Template template, String[] arguments, TemplateContext context) {
 		Assert.isNotNull(template);
 		Assert.isNotNull(context);
@@ -72,7 +65,6 @@ public class TemplateProposal implements ICompletionProposal {
 		// resolve variables automatically
 		pattern= fInterpolator.interpolate(pattern, fArgumentEvaluator);		
 		pattern= fInterpolator.interpolate(pattern, fContext);
-//		pattern= fInterpolator.interpolate(pattern, fLocalVariableEvaluator);
 
 		fInterpolator.interpolate(pattern, fModelEvaluator);
 		TemplateModel model= fModelEvaluator.getModel();
@@ -113,15 +105,35 @@ public class TemplateProposal implements ICompletionProposal {
 		}
 
 		if (TemplatePreferencePage.useCodeFormatter() && fTemplate.getContext().equals("java")) { //$NON-NLS-1$
+			// XXX 4360
+			// workaround for code formatter limitations
+			// handle a special case where cursor position is surrounded by whitespaces
+			boolean kludge=
+				(fSelectionStart == fSelectionEnd) &&
+				(fSelectionStart > 0) && Character.isWhitespace(pattern.charAt(fSelectionStart - 1)) &&
+				(fSelectionStart < pattern.length()) && Character.isWhitespace(pattern.charAt(fSelectionStart));
+
+			final String marker= "/*${cursor}*/"; //$NON-NLS-1$
+
+			if (kludge)
+				pattern=
+					pattern.substring(0, fSelectionStart) + marker +
+					pattern.substring(fSelectionStart);
+
 			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
 			formatter.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
 			formatter.setInitialIndentationLevel(indentationLevel);
-
-			pattern= formatter.formatSourceString(pattern);
+			pattern= formatter.formatSourceString(pattern);				
 			
 			int[] positions= formatter.getMappedPositions();
 			fSelectionStart= positions[0];
-			fSelectionEnd= positions[1];
+			fSelectionEnd= positions[1];		
+
+			if (kludge)
+				pattern=
+					pattern.substring(0, fSelectionStart) +
+					pattern.substring(fSelectionStart + marker.length());
+			
 		} else {
 			CodeIndentator indentator= new CodeIndentator();
 			indentator.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
@@ -169,7 +181,6 @@ public class TemplateProposal implements ICompletionProposal {
 		String pattern= fTemplate.getPattern();
 		pattern= fInterpolator.interpolate(pattern, fArgumentEvaluator);		
 		pattern= fInterpolator.interpolate(pattern, fContext);		
-		pattern= fInterpolator.interpolate(pattern, fLocalVariableEvaluator);
 		pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
 		
 		return textToHTML(pattern);

@@ -117,7 +117,7 @@ public class TemplateEditorPopup implements ModifyListener, VerifyKeyListener, C
 		
 		Display display= fShell.getDisplay();
 		
-		// XXX kludge: attempt to flush pending events to gain focus
+		// XXX flush pending events to win race for gaining focus
 		while (display.readAndDispatch());
 		fEditBoxes[0].selectAll();				
 		
@@ -184,7 +184,7 @@ public class TemplateEditorPopup implements ModifyListener, VerifyKeyListener, C
 
 	public void verifyKey(VerifyEvent e) {
 		switch (e.character) {
-		// (SHIFT-)TAB = hop between edit boxes
+		// [SHIFT-]TAB = hop between edit boxes
 		case 0x09:
 			int index= findEditBoxIndex(e); 
 			
@@ -251,11 +251,11 @@ public class TemplateEditorPopup implements ModifyListener, VerifyKeyListener, C
 			return;
 		
 		StyledText text= fContext.getViewer().getTextWidget();
-		Point location= text.getLocationAtOffset(fContext.getStart());
+		Point location= text.getLocationAtOffset(fContext.getStart()); // XXX IAB 5123
 		location= text.toDisplay(location);
 		
-		// XXX not enough?
-		location.x -= BORDER_WIDTH; // XXX bidi safe?
+		// XXX bidi safe?
+		location.x -= BORDER_WIDTH;
 		location.y -= BORDER_WIDTH;
 
 		Point size= fShell.getSize();
