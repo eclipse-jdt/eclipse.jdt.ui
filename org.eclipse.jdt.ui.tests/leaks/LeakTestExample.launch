@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="org.eclipse.pde.ui.JunitLaunchConfig">
+<booleanAttribute key="clearws" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.ui.leaktest.example.LeakTestExample"/>
+<booleanAttribute key="default" value="true"/>
+<stringAttribute key="vmargs" value="-Xj9 -XrunProfileNatives"/>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<stringAttribute key="progargs" value="-os win32 -ws win32 -arch x86 -nl de_CH"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.jdt.ui.tests"/>
+<booleanAttribute key="askclear" value="false"/>
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+<mapEntry key="PATH" value="%PATH%;C:\workspaces\eclipse-sh3\org.eclipse.jdt.ui.tests\leaks"/>
+</mapAttribute>
+<stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.jdt.debug.ui.javaSourceLocator"/>
+<stringAttribute key="location0" value="C:\workspaces\junit-workbench-workspace"/>
+<stringAttribute key="application" value="org.eclipse.pde.junit.runtime.uitestapplication"/>
+</launchConfiguration>
