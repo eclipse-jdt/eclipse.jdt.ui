@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -110,6 +111,8 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaDocIndentStrategyTest.class;
 
+	private static final String SHORT_NAME= "JavaDoc auto completion";
+
 	private static final int WARM_UP_RUNS= 5;
 
 	private static final int MEASURED_RUNS= 5;
@@ -140,7 +143,8 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
 	public void testJavaDocIndentStrategy() throws Exception {
 		int destOffset= EditorTestHelper.getDocument(fEditor).getLineOffset(LINE) + COLUMN;
 		measureJavaDocIndentStrategy(destOffset, getNullPerformanceMeter(), getWarmUpRuns());
-		measureJavaDocIndentStrategy(destOffset, createPerformanceMeter(), getMeasuredRuns());
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
+		measureJavaDocIndentStrategy(destOffset, performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
