@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -19,10 +21,11 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
-public class NLSSearchResultPage extends AbstractTextSearchViewPage {
+public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements IAdaptable {
 
 	private TextSearchTableContentProvider fContentProvider;
 	private NLSSearchEditorOpener fEditorOpener= new NLSSearchEditorOpener();
@@ -30,7 +33,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage {
 	public NLSSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match,
 	 *      int, int)
@@ -81,5 +84,16 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage {
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (IShowInTargetList.class.equals(adapter)) {
+			return JavaSearchResultPage.SHOW_IN_TARGET_LIST;
+		}
+		return null;
+	}
+
 	
 }

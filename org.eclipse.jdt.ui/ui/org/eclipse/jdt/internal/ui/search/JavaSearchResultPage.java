@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
@@ -80,8 +81,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
 	
-	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES };
-	private static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
+	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
+	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
 		public String[] getShowInTargetIds() {
 			return SHOW_IN_TARGETS;
 		}
