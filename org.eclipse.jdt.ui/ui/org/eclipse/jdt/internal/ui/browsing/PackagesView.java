@@ -82,14 +82,14 @@ public class PackagesView extends JavaBrowsingPart{
 				int nElements= selection.size();
 				Object elem= selection.getFirstElement();
 				if (nElements == 1 && (elem instanceof LogicalPackage))
-					return formatCompoundElementMessage((LogicalPackage) elem);
+					return formatLogicalPackageMessage((LogicalPackage) elem);
 			}
 			return super.formatMessage(sel);
 		}
 
-		private String formatCompoundElementMessage(LogicalPackage compoundElement) {
-			IPackageFragment[] fragments= compoundElement.getFragments();
-			StringBuffer buf= new StringBuffer(compoundElement.getElementName());
+		private String formatLogicalPackageMessage(LogicalPackage logicalPackage) {
+			IPackageFragment[] fragments= logicalPackage.getFragments();
+			StringBuffer buf= new StringBuffer(logicalPackage.getElementName());
 			buf.append(JavaElementLabels.CONCAT_STRING);
 			String message= ""; //$NON-NLS-1$
 			boolean firstTime= true;
@@ -135,7 +135,7 @@ public class PackagesView extends JavaBrowsingPart{
 	
 	/**
 	 * Creates new NonJavaElementFilter and overides method select to allow for
-	 * CompoundElements.
+	 * LogicalPackages.
 	 * @return NonJavaElementFilter
 	 */
 	protected NonJavaElementFilter createNonJavaElementFilter() {
@@ -228,12 +228,12 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	private ILabelProvider createTreeLabelProvider() {
-		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(false, new TreeHierarchyLayoutProblemsDecorator(null));
+		ILabelDecorator[] decorators= concat(AppearanceAwareLabelProvider.getDecorators(true, null), new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null)});
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE, decorators);
 	}
 
 	private ILabelProvider createListLabelProvider() {
-		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(false, null);
+		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(true, null);
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE,  decorators);
 	}
 	
@@ -361,7 +361,7 @@ public class PackagesView extends JavaBrowsingPart{
 		
 	}
 
-	//alter sorter to include CompoundElements
+	//alter sorter to include LogicalPackages
 	protected JavaElementSorter createJavaElementSorter() {
 		return new JavaElementSorter(){
 			public int category(Object element) {
@@ -528,7 +528,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * 
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jface.viewers.ILabelDecorator)
 	 */
-	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
+	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, final ILabelDecorator decorationMgr) {
 		return new DecoratingLabelProvider(provider, decorationMgr){
 			
 			public String getText(Object element){
@@ -543,14 +543,14 @@ public class PackagesView extends JavaBrowsingPart{
 					LogicalPackage el= (LogicalPackage) element;
 					ILabelDecorator decorator= getLabelDecorator();
 					IPackageFragment[] fragments= el.getFragments();
-					
+				
 					Image image= super.getImage(el);
 					for (int i= 0; i < fragments.length; i++) {
 						IPackageFragment fragment= fragments[i];
 						Image decoratedImage= decorator.decorateImage(image, fragment);
 						if(decoratedImage != null)
 							image= decoratedImage;
-					}
+			}
 					return image;
 				} else return super.getImage(element);
 			}
@@ -559,7 +559,7 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	/*
-	 * Overridden from JavaBrowsingPart to handel CompoundElements and tree
+	 * Overridden from JavaBrowsingPart to handel LogicalPackages and tree
 	 * structure.
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#adjustInputAndSetSelection(org.eclipse.jdt.core.IJavaElement)
 	 */
