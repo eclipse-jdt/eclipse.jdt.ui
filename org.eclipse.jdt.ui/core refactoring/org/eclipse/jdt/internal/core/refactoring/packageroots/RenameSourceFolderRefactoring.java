@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
@@ -101,7 +102,10 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			return new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();
+			if (isReadOnly())
+				result.addError("Source folder " + fSourceFolder.getElementName() + " is marked as read-only.");
+			return result;	
 		} finally{
 			pm.done();
 		}		
@@ -117,6 +121,12 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 		} finally{
 			pm.done();
 		}	
+	}
+	
+	private boolean isReadOnly() throws JavaModelException{
+		if (Checks.isClasspathDelete(fSourceFolder))
+			return false;
+		return fSourceFolder.getCorrespondingResource().isReadOnly();
 	}
 }
 

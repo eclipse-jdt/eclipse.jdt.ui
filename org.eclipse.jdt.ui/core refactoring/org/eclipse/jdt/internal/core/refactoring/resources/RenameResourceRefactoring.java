@@ -34,7 +34,10 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			return new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();
+			if (isReadOnly())
+				result.addError("Resource " + fResource.getName() + " is marked as read-only.");
+			return result;
 		} finally{
 			pm.done();
 		}	
@@ -90,6 +93,11 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		if (! result.hasFatalError())
 			result.merge(validateStatus(c.getWorkspace().validatePath(createNewPath(), IResource.FOLDER)));		
 		return result;		
+	}
+	
+	
+	private boolean isReadOnly(){
+		return fResource.isReadOnly();
 	}
 	
 	private String createNewPath(){
