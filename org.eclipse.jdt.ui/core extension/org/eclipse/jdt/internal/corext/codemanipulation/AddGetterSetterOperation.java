@@ -317,36 +317,22 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return (IMethod[]) fCreatedAccessors.toArray(new IMethod[fCreatedAccessors.size()]);
 	}
 
-	/**
-	 * @param fSort
-	 */
 	public void setSort(boolean sort) {
 		fSort = sort;
 	}
 
-	/**
-	 * @param fVisibility
-	 */
 	public void setVisibility(int visibility) {
 		fVisibility = visibility;
 	}
 	
-	/**
-	 * @param syncSet
-	 */
 	public void setSynchronized(boolean syncSet) {
 		fSynchronized = syncSet;
 	}
 	
-	/**
-	 * @param finalSet
-	 */
 	public void setFinal(boolean finalSet) {
 		fFinal = finalSet;
 	}			
-	/**
-	 * @return
-	 */
+
 	public IJavaElement getInsertPosition() {
 		return fInsertPosition;
 	}
