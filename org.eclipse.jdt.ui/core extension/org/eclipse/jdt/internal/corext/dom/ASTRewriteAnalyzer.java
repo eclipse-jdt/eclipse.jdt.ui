@@ -509,7 +509,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/**
 	 * Rewrite a paragraph (node that is on a new line and has same indent as previous
 	 */
-	private ASTNode rewriteParagraph(ASTNode elem, ASTNode sibling, int insertPos, int insertIndent, int additionalNewLine, boolean useIndentOfSibling) {
+	private ASTNode rewriteParagraph(ASTNode elem, ASTNode sibling, int insertPos, int maxEndPos, int insertIndent, int additionalNewLine, boolean useIndentOfSibling) {
 		if (elem == null) {
 			return sibling;
 		} else if (isInserted(elem)) {
@@ -517,7 +517,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			return sibling;
 		} else {
 			if (isRemoved(elem)) {
-				removeParagraph(elem);
+				removeParagraph(elem, insertPos, maxEndPos);
 			} else if (isReplaced(elem)) {
 				replaceParagraph(elem);
 			} else {
@@ -637,17 +637,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	
-	private void removeParagraph(ASTNode elem) {
+	private void removeParagraph(ASTNode elem, int minStart, int maxEnd) {
 		int start= elem.getStartPosition();
 		int end= start + elem.getLength();
 		
 		// move end to include all spaces, tabs
-		end= getEndLineOffset(end);
+		end= Math.min(maxEnd, getEndLineOffset(end));
 		
 		int startLine= fTextBuffer.getLineOfOffset(start);
 		if (startLine > 0) {
 			TextRegion prevRegion= fTextBuffer.getLineInformation(startLine - 1);
 			int cutPos= prevRegion.getOffset() + prevRegion.getLength();
+			cutPos= Math.max(minStart, cutPos);
 			try {
 				if (getScanner().getNextStartOffset(cutPos, true) == start) {
 					start= cutPos;
@@ -835,7 +836,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */ 
 	public boolean visit(CompilationUnit node) {
 		PackageDeclaration packageDeclaration= node.getPackage();
-		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, 0, 1, false);
+		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, fTextBuffer.getLength(), 0, 1, false);
 				
 		List imports= node.imports();
 		int startPos= last != null ? last.getStartPosition() + last.getLength() : 0;
@@ -1018,12 +1019,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(Block block) {
 		List list=  block.statements();
 		
+		int startPos= block.getStartPosition();
+		int endPos= startPos + block.getLength();
 		List collapsedChildren= fRewrite.getCollapsedNodes(block);
 		if (collapsedChildren != null) {
 			list= collapsedChildren; // not a real block, but a placeholder
+		} else {
+			startPos++;		
 		}
-
-		int startPos= block.getStartPosition() + 1; // insert after left brace
 		int startIndent= 0;
 		if (!list.isEmpty() && isInserted((ASTNode) list.get(0))) { // calculate only when needed
 			startIndent= getIndent(block.getStartPosition()) + 1;
@@ -1031,7 +1034,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		ASTNode last= null; 
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem = (ASTNode) list.get(i);
-			last= rewriteParagraph(elem, last, startPos, startIndent, 0, true);
+			last= rewriteParagraph(elem, last, startPos, endPos, startIndent, 0, true);
 		}
 		return false;
 	}
@@ -1808,7 +1811,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					ASTNode elem = (ASTNode) statements.get(i);
 					// non-case statements are indented with one extra indent
 					int currIndent= elem.getNodeType() == ASTNode.SWITCH_CASE ? insertIndent : insertIndent + 1;
-					last= rewriteParagraph(elem, last, pos, currIndent, 0, false);
+					last= rewriteParagraph(elem, last, pos, fTextBuffer.getLength(), currIndent, 0, false);
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
