@@ -95,7 +95,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		return JavaModelUtil.getAllSuperTypes(fInputType, pm);
 	}
 
-	public IType[] getSuperTypes() throws JavaModelException{
+	public IType[] getSuperTypes(){
 		return fSuperTypes;
 	}
 	
@@ -122,11 +122,11 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		}	
 	}
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
