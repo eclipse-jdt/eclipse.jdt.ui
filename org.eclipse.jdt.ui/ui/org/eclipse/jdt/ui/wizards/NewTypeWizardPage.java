@@ -1227,7 +1227,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
 		if (!isInnerClass) {
 			String fileComment= getFileComment(cu);
-			if (fileComment != null) {
+			if (fileComment != null && fileComment.length() > 0) {
 				buf.replace(0, 0, fileComment + lineDelimiter);
 			}
 			buf.save(new SubProgressMonitor(monitor, 1), false);
@@ -1286,7 +1286,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private String constructTypeStub(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
 		StringBuffer buf= new StringBuffer();
 		String typeComment= getTypeComment(parentCU);
-		if (typeComment != null) {
+		if (typeComment != null && typeComment.length() > 0) {
 			buf.append(typeComment);
 			buf.append(lineDelimiter);
 		}
