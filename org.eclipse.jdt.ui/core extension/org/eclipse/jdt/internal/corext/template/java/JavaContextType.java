@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -100,7 +101,7 @@ public class JavaContextType extends ContextType {
 				return null;
 
 			try {
-				return ((IMethod) element).getReturnType();
+				return Signature.toString(((IMethod) element).getReturnType());
 			} catch (JavaModelException e) {
 				return null;
 			}
