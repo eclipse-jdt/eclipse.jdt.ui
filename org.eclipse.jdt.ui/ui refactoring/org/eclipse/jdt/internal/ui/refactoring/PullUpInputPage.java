@@ -110,9 +110,11 @@ public class PullUpInputPage extends UserInputWizardPage {
 		private ITypeHierarchy fHierarchy;
 		private IMember[] fMembers;
 		private Map fTypeToMemberArray; //IType -> IMember[]
+		private IType fDeclaringType; 
 		
-		PullUpHierarchyContentProvider(IMember[] members){
+		PullUpHierarchyContentProvider(IType declaringType, IMember[] members){
 			fMembers= members;
+			fDeclaringType= declaringType;
 			fTypeToMemberArray= PullUpInputPage.createTypeToMemberArrayMapping(members);
 		}
 				
@@ -124,7 +126,8 @@ public class PullUpInputPage extends UserInputWizardPage {
 				return new Object[0];
 			IType type= (IType)parentElement; 
 			Set set= new HashSet();
-			set.addAll(Arrays.asList(fHierarchy.getSubclasses(type)));
+			if (!type.equals(fDeclaringType))
+				set.addAll(Arrays.asList(fHierarchy.getSubclasses(type)));
 			if (fTypeToMemberArray.containsKey(type))
 				set.addAll(Arrays.asList((IMember[])(fTypeToMemberArray.get(type))));
 			return set.toArray();
@@ -361,7 +364,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1));
 			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
 			treeViever.addFilter(new PullUpFilter(hierarchy, matchingMethods));	
-			treeViever.setContentProvider(new PullUpHierarchyContentProvider(matchingMethods));
+			treeViever.setContentProvider(new PullUpHierarchyContentProvider(getPullUpMethodsRefactoring().getDeclaringType(), matchingMethods));
 			treeViever.setInput(hierarchy);			
 			treeViever.expandAll();
 			treeViever.addSelectionChangedListener(new ISelectionChangedListener() {
