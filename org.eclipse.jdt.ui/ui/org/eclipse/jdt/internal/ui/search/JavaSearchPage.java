@@ -270,7 +270,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			match= new SearchPatternData(
 							getSearchFor(),
 							getLimitTo(),
-							getPattern(),
+							pattern,
 							fCaseSensitive.getSelection(),
 							fJavaElement,
 							getContainer().getSelectedScope(),
@@ -427,7 +427,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		fPattern.setText(fInitialData.pattern);
 		fIsCaseSensitive= fInitialData.isCaseSensitive;
-		fCaseSensitive.setEnabled(fInitialData.javaElement == null);
+		fJavaElement= fInitialData.javaElement;
+		fCaseSensitive.setEnabled(fJavaElement == null);
 		fCaseSensitive.setSelection(fInitialData.isCaseSensitive);
 
 		if (fInitialData.workingSet != null)
