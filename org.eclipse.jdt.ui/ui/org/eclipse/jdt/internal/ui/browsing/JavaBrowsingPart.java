@@ -561,9 +561,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				fOpenEditorGroup= new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
+				new GenerateActionGroup(this),
 				new RefactorActionGroup(this),
 				new ImportActionGroup(this),
-				new GenerateActionGroup(this),
 				fBuildActionGroup= new BuildActionGroup(this),
 				new JavaSearchActionGroup(this)});
 

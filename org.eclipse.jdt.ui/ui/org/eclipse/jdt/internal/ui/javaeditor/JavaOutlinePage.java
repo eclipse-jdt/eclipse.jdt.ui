@@ -920,8 +920,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this),
-				new RefactorActionGroup(this), 
 				new GenerateActionGroup(this),
+				new RefactorActionGroup(this), 
 				new JavaSearchActionGroup(this)});
 				
 		// register global actions

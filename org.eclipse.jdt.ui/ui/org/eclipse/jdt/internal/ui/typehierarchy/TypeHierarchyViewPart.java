@@ -790,8 +790,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
-				new RefactorActionGroup(this),
 				new GenerateActionGroup(this),
+				new RefactorActionGroup(this),
 				new JavaSearchActionGroup(this)});
 		
 		fActionGroups.fillActionBars(actionBars);

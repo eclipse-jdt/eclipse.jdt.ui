@@ -55,7 +55,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private CompilationUnitEditor fEditor;
 	private IWorkbenchSite fSite;
-	private String fGroupName= IContextMenuConstants.GROUP_SOURCE;
+	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 	private List fRegisteredSelectionListeners;
 	
 	private AddImportOnSelectionAction fAddImport;
@@ -260,20 +260,14 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
+		IMenuManager subMenu= null;
 		if (isEditorOwner()) {
-			IMenuManager subMenu= createEditorSubMenu(menu);
-			if (subMenu != null)
-				menu.appendToGroup(fGroupName, subMenu);
+			subMenu= createEditorSubMenu(menu);
 		} else {
-			appendToGroup(menu, fOrganizeImports);
-			appendToGroup(menu, fOverrideMethods);
-			appendToGroup(menu, fAddGetterSetter);
-			appendToGroup(menu, fAddDelegateMethods);
-			appendToGroup(menu, fAddUnimplementedConstructors);
-			appendToGroup(menu, fAddJavaDocStub);
-			appendToGroup(menu, fAddToClasspathAction);
-			appendToGroup(menu, fRemoveFromClasspathAction);
+			subMenu= createViewSubMenu(menu);
 		}
+		if (subMenu != null)
+			menu.appendToGroup(fGroupName, subMenu);
 	}
 	
 	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
@@ -291,6 +285,27 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
 		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
+		added+= addAction(result, fSortMembers);
+		added+= addAction(result, fAddBookmark);
+		result.add(new Separator());		
+		added+= addAction(result, fSurroundWithTryCatch);
+		added+= addAction(result, fExternalizeStrings);
+		if (added == 0)
+			result= null;
+		return result;
+	}
+
+	private IMenuManager createViewSubMenu(IMenuManager mainMenu) {
+		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
+		int added= 0;
+		added+= addAction(result, fOrganizeImports);
+		added+= addAction(result, fAddImport);
+		result.add(new Separator());
+		added+= addAction(result, fOverrideMethods);
+		added+= addAction(result, fAddGetterSetter);
+		added+= addAction(result, fAddDelegateMethods);
+		added+= addAction(result, fAddUnimplementedConstructors);
+		added+= addAction(result, fAddJavaDocStub);
 		added+= addAction(result, fSortMembers);
 		added+= addAction(result, fAddBookmark);
 		result.add(new Separator());		
