@@ -223,7 +223,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		} else if ((ifStatement.getParent() instanceof Block)
 				&& (ifStatement.getParent().getParent() instanceof WhileStatement)) {
 			loopBlock = (Block) ifStatement.getParent();
+		} else {
+			return false;
 		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		
 		//
 		AST ast = coveringStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
@@ -343,7 +349,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final AST ast = covering.getAST();
 		final ASTRewrite rewrite = ASTRewrite.create(ast);
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes = new ArrayList();
+		boolean hasChanges= false;
 		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
 			ASTNode covered = (ASTNode) I.next();
 			if (!(covered instanceof Expression)) {
@@ -357,12 +363,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			//
 			Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, coveredExpression);
 			rewrite.replace(coveredExpression, inversedExpression, null);
-			changedNodes.add(coveredExpression);
+			hasChanges= true;
 		}
 		//
-		if (changedNodes.isEmpty()) {
+		if (!hasChanges) {
 			return false;
 		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		
 		// add correction proposal
 		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.inverseConditions.description"); //$NON-NLS-1$
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -511,6 +522,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		if (changedNodes.isEmpty())
 			return false;
+		if (resultingCollections == null) {
+			return true;
+		}
+		
 		// add correction proposal
 		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.removeParenthesis.description"); //$NON-NLS-1$
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -636,6 +651,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		if (changedNodes.isEmpty())
 			return false;
+		if (resultingCollections == null) {
+			return true;
+		}
+		
 		// add correction proposal
 		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.addParethesis.description"); //$NON-NLS-1$
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -714,6 +733,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label,
 						context.getCompilationUnit(), rewrite, 1, image);
 				resultingCollections.add(proposal);
+				result= true;
 			}
 		}
 		// case when current IfStatement has another IfStatement as sole child
@@ -754,6 +774,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label,
 						context.getCompilationUnit(), rewrite, 1, image);
 				resultingCollections.add(proposal);
+				result= true;
 			}
 		}
 		return result;
@@ -893,6 +914,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			} catch (Throwable e) {
 				return false;
 			}
+		}
+		if (resultingCollections == null) {
+			return true;
 		}
 		//
 		final AST ast = covering.getAST();
@@ -1049,109 +1073,5 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private boolean getVariableDebugOutputProposals(IInvocationContext context, ASTNode node,
-			Collection resultingCollections) {
-		if (!(node instanceof Expression)) {
-			return false;
-		}
-		// prepare selected expression
-		Expression expression = (Expression) node;
-		if (expression instanceof Name) {
-			if (context.getSelectionLength() == 0) {
-				expression = (Name) node;
-				while (expression.getParent() instanceof QualifiedName)
-					expression = (QualifiedName) expression.getParent();
-				//
-				if ((expression.getParent() instanceof MethodInvocation)
-						&& (((MethodInvocation) expression.getParent()).getName() == expression)) {
-					MethodInvocation mi = (MethodInvocation) expression.getParent();
-					IMethodBinding binding= mi.resolveMethodBinding();
-					if (binding != null && binding.getReturnType().getName().equals("void"))  //$NON-NLS-1$
-						return false;
-					expression = mi;
-				}
-			} else {
-				expression = (Name) node;
-			}
-		} else {
-			ArrayList nodes = getFullyCoveredNodes(context);
-			if (nodes.size() != 1)
-				return false;
-			ASTNode coveredNode = (ASTNode) nodes.get(0);
-			if (!(coveredNode instanceof Expression))
-				return false;
-			expression = (Expression) coveredNode;
-		}
-		if (expression == null) {
-			return false;
-		}
-		// check expression location and prepare location for debug output statement
-		MethodDeclaration methodDeclaration = ASTResolving.findParentMethodDeclaration(expression);
-		Block parentBlock = null;
-		int insertIndex = -1;
-		Statement parentStatement = ASTResolving.findParentStatement(expression);
-		if (expression.getParent() instanceof SingleVariableDeclaration) {
-			parentBlock = methodDeclaration.getBody();
-			if (parentBlock.statements().isEmpty())
-				return false;
-			parentStatement = (Statement) parentBlock.statements().get(0);
-			insertIndex = 0;
-		} else if ((parentStatement != null) && (parentStatement.getParent() instanceof Block)) {
-			parentBlock = (Block) parentStatement.getParent();
-			int statementIndex = parentBlock.statements().indexOf(parentStatement);
-			insertIndex = statementIndex;
-			if (expression.getParent() instanceof Assignment) {
-				Assignment assignment = (Assignment) expression.getParent();
-				if (assignment.getLeftHandSide() == expression)
-					insertIndex = statementIndex + 1;
-			}
-			if (expression.getParent() instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment vdf = (VariableDeclarationFragment) expression.getParent();
-				if (vdf.getName() == expression)
-					insertIndex = statementIndex + 1;
-			}
-		} else {
-			return false;
-		}
-		//
-		AST ast = expression.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		// prepare argument for debug output
-		String debugTitle = "[" + methodDeclaration.getName().getIdentifier() + "] value of " + expression + ": "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		InfixExpression outExpression = ast.newInfixExpression();
-		outExpression.setOperator(InfixExpression.Operator.PLUS);
-		StringLiteral debugTitleLiteral = ast.newStringLiteral();
-		debugTitleLiteral.setLiteralValue(debugTitle);
-		outExpression.setLeftOperand(debugTitleLiteral);
-		Expression parenthesizedExpression;
-		if (expression instanceof ParenthesizedExpression) {
-			parenthesizedExpression = (ParenthesizedExpression) rewrite.createCopyTarget(expression);
-		} else {
-			if (getExpressionPrecedence(expression) > getInfixOperatorPrecedence(InfixExpression.Operator.PLUS)) {
-				ParenthesizedExpression newExpression = ast.newParenthesizedExpression();
-				newExpression.setExpression((Expression) rewrite.createCopyTarget(expression));
-				parenthesizedExpression = newExpression;
-			} else {
-				parenthesizedExpression = (Expression) rewrite.createCopyTarget(expression);
-			}
-		}
-		outExpression.setRightOperand(parenthesizedExpression);
-		// prepare debug output statement
-		MethodInvocation sysout = ast.newMethodInvocation();
-		sysout.setExpression(ast.newName(new String[]{"System", "out"})); //$NON-NLS-1$ //$NON-NLS-2$
-		sysout.setName(ast.newSimpleName("println")); //$NON-NLS-1$
-		sysout.arguments().add(outExpression);
-		Statement newStatement = ast.newExpressionStatement(sysout);
-		// add debug output statement
-		ListRewrite listRewriter = rewrite.getListRewrite(parentBlock,
-				(ChildListPropertyDescriptor) parentStatement.getLocationInParent());
-		listRewriter.insertAt(newStatement, insertIndex, null);
-		// add correction proposal
-		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.debugOutput.description"); //$NON-NLS-1$
-		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(),
-				rewrite, 1, image);
-		resultingCollections.add(proposal);
-		return true;
-	}
+
 }
