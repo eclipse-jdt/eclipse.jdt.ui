@@ -42,6 +42,7 @@ import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.internal.ui.IJavaUIStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -56,7 +57,9 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -98,6 +101,8 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 	private String fPackageName= null;
 	
+	private Image fOldTitleImage= null;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -121,6 +126,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	/**
+	 * Actions for the editor popup menu
 	 * @see AbstractTextEditor#createActions
 	 */
 	protected void createActions() {
@@ -128,14 +134,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		setAction("Display", new DisplayAction(this));		 //$NON-NLS-1$
 		setAction("Run", new RunAction(this)); //$NON-NLS-1$
 		setAction("Inspect", new InspectAction(this)); //$NON-NLS-1$
-		
-		Action a= new StopAction(this);
-		a.setEnabled(false);
-		setAction("Stop", a); //$NON-NLS-1$
-
-		setAction("RunInPackage", new RunInPackageAction(this)); //$NON-NLS-1$
 		setAction("ContentAssistProposal", new TextOperationAction(SnippetMessages.getBundle(), "SnippetEditor.ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-2$ //$NON-NLS-1$
 		setAction("OpenOnSelection", new SnippetOpenOnSelectionAction(this));			 //$NON-NLS-1$
+		setAction("OpenHierarchyOnSelection", new SnippetOpenHierarchyOnSelectionAction(this));  //$NON-NLS-1$
 	} 
 	
 	/**
@@ -149,15 +150,17 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	/**
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(MenuManager)
 	 */
-	public void editorContextMenuAboutToShow(IMenuManager menu) {
+	protected void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_GENERATE);		
 		addGroup(menu, ITextEditorActionConstants.GROUP_FIND, IContextMenuConstants.GROUP_SEARCH);		
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OpenOnSelection"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_SEARCH, "Display"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_SEARCH, "Run"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_SEARCH, "Inspect"); //$NON-NLS-1$
+		addGroup(menu, IContextMenuConstants.GROUP_SEARCH,  IContextMenuConstants.GROUP_SHOW);
+		addAction(menu, IContextMenuConstants.GROUP_SHOW, "OpenOnSelection"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_SHOW, "OpenHierarchyOnSelection"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Display"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Run"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Inspect"); //$NON-NLS-1$
 	}
 
 	public boolean isVMLaunched() {
@@ -296,7 +299,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	/**
-	 * The VM has termianted, update state
+	 * The VM has terminated, update state
 	 */
 	protected void vmTerminated() {
 		DebugPlugin.getDefault().getLaunchManager().deregisterLaunch(fVM.getLaunch());
@@ -556,6 +559,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 		
 	synchronized void evaluationStarts() {
+
 		if (fThread != null) {
 			try {
 				fThread.resume();
@@ -566,13 +570,33 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		}		
 		fEvaluating = true;
 		fAttempts = 0;
+		setTitleImage();
 		fireEvalStateChanged();
 		showStatus(SnippetMessages.getString("SnippetEditor.evaluating")); //$NON-NLS-1$
 		getSourceViewer().setEditable(false);
+		
 	}
 	
+	/** 
+	 * Sets the tab image to indicate whether in the process of
+	 * evaluating or not.
+	 */
+	protected void setTitleImage() {
+
+		Image image=null;
+		if (fEvaluating) {
+			fOldTitleImage= getTitleImage();
+			image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SNIPPET_EVALUATING);
+		} else {
+			image= fOldTitleImage;
+			fOldTitleImage= null;
+		}
+		setTitleImage(image);
+	}
+		
 	void evaluationEnds() {
 		fEvaluating= false;
+		setTitleImage();
 		fireEvalStateChanged();
 		showStatus(""); //$NON-NLS-1$
 		getSourceViewer().setEditable(true);
@@ -657,5 +681,16 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	protected void updateSelectionDependentActions() {
 		super.updateSelectionDependentActions();
 		fireEvalStateChanged();
+	}
+	
+   /**
+    * Terminates existing VM on a rename of the editor
+	* @see WorkbenchPart#setTitle
+ 	*/
+	protected void setTitle(String title) {
+		if(isVMLaunched()) {
+			shutDownVM();
+		}
+		super.setTitle(title);
 	}
 }
