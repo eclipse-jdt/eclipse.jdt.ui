@@ -257,8 +257,12 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		String className= fAccessorClassName.getText();
 		
 		getNLSRefactoring().setAccessorClassName(className);
-		getNLSRefactoring().setCodePattern(getNLSRefactoring().getDefaultCodePattern());
-		fCodePattern.setText(getNLSRefactoring().getCodePattern());
+		if (fUseDefaultPattern.isSelected()){
+			getNLSRefactoring().setCodePattern(getNLSRefactoring().getDefaultCodePattern());
+			fCodePattern.setText(getNLSRefactoring().getCodePattern());
+		} else {
+			getNLSRefactoring().setCodePattern(fCodePattern.getText());
+		}
 		
 		IStatus status= JavaConventions.validateJavaTypeName(className);
 		if (!status.isOK()) {
