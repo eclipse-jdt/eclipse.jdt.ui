@@ -91,7 +91,7 @@ public abstract class OptionsConfigurationBlock {
 					}
 				}
 			}
-			return 0;
+			return fValues.length -1; // assume the last option is the least severe
 		}
 	}
 	
