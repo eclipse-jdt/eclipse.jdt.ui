@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -124,28 +125,19 @@ public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate i
 			if (runner == null) {
 				return false;
 			}
-			
-			VMRunnerConfiguration config= new VMRunnerConfiguration("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain", classPath); //$NON-NLS-1$
+						
 			ISourceLocator sl= new ProjectSourceLocator(p);
+			IPath outputLocation =	p.getProject().getPluginWorkingLocation(JavaPlugin.getDefault().getDescriptor());
+			java.io.File f = new java.io.File(outputLocation.toOSString());
+			URL u = null;
 			try {
-				IPath outputLocation =	p.getOutputLocation();
-				IResource outputFolder = p.getProject().getWorkspace().getRoot().findMember(outputLocation);
-				if (outputFolder == null) {
-					return false;
-				}
-				IPath osPath = outputFolder.getLocation();
-				java.io.File f = new java.io.File(osPath.toOSString());
-				URL u = null;
-				try {
-					u = f.toURL();
-				} catch (MalformedURLException e) {
-					return false;
-				}
-				String url = u.toExternalForm();
-				config.setProgramArguments(new String[] {url});
-			} catch (JavaModelException e) {
+				u = f.toURL();
+			} catch (MalformedURLException e) {
 				return false;
 			}
+			String url = u.toExternalForm();
+			VMRunnerConfiguration config= new VMRunnerConfiguration("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain", classPath); //$NON-NLS-1$
+			config.setProgramArguments(new String[] {url});
 			
 			VMRunnerResult result= runner.run(config);
 			if (result != null) {

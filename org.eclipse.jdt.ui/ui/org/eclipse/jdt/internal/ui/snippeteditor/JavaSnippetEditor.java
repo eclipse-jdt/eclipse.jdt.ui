@@ -37,11 +37,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.eval.IEvaluationContext;
-import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaValue;
+import org.eclipse.jdt.debug.eval.EvaluationManager;
+import org.eclipse.jdt.debug.eval.IEvaluationEngine;
+import org.eclipse.jdt.debug.eval.IEvaluationListener;
+import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
@@ -81,7 +85,7 @@ import com.sun.jdi.ObjectReference;
 /**
  * An editor for Java snippets.
  */
-public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEventListener, IJavaEvaluationListener {			
+public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEventListener, IEvaluationListener {			
 	public static final String PACKAGE_CONTEXT = "SnippetEditor.package"; //$NON-NLS-1$
 	
 	private final static String TAG= "input_element"; //$NON-NLS-1$
@@ -106,6 +110,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	private String fPackageName= null;
 	
 	private Image fOldTitleImage= null;
+	private IEvaluationEngine fEngine= null;
 	
 	/**
 	 * Default constructor.
@@ -335,6 +340,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		fThread= null;
 		fEvaluationContext= null;
 		fLaunchedClassPath= null;
+		fEngine= null;
 		fireEvalStateChanged();
 	}
 	
@@ -385,14 +391,14 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			return;
 		}
 		try {
-			getThread().evaluate(snippet, JavaSnippetEditor.this, getEvaluationContext());
+			getEvaluationEngine().evaluate(snippet,getThread(), this);
 		} catch (DebugException e) {
 			ErrorDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.error.evaluating"), null, e.getStatus()); //$NON-NLS-1$
 			evaluationEnds();
 		}
 	}
 
-	public void evaluationComplete(final IJavaEvaluationResult result) {
+	public void evaluationComplete(final IEvaluationResult result) {
 		Runnable r = new Runnable() {
 			public void run() {
 				if (result.hasProblems()) {
@@ -477,7 +483,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	public void displayResult(IJavaValue result, IJavaThread thread) {
 		StringBuffer resultString= new StringBuffer();
 		try {
-			String sig= result.getSignature();
+			String sig= result.getJavaType().getSignature();
 			if ("V".equals(sig)) { //$NON-NLS-1$
 				resultString.append(SnippetMessages.getString("SnippetEditor.noreturnvalue")); //$NON-NLS-1$
 			} else {
@@ -818,5 +824,14 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	 */
 	public boolean isSaveAsAllowed() {
 		return true;
+	}
+	
+	protected IEvaluationEngine getEvaluationEngine() {
+		if (fEngine == null) {
+			IPath outputLocation =	getJavaProject().getProject().getPluginWorkingLocation(JavaPlugin.getDefault().getDescriptor());
+			java.io.File f = new java.io.File(outputLocation.toOSString());
+			fEngine = EvaluationManager.newLocalEvaluationEngine(getJavaProject(), (IJavaDebugTarget)getThread().getDebugTarget(), f);
+		}
+		return fEngine;
 	}
 }
