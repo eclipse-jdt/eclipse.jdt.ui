@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -232,6 +233,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		/** The link color. */
 		private Color fColor;
+		/** The key modifier mask. */
+		private int fKeyModifierMask;
 
 		public void deactivate() {
 			deactivate(false);
@@ -269,8 +272,33 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			text.addFocusListener(this);
 			text.addPaintListener(this);
 			
+			updateKeyModifierMask();
+			
 			IPreferenceStore preferenceStore= getPreferenceStore();
 			preferenceStore.addPropertyChangeListener(this);			
+		}
+		
+		private void updateKeyModifierMask() {
+			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
+			fKeyModifierMask= computeStateMask(modifiers);
+		}
+
+		private int computeStateMask(String modifiers) {
+			if (modifiers == null)
+				return -1;
+		
+			if (modifiers.length() == 0)
+				return SWT.NONE;
+
+			int stateMask= 0;
+			StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
+			while (modifierTokenizer.hasMoreTokens()) {
+				int modifier= Action.findModifier(modifierTokenizer.nextToken());
+				if (modifier == 0 || (stateMask & modifier) == modifier)
+					return -1;
+				stateMask= stateMask | modifier;
+			}
+			return stateMask;
 		}
 		
 		public void uninstall() {
@@ -318,6 +346,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				ISourceViewer viewer= getSourceViewer();
 				if (viewer != null)	
 					updateColor(viewer);
+			} else if (event.getProperty().equals(BROWSER_LIKE_LINKS_KEY_MODIFIER)) {
+				updateKeyModifierMask();
 			}
 		}
 
@@ -564,7 +594,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;	
 			}
 
-			if (event.keyCode != SWT.MOD1) {
+			if (event.keyCode != fKeyModifierMask) {
 				deactivate();
 				return;
 			}
@@ -608,7 +638,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (!fActive)
 				return;
 				
-			if (event.stateMask != SWT.MOD1) {
+			if (event.stateMask != fKeyModifierMask) {
 				deactivate();
 				return;	
 			}
@@ -652,9 +682,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			if (!fActive) {
-				if (event.stateMask != SWT.MOD1)
+				if (event.stateMask != fKeyModifierMask)
 					return;
-				// MOD1 was already pressed
+				// modifier was already pressed
 				fActive= true;
 			}
 	
@@ -1062,6 +1092,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/** Preference key for browser like links */
 	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
+	/** Preference key for key modifier of browser like links */
+	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
@@ -1621,7 +1653,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
-		}
+	}
 	
 	private boolean isTextSelectionEmpty() {
 		ISelection selection= getSelectionProvider().getSelection();

@@ -1291,6 +1291,14 @@ public class PreferenceConstants {
 	public static final String EDITOR_BROWSER_LIKE_LINKS= "browserLikeLinks"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls the key modifier for browser like links.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER= "browserLikeLinksKeyModifier"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1775,6 +1783,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
 		
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, "Ctrl"); //$NON-NLS-1$
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	
