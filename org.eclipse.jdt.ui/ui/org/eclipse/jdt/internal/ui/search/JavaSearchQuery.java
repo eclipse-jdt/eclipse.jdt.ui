@@ -181,7 +181,7 @@ public class JavaSearchQuery implements ISearchQuery {
 					return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
 			}
 		} else {
-			String[] args= { getSearchPatternDescription(), String.valueOf(nMatches), fPatternData.getScopeDescription() };
+			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), fPatternData.getScopeDescription() };
 			switch (fPatternData.getLimitTo()) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$

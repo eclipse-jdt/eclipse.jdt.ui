@@ -773,16 +773,17 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	public String getLabel() {
 		String label= super.getLabel();
-		int matchFilterCount= getMatchFiltersCount();
-		int filteredMatchCount = getFilteredMatchCount();
-		if (getInput() != null &&  (matchFilterCount > 0 || filteredMatchCount < getInput().getMatchCount())) {
-			if (isQueryRunning()) {
-				String message= SearchMessages.getString("JavaSearchResultPage.filtered.message"); //$NON-NLS-1$
-				return MessageFormat.format(message, new Object[] { label });
-			
-			} else {
-				String message= SearchMessages.getString("JavaSearchResultPage.filteredWithCount.message"); //$NON-NLS-1$
-				return MessageFormat.format(message, new Object[] { label, new Integer(filteredMatchCount) });
+		if (getInput() != null) {
+			int filteredOut= getInput().getMatchCount() - getFilteredMatchCount();
+			if (filteredOut > 0 || getMatchFiltersCount() > 0) {
+				if (isQueryRunning()) {
+					String message= SearchMessages.getString("JavaSearchResultPage.filtered.message"); //$NON-NLS-1$
+					return MessageFormat.format(message, new Object[] { label });
+				
+				} else {
+					String message= SearchMessages.getString("JavaSearchResultPage.filteredWithCount.message"); //$NON-NLS-1$
+					return MessageFormat.format(message, new Object[] { label, String.valueOf(filteredOut) });
+				}
 			}
 		}
 		return label;
