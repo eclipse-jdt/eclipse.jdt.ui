@@ -155,11 +155,10 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	
 	private int countNotExternalizedStrings(ICompilationUnit cu){
 		try{
-			List l= NLSScanner.scan(cu);
-						
+			NLSLine[] lines= NLSScanner.scan(cu);
 			int result= 0;
-			for (Iterator iter= l.iterator(); iter.hasNext();){
-				result += countNotExternalizedStrings((NLSLine)iter.next());
+			for (int i= 0; i < lines.length; i++) {
+				result += countNotExternalizedStrings(lines[i]);
 			}
 			return result;
 		}catch(JavaModelException e) {

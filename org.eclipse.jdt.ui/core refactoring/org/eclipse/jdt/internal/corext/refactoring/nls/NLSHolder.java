@@ -5,11 +5,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 
 /**
@@ -34,9 +34,8 @@ public class NLSHolder {
 	}
 
 	public static NLSHolder create(ICompilationUnit cu){
-		List lines= createRawLines(cu);
-		NLSSubstitution[] subs= processLines(lines);
-		NLSLine[] nlsLines = (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
+		NLSLine[] nlsLines= createRawLines(cu);
+		NLSSubstitution[] subs= processLines(nlsLines);
 		return new NLSHolder(subs, nlsLines, cu);
 	}
 
@@ -52,7 +51,7 @@ public class NLSHolder {
 		return fCu;
 	}
 	
-	private static List createRawLines(ICompilationUnit cu){
+	private static NLSLine[] createRawLines(ICompilationUnit cu){
 		try {
 			return NLSScanner.scan(cu);
 		} catch (JavaModelException x) {
@@ -63,15 +62,15 @@ public class NLSHolder {
 	}
 	
 	//modifies its parameter
-	private static NLSSubstitution[] processLines(List lines) {
+	private static NLSSubstitution[] processLines(NLSLine[] lines) {
 		if (lines == null) 
 			return new NLSSubstitution[0];
 		List result= new ArrayList();
 		int counter= 1;
-		for (Iterator e= lines.iterator(); e.hasNext(); ) {
-			NLSElement[] elements= ((NLSLine) e.next()).getElements();
-			for(int i= 0; i < elements.length; i++){
-				NLSElement element= elements[i];
+		for (int i= 0; i < lines.length; i++) {
+			NLSElement[] elements= lines[i].getElements();
+			for(int j= 0; j < elements.length; j++){
+				NLSElement element= elements[j];
 				if (element.hasTag()) //don't show nls'ed stuff
 					continue;
 				element.setValue(unwindEscapeChars(element.getValue()));

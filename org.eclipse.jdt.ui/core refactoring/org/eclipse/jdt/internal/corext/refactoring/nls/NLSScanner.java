@@ -13,8 +13,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 
 public class NLSScanner {
 
@@ -25,18 +23,18 @@ public class NLSScanner {
 	/**
 	 * Returns a list of NLSLines found in the compilation unit
 	 */
-	public static List scan(ICompilationUnit cu) throws JavaModelException, InvalidInputException {
+	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, InvalidInputException {
 		return scan(cu.getBuffer().getCharacters());
 	}
 
 	/**
 	 * Returns a list of NLSLines found in the string
 	 */	
-	public static List scan(String s) throws JavaModelException, InvalidInputException {
+	public static NLSLine[] scan(String s) throws JavaModelException, InvalidInputException {
 		return scan(s.toCharArray()); 
 	}
 	
-	private static List scan(char[] content) throws JavaModelException, InvalidInputException {
+	private static NLSLine[] scan(char[] content) throws JavaModelException, InvalidInputException {
 		List lines= new ArrayList();
 		Scanner scanner= new Scanner(true, true);
 		scanner.recordLineSeparator= true;
@@ -68,7 +66,7 @@ public class NLSScanner {
 			}
 			token= scanner.getNextToken();
 		}
-		return lines;
+		return (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
 	}
 	
 	private static void parseTags(NLSLine line, Scanner scanner) throws InvalidInputException {
