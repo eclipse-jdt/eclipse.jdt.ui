@@ -5,6 +5,10 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -16,14 +20,16 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
+import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
+
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
-import org.eclipse.jdt.internal.ui.filters.*;
-
 public class PackagesView extends JavaBrowsingPart {
+
+	private SelectAllAction fSelectAllAction;
 
 	/**
 	 * Adds filters the viewer of this part.
@@ -104,5 +110,24 @@ public class PackagesView extends JavaBrowsingPart {
 			default:
 				return findElementToSelect(je.getParent());
 		}
+	}
+
+	protected void createActions() {
+		super.createActions();
+		fSelectAllAction= new SelectAllAction((TableViewer)getViewer());
+	}
+
+	protected void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+		
+		// Add selectAll action handlers.
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(fSelectAllAction);
+	}
+	
+	public void dispose() {
+		if (fSelectAllAction != null)
+			getViewSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(fSelectAllAction);
+		super.dispose();
 	}
 }

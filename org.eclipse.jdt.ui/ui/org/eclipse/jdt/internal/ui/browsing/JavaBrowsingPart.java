@@ -285,7 +285,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		if (fMemento != null)
 			restoreState(fMemento);
-//		fMemento= null;
 
 		getSite().setSelectionProvider(fViewer);
 		
@@ -312,8 +311,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Listen to workbench window changes
 		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
-		
-		fillActionBars();
+
+		fillActionBars(getViewSite().getActionBars());
 		
 		setHelp();
 	}
@@ -352,8 +351,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		});
 	}
 	
-	protected void fillActionBars() {
-		IActionBars actionBars= getViewSite().getActionBars();
+	protected void fillActionBars(IActionBars actionBars) {
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
 		if (fHasWorkingSetFilter)
