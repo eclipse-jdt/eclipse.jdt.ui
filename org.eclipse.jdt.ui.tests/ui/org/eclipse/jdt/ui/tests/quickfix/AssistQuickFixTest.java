@@ -29,11 +29,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 public class AssistQuickFixTest extends QuickFixTest {
@@ -47,15 +48,18 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public AssistQuickFixTest(String name) {
 		super(name);
 	}
-
-
+	
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+	
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AssistQuickFixTest("testAssignToLocal4"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}
 	}
 
@@ -77,17 +81,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 //		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
 		
 		
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		fJProject1= ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-
 	
 	public void testAssignToLocal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -101,11 +103,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
 		int offset= buf.toString().indexOf("getClass()");
-		CorrectionContext context= getCorrectionContext(cu, offset, 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -165,11 +166,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
 		int offset= buf.toString().indexOf("goo().iterator()");
-		CorrectionContext context= getCorrectionContext(cu, offset, 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -247,11 +247,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
 		int offset= buf.toString().indexOf("System");
-		CorrectionContext context= getCorrectionContext(cu, offset, 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -318,11 +317,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
 		int offset= buf.toString().indexOf("Math");
-		CorrectionContext context= getCorrectionContext(cu, offset, 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -393,11 +391,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "goo().toArray();";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -463,11 +460,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "(IOException e)";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -505,11 +501,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "(IOException e)";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -542,11 +537,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "for";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -580,11 +574,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "do";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -619,11 +612,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "while";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -659,11 +651,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "if";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -703,11 +694,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "try";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -744,11 +734,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "};";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -782,11 +771,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "}//comment";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -816,11 +804,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "(9+ 8)";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -847,11 +834,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "Math.abs(9+ 8)";
-		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		assertCorrectContext(context);
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectAssists(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		

@@ -33,8 +33,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.IAssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
   */
@@ -42,15 +44,15 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(new TestSuite(UnresolvedTypesQuickFixTest.class));
-		suite.addTest(new TestSuite(UnresolvedVariablesQuickFixTest.class));
-		suite.addTest(new TestSuite(UnresolvedMethodsQuickFixTest.class));
-		suite.addTest(new TestSuite(ReturnTypeQuickFixTest.class));
-		suite.addTest(new TestSuite(LocalCorrectionsQuickFixTest.class));
-		suite.addTest(new TestSuite(ReorgQuickFixTest.class));
-		suite.addTest(new TestSuite(ModifierCorrectionsQuickFixTest.class));
-		suite.addTest(new TestSuite(AssistQuickFixTest.class));
-		suite.addTest(new TestSuite(MarkerResolutionTest.class));
+		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
+		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
+		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
+		suite.addTest(ReturnTypeQuickFixTest.allTests());
+		suite.addTest(LocalCorrectionsQuickFixTest.allTests());
+		suite.addTest(ReorgQuickFixTest.allTests());
+		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
+		suite.addTest(AssistQuickFixTest.allTests());
+		suite.addTest(MarkerResolutionTest.allTests());
 		return new ProjectTestSetup(suite);
 	}
 
@@ -72,9 +74,9 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 	
-	public static void assertCorrectContext(CorrectionContext context) {
-		if (context.getProblemId() != 0) {
-			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+	public static void assertCorrectContext(IAssistContext context, ProblemLocation problem) {
+		if (problem.getProblemId() != 0) {
+			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problem.getProblemId()));
 		}
 	}	
 	
@@ -206,17 +208,33 @@ public class QuickFixTest extends TestCase {
 		}
 		return null;
 	}	
-	
-	public static CorrectionContext getCorrectionContext(ICompilationUnit cu, IProblem problem) {
-		CorrectionContext context= new CorrectionContext(cu);
-		context.initialize(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, problem.getID(), problem.getArguments());
+		
+	public static AssistContext getCorrectionContext(ICompilationUnit cu, int offset, int length) {
+		AssistContext context= new AssistContext(cu, offset, length);
 		return context;
 	}
-	
-	public static CorrectionContext getCorrectionContext(ICompilationUnit cu, int offset, int length) {
-		CorrectionContext context= new CorrectionContext(cu);
-		context.initialize(offset, length, 0, null);
-		return context;
+
+
+	protected final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) {
+		return collectCorrections(cu, astRoot, 1);
+	}
+
+
+	protected final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, nProblems);
+		
+		IProblem curr= problems[0];
+		int offset= curr.getSourceStart();
+		int length= curr.getSourceEnd() + 1 - offset;
+		
+		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments());
+		AssistContext context= new AssistContext(cu, offset, length);
+		assertCorrectContext(context, problem);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  new ProblemLocation[] { problem }, proposals);
+		return proposals;
 	}	
 	
 	

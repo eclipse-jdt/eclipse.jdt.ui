@@ -16,6 +16,8 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -33,9 +35,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -52,9 +54,13 @@ public class MarkerResolutionTest extends QuickFixTest {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+	
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new MarkerResolutionTest("testQuickFixAfterModification"));
@@ -72,15 +78,14 @@ public class MarkerResolutionTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-
+		fJProject1= ProjectTestSetup.getProject();
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
 
