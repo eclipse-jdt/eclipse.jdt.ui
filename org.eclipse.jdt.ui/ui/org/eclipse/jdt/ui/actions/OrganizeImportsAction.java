@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
@@ -315,8 +316,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 						throw new OperationCanceledException();
 					}
 					
-					ISourceRange errorRange= op.getErrorSourceRange();
-					if (errorRange != null) {
+					IProblem parseError= op.getParseError();
+					if (parseError != null) {
 						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
 						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
 					} 
@@ -359,11 +360,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 			context.run(false, true, new WorkbenchRunnableAdapter(op));
-			ISourceRange errorRange= op.getErrorSourceRange();
-			if (errorRange != null) {
-				MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.single.error.parse")); //$NON-NLS-1$ //$NON-NLS-2$
-				if (fEditor != null) {
-					fEditor.selectAndReveal(errorRange.getOffset(), errorRange.getLength());
+			IProblem parseError= op.getParseError();
+			if (parseError != null) {
+				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
+				if (fEditor != null && parseError.getSourceStart() != -1) {
+					fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 				}
 			} else {
 				if (fEditor != null) {

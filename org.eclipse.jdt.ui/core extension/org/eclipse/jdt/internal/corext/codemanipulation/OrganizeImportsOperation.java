@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -33,7 +34,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.UnresolvedTypeInfo;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -51,14 +51,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges);
 	}
 	
-	private static class ASTError extends Error {
-		
-		public ASTNode errorNode;
-		
-		public ASTError(ASTNode node) {
-			errorNode= node;
-		}
-	}
 	
 	private static class TypeRefASTVisitor extends ASTVisitor {
 
@@ -247,17 +239,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				node.getBody().accept(this);
 			}
 			return false;
-		}		
-		
-		/*
-		 * @see ASTVisitor#preVisit(ASTNode)
-		 */		
-		public void preVisit(ASTNode node) {
-			if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
-				throw new ASTError(node);
-			}
 		}
-
 	}
 		
 	private static class TypeReferenceProcessor {
@@ -475,7 +457,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private int fNumberOfImportsAdded;
 
-	private ISourceRange fParsingErrorRange;
+	private IProblem fParsingError;
 
 	private boolean fDoResolve;
 		
@@ -492,7 +474,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		fNumberOfImportsAdded= 0;
 		
-		fParsingErrorRange= null;
+		fParsingError= null;
 	}
 
 	/**
@@ -563,26 +545,28 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	// find type references in a compilation unit
 	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) throws JavaModelException {
-		try {
-			CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, fDoResolve);
-			
-			HashMap references= new HashMap();
-			TypeRefASTVisitor visitor = new TypeRefASTVisitor(references, oldSingleImports, oldDemandImports);
-			astRoot.accept(visitor);
-
-			return references.values().iterator();
-		} catch (ASTError e) {
-			fParsingErrorRange= new SourceRange(e.errorNode.getStartPosition(), e.errorNode.getLength());
+		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, fDoResolve);
+		IProblem[] problems= astRoot.getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			IProblem curr= problems[i];
+			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
+				fParsingError= problems[i];
+				return null;
+			}
 		}
-		return null;
+		HashMap references= new HashMap();
+		TypeRefASTVisitor visitor = new TypeRefASTVisitor(references, oldSingleImports, oldDemandImports);
+		astRoot.accept(visitor);
+
+		return references.values().iterator();
 	}	
 	
 	/**
 	 * After executing the operation, returns <code>null</code> if the operation has been executed successfully or
 	 * the range where parsing failed. 
 	 */
-	public ISourceRange getErrorSourceRange() {
-		return fParsingErrorRange;
+	public IProblem getParseError() {
+		return fParsingError;
 	}
 	
 	public int getNumberOfImportsAdded() {
