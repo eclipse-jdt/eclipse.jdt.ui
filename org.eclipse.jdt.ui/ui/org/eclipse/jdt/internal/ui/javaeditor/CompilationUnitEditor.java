@@ -544,8 +544,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		 * Will be reworked for overal context menu reorganization.
 		 */
 //		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
-//		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
-//		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
 		
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "SurroundWithTryCatch"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
