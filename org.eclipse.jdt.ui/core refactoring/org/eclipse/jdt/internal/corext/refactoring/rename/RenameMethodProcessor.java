@@ -189,6 +189,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		
+		if (fMethod.getDeclaringType().isAnnotation())
+			return RefactoringStatus.createFatalErrorStatus("Renaming annotation elements is not supported yet."); // see bugs 81058, 85415
+
 		RefactoringStatus result= Checks.checkAvailability(fMethod);
 		if (result.hasFatalError())
 				return result;
