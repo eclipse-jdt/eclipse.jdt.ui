@@ -25,15 +25,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -41,7 +46,6 @@ import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 
@@ -76,13 +80,14 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.ISourceActionContentProvider;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
-import org.eclipse.jdt.internal.ui.refactoring.VisibilityControlUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -112,6 +117,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private boolean fSort;
 	private boolean fSynchronized;
 	private boolean fFinal;	
+	private int fVisibility;
 	private boolean fGenerateComment;
 	private int fNumEntries;
 	private CompilationUnitEditor fEditor;
@@ -174,7 +180,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (firstElement instanceof IType)
 				run((IType)firstElement, new IField[0], false);
 			else if (firstElement instanceof ICompilationUnit)	{
-				run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500				
+				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
+				if (type.isInterface()) {
+					MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+					return;
+				}
+				else 
+					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
@@ -227,7 +240,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
 		}	
-		ITreeContentProvider cp= new AddGetterSetterContentProvider(entries);
+		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
@@ -237,8 +250,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		dialog.setContainerMode(true);
 		dialog.setSize(60, 18);
 		dialog.setInput(type);
-		dialog.setExpandedElements(type.getFields());
-		dialog.setInitialSelections(preselected);
+
+		if (preselected.length > 0)  {
+			dialog.setInitialSelections(preselected);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
+			cp.setPreselected(preselected[0]);
+		}
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] result= dialog.getResult();
@@ -247,6 +264,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fSort= dialog.getSort();
 			fSynchronized= dialog.getSynchronized();
 			fFinal= dialog.getFinal();
+			fVisibility= dialog.getVisibility();
 			fGenerateComment= dialog.getGenerateComment();
 			IField[] getterFields, setterFields, getterSetterFields;
 			if (fSort) {
@@ -539,7 +557,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private void setOperationStatusFields(AddGetterSetterOperation op) {
 		// Set the status fields corresponding to the visibility and modifiers set
 		op.setSort(fSort);
-		op.setVisibility(Modifier.PUBLIC);
+		op.setVisibility(fVisibility);
 		op.setSynchronized(fSynchronized);
 		op.setFinal(fFinal);
 	}
@@ -715,11 +733,133 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return result;
 	}
 	
-	private static class AddGetterSetterContentProvider implements ITreeContentProvider{
+	private static class AddGetterSetterContentProvider implements ISourceActionContentProvider {
+		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
+		private final String VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
+		private final String FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
+		private final String SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
+		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
+		
 		private static final Object[] EMPTY= new Object[0];
+		private Viewer fViewer;
 		private Map fGetterSetterEntries;	//IField -> Object[] (with 0 to 2 elements of type GetterSetterEntry)
+		private IField fPreselected;
+		private IDialogSettings fSettings;		
+		private int fInsertPosition;
+		private int fVisibilityModifier;
+		private boolean fFinal;
+		private boolean fSynchronized;
+		private boolean fSortOrder;
+		
 		public AddGetterSetterContentProvider(Map entries) throws JavaModelException {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+			fSettings= dialogSettings.getSection(SETTINGS_SECTION);
+			if (fSettings == null) {
+				fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+				fSettings.put(SETTINGS_INSERTPOSITION, 0); //$NON-NLS-1$
+				fSettings.put(VISIBILITY_MODIFIER, Modifier.PUBLIC); //$NON-NLS-1$
+				fSettings.put(FINAL_MODIFIER, false); //$NON-NLS-1$
+				fSettings.put(SYNCHRONIZED_MODIFIER, false); //$NON-NLS-1$
+				fSettings.put(SORT_ORDER, false); //$NON-NLS-1$
+			}			
+			fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION); 
+			fVisibilityModifier= fSettings.getInt(VISIBILITY_MODIFIER);
+			fFinal= fSettings.getBoolean(FINAL_MODIFIER);
+			fSynchronized= fSettings.getBoolean(SYNCHRONIZED_MODIFIER);
+			fSortOrder= fSettings.getBoolean(SORT_ORDER);
 			fGetterSetterEntries= entries;
+		}
+			
+		public boolean isFinal() {
+			return fFinal;
+		}
+
+		/***
+		 * Returns 0 for the first method, 1 for the last method, > 1  for all else.
+		 */
+		public int getInsertPosition() {
+			return fInsertPosition;
+		}
+
+		public boolean isSynchronized() {
+			return fSynchronized;
+		}
+
+		public int getVisibilityModifier() {
+			return fVisibilityModifier;
+		}
+		
+		public boolean getSortOrder() {
+			return fSortOrder;
+		}
+		
+		/***
+		 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
+		 */
+		public void setInsertPosition(int insert) {
+			if (fInsertPosition != insert) {
+				fInsertPosition= insert;
+				fSettings.put(SETTINGS_INSERTPOSITION, insert);
+				if (fViewer != null) {
+					fViewer.refresh();
+				}
+			}
+		}			
+		
+		public void setVisibility(int visibility) {
+			if (fVisibilityModifier != visibility) {
+				fVisibilityModifier= visibility;
+				fSettings.put(VISIBILITY_MODIFIER, visibility);
+				if (fViewer != null) {
+					fViewer.refresh();
+				}
+			}
+		}
+		
+		public void setFinal(boolean value) {
+			if (fFinal != value)  {
+				fFinal= value;
+				fSettings.put(FINAL_MODIFIER, value);
+				if (fViewer != null) {
+					fViewer.refresh();
+				}
+			}
+		}
+		
+		public void setSynchronized(boolean value)  {
+			if (fSynchronized != value)  {
+				fSynchronized= value;
+				fSettings.put(SYNCHRONIZED_MODIFIER, value);
+				if (fViewer != null)  {
+					fViewer.refresh();
+				}
+			}
+		}		
+		
+		public void setSort(boolean sort)  {
+			if (fSortOrder != sort)  {
+				fSortOrder= sort;
+				fSettings.put(SORT_ORDER, sort);
+				if (fViewer != null)  {
+					fViewer.refresh();
+				}
+			}
+		}			
+
+		public IField getPreselected() {
+			return fPreselected;
+		}
+
+		public void setPreselected(IField preselected) {
+			fPreselected= preselected;
+		}
+
+		/*
+		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			fViewer= viewer;
 		}
 		
 		/*
@@ -765,29 +905,28 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fGetterSetterEntries.clear();
 			fGetterSetterEntries= null;
 		}
-
-		/*
-		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
-		 */
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
 	}
 	
 	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
-
-		private boolean fSort;
 		private int fVisibility;
 		private boolean fFinal;
 		private boolean fSynchronized;
-		private ITreeContentProvider fContentProvider;
+		private boolean fSort;
+		private IType fType;
+		private AddGetterSetterContentProvider fContentProvider;
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
 				
-		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 			super(parent, labelProvider, contentProvider, editor, type);
 			fContentProvider= contentProvider;
+			fSynchronized= fContentProvider.isSynchronized();
+			fFinal= fContentProvider.isFinal();
+			fVisibility= fContentProvider.getVisibilityModifier();
+			fSort= fContentProvider.getSortOrder();
+			fType= type;
 		}
-	
+
 		public int getVisibility() {
 			return fVisibility;
 		}
@@ -826,9 +965,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}			
 		
 		protected Composite createEntryPtCombo(Composite composite) {
-			Composite entryComposite= super.createEntryPtCombo(composite);
+			Composite entryComposite= super.createEntryPtCombo(composite);			
 			entryComposite= addSortOrder(entryComposite);
 			entryComposite= addVisibilityAndModifiersChoices(entryComposite);
+			
 			return entryComposite;						
 		}
 		
@@ -842,13 +982,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			combo.setItems(new String[]{ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_pair_sort"), //$NON-NLS-1$
 										ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_method_sort")});  //$NON-NLS-1$  
 			final int methodIndex= 1;	// Hard-coded. Change this if the list gets more complicated.
-			combo.setText(combo.getItem(0));
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
+			int sort= fContentProvider.getSortOrder() ? 1 : 0;
+			combo.setText(combo.getItem(sort));
 			gd= new GridData(GridData.FILL_BOTH);
 			gd.grabExcessHorizontalSpace= true;
 			combo.setLayoutData(gd);
 			combo.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					fSort= (combo.getSelectionIndex() == methodIndex);
+					fContentProvider.setSort(fSort);
 				}
 			});	
 			return composite;
@@ -856,28 +999,127 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		
 		private Composite addVisibilityAndModifiersChoices(Composite buttonComposite) {
 			// Add visibility and modifiers buttons: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
+			// Add persistence of options: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 			IVisibilityChangeListener visibilityChangeListener = new IVisibilityChangeListener(){
 				public void visibilityChanged(int newVisibility) {
 					fVisibility= newVisibility;
+					fContentProvider.setVisibility(fVisibility);
 				}
 				public void modifierChanged(int modifier, boolean isChecked) {	
 					switch (modifier) {
-						case Modifier.FINAL: fFinal= isChecked; return;
-						case Modifier.SYNCHRONIZED: fSynchronized= isChecked; return;
+						case Modifier.FINAL:  {
+							fFinal= isChecked;
+							fContentProvider.setFinal(fFinal) ;
+							return; 
+						}
+						case Modifier.SYNCHRONIZED:  {
+						 	fSynchronized= isChecked; 
+						 	fContentProvider.setSynchronized(fSynchronized);
+						 	return;
+						}
 						default: return;
 					}
 				}
 			};
-			int correctVisibility= Modifier.PUBLIC;
-			int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
-			int[] availableModifiers= new int[] {Modifier.FINAL, Modifier.SYNCHRONIZED};
 			
-			Composite visibilityComposite= VisibilityControlUtil.createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, correctVisibility, availableModifiers);
-			((GridData)visibilityComposite.getLayoutData()).horizontalSpan = 4;		
+			int initialVisibility= fContentProvider.getVisibilityModifier();
+			int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
+			
+			Composite visibilityComposite= createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, initialVisibility);							
 			
 			return visibilityComposite;				
 		}
 		
+		private List convertToIntegerList(int[] array) {
+			List result= new ArrayList(array.length);
+			for (int i= 0; i < array.length; i++) {
+				result.add(new Integer(array[i]));
+			}
+			return result;
+		}		
+
+		private Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+			List allowedVisibilities= convertToIntegerList(availableVisibilities);
+			if (allowedVisibilities.size() == 1)
+				return null;
+		
+			Group group= new Group(parent, SWT.NONE);
+			group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
+			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			group.setLayoutData(gd);
+			GridLayout layout= new GridLayout();
+			layout.makeColumnsEqualWidth= true;
+			layout.numColumns= 4; 
+			group.setLayout(layout);
+		
+			String[] labels= new String[] {
+				"&public", //$NON-NLS-1$
+				"pro&tected", //$NON-NLS-1$
+				RefactoringMessages.getString("VisibilityControlUtil.defa&ult_4"), //$NON-NLS-1$
+				"pri&vate" //$NON-NLS-1$
+			};
+			Integer[] data= new Integer[] {
+						new Integer(Modifier.PUBLIC),
+						new Integer(Modifier.PROTECTED),
+						new Integer(Modifier.NONE),
+						new Integer(Modifier.PRIVATE)};
+			Integer initialVisibility= new Integer(correctVisibility);
+			for (int i= 0; i < labels.length; i++) {
+				Button radio= new Button(group, SWT.RADIO);
+				Integer visibilityCode= data[i];
+				radio.setText(labels[i]);
+				radio.setData(visibilityCode);
+				radio.setSelection(visibilityCode.equals(initialVisibility));
+				radio.setEnabled(allowedVisibilities.contains(visibilityCode));
+				radio.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent event) {
+						visibilityChangeListener.visibilityChanged(((Integer)event.widget.getData()).intValue());
+					}
+				});
+			}
+			group.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			return group;
+		}		
+		
+		private Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+			Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
+
+			Button finalCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
+			finalCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.final")); //$NON-NLS-1$
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			finalCheckboxButton.setLayoutData(gd);
+			finalCheckboxButton.setData(new Integer(Modifier.FINAL));
+			finalCheckboxButton.setEnabled(true);
+			finalCheckboxButton.setSelection(fContentProvider.isFinal());
+			finalCheckboxButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent event) {
+					visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
+				}
+
+				public void widgetDefaultSelected(SelectionEvent event) {
+					widgetSelected(event);
+				}
+			});	
+			
+			Button syncCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
+			syncCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.synchronized")); //$NON-NLS-1$
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			syncCheckboxButton.setLayoutData(gd);
+			syncCheckboxButton.setData(new Integer(Modifier.SYNCHRONIZED));
+			syncCheckboxButton.setEnabled(true);
+			syncCheckboxButton.setSelection(fContentProvider.isSynchronized());
+			syncCheckboxButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent event) {
+					visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
+				}
+
+				public void widgetDefaultSelected(SelectionEvent event) {
+					widgetSelected(event);
+				}
+			});	
+			return visibilityComposite;			
+		}	
+				
 		private Object[] getGetterSetterElements(boolean isGetter){
 			Object[] allFields= fContentProvider.getElements(null);
 			Set result= new HashSet();
@@ -912,7 +1154,23 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			
 			return buttonComposite;
 		}	
+		
+		/*
+		 * @see Dialog#createDialogArea(Composite)
+		 */
+		protected Control createDialogArea(Composite parent) {	
+			Control control= super.createDialogArea(parent);
 
+			try {
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
+				getTreeViewer().setExpandedElements(fType.getFields());
+				getTreeViewer().reveal(fContentProvider.getPreselected());
+				getTreeViewer().refresh();
+			} catch (JavaModelException e) {
+			}
+	
+			return control;
+		}			
 	}
 
 	private static class GetterSetterEntry {

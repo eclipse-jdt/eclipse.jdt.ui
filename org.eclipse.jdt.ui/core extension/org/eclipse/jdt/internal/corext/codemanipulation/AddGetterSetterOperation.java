@@ -39,7 +39,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private int fVisibility;
 	private boolean fSort;
 	private boolean fSynchronized;
-	private boolean fNative;
 	private boolean fFinal;
 
 	private final String[] EMPTY= new String[0];
@@ -190,8 +189,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				buf.append("synchronized "); //$NON-NLS-1$
 			if (fFinal)
 				buf.append("final "); //$NON-NLS-1$
-			if (fNative)
-				buf.append("native "); //$NON-NLS-1$
 				
 			buf.append(typeName);
 			buf.append(' ');
@@ -264,8 +261,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				buf.append("synchronized "); //$NON-NLS-1$
 			if (fFinal)
 				buf.append("final "); //$NON-NLS-1$				
-			if (fNative)
-				buf.append("native "); //$NON-NLS-1$
 				
 			buf.append("void "); //$NON-NLS-1$
 			buf.append(setterName);
@@ -336,12 +331,4 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	public IJavaElement getInsertPosition() {
 		return fInsertPosition;
 	}
-
-	/**
-	 * @param nativeSet
-	 */
-	public void setNative(boolean nativeSet) {
-		fNative= nativeSet;
-	}
-
 }

@@ -13,16 +13,16 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+
+import org.eclipse.jdt.core.dom.Modifier;
 
 public class VisibilityControlUtil {
 	private VisibilityControlUtil(){}
@@ -68,50 +68,6 @@ public class VisibilityControlUtil {
 		}
 		group.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 		return group;
-	}
-
-	public static Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility, int[] availableModifiers) {
-		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
-
-		List allowedModifiers= convertToIntegerList(availableModifiers);
-		if (allowedModifiers.size() == 1)
-			return null;
-			
-		String[] labels= new String[] {
-			RefactoringMessages.getString("VisibilityControlUtil.abstract"), //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.static"), //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.final"), //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.synchronized"), //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.native"), //$NON-NLS-1$
-		};		
-		Integer[] data= new Integer[] {
-					new Integer(Modifier.ABSTRACT),
-					new Integer(Modifier.STATIC),
-					new Integer(Modifier.FINAL),
-					new Integer(Modifier.SYNCHRONIZED),
-					new Integer(Modifier.NATIVE)};
-		
-		for (int i=0; i < labels.length; i++) {
-			if (allowedModifiers.contains(data[i])) {
-				Button checkboxButton= new Button(visibilityComposite, SWT.CHECK);
-				checkboxButton.setText(labels[i]);
-				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-				checkboxButton.setLayoutData(gd);
-				checkboxButton.setData(data[i]);
-				checkboxButton.setEnabled(true);
-				checkboxButton.setSelection(false);
-				checkboxButton.addSelectionListener(new SelectionListener() {
-					public void widgetSelected(SelectionEvent event) {
-						visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
-					}
-		
-					public void widgetDefaultSelected(SelectionEvent event) {
-						widgetSelected(event);
-					}
-				});				
-			}
-		}				
-		return visibilityComposite;			
 	}
 
 	private static List convertToIntegerList(int[] array) {

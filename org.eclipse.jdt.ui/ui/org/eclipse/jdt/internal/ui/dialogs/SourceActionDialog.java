@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 
@@ -54,14 +53,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	private int fInsertionIndex;
 	private CompilationUnitEditor fEditor;
-	private ITreeContentProvider fContentProvider;
+	private ISourceActionContentProvider fContentProvider;
 	private boolean fGenerateComment;
 	private IType fType;
 	private int fWidth = 60;
 	private int fHeight = 18;
 	private String fCommentString;
 
-	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ISourceActionContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 		super(parent, labelProvider, contentProvider);
 		fEditor= editor;
 		fContentProvider= contentProvider;		
@@ -78,7 +77,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fCommentString= string;
 	}
 		
-	protected ITreeContentProvider getContentProvider() {
+	protected ISourceActionContentProvider getContentProvider() {
 		return fContentProvider;
 	}
 
@@ -263,7 +262,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		enterCombo.setLayoutData(gd);
 		enterCombo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				setInsertionIndex(enterCombo.getSelectionIndex());
+				int index= enterCombo.getSelectionIndex();
+				// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400				
+				getContentProvider().setInsertPosition(index);
+				setInsertionIndex(index);
 			}
 		});	
 
@@ -295,7 +297,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			IMethod[] methods= fType.getMethods();
 
 			combo.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
-				
+			combo.add(ActionMessages.getString("SourceActionDialog.last_method")); //$NON-NLS-1$
+							
 			int bestDiff= Integer.MAX_VALUE;
 			
 			for (int i= 0; i < methods.length; i++) {
@@ -307,12 +310,18 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 				if (currDiff >= 0)
 					if(currDiff < bestDiff) {
 						bestDiff= currDiff;
-						position= i + 1;	// first entry is "as first method"
+						position= i + 2;	// first two entries are first/last
 					}
 					else
 						break;
 			}	
-			combo.select(position);
+			// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
+			int index= getContentProvider().getInsertPosition();
+			if ((index == 0) || (index == 1))
+				combo.select(index);
+			else			
+				combo.select(position);
+
 			setInsertionIndex(combo.getSelectionIndex());
 		} catch (JavaModelException e) {
 		}	
@@ -327,6 +336,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		try {
 			if (comboBoxIndex == 0)				// as first method
 				return asFirstMethod(fType);
+			else if (comboBoxIndex == 1)		// as last method
+				return null;
 			else								// method position
 				return atMethodPosition(fType, comboBoxIndex);
 		} catch (JavaModelException e) {
@@ -343,12 +354,12 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		}
 		return null;
 	}
-	
+
 	private IMethod atMethodPosition(IType type, int index) throws JavaModelException {
 		if (type != null) {
 			IMethod[] methods= type.getMethods();
-			if (index < methods.length) {
-				return methods[index];
+			if ((index-1) < methods.length) {
+				return methods[index-1];		// first two entries are first/last
 			}
 		}
 		return null;
