@@ -101,7 +101,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "RenameTypeRefactoring:" + getType().getFullyQualifiedName() + " to:" + fNewName;
+		return "Rename type:" + getType().getFullyQualifiedName() + " to:" + fNewName;
 	}
 
 	//------------- Conditions -----------------
@@ -154,14 +154,13 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			if (result.hasFatalError())
 				return result;
 									
-			if (Flags.isPublic(getType().getFlags()))
-				result.merge(analyzeImportDeclarations(new SubProgressMonitor(pm, 8, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			//if (Flags.isPublic(getType().getFlags()))
+			//	result.merge(analyzeImportDeclarations(new SubProgressMonitor(pm, 8, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 				
 			pm.worked(1);
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL))));
 			pm.worked(1);
-			result.merge(analyzeAffectedCompilationUnits());
-			pm.worked(7);
+			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 7)));
 		} finally {
 			pm.done();
 		}	
@@ -353,19 +352,22 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	 * (non java-doc)
 	 * Analyzes all compilation units in which type is referenced
 	 */
-	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		Iterator iter= getOccurrences(null).iterator();
+		Iterator iter= fOccurrences.iterator();
+		pm.beginTask("", fOccurrences.size());
 		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, getType());
 		while (iter.hasNext()){
-			analyzeCompilationUnit(analyzer, (List)iter.next(), result);
+			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
+			pm.worked(1);
 		}
 		return result;
 	}
 	
-	private void analyzeCompilationUnit(RenameTypeASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
+	private void analyzeCompilationUnit(IProgressMonitor pm, RenameTypeASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
+		pm.subTask("analyzing \"" + cu.getElementName()+ "\"");
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzeCompilationUnit(cu));	
