@@ -11,6 +11,7 @@ Contributors:
 
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -52,10 +53,10 @@ public class JarPackagerUtil {
 	static final String JAR_EXTENSION= "jar"; //$NON-NLS-1$
 	static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
 
-	public static boolean askToCreateDirectory(final Shell parent) {
+	public static boolean askToCreateDirectory(final Shell parent, File directory) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmCreate.title"), JarPackagerMessages.getString("JarPackage.confirmCreate.message")); //$NON-NLS-2$ //$NON-NLS-1$
+		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmCreate.title"), JarPackagerMessages.getFormattedString("JarPackage.confirmCreate.message", directory.toString())); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 
 	/**
