@@ -10,15 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
-
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -27,15 +18,25 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.ui.search.IQueryParticipant;
@@ -43,19 +44,17 @@ import org.eclipse.jdt.ui.search.ISearchRequestor;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchQuery implements ISearchQuery {
+	
 	private ISearchResult fResult;
 	private QuerySpecification fPatternData;
-	
 	
 	public JavaSearchQuery(QuerySpecification data) {
 		fPatternData= data;
 	}
-
 	
 	private static class SearchRequestor implements ISearchRequestor {
 		private IQueryParticipant fParticipant;
@@ -154,9 +153,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
-		// TODO fix status message
-		String message= SearchMessages.getString("JavaSearchQuery.status.ok.message"); //$NON-NLS-1$
-		MessageFormat.format(message, new Object[] { new Integer(textResult.getMatchCount()) });
+		String message= SearchMessages.getFormattedString("JavaSearchQuery.status.ok.message", String.valueOf(textResult.getMatchCount())); //$NON-NLS-1$
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, message, null);
 	}
 
@@ -164,90 +161,52 @@ public class JavaSearchQuery implements ISearchQuery {
 		return SearchMessages.getString("JavaSearchQuery.label"); //$NON-NLS-1$
 	}
 
-	String getSingularLabel() {
-		String desc= null;
-		desc= getSearchPattern();
-
-		desc= quote(desc);
-		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
-		String[] args= new String[] {desc, fPatternData.getScopeDescription()}; //$NON-NLS-1$
-		switch (fPatternData.getLimitTo()) {
-			case IJavaSearchConstants.IMPLEMENTORS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.DECLARATIONS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularDeclarationsPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.REFERENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularReferencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.ALL_OCCURRENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.READ_ACCESSES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularReadReferencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.WRITE_ACCESSES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularWriteReferencesPostfix", args); //$NON-NLS-1$
-			default:
-				return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
+	public String getResultLabel(int nMatches) {
+		if (nMatches == 1) {
+			String[] args= { getSearchPatternDescription(), fPatternData.getScopeDescription() };
+			switch (fPatternData.getLimitTo()) {
+				case IJavaSearchConstants.IMPLEMENTORS:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.DECLARATIONS:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularDeclarationsPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.REFERENCES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularReferencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.ALL_OCCURRENCES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.READ_ACCESSES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularReadReferencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.WRITE_ACCESSES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularWriteReferencesPostfix", args); //$NON-NLS-1$
+				default:
+					return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
+			}
+		} else {
+			String[] args= { getSearchPatternDescription(), String.valueOf(nMatches), fPatternData.getScopeDescription() };
+			switch (fPatternData.getLimitTo()) {
+				case IJavaSearchConstants.IMPLEMENTORS:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.DECLARATIONS:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralDeclarationsPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.REFERENCES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralReferencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.ALL_OCCURRENCES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.READ_ACCESSES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralReadReferencesPostfix", args); //$NON-NLS-1$
+				case IJavaSearchConstants.WRITE_ACCESSES:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralWriteReferencesPostfix", args); //$NON-NLS-1$
+				default:
+					return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$;
+			}
 		}
 	}
 	
-	private String getSearchPattern() {
-		String desc;
+	private String getSearchPatternDescription() {
 		if (fPatternData instanceof ElementQuerySpecification) {
-			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
-			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
-					&& element.getElementType() == IJavaElement.METHOD)
-				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
-			else
-				desc= element.getElementName();
-			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
-				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
-		} else {
-			desc= ((PatternQuerySpecification)fPatternData).getPattern();
-		}
-		return desc;
-	}
-
-	public static String quote(String searchString) {
-		searchString= searchString.replaceAll("\\{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
-		return searchString.replaceAll("\\}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-	}
-
-
-	String getPluralLabelPattern() {
-		String desc= null;
-		if (fPatternData instanceof ElementQuerySpecification) {
-			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
-			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
-			&& element.getElementType() == IJavaElement.METHOD)
-				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
-			else
-				desc= element.getElementName();
-			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
-				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
-		}
-		else {
-			desc= ((PatternQuerySpecification)fPatternData).getPattern();
-		}
-
-		desc= quote(desc);
-		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
-		String[] args= new String[] {desc, "{0}", fPatternData.getScopeDescription()}; //$NON-NLS-1$
-		switch (fPatternData.getLimitTo()) {
-			case IJavaSearchConstants.IMPLEMENTORS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.DECLARATIONS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralDeclarationsPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.REFERENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReferencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.ALL_OCCURRENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.READ_ACCESSES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReadReferencesPostfix", args); //$NON-NLS-1$
-			case IJavaSearchConstants.WRITE_ACCESSES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralWriteReferencesPostfix", args); //$NON-NLS-1$
-			default:
-				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$;
-		}
+			IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
+			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+		} 
+		return ((PatternQuerySpecification) fPatternData).getPattern();
 	}
 
 	ImageDescriptor getImageDescriptor() {

@@ -10,16 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.IEditorMatchAdapter;
+import org.eclipse.search.ui.text.IFileMatchAdapter;
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,18 +40,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.search.IMatchPresentation;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.ui.search.IMatchPresentation;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.IEditorMatchAdapter;
-import org.eclipse.search.ui.text.IFileMatchAdapter;
-import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 
 public class JavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	private JavaSearchQuery fQuery;
@@ -58,13 +64,7 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	 * @see org.eclipse.search.ui.ISearchCategory#getText(org.eclipse.search.core.basic.ITextSearchResult)
 	 */
 	public String getLabel() {
-		int matchCount= getMatchCount();
-		String format= null;
-		if (matchCount == 1)
-			return fQuery.getSingularLabel();
-		else 
-			format= fQuery.getPluralLabelPattern();
-		return MessageFormat.format(format, new Object[] { new Integer(matchCount) });
+		return fQuery.getResultLabel(getMatchCount());
 	}
 
 	public String getTooltip() {
@@ -188,7 +188,7 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		Object element= match.getElement();
 		if (fElementsToParticipants.get(element) != null) {
 			// TODO must access the participant id / label to properly report the error.
-			JavaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "A second search participant was found for an element", null)); //$NON-NLS-1$
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "A second search participant was found for an element", null)); //$NON-NLS-1$
 			return false;
 		}
 		fElementsToParticipants.put(element, participant);
