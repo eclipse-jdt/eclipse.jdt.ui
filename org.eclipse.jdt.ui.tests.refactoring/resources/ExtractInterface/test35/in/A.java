@@ -1,6 +1,6 @@
 package p;
 
-class A { //implements Fred
+class A {
 	public void m() {}
 	public void m1() {}
 }

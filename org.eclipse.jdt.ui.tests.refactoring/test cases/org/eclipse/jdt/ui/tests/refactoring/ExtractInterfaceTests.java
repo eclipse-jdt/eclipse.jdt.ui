@@ -97,11 +97,13 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
-			assertEquals("incorrect changes in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(cuNames[i])), cus[i].getSource());
+			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
+			String actual= cus[i].getSource();
+			SourceCompareUtil.compare("(" + cus[i].getElementName() +")", actual, expected);
 		}
 
 		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
-		SourceCompareUtil.compare(interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
+		SourceCompareUtil.compare("(interface cu)", interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
 	}
 	
 	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
@@ -515,6 +517,28 @@ public class ExtractInterfaceTests extends RefactoringTest {
         String[][] signatures= new String[][]{new String[0], new String[]{"QA;"}};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, null);
     }
+
+	public void test80() throws Exception{
+//		printTestDisabledMessage("bug 33223");
+		String[] names= new String[]{"f", "fz", "f1", "f1z", "f11", "f2"};
+		String[][] signatures= new String[][]{new String[0], new String[0], new String[0], new String[0], new String[0], new String[0]};
+		String[] fieldNames= {"I1", "I1z", "I2", "I2z", "I3", "I4"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testPaperExample0() throws Exception{
+		String[] names= new String[]{"add", "addAll", "iterator"};
+		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
+	}
+
+	public void testPaperExampleSimplified0() throws Exception{
+		String[] names= new String[]{};
+		String[][] signatures= {{}};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
+	}
     
     public void testConstant80() throws Exception{
         String[] names= null;
