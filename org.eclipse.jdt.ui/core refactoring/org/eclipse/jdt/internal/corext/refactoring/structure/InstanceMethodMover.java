@@ -968,18 +968,25 @@ class InstanceMethodMover {
 		
 		//cache:
 		private NewReceiver[] fPossibleNewReceivers;		
-
-		Method(MethodDeclaration declaration, ICompilationUnit declaringCU, CodeGenerationSettings codeGenSettings) {
+		
+		static Method create(MethodDeclaration declaration, ICompilationUnit declaringCU, CodeGenerationSettings codeGenSettings) {
+			ITypeBinding declaringClass= 	getDeclaringClassBinding(declaration);
+			if (declaringClass == null) return null;
+			return new Method(declaration, declaringCU, codeGenSettings, declaringClass);
+		}
+		
+		private Method(MethodDeclaration declaration, ICompilationUnit declaringCU, CodeGenerationSettings codeGenSettings, ITypeBinding declaringClass) {
 			Assert.isNotNull(declaringCU);
 			Assert.isTrue(declaringCU.exists());
 			Assert.isNotNull(declaration);
 			Assert.isNotNull(codeGenSettings);
+			Assert.isNotNull(declaringClass);
 
 			fDeclaringCU= declaringCU;
 			fMethodNode= declaration;
 			
-			fDeclaringClass= getDeclaringClassBinding(fMethodNode);
-			fCodeGenSettings= codeGenSettings;
+			fDeclaringClass= declaringClass;
+			fCodeGenSettings= codeGenSettings;			
 		}
 		
 		public Expression createFieldReference(IVariableBinding field) {
@@ -1105,8 +1112,8 @@ class InstanceMethodMover {
 			Assert.isNotNull(decl);
 
 			IMethodBinding binding= decl.resolveBinding();
-			//TODO: deal with null binding
-			Assert.isNotNull(binding);
+			if (binding == null)
+				return null;
 			return binding.getDeclaringClass();
 		}
 
@@ -1718,7 +1725,6 @@ class InstanceMethodMover {
 	}
 	
 	private final Method fMethodToMove;
-	private final CodeGenerationSettings fCodeGenSettings;
 
 	private NewReceiver fNewReceiver;
 	
@@ -1729,12 +1735,14 @@ class InstanceMethodMover {
 	private boolean fRemoveDelegator;
 	
 	public static InstanceMethodMover create(MethodDeclaration declaration, ICompilationUnit declarationCU, CodeGenerationSettings codeGenSettings) {
-		return new InstanceMethodMover(declaration, declarationCU, codeGenSettings);
+		Method method= Method.create(declaration, declarationCU, codeGenSettings);
+		if (method == null) return null;
+		return new InstanceMethodMover(declaration, declarationCU, method);
 	}
 
-	private InstanceMethodMover(MethodDeclaration declaration, ICompilationUnit declarationCU, CodeGenerationSettings codeGenSettings) {	
-		fCodeGenSettings= codeGenSettings;
-		fMethodToMove= new Method(declaration, declarationCU, fCodeGenSettings);
+	private InstanceMethodMover(MethodDeclaration declaration, ICompilationUnit declarationCU, Method method) {	
+		Assert.isNotNull(method);
+		fMethodToMove= method;
 		
 		fInlineDelegator= true;  //default
 		fRemoveDelegator= true;  //default
