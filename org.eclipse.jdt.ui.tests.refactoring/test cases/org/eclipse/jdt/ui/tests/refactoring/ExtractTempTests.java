@@ -99,7 +99,7 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(startLine, startColumn, endLine, endColumn, replaceAll, makeFinal, tempName, tempName);
 	}	
 	
-	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
+	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, int expectedStatus) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
@@ -110,6 +110,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ref.setTempName(tempName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
+		assertEquals("status", expectedStatus, result.getSeverity());
 	}	
 
 	//--- TESTS
@@ -214,10 +215,11 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 17, 7, 20, false, false, "temp");
 	}		
 	
-	public void test24() throws Exception{
-		//regression test for bug#8116
-		helper1(4, 16, 4, 18, false, false, "temp");
-	}
+//	public void test24() throws Exception{
+//test disabled - trainling semicolons are disallowed now
+//		//regression test for bug#8116
+//		helper1(4, 16, 4, 18, false, false, "temp");
+//	}
 	
 	public void test25() throws Exception{
 //		printTestDisabledMessage("regression test for bug#8895");
@@ -351,105 +353,124 @@ public class ExtractTempTests extends RefactoringTest {
 	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
-		failHelper1(5, 16, 5, 17, false, false, "temp");
+		failHelper1(5, 16, 5, 17, false, false, "temp", RefactoringStatus.ERROR);
 	}	
 
 	public void testFail1() throws Exception{
-		failHelper1(4, 9, 5, 13, false, false, "temp");
+		failHelper1(4, 9, 5, 13, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail2() throws Exception{
-		failHelper1(4, 9, 4, 20, false, false, "temp");
+		failHelper1(4, 9, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail3() throws Exception{
-		failHelper1(4, 9, 4, 20, false, false, "temp");
+		failHelper1(4, 9, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail4() throws Exception{
-		failHelper1(5, 9, 5, 12, false, false, "temp");
+		failHelper1(5, 9, 5, 12, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 	
 	public void testFail5() throws Exception{
-		failHelper1(3, 12, 3, 15, false, false, "temp");
+		failHelper1(3, 12, 3, 15, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail6() throws Exception{
-		failHelper1(4, 14, 4, 19, false, false, "temp");
+		failHelper1(4, 14, 4, 19, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail7() throws Exception{
-		failHelper1(4, 15, 4, 20, false, false, "temp");
+		failHelper1(4, 15, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 //	public void testFail8() throws Exception{
 //		printTestDisabledMessage("removed");
-//		failHelper1(5, 16, 5, 20, false, false, "temp");
+//		failHelper1(5, 16, 5, 20, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 
 	public void testFail9() throws Exception{
-		failHelper1(4, 19, 4, 23, false, false, "temp");
+		failHelper1(4, 19, 4, 23, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail10() throws Exception{
-		failHelper1(4, 33, 4, 39, false, false, "temp");
+		failHelper1(4, 33, 4, 39, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail11() throws Exception{
 //		printTestDisabledMessage("regression test for bug#13061");
-		failHelper1(4, 18, 4, 19, false, false, "temp");
+		failHelper1(4, 18, 4, 19, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail12() throws Exception{
-		failHelper1(4, 16, 4, 29, false, false, "temp");
+		failHelper1(4, 16, 4, 29, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 //removed
 //	public void testFail13() throws Exception{
-//		failHelper1(5, 16, 5, 20, false, false, "temp");
+//		failHelper1(5, 16, 5, 20, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 
 //removed
 //	public void testFail14() throws Exception{
-//		failHelper1(4, 16, 4, 22, false, false, "temp");
+//		failHelper1(4, 16, 4, 22, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 
 //removed
 //	public void testFail15() throws Exception{
-//		failHelper1(4, 19, 4, 22, false, false, "temp");
+//		failHelper1(4, 19, 4, 22, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 
 //removed - allowed now (see bug 21815)
 //	public void testFail16() throws Exception{
-//		failHelper1(5, 9, 5, 12, false, false, "temp");
+//		failHelper1(5, 9, 5, 12, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 //
 //	public void testFail17() throws Exception{
-//		failHelper1(6, 13, 6, 16, false, false, "temp");
+//		failHelper1(6, 13, 6, 16, false, false, "temp", RefactoringStatus.FATAL);
 //	}	
 
 	public void testFail18() throws Exception{
 //		printTestDisabledMessage("regression test for bug#8149");
-		failHelper1(4, 27, 4, 28, false, false, "temp");
+		failHelper1(4, 27, 4, 28, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail19() throws Exception{
 		printTestDisabledMessage("regression test for bug#8149");
-//		failHelper1(6, 16, 6, 18, false, false, "temp");
+//		failHelper1(6, 16, 6, 18, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail20() throws Exception{
 //		printTestDisabledMessage("regression test for bug#13249");
-		failHelper1(3, 9, 3, 41, false, false, "temp");
+		failHelper1(3, 9, 3, 41, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 	
 	public void testFail21() throws Exception{
 		//test for bug 19851
-		failHelper1(6, 9, 6, 24, false, false, "temp");
+		failHelper1(6, 9, 6, 24, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
 	public void testFail22() throws Exception{
 //		printTestDisabledMessage("test for bug 21815");
-		failHelper1(5, 9, 5, 12, false, false, "temp");
+		failHelper1(5, 9, 5, 12, false, false, "temp", RefactoringStatus.FATAL);
 	}	
+	
+	public void testFail23() throws Exception{
+//		printTestDisabledMessage("test for bug 24265");
+		failHelper1(4, 13, 4, 14, false, false, "temp", RefactoringStatus.FATAL);
+	}	
+
+	public void testFail24() throws Exception{
+//		printTestDisabledMessage("test for bug 24265");
+		failHelper1(4, 13, 4, 14, false, false, "temp", RefactoringStatus.FATAL);
+	}	
+
+	public void testFail25() throws Exception{
+		failHelper1(4, 16, 4, 18, false, false, "temp", RefactoringStatus.FATAL);
+	}	
+
+	public void testFail26() throws Exception{
+		failHelper1(4, 15, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
+	}	
+	
 }
