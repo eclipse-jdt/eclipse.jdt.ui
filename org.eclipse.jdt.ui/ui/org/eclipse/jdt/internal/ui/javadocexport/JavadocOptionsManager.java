@@ -67,7 +67,7 @@ public class JavadocOptionsManager {
 	private String fStylesheet;
 	private String fAdditionalParams;
 	private String fOverview;
-	private String fJDocCommand;
+	private String fTitle;	private String fJDocCommand;
 
 	private String fSourcepath;
 	private String fClasspath;
@@ -108,7 +108,7 @@ public class JavadocOptionsManager {
 	public final static String PACKAGENAMES= "packagenames";
 	public final static String EXTRAOPTIONS= "additionalparam";
 	public final static String JAVADOCCOMMAND= "javadoccommand";
-
+	public final static String TITLE= "doctitle";
 	public final String NAME= "name";
 	public final String PATH= "path";
 	
@@ -170,29 +170,12 @@ public class JavadocOptionsManager {
 		}
 
 		//load a destination even if a custom doclet is being used
-		IPath path= null;
-		if (fProject != null) {
-			path= fProject.getProject().getFullPath();
-
-			URL url= JavaDocLocations.getJavadocLocation(path);
-			//uses default if source is has http protocol
-			if (url == null || !url.getProtocol().equals("file")) {
-				fDestination= fProject.getProject().getLocation().addTrailingSeparator().append("doc").toOSString();
-			} else {
-				//must do this to remove leading "/"
-				File file= new File(url.getFile());
-				IPath tpath= new Path(file.getPath());
-				fDestination= tpath.toOSString();
-			}
-		} else
-			fDestination= "";
-
-		if (fProject != null) {
+		fDestination= settings.get(DESTINATION);		IPath path = null;				if ((fDestination == null) || fDestination.equals("")) {			path = null;			if (fProject != null) {				URL url = JavaDocLocations.getProjectJavadocLocation(fProject);				//uses default if source is has http protocol				if (url == null || !url.getProtocol().equals("file")) {					fDestination =						fProject							.getProject()							.getLocation()							.addTrailingSeparator()							.append("doc")							.toOSString();				} else {					//must do this to remove leading "/"					File file = new File(url.getFile());					IPath tpath = new Path(file.getPath());					fDestination = tpath.toOSString();				}			} else				fDestination = "";		}				if (fProject != null) {
 			path= fProject.getProject().getLocation();
 			fAntpath= path.addTrailingSeparator().append("javadoc.xml").toOSString();
 		} else
 			fAntpath= "";
-
+					fTitle= settings.get(TITLE);		if(fTitle==null)			fTitle="";	
 		fStylesheet= settings.get(STYLESHEETFILE);
 		if (fStylesheet == null)
 			fStylesheet= "";
@@ -233,8 +216,7 @@ public class JavadocOptionsManager {
 		//default destination
 		fFromStandard= true;
 		if (fProject != null) {
-			IPath path= fProject.getProject().getFullPath();
-			URL url= JavaDocLocations.getJavadocLocation(path);
+			URL url= JavaDocLocations.getProjectJavadocLocation(fProject);
 			if (url != null && url.getProtocol().equals("file")) {
 				File file= new File(url.getFile());
 				IPath tpath= new Path(file.getPath());
@@ -248,7 +230,7 @@ public class JavadocOptionsManager {
 		
 		fDocletname="";
 		fDocletpath="";
-		fStylesheet= "";
+		fTitle= "";		fStylesheet= "";
 		fAdditionalParams= "";
 		fOverview= "";
 
@@ -341,7 +323,7 @@ public class JavadocOptionsManager {
 		//		} 
 
 		fStylesheet= element.getAttribute(STYLESHEETFILE);
-		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
+		fTitle= element.getAttribute(TITLE);		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
 		fOverview= element.getAttribute(OVERVIEW);
 
 		fAuthor= loadbutton(element.getAttribute(AUTHOR));
@@ -414,7 +396,7 @@ public class JavadocOptionsManager {
 	public IJavaProject getJavaProject() {
 		return this.fProject;
 	}
-
+		public String getTitle() {		return fTitle;	}
 	public boolean getBoolean(String flag) {
 
 		if (flag.equals(AUTHOR))
@@ -494,16 +476,11 @@ public class JavadocOptionsManager {
 			if (fSplitindex)
 				args.add("-splitindex");
 
-			if (!fStylesheet.equals("")) {
+			if(!fTitle.equals("")) {				args.add("-doctitle");				args.add(fTitle);			}			if (!fStylesheet.equals("")) {
 				args.add("-stylsheet");
 				args.add(fStylesheet);
 			}
-			if (!fAdditionalParams.equals("")) {
-				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams);
-				String[] argsArray= tokens.getProgramArgumentsArray();
-				for (int i= 0; i < argsArray.length; i++) {
-					args.add(argsArray[i]);
-				}
+			if (fFromStandard) {				if (!fAdditionalParams.equals("")) {					ExecutionArguments tokens = new ExecutionArguments("", fAdditionalParams);					String[] argsArray = tokens.getProgramArgumentsArray();					for (int i = 0; i < argsArray.length; i++) {						args.add(argsArray[i]);					}				}
 			}
 
 		}
@@ -572,7 +549,7 @@ public class JavadocOptionsManager {
 			settings.put(OVERVIEW, fOverview);
 		if (!fStylesheet.equals(""))
 			settings.put(STYLESHEETFILE, fStylesheet);
-
+		if(!fTitle.equals(""))			settings.put(TITLE, fTitle);
 		return settings;
 	}
 
@@ -630,7 +607,7 @@ public class JavadocOptionsManager {
 
 	public void setFromStandard(boolean fromStandard) {
 		this.fFromStandard= fromStandard;
-	}
+	}		public void setTitle(String title) {		this.fTitle= title;	}
 
 	public void setBoolean(String flag, boolean value) {
 

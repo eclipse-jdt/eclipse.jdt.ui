@@ -105,14 +105,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 
 		try {
-			IPath path= fStore.getJavaProject().getProject().getFullPath();
-			URL currURL= JavaDocLocations.getJavadocLocation(path);
+			URL currURL= JavaDocLocations.getProjectJavadocLocation(fStore.getJavaProject());
 			URL newURL= fDestination.toFile().toURL();
 
 			if (fStore.fromStandard() && ((currURL == null) || !(currURL.equals(newURL)))) {
 				String message=  "Do you want to update the Javadoc location for ''{0}'' with the chosen destination folder ''{1}''?";
 				if (MessageDialog.openQuestion(getShell(), "Update Javadoc Location", MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) {
-					JavaDocLocations.setJavadocLocation(path, newURL);
+					JavaDocLocations.setProjectJavadocLocation(fStore.getJavaProject(), newURL);
 				}
 			}
 		} catch (MalformedURLException e) {

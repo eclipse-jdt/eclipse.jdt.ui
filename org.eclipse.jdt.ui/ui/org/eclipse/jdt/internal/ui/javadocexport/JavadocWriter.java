@@ -119,6 +119,10 @@ public class JavadocWriter {
 		str= store.getStyleSheet();
 		if (!str.equals(""))
 			xmlJavadocDesc.setAttribute(store.STYLESHEETFILE, str);
+			
+		str= store.getTitle();	
+		if(!str.equals(""))
+			xmlJavadocDesc.setAttribute(store.TITLE, str);
 
 		str= store.getAdditionalParams();
 		if (!str.equals(""))

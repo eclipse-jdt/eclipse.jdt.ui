@@ -47,7 +47,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	protected Button fStyleSheetButton;
 	protected Button fAntBrowseButton;
 	private Button fCheckbrowser;
-	protected Text fStyleSheetText;
+	private Button 	fTitleButton;	private Text fTitleText;	protected Text fStyleSheetText;
 	protected Text fExtraOptionsText;
 	protected Text fOverViewText;
 	protected Text fAntText;
@@ -134,7 +134,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	} //end method createControl
 
 	private void createBasicOptionsGroup(Composite composite) {
-		fBasicOptionsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
+				fTitleButton= createButton(composite, SWT.CHECK, "Document Title :", createGridData(1));		fTitleText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 3, 0));		String text= fStore.getTitle();		if(!text.equals("")) {			fTitleText.setText(text);			fTitleButton.setSelection(true);		} else fTitleText.setEnabled(false);				fBasicOptionsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fBasicOptionsGroup.setLayout(createGridLayout(1));
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
 		fBasicOptionsGroup.setText("Basic Options");
@@ -151,7 +151,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			public void validate() {
 			}
 		});
-
+				fTitleButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fTitleText}) {			public void validate() {			}		});
 	}
 
 	private void createTagOptionsGroup(Composite composite) {
@@ -351,7 +351,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	 */
 
 	protected void finish() {
-
+				if(fTitleButton.getSelection())			fStore.setTitle(fTitleText.getText());		else fStore.setTitle("");
 		Object[] buttons= fButtonsList.toArray();
 		for (int i= 0; i < buttons.length; i++) {
 			FlaggedButton button= (FlaggedButton) buttons[i];
@@ -361,16 +361,15 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				fStore.setBoolean(button.getFlag(), false == button.show());
 		}
 
-		String str= fExtraOptionsText.getText();
-		if (str.length() > 0)
-			fStore.setAdditionalParams(str);
-		if (fOverViewText.getEnabled())
+		//@ToDo		String str= fExtraOptionsText.getText();
+		if (str.length() > 0) 			fStore.setAdditionalParams(str);
+		else fStore.setAdditionalParams("");				if (fOverViewText.getEnabled())
 			fStore.setOverview(fOverViewText.getText());
-		if (fStyleSheetText.getEnabled())
+		else fStore.setOverview("");				if (fStyleSheetText.getEnabled())
 			fStore.setStyleSheet(fStyleSheetText.getText());
-		if (fAntText.getEnabled())
+		else fStore.setStyleSheet("");				if (fAntText.getEnabled())
 			fStore.setAntpath(fAntText.getText());
-	}
+		else fStore.setAntpath("");	}
 
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
