@@ -53,6 +53,8 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	}
 
 	public boolean canOperateOn(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return false;
 		if (ClipboardActionUtil.hasOnlyProjects(selection))
 			return selection.size() == 1;
 		else
