@@ -51,6 +51,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 
 /**
   */
@@ -138,33 +141,31 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		if (decl instanceof MethodDeclaration) {
-			AST ast= astRoot.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ImportRewrite imports= new ImportRewrite(cu);
-			
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-			proposal.setImportRewrite(imports);
-
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			List exceptions= methodDecl.thrownExceptions();
-			ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
-			for (int i= 0; i < uncaughtExceptions.length; i++) {
-				String imp= imports.addImport(uncaughtExceptions[i]);
-				Name name= ASTNodeFactory.newName(ast, imp);
-				listRewrite.insertLast(name, null);
-				String typeKey= "type" + i; //$NON-NLS-1$
-				proposal.addLinkedPosition(rewrite.track(name), false, typeKey);
-				addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], typeKey);
-			}
-			for (int i= 0; i < exceptions.size(); i++) {
-				Name elem= (Name) exceptions.get(i);
-				if (canRemoveException(elem.resolveTypeBinding(), uncaughtExceptions)) {
-					rewrite.remove(elem, null);
+			IMethodBinding binding= methodDecl.resolveBinding();
+			if (binding != null) {
+				List exceptions= methodDecl.thrownExceptions();
+				int nExistingExceptions= exceptions.size();
+				ChangeDescription[] desc= new ChangeDescription[nExistingExceptions + uncaughtExceptions.length];
+				for (int i= 0; i < exceptions.size(); i++) {
+					Name elem= (Name) exceptions.get(i);
+					if (canRemoveException(elem.resolveTypeBinding(), uncaughtExceptions)) {
+						desc[i]= new RemoveDescription();
+					}
 				}
+				for (int i = 0; i < uncaughtExceptions.length; i++) {
+					desc[i + nExistingExceptions]= new InsertDescription(uncaughtExceptions[i], ""); //$NON-NLS-1$
+				}
+				
+				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+				
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, desc, 6, image);
+				for (int i= 0; i < uncaughtExceptions.length; i++) {
+					addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], proposal.getExceptionTypeGroupId(i));
+				}
+				proposals.add(proposal);
 			}
-			proposals.add(proposal);
 		}
 	}
 	
@@ -521,55 +522,27 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
+		if (selectedNode == null || !(selectedNode.getParent() instanceof MethodDeclaration)) {
 			return;
 		}
-		if (selectedNode.getParent() instanceof MethodDeclaration) {
-			MethodDeclaration decl= (MethodDeclaration) selectedNode.getParent();
+		MethodDeclaration decl= (MethodDeclaration) selectedNode.getParent();
+		IMethodBinding binding= decl.resolveBinding();
+		if (binding != null) {
 			List thrownExceptions= decl.thrownExceptions();
-			if (!thrownExceptions.contains(selectedNode)) {
+			int index= thrownExceptions.indexOf(selectedNode);
+			if (index == -1) {
 				return;
 			}
+			ChangeDescription[] desc= new ChangeDescription[thrownExceptions.size()];
+			desc[index]= new RemoveDescription();
 			
-			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
-			rewrite.remove(selectedNode, null);
-			
-			Javadoc javadoc= decl.getJavadoc();
-			if (javadoc != null) {
-				IBinding binding= ((Name) selectedNode).resolveBinding();
-				if (binding != null) {
-					TagElement tagElement= findThrowsTag(javadoc, binding);
-					if (tagElement != null) {
-						rewrite.remove(tagElement, null);
-					}
-				}
-			}
-			
+			ICompilationUnit cu= context.getCompilationUnit();
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessarythrow.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
-			proposals.add(proposal);
+			
+			proposals.add(new ChangeMethodSignatureProposal(label, cu, selectedNode, binding, null, desc, 5, image));
 		}
 	}
-	
-	private static TagElement findThrowsTag(Javadoc javadoc, IBinding binding) {
-		List tags= javadoc.tags();
-		for (int i= tags.size() - 1; i >= 0; i--) {
-			TagElement curr= (TagElement) tags.get(i);
-			String currName= curr.getTagName();
-			if ("@throws".equals(currName) || "@exception".equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
-				List fragments= curr.fragments();
-				if (!fragments.isEmpty() && fragments.get(0) instanceof Name) {
-					Name name= (Name) fragments.get(0);
-					if (name.resolveBinding() == binding) {
-						return curr;
-					}
-				}
-			}
-		}
-		return null;
-	}
-	
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());

@@ -33,7 +33,21 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -119,7 +133,7 @@ public class JavadocTagsSubProcessor {
 					String indentString= Strings.getIndentString(lineContent, tabWidth);
 					String str= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelimiter);
 					InsertEdit edit= new InsertEdit(insertPosition, str);
-					rootEdit.addChild(edit); //$NON-NLS-1$
+					rootEdit.addChild(edit);
 					if (comment.charAt(comment.length() - 1) != '\n') {
 						rootEdit.addChild(new InsertEdit(insertPosition, lineDelimiter)); 
 						rootEdit.addChild(new InsertEdit(insertPosition, indentString));
@@ -162,23 +176,26 @@ public class JavadocTagsSubProcessor {
 				String name= ASTNodes.asString(node);
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.paramtag.description")); //$NON-NLS-1$
 				TagElement newTag= ast.newTagElement();
-				newTag.setTagName("@param"); //$NON-NLS-1$
+				newTag.setTagName(TagElement.TAG_PARAM);
 				newTag.fragments().add(ast.newSimpleName(name));
-				insertParamTag(javadoc, tagsRewriter, newTag, node.getParent());
+				
+				List params= methodDecl.parameters();
+				insertTag(tagsRewriter, newTag, getPreviousParamNames(params, node.getParent()));
 				break;
 			}
 			case IProblem.JavadocMissingReturnTag: {
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.returntag.description")); //$NON-NLS-1$
 				TagElement newTag= ast.newTagElement();
-				newTag.setTagName("@return"); //$NON-NLS-1$
-				insertReturnTag(javadoc, tagsRewriter, newTag);
+				newTag.setTagName(TagElement.TAG_RETURN);
+				insertTag(tagsRewriter, newTag, null);
 				break;
 			}
 			case IProblem.JavadocMissingThrowsTag: {
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.throwstag.description")); //$NON-NLS-1$
 				TagElement newTag= ast.newTagElement();
-				newTag.setTagName("@throws"); //$NON-NLS-1$
-				insertThrowsTag(javadoc, tagsRewriter, newTag, node);
+				newTag.setTagName(TagElement.TAG_THROWS);
+				List exceptions= methodDecl.thrownExceptions();
+				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, node));
 				break;
 			}
 			default:
@@ -195,40 +212,61 @@ public class JavadocTagsSubProcessor {
 		for (int i= list.size() - 1; i >= 0 ; i--) {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) list.get(i);
 			String name= decl.getName().getIdentifier();
-			if (findTag(javadoc, "@param", name) == null) { //$NON-NLS-1$
+			if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
 				TagElement newTag= ast.newTagElement();
-				newTag.setTagName("@param"); //$NON-NLS-1$
+				newTag.setTagName(TagElement.TAG_PARAM);
 				newTag.fragments().add(ast.newSimpleName(name));
-				insertParamTag(javadoc, tagsRewriter, newTag, decl);
+				insertTag(tagsRewriter, newTag, getPreviousParamNames(list, decl));
 			}
 		}
 		if (!methodDecl.isConstructor()) {
 			Type type= methodDecl.getReturnType();
 			if (!type.isPrimitiveType() || (((PrimitiveType) type).getPrimitiveTypeCode() != PrimitiveType.VOID)) {
-				if (findTag(javadoc, "@return", null) == null) { //$NON-NLS-1$
+				if (findTag(javadoc, TagElement.TAG_RETURN, null) == null) {
 					TagElement newTag= ast.newTagElement();
-					newTag.setTagName("@return"); //$NON-NLS-1$
-					insertReturnTag(javadoc, tagsRewriter, newTag);
+					newTag.setTagName(TagElement.TAG_RETURN);
+					insertTag(tagsRewriter, newTag, null);
 				}
 			}
 		}
-		List throwsExceptions= methodDecl.thrownExceptions();
-		for (int i= throwsExceptions.size() - 1; i >= 0 ; i--) {
-			Name exception= (Name) throwsExceptions.get(i);
+		List thrownExceptions= methodDecl.thrownExceptions();
+		for (int i= thrownExceptions.size() - 1; i >= 0 ; i--) {
+			Name exception= (Name) thrownExceptions.get(i);
 			ITypeBinding binding= exception.resolveTypeBinding();
 			if (binding != null) {
 				String name= binding.getName();
 				if (findThrowsTag(javadoc, name) == null) {
 					TagElement newTag= ast.newTagElement();
-					newTag.setTagName("@throws"); //$NON-NLS-1$
+					newTag.setTagName(TagElement.TAG_THROWS);
 					newTag.fragments().add(ast.newSimpleName(name));
-					insertThrowsTag(javadoc, tagsRewriter, newTag, exception);
+					insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
 				}
 			}
 		}
 		proposals.add(addAllMissing);
 	}
 	
+	private static Set getPreviousParamNames(List params, ASTNode missingNode) {
+		Set previousNames=  new HashSet();
+		for (int i = 0; i < params.size(); i++) {
+			SingleVariableDeclaration curr= (SingleVariableDeclaration) params.get(i);
+			if (curr == missingNode) {
+				return previousNames;
+			}
+			previousNames.add(curr.getName().getIdentifier());
+		}
+		return previousNames;
+	}
+	
+	private static Set getPreviousExceptionNames(List list, ASTNode missingNode) {
+		Set previousNames=  new HashSet();
+		for (int i= 0; i < list.size() && missingNode != list.get(i); i++) {
+			Name curr= (Name) list.get(i);
+			previousNames.add(ASTNodes.getSimpleNameIdentifier(curr));
+		}
+		return previousNames;
+	}
+
 	public static TagElement findTag(Javadoc javadoc, String name, String arg) {
 		List tags= javadoc.tags();
 		int nTags= tags.size();
@@ -248,13 +286,13 @@ public class JavadocTagsSubProcessor {
 		return null;
 	}
 	
-	private static TagElement findThrowsTag(Javadoc javadoc, String arg) {
+	public static TagElement findParamTag(Javadoc javadoc, String arg) {
 		List tags= javadoc.tags();
 		int nTags= tags.size();
 		for (int i= 0; i < nTags; i++) {
 			TagElement curr= (TagElement) tags.get(i);
 			String currName= curr.getTagName();
-			if ("@throws".equals(currName) || "@exception".equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
+			if (TagElement.TAG_PARAM.equals(currName)) {
 				String argument= getArgument(curr);
 				if (arg.equals(argument)) {
 					return curr;
@@ -265,84 +303,69 @@ public class JavadocTagsSubProcessor {
 	}
 	
 	
-	private static void insertThrowsTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement, ASTNode node) {
-		Set previousArgs= new HashSet();
-		List list= ((MethodDeclaration) javadoc.getParent()).thrownExceptions();
-		for (int i= 0; i < list.size() && node != list.get(i); i++) {
-			Name curr= (Name) list.get(i);
-			previousArgs.add(ASTNodes.getSimpleNameIdentifier(curr));
+	public static TagElement findThrowsTag(Javadoc javadoc, String arg) {
+		List tags= javadoc.tags();
+		int nTags= tags.size();
+		for (int i= 0; i < nTags; i++) {
+			TagElement curr= (TagElement) tags.get(i);
+			String currName= curr.getTagName();
+			if (TagElement.TAG_THROWS.equals(currName) || TagElement.TAG_EXCEPTION.equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
+				String argument= getArgument(curr);
+				if (arg.equals(argument)) {
+					return curr;
+				}
+			}
 		}
+		return null;
+	}
+	
+	public static void insertTag(ListRewrite rewriter, TagElement newElement, Set sameKindLeadingNames) {
 		List tags= rewriter.getRewrittenList();
 		
-		ASTNode before= null;
+		String insertedTagName= newElement.getTagName();
+		
+		ASTNode after= null;
 		for (int i= tags.size() - 1; i >= 0; i--) {
 			TagElement curr= (TagElement) tags.get(i);
 			String tagName= curr.getTagName();
-			if ("@throws".equals(tagName) || "@exception".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$
-				String arg= getArgument(curr);
-				if (arg != null && previousArgs.contains(arg)) {
-					rewriter.insertAfter(newElement, curr, null);
-					return;
-				}
-				before= curr;
-			}
-		}
-		if (before != null) {
-			rewriter.insertBefore(newElement, before, null);
-		} else {
-			rewriter.insertLast(newElement, null);
-		}
-	}
-
-	private static void insertReturnTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement) {
-		List tags= rewriter.getRewrittenList();
-
-		ASTNode before= null;
-		
-		for (int i= tags.size() - 1; i >= 0; i--) {
-			TagElement curr= (TagElement) tags.get(i);
-			String tagName=curr.getTagName();
-			if ("@throws".equals(tagName) || "@exception".equals(tagName)) { //$NON-NLS-1$ //$NON-NLS-2$
-				before= curr;
-			} else if ("@param".equals(tagName)) { //$NON-NLS-1$
+			if (tagName == null || isTagLeading(insertedTagName, tagName)) {
+				after= curr;
 				break;
 			}
-		}
-		if (before != null) {
-			rewriter.insertBefore(newElement, before, null);
-		} else {
-			rewriter.insertLast(newElement, null);
-		}
-	}
-
-	private static void insertParamTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement, ASTNode node) {
-		Set previousArgs= new HashSet();
-
-		List list= ((MethodDeclaration) javadoc.getParent()).parameters();
-		for (int i= 0; i < list.size() && (list.get(i) != node); i++) {
-			SingleVariableDeclaration curr= (SingleVariableDeclaration) list.get(i);
-			previousArgs.add(curr.getName().getIdentifier());
-		}
-		List tags= rewriter.getRewrittenList();
-		for (int i= tags.size() - 1; i >= 0; i--) {
-			TagElement curr= (TagElement) tags.get(i);
-			if ("@param".equals(curr.getTagName())) { //$NON-NLS-1$
+			if (sameKindLeadingNames != null && isSameTag(insertedTagName, tagName)) {
 				String arg= getArgument(curr);
-				if (arg != null && previousArgs.contains(arg)) {
-					rewriter.insertAfter(newElement, curr, null);
-					return;
+				if (arg != null && sameKindLeadingNames.contains(arg)) {
+					after= curr;
+					break;
 				}
 			}
 		}
-		if (!tags.isEmpty()) {
-			TagElement first= (TagElement) tags.get(0);
-			if (first.getTagName() == null) {
-				rewriter.insertAfter(newElement, first, null);
-				return;
-			}
+		if (after != null) {
+			rewriter.insertAfter(newElement, after, null);
+		} else {
+			rewriter.insertFirst(newElement, null);
 		}
-		rewriter.insertFirst(newElement, null);
 	}
+		
+	private static boolean isSameTag(String insertedTagName, String tagName) {
+		if (insertedTagName.equals(tagName)) {
+			return true;
+		}
+		if (TagElement.TAG_EXCEPTION.equals(tagName)) {
+			return TagElement.TAG_THROWS.equals(insertedTagName);
+		}
+		return false;
+	}
+
+	private static boolean isTagLeading(String insertedTagName, String tagName) {
+		if (TagElement.TAG_EXCEPTION.equals(insertedTagName) || TagElement.TAG_THROWS.equals(insertedTagName)) {
+			return TagElement.TAG_PARAM.equals(tagName) || TagElement.TAG_RETURN.equals(tagName);
+		} else if (TagElement.TAG_RETURN.equals(insertedTagName)) {
+			return TagElement.TAG_PARAM.equals(tagName);
+		}
+		return false;
+	}
+
 	
 	private static String getArgument(TagElement curr) {
 		List fragments= curr.fragments();

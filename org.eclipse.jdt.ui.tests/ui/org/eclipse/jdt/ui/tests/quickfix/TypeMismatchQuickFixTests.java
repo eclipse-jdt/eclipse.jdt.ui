@@ -915,6 +915,93 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 						
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
+	
+	public void testMismatchingExceptions3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class Base {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The parameter\n");
+		buf.append("     *                  More about the parameter\n");
+		buf.append("     * @return The returned argument\n");
+		buf.append("     * @throws IOException IO problems\n");
+		buf.append("     * @since 3.0\n");
+		buf.append("     */\n");
+		buf.append("    String[] getValues(int i) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Base.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.EOFException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E extends Base {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The parameter\n");
+		buf.append("     *                  More about the parameter\n");
+		buf.append("     * @return The returned argument\n");
+		buf.append("     * @throws EOFException EOF problems\n");
+		buf.append("     * @throws ParseException Parse problems\n");
+		buf.append("     */\n");
+		buf.append("    public String[] getValues(int i) throws EOFException, ParseException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class Base {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The parameter\n");
+		buf.append("     *                  More about the parameter\n");
+		buf.append("     * @return The returned argument\n");
+		buf.append("     * @throws IOException IO problems\n");
+		buf.append("     * @throws ParseException\n");
+		buf.append("     * @since 3.0\n");
+		buf.append("     */\n");
+		buf.append("    String[] getValues(int i) throws IOException, ParseException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.EOFException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E extends Base {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The parameter\n");
+		buf.append("     *                  More about the parameter\n");
+		buf.append("     * @return The returned argument\n");
+		buf.append("     * @throws EOFException EOF problems\n");
+		buf.append("     */\n");
+		buf.append("    public String[] getValues(int i) throws EOFException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+						
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
 
 	
 }

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -71,6 +73,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
+			MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
+			
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
@@ -84,6 +88,26 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
 			
+			// add javadoc tag
+			Javadoc javadoc= methodDeclaration.getJavadoc();
+			if (javadoc != null) {
+				HashSet leadingNames= new HashSet();
+				for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
+					SingleVariableDeclaration curr= (SingleVariableDeclaration) iter.next();
+					leadingNames.add(curr.getName().getIdentifier());
+				}
+				SimpleName newTagRef= ast.newSimpleName(node.getIdentifier());
+				
+				TagElement newTagElement= ast.newTagElement();
+				newTagElement.setTagName(TagElement.TAG_PARAM);
+				newTagElement.fragments().add(newTagRef);
+				
+				addLinkedPosition(rewrite.track(newTagRef), true, KEY_NAME);
+				
+				ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+				JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);
+			}
+
 			return rewrite;
 		}
 		return null;

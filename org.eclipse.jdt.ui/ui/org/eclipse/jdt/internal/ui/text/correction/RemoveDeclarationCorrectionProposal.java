@@ -121,42 +121,26 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			
 			ASTNode declaringNode= completeRoot.findDeclaringNode(nameNode.resolveBinding());
 			if (declaringNode instanceof SingleVariableDeclaration) {
-				if (declaringNode.getParent() instanceof MethodDeclaration) {
-					Javadoc javadoc= ((MethodDeclaration) declaringNode.getParent()).getJavadoc();
-					if (javadoc != null) {
-						TagElement tagElement= findThrowsTag(javadoc, nameNode.resolveBinding());
-						if (tagElement != null) {
-							rewrite.remove(tagElement, null);
-						}
-					}
-				}
+				removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode);
 			}
 		}
 		return rewrite;
 	}
 	
-	private static TagElement findThrowsTag(Javadoc javadoc, IBinding binding) {
-		List tags= javadoc.tags();
-		for (int i= tags.size() - 1; i >= 0; i--) {
-			TagElement curr= (TagElement) tags.get(i);
-			String currName= curr.getTagName();
-			if ("@param".equals(currName)) {  //$NON-NLS-1$
-				List fragments= curr.fragments();
-				if (!fragments.isEmpty() && fragments.get(0) instanceof Name) {
-					Name name= (Name) fragments.get(0);
-					if (name.resolveBinding() == binding) {
-						return curr;
-					}
+	private void removeParamTag(ASTRewrite rewrite, SingleVariableDeclaration varDecl) {
+		if (varDecl.getParent() instanceof MethodDeclaration) {
+			Javadoc javadoc= ((MethodDeclaration) varDecl.getParent()).getJavadoc();
+			if (javadoc != null) {
+				TagElement tagElement= JavadocTagsSubProcessor.findParamTag(javadoc, varDecl.getName().getIdentifier());
+				if (tagElement != null) {
+					rewrite.remove(tagElement, null);
 				}
 			}
 		}
-		return null;
 	}
-	
-	
+
 	/**
 	 * Remove the field or variable declaration including the initializer.
-	 * 
 	 */
 	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
 		int nameParentType= reference.getParent().getNodeType();
