@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,12 +26,14 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -63,9 +66,11 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	// preference store keys
 	private static final String PREF_FORMAT_TEMPLATES= JavaUI.ID_PLUGIN + ".template.format"; //$NON-NLS-1$
 
-	private /*Checkbox*/ TableViewer fTableViewer;
+	private CheckboxTableViewer fTableViewer;
 	private Button fAddButton;
 	private Button fRemoveButton;
+	private Button fEnableAllButton;
+	private Button fDisableAllButton;
 	private Group fEditor;
 	private Text fNameText;
 	private Text fDescriptionText;
@@ -110,7 +115,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 		item.setControl(firstPage);
 		
-		fTableViewer= new /*Checkbox*/ TableViewer(firstPage, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		fTableViewer= new CheckboxTableViewer(firstPage, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table table= fTableViewer.getTable();
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
@@ -124,8 +129,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
 		
-		TableColumn column1= new TableColumn(table, SWT.NULL);
-//		TableColumn column1= table.getColumn(0);
+//		TableColumn column1= new TableColumn(table, SWT.NULL);
+		TableColumn column1= table.getColumn(0);
 		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
 	
 		TableColumn column2= new TableColumn(table, SWT.NULL);
@@ -160,15 +165,14 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				selectionChanged1();
 			}
 		});
-/*
+
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Template template=  (Template) event.getElement();
-//				template.setEnable(event.getChecked());
-				fTableViewer.setCheckedElements(new Object[] {template});
+				template.setEnabled(event.getChecked());
 			}
 		});
-*/
+
 		Composite buttons= new Composite(firstPage, SWT.NULL);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout= new GridLayout();
@@ -191,6 +195,24 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fRemoveButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
 				remove();
+			}
+		});
+		
+		fEnableAllButton= new Button(buttons, SWT.PUSH);
+		fEnableAllButton.setLayoutData(getButtonGridData(fEnableAllButton));
+		fEnableAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.enable.all")); //$NON-NLS-1$
+		fEnableAllButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				enableAll(true);
+			}
+		});
+
+		fDisableAllButton= new Button(buttons, SWT.PUSH);
+		fDisableAllButton.setLayoutData(getButtonGridData(fDisableAllButton));
+		fDisableAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.disable.all")); //$NON-NLS-1$
+		fDisableAllButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				enableAll(false);
 			}
 		});
 
@@ -277,13 +299,27 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
 		
-		fTableViewer.setInput(TemplateSet.getInstance());
+		fTableViewer.setInput(TemplateSet.getInstance());		
+		fTableViewer.setAllChecked(false);
+		fTableViewer.setCheckedElements(getEnabledTemplates());		
 		updateButtons();
 
 		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.JRE_PREFERENCE_PAGE));		
 		leaveEditor();
 		
 		return parent;
+	}
+	
+	private Template[] getEnabledTemplates() {
+		Template[] templates= TemplateSet.getInstance().getTemplates();
+		
+		List list= new ArrayList(templates.length);
+		
+		for (int i= 0; i != templates.length; i++)
+			if (templates[i].isEnabled())
+				list.add(templates[i]);
+				
+		return (Template[]) list.toArray(new Template[list.size()]);
 	}
 
 	private static Label createLabel(Composite parent, String name) {
@@ -329,11 +365,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	
 	private void selectionChanged1() {		
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
-		if (selection.size() == 0) {
-			leaveEditor();
-		} else {		
+
+		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
 			enterEditor(template);		
+		} else {		
+			leaveEditor();
 		}
 		
 		updateButtons();
@@ -341,10 +378,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	
 	private void updateButtons() {
 		int selectionCount= ((IStructuredSelection) fTableViewer.getSelection()).size();
-		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount < fTableViewer.getTable().getItemCount());
+		int itemCount= fTableViewer.getTable().getItemCount();
+		
+		boolean error= (fCurrent != null) && (fCurrent.getName().length() == 0);
+		
+		fAddButton.setEnabled(!error);
+		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount <= itemCount);
+		fEnableAllButton.setEnabled(itemCount > 0);
+		fDisableAllButton.setEnabled(itemCount > 0);
 
 		StatusInfo status= new StatusInfo();
-		if ((fCurrent != null) && (fNameText.getText().length() == 0))
+		if (error)
 			status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);			
@@ -367,8 +411,10 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fContextCombo.select(getIndex(template.getContext()));
 		fPatternEditor.getDocument().set(template.getPattern());
 
-		if (fEditorEnabler != null)
-			fEditorEnabler.restore();	
+		if (fEditorEnabler != null) {
+			fEditorEnabler.restore();
+			fEditorEnabler= null;
+		}
 	}
 	
 	private void leaveEditor() {
@@ -379,15 +425,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fContextCombo.select(getIndex("")); //$NON-NLS-1$
 		fPatternEditor.getDocument().set(""); //$NON-NLS-1$
 
-		fEditorEnabler= ControlEnableState.disable(fEditor);		
+		if (fEditorEnabler == null)
+			fEditorEnabler= ControlEnableState.disable(fEditor);		
 	}
 	
 	private void add() {
 		Template template= new Template();
 		template.setContext("java"); //$NON-NLS-1$
 
-		TemplateSet.getInstance().add(template);		
+		TemplateSet.getInstance().add(template);
 		fTableViewer.refresh();
+		fTableViewer.setChecked(template, template.isEnabled());
 		enterEditor(template);
 
 		fNameText.setFocus();
@@ -404,7 +452,15 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		leaveEditor();		
 		fTableViewer.refresh();
-	}	
+	}
+	
+	private void enableAll(boolean enable) {
+		Template[] templates= TemplateSet.getInstance().getTemplates();
+		for (int i= 0; i != templates.length; i++)
+			templates[i].setEnabled(enable);		
+			
+		fTableViewer.setAllChecked(enable);
+	}
 	
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)

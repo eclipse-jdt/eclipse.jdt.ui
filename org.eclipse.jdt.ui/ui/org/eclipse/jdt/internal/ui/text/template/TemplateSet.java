@@ -63,6 +63,7 @@ public class TemplateSet {
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
+	private static final String ENABLED_ATTRIBUTE= "enabled"; //$NON-NLS-1$
 
 	private List fTemplates= new ArrayList();
 	private Comparator fTemplateComparator= new TemplateComparator();
@@ -171,6 +172,8 @@ public class TemplateSet {
 				String name= attributes.getNamedItem(NAME_ATTRIBUTE).getNodeValue();
 				String description= attributes.getNamedItem(DESCRIPTION_ATTRIBUTE).getNodeValue();
 				String context= attributes.getNamedItem(CONTEXT_ATTRIBUTE).getNodeValue();
+				Node enabledNode= attributes.getNamedItem(ENABLED_ATTRIBUTE);
+				boolean enabled= (enabledNode == null) || (enabledNode.getNodeValue().equals("true")); //$NON-NLS-1$
 
 				StringBuffer buffer= new StringBuffer();
 				NodeList children= node.getChildNodes();
@@ -180,8 +183,10 @@ public class TemplateSet {
 						buffer.append(value);
 				}
 				String pattern= buffer.toString().trim();
-					
-				add(new Template(name, description, context, pattern));
+
+				Template template= new Template(name, description, context, pattern);	
+				template.setEnabled(enabled);
+				add(template);
 			}
 
 			return true;
@@ -243,6 +248,10 @@ public class TemplateSet {
 				Attr context= document.createAttribute(CONTEXT_ATTRIBUTE);
 				context.setValue(template.getContext());
 				attributes.setNamedItem(context);			
+
+				Attr enabled= document.createAttribute(ENABLED_ATTRIBUTE);
+				enabled.setValue(template.isEnabled() ? "true" : "false"); // $NON-NLS-1$ // $NON-NLS-2$
+				attributes.setNamedItem(enabled);
 				
 				Text pattern= document.createTextNode(template.getPattern());
 				node.appendChild(pattern);			

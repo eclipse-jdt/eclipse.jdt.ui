@@ -16,6 +16,7 @@ public class Template {
 	private String fDescription;
 	private String fContext;
 	private String fPattern;
+	private boolean fEnabled= true;
 
 	public Template() {
 		this("", "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -102,13 +103,28 @@ public class Template {
 	}
 	
 	/**
+	 * Sets the enable state of the template.
+	 */
+	public void setEnabled(boolean enable) {
+		fEnabled= enable;	
+	}
+	
+	/**
+	 * Returns <code>true</code> if template is enabled, <code>false</code> otherwise.
+	 */
+	public boolean isEnabled() {
+		return fEnabled;	
+	}
+	
+	/**
 	 * Returns <code>true</code> if template matches the prefix and context,
 	 * <code>false</code> otherwise.
 	 */
 	public boolean matches(String prefix, String context) {
 		return 
-			(prefix.length() != 0) &&
+			fEnabled &&
 			fContext.equals(context) &&
+			(prefix.length() != 0) &&
 			fName.toLowerCase().startsWith(prefix.toLowerCase());
 	}
 
