@@ -96,9 +96,11 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		IPath path= fClassPathEntry.getPath();
 		String containerId= path.segment(0);
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerId);
-		String description= initializer.getDescription(path, fProject);
-		
-		return PackagesMessages.getFormattedString("ClassPathContainer.unbound_label", description); //$NON-NLS-1$
+		if (initializer != null) {
+			String description= initializer.getDescription(path, fProject);
+			return PackagesMessages.getFormattedString("ClassPathContainer.unbound_label", description); //$NON-NLS-1$
+		}
+		return PackagesMessages.getFormattedString("ClassPathContainer.unknown_label", path.toString()); //$NON-NLS-1$
 	}
 
 	public Object getParent(Object o) {
