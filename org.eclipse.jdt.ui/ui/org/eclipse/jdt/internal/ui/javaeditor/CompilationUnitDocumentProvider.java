@@ -244,9 +244,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 	
 	/**
-	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument)
+	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument, boolean)
 	 */
-	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
+	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
 				
 		ElementInfo elementInfo= getElementInfo(element);		
 		if (elementInfo instanceof CompilationUnitInfo) {
@@ -259,11 +259,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
 				
-				if (resource != null)
+				if (resource != null && !overwrite)
 					checkSynchronizationState(info.fModificationStamp, resource);
 				
 				// commit working copy
-				info.fCopy.commit(false, monitor);
+				info.fCopy.commit(overwrite, monitor);
 				
 				if (resource != null)
 					info.setModificationStamp(computeModificationStamp(resource));
@@ -276,7 +276,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 		} else {
-			super.doSaveDocument(monitor, element, document);
+			super.doSaveDocument(monitor, element, document, overwrite);
 		}		
 	}
 		

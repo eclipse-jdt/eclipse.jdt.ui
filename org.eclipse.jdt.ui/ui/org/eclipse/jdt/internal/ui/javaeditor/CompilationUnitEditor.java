@@ -139,11 +139,28 @@ public class CompilationUnitEditor extends JavaEditor {
 		if (getDocumentProvider() == null)
 			return;
 			
+		getStatusLineManager().setErrorMessage("");
+		
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+		
+		if (unit != null) {
+			synchronized (unit) { 
+				performSaveOperation(createSaveOperation(false), progressMonitor); 
+			}
+		} else 
+			performSaveOperation(createSaveOperation(false), progressMonitor);
+	}
+	
+	/**
+	 * @see AbstractTextEditor#createSaveOperation(boolean)
+	 */
+	protected WorkspaceModifyOperation createSaveOperation(final boolean overwrite) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
 		final ICompilationUnit original= (unit == null ? null : (ICompilationUnit) unit.getOriginalElement());
 		
-		WorkspaceModifyOperation operation= new WorkspaceModifyOperation() {
+		return new WorkspaceModifyOperation() {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
 				
 				if (fSavePolicy != null && original != null)
@@ -151,19 +168,12 @@ public class CompilationUnitEditor extends JavaEditor {
 				
 				IDocumentProvider provider= getDocumentProvider();
 				IEditorInput input= getEditorInput();
-				provider.saveDocument(monitor, input, provider.getDocument(input));
+				provider.saveDocument(monitor, input, provider.getDocument(input), overwrite);
 				
 				if (fSavePolicy != null && original != null)
 					fSavePolicy.postSave(original);
 			}
 		};
-		
-		getStatusLineManager().setErrorMessage("");
-		
-		if (unit != null) {
-			synchronized (unit) { performSaveOperation(operation, progressMonitor); }
-		} else 
-			performSaveOperation(operation, progressMonitor);
 	}
 	
 	public void gotoError(boolean forward) {
@@ -291,7 +301,7 @@ public class CompilationUnitEditor extends JavaEditor {
 					unit.copy(fragment, null, fileName, false, monitor);
 				} else {
 					// copy to another directory
-					getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()));
+					getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), false);
 				}
 			}
 		};

@@ -119,7 +119,7 @@ public class DocumentManager implements IDocumentManager {
 		if (fDocument == null)
 			return;
 			
-		fDocumentProvider.saveDocument(pm, fInput, fDocument);	
+		fDocumentProvider.saveDocument(pm, fInput, fDocument, false);	
 	}	 
 	
 	/**
