@@ -96,12 +96,16 @@ public abstract class RefactoringTest extends TestCase {
 			return status;
 
 		IChange change= ref.createChange(fgNullProgressMonitor);
-		change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
-
+		performChange(change);
+		
 		// XXX: this should be done by someone else
 		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
 
 		return null;
+	}
+	
+	protected void performChange(IChange change) throws JavaModelException{
+		change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
 	}
 
 	/****************  helpers  ******************/

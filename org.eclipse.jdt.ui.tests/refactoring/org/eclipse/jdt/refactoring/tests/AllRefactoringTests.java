@@ -14,6 +14,12 @@ public class AllRefactoringTests {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
+		suite.addTest(noSetupSuite());						
+		return new JavaTestSetup(suite);
+	}
+	
+	public static Test noSetupSuite() {
+		TestSuite suite= new TestSuite();
 		
 		//--code
 		suite.addTest(ExtractMethodTests.noSetupSuite());
@@ -38,12 +44,9 @@ public class AllRefactoringTests {
 		
 		//--compilation units
 		suite.addTest(MoveCUTests.noSetupSuite());
-		
-		//--other tests
-		suite.addTest(UndoManagerTests.noSetupSuite());
-		suite.addTest(PathTransformationTests.noSetupSuite());
-				
-		return new JavaTestSetup(suite);
+
+		return suite;
 	}
+	
 }
  
