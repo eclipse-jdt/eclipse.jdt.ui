@@ -128,6 +128,15 @@ public abstract class RefactoringTest extends TestCase {
 		return new StringBufferInputStream(content);
 	}
 	
+	protected static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
+		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
+				return roots[i];
+		}
+		return null;
+	}
+	
 	protected IPackageFragmentRoot getRoot() {
 		return fRoot;
 	}
