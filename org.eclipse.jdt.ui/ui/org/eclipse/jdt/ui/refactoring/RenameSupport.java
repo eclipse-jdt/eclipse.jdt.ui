@@ -10,10 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
