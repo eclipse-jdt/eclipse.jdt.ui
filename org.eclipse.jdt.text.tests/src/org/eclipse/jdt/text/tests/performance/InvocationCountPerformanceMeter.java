@@ -49,7 +49,7 @@ import org.eclipse.jdi.Bootstrap;
 
 /**
  * To use this performance meter add the following VM arguments:
- * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Decilpse.perf.debugPort=7777.</code>
+ * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Declipse.perf.debugPort=7777.</code>
  * Try a different port if 7777 does not work.
  * Because the performance meter uses the VM's debugging facility, it cannot be
  * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
@@ -315,6 +315,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor[] constructors) {
 		super(scenarioId);
+		Assert.assertNotNull("Could not create performance meter: check the command line arguments (see InvocationCountPerformanceMeter for details)", System.getProperty(DEBUG_PORT_PROPERTY));
+		
 		fMethods= methods;
 		fConstructors= constructors;
 		fStartTime= System.currentTimeMillis();
@@ -365,7 +367,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		} catch (IllegalConnectorArgumentsException x) {
 			x.printStackTrace();
 		} finally {
-			Assert.assertTrue("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader != null);
+			Assert.assertNotNull("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader);
 		}
 	}
 	
