@@ -37,11 +37,13 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 class SourceFirstPackageSelectionDialogField {
 
@@ -198,8 +200,12 @@ class SourceFirstPackageSelectionDialogField {
 
 	public void createControl(Composite parent, int nOfColumns, int textWidth) {
 		fShell= parent.getShell();
+		PixelConverter converter= new PixelConverter(parent);
 		fSourceFolderSelection.doFillIntoGrid(parent, nOfColumns, textWidth);
+		LayoutUtil.setWidthHint(fSourceFolderSelection.getTextControl(null), converter.convertWidthInCharsToPixels(60));
+
 		fPackageSelection.doFillIntoGrid(parent, nOfColumns, textWidth);
+		LayoutUtil.setWidthHint(fPackageSelection.getTextControl(null), converter.convertWidthInCharsToPixels(60));
 	}
 
 }

@@ -450,7 +450,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
 
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.heightHint= 360;
 		composite.setLayoutData(data);
 
 		createTableViewer(composite);
@@ -496,13 +495,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		propertiesFileLabel.setLayoutData(new GridData());
 		
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint= convertWidthInCharsToPixels(40);
+		data.widthHint= convertWidthInCharsToPixels(30);
 		fAccessorClassField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fAccessorClassField.setLayoutData(data);
 		fAccessorClassField.setEditable(false);
 		
 		data= new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint= convertWidthInCharsToPixels(40);
+		data.widthHint= convertWidthInCharsToPixels(30);
 		fPropertiesFileField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fPropertiesFileField.setLayoutData(data);
 		fPropertiesFileField.setEditable(false);
