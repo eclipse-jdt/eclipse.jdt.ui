@@ -211,7 +211,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
 		
-		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, true);
+		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, false);
 		store.setDefault(CompilationUnitEditor.PRINT_MARGIN_COLUMN, 80);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
 

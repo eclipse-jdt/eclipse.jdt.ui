@@ -72,7 +72,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 		
 		boolEditor= new BooleanFieldEditor(
 			PREF_SHOW_TEMP_PROBLEMS,
-			"Show &temporary problems in vertical ruler", //$NON-NLS-1$
+			"Show &temporary problems solvable with Quick Fix in vertical ruler", //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);
