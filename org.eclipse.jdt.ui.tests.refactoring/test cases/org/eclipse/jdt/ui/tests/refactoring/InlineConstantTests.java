@@ -96,8 +96,10 @@ public class InlineConstantTests extends RefactoringTest {
 		IChange change= ref.createChange(new NullProgressMonitor());
 		performChange(change);
 
-		for(int i= 0; i < cus.length; i++)
-			assertEquals("Incorrect inline", getFileContents(getOutputTestFileName(getSimpleName(cuQNames[i]))), cus[i].getSource());				
+		for(int i= 0; i < cus.length; i++){
+			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
+			assertEquals("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());				
+		}	
 	}
 
 	private void failHelper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean removeDeclaration, int errorCode) throws Exception{
