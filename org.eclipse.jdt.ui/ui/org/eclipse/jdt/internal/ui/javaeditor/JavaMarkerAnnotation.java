@@ -125,4 +125,11 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			return getMarker().getAttribute(IJavaModelMarker.ID, -1);
 		return 0;
 	}
+	
+	/*
+	 * @see IProblemAnnotation#isProblem()
+	 */
+	public boolean isProblem() {
+		return fIsProblemMarker;
+	}
 }

@@ -21,4 +21,6 @@ public interface IProblemAnnotation {
 	boolean isWarning();
 	
 	boolean isError();
+	
+	boolean isProblem();
 }

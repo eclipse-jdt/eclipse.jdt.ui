@@ -160,6 +160,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				return fProblem.getID();
 			}
 
+			/*
+			 * @see IProblemAnnotation#isProblem()
+			 */
+			public boolean isProblem() {
+				return true;
+			}
 		};
 		
 		/**

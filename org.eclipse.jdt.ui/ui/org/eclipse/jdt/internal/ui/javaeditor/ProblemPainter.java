@@ -92,9 +92,12 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		if (fModel != null) {
 			Iterator e= new ProblemAnnotationIterator(fModel);
 			while (e.hasNext()) {
-				Annotation a= (Annotation) e.next();
-				Position p= fModel.getPosition(a);
-				fProblemPositions.add(p);
+				IProblemAnnotation pa= (IProblemAnnotation) e.next();
+				if (pa.isProblem()) {
+					Annotation a= (Annotation) pa;
+					Position p= fModel.getPosition(a);
+					fProblemPositions.add(p);
+				}
 			}
 		}
 	}
