@@ -40,10 +40,10 @@ public class ParameterEditDialog extends StatusDialog {
 	private Text fName;
 	private Text fDefaultValue;
 
-	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean type) {
+	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType) {
 		super(parentShell);
 		fParameter= parameter;
-		fEditType= type;
+		fEditType= canEditType;
 	}
 	
 	protected void configureShell(Shell newShell) {
